@@ -16,6 +16,7 @@
 
 .define __sys_getdate
 __sys_getdate:
+	int 3
 	movb ah, 0x2a
 	int 0x21
 	mov bx, sp

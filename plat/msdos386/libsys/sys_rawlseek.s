@@ -16,6 +16,7 @@
 
 .define __sys_rawlseek
 __sys_rawlseek:
+	int 3
 	movb ah, 0x42
 	mov bx, sp
 	mov dx, 4(bx)

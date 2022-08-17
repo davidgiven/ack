@@ -16,6 +16,7 @@
 
 .define _rename
 _rename:
+	int 3
 	mov bx, sp
 	push di
 	mov dx, 2(bx)

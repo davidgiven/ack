@@ -16,22 +16,22 @@
 
 .define _isatty
 _isatty:
-	mov bx, sp
-	mov bx, 2(bx)
-	mov ax, 0x4400
+	mov ebx, sp
+	mov ebx, 4(ebx)
+	o16 mov ax, 0x4400
 	int 0x21
 	jc error
 	testb dl, dl
 	jz not_tty
-	mov ax, 1
+	mov eax, 1
 	ret
 not_tty:
 	mov (_errno), 25		! ENOTTY
 not_tty_2:
-	xor ax, ax
+	xor eax, eax
 	ret
 error:
-	push ax
+	push eax
 	call __sys_seterrno
-	pop cx
+	pop ecx
 	jmp not_tty_2

@@ -39,7 +39,7 @@ _getpid:
 	jnc .eur_dos
 	movb ah, 0x51
 	int 0x21
-	xchg bx, ax
+	xchg ebx, eax
 .eur_dos:
-	xor dx, dx
+	xor edx, edx
 	ret

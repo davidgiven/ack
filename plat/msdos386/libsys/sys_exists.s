@@ -16,6 +16,7 @@
 
 .define __sys_exists
 __sys_exists:
+	int 3
 	mov bx, sp
 	mov dx, 2(bx)
 	mov ax, 0x4300

@@ -39,7 +39,6 @@ name as
 	program {EM}/lib/ack/{PLATFORM}/as
 	args - -o > <
 	prep cond
-
 end
 name led
 	from .o.a

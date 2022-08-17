@@ -210,15 +210,17 @@ exe_start:
 
     ! Jump to the new segment and enter 32-bit mode!
 
-    mov ax, (psegcs)
-    mov bx, (psegds)
-    mov cx, (rseg)
+    o32 movzx eax, (psegcs)
+    o32 movzx ebx, (psegds)
+    o32 movzx ecx, (rseg)
     o32 mov edx, realloc
+    o32 mov esi, interruptf
+    o32 mov edi, transfer_buffer
     push es
     pop ds
     push es
     push 0
-    retf
+    retf ! 19b
 
     ! ALL CODE ABOVE THIS POINT DISCARDED ON ENTRY TO 32-BIT CODE
     ! (it's reused as the 16-bit stack)
@@ -271,6 +273,7 @@ realloc:
     jc bad_dpmi
     
     popa
+    o32 mov eax, (pmemlen)
     cli                         ! atomically switch stacks back
     mov ss, (dpmi_ss)
     o32 mov esp, (dpmi_ebp)
@@ -309,10 +312,15 @@ exit_with_error:
 
     ! Simulate DOS interrupt.
 int21:
+    o32 or ebx, 0x210000
+    ! Simulate interrupt in the high half of ebx.
+interrupt:
     mov (dpmi_eax), ax
     mov (dpmi_ebx), bx
     mov (dpmi_ecx), cx
     mov (dpmi_edx), dx
+    mov (dpmi_esi), si
+    mov (dpmi_edi), di
     mov ax, (rseg)
     mov (dpmi_ds), ax
     push es
@@ -324,15 +332,27 @@ int21:
     pop es
     mov di, dpmi_edi
     mov ax, 0x300
-    mov bx, 0x21
+    o32 shr ebx, 16
     int 0x31                    ! simulate DOS interrupt
     pop ds
     pop es
+    pushf
     mov ax, (dpmi_eax)
     mov bx, (dpmi_ebx)
     mov cx, (dpmi_ecx)
     mov dx, (dpmi_edx)
+    mov si, (dpmi_esi)
+    mov di, (dpmi_edi)
+    popf
     ret
+
+! Far call wrapper around interrupt.
+interruptf:
+    push ds
+    cseg mov ds, (psegds)
+    call interrupt
+    pop ds
+    o32 retf
 
 bad_dpmi_msg:
     .asciz "DPMI error during setup"

@@ -17,6 +17,7 @@
 
 .define __sys_isopen
 __sys_isopen:
+	int 3
 	mov bx, sp
 	mov bx, 2(bx)
 	mov ax, 0x4400

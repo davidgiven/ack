@@ -16,6 +16,7 @@
 
 .define __sys_rawcreat
 __sys_rawcreat:
+	int 3
 	movb ah, 0x3c
 	mov bx, sp
 	mov dx, 2(bx)

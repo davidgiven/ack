@@ -18,15 +18,24 @@ begtext:
     ! On entry, the stub has cs and ds pointing at the 32-bit
     ! segment, but ss is still pointing at the 16-bit segment.
     !
-    !   si:di memory handle of linear block
     !   ax: pmode code segment of stub
-    !   dx: pointer to realloc routine
-    !   fs: data segment (just a clone of the code segment)
+    !   bx: pmode data segment of stub
+    !   cx: rmode segment of stub
+    !   dx: pointer to realloc routine (in stub)e
+    !   si: pointer to interrupt routine (in stub)
+    !   di: pointer to transfer buffer (in stub)
 
     ! Resize the segment to include the BSS.
 
     o16 cseg mov (realloc_ptr+4), ax
     cseg mov (realloc_ptr+0), edx
+    cseg o16 mov (pmode_cs), ax
+    cseg o16 mov (pmode_ds), bx
+    cseg o16 mov (rmode), cx
+    cseg o16 mov (interrupt_ptr+4), ax
+    cseg mov (interrupt_ptr+0), esi
+    cseg o16 mov (transfer_buffer_ptr), di
+
     mov eax, endbss
     cseg callf (realloc_ptr)
 
@@ -180,10 +189,19 @@ al_exit:
     movb ah, 0x4c
     int 0x21
 
-    ! This must be in the code segment due to bootstrap issues.
-realloc_ptr:
-    .data2 0
-    .data4 0
+    ! These must be in the code segment due to bootstrap issues.
+realloc_ptr:         .space 6 ! far
+interrupt_ptr:       .space 6 ! far
+transfer_buffer_ptr: .space 2 ! near
+rmode:               .space 2
+pmode_cs:            .space 2
+pmode_ds:            .space 2
+
+.define interrupt_ptr
+.define rmode
+.define pmode_cs
+.define pmode_ds
+.define transfer_buffer_ptr
 
 ! Define symbols at the beginning of our various segments, so that we can find
 ! them. (Except .text, which has already been done.)
@@ -210,7 +228,7 @@ no_room_msg: .ascii 'No room$'
 .comm _psp, 256
 
 .sect .bss
-    .space 512
+    .space 32*1024
 .stack:
 
 ! vim: ts=4 sw=4 et ft=asm

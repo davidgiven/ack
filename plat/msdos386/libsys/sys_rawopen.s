@@ -16,6 +16,7 @@
 
 .define __sys_rawopen
 __sys_rawopen:
+	int 3
 	movb ah, 0x3d
 	mov bx, sp
 	mov dx, 2(bx)
