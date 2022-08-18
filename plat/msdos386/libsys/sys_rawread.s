@@ -26,19 +26,12 @@
 
 .define __sys_rawread
 __sys_rawread:
-	enter 4, 0
-amount_transferred = -1*4
+	enter 0, 0
 file_handle = 2*4
 write_buffer = 3*4
 amount_to_read = 4*4
 
-	mov amount_transferred(ebp), 0
-
-mainloop:
 	mov eax, amount_to_read(ebp)
-	test eax, eax
-	jz exit
-
 	mov ecx, 32*1024
 	cmp eax, ecx
 	jge 2f
@@ -53,33 +46,31 @@ mainloop:
 	mov ecx, 0x80
 	or ebx, 0x210000
 	callf (interrupt_ptr)
-	jc exit
-	test eax, eax
-	jz exit
+	jnc success
+
+	! Process errors.
+
+	push eax
+	call __sys_seterrno
+	leave
+	ret
+success:
 
 	! Copy eax bytes out of the transfer buffer.
 
-	mov ecx, eax
 	push eax
+	mov ecx, eax
 	movzx esi, (transfer_buffer_ptr)
 	mov edi, write_buffer(ebp)
 	mov es, (pmode_ds)
 	cld
 1:
-	eseg lods
+	eseg lodsb
 	movb (edi), al
-	add edi, 4
+	inc edi
 	loop 1b
 	pop eax
 
-	add write_buffer(ebp), eax
-	add amount_transferred(ebp), eax
-	sub amount_to_read(ebp), eax
-	jmp mainloop
-
-exit:
-	mov eax, amount_transferred(ebp)
 	leave
 	ret
-
 

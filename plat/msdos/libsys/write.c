@@ -20,42 +20,55 @@ ssize_t write(int fd, void* buffer, size_t count)
 	if (!count)
 		return 0;
 
-	if (_sys_getmode(fd) == O_BINARY)
-		return _sys_rawwrite(fd, buffer, count);
-
-	/* If the file descriptor is an O_TEXT fd, translate LFs to CRLFs. */
 	p = buffer;
 	left = count;
 	tot = 0;
-	while (left)
-	{
-		q = memchr(p, '\n', left);
-		if (!q)
-			return _sys_rawwrite(fd, p, left);
 
-		n = q - p;
-		if (n)
+	if (_sys_getmode(fd) == O_BINARY)
+	{
+		while (left)
 		{
-			r = _sys_rawwrite(fd, p, n);
+			r = _sys_rawwrite(fd, p, left);
 			if (r <= 0)
 				return tot ? tot : r;
 			tot += r;
 			p += r;
 			left -= r;
-			if (r != n)
-				break;
 		}
-
-		r = _sys_rawwrite(fd, crlf, sizeof crlf);
-		if (r != 2)
+	}
+	else
+	{
+		/* If the file descriptor is an O_TEXT fd, translate LFs to CRLFs. */
+		while (left)
 		{
-			if (r > 0)
-				r = 0;
-			return tot ? tot : r;
+			q = memchr(p, '\n', left);
+			if (!q)
+				return _sys_rawwrite(fd, p, left);
+
+			n = q - p;
+			if (n)
+			{
+				r = _sys_rawwrite(fd, p, n);
+				if (r <= 0)
+					return tot ? tot : r;
+				tot += r;
+				p += r;
+				left -= r;
+				if (r != n)
+					break;
+			}
+
+			r = _sys_rawwrite(fd, crlf, sizeof crlf);
+			if (r != 2)
+			{
+				if (r > 0)
+					r = 0;
+				return tot ? tot : r;
+			}
+			++tot;
+			++p;
+			--left;
 		}
-		++tot;
-		++p;
-		--left;
 	}
 	return tot;
 }

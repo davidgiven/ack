@@ -116,7 +116,7 @@ exe_start:
     callf (pmode_switch)
     jc bad_dpmi
 
-    ! We're now in protected mode. (ae)
+    ! We're now in protected mode.
 
     mov (psegcs), cs
     mov (psegds), ds
@@ -222,10 +222,6 @@ exe_start:
     push 0
     retf ! 19b
 
-    ! ALL CODE ABOVE THIS POINT DISCARDED ON ENTRY TO 32-BIT CODE
-    ! (it's reused as the 16-bit stack)
-stack16:
-
     ! Helper routine which reallocates the linear block that the 32-bit code
     ! is running from. This can't happen from inside the 32-bit code itself
     ! because it might move.
@@ -238,7 +234,7 @@ realloc:
     o32 mov (dpmi_ebp), esp     ! yes, saving esp into the ebp field
     mov (dpmi_ss), ss
     mov ss, (psegds)
-    mov sp, stack16
+    mov sp, dosstack
     sti
     pusha
 
@@ -323,10 +319,10 @@ interrupt:
     mov (dpmi_edi), di
     mov ax, (rseg)
     mov (dpmi_ds), ax
+    mov (dpmi_ss), ax
     push es
     push ds
-    xor ax, ax
-    mov (dpmi_ss), ax           ! zero stack: DPMI host allocates one.
+    mov ax, dosstack            ! auto stack is too small
     mov (dpmi_sp), ax
     push ds
     pop es
@@ -401,8 +397,10 @@ pmemhandle:     .space 4 ! protected mode linear memory handle
 pmemlen:        .space 4 ! protected mode linear memory length
 fh:             .space 2
 
-    .space 128
+    .space 512
 stack:
+    .space 512
+dosstack:
 
 TRANSFER_BUFFER_SIZE = 32*1024
 transfer_buffer:

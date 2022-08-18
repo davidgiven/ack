@@ -26,53 +26,42 @@
 
 .define __sys_rawwrite
 __sys_rawwrite:
-	enter 4, 0
-amount_transferred = -1*4
+    enter 0, 0
 file_handle = 2*4
 read_buffer = 3*4
 amount_to_write = 4*4
 
-	mov amount_transferred(ebp), 0
-
-mainloop:
-	mov eax, amount_to_write(ebp)
-	test eax, eax
-	jz exit
-
-	mov ecx, 32*1024
-	cmp eax, ecx
-	jge 2f
-	mov ecx, eax
+    mov eax, amount_to_write(ebp)
+    mov ecx, 32*1024        ! size of transfer buffer
+    cmp eax, ecx
+    jge 2f
+    mov ecx, eax
 2:
 
-	! Copy ecx bytes into the transfer buffer.
+    ! Copy ecx bytes into the transfer buffer.
 
-	push ecx
-	mov esi, read_buffer(ebp)
-	movzx edi, (transfer_buffer_ptr)
-	mov es, (pmode_ds)
-	cld
-	rep movsb
-	pop ecx
+    push ecx
+    mov esi, read_buffer(ebp)
+    movzx edi, (transfer_buffer_ptr)
+    mov es, (pmode_ds)
+    cld
+    rep movsb
+    pop ecx
 
-	! Write from the transfer buffer to DOS.
+    ! Write from the transfer buffer to DOS.
 
-	movb ah, 0x40
-	o16 mov dx, (transfer_buffer_ptr)
-	o16 mov bx, file_handle(ebp)
-	or ebx, 0x210000
-	callf (interrupt_ptr)
-	jc exit
+    movb ah, 0x40
+    o16 mov dx, (transfer_buffer_ptr)
+    o16 mov bx, file_handle(ebp)
+    or ebx, 0x210000
+    callf (interrupt_ptr)
+    jnc exit
 
-	! Update counters and go again.
-
-	add read_buffer(ebp), eax
-	add amount_transferred(ebp), eax
-	sub amount_to_write(ebp), eax
-	jmp mainloop
-
+    push eax
+    call __sys_seterrno
 exit:
-	mov eax, amount_transferred(ebp)
-	leave
-	ret
+    leave
+    ret
+
+! vim: sw=4 ts=4 et
 

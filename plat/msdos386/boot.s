@@ -166,7 +166,7 @@ empty_environment:
 
     ! argc, argv, and envp are now at the stack top.  Now go.
     call __m_a_i_n
-    add sp, 6
+    add sp, 3*4
     push ax
     call _exit
 
