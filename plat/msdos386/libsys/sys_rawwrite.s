@@ -12,12 +12,6 @@
 
 .sect .text
 
-.extern pmode_ds
-.extern pmode_cs
-.extern rmode
-.extern transfer_buffer_ptr
-.extern interrupt_ptr
-
 ! Write bytes to/to a file descriptor.  These routines do not do any
 ! translation between CRLF and LF line endings.
 !
@@ -27,6 +21,8 @@
 .define __sys_rawwrite
 __sys_rawwrite:
     enter 0, 0
+    push esi
+    push edi
 file_handle = 2*4
 read_buffer = 3*4
 amount_to_write = 4*4
@@ -59,7 +55,10 @@ amount_to_write = 4*4
 
     push eax
     call __sys_seterrno
+    pop ecx
 exit:
+    pop edi
+    pop esi
     leave
     ret
 

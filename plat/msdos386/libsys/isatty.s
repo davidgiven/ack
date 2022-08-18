@@ -16,7 +16,7 @@
 
 .define _isatty
 _isatty:
-	mov ebx, sp
+	mov ebx, esp
 	mov ebx, 4(ebx)
 	o16 mov ax, 0x4400
 	int 0x21

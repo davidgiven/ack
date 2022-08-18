@@ -321,24 +321,21 @@ interrupt:
     mov (dpmi_ds), ax
     mov (dpmi_ss), ax
     push es
-    push ds
-    mov ax, dosstack            ! auto stack is too small
-    mov (dpmi_sp), ax
+    mov (dpmi_sp), dosstack     ! auto stack is too small
     push ds
     pop es
-    mov di, dpmi_edi
+    o32 mov edi, dpmi_edi
     mov ax, 0x300
     o32 shr ebx, 16
     int 0x31                    ! simulate DOS interrupt
-    pop ds
     pop es
-    pushf
     o32 movzx eax, (dpmi_eax)
     o32 movzx ebx, (dpmi_ebx)
     o32 movzx ecx, (dpmi_ecx)
     o32 movzx edx, (dpmi_edx)
     o32 movzx esi, (dpmi_esi)
     o32 movzx edi, (dpmi_edi)
+    push (dpmi_flags)
     popf
     ret
 

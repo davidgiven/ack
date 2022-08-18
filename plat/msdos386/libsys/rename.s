@@ -16,12 +16,39 @@
 
 .define _rename
 _rename:
-	int 3
-	mov bx, sp
-	push di
-	mov dx, 2(bx)
-	mov di, 4(bx)
+	mov ebx, esp
+	push esi
+	push edi
+
+	! Source filename.
+
+	mov esi, 4(ebx)
+    movzx edi, (transfer_buffer_ptr)
+    mov es, (pmode_ds)
+    cld
+1:
+	lodsb
+	stosb
+	testb al, al
+	jnz 1b
+	
+	! Destination filename.
+
+	mov eax, edi
+	mov esi, 8(ebx)
+1:
+	lodsb
+	stosb
+	testb al, al
+	jnz 1b
+	
+	! Make the DOS call.
+
+	o16 mov dx, (transfer_buffer_ptr)
+	o16 mov di, ax
 	movb ah, 0x56
-	int 0x21
-	pop di
+	or ebx, 0x210000
+	callf (interrupt_ptr)
+	pop edi
+	pop esi
 	jmp .sys_zret

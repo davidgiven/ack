@@ -16,11 +16,10 @@
 
 .define __sys_exists
 __sys_exists:
-	int 3
-	mov bx, sp
-	mov dx, 2(bx)
-	mov ax, 0x4300
+	mov ebx, esp
+	mov edx, 4(ebx)
+	mov eax, 0x4300
 	int 0x21
-	sbb ax, ax
-	inc ax
+	sbb eax, eax
+	inc eax
 	ret

@@ -16,11 +16,10 @@
 
 .define __sys_gettime
 __sys_gettime:
-	int 3
 	movb ah, 0x2c
 	int 0x21
-	mov bx, sp
-	mov bx, 2(bx)
-	mov (bx), cx
-	mov 2(bx), dx
+	mov ebx, esp
+	mov ebx, 2(ebx)
+	o16 mov 0(ebx), cx
+	o16 mov 2(ebx), dx
 	ret

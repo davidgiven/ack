@@ -7,17 +7,12 @@
 
 .sect .text
 
-.extern realloc_ptr
-
 .define _brk
 _brk:
-	enter 0, 0
-newsize = 2*4
-
-	mov eax, newsize(ebp)
+	mov ebx, esp
+	mov eax, 1*4(ebx)
 	callf (realloc_ptr)
 	xor eax, eax
-	leave
 	ret
 
 

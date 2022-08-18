@@ -12,12 +12,6 @@
 
 .sect .text
 
-.extern pmode_ds
-.extern pmode_cs
-.extern rmode
-.extern transfer_buffer_ptr
-.extern interrupt_ptr
-
 ! Read bytes from a file descriptor.  These routines do not do any
 ! translation between CRLF and LF line endings.
 !
@@ -27,6 +21,8 @@
 .define __sys_rawread
 __sys_rawread:
 	enter 0, 0
+	push esi
+	push edi
 file_handle = 2*4
 write_buffer = 3*4
 amount_to_read = 4*4
@@ -43,7 +39,6 @@ amount_to_read = 4*4
 	movb ah, 0x3f
 	o16 mov dx, (transfer_buffer_ptr)
 	o16 mov bx, file_handle(ebp)
-	mov ecx, 0x80
 	or ebx, 0x210000
 	callf (interrupt_ptr)
 	jnc success
@@ -52,8 +47,8 @@ amount_to_read = 4*4
 
 	push eax
 	call __sys_seterrno
-	leave
-	ret
+	pop ecx
+	jmp exit
 success:
 
 	! Copy eax bytes out of the transfer buffer.
@@ -71,6 +66,9 @@ success:
 	loop 1b
 	pop eax
 
+exit:
+	pop edi
+	pop esi
 	leave
 	ret
 

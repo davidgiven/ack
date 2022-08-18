@@ -46,7 +46,7 @@ name led
 	program {EM}/lib/ack/em_led
 	mapflag -l* LNAME={PLATFORMDIR}/lib*
 	mapflag -fp FLOATS={EM}/{ILIB}fp
-	args {ALIGN} {SEPID} \
+	args {ALIGN} \
 		({RTS}:.b=-u _i_main) \
 	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
 		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
@@ -66,7 +66,6 @@ name led
 		           {PLATFORMDIR}/libc.a \
 		           {PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libend.a)
-
 	linker
 end
 name cv
