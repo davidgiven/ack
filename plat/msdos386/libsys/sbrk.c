@@ -31,6 +31,7 @@ void* sbrk(int increment)
 	if (brk(new) < 0)
 		goto out_of_memory;
 		
+	current = new;
 	return old;
 
 out_of_memory:
