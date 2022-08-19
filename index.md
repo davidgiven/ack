@@ -45,6 +45,11 @@ issue](https://github.com/davidgiven/ack/issues/new).
 New news
 --------
 
+### 2022-08-19
+
+I've just added a 32-bit MS-DOS plat, producing DPMI .EXEs. It's had very
+little testing but works well enough to run `startrek` and `paranoia`.
+
 ### 2022-07-18
 
 Still not dead! Development has been proceeding slowly in the background; we

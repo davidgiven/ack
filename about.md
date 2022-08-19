@@ -49,6 +49,9 @@ VideoCore IV.
 It contains code generator support for: 6500, ARM, i80, Z80, Z8000, i86, i386,
 68000, 68020, NS32016, SPARC, VAX4, PDP11 and VideoCore IV.
 
+It supports these platforms: pc86, linux386, linux68k, linuxppc, linuxmips,
+cpm, rpi (VideoCore IV), pdpv7, msdos86 and msdos386.
+
 However, that doesn't necessarily mean that the code is *working*. There is a
 lot of half-finished code in the repository. There is *tested* support for:
 i86, i386, 68000, i80, and VideoCore IV.
@@ -73,9 +76,10 @@ the underlying architecture requires nearly all operations to touch memory. It
 is very easy to port to a new architecture... but the generated code is
 terrible.
 
-I, dtrg, cannot honestly recommend using the ACK for production code unless as
-a stop-gap measure or unless the other benefits of the ACK (e.g. having a very
-lightweight turnkey toolchain is valuable to you) outweigh the code quality.
+I, dtrg, cannot honestly recommend using the ACK for production code on modern
+architectures unless as a stop-gap measure or unless the other benefits of the
+ACK (e.g. having a very lightweight turnkey toolchain is valuable to you)
+outweigh the code quality.
 
 Haven't I seen this before somewhere?
 -------------------------------------
@@ -105,5 +109,5 @@ They have no official involvement.
 They're aware that I, dtrg, am doing this, and are quite happy with it and
 maintain an interest, but are not actively participating in the project. (Due
 to being busy people with other things to do.) I, dtrg, have nothing to do
-with Vrije Universiteit and have never even been to Holland.
+with Vrije Universiteit and have never even been to the Netherlands.
 
