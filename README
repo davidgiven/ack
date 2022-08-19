@@ -2,7 +2,7 @@
                      ===================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2022-06-18
+                                2022-08-19
 
 
 INTRODUCTION
@@ -38,6 +38,7 @@ cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
 pdpv7         produces PDP/11 V7 Unix binaries
 msdos86       produces i86 MS-DOS .COM files
+msdos386      produces i386 MS-DOS 32-bit DPMI .EXE files
 
 
 

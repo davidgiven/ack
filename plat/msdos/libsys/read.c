@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -16,9 +17,7 @@ ssize_t read(int fd, void* buffer, size_t count)
 	ssize_t r, tot;
 	size_t left;
 	int eof = 0;
-
-	if (!count || _sys_getmode(fd) == O_BINARY)
-		return _sys_rawread(fd, buffer, count);
+	bool text = _sys_getmode(fd) == O_TEXT;
 
 	if (_sys_iseof(fd))
 		return 0;
@@ -47,33 +46,36 @@ ssize_t read(int fd, void* buffer, size_t count)
 		if (r <= 0)
 			return tot ? tot : r;
 
-		q = memchr(p, 0x1a, (size_t)r);
-		if (q)
+		if (text)
 		{
-			_sys_rawlseek(fd, (off_t)(q - p) - r, SEEK_CUR);
-			r = q - p;
-			eof = 1;
-			_sys_seteof(fd, 1);
-		}
-
-		q = memchr(p, '\r', (size_t)r);
-		if (!q)
-			return tot + r;
-
-		tot += q - p;
-		left = r - (q + 1 - p);
-		p = q;
-		++q;
-
-		while (left)
-		{
-			char c = *q++;
-			if (c != '\r')
+			q = memchr(p, 0x1a, (size_t)r);
+			if (q)
 			{
-				*p++ = c;
-				++tot;
+				_sys_rawlseek(fd, (off_t)(q - p) - r, SEEK_CUR);
+				r = q - p;
+				eof = 1;
+				_sys_seteof(fd, 1);
 			}
-			--left;
+
+			q = memchr(p, '\r', (size_t)r);
+			if (!q)
+				return tot + r;
+
+			tot += q - p;
+			left = r - (q + 1 - p);
+			p = q;
+			++q;
+
+			while (left)
+			{
+				char c = *q++;
+				if (c != '\r')
+				{
+					*p++ = c;
+					++tot;
+				}
+				--left;
+			}
 		}
 	} while (tot < count && !eof && _sys_isreadyr(fd));
 
