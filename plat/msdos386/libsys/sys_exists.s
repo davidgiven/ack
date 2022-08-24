@@ -16,10 +16,22 @@
 
 .define __sys_exists
 __sys_exists:
-	mov ebx, esp
-	mov edx, 4(ebx)
+	push esi
+	mov esi, 4+4(esp)
+	movzx edi, (transfer_buffer_ptr)
+	mov edx, edi
+	mov es, (pmode_ds)
+	cld
+1:
+	lodsb
+	stosb
+	testb al, al
+	jnz 1b
 	mov eax, 0x4300
-	int 0x21
+	mov ebx, 0x210000
+	callf (interrupt_ptr)
+	push ss
+	pop es
 	sbb eax, eax
 	inc eax
 	ret

@@ -35,7 +35,7 @@ static const signed char err_map[] =
  * Map an MS-DOS 2+ system error code to an `errno' value and store that in
  * `errno'.  Return a longword -1.
  */
-long _sys_seterrno(unsigned dos_err)
+long _sys_seterrno(unsigned short dos_err)
 {
 	if (dos_err < sizeof(err_map) / sizeof(err_map[0]))
 		errno = err_map[dos_err];

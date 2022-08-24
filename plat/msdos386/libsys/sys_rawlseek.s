@@ -18,9 +18,10 @@
 __sys_rawlseek:
 	movb ah, 0x42
 	mov ebx, esp
-	mov edx, 8(bx)
-	mov ecx, 12(bx)
-	movb al, 16(bx)
-	mov ebx, 4(bx)
+	mov edx, 8(ebx)
+	mov ecx, edx
+	shr ecx, 16
+	movb al, 12(ebx)
+	mov ebx, 4(ebx)
 	int 0x21
 	jmp .sys_dxaxret

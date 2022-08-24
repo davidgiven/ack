@@ -16,7 +16,6 @@
 
 .define __sys_gettime
 __sys_gettime:
-	int 3
 	movb ah, 0x2c
 	int 0x21
 	mov ebx, esp

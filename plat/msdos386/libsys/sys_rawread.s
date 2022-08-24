@@ -38,8 +38,9 @@ amount_to_read = 4*4
 
 	movb ah, 0x3f
 	o16 mov dx, (transfer_buffer_ptr)
+	movzx esi, dx
+	mov ebx, 0x210000
 	o16 mov bx, file_handle(ebp)
-	or ebx, 0x210000
 	callf (interrupt_ptr)
 	jnc success
 
@@ -53,9 +54,10 @@ success:
 
 	! Copy eax bytes out of the transfer buffer.
 
-	push eax
+	movzx eax, ax
 	mov ecx, eax
-	movzx esi, (transfer_buffer_ptr)
+	jcxz exit
+	push eax
 	mov edi, write_buffer(ebp)
 	mov es, (pmode_ds)
 	cld
@@ -69,6 +71,8 @@ success:
 exit:
 	pop edi
 	pop esi
+	push ss
+	pop es
 	leave
 	ret
 

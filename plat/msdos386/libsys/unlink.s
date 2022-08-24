@@ -34,11 +34,13 @@ _unlink:
 
 	! Make the DOS call.
 
-    movzx edi, (transfer_buffer_ptr)
+    mov dx, (transfer_buffer_ptr)
 	movb ah, 0x41
 	or ebx, 0x210000
 	callf (interrupt_ptr)
 
 	pop edi
 	pop esi
+	push ss
+	pop es
 	jmp .sys_zret
