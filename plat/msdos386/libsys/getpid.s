@@ -38,8 +38,9 @@ _getpid:
 	int 0x21
 	jnc .eur_dos
 	movb ah, 0x51
-	int 0x21
+	mov ebx, 0x210000
+	callf (interrupt_ptr)
 	xchg ebx, eax
 .eur_dos:
-	xor edx, edx
+	movzx eax, ax
 	ret

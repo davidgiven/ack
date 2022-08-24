@@ -127,7 +127,7 @@ exe_start:
     mov cx, 1
     int 0x31                    ! allocate LDT
     jc bad_dpmi
-    mov es, ax
+    mov fs, ax
     mov (psegcs32), ax
 
     mov cx, (pmemlen+0)
@@ -140,14 +140,16 @@ exe_start:
 
     mov dx, cx
     mov cx, bx
-    mov bx, es
+    mov bx, fs
     mov ax, 0x0007
     int 0x31                    ! set segment base address
     jc bad_dpmi
 
-    mov bx, es
+    mov bx, fs
     mov dx, (pmemlen+0)
     mov cx, (pmemlen+2)
+    sub dx, 1
+    sbb cx, 0
     mov ax, 0x0008
     int 0x31                    ! set segment limit
 
@@ -155,23 +157,23 @@ exe_start:
     and cx, 3
     shl cx, 5
     or cx, 0xc09b               ! 32-bit, big, code, non-conforming, readable
-    mov bx, es
+    mov bx, fs
     mov ax, 0x0009
     int 0x31                    ! set descriptor access rights
 
     ! Allocate the data segment (as a simple clone of the code segment). (10e)
 
     mov ax, 0x000a
-    mov bx, es
+    mov bx, fs
     int 0x31
-    mov fs, ax
+    mov es, ax
     mov (psegds32), ax
 
     mov cx, ax
     and cx, 3
     shl cx, 5
     or cx, 0xc093               ! 32-bit, big, data, r/w, expand-up
-    mov bx, fs
+    mov bx, es
     mov ax, 0x0009
     int 0x31                    ! set descriptor access rights
 
@@ -198,7 +200,7 @@ exe_start:
     o32 movzx ecx, ax           ! number of bytes read
     o32 mov esi, transfer_buffer
     cld
-    o32 rep movsb
+    rep a32 movsb
     jmp 1b
 2:
 
@@ -216,9 +218,10 @@ exe_start:
     o32 mov edx, realloc
     o32 mov esi, interruptf
     o32 mov edi, transfer_buffer
+    o32 movzx ebp, (pspseg)
     push es
     pop ds
-    push es
+    push fs
     push 0
     retf ! 19b
 
@@ -226,7 +229,8 @@ exe_start:
     ! is running from. This can't happen from inside the 32-bit code itself
     ! because it might move.
     !
-    ! On entry, ds and ss are ignored. On exit, ds is set to the 32-bit segment.
+    ! On entry, ds and ss are ignored. On exit, ds and es are set to the
+    ! 32-bit segment.
     !  eax: new block size
 realloc:
     cseg mov ds, (psegds)
@@ -253,19 +257,21 @@ realloc:
     mov (pmemaddr+0), cx
     mov (pmemaddr+2), bx
 
-    mov bx, (psegds32)
-    mov dx, (pmemlen+0)
-    mov cx, (pmemlen+2)
-    mov ax, 0x0008
-    int 0x31                    ! set ds segment limit
-    jc bad_dpmi
+    mov bx, (psegcs32)
     mov dx, (pmemaddr+0)
     mov cx, (pmemaddr+2)
     mov ax, 0x0007
+    int 0x31                    ! set cs linear address
+    jc bad_dpmi
+    mov bx, (psegds32)
     int 0x31                    ! set ds linear address
     jc bad_dpmi
-    mov bx, (psegcs32)
-    int 0x31                    ! set cs linear address
+    mov dx, (pmemlen+0)
+    mov cx, (pmemlen+2)
+    sub dx, 1
+    sbb cx, 0
+    mov ax, 0x0008
+    int 0x31                    ! set ds segment limit
     jc bad_dpmi
     
     popa
@@ -273,6 +279,7 @@ realloc:
     cli                         ! atomically switch stacks back
     mov ss, (dpmi_ss)
     o32 mov esp, (dpmi_ebp)
+    mov es, (psegds32)
     mov ds, (psegds32)
     sti
 
@@ -308,6 +315,7 @@ exit_with_error:
 
     ! Simulate DOS interrupt.
 int21:
+    o32 movzx ebx, bx
     o32 or ebx, 0x210000
     ! Simulate interrupt in the high half of ebx.
 interrupt:
@@ -317,6 +325,8 @@ interrupt:
     mov (dpmi_edx), dx
     mov (dpmi_esi), si
     mov (dpmi_edi), di
+    pushf
+    pop (dpmi_flags)
     mov ax, (rseg)
     mov (dpmi_ds), ax
     mov (dpmi_ss), ax
@@ -327,6 +337,7 @@ interrupt:
     o32 mov edi, dpmi_edi
     mov ax, 0x300
     o32 shr ebx, 16
+    xor cx, cx
     int 0x31                    ! simulate DOS interrupt
     pop es
     o32 movzx eax, (dpmi_eax)

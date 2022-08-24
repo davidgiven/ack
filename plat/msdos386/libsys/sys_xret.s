@@ -20,7 +20,8 @@
 ! code in ax, and return a shortword -1.  If the carry flag is clear, just
 ! return ax as a return value.
 !
-! .sys_dxaxret: same as .sys_axret, but return -1 or dx:ax as a return value.
+! .sys_dxaxret: same as .sys_axret, but return -1 or eax := dx:ax as a
+! return value.
 
 .extern .sys_zret
 .extern .sys_axret

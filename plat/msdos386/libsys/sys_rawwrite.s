@@ -48,8 +48,8 @@ amount_to_write = 4*4
 
     movb ah, 0x40
     o16 mov dx, (transfer_buffer_ptr)
+    mov ebx, 0x210000
     o16 mov bx, file_handle(ebp)
-    or ebx, 0x210000
     callf (interrupt_ptr)
     jnc exit
 
@@ -59,6 +59,8 @@ amount_to_write = 4*4
 exit:
     pop edi
     pop esi
+    push ss
+    pop es
     leave
     ret
 

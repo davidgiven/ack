@@ -37,9 +37,11 @@ __sys_rawopen:
 	movb ah, 0x3d
 	o16 mov dx, (transfer_buffer_ptr)
 	movb al, 8(ebx)
-	or ebx, 0x210000
+	mov ebx, 0x210000
 	callf (interrupt_ptr)
 
 	pop edi
 	pop esi
+	push ss
+	pop es
 	jmp .sys_axret

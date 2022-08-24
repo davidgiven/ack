@@ -21,33 +21,34 @@ begtext:
     !   ax: pmode code segment of stub
     !   bx: pmode data segment of stub
     !   cx: rmode segment of stub
-    !   dx: pointer to realloc routine (in stub)e
+    !   dx: pointer to realloc routine (in stub)
     !   si: pointer to interrupt routine (in stub)
     !   di: pointer to transfer buffer (in stub)
+    !   bp: rmode PSP segment
 
     ! Resize the segment to include the BSS.
 
-    o16 cseg mov (realloc_ptr+4), ax
-    cseg mov (realloc_ptr+0), edx
-    cseg o16 mov (pmode_cs), ax
-    cseg o16 mov (pmode_ds), bx
-    cseg o16 mov (rmode), cx
-    cseg o16 mov (interrupt_ptr+4), ax
-    cseg mov (interrupt_ptr+0), esi
-    cseg o16 mov (transfer_buffer_ptr), di
+    o16 mov (realloc_ptr+4), ax
+    mov (realloc_ptr+0), edx
+    o16 mov (pmode_cs), ax
+    o16 mov (pmode_ds), bx
+    o16 mov (rmode), cx
+    o16 mov (interrupt_ptr+4), ax
+    mov (interrupt_ptr+0), esi
+    o16 mov (transfer_buffer_ptr), di
 
     mov eax, __end
-    cseg callf (realloc_ptr)
+    callf (realloc_ptr)
 
     ! Clear BSS.
 
     mov edi, begbss
-    mov ecx, endbss+1
+    mov ecx, endbss+3
     sub ecx, edi
-    shr ecx, 1
+    shr ecx, 2
     xor eax, eax
     cld
-    rep stosw
+    rep stos
 
     ! It's now safe to switch stacks.
 
@@ -62,16 +63,16 @@ begtext:
     o16 mov ax, 0x0000
     o16 mov cx, 1
     int 0x31                    ! allocate LDT
+    o16 mov (.doshandle), ax
     mov es, ax
-    o16 mov bx, ax
-    o16 mov (.doshandle), bx
-    mov es, bx
+    xchg ebx, eax
 
     xor ecx, ecx
     xor edx, edx
     o16 mov ax, 0x0007
     int 0x31                    ! set base address to 0
-    o16 mov cx, 0x0010
+    o16 dec dx
+    o16 mov cx, 0x000f
     o16 mov ax, 0x0008
     int 0x31                    ! set limit to 1MB
 
@@ -84,9 +85,7 @@ begtext:
 
     ! Locate the PSP.
     
-    movb ah, 0x62
-    int 0x21
-    movzx esi, bx
+    movzx esi, bp
     shl esi, 4                  ! convert to linear address
 
     ! Copy the whole thing into 32-bit memory.
