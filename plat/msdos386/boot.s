@@ -43,12 +43,12 @@ begtext:
     ! Clear BSS.
 
     mov edi, begbss
-    mov ecx, endbss+1
+    mov ecx, endbss+3
     sub ecx, edi
-    shr ecx, 1
+    shr ecx, 2
     xor eax, eax
     cld
-    rep stosw
+    rep stos
 
     ! It's now safe to switch stacks.
 
@@ -63,10 +63,9 @@ begtext:
     o16 mov ax, 0x0000
     o16 mov cx, 1
     int 0x31                    ! allocate LDT
+    o16 mov (.doshandle), ax
     mov es, ax
-    o16 mov bx, ax
-    o16 mov (.doshandle), bx
-    mov es, bx
+    xchg ebx, eax
 
     xor ecx, ecx
     xor edx, edx

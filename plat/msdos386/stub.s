@@ -148,6 +148,8 @@ exe_start:
     mov bx, fs
     mov dx, (pmemlen+0)
     mov cx, (pmemlen+2)
+    sub dx, 1
+    sbb cx, 0
     mov ax, 0x0008
     int 0x31                    ! set segment limit
 
@@ -227,7 +229,8 @@ exe_start:
     ! is running from. This can't happen from inside the 32-bit code itself
     ! because it might move.
     !
-    ! On entry, ds and ss are ignored. On exit, ds is set to the 32-bit segment.
+    ! On entry, ds and ss are ignored. On exit, ds and es are set to the
+    ! 32-bit segment.
     !  eax: new block size
 realloc:
     cseg mov ds, (psegds)
@@ -276,6 +279,7 @@ realloc:
     cli                         ! atomically switch stacks back
     mov ss, (dpmi_ss)
     o32 mov esp, (dpmi_ebp)
+    mov es, (psegds32)
     mov ds, (psegds32)
     sti
 
@@ -321,6 +325,8 @@ interrupt:
     mov (dpmi_edx), dx
     mov (dpmi_esi), si
     mov (dpmi_edi), di
+    pushf
+    pop (dpmi_flags)
     mov ax, (rseg)
     mov (dpmi_ds), ax
     mov (dpmi_ss), ax
