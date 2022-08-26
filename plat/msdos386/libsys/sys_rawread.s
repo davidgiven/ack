@@ -3,14 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Read bytes from a file descriptor.  These routines do not do any
 ! translation between CRLF and LF line endings.
@@ -20,15 +13,12 @@
 
 .define __sys_rawread
 __sys_rawread:
-	enter 0, 0
-	push esi
-	push edi
-file_handle = 2*4
-write_buffer = 3*4
-amount_to_read = 4*4
+file_handle = 1*4
+write_buffer = 2*4
+amount_to_read = 3*4
 
-	mov eax, amount_to_read(ebp)
-	mov ecx, 32*1024
+	mov eax, amount_to_read(esp)
+	mov ecx, TRANSFER_BUFFER_SIZE
 	cmp eax, ecx
 	jge 2f
 	mov ecx, eax
@@ -38,41 +28,23 @@ amount_to_read = 4*4
 
 	movb ah, 0x3f
 	o16 mov dx, (transfer_buffer_ptr)
-	movzx esi, dx
-	mov ebx, 0x210000
-	o16 mov bx, file_handle(ebp)
-	callf (interrupt_ptr)
-	jnc success
+	o16 mov bx, file_handle(esp)
+	call .sys_dpmidos
+	jc 3f
 
+	! Copy eax bytes out of the transfer buffer.
+
+	movzx ecx, ax
+	mov eax, write_buffer(esp)
+	call .sys_cpyin
+
+	xchg eax, ecx
+	ret
+
+3:
 	! Process errors.
 
 	push eax
 	call __sys_seterrno
 	pop ecx
-	jmp exit
-success:
-
-	! Copy eax bytes out of the transfer buffer.
-
-	movzx eax, ax
-	mov ecx, eax
-	jcxz exit
-	push eax
-	mov edi, write_buffer(ebp)
-	mov es, (pmode_ds)
-	cld
-1:
-	eseg lodsb
-	movb (edi), al
-	inc edi
-	loop 1b
-	pop eax
-
-exit:
-	pop edi
-	pop esi
-	push ss
-	pop es
-	leave
 	ret
-

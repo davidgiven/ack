@@ -15,14 +15,7 @@
 ! the new terms are clearly indicated on the first page of each file where
 ! they apply.
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Get the current process identifier.  For MS-DOS, use the Program Segment
 ! Prefix (PSP) segment as the PID, unless the system supports an actual

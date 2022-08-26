@@ -3,14 +3,8 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
+#include "libsysasm.h"
 
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
 .use16
 exe_header:
     .data2 0x5a4d               ! magic number
@@ -319,12 +313,12 @@ int21:
     o32 or ebx, 0x210000
     ! Simulate interrupt in the high half of ebx.
 interrupt:
-    mov (dpmi_eax), ax
-    mov (dpmi_ebx), bx
-    mov (dpmi_ecx), cx
-    mov (dpmi_edx), dx
-    mov (dpmi_esi), si
-    mov (dpmi_edi), di
+    o32 mov (dpmi_eax), eax
+    o32 mov (dpmi_ebx), ebx
+    o32 mov (dpmi_ecx), ecx
+    o32 mov (dpmi_edx), edx
+    o32 mov (dpmi_esi), esi
+    o32 mov (dpmi_edi), edi
     pushf
     pop (dpmi_flags)
     mov ax, (rseg)
@@ -340,12 +334,12 @@ interrupt:
     xor cx, cx
     int 0x31                    ! simulate DOS interrupt
     pop es
-    o32 movzx eax, (dpmi_eax)
-    o32 movzx ebx, (dpmi_ebx)
-    o32 movzx ecx, (dpmi_ecx)
-    o32 movzx edx, (dpmi_edx)
-    o32 movzx esi, (dpmi_esi)
-    o32 movzx edi, (dpmi_edi)
+    o32 mov eax, (dpmi_eax)
+    o32 mov ebx, (dpmi_ebx)
+    o32 mov ecx, (dpmi_ecx)
+    o32 mov edx, (dpmi_edx)
+    o32 mov esi, (dpmi_esi)
+    o32 mov edi, (dpmi_edi)
     push (dpmi_flags)
     popf
     ret
@@ -410,7 +404,6 @@ stack:
     .space 512
 dosstack:
 
-TRANSFER_BUFFER_SIZE = 32*1024
 transfer_buffer:
     .space TRANSFER_BUFFER_SIZE
 

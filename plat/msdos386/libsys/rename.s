@@ -3,54 +3,40 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Rename a file.
 
 .define _rename
 _rename:
-	mov ebx, esp
-	push esi
 	push edi
 
-	! Source filename.
-
-	mov esi, 4(ebx)
-	movzx edi, (transfer_buffer_ptr)
-	mov es, (pmode_ds)
-	cld
-1:
-	lodsb
-	stosb
-	testb al, al
-	jnz 1b
-	
 	! Destination filename.
 
-	mov eax, edi
-	mov esi, 8(ebx)
-1:
-	lodsb
-	stosb
-	testb al, al
-	jnz 1b
+	mov eax, 4+8(esp)
+#define DEST_NAME_OFFSET (TRANSFER_BUFFER_SIZE / 2)
+	mov edx, DEST_NAME_OFFSET
+	mov ecx, edx
+	call .sys_sncpyout
+	jc 9f
+	xchg edi, eax
 	
+	! Source filename.
+
+	mov eax, 4+4(esp)
+	xor edx, edx
+	call .sys_sncpyout
+	jc 9f
+	xchg edx, eax
+
 	! Make the DOS call.
 
-	o16 mov dx, (transfer_buffer_ptr)
-	o16 mov di, ax
 	movb ah, 0x56
-	mov ebx, 0x210000
-	callf (interrupt_ptr)
+	call .sys_dpmidos
+
 	pop edi
-	pop esi
-	push ss
-	pop es
 	jmp .sys_zret
+
+9:
+	pop edi
+	jmp .sys_toolongret

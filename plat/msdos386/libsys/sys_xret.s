@@ -3,14 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! .sys_zret: if the carry flag is set, then set `errno' from the DOS error
 ! code in ax, and return an int -1.  If the carry flag is clear, just
@@ -18,14 +11,18 @@
 !
 ! .sys_axret: if the carry flag is set, then set `errno' from the DOS error
 ! code in ax, and return a shortword -1.  If the carry flag is clear, just
-! return ax as a return value.
+! return eax := ax as a return value.
 !
 ! .sys_dxaxret: same as .sys_axret, but return -1 or eax := dx:ax as a
 ! return value.
+!
+! .sys_toolongret: a file name is too long: set `errno' to E2BIG, and return
+! -1.
 
 .extern .sys_zret
 .extern .sys_axret
 .extern .sys_dxaxret
+.extern .sys_toolongret
 .sys_zret:
 	jc error
 	xor eax, eax
@@ -34,6 +31,7 @@ no_error:
 
 .sys_axret:
 	jc error
+	movzx eax, ax
 	ret
 
 .sys_dxaxret:
@@ -41,6 +39,11 @@ no_error:
 	shl edx, 16
 	o16 mov dx, ax
 	mov eax, edx
+	ret
+
+.sys_toolongret:
+	mov (_errno), 7			! E2BIG
+	or eax, -1
 	ret
 
 error:

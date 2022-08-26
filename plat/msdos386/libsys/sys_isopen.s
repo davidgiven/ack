@@ -3,14 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Say whether a given file descriptor number refers to a valid open file
 ! descriptor.

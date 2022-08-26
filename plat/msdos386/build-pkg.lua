@@ -9,6 +9,7 @@ ackfile {
 ackfile {
 	name = "stub",
 	srcs = { "./stub.s" },
+	deps = { "plat/msdos386/libsys+headers" },
 	vars = { plat = "msdos386" }
 }
 

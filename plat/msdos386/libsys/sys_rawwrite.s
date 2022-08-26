@@ -3,14 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Write bytes to/to a file descriptor.  These routines do not do any
 ! translation between CRLF and LF line endings.
@@ -20,15 +13,12 @@
 
 .define __sys_rawwrite
 __sys_rawwrite:
-    enter 0, 0
-    push esi
-    push edi
-file_handle = 2*4
-read_buffer = 3*4
-amount_to_write = 4*4
+file_handle = 1*4
+read_buffer = 2*4
+amount_to_write = 3*4
 
-    mov eax, amount_to_write(ebp)
-    mov ecx, 32*1024        ! size of transfer buffer
+    mov eax, amount_to_write(esp)
+    mov ecx, TRANSFER_BUFFER_SIZE
     cmp eax, ecx
     jge 2f
     mov ecx, eax
@@ -36,32 +26,22 @@ amount_to_write = 4*4
 
     ! Copy ecx bytes into the transfer buffer.
 
-    push ecx
-    mov esi, read_buffer(ebp)
-    movzx edi, (transfer_buffer_ptr)
-    mov es, (pmode_ds)
-    cld
-    rep movsb
-    pop ecx
+    mov eax, read_buffer(esp)
+    call .sys_cpyout
 
     ! Write from the transfer buffer to DOS.
 
+    xchg edx, eax
     movb ah, 0x40
-    o16 mov dx, (transfer_buffer_ptr)
-    mov ebx, 0x210000
-    o16 mov bx, file_handle(ebp)
-    callf (interrupt_ptr)
+    o16 mov bx, file_handle(esp)
+    call .sys_dpmidos
+    movzx eax, ax
     jnc exit
 
     push eax
     call __sys_seterrno
     pop ecx
 exit:
-    pop edi
-    pop esi
-    push ss
-    pop es
-    leave
     ret
 
 ! vim: sw=4 ts=4 et

@@ -3,14 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 ! Remove a file.
 
@@ -18,29 +11,13 @@
 _unlink:
 	! Copy filename to transfer buffer.
 
-	mov ebx, esp
-	push esi
-	push edi
-
-	mov esi, 4(ebx)
-    movzx edi, (transfer_buffer_ptr)
-    mov es, (pmode_ds)
-    cld
-1:
-	lodsb
-	stosb
-	testb al, al
-	jnz 1b
+	mov eax, 4(esp)
+	call .sys_scpyout
 
 	! Make the DOS call.
 
-    mov dx, (transfer_buffer_ptr)
+	xchg edx, eax
 	movb ah, 0x41
-	or ebx, 0x210000
-	callf (interrupt_ptr)
+	call .sys_dpmidos
 
-	pop edi
-	pop esi
-	push ss
-	pop es
 	jmp .sys_zret
