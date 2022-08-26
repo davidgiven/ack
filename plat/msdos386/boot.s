@@ -91,7 +91,7 @@ begtext:
     ! Copy the whole thing into 32-bit memory.
 
     mov ecx, 0x100/4
-    mov edi, _psp
+    mov edi, .psp
     cld
 1:
     eseg lods
@@ -101,7 +101,7 @@ begtext:
 
     ! Find the environment.
 
-    mov es, (_psp + 0x002C)     ! converted to pmode segment
+    mov es, (.psp + 0x002C)     ! converted to pmode segment
     
     ! Count the size of the environment variable block.
 
@@ -155,7 +155,7 @@ empty_environment:
     push 3              ! MS-DOS version
     push ecx            ! env. string data
     push edx            ! count of env. vars.
-    push _psp+0x80      ! raw command line
+    push .psp+0x80      ! raw command line
     call __sys_initmain
     add esp, 5*4
 
@@ -225,7 +225,7 @@ no_room_msg: .ascii 'No room$'
 .comm _errno, 4
 
 .comm .doshandle, 2
-.comm _psp, 256
+.comm .psp, 256
 
 .sect .bss
     .space 32*1024
