@@ -3,12 +3,7 @@
 ! $State$
 ! $Revision$
 
-! Declare segments (the order is important).
-
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
+#include "libsysasm.h"
 
 #define D(e) .define e; e
 

@@ -1,11 +1,9 @@
-! Declare segments (the order is important).
+#
+! $Source$
+! $State$
+! $Revision$
 
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
-
-.sect .text
+#include "libsysasm.h"
 
 .define _brk
 _brk:
