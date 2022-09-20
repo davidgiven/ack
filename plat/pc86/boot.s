@@ -302,8 +302,23 @@ argv: .data2 exename, 0
 envp: .data2 0
 exename: .asciz 'pc86.img'
 
+	! A degenerate "hard disk partition table" covering this boot
+	! sector (possibly needed if booting from a USB drive).
+
+	.seek 0x1BE
+	.data1 0x80		! boot indicator (0x80 = active)
+	.data1 0x00		! partition start head
+	.data1 0x01		! partition start sector and start track high
+	.data1 0x00		! partition start track low
+	.data1 0x7F		! OS or filesystem indicator
+	.data1 0xFF		! partition end head
+	.data1 0xFF		! partition end sector and end track high
+	.data1 0xFF		! partition end track low
+	.data4 0		! partition start LBA
+	.data4 0xFFFFFFFF	! length of partition in sectors
+
 	! ...and we need this to fool the PC into booting our boot sector.
-	
+
 	.seek 0x1FE
 	.data2 0xAA55
 
