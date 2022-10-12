@@ -9,4 +9,11 @@
  */
 #define	THREE_PASS	/* Distinguish short and long branches. */
 #define	LISTING		/* Enable listing facilities. */
-#define ASLD
+#define RELOCATION	/* generate relocation info */
+#define DEBUG 0
+
+#undef ALIGNWORD
+#define ALIGNWORD 2
+#undef ALIGNSECT
+#define ALIGNSECT 2
+

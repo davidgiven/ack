@@ -6,27 +6,28 @@ vars.ackcflags = {
 }
 vars.ackldflags = {}
 vars.plats = {
+	"bbcmicro",
 	"cpm",
-	"linux386",
-	"linux68k",
-	"linuxppc",
-	"linuxmips",
-	"msdos86",
-	"msdos386",
-	"osx386",
-	"osxppc",
-	"pc86",
-	"rpi",
-	"pdpv7",
-	"em22",
+--	"linux386",
+--	"linux68k",
+--	"linuxppc",
+--	"linuxmips",
+--	"msdos86",
+--	"msdos386",
+--	"osx386",
+--	"osxppc",
+--	"pc86",
+--	"rpi",
+--	"pdpv7",
+--	"em22",
 }
 vars.plats_with_tests = {
-	"cpm",
-	"linux68k",
-	"linux386",
-	"linuxppc",
-	"linuxmips",
-	"pc86",
+--	"cpm",
+--	"linux68k",
+--	"linux386",
+--	"linuxppc",
+--	"linuxmips",
+--	"pc86",
 }
 
 local is_windows = os.getenv("OS") == "Windows_NT"
