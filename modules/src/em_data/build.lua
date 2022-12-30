@@ -23,7 +23,7 @@ for _, f in ipairs(GENFILES) do
 			"h+emheaders"
 		},
 		commands = {
-			"$LUA %{ins[1]} < %{ins[3]} > %{outs}"
+			"$(LUA) %{ins[1]} < %{ins[3]} > %{outs}"
 		}
 	}
 end

@@ -8,7 +8,7 @@ normalrule {
 	},
 	outleaves = { "em_codeEK.h" },
 	commands = {
-		"$LUA %{ins[1]} < %{ins[3]} > %{outs}",
+		"$(LUA) %{ins[1]} < %{ins[3]} > %{outs}",
 		"cat %{ins[4]} >> %{outs}"
 	}
 }
