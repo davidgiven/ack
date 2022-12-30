@@ -7,7 +7,7 @@ normalrule {
 	},
 	outleaves = "C_mnem_narg.h",
 	commands = {
-		"$LUA %{ins[1]} < %{ins[3]} > %{outs}"
+		"$(LUA) %{ins[1]} < %{ins[3]} > %{outs}"
 	}
 }
 	
@@ -20,7 +20,7 @@ normalrule {
 	},
 	outleaves = "C_mnem.h",
 	commands = {
-		"$LUA %{ins[1]} < %{ins[3]} > %{outs}"
+		"$(LUA) %{ins[1]} < %{ins[3]} > %{outs}"
 	}
 }
 	

@@ -78,7 +78,7 @@ for _, plat in ipairs({"cpm"}) do
 			},
 			outleaves = { n..".s" },
 			commands = {
-				"$LUA %{ins[1]} <%{ins[2]} >%{outs}"
+				"$(LUA) %{ins[1]} <%{ins[2]} >%{outs}"
 			}
 		}
 	end
