@@ -3,7 +3,7 @@
 
 struct stringfragment
 {
-	char* data;
+	const char* data;
 	struct stringfragment* next;
 };
 
@@ -18,7 +18,7 @@ extern void stringlist_addall(struct stringlist* list, struct stringlist* src);
 extern void stringlist_free(struct stringlist* list, int freedata);
 extern void stringlist_init(struct stringlist* list);
 extern int stringlist_count(struct stringlist *list);
-extern char* stringlist_get(struct stringlist *list, int index);
+extern const char* stringlist_get(struct stringlist *list, int index);
 
 
 #endif

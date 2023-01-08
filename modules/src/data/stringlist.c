@@ -39,7 +39,7 @@ void stringlist_free(struct stringlist* list, int freedata)
 		struct stringfragment* next = f->next;
 		if (freedata)
 		{
-			free(f->data);
+			free((void*) f->data);
 			f->data = NULL;
 		}
 		free(f);
@@ -54,7 +54,7 @@ void stringlist_init(struct stringlist* list)
 }
 
 
-char* stringlist_get(struct stringlist *list, int index)
+const char* stringlist_get(struct stringlist *list, int index)
 {
 	struct stringfragment* f = list->first;
 	int i = 0;
