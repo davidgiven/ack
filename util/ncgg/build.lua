@@ -18,7 +18,7 @@ normalrule {
 	},
 	outleaves = { "enterkeyw.c" },
 	commands = {
-		"$LUA %{ins[1]} < %{ins[2]} > %{outs[1]}"
+		"$(LUA) %{ins[1]} < %{ins[2]} > %{outs[1]}"
 	}
 }
 
