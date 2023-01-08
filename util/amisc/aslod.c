@@ -37,6 +37,7 @@ struct outsect outsect[S_MAX];
 char* stringarea;
 
 char* outputfile = NULL;                /* Name of output file, or NULL */
+char* prefixfile = NULL;				/* Name of prefix file, or NULL */
 char* program;                          /* Name of current program: argv[0] */
 
 FILE* input;                            /* Input stream */
@@ -136,6 +137,19 @@ void emits(struct outsect* section, struct outsect* nextsect)
 	}
 }
 
+void emitprefixfile(void)
+{
+	FILE* fp = fopen(prefixfile, "rb");
+
+	while (!feof(fp))
+	{
+		char buffer[BUFSIZ];
+		size_t blocksize = fread(buffer, 1, BUFSIZ, fp);
+		writef(buffer, 1, blocksize);
+	}
+
+	fclose(fp);
+}
 
 /* Macros from modules/src/object/obj.h */
 #define Xchar(ch)	((ch) & 0377)
@@ -202,6 +216,12 @@ int main(int argc, char* argv[])
 				
 			case 'v':
 				verbose = true;
+				break;
+
+			case 'p':
+				argv++;
+				argc--;
+				prefixfile = argv[1];
 				break;
 
 			default:
@@ -288,6 +308,8 @@ int main(int argc, char* argv[])
 
 	/* And go! */
 	
+	if (prefixfile)
+		emitprefixfile();
 	emits(&outsect[TEXT], &outsect[ROM]);
 	emits(&outsect[ROM], &outsect[DATA]);
 	emits(&outsect[DATA], NULL);

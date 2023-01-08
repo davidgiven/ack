@@ -86,6 +86,9 @@ char* remember(char* s)
 
 int combine(int typ1, int typ2, int op)
 {
+	typ1 &= ~S_VAR;
+	typ2 &= ~S_VAR;
+
 	switch (op)
 	{
 		case '+':

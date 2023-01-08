@@ -1,13 +1,24 @@
+bundle {
+	name = "headers",
+	srcs = {
+		"./libsysasm.h"
+	}
+}
+
 acklibrary {
-    name = "lib",
-    srcs = {
-		"./brk.c",
+	name = "lib",
+	srcs = {
+		"./_hol0.s",
+		"./brk.s",
 		"./close.s",
 		"./errno.s",
 		"./getpid.s",
-		"./_hol0.s",
 		"./isatty.s",
 		"./rename.s",
+		"./sbrk.c",
+		"./sys_cpyin.s",
+		"./sys_cpyout.s",
+		"./sys_dpmidos.s",
 		"./sys_exists.s",
 		"./sys_getdate.s",
 		"./sys_gettime.s",
@@ -16,18 +27,18 @@ acklibrary {
 		"./sys_rawcreat.s",
 		"./sys_rawlseek.s",
 		"./sys_rawopen.s",
-		"./sys_rawrw.s",
+		"./sys_rawread.s",
+		"./sys_rawwrite.s",
+		"./sys_scpyout.s",
 		"./sys_xret.s",
 		"./unlink.s",
 		"plat/msdos/libsys+srcs",
-    },
-	deps = {
-		"lang/cem/libcc.ansi/headers+headers",
-		"plat/msdos86/include+headers",
-		"plat/msdos/libsys+headers",
 	},
-    vars = {
-        plat = "msdos86"
-    }
+	deps = {
+		"plat/msdos/libsys+headers",
+		"+headers"
+	},
+	vars = {
+		plat = "msdos386"
+	}
 }
-

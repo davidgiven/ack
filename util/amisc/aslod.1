@@ -3,7 +3,7 @@
 aslod \- ACK simple loader
 .SH SYNOPSIS
 .B aslod
-[\-h] [\-v] inputfile outputfile
+[\-h] [\-v] [\-p prefixfile] inputfile outputfile
 .SH DESCRIPTION
 .I aslod
 converts an absolute ack.out file into a simple binary memory dump.
@@ -16,5 +16,8 @@ The file must have all references resolved and be linked to a
 fixed address. aslod will dump the segments, in order, such
 that the first byte of TEXT is at offset 0 in the file
 (regardless of where it is in memory).
+.PP
+If a prefix file is specified, this is prepended to the output before writing.
+No changes to the output itself are made.
 .SH "SEE ALSO"
 ack.out(5)

@@ -1,0 +1,24 @@
+The msdos386 platform
+=====================
+
+msdos386 is an i386-based BSP that produces DPMI DOS executables. It should
+have the same functionality as msdos86 (as the libc is all the same code), but
+has been much less well tested.
+
+The code runs in flat 32-bit mode, so normal 32-bit pointers work with no
+worries about segmentation. It requires a DPMI host to run; it was tested with
+CWSDPMI. It will _not_ automatically load the host --- you need to manually
+install the DPMI hsot first.
+
+IEEE floating point is available, but requires an FPU.
+
+
+Example command line
+====================
+
+ack -mmsdos386 -O -o msdos386.exe examples/paranoia.c
+
+
+David Given
+dg@cowlark.com
+
