@@ -63,11 +63,6 @@ Requirements:
 - (optionally) ninja; if you've got this, this will be autodetected and give
   you faster builds.
 
-- (optionally) the qemu suite: if you have this installed, the build system
-  will detect it automatically and run the test suites for the supported
-  architectures. Get both the qemu-system-* platform emulators and the qemu-*
-  userland emulators (only works on Linux).
-
 - about 115MB free in /tmp (or some other temporary directory).
 
 - about 15MB in the target directory.
