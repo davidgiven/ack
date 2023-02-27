@@ -80,6 +80,8 @@ struct timezone
 /* Special variables */
 
 extern char** environ;
+extern char* optarg;
+extern int opterr, optind, optopt;
 
 /* Implemented system calls */
 
@@ -92,6 +94,7 @@ extern int dup2(int oldfd, int newfd);
 extern int execl(const char *path, const char* arg, ...);
 extern int execve(const char *path, char *const argv[], char *const envp[]);
 extern int fcntl(int fd, int op, ...);
+extern int getopt(int argc, char *const argv[], const char* opts);
 extern int gettimeofday(struct timeval* tv, struct timezone* tz);
 extern int isatty(int d);
 extern int isatty(int d);
