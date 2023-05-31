@@ -10,18 +10,18 @@ include("lang/build.lua")
 --	}
 --}
 
---build_plat_libs {
---	name = "libs",
---	arch = "i80",
---	plat = "cpm",
---}
+build_plat_libs {
+	name = "libs",
+	arch = "ez80",
+	plat = "agonmos",
+}
 
 installable {
 	name = "pkg",
 	map = {
 		"+tools",
---		"+libs",
---        "./include+pkg",
+		"+libs",
+        "./include+pkg",
 --		["$(PLATIND)/cpm/boot.o"] = "+boot",
 --        ["$(PLATIND)/cpm/libsys.a"] = "./libsys+lib",
 	}

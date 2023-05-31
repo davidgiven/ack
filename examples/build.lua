@@ -1,7 +1,8 @@
 include("plat/build.lua")
 
 local conly = {
-	rpi = true
+	rpi = true,
+	agonmos = true
 }
 
 local softfp = {
@@ -9,7 +10,7 @@ local softfp = {
 }
 
 local sourcefiles = filenamesof(
-	"./hilo.b",
+	--"./hilo.b",
 	"./hilo.bas",
 	"./hilo.c",
 	"./hilo.mod",

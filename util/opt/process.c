@@ -100,8 +100,7 @@ static void checklocs(void)
 static offset align(offset count, offset alignment)
 {
 
-	assert(alignment == 1 || alignment == 2 || alignment == 4);
-	return ((count + alignment - 1) & ~(alignment - 1));
+	return ((count + alignment - 1) / alignment) * alignment;
 }
 
 static void symvalue(void)

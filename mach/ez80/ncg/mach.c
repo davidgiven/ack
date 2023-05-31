@@ -5,7 +5,7 @@
  */
 
 /*
- * machine dependent back end routines for the Intel 8080.
+ * machine dependent back end routines for the eZ80.
  */
 
 #include <stdlib.h> /* atol */
@@ -15,7 +15,7 @@ void con_part(int sz, word w)
 
 	while (part_size % sz)
 		part_size++;
-	if (part_size == 2)
+	if (part_size == 3)
 		part_flush();
 	if (sz == 1)
 	{
@@ -24,10 +24,12 @@ void con_part(int sz, word w)
 			w <<= 8;
 		part_word |= w;
 	}
-	else
+	else if (sz == 2)
 	{
-		assert(sz == 2);
-		part_word = w;
+		w &= 0xffff;
+		if (part_size)
+			w <<= 16;
+		part_word |= w;
 	}
 	part_size += sz;
 }
@@ -35,7 +37,7 @@ void con_part(int sz, word w)
 void
 con_mult(word sz) {
 
-	if (sz != 4 && sz != 8)
+	if (sz != 3 && sz != 6)
 		fatal("bad icon/ucon size");
 	fprintf(codefile,".data%d\t%s\n", (int)sz, str);
 }
