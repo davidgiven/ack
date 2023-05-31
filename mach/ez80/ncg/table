@@ -1,0 +1,113 @@
+EM_WSIZE = 3  /* size of a word */
+EM_PSIZE = 3  /* size of a pointer */
+EM_BSIZE = 6  /* two pointers saved in stack frame */
+
+FP_OFFSET = 0 /* offset of saved FP relative to our FP */
+PC_OFFSET = 3 /* offset of saved PC relative to our PC */
+
+#define COMMENT(n) /* command {LABEL, n} */
+
+PROPERTIES
+
+    areg        /* the A register */
+    breg        /* any byte-sized register */
+
+    hlreg       /* the HL register */
+    bcreg       /* the BC register */
+    dereg       /* the DE register */
+    hlbcdereg   /* any of HL, BC, DE */
+    xreg        /* any index register */
+    wreg        /* any word-sized register */
+    spreg       /* the stack pointer */
+
+REGISTERS
+
+    a:                  areg, breg.
+    b, c, d, e, h, l:   breg.
+    hl("hl")=h+l:       hlreg, hlbcdereg, wreg.
+    bc("bc")=b+c:       bcreg, hlbcdereg, wreg.
+    de("de")=d+e:       dereg, hlbcdereg, wreg.
+    ix:                 wreg, xreg.
+    sp:                 spreg.
+
+TOKENS
+
+    const1      = { INT num; } 1 num.
+    const3      = { INT num; } 3 num.
+    label       = { ADDR off; } 2 off.
+    comment     = { ADDR str; } 2 "! " str.
+
+SETS
+
+    
+    bc_de       = bcreg + dereg.
+    hl_de       = hlreg + dereg.
+    any_reg     = breg + wreg.
+
+INSTRUCTIONS
+
+    add areg:rw, breg+const1:ro.
+    ex spreg, hlreg:rw.
+    ld breg:wo, (breg+const1):ro.
+    ld wreg:wo, const3:ro.
+    push wreg:ro.
+    pop wreg:wo.
+    xor breg:ro.
+
+
+MOVES
+
+    from breg to breg
+        gen
+            ld %2, %1
+
+    from const1 %num==0 to areg
+        gen
+            xor a
+
+    from const1 to breg
+        gen
+            ld %2, %1
+
+    from const3 to wreg
+        gen
+            ld %2, %1
+
+    from hlbcdereg to hlbcdereg
+        gen
+            ld %2.1, %1.1
+            ld %2.2, %1.2
+
+STACKINGRULES
+
+    from wreg to STACK
+        gen
+            push %1
+
+    from const3+hlbcdereg to STACK
+        uses hlbcdereg
+        gen
+            move %1, %a
+            push %a
+
+    from const3+hlbcdereg to STACK
+        gen
+            push hl
+            move %1, hl
+            ex sp, hl
+
+COERCIONS
+
+   from STACK
+        uses wreg
+        gen
+            pop %a
+        yields %a
+
+PATTERNS
+
+    pat loc
+        yields {const3, $1}
+
+// vim: sw=4 ts=4 et
+

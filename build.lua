@@ -6,6 +6,7 @@ vars.ackcflags = {
 }
 vars.ackldflags = {}
 vars.plats = {
+	"agonmos",
 	"cpm",
 	"linux386",
 	"linux68k",
