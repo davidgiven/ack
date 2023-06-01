@@ -130,18 +130,28 @@ definerule("build_plat_libs",
 		arch = { type="string" },
 		plat = { type="string" },
 		em = { type="boolean", default=false },
+		exclude = { type="table", default={} },
 	},
 	function(e)
 		local installmap = {
-			"lang/b/lib+pkg_"..e.plat,
-			"lang/basic/lib+pkg_"..e.plat,
-			"lang/cem/libcc.ansi+pkg_"..e.plat,
-			"lang/m2/libm2+pkg_"..e.plat,
-			"lang/pc/libpc+pkg_"..e.plat,
-			"lang/b/lib+pkg_"..e.plat,
 			["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
 			["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
 		}
+
+		for _, lang in ipairs({"b", "basic"}) do
+			if not e.exclude[lang] then
+				installmap[#installmap+1] = "lang/"..lang.."/lib+pkg_"..e.plat
+			end
+		end
+		if not e.exclude["pc"] then
+			installmap[#installmap+1] = "lang/pc/libpc+pkg_"..e.plat
+		end
+		if not e.exclude["m2"] then
+			installmap[#installmap+1] = "lang/m2/libm2+pkg_"..e.plat
+		end
+		if not e.exclude["cem"] then
+			installmap[#installmap+1] = "lang/cem/libcc.ansi+pkg_"..e.plat
+		end
 
 		-- For now, only cpm uses software floating-point.
 		if e.plat == "cpm" then
