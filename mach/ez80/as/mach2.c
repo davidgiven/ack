@@ -2,13 +2,12 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#define RCSID2 "$Id$"
 
 /*
  * Zilog Z80 tokens
  */
 %token <y_word> R8
-%token <y_word> R16
+%token <y_word> R24
 %token <y_word> CC
 %token <y_word> NOOPOP
 %token <y_word> E_ED

@@ -34,12 +34,25 @@ void con_part(int sz, word w)
 	part_size += sz;
 }
 
-void
-con_mult(word sz) {
+void con_mult(word sz)
+{
+	switch (sz)
+	{
+		case 3:
+			fprintf(codefile, ".data3 %s\n", (int)sz, str);
+			break;
 
-	if (sz != 3 && sz != 6)
-		fatal("bad icon/ucon size");
-	fprintf(codefile,".data%d\t%s\n", (int)sz, str);
+		case 6:
+		{
+			long long value = atoll(str);
+			fprintf(codefile, ".data3 0x%lx\n", value & 0xffffff);
+			fprintf(codefile, ".data3 0x%lx\n", value >> 24);
+			break;
+		}
+
+		default:
+			fatal("bad icon/ucon size");
+	}
 }
 
 #define CODE_GENERATOR
@@ -77,12 +90,14 @@ void mes(type) word type;
 				{
 					case sp_cend:
 						return;
+
 					default:
 						strarg(argt);
 						fprintf(codefile, ".define %s\n", argstr);
 						break;
 				}
 			}
+
 		default:
 			while (getarg(any_ptyp) != sp_cend)
 				;

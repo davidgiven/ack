@@ -298,6 +298,19 @@ void emit2(int arg)
 #endif
 }
 
+void emit3(int arg)
+{
+#ifdef BYTES_REVERSED
+	emit1((arg >> 16));
+	emit1((arg >> 8));
+	emit1(arg);
+#else
+	emit1(arg);
+	emit1((arg >> 8));
+	emit1((arg >> 16));
+#endif
+}
+
 void emit4(long arg)
 {
 #ifdef WORDS_REVERSED
@@ -316,6 +329,7 @@ void emitx(valu_t val, int n)
 		case RELO1:
 			emit1((int)val);
 			break;
+
 		case RELO2:
 #ifdef BYTES_REVERSED
 			emit1(((int)val >> 8));
@@ -325,6 +339,19 @@ void emitx(valu_t val, int n)
 			emit1(((int)val >> 8));
 #endif
 			break;
+
+		case RELO3:
+#ifdef BYTES_REVERSED
+			emit1(((int)val >> 16));
+			emit1(((int)val >> 8));
+			emit1((int)val);
+#else
+			emit1((int)val);
+			emit1(((int)val >> 8));
+			emit1(((int)val >> 16));
+#endif
+			break;
+
 		case RELO4:
 #ifdef WORDS_REVERSED
 			emit2((int)(val >> 16));
@@ -334,6 +361,7 @@ void emitx(valu_t val, int n)
 			emit2((int)(val >> 16));
 #endif
 			break;
+
 		default:
 			assert(0);
 	}
@@ -370,21 +398,21 @@ void emitstr(int zero)
 #define CODE_EXPANDER
 
 #if !defined IEEEFLOAT && !defined PDPFLOAT
-	#define IEEEFLOAT
+#define IEEEFLOAT
 #endif
 
 #if defined WORDS_REVERSED
-	#define FL_MSL_AT_LOW_ADDRESS 1
-	#define FL_MSW_AT_LOW_ADDRESS 1
+#define FL_MSL_AT_LOW_ADDRESS 1
+#define FL_MSW_AT_LOW_ADDRESS 1
 #else
-	#define FL_MSL_AT_LOW_ADDRESS 0
-	#define FL_MSW_AT_LOW_ADDRESS 0
+#define FL_MSL_AT_LOW_ADDRESS 0
+#define FL_MSW_AT_LOW_ADDRESS 0
 #endif
 
 #if defined BYTES_REVERSED
-	#define FL_MSB_AT_LOW_ADDRESS 1
+#define FL_MSB_AT_LOW_ADDRESS 1
 #else
-	#define FL_MSB_AT_LOW_ADDRESS 0
+#define FL_MSB_AT_LOW_ADDRESS 0
 #endif
 
 #define gen1 emit1
@@ -394,13 +422,13 @@ void emitf(int size, int negative)
 {
 	char buffer[40];
 
-	if (stringlen > sizeof(buffer)-1)
+	if (stringlen > sizeof(buffer) - 1)
 		fatal("floating point constant too long");
 
 	if (negative)
 	{
 		buffer[0] = '-';
-		strcpy(buffer+1, stringbuf);
+		strcpy(buffer + 1, stringbuf);
 		con_float(buffer, size);
 	}
 	else

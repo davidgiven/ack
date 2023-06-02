@@ -2,7 +2,6 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#define RCSID1 "$Id$"
 
 /*
  * Zilog Z80 dependent C declarations.
@@ -38,6 +37,6 @@ extern int	rel_ind;
 /*
  * Zilog Z80 special routines
  */
-void xyreg(int r,int byte);
-void xymem(int r,int byte);
-void branch(register int opc,expr_t exp);
+extern void xyreg(int r,int byte);
+extern void xymem(int r,int byte);
+extern void branch(register int opc,expr_t exp);

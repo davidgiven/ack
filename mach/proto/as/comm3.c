@@ -28,6 +28,7 @@ item_t	keytab[] = {
 	{0,	DOT,		0,		"."},
 	{0,	DATA,		RELO1,	".data1"},
 	{0,	DATA,		RELO2,	".data2"},
+	{0, DATA,  		RELO3,  ".data3"},
 	{0,	DATA,		RELO4,	".data4"},
 	{0,	DATA8,		0,	".data8"},
 	{0,  DATAF,      4,      ".dataf4"},

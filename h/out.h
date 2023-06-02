@@ -71,6 +71,7 @@ struct outname {
 #define RELOMIPS     7          /* MIPS */
 #define RELO2HI      8          /* high 2 bytes of word */
 #define RELO2HISAD   9          /* high 2 bytes of word, sign adjusted */
+#define RELO3       10          /* 3 bytes */
 
 #define RELPC	0x2000			/* pc relative */
 #define RELBR	0x4000			/* High order byte lowest address. */

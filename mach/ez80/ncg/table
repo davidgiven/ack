@@ -71,10 +71,10 @@ INSTRUCTIONS
     add areg:rw, breg+const1:ro kills :cc.
     add hlreg+hlhlreg:rw, wreg:ro kills :cc.
     add hlreg:rw, spreg:ro kills :cc.
-    and areg:rw:cc, const1+breg:ro.
+    and const1+breg:ro.
     dec breg+wreg+spreg:rw:cc.
     ex dereg:rw, hlreg:rw.
-    ex spreg, hlreg:rw.
+    exsp "ex (sp)," hlreg:rw.
     exx.
     inc breg+wreg+spreg:rw:cc.
     jp label:ro kills :cc.
@@ -183,7 +183,7 @@ STACKINGRULES
         gen
             push hl
             move %1, hl
-            ex sp, hl
+            exsp hl
 
     from const1+breg to STACK
         uses wreg
@@ -195,7 +195,7 @@ STACKINGRULES
         gen
             push hl
             move %1, hl
-            ex sp, hl
+            exsp hl
 
     from stackaddr to STACK
         gen
@@ -205,24 +205,25 @@ STACKINGRULES
         gen
             push hl
             ld hl, %1
-            ex sp, hl
-
-    from memref6 to STACK
-        uses wreg
-        gen
-            ld %a, {memref3, %1.off+0}
-            push %a
-            ld %a, {memref3, %1.off+3}
-            push %a
+            exsp hl
 
     from memref6 to STACK
         gen
             push hl
             ld hl, {memref3, %1.off+0}
-            ex sp, hl
+            exsp hl
             push hl
             ld hl, {memref3, %1.off+3}
-            ex sp, hl
+            exsp hl
+
+    from stackref6 to STACK
+        gen
+            push hl
+            ld hl, {stackref3, %1.off+0}
+            exsp hl
+            push hl
+            ld hl, {stackref3, %1.off+3}
+            exsp hl
 
 COERCIONS
 
@@ -263,6 +264,15 @@ COERCIONS
         uses wreg
         gen
             ld %a, %1
+        yields %a
+
+    from stackref6
+        uses dreg
+        gen
+            ld %a.1, {stackref3, %1.off+0}
+            exx.
+            ld %a.1, {stackref3, %1.off+3}
+            exx.
         yields %a
 
 PATTERNS
@@ -364,20 +374,14 @@ PATTERNS
     pat loi $1==6
         with exact label
             yields {memref6, %1.off}
+        with stackaddr
+            yields {stackref6, %1.off}
         with xreg
             uses dreg
             gen
                 ld %a.1, {indexref6, %1, 0}
                 exx.
                 ld %a.1, {indexref6, %1, 3}
-                exx.
-            yields %a
-        with stackaddr
-            uses dreg
-            gen
-                ld %a.1, {stackref3, %1.off+0}
-                exx.
-                ld %a.1, {stackref3, %1.off+3}
                 exx.
             yields %a
         
@@ -493,14 +497,14 @@ PATTERNS
     pat sbi $1==3
         with hlreg wreg
         gen
-            and a, a
+            and a
             sbc %1, %2
         yields %1
 
     pat sbi $1==6
         with hlhlreg dreg
         gen
-            and a, a
+            and a
             sbc %1.1, %2.1
             exx.
             sbc %1.1, %2.1
@@ -524,7 +528,7 @@ PATTERNS
         with bcreg+dereg
         uses hlreg={const3, 0}
         gen
-            and a, a
+            and a
             sbc %a, %1
         yields %a
         
@@ -614,7 +618,7 @@ PATTERNS
     pat ble
         with wreg hlreg STACK
         gen
-            and a, a
+            and a
             sbc %2, %1
             jpc {label, $1}
         with hlreg wreg STACK
