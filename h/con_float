@@ -102,12 +102,18 @@ static int float_cst(const char *float_str, int sz, char *buf)
 	int overflow = 0;
 	flt_arith e;
 
-	if (sz != 4 && sz != 8)
+	if (sz != 4 && sz != 3 && sz != 8)
 	{
 		return 1;
 	}
 	flt_str2flt(float_str, &e);
 #ifdef IEEEFLOAT
+	if (sz == 3)
+	{
+		buf[I0] = 0xff;
+		buf[I1] = 0xff;
+		buf[I2] = 0xff;
+	}
 	if (sz == 4)
 	{
 #endif
