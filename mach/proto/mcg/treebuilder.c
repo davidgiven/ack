@@ -258,7 +258,7 @@ static struct ir* compare(struct ir* left, struct ir* right,
     else if (size == (2*EM_wordsize))
         opcode++;
     else
-        fatal("can't compare things of size %d", size);
+        fatal("can't compare things of size %d; the word size is %d", size, EM_wordsize);
 
     return
         new_ir2(

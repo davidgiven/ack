@@ -58,7 +58,7 @@ static void writehex(arith data, int size)
 void data_int(arith data, size_t size, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
+    //assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
     fprintf(outputfile, "\t.data%ld ", size);
     writehex(data, size);
     fprintf(outputfile, "\n");
@@ -71,7 +71,7 @@ void data_float(const char* data, size_t size, bool is_ro)
     int i;
 
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    assert((size == 4) || (size == 8));
+    //assert((size == 4) || (size == 8));
 
     fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
 }

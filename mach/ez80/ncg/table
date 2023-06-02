@@ -13,22 +13,31 @@ PROPERTIES
     breg        /* any byte-sized register */
 
     hlreg       /* the HL register */
+    hlhlreg     /* the HLHL' register */
     bcreg       /* the BC register */
     dereg       /* the DE register */
-    hlbcdereg   /* any of HL, BC, DE */
-    xreg        /* any index register */
-    wreg        /* any word-sized register */
+    dedereg     /* the DEDE' register */
+    xreg        /* IX */
+    wreg        /* any word-sized register except IX */
+    wxreg       /* any word-sized register including IX */
+    dreg        /* any doubleword-sized register */
     spreg       /* the stack pointer */
+    altreg      /* alternate bank registers */
+    hlreg_or_dereg /* HL or DE */
 
 REGISTERS
 
     a:                          areg, breg.
     b, c, d, e, h, l, ixh, ixl: breg.
-    hl("hl")=l+h:               hlreg, hlbcdereg, wreg.
-    bc("bc")=c+b:               bcreg, hlbcdereg, wreg.
-    de("de")=e+d:               dereg, hlbcdereg, wreg.
-    ix("ix")=ixl+ixh:           wreg, xreg.
+    hl("hl")=l+h:               hlreg, wreg, wxreg, hlreg_or_dereg.
+    bc("bc")=c+b:               bcreg, wreg, wxreg.
+    de("de")=e+d:               dereg, wreg, wxreg, hlreg_or_dereg.
+    ix("ix")=ixl+ixh:           xreg, wxreg.
     sp:                         spreg.
+
+    hlhl("hl")=hl:              dreg, hlhlreg.
+    bcbc("bc")=bc:              dreg.
+    dede("de")=de:              dreg, dedereg.
 
 TOKENS
 
@@ -37,10 +46,14 @@ TOKENS
     label       = { ADDR off; } 3 off.
     comment     = { ADDR str; } 0 "! " str.
 
-    regind      = { wreg reg; } 2 "(" reg ")".
-    memref      = { ADDR off; } 2 "(" off ")".
+    regind      = { wreg reg; } 3 "(" reg ")".
+    indexref3   = { xreg reg; ADDR off; } 3 "(" reg "+" off ")".
+    indexref6   = { xreg reg; ADDR off; } 6 "(" reg "+" off ")".
+    memref3     = { ADDR off; } 3 "(" off ")".
+    memref6     = { ADDR off; } 6 "(" off ")".
     stackaddr   = { ADDR off; } 3 "iy+" off .
-    stackref    = { ADDR off; } 2 "(iy+" off ")".
+    stackref3   = { ADDR off; } 3 "(iy+" off ")".
+    stackref6   = { ADDR off; } 6 "(iy+" off ")".
 
 SETS
 
@@ -48,33 +61,50 @@ SETS
     bc_de       = bcreg + dereg.
     hl_de       = hlreg + dereg.
     any_reg     = breg + wreg.
-    any         = any_reg + const3 + label.
+    any_int     = any_reg + const3 + label.
+    any_long    = dreg.
 
 INSTRUCTIONS
 
-    Call "call" label:ro.
-    add areg:rw, breg+const1:ro.
-    add hlreg:rw, spreg:ro.
-    and areg:rw, const1+breg:ro.
-    dec breg+wreg+spreg:rw.
+    Call "call" label:ro kills :cc.
+    adc hlreg+hlhlreg:rw, wreg:ro kills :cc.
+    add areg:rw, breg+const1:ro kills :cc.
+    add hlreg+hlhlreg:rw, wreg:ro kills :cc.
+    add hlreg:rw, spreg:ro kills :cc.
+    and areg:rw:cc, const1+breg:ro.
+    dec breg+wreg+spreg:rw:cc.
+    ex dereg:rw, hlreg:rw.
     ex spreg, hlreg:rw.
-    inc breg+wreg+spreg:rw.
-    jp label:ro.
-    jpz label:ro.
-    jpnz label:ro.
-    ld breg+wreg:wo, stackref:ro.
-    ld breg:wo, (breg+const1):ro.
-    ld breg:wo, memref+regind:ro.
-    ld memref:wo, wreg:ro.
-    ld spreg:wo, hlreg:ro.
-    ld wreg:wo, const1+const3+label:ro.
-    ld wreg:wo, memref+regind:ro.
-    lea hlbcdereg:wo, stackaddr:ro.
+    exx.
+    inc breg+wreg+spreg:rw:cc.
+    jp label:ro kills :cc.
+    jpc "jp c," label:ro kills :cc.
+    jpm "jp m," label:ro kills :cc.
+    jpnc "jp nc," label:ro kills :cc.
+    jpnz "jp nz," label:ro kills :cc.
+    jpp "jp p," label:ro kills :cc.
+    jpz "jp z," label:ro kills :cc.
+    jr label:ro kills :cc.
+    jrc "jp z," label:ro kills :cc.
+    jrm "jp m," label:ro kills :cc.
+    jrnc "jp nc," label:ro kills :cc.
+    jrnz "jp nz," label:ro kills :cc.
+    jrp "jp p," label:ro kills :cc.
+    jrz "jp z," label:ro kills :cc.
+    ld breg+wreg:wo:cc, stackref3+memref3+indexref6:ro.
+    ld breg:wo:cc, breg+const1:ro.
+    ld breg:wo:cc, memref3+regind:ro.
+    ld indexref6:wo:cc, wreg:ro.
+    ld memref3+stackref3:wo:cc, wreg:ro.
+    ld regind:wo:cc, wreg:ro.
+    ld spreg:wo:cc, hlreg:ro.
+    ld wxreg:wo:cc, const1+const3+label+memref3+regind:ro.
+    lea wxreg:wo:cc, stackaddr:ro.
     pea stackaddr:ro.
-    pop wreg:wo.
-    push wreg:ro.
-    sbc hlreg:rw, hlbcdereg+spreg:ro.
-    xor breg:ro.
+    pop wreg+xreg:wo.
+    push wreg+xreg:ro.
+    sbc hlreg+hlhlreg:rw:cc, wreg+spreg:ro.
+    xor breg:ro:cc.
 
 
 MOVES
@@ -96,35 +126,67 @@ MOVES
         gen
             ld %2, %1
 
+    from const1+const3 to dreg
+        gen
+            move %1, %2.1
+            exx.
+            move {const1, 0}, %2.1
+            exx.
+
     from label to wreg
         gen
             ld %2, %1
 
-    from wreg to wreg
+    from label to xreg
+        gen
+            ld %2, %1
+
+    from wxreg to wxreg
         gen
             push %1
             pop %2
 
+TESTS
+
+    to test hlreg
+        gen
+            Call {label, ".testhl3"}
+            
+    to test bcreg
+        gen
+            Call {label, ".testbc3"}
+            
+    to test dereg
+        gen
+            Call {label, ".testde3"}
+            
 STACKINGRULES
 
-    from wreg to STACK
+    from wreg+xreg to STACK
         gen
             push %1
 
-    from const3+hlbcdereg+label to STACK
-        uses hlbcdereg
+    from dreg to STACK
+        gen
+            exx.
+            push %1.1
+            exx.
+            push %1.1
+
+    from const3+wreg+label to STACK
+        uses wreg
         gen
             move %1, %a
             push %a
 
-    from const3+hlbcdereg+label to STACK
+    from const3+wreg+label to STACK
         gen
             push hl
             move %1, hl
             ex sp, hl
 
     from const1+breg to STACK
-        uses hlbcdereg
+        uses wreg
         gen
             move %1, %a
             push %a
@@ -139,12 +201,68 @@ STACKINGRULES
         gen
             pea %1
 
-COERCIONS
+    from memref3+stackref3 to STACK
+        gen
+            push hl
+            ld hl, %1
+            ex sp, hl
 
-   from STACK
+    from memref6 to STACK
         uses wreg
         gen
+            ld %a, {memref3, %1.off+0}
+            push %a
+            ld %a, {memref3, %1.off+3}
+            push %a
+
+    from memref6 to STACK
+        gen
+            push hl
+            ld hl, {memref3, %1.off+0}
+            ex sp, hl
+            push hl
+            ld hl, {memref3, %1.off+3}
+            ex sp, hl
+
+COERCIONS
+
+    from STACK
+        uses wxreg
+        gen
             pop %a
+        yields %a
+
+    from STACK
+        uses dreg
+        gen
+            pop %a.1
+            exx.
+            pop %a.1
+            exx.
+        yields %a
+    
+    from hlreg_or_dereg
+        uses hlreg_or_dereg
+        gen
+            ex de, hl
+        yields %a
+
+    from stackaddr
+        uses wxreg
+        gen
+            lea %a, %1
+        yields %a
+
+    from label+const1+const3
+        uses xreg
+        gen
+            ld %a, %1
+        yields %a
+
+    from stackref3
+        uses wreg
+        gen
+            ld %a, %1
         yields %a
 
 PATTERNS
@@ -152,26 +270,34 @@ PATTERNS
 /* Stack stuff */
 
     pat dup $1==3
-        with any
+        with any_int
         yields %1 %1
 
     pat dup $1==6
-        with any any
-        yields %2 %1 %2 %1
+        with any_long
+        yields %1 %1
+
+    pat exg $1==3
+        with any_int any_int
+        yields %1 %2
+
+    pat exg $1==6
+        with any_long any_long
+        yields %1 %2
 
     pat asp $1==0 /* do nothing */
 
-    pat asp ($1==1)
+    pat asp $1==1
         with STACK
         gen
             inc sp
 
-    pat asp ($1==0-1)
+    pat asp $1==0-1
         with STACK
         gen
             dec sp
 
-    pat asp ($1==3)
+    pat asp $1==3
         with STACK
         uses wreg
         gen
@@ -226,30 +352,46 @@ PATTERNS
 
     pat loi $1==3
         with exact label
-            uses wreg
-            gen
-                ld %a, {memref, %1.off}
-            yields %a
+            yields {memref3, %1.off}
         with stackaddr
-            uses hlbcdereg
-            gen
-                ld %a, {stackref, %1.off}
-            yields %a
+            yields {stackref3, %1.off}
         with wreg
             uses wreg
             gen
                 ld %a, {regind, %1}
+            yields %a
 
     pat loi $1==6
-        with wreg
-            uses wreg, wreg
+        with exact label
+            yields {memref6, %1.off}
+        with xreg
+            uses dreg
             gen
-                ld %a, {regind, %1}
-                inc %1
-                inc %1
-                inc %1
-                ld %b, {regind, %1}
+                ld %a.1, {indexref6, %1, 0}
+                exx.
+                ld %a.1, {indexref6, %1, 3}
+                exx.
+            yields %a
+        with stackaddr
+            uses dreg
+            gen
+                ld %a.1, {stackref3, %1.off+0}
+                exx.
+                ld %a.1, {stackref3, %1.off+3}
+                exx.
+            yields %a
         
+    pat sti $1==3
+        with label wreg
+            gen
+                ld {memref3, %1.off}, %2
+        with stackaddr wreg
+            gen
+                ld {stackref3, %1.off}, %2
+        with wreg wreg
+            gen
+                ld {regind, %1}, %2
+
     pat lol
         leaving
             lal $1
@@ -300,7 +442,18 @@ PATTERNS
             lae $1
             sti 6
         
+    pat inl
+        leaving
+            lol $1
+            inc
+            stl $1
+
 /* Arithmetic */
+
+    pat adp
+        leaving
+            loc $1
+            adi 3
 
     pat dec
         with wreg
@@ -314,17 +467,57 @@ PATTERNS
             inc %1
         yields %1
 
+    pat adi $1==3
+        with hlreg wreg
+            gen
+                add %1, %2
+            yields %1
+        with wreg hlreg
+            leaving
+                exg 3
+                adi 3
+
+    pat adi $1==6
+        with hlhlreg dreg
+            gen
+                add %1.1, %2.1
+                exx.
+                adc %1.1, %2.1
+                exx.
+            yields %1
+        with dreg hlhlreg
+            leaving
+                exg 6
+                adi 6
+
+    pat sbi $1==3
+        with hlreg wreg
+        gen
+            and a, a
+            sbc %1, %2
+        yields %1
+
+    pat sbi $1==6
+        with hlhlreg dreg
+        gen
+            and a, a
+            sbc %1.1, %2.1
+            exx.
+            sbc %1.1, %2.1
+            exx.
+        yields %1
+
     pat ngi $1==3
         leaving
             loc 0
-            xcg 3
+            exg 3
             sbi 3
         
     pat ngi $1==6
         leaving
             loc 0
             loc 0
-            xcg 6
+            exg 6
             sbi 6
         
     pat ngi $1==6
@@ -335,6 +528,16 @@ PATTERNS
             sbc %a, %1
         yields %a
         
+/* Floating point arithmetic */
+
+    pat cmf
+        gen
+            Call {label, ".cmf_unsupported"}
+
+    pat ngf
+        gen
+            Call {label, ".ngf_unsupported"}
+
 /* Subroutines and jumps */
 
     pat cal
@@ -354,13 +557,20 @@ PATTERNS
             jp {label, ".ret"}
 
     pat ret $1==3
-        with STACK
-        uses hlreg
+        with dereg STACK
+        gen
+            jp {label, ".ret"}
+
+    pat ret $1==6
+        with dedereg STACK
         gen
             jp {label, ".ret"}
 
     pat lfr $1==3
         yields hl
+
+    pat lfr $1==6
+        yields dede
 
 /* Comparisons */
 
@@ -373,7 +583,7 @@ PATTERNS
             sbu 3
 
     pat cmi $1==6
-        with STACK
+        with hlhlreg dedereg
         gen
             Call {label, ".cmi6"}
         yields hl
@@ -392,44 +602,61 @@ PATTERNS
             jp {label, $1}
 
     pat bne
-        with hlbcdereg hlreg STACK
-        gen
-            and a, a
-            sbc %2, %1
-            jpnz {label, $1}
-        with hlreg wreg STACK
         leaving
-            exg 2
-            bne $1
+            sbi 3
+            zne $1
             
     pat beq
-        with hlbcdereg hlreg STACK
+        leaving
+            sbi 3
+            zeq $1
+            
+    pat ble
+        with wreg hlreg STACK
         gen
             and a, a
             sbc %2, %1
-            jpz {label, $1}
+            jpc {label, $1}
         with hlreg wreg STACK
         leaving
-            exg 2
-            beq $1
-            
-    pat zlt
-        with 
+            exg 3
+            bgt $1
 
+    pat zeq
+        with wreg STACK
+        gen
+            test %1
+            jpz {label, $1}
+
+    pat zne
+        with wreg STACK
+        gen
+            test %1
+            jpnz {label, $1}
+
+    pat zlt
+        with wreg STACK
+        gen
+            test %1
+            jpm {label, $1}
+
+    pat zgt
+        with wreg STACK
+        gen
+            test %1
+            jrz {label, "1f"}
+            jpm {label, $1}
+        1:
 
 /* Weird miscellaneous stuff */
 
     pat lin
-        uses hlbcdereg={const3, $1}
-        gen
-            ld {memref, ".hol0"}, %a
+        leaving
+            ste ".hol0"
 
     pat lni
-        uses hlbcdereg
-        gen
-            ld %a, {memref, ".hol0"}
-            inc %a
-            ld {memref, ".hol0"}, %a
+        leaving
+            ine ".hol0"
 
 
 // vim: sw=4 ts=4 et

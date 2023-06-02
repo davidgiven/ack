@@ -53,11 +53,14 @@ void prolog(full nlocals)
 {
 	int16_t adjustment = -nlocals;
 
-	fprintf(codefile, "\tpush iy\n");
+	fprintf(codefile, "push iy\n");
+	fprintf(codefile, "ld iy, 0\n");
+	fprintf(codefile, "add iy, sp\n");
 	if (adjustment != 0)
 	{
-		fprintf(codefile, "\tld iy, %d\n", adjustment);
-		fprintf(codefile, "\tadd iy, sp\n");
+		fprintf(codefile, "ld hl, %d\n", adjustment);
+		fprintf(codefile, "add hl, sp\n");
+		fprintf(codefile, "ld sp, hl\n");
 	}
 }
 

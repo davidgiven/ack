@@ -2,7 +2,7 @@ include("plat/build.lua")
 
 build_as {
 	name = "as",
-	arch = "i80",
+	arch = "ez80",
 }
 
 build_ncg {

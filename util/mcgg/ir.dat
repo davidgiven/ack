@@ -55,16 +55,16 @@ S i=ii LSR
 
 # Bitwise conversions
 # (Remember, these don't change the value, merely move it)
-# (order is important here; the 8-byte version of each must immediate succeed
-# the 4-byte version)
+# (order is important here; the 2-word version of each must immediate succeed
+# the 1-word version)
 S F=I. COPYI
 S I=F. COPYF
 S D=L. COPYL
 S L=D. COPYD
 
 # Semantic conversions
-# (order is important here; the 8-byte version of each must immediate succeed
-# the 4-byte version)
+# (order is important here; the 2-word version of each must immediate succeed
+# the 1-word version)
 S ?=I. FROMUI
 S ?=L. FROMUL
 S ?=I. FROMSI
@@ -84,8 +84,8 @@ S I=I. TRUNCATEB
 S I=I. TRUNCATEH
 
 # Tristate comparisons
-# (order is important here; the 8-byte version of each must immediate succeed
-# the 4-byte version)
+# (order is important here; the 2-word version of each must immediate succeed
+# the 1-word version)
 S I=II COMPARESI
 S I=LL COMPARESL
 S I=II COMPAREUI
