@@ -7,7 +7,7 @@ BasedOnStyle: WebKit
 BinPackArguments: true
 BinPackParameters: false
 BreakBeforeBraces: Allman
-ColumnLimit: 100
+ColumnLimit: 80
 IndentCaseLabels: 'true'
 PointerAlignment: Left
 SortIncludes: false
