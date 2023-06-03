@@ -26,8 +26,8 @@ static char rcsid[] = "$Id$";
  * Author: Hans van Staveren
  */
 
-#define ALLOW_NEXTEM /* code generator is allowed new try of NEXTEM \
-            in exceptional cases */
+#define ALLOW_NEXTEM /* code generator is allowed new try of NEXTEM in         \
+                        exceptional cases */
 
 byte startupcode[] = { DO_NEXTEM };
 
@@ -35,24 +35,24 @@ byte startupcode[] = { DO_NEXTEM };
 #define DEBUG(string)
 #else
 #include <stdio.h>
-#define DEBUG(string)                                              \
-	{                                                              \
-		if (Debug)                                                 \
-			fprintf(stderr, "%-*d%s\n", 4 * level, level, string); \
+#define DEBUG(string)                                                          \
+	{                                                                          \
+		if (Debug)                                                             \
+			fprintf(stderr, "%-*d%s\n", 4 * level, level, string);             \
 	}
 #endif
 
-#define BROKE()                                    \
-	{                                              \
-		assert(origcp != startupcode || !paniced); \
-		DEBUG("BROKE");                            \
-		totalcost = INFINITY;                      \
-		goto doreturn;                             \
+#define BROKE()                                                                \
+	{                                                                          \
+		assert(origcp != startupcode || !paniced);                             \
+		DEBUG("BROKE");                                                        \
+		totalcost = INFINITY;                                                  \
+		goto doreturn;                                                         \
 	}
-#define CHKCOST()                   \
-	{                               \
-		if (totalcost >= costlimit) \
-			BROKE();                \
+#define CHKCOST()                                                              \
+	{                                                                          \
+		if (totalcost >= costlimit)                                            \
+			BROKE();                                                           \
 	}
 
 #ifdef TABLEDEBUG
@@ -63,7 +63,8 @@ short* set_val;
 char* set_flag;
 #endif
 
-unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int forced)
+unsigned
+codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int forced)
 {
 #ifndef NDEBUG
 	byte* origcp = codep;
@@ -111,7 +112,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					set_val[n >> 4] &= ~(1 << (n & 017));
 #ifndef NDEBUG
 				if (Debug)
-					fprintf(stderr, "code from \"%s\", line %d\n", tablename, n);
+					fprintf(
+					    stderr, "code from \"%s\", line %d\n", tablename, n);
 #endif
 				break;
 			}
@@ -143,7 +145,10 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				{
 #ifndef NDEBUG
 					if (Debug)
-						fprintf(stderr, "Fakestack overflow threatens(%d), action ...\n", stackheight);
+						fprintf(
+						    stderr,
+						    "Fakestack overflow threatens(%d), action ...\n",
+						    stackheight);
 #endif
 					totalcost += stackupto(&fakestack[6], ply, toplevel);
 				}
@@ -161,9 +166,9 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				if (bp == 0)
 				{
 					/*
-		 * No pattern found, can be pseudo or error
-		 * in table.
-		 */
+					 * No pattern found, can be pseudo or error
+					 * in table.
+					 */
 					if (toplevel)
 					{
 						codep--;
@@ -210,13 +215,15 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 							dist = distance(cindex);
 #ifndef NDEBUG
 							if (Debug)
-								fprintf(stderr, "distance of pos %d is %u\n", i, dist);
+								fprintf(
+								    stderr, "distance of pos %d is %u\n", i,
+								    dist);
 #endif
 							if (dist <= mindistance
 #ifdef ALLOW_NEXTEM
 							    || paniced
 #endif
-							    )
+							)
 							{
 								if (dist < mindistance)
 								{
@@ -235,19 +242,22 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						if (npos > 1)
 						{
 							/*
-				 * More than 1 tokenpattern is a candidate.
-				 * Decision has to be made by lookahead.
-				 */
+							 * More than 1 tokenpattern is a candidate.
+							 * Decision has to be made by lookahead.
+							 */
 							SAVEST;
 							mincost = costlimit - totalcost + 1;
 							assert(mincost <= INFINITY);
 							for (i = 0; i < npos; i++)
 							{
-								t = codegen(&coderules[pos[i]], ply, FALSE,
+								t = codegen(
+								    &coderules[pos[i]], ply, FALSE,
 								    costlimit < MAXINT ? mincost : MAXINT, 0);
 #ifndef NDEBUG
 								if (Debug)
-									fprintf(stderr, "mincost %u,cost %u,pos %d\n", mincost, t, i);
+									fprintf(
+									    stderr, "mincost %u,cost %u,pos %d\n",
+									    mincost, t, i);
 #endif
 								if (t < mincost)
 								{
@@ -274,9 +284,9 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 
 				gotit:
 					/*
-		 * Now cindex contains the code-index of the best candidate
-		 * so proceed to use it.
-		 */
+					 * Now cindex contains the code-index of the best candidate
+					 * so proceed to use it.
+					 */
 					codep = &coderules[cindex];
 				}
 				break;
@@ -376,7 +386,9 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						cp = findcoerc(tp, &machsets[tokexp[i]]);
 #ifndef NDEBUG
 						if (Debug > 1)
-							fprintf(stderr, "findcoerc returns %p at position %d\n", cp, i);
+							fprintf(
+							    stderr, "findcoerc returns %p at position %d\n",
+							    cp, i);
 #endif
 						if (cp == 0)
 						{
@@ -397,7 +409,11 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 							{
 #ifndef NDEBUG
 								if (Debug > 1)
-									fprintf(stderr, "Register of type %d needed, remembering...\n", cp->c3_prop);
+									fprintf(
+									    stderr,
+									    "Register of type %d needed, "
+									    "remembering...\n",
+									    cp->c3_prop);
 #endif
 								assert(nregneeded < MAXCREG);
 								regtp[nregneeded] = tp;
@@ -414,7 +430,10 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				{
 #ifndef NDEBUG
 					if (Debug > 1)
-						fprintf(stderr, "Pattern too long, %d with only %d items on stack\n",
+						fprintf(
+						    stderr,
+						    "Pattern too long, %d with only %d items on "
+						    "stack\n",
 						    tokpatlen, stackheight);
 #endif
 					stackpad = tokpatlen - stackheight;
@@ -425,7 +444,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					stackheight += stackpad;
 					for (j = 0; j < nregneeded; j++)
 						regtp[j] += stackpad;
-					for (tp = &fakestack[stackpad - 1]; i < tokpatlen && tp >= fakestack; i++, tp--)
+					for (tp = &fakestack[stackpad - 1];
+					     i < tokpatlen && tp >= fakestack; i++, tp--)
 					{
 						cp = findcoerc((token_p)0, &machsets[tokexp[i]]);
 						if (cp == 0)
@@ -475,18 +495,19 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 #ifndef NDEBUG
 					if (Debug > 1)
 					{
-						fprintf(stderr, "Next tuple %d,%d,%d,%d\n",
-						    tup->p_rar[0],
-						    tup->p_rar[1],
-						    tup->p_rar[2],
-						    tup->p_rar[3]);
-						fprintf(stderr, "totalcost = %u, costlimit = %u, mincost = %u\n",
+						fprintf(
+						    stderr, "Next tuple %d,%d,%d,%d\n", tup->p_rar[0],
+						    tup->p_rar[1], tup->p_rar[2], tup->p_rar[3]);
+						fprintf(
+						    stderr,
+						    "totalcost = %u, costlimit = %u, mincost = %u\n",
 						    totalcost, costlimit, mincost);
 					}
 #endif
 					ntup = tup->p_next;
 					for (i = 0, t = 0; i < nregneeded && t < mincost; i++)
-						t += docoerc(regtp[i], regcp[i], ply, FALSE, tup->p_rar[i]);
+						t += docoerc(
+						    regtp[i], regcp[i], ply, FALSE, tup->p_rar[i]);
 #ifndef NDEBUG
 					if (Debug > 1)
 						fprintf(stderr, "cost after coercions: %u\n", t);
@@ -495,9 +516,12 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					{
 #ifndef NDEBUG
 						if (Debug > 2)
-							fprintf(stderr, "Continuing match after coercions\n");
+							fprintf(
+							    stderr, "Continuing match after coercions\n");
 #endif
-						t += codegen(codep, ply, FALSE, mincost < MAXINT ? mincost - t : MAXINT, 0);
+						t += codegen(
+						    codep, ply, FALSE,
+						    mincost < MAXINT ? mincost - t : MAXINT, 0);
 					}
 					if (t < mincost && tokpatlen <= stackheight)
 					{
@@ -525,7 +549,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 							stackheight -= stackpad;
 							if (costlimit < MAXINT)
 								BROKE();
-							totalcost += stackupto(&fakestack[stackheight - 1], ply, toplevel);
+							totalcost += stackupto(
+							    &fakestack[stackheight - 1], ply, toplevel);
 						}
 						else
 							totalcost += stackupto(fakestack, ply, toplevel);
@@ -539,7 +564,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					BROKE();
 				}
 				for (i = 0; i < nregneeded; i++)
-					totalcost += docoerc(regtp[i], regcp[i], ply, toplevel, besttup->p_rar[i]);
+					totalcost += docoerc(
+					    regtp[i], regcp[i], ply, toplevel, besttup->p_rar[i]);
 				assert(totalcost <= costlimit);
 				myfree((string)besttup);
 				break;
@@ -566,14 +592,16 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				}
 				if (texpno == allsetno)
 				{
-					totalcost += stackupto(&fakestack[stackheight - tokpatlen - 1], ply, toplevel);
+					totalcost += stackupto(
+					    &fakestack[stackheight - tokpatlen - 1], ply, toplevel);
 					CHKCOST();
 					if (doremove)
 						for (rp = machregs; rp < machregs + NREGS; rp++)
 							rp->r_contents.t_token = 0;
 					break;
 				}
-				for (tp = &fakestack[stackheight - tokpatlen - 1]; tp >= &fakestack[0]; tp--)
+				for (tp = &fakestack[stackheight - tokpatlen - 1];
+				     tp >= &fakestack[0]; tp--)
 					if (match(tp, &machsets[texpno], nodeno))
 					{
 						/* investigate possible coercion to register */
@@ -584,11 +612,17 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				if (doremove)
 					for (rp = machregs; rp < machregs + NREGS; rp++)
 					{
-						if (rp->r_contents.t_token != 0 && match(&rp->r_contents, &machsets[texpno], nodeno))
+						if (rp->r_contents.t_token != 0
+						    && match(
+						        &rp->r_contents, &machsets[texpno], nodeno))
 						{
 #ifndef NDEBUG
 							if (Debug > 1)
-								fprintf(stderr, "killing reg %ld (%s)\n", (long)(rp - machregs), rp->r_repr ? codestrings[rp->r_repr] : "cc");
+								fprintf(
+								    stderr, "killing reg %ld (%s)\n",
+								    (long)(rp - machregs),
+								    rp->r_repr ? codestrings[rp->r_repr]
+								               : "cc");
 #endif
 							rp->r_contents.t_token = 0;
 						}
@@ -613,16 +647,19 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					BROKE(); /* Check aside-stack */
 				if (dokill)
 				{
-					/* kill register, and kill condition codes if they are set to
-		   this register
+					/* kill register, and kill condition codes if they are set
+		   to this register
 		*/
 					machregs[result.e_v.e_reg].r_contents.t_token = 0;
-					if (machregs[0].r_contents.t_token == -1 && machregs[0].r_contents.t_att[0].ar == result.e_v.e_reg)
+					if (machregs[0].r_contents.t_token == -1
+					    && machregs[0].r_contents.t_att[0].ar
+					        == result.e_v.e_reg)
 					{
 						machregs[0].r_contents.t_token = 0;
 					}
 				}
-				for (tp = &fakestack[stackheight - tokpatlen - 1]; tp >= &fakestack[0]; tp--)
+				for (tp = &fakestack[stackheight - tokpatlen - 1];
+				     tp >= &fakestack[0]; tp--)
 					if (tp->t_token == -1)
 					{
 						if (tp->t_att[0].ar == result.e_v.e_reg)
@@ -632,7 +669,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					{
 						tdp = &tokens[tp->t_token];
 						for (i = 0; i < TOKENSIZE; i++)
-							if (tdp->t_type[i] == EV_REG && tp->t_att[i].ar == result.e_v.e_reg)
+							if (tdp->t_type[i] == EV_REG
+							    && tp->t_att[i].ar == result.e_v.e_reg)
 								goto gotone;
 					}
 				break;
@@ -714,9 +752,10 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 									pos2[exactmatch++] = rp - machregs;
 							}
 						/*
-			 * Now pos[] contains all free registers with desired
-			 * property. If none then some stacking has to take place.
-			 */
+						 * Now pos[] contains all free registers with desired
+						 * property. If none then some stacking has to take
+						 * place.
+						 */
 						if (npos == 0)
 						{
 							if (stackheight <= tokpatlen)
@@ -729,11 +768,13 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 								{
 									if (paniced)
 										fatal("No regs available");
-									totalcost += stackupto(&fakestack[0], ply, toplevel);
+									totalcost += stackupto(
+									    &fakestack[0], ply, toplevel);
 									goto panic;
 								}
 							}
-							totalcost += stackupto(&fakestack[0], ply, toplevel);
+							totalcost
+							    += stackupto(&fakestack[0], ply, toplevel);
 							CHKCOST();
 						}
 					} while (npos == 0);
@@ -741,11 +782,11 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					if (!exactmatch && tinstno != 0)
 					{
 						/*
-			 * No exact match, but we were looking for a particular
-			 * token. Now try to find registers of which no
-			 * known contents is available (the others might still
-			 * be useful).
-			 */
+						 * No exact match, but we were looking for a particular
+						 * token. Now try to find registers of which no
+						 * known contents is available (the others might still
+						 * be useful).
+						 */
 						for (i = 0; i < npos; i++)
 							if (machregs[pos[i]].r_contents.t_token == 0)
 							{
@@ -762,10 +803,10 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					else
 					{
 						/*
-			 * Now we are reducing the number of possible registers.
-			 * We take only one equally likely register out of every
-			 * equivalence class as given by set of properties.
-			 */
+						 * Now we are reducing the number of possible registers.
+						 * We take only one equally likely register out of every
+						 * equivalence class as given by set of properties.
+						 */
 						npos2 = 0;
 						for (i = 0; i < exactmatch; i++)
 						{
@@ -779,9 +820,9 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						}
 					}
 					/*
-		 * Now pos2[] contains all possibilities to try, if more than
-		 * one, lookahead is necessary.
-		 */
+					 * Now pos2[] contains all possibilities to try, if more
+					 * than one, lookahead is necessary.
+					 */
 					token2.t_token = -1;
 					for (i = 1; i < TOKENSIZE; i++)
 						token2.t_att[i].aw = 0;
@@ -803,7 +844,9 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 								erasereg(pos2[j]);
 							}
 							if (t < mincost)
-								t += codegen(codep, ply, FALSE, mincost < MAXINT ? mincost - t : MAXINT, 0);
+								t += codegen(
+								    codep, ply, FALSE,
+								    mincost < MAXINT ? mincost - t : MAXINT, 0);
 							if (t < mincost)
 							{
 								mincost = t;
@@ -880,7 +923,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				instance(tinstno, &token);
 				getint(tinstno, codep);
 				instance(tinstno, &token2);
-				totalcost += move(&token, &token2, ply, toplevel, costlimit - totalcost + 1);
+				totalcost += move(
+				    &token, &token2, ply, toplevel, costlimit - totalcost + 1);
 				CHKCOST();
 				break;
 			}
@@ -892,7 +936,8 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				DEBUG("TEST");
 				getint(tinstno, codep);
 				instance(tinstno, &token);
-				totalcost += test(&token, ply, toplevel, costlimit - totalcost + 1);
+				totalcost
+				    += test(&token, ply, toplevel, costlimit - totalcost + 1);
 				CHKCOST();
 				break;
 			}
@@ -935,8 +980,10 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				repllen = (codep[-1] >> 5) & 07;
 #ifndef NDEBUG
 				if (Debug > 2)
-					fprintf(stderr, "Stackheight=%d, tokpatlen=%d, repllen=%d %s\n",
-					    stackheight, tokpatlen, repllen, inscoerc ? "(inscoerc)" : "");
+					fprintf(
+					    stderr, "Stackheight=%d, tokpatlen=%d, repllen=%d %s\n",
+					    stackheight, tokpatlen, repllen,
+					    inscoerc ? "(inscoerc)" : "");
 #endif
 				for (i = 0; i < repllen; i++)
 				{
@@ -1103,7 +1150,7 @@ void readcodebytes(void)
 }
 
 #ifdef TABLEDEBUG
-void initlset(char *f)
+void initlset(char* f)
 {
 
 	set_flag = f;
@@ -1134,3 +1181,5 @@ void termlset(void)
 	}
 }
 #endif /* TABLEDEBUG */
+
+// vim: ts=4 sw=4 et
