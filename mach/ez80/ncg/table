@@ -47,11 +47,14 @@ TOKENS
     comment     = { ADDR str; } 0 "! " str.
 
     regind      = { wreg reg; } 3 "(" reg ")".
+    indexref1   = { xreg reg; ADDR off; } 1 "(" reg "+" off ")".
     indexref3   = { xreg reg; ADDR off; } 3 "(" reg "+" off ")".
     indexref6   = { xreg reg; ADDR off; } 6 "(" reg "+" off ")".
+    memref1     = { ADDR off; } 1 "(" off ")".
     memref3     = { ADDR off; } 3 "(" off ")".
     memref6     = { ADDR off; } 6 "(" off ")".
     stackaddr   = { ADDR off; } 3 "iy+" off .
+    stackref1   = { ADDR off; } 1 "(iy+" off ")".
     stackref3   = { ADDR off; } 3 "(iy+" off ")".
     stackref6   = { ADDR off; } 6 "(iy+" off ")".
 
@@ -91,14 +94,13 @@ INSTRUCTIONS
     jrnz "jp nz," label:ro kills :cc.
     jrp "jp p," label:ro kills :cc.
     jrz "jp z," label:ro kills :cc.
-    ld breg+wreg:wo:cc, stackref3+memref3+indexref6:ro.
-    ld breg:wo:cc, breg+const1:ro.
-    ld breg:wo:cc, memref3+regind:ro.
-    ld indexref6:wo:cc, wreg:ro.
-    ld memref3+stackref3:wo:cc, wreg:ro.
-    ld regind:wo:cc, wreg:ro.
-    ld spreg:wo:cc, hlreg:ro.
-    ld wxreg:wo:cc, const1+const3+label+memref3+regind:ro.
+    ld breg:wo, breg+const1+memref1+stackref1+regind:ro.
+    ld indexref6:wo, wreg:ro.
+    ld memref3+stackref3:wo, wreg:ro.
+    ld regind:wo, wreg:ro.
+    ld spreg:wo, hlreg:ro.
+    ld wreg:wo, stackref3+memref3+indexref3:ro.
+    ld wxreg:wo, const1+const3+label+memref3+regind:ro.
     lea wxreg:wo:cc, stackaddr:ro.
     pea stackaddr:ro.
     pop wreg+xreg:wo.
@@ -200,6 +202,12 @@ STACKINGRULES
     from stackaddr to STACK
         gen
             pea %1
+
+    from memref1+stackref1 to STACK
+        gen
+            push hl
+            ld l, %1
+            exsp hl
 
     from memref3+stackref3 to STACK
         gen
@@ -325,7 +333,7 @@ PATTERNS
 
 /* Conversions */
 
-    pat loc loc cuu
+    pat loc loc ciu
         leaving
             loc $1
             loc $2
@@ -346,29 +354,75 @@ PATTERNS
             cuu $1
 
     pat loc loc cuu $1==$2
+    pat loc loc cii $1==$2
     
+    pat loc loc cuu $1==1 && $2==3
+        with wreg
+        uses wreg={const3, 0}
+        gen
+            ld %a.1, %1.1
+        yields %a
+
     pat loc loc cuu $1==3 && $2==6
         with wreg+const3+label
         yields {const3, 0} %1
 
     pat loc loc cuu $1==6 && $2==3
-        with wreg wreg
-        yields %2
+        with dreg
+        yields %1.1
+
+    pat loc loc cii $1==1 && $2==3
+        with wreg
+            uses areg
+            gen
+                ld %a, %1.1
+                Call {label, ".cii13"}
+            yields hl
+        with areg
+            gen
+                Call {label, ".cii13"}
+            yields hl
 
 /* Loads and saves */
 
     pat lal
         yields {stackaddr, $1}
 
+    pat loi $1==1
+        with exact label
+            yields {memref1, %1.off}
+        with stackaddr
+            yields {stackref1, %1.off}
+        with hlreg
+            uses wreg
+            gen
+                ld %a.1, {regind, %1}
+            yields %a
+        with wreg
+            uses areg
+            gen
+                ld %a, {regind, %1}
+            yields %a
+
     pat loi $1==3
         with exact label
             yields {memref3, %1.off}
         with stackaddr
             yields {stackref3, %1.off}
-        with wreg
+        with hlreg
             uses wreg
             gen
                 ld %a, {regind, %1}
+            yields %a
+        with xreg
+            uses wreg
+            gen
+                ld %a, {indexref3, %1, 0}
+            yields %a
+        with indexref3
+            uses wreg
+            gen
+                ld %a, %1
             yields %a
 
     pat loi $1==6
@@ -379,9 +433,17 @@ PATTERNS
         with xreg
             uses dreg
             gen
-                ld %a.1, {indexref6, %1, 0}
+                ld %a.1, {indexref3, %1, 0}
                 exx.
-                ld %a.1, {indexref6, %1, 3}
+                ld %a.1, {indexref3, %1, 3}
+                exx.
+            yields %a
+        with indexref6
+            uses dreg
+            gen
+                ld %a.1, {indexref3, %1.reg, %1.off+0}
+                exx.
+                ld %a.1, {indexref3, %1.reg, %1.off+3}
                 exx.
             yields %a
         
@@ -399,6 +461,11 @@ PATTERNS
     pat lol
         leaving
             lal $1
+            loi 3
+
+    pat lil
+        leaving
+            lol $1
             loi 3
 
     pat stl lol $1==$2
