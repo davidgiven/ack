@@ -222,7 +222,9 @@ ari8    :   ARI8
 
 ldargs:
     R8 ',' R8
-            {   if ($1==F || $3==F) serror("register error");
+            {
+                if ($1==F || $3==F)
+                    serror("register error");
                 if ($1<=A && $3<=A)
                     emit1(0100 | $1<<3 | $3);
                 else {
@@ -235,8 +237,10 @@ ldargs:
                     );
                 }
             }
+
     |   R8 ',' expr
-            {   if ($1==F || $1==I || $1==R)
+            {
+                if ($1==F || $1==I || $1==R)
                     serror("register error");
                 emit1(06 | $1<<3);
 #ifdef RELOCATION
@@ -244,14 +248,17 @@ ldargs:
 #endif
                 emit1($3.val);
             }
+
     |   R8 ',' indir
-            {   if ($1==F || $1==I || $1==R)
+            {
+                if ($1==F || $1==I || $1==R)
                     serror("register error");
                 if ($1==A && ($3==BC || $3==DE))
                     emit1($3==BC ? 012 : 032);
                 else
                     xymem($3,0106 | $1<<3);
             }
+
     |   R8 ',' index
             {   if ($1==F || $1==I || $1==R)
                     serror("register error");
@@ -259,28 +266,37 @@ ldargs:
             }
 
     |   R8 ',' '(' expr ')'
-            {   if ($1!=A) serror("register error");
-                emit1(072);
+            {
+                if ($1!=A) serror("register error");
+                    emit1(072);
 #ifdef RELOCATION
                 newrelo($4.typ, RELO3);
 #endif
                 emit3($4.val);
             }
+
     |   indir ',' r8
-            {   if ($3==A && ($1==BC || $1==DE))
+            {
+                if ($3==A && ($1==BC || $1==DE))
                     emit1($1==BC ? 02 : 022);
                 else
                     xymem($1,0160 | $3);
             }
+
     |   index ',' r8
-            {   xymem($1,0160 | $3);}
+            {
+                xymem($1,0160 | $3);
+            }
+
     |   indir ',' expr
-            {   xymem($1,066);
+            {
+                xymem($1,066);
 #ifdef RELOCATION
                 newrelo($3.typ, RELO1);
 #endif
                 emit1($3.val);
             }
+
     |   index ',' expr
             {   xymem($1,066);
 #ifdef RELOCATION
@@ -335,6 +351,21 @@ ldargs:
                 }
             }
 
+    | index ',' R24
+            {
+                switch ($3)
+                {
+                    case BC:
+                    case DE:
+                    case HL:
+                        xymem($1, ($3 << 4) | 0x0f);
+                        break;
+
+                    default:
+                        serror("register error");
+                }
+            }
+
     |   '(' expr ')' ',' R8
             {   if ($5!=A) serror("register error");
                 emit1(062);
@@ -357,18 +388,23 @@ ldargs:
                 emit3($2.val);
             }
     ;
+
 r8  :   R8
             {   if ($1==F || $1==I || $1==R)
                     serror("register error");
             }
     ;
-indir   :   '(' R24 ')'
-            {   if ($2>=SP && $2!=IX && $2!=IY)
+
+indir:
+    '(' R24 ')'
+            {
+                if ($2>=SP && $2!=IX && $2!=IY)
                     serror("register error");
                 exp_ind.typ = S_ABS; exp_ind.val = 0;
                 $$ = $2;
             }
     ;
+
 index:
     '(' R24 '+' expr ')'
             {
@@ -390,13 +426,17 @@ index:
             }
     ;
 
-ind :   indir
-    |   index
+ind:
+    indir
+    | index
     ;
-coco    :   CC
-    |   R8
-            {   if ($1 != C) serror("bad condition code");
-                $$ = 3;
+
+coco:
+    CC
+    | R8
+            {
+                if ($1 != C) serror("bad condition code");
+                    $$ = 3;
             }
     ;
 
