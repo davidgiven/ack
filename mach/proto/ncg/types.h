@@ -30,40 +30,40 @@ typedef char * string;
 #endif /* WRD_FMT */
 
 /* codegen.c */
-unsigned codegen(byte *, int, int, unsigned, int);
-void readcodebytes(void);
+extern unsigned codegen(byte *, int, int, unsigned, int);
+extern void readcodebytes(void);
 #ifdef TABLEDEBUG
-void initlset(char *);
-void termlset(void);
+extern void initlset(char *);
+extern void termlset(void);
 #endif
 /* compute.c */
-string mystrcpy(string);
-string tostring(word);
+extern string mystrcpy(string);
+extern string tostring(word);
 /* fillem.c */
-void in_init(char *);
-void in_start(void);
-void fillemlines(void);
-void swtxt(void);
-void dopseudo(void);
+extern void in_init(char *);
+extern void in_start(void);
+extern void fillemlines(void);
+extern void swtxt(void);
+extern void dopseudo(void);
 /* gencode.c */
-void out_init(char *);
-void out_finish(void);
-void tstoutput(void);
+extern void out_init(char *);
+extern void out_finish(void);
+extern void tstoutput(void);
 /* nextem.c */
-byte *nextem(int);
+extern byte *nextem(int);
 /* reg.c */
-void chrefcount(int, int, int);
-int getrefcount(int, int);
-void erasereg(int);
-void cleanregs(void);
-void chkregs(void);
+extern void chrefcount(int, int, int);
+extern int getrefcount(int, int);
+extern void erasereg(int);
+extern void cleanregs(void);
+extern void chkregs(void);
 /* salloc.c */
-string myalloc(int);
-void myfree(string);
-void popstr(int);
-char *salloc(int);
-void garbage_collect(void);
+extern string myalloc(int);
+extern void myfree(string);
+extern void popstr(int);
+extern char *salloc(int);
+extern void garbage_collect(void);
 /* subr.c */
-void itokcost(void);
-void error(const char *s, ...);
-void fatal(const char *s, ...);
+extern void itokcost(void);
+extern void error(const char *s, ...);
+extern void fatal(const char *s, ...);

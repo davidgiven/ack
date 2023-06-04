@@ -21,6 +21,6 @@
  * Tunable constants
  */
 
-#define MAXEMLINES 20
+#define MAXEMLINES 80
 #define MAXFSTACK 20
 #define MAXTDBUG 32

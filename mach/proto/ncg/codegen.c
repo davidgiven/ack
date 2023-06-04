@@ -321,7 +321,7 @@ codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int forced)
 				token_p regtp[MAXCREG];
 				c3_p regcp[MAXCREG];
 				rl_p regls[MAXCREG];
-				c3_p cp, findcoerc();
+				c3_p cp;
 #ifdef MAXSPLIT
 				int sret;
 #endif
@@ -333,6 +333,13 @@ codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int forced)
 				for (i = 0; i < tokpatlen; i++)
 					getint(tokexp[i], codep);
 				tp = &fakestack[stackheight - 1];
+#ifndef NDEBUG
+                if (Debug > 1)
+                    fprintf(
+                        stderr,
+                        "pattern length %d, stack height %d\n",
+                        tokpatlen, stackheight);
+#endif
 				i = 0;
 				while (i < tokpatlen && tp >= fakestack)
 				{

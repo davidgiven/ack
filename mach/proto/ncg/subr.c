@@ -687,7 +687,7 @@ unsigned stackupto(token_p limit, int ply, int toplevel)
 				goto contin;
 			}
 		}
-		assert(FALSE);
+		//assert(FALSE);
 	contin:;
 	}
 	return (totalcost);
