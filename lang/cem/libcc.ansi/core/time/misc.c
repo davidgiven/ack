@@ -115,7 +115,7 @@ static TABLE TimezoneTable[]
  * wheter the name is for daylight-saving-time or not.
  * Both ntstr and dststr are TZ_LEN + 1 chars.
  */
-static void ZoneFromTable(long timezone)
+void ZoneFromTable(long timezone)
 {
 	register TABLE* tptr = TimezoneTable;
 
@@ -139,7 +139,7 @@ static void ZoneFromTable(long timezone)
 }
 #endif /* USE_TABLE */
 
-static const char* parseZoneName(register char* buf, register const char* p)
+const char* parseZoneName(register char* buf, register const char* p)
 {
 	register int n = 0;
 
@@ -158,7 +158,7 @@ static const char* parseZoneName(register char* buf, register const char* p)
 	return p;
 }
 
-static const char*
+const char*
 parseTime(register long* tm, const char* p, register struct dsttype* dst)
 {
 	register int n = 0;
@@ -214,7 +214,7 @@ parseTime(register long* tm, const char* p, register struct dsttype* dst)
 	return p;
 }
 
-static const char*
+const char*
 parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
 {
 	register const char* q;
@@ -271,7 +271,7 @@ parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
 	return p;
 }
 
-static const char* parseRule(register char* buf, register const char* p)
+const char* parseRule(register char* buf, register const char* p)
 {
 	long tim;
 	register const char* q;
@@ -310,7 +310,7 @@ static const char* parseRule(register char* buf, register const char* p)
  * the requirements, see IEEE Std 1003.1-1988 section 8.1.1.
  * The function returns as soon as it spots an error.
  */
-static void parseTZ(const char* p)
+void parseTZ(const char* p)
 {
 	long tz, dst = 60 * 60, sign = 1;
 	static char lastTZ[2 * RULE_LEN];
@@ -396,7 +396,7 @@ void _tzset(void)
 	tzname[1] = _tzname[1];
 }
 
-static int last_sunday(register int day, register struct tm* timep)
+int last_sunday(register int day, register struct tm* timep)
 {
 	int first = FIRSTSUNDAY(timep);
 
@@ -407,7 +407,7 @@ static int last_sunday(register int day, register struct tm* timep)
 	return day - (day - first) % 7;
 }
 
-static int date_of(register struct dsttype* dst, struct tm* timep)
+int date_of(register struct dsttype* dst, struct tm* timep)
 {
 	int leap = LEAPYEAR(YEAR0 + timep->tm_year);
 	int firstday, tmpday;

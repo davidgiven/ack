@@ -28,6 +28,10 @@
 #define	INT_MIN			SHRT_MIN
 #define	INT_MAX			SHRT_MAX
 #define	UINT_MAX		65535U
+#elif _EM_WSIZE == 3
+#define	INT_MIN			(-8388607 - 1)
+#define	INT_MAX			8388607
+#define	UINT_MAX		16777215U
 #else	/* _EM_WSIZE == 4 */
 #define	INT_MIN			(-2147483647 - 1)
 #define	INT_MAX			2147483647

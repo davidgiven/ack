@@ -63,7 +63,7 @@ typedef int32_t         intmax_t;
 typedef uint32_t        uintmax_t;
 #endif
 
-/* Pointers can be either 16 or 32 bits. */
+/* Pointers. */
 
 #if _EM_PSIZE == 2
 typedef int16_t         intptr_t;
@@ -74,7 +74,16 @@ typedef int16_t         ssize_t;
 #define INTPTR_MAX      32767
 #define INTPTR_MIN      (-32768)
 #define UINTPTR_MAX     65535
-#else
+#elif _EM_PSIZE == 3
+typedef int         intptr_t;
+typedef unsigned int        uintptr_t;
+typedef int         ptrdiff_t;
+typedef unsigned int        size_t;
+typedef int         ssize_t;
+#define INTPTR_MAX      8388607
+#define INTPTR_MIN      (-8388608)
+#define UINTPTR_MAX     16777215
+#elif _EM_PSIZE == 4
 typedef int32_t         intptr_t;
 typedef uint32_t        uintptr_t;
 typedef int32_t         ptrdiff_t;
