@@ -32,24 +32,18 @@ static struct dsttype
 	char ds_type; /* Unknown, Julian, Zero-based or M */
 	int ds_date[3]; /* months, weeks, days */
 	long ds_sec; /* usually 02:00:00 */
-} dststart = { 'U', { 0, 0, 0 }, 2 * 60 * 60 }, dstend = { 'U', { 0, 0, 0 }, 2 * 60 * 60 };
+} dststart = { 'U', { 0, 0, 0 }, 2 * 60 * 60 },
+  dstend = { 'U', { 0, 0, 0 }, 2 * 60 * 60 };
 
-const char* _days[] = {
-	"Sunday", "Monday", "Tuesday", "Wednesday",
-	"Thursday", "Friday", "Saturday"
-};
+const char* _days[] = { "Sunday",   "Monday", "Tuesday", "Wednesday",
+	                    "Thursday", "Friday", "Saturday" };
 
-const char* _months[] = {
-	"January", "February", "March",
-	"April", "May", "June",
-	"July", "August", "September",
-	"October", "November", "December"
-};
+const char* _months[]
+    = { "January", "February", "March",     "April",   "May",      "June",
+	    "July",    "August",   "September", "October", "November", "December" };
 
-const int _ytab[2][12] = {
-	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-	{ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
-};
+const int _ytab[2][12] = { { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
+	                       { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 } };
 
 #if !defined(_POSIX_SOURCE) && !defined(__USG)
 #define USE_TABLE 1
@@ -67,54 +61,53 @@ typedef struct table
 
 #define HOUR(x) ((x)*60 * 60)
 
-static TABLE TimezoneTable[] = {
-	{ "GMT", 0, HOUR(0) }, /* Greenwich Mean */
-	{ "BST", 60 * 60, HOUR(0) }, /* British Summer */
-	{ "WAT", 0, HOUR(1) }, /* West Africa */
-	{ "AT", 0, HOUR(2) }, /* Azores */
-	{ "BST", 0, HOUR(3) }, /* Brazil Standard */
-	{ "NFT", 0, HOUR(3.5) }, /* Newfoundland */
-	{ "NDT", 60 * 60, HOUR(3.5) }, /* Newfoundland Daylight */
-	{ "AST", 0, HOUR(4) }, /* Atlantic Standard */
-	{ "ADT", 60 * 60, HOUR(4) }, /* Atlantic Daylight */
-	{ "EST", 0, HOUR(5) }, /* Eastern Standard */
-	{ "EDT", 60 * 60, HOUR(5) }, /* Eastern Daylight */
-	{ "CST", 0, HOUR(6) }, /* Central Standard */
-	{ "CDT", 60 * 60, HOUR(6) }, /* Central Daylight */
-	{ "MST", 0, HOUR(7) }, /* Mountain Standard */
-	{ "MDT", 60 * 60, HOUR(7) }, /* Mountain Daylight */
-	{ "PST", 0, HOUR(8) }, /* Pacific Standard */
-	{ "PDT", 60 * 60, HOUR(8) }, /* Pacific Daylight */
-	{ "YST", 0, HOUR(9) }, /* Yukon Standard */
-	{ "YDT", 60 * 60, HOUR(9) }, /* Yukon Daylight */
-	{ "HST", 0, HOUR(10) }, /* Hawaii Standard */
-	{ "HDT", 60 * 60, HOUR(10) }, /* Hawaii Daylight */
-	{ "NT", 0, HOUR(11) }, /* Nome */
-	{ "IDLW", 0, HOUR(12) }, /* International Date Line West */
-	{ "MET", 0, -HOUR(1) }, /* Middle European */
-	{ "MDT", 60 * 60, -HOUR(1) }, /* Middle European Summer */
-	{ "EET", 0, -HOUR(2) }, /* Eastern Europe, USSR Zone 1 */
-	{ "BT", 0, -HOUR(3) }, /* Baghdad, USSR Zone 2 */
-	{ "IT", 0, -HOUR(3.5) }, /* Iran */
-	{ "ZP4", 0, -HOUR(4) }, /* USSR Zone 3 */
-	{ "ZP5", 0, -HOUR(5) }, /* USSR Zone 4 */
-	{ "IST", 0, -HOUR(5.5) }, /* Indian Standard */
-	{ "ZP6", 0, -HOUR(6) }, /* USSR Zone 5 */
-	{ "NST", 0, -HOUR(6.5) }, /* North Sumatra */
-	{ "SST", 0, -HOUR(7) }, /* South Sumatra, USSR Zone 6 */
-	{ "WAST", 0, -HOUR(7) }, /* West Australian Standard */
-	{ "WADT", 60 * 60, -HOUR(7) }, /* West Australian Daylight */
-	{ "JT", 0, -HOUR(7.5) }, /* Java (3pm in Cronusland!) */
-	{ "CCT", 0, -HOUR(8) }, /* China Coast, USSR Zone 7 */
-	{ "JST", 0, -HOUR(9) }, /* Japan Standard, USSR Zone 8 */
-	{ "CAST", 0, -HOUR(9.5) }, /* Central Australian Standard */
-	{ "CADT", 60 * 60, -HOUR(9.5) }, /* Central Australian Daylight */
-	{ "EAST", 0, -HOUR(10) }, /* Eastern Australian Standard */
-	{ "EADT", 60 * 60, -HOUR(10) }, /* Eastern Australian Daylight */
-	{ "NZT", 0, -HOUR(12) }, /* New Zealand */
-	{ "NZDT", 60 * 60, -HOUR(12) }, /* New Zealand Daylight */
-	{ NULL, 0, 0 }
-};
+static TABLE TimezoneTable[]
+    = { { "GMT", 0, HOUR(0) }, /* Greenwich Mean */
+	    { "BST", 60 * 60, HOUR(0) }, /* British Summer */
+	    { "WAT", 0, HOUR(1) }, /* West Africa */
+	    { "AT", 0, HOUR(2) }, /* Azores */
+	    { "BST", 0, HOUR(3) }, /* Brazil Standard */
+	    { "NFT", 0, HOUR(3.5) }, /* Newfoundland */
+	    { "NDT", 60 * 60, HOUR(3.5) }, /* Newfoundland Daylight */
+	    { "AST", 0, HOUR(4) }, /* Atlantic Standard */
+	    { "ADT", 60 * 60, HOUR(4) }, /* Atlantic Daylight */
+	    { "EST", 0, HOUR(5) }, /* Eastern Standard */
+	    { "EDT", 60 * 60, HOUR(5) }, /* Eastern Daylight */
+	    { "CST", 0, HOUR(6) }, /* Central Standard */
+	    { "CDT", 60 * 60, HOUR(6) }, /* Central Daylight */
+	    { "MST", 0, HOUR(7) }, /* Mountain Standard */
+	    { "MDT", 60 * 60, HOUR(7) }, /* Mountain Daylight */
+	    { "PST", 0, HOUR(8) }, /* Pacific Standard */
+	    { "PDT", 60 * 60, HOUR(8) }, /* Pacific Daylight */
+	    { "YST", 0, HOUR(9) }, /* Yukon Standard */
+	    { "YDT", 60 * 60, HOUR(9) }, /* Yukon Daylight */
+	    { "HST", 0, HOUR(10) }, /* Hawaii Standard */
+	    { "HDT", 60 * 60, HOUR(10) }, /* Hawaii Daylight */
+	    { "NT", 0, HOUR(11) }, /* Nome */
+	    { "IDLW", 0, HOUR(12) }, /* International Date Line West */
+	    { "MET", 0, -HOUR(1) }, /* Middle European */
+	    { "MDT", 60 * 60, -HOUR(1) }, /* Middle European Summer */
+	    { "EET", 0, -HOUR(2) }, /* Eastern Europe, USSR Zone 1 */
+	    { "BT", 0, -HOUR(3) }, /* Baghdad, USSR Zone 2 */
+	    { "IT", 0, -HOUR(3.5) }, /* Iran */
+	    { "ZP4", 0, -HOUR(4) }, /* USSR Zone 3 */
+	    { "ZP5", 0, -HOUR(5) }, /* USSR Zone 4 */
+	    { "IST", 0, -HOUR(5.5) }, /* Indian Standard */
+	    { "ZP6", 0, -HOUR(6) }, /* USSR Zone 5 */
+	    { "NST", 0, -HOUR(6.5) }, /* North Sumatra */
+	    { "SST", 0, -HOUR(7) }, /* South Sumatra, USSR Zone 6 */
+	    { "WAST", 0, -HOUR(7) }, /* West Australian Standard */
+	    { "WADT", 60 * 60, -HOUR(7) }, /* West Australian Daylight */
+	    { "JT", 0, -HOUR(7.5) }, /* Java (3pm in Cronusland!) */
+	    { "CCT", 0, -HOUR(8) }, /* China Coast, USSR Zone 7 */
+	    { "JST", 0, -HOUR(9) }, /* Japan Standard, USSR Zone 8 */
+	    { "CAST", 0, -HOUR(9.5) }, /* Central Australian Standard */
+	    { "CADT", 60 * 60, -HOUR(9.5) }, /* Central Australian Daylight */
+	    { "EAST", 0, -HOUR(10) }, /* Eastern Australian Standard */
+	    { "EADT", 60 * 60, -HOUR(10) }, /* Eastern Australian Daylight */
+	    { "NZT", 0, -HOUR(12) }, /* New Zealand */
+	    { "NZDT", 60 * 60, -HOUR(12) }, /* New Zealand Daylight */
+	    { NULL, 0, 0 } };
 
 /*
  * The function ZoneFromTable() searches the table for the current
@@ -122,8 +115,7 @@ static TABLE TimezoneTable[] = {
  * wheter the name is for daylight-saving-time or not.
  * Both ntstr and dststr are TZ_LEN + 1 chars.
  */
-static void
-ZoneFromTable(long timezone)
+static void ZoneFromTable(long timezone)
 {
 	register TABLE* tptr = TimezoneTable;
 
@@ -147,8 +139,7 @@ ZoneFromTable(long timezone)
 }
 #endif /* USE_TABLE */
 
-static const char*
-parseZoneName(register char* buf, register const char* p)
+static const char* parseZoneName(register char* buf, register const char* p)
 {
 	register int n = 0;
 
@@ -229,9 +220,7 @@ parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
 	register const char* q;
 	register int n = 0;
 	int cnt = 0;
-	const int bnds[3][2] = { { 1, 12 },
-		{ 1, 5 },
-		{ 0, 6 } };
+	const int bnds[3][2] = { { 1, 12 }, { 1, 5 }, { 0, 6 } };
 	char ds_type;
 
 	if (*p != 'M')
@@ -282,8 +271,7 @@ parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
 	return p;
 }
 
-static const char*
-parseRule(register char* buf, register const char* p)
+static const char* parseRule(register char* buf, register const char* p)
 {
 	long tim;
 	register const char* q;
@@ -322,8 +310,7 @@ parseRule(register char* buf, register const char* p)
  * the requirements, see IEEE Std 1003.1-1988 section 8.1.1.
  * The function returns as soon as it spots an error.
  */
-static void
-parseTZ(const char* p)
+static void parseTZ(const char* p)
 {
 	long tz, dst = 60 * 60, sign = 1;
 	static char lastTZ[2 * RULE_LEN];
@@ -409,8 +396,7 @@ void _tzset(void)
 	tzname[1] = _tzname[1];
 }
 
-static int
-last_sunday(register int day, register struct tm* timep)
+static int last_sunday(register int day, register struct tm* timep)
 {
 	int first = FIRSTSUNDAY(timep);
 
@@ -421,8 +407,7 @@ last_sunday(register int day, register struct tm* timep)
 	return day - (day - first) % 7;
 }
 
-static int
-date_of(register struct dsttype* dst, struct tm* timep)
+static int date_of(register struct dsttype* dst, struct tm* timep)
 {
 	int leap = LEAPYEAR(YEAR0 + timep->tm_year);
 	int firstday, tmpday;
@@ -430,9 +415,8 @@ date_of(register struct dsttype* dst, struct tm* timep)
 
 	if (dst->ds_type != 'M')
 	{
-		return dst->ds_date[0] - (dst->ds_type == 'J'
-		                             && leap
-		                             && dst->ds_date[0] < 58);
+		return dst->ds_date[0]
+		    - (dst->ds_type == 'J' && leap && dst->ds_date[0] < 58);
 	}
 	day = 0;
 	month = 1;
@@ -443,8 +427,7 @@ date_of(register struct dsttype* dst, struct tm* timep)
 	}
 	firstday = (day + FIRSTDAYOF(timep)) % 7;
 	tmpday = day;
-	day += (dst->ds_date[2] - firstday + 7) % 7
-	    + 7 * (dst->ds_date[1] - 1);
+	day += (dst->ds_date[2] - firstday + 7) % 7 + 7 * (dst->ds_date[1] - 1);
 	if (day >= tmpday + _ytab[leap][month])
 		day -= 7;
 	return day;
@@ -452,10 +435,9 @@ date_of(register struct dsttype* dst, struct tm* timep)
 
 /*
  * The default dst transitions are those for Western Europe (except Great
- * Britain). 
+ * Britain).
  */
-unsigned
-_dstget(register struct tm* timep)
+unsigned _dstget(register struct tm* timep)
 {
 	int begindst, enddst;
 	register struct dsttype *dsts = &dststart, *dste = &dstend;
@@ -489,8 +471,7 @@ _dstget(register struct tm* timep)
 			do_dst = 1;
 	}
 
-	if (!do_dst
-	    && (timep->tm_yday == begindst || timep->tm_yday == enddst))
+	if (!do_dst && (timep->tm_yday == begindst || timep->tm_yday == enddst))
 	{
 		long dsttranssec; /* transition when day is this old */
 		long cursec;
@@ -499,8 +480,7 @@ _dstget(register struct tm* timep)
 			dsttranssec = dsts->ds_sec;
 		else
 			dsttranssec = dste->ds_sec;
-		cursec = ((timep->tm_hour * 60) + timep->tm_min) * 60L
-		    + timep->tm_sec;
+		cursec = ((timep->tm_hour * 60) + timep->tm_min) * 60L + timep->tm_sec;
 
 		if ((timep->tm_yday == begindst && cursec >= dsttranssec)
 		    || (timep->tm_yday == enddst && cursec < dsttranssec))
