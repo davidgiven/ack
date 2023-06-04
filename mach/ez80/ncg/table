@@ -149,6 +149,12 @@ MOVES
             push %1
             pop %2
 
+    from areg to wreg
+        gen
+            ld %2, {const3, 0}
+            ld %2.1, %1
+
+
 TESTS
 
     to test hlreg
@@ -251,6 +257,12 @@ COERCIONS
             exx.
         yields %a
     
+    from breg
+        uses wreg={const3, 0}
+        gen
+            ld %a.1, %1
+        yields %a
+
     from hlreg_or_dereg
         uses hlreg_or_dereg
         gen
@@ -411,15 +423,17 @@ PATTERNS
         with stackaddr
             yields {stackref1, %1.off}
         with hlreg
-            uses wreg
+            uses wreg={const3, 0}
             gen
                 ld %a.1, {regind, %1}
             yields %a
+        #if 0
         with wreg
             uses areg
             gen
                 ld %a, {regind, %1}
             yields %a
+       #endif
 
     pat loi $1==3
         with exact label
@@ -583,6 +597,15 @@ PATTERNS
             exg 3
             sti 3
 
+    pat dee
+        leaving
+            lae $1
+            dup 3
+            loi 3
+            dec
+            exg 3
+            sti 3
+
     pat zrl
         leaving
             loc 0
@@ -620,6 +643,10 @@ PATTERNS
         leaving
             adi $1
 
+    pat sbs
+        leaving
+            sbi $1
+
     pat adi $1==3
         with hlreg wreg
             gen
@@ -649,10 +676,10 @@ PATTERNS
 
     pat sbi $1==3
         with hlreg wreg
-        gen
-            and a
-            sbc %1, %2
-        yields %1
+            gen
+                and a
+                sbc %1, %2
+            yields %1
 
     pat sbi $1==6
         with hlhlreg dreg
@@ -664,21 +691,89 @@ PATTERNS
             exx.
         yields %1
 
-    pat rmi $1==3
-        with STACK
+    pat mlu
+        leaving
+            mli $1
+
+    pat mli $1==3
+        with hlreg dereg
         kills ALL
         gen
-            Call {label, ".rmidiv3"}
+            Call {label, ".mli3"}
+        yields
+            hl
+
+    pat mli $1==6
+        with hlhlreg dedereg
+        kills ALL
+        gen
+            Call {label, ".mli6"}
+        yields
+            hlhl
+
+    pat rmi $1==3
+        with hlreg dereg
+        kills ALL
+        gen
+            Call {label, ".rmidvi3"}
         yields
             de
 
     pat dvi $1==3
-        with STACK
+        with hlreg dereg
         kills ALL
         gen
-            Call {label, ".rmidiv3"}
+            Call {label, ".rmidvi3"}
         yields
             hl
+
+    pat rmu $1==3
+        with hlreg dereg
+        kills ALL
+        gen
+            Call {label, ".rmudvu3"}
+        yields
+            de
+
+    pat dvu $1==3
+        with hlreg dereg
+        kills ALL
+        gen
+            Call {label, ".rmudvu3"}
+        yields
+            hl
+
+    pat rmi $1==6
+        with hlhlreg dedereg
+        kills ALL
+        gen
+            Call {label, ".rmidvi6"}
+        yields
+            dede
+
+    pat dvi $1==6
+        with hlhlreg dedereg
+        kills ALL
+        gen
+            Call {label, ".rmidvi6"}
+        yields
+            hlhl
+
+    pat rmu $1==6
+        with hlhlreg dedereg
+        kills ALL
+        gen
+            Call {label, ".rmudvu6"}
+        yields
+            dede
+
+    pat dvu $1==6
+        with hlhlreg dedereg
+        kills ALL
+        gen
+            Call {label, ".rmudvu6"}
+        yields
+            hlhl
 
     pat ngi $1==3
         leaving
@@ -707,12 +802,9 @@ PATTERNS
 
     pat loc sli $1==0
 
-    pat loc sli $1!=0 && $2==3
-        with hlreg
-        gen
-            add hl, hl
-        yields hl
+    pat loc sli $1!=0
         leaving
+            adi $2
             loc $1-1
             sli $2
 
@@ -722,6 +814,33 @@ PATTERNS
         gen
             Call {label, ".sli3"}
         yields hl
+        
+    pat sli $1==6
+        with hlhlreg dereg
+        kills ALL
+        gen
+            Call {label, ".sli6"}
+        yields hlhl
+        
+    pat sru
+        leaving
+            sri $1
+
+    pat loc sri $1==0
+
+    pat sri $1==3
+        with hlreg dereg
+        kills ALL
+        gen
+            Call {label, ".sri3"}
+        yields hl
+        
+    pat sri $1==6
+        with hlhlreg dereg
+        kills ALL
+        gen
+            Call {label, ".sri6"}
+        yields hlhl
         
 /* Logical operations */
 
@@ -796,6 +915,8 @@ PATTERNS
     pat cif call floatop("cif")
     pat stf call floatop("stf")
     pat dvf call floatop("dvf")
+    pat fef call floatop("fef")
+    pat fif call floatop("fif")
 
 /* Subroutines and jumps */
 
@@ -933,6 +1054,33 @@ PATTERNS
             test %1
             jpp {label, $1}
 
+    pat tlt
+        with wreg
+        uses areg={const1, 0}
+        gen
+            test %1
+            jrp {label, "1f"}
+            inc a
+        1:
+
+    pat tne
+        with wreg
+        uses areg={const1, 0}
+        gen
+            test %1
+            jrz {label, "1f"}
+            inc a
+        1:
+
+    pat teq
+        with wreg
+        uses areg={const1, 0}
+        gen
+            test %1
+            jrnz {label, "1f"}
+            inc a
+        1:
+
 /* Weird miscellaneous stuff */
 
     pat lin
@@ -942,12 +1090,23 @@ PATTERNS
     pat lni
         leaving
             ine ".hol0"
+    
+    pat fil
+        leaving
+            lae $1
+            ste ".hol0"
 
     pat csb $1==3
         kills ALL
         gen
             jp {label, ".csb3"}
             
+    pat cms
+        with STACK
+        uses bcreg={const3, $1}
+        gen
+            Call {label, ".cms"}
+
     pat blm
         with hlreg dereg
         uses bcreg={const3, $1}
