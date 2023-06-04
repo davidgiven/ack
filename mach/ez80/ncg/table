@@ -22,6 +22,7 @@ PROPERTIES
     wxreg       /* any word-sized register including IX */
     dreg        /* any doubleword-sized register */
     spreg       /* the stack pointer */
+    afreg       /* AF */
     altreg      /* alternate bank registers */
     hlreg_or_dereg /* HL or DE */
 
@@ -34,6 +35,7 @@ REGISTERS
     de("de")=e+d:               dereg, wreg, wxreg, hlreg_or_dereg.
     ix("ix")=ixl+ixh:           xreg, wxreg.
     sp:                         spreg.
+    af:                         afreg.
 
     hlhl("hl")=hl:              dreg, hlhlreg.
     bcbc("bc")=bc:              dreg.
@@ -94,7 +96,8 @@ INSTRUCTIONS
     jrnz "jp nz," label:ro kills :cc.
     jrp "jp p," label:ro kills :cc.
     jrz "jp z," label:ro kills :cc.
-    ld breg:wo, breg+const1+memref1+stackref1+regind:ro.
+    ld areg:wo, memref1:ro.
+    ld breg:wo, breg+const1+stackref1+regind:ro.
     ld breg+memref1+stackref1+regind:wo, breg:ro.
     ld memref3+stackref3+indexref3:wo, wreg:ro.
     ld regind:wo, wreg:ro.
@@ -104,8 +107,8 @@ INSTRUCTIONS
     ldir kills :cc.
     lea wxreg:wo:cc, stackaddr:ro.
     pea stackaddr:ro.
-    pop wreg+xreg:wo.
-    push wreg+xreg:ro.
+    pop wreg+xreg+afreg:wo.
+    push wreg+xreg+afreg:ro.
     sbc hlreg+hlhlreg:rw:cc, wreg+spreg:ro.
     xor breg:ro:cc.
 
@@ -210,7 +213,17 @@ STACKINGRULES
         gen
             pea %1
 
-    from memref1+stackref1 to STACK
+    from memref1 to STACK
+        gen
+            push hl
+            ld hl, {const3, 0}
+            push af
+            ld a, %1
+            ld l, a
+            pop af
+            exsp hl
+
+    from stackref1 to STACK
         gen
             push hl
             ld l, %1
@@ -906,17 +919,19 @@ PATTERNS
         gen
             Call {label, ".float_unsupported"}
 
-    pat cmf call floatop("cmf")
-    pat ngf call floatop("ngf")
     pat adf call floatop("adf")
-    pat sbf call floatop("sbf")
-    pat mlf call floatop("mlf")
     pat cfi call floatop("cfi")
+    pat cfu call floatop("cfu")
     pat cif call floatop("cif")
-    pat stf call floatop("stf")
+    pat cmf call floatop("cmf")
     pat dvf call floatop("dvf")
     pat fef call floatop("fef")
     pat fif call floatop("fif")
+    pat mlf call floatop("mlf")
+    pat ngf call floatop("ngf")
+    pat sbf call floatop("sbf")
+    pat stf call floatop("stf")
+    pat ldf call floatop("ldf")
 
 /* Subroutines and jumps */
 
@@ -1096,6 +1111,11 @@ PATTERNS
             lae $1
             ste ".hol0"
 
+    pat csa $1==3
+        kills ALL
+        gen
+            jp {label, ".csa3"}
+            
     pat csb $1==3
         kills ALL
         gen
@@ -1112,6 +1132,18 @@ PATTERNS
         uses bcreg={const3, $1}
         gen
             ldir.
+
+    pat lar $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".lar3"}
+
+    pat sar $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".sar3"}
 
 // vim: sw=4 ts=4 et
 
