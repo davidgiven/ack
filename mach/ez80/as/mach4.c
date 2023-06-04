@@ -351,6 +351,15 @@ ldargs:
                 }
             }
 
+    | indir ',' R24
+            {
+                if ($1 != HL)
+                    serror("register error");
+
+                emit1(0xed);
+                emit1(($3 << 4) | 0x0f);
+            }
+
     | index ',' R24
             {
                 switch ($3)
