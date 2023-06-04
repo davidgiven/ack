@@ -21,7 +21,6 @@ void xyreg(int r, int byte)
 
 void xymem(int r, int byte)
 {
-
 	xyreg(r, byte);
 	if (r != HL)
 	{

@@ -184,7 +184,9 @@ ari8    :   ARI8
     |   ADCSBC R8 ','
             {   if ($2 != A) serror("register error");}
     ;
-ldargs  :   R8 ',' R8
+
+ldargs:
+    R8 ',' R8
             {   if ($1==F || $3==F) serror("register error");
                 if ($1<=A && $3<=A)
                     emit1(0100 | $1<<3 | $3);
@@ -220,6 +222,7 @@ ldargs  :   R8 ',' R8
                     serror("register error");
                 xymem($3,0106 | $1<<3);
             }
+
     |   R8 ',' '(' expr ')'
             {   if ($1!=A) serror("register error");
                 emit1(072);
@@ -269,12 +272,14 @@ ldargs  :   R8 ',' R8
                 xyreg($3,0371);
             }
     |   R24 ',' '(' expr ')'
-            {   switch ($1) {
-                case BC: case DE: case SP:
-                    emit1(0355); emit1(0113 | $1<<4); break;
-                case HL: case IX: case IY:
-                    xyreg($1,052); break;
-                default: serror("register error");
+            {
+                switch ($1)
+                {
+                    case BC: case DE: case SP:
+                        emit1(0355); emit1(0113 | $1<<4); break;
+                    case HL: case IX: case IY:
+                        xyreg($1,052); break;
+                    default: serror("register error");
                 }
 #ifdef RELOCATION
                 newrelo($4.typ, RELO3);
@@ -282,7 +287,7 @@ ldargs  :   R8 ',' R8
                 emit3($4.val);
             }
 
-    | R24 ',' index
+    | R24 ',' ind
             {
                 switch ($1)
                 {
@@ -329,21 +334,27 @@ indir   :   '(' R24 ')'
                 $$ = $2;
             }
     ;
-index   :   '(' R24 '+' expr ')'
-            {   if ($2!=IX && $2!=IY) serror("register error");
+index:
+    '(' R24 '+' expr ')'
+            {
+                if ($2!=IX && $2!=IY)
+                    serror("register error");
                 exp_ind = $4;
                 RELOMOVE(rel_ind, relonami);
                 $$ = $2;
             }
-    |   '(' R24 '-' expr ')'
+
+    | '(' R24 '-' expr ')'
             {
-                if ($2!=IX && $2!=IY) serror("register error");
+                if ($2!=IX && $2!=IY)
+                    serror("register error");
                 fit(fitb($4.val));
                 exp_ind = $4;
                 RELOMOVE(rel_ind, relonami);
                 $$ = $2;
             }
     ;
+
 ind :   indir
     |   index
     ;
