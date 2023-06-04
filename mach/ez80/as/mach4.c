@@ -177,7 +177,42 @@ operation
             {   if ($2 != C) serror("register error");
                 emit1(0355); emit1(0101 | $4<<3);
             }
+
+    | LEA R24 ',' R24 '+' expr
+            {
+                exp_ind = $6;
+                RELOMOVE(rel_ind, relonami);
+
+                xylea($2, $4);
+            }
+
+    | LEA R24 ',' R24 '-' expr
+            {
+                fit(fitb($6.val));
+                exp_ind = $6;
+                RELOMOVE(rel_ind, relonami);
+
+                xylea($2, $4);
+            }
+
+    | PEA R24 '+' expr
+            {
+                exp_ind = $4;
+                RELOMOVE(rel_ind, relonami);
+
+                xylea(SP, $2);
+            }
+
+    | PEA R24 '-' expr
+            {
+                fit(fitb($4.val));
+                exp_ind = $4;
+                RELOMOVE(rel_ind, relonami);
+
+                xylea(SP, $2);
+            }
     ;
+
 ari8    :   ARI8
     |   ADDOP R8 ','
             {   if ($2 != A) serror("register error");}

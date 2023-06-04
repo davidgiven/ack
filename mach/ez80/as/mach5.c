@@ -32,6 +32,40 @@ void xymem(int r, int byte)
 	}
 }
 
+void xylea(int r1, int r2)
+{
+	if ((r2 != IX) && (r2 != IY))
+		serror("can't use this as index register");
+
+	emit1(0xed);
+	switch (r1)
+	{
+		case SP:
+			emit1((r2 - 1) | 0x60);
+			break;
+			
+		case HL:
+		case BC:
+		case DE:
+			emit1((r1 << 4) | (r2 & 3));
+			break;
+
+		case IX:
+			emit1((r2 == IX) ? 0x32 : 0x54);
+			break;
+
+		case IY:
+			emit1((r2 == IX) ? 0x55 : 0x33);
+			break;
+	}
+
+#ifdef RELOCATION
+	RELOMOVE(relonami, rel_ind);
+	newrelo(exp_ind.typ, RELO1);
+#endif
+	emit1(exp_ind.val);
+}
+
 void branch(register int opc, expr_t exp)
 {
 	register int sm, dist;

@@ -39,4 +39,5 @@ extern int	rel_ind;
  */
 extern void xyreg(int r,int byte);
 extern void xymem(int r,int byte);
+extern void xylea(int r1, int r2);
 extern void branch(register int opc,expr_t exp);

@@ -100,6 +100,8 @@
 {0,     E_ED,           0263,           "otir"},
 {0,     E_ED,           0253,           "outd"},
 {0,     E_ED,           0273,           "otdr"},
+{0,     PEA,            0,              "pea"},
+{0,     LEA,            0,              "lea"},
 
 // vim: ts=4 sw=4 et
 
