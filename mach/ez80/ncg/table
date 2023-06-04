@@ -95,12 +95,13 @@ INSTRUCTIONS
     jrp "jp p," label:ro kills :cc.
     jrz "jp z," label:ro kills :cc.
     ld breg:wo, breg+const1+memref1+stackref1+regind:ro.
-    ld indexref6:wo, wreg:ro.
-    ld memref3+stackref3:wo, wreg:ro.
+    ld breg+memref1+stackref1+regind:wo, breg:ro.
+    ld memref3+stackref3+indexref3:wo, wreg:ro.
     ld regind:wo, wreg:ro.
     ld spreg:wo, hlreg:ro.
     ld wreg:wo, stackref3+memref3+indexref3:ro.
     ld wxreg:wo, const1+const3+label+memref3+regind:ro.
+    ldir kills :cc.
     lea wxreg:wo:cc, stackaddr:ro.
     pea stackaddr:ro.
     pop wreg+xreg:wo.
@@ -331,6 +332,10 @@ PATTERNS
     pat loc
         yields {const3, $1}
 
+    pat lpi
+        leaving
+            loc $1
+
 /* Conversions */
 
     pat loc loc ciu
@@ -356,6 +361,12 @@ PATTERNS
     pat loc loc cuu $1==$2
     pat loc loc cii $1==$2
     
+    pat loc loc cii $1>$2
+        leaving
+            loc $1
+            loc $2
+            cuu
+
     pat loc loc cuu $1==1 && $2==3
         with wreg
         uses wreg={const3, 0}
@@ -382,6 +393,12 @@ PATTERNS
             gen
                 Call {label, ".cii13"}
             yields hl
+
+    pat loc loc cii $1==3 && $2==6
+        with hlreg dereg
+        gen
+            Call {label, ".cii36"}
+        yields hlhl
 
 /* Loads and saves */
 
@@ -447,6 +464,20 @@ PATTERNS
                 exx.
             yields %a
         
+    pat sti $1==1
+        with exact label areg
+            gen
+                ld {memref1, %1.off}, %2
+        with stackaddr areg
+            gen
+                ld {stackref1, %1.off}, %2
+        with hlreg wreg
+            gen
+                ld {regind, %1}, %2.1
+        with wreg areg
+            gen
+                ld {regind, %1}, %2
+
     pat sti $1==3
         with label wreg
             gen
@@ -454,9 +485,17 @@ PATTERNS
         with stackaddr wreg
             gen
                 ld {stackref3, %1.off}, %2
-        with wreg wreg
+        with hlreg wreg
             gen
                 ld {regind, %1}, %2
+
+    pat sti $1==6
+        with xreg wreg
+            gen
+                ld {indexref3, %1, 0}, %2
+                exx.
+                ld {indexref3, %1, 3}, %2
+                exx.
 
     pat lol
         leaving
@@ -467,6 +506,11 @@ PATTERNS
         leaving
             lol $1
             loi 3
+
+    pat sil
+        leaving
+            lol $1
+            sti 3
 
     pat stl lol $1==$2
         with wreg
@@ -498,6 +542,11 @@ PATTERNS
             lae $1
             loi 3
 
+    pat lof
+        leaving
+            adp $1
+            loi 3
+
     pat lde
         leaving
             lae $1
@@ -519,6 +568,31 @@ PATTERNS
             inc
             stl $1
 
+    pat del
+        leaving
+            lol $1
+            dec
+            stl $1
+
+    pat ine
+        leaving
+            lae $1
+            dup 3
+            loi 3
+            inc
+            exg 3
+            sti 3
+
+    pat zrl
+        leaving
+            loc 0
+            stl $1
+
+    pat zre
+        leaving
+            loc 0
+            ste $1
+
 /* Arithmetic */
 
     pat adp
@@ -537,6 +611,14 @@ PATTERNS
         gen
             inc %1
         yields %1
+
+    pat adu
+        leaving
+            adi $1
+
+    pat ads
+        leaving
+            adi $1
 
     pat adi $1==3
         with hlreg wreg
@@ -561,6 +643,10 @@ PATTERNS
                 exg 6
                 adi 6
 
+    pat sbu
+        leaving
+            sbi $1
+
     pat sbi $1==3
         with hlreg wreg
         gen
@@ -577,6 +663,22 @@ PATTERNS
             sbc %1.1, %2.1
             exx.
         yields %1
+
+    pat rmi $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".rmidiv3"}
+        yields
+            de
+
+    pat dvi $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".rmidiv3"}
+        yields
+            hl
 
     pat ngi $1==3
         leaving
@@ -599,15 +701,101 @@ PATTERNS
             sbc %a, %1
         yields %a
         
+    pat slu
+        leaving
+            sli $1
+
+    pat loc sli $1==0
+
+    pat loc sli $1!=0 && $2==3
+        with hlreg
+        gen
+            add hl, hl
+        yields hl
+        leaving
+            loc $1-1
+            sli $2
+
+    pat sli $1==3
+        with hlreg dereg
+        kills ALL
+        gen
+            Call {label, ".sli3"}
+        yields hl
+        
+/* Logical operations */
+
+    pat and $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".and3"}
+        yields hl
+
+    pat and $1==6
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".and6"}
+        yields hl
+
+    pat ior $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".ior3"}
+        yields hl
+
+    pat ior $1==6
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".ior6"}
+        yields hl
+
+    pat xor $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".xor3"}
+        yields hl
+
+    pat xor $1==6
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".xor6"}
+        yields hl
+
+    pat com $1==3
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".com3"}
+        yields hl
+
+    pat com $1==6
+        with STACK
+        kills ALL
+        gen
+            Call {label, ".com6"}
+        yields hl
+
 /* Floating point arithmetic */
 
-    pat cmf
+    proc floatop example cmf
         gen
-            Call {label, ".cmf_unsupported"}
+            Call {label, ".float_unsupported"}
 
-    pat ngf
-        gen
-            Call {label, ".ngf_unsupported"}
+    pat cmf call floatop("cmf")
+    pat ngf call floatop("ngf")
+    pat adf call floatop("adf")
+    pat sbf call floatop("sbf")
+    pat mlf call floatop("mlf")
+    pat cfi call floatop("cfi")
+    pat cif call floatop("cif")
+    pat stf call floatop("stf")
+    pat dvf call floatop("dvf")
 
 /* Subroutines and jumps */
 
@@ -665,6 +853,10 @@ PATTERNS
             Call {label, ".cmu6"}
         yields hl
 
+    pat cmp
+        leaving
+            cmu 3
+
 /* Branches */
 
     pat bra
@@ -683,15 +875,24 @@ PATTERNS
             zeq $1
             
     pat ble
-        with wreg hlreg STACK
-        gen
-            and a
-            sbc %2, %1
-            jpc {label, $1}
-        with hlreg wreg STACK
         leaving
-            exg 3
-            bgt $1
+            sbi 3
+            zle $1
+
+    pat blt
+        leaving
+            sbi 3
+            zlt $1
+
+    pat bge
+        leaving
+            sbi 3
+            zge $1
+
+    pat bgt
+        leaving
+            sbi 3
+            zgt $1
 
     pat zeq
         with wreg STACK
@@ -711,13 +912,26 @@ PATTERNS
             test %1
             jpm {label, $1}
 
+    pat zle
+        with wreg STACK
+        gen
+            test %1
+            jpz {label, $1}
+            jpm {label, $1}
+
     pat zgt
         with wreg STACK
         gen
             test %1
             jrz {label, "1f"}
-            jpm {label, $1}
+            jpp {label, $1}
         1:
+
+    pat zge
+        with wreg STACK
+        gen
+            test %1
+            jpp {label, $1}
 
 /* Weird miscellaneous stuff */
 
@@ -729,6 +943,16 @@ PATTERNS
         leaving
             ine ".hol0"
 
+    pat csb $1==3
+        kills ALL
+        gen
+            jp {label, ".csb3"}
+            
+    pat blm
+        with hlreg dereg
+        uses bcreg={const3, $1}
+        gen
+            ldir.
 
 // vim: sw=4 ts=4 et
 
