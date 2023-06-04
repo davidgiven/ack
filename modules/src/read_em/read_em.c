@@ -83,13 +83,17 @@ static int EM_initialized; /* EM_open called? */
 
 static long wordmask[] =
 { /* allowed bits in a word */
-0x00000000, 0x000000FF, 0x0000FFFF, 0x00000000, 0xFFFFFFFF };
+0x00000000, 0x000000FF, 0x0000FFFF, 0x00ffffff, 0xFFFFFFFF };
 
 static int wsize, psize; /* word size and pointer size */
 
 #ifdef CHECKING
-static char *argrange = "Argument range error";
-#define check(expr) ((expr) || (EM_error) || (EM_error = argrange))
+inline static void check(int expr)
+{
+	static char *argrange = "Argument range error";
+	if (!expr && !EM_error)
+		EM_error = argrange;
+}
 #else /* not CHECKING */
 #define check(x)	/* nothing */
 #endif /* CHECKING */
