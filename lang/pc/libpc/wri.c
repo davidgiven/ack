@@ -29,6 +29,11 @@
 #define MININT -2147483648
 #define STRMININT "-2147483648"
 #endif
+#if EM_WSIZE == 3
+#define SZ 11
+#define MININT -8388608
+#define STRMININT "-8388607"
+#endif
 #if EM_WSIZE == 2
 #define SZ 6
 #define MININT -32768
