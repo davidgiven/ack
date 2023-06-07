@@ -1195,5 +1195,9 @@ PATTERNS
             ld hl, {memref3, $1+0}
             jp {regind, hl}
 
+    pat sim
+        leaving
+            ste ".ignmask"
+
 // vim: sw=4 ts=4 et
 
