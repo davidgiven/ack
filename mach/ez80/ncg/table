@@ -872,61 +872,46 @@ PATTERNS
         
 /* Logical operations */
 
-    pat and $1==3
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".and3"}
-        yields hl
+    #define ALUOP(name, op3, op6)           \
+        pat name $1==3                      \
+            with hlreg dereg                \
+                gen                         \
+                    Call {label, op3}       \
+                yields hl                   \
+            with dereg hlreg                \
+                gen                         \
+                    ex de, hl               \
+                    Call {label, op3}       \
+                yields hl                   \
+                                            \
+        pat name $1==6                      \
+            with hlhlreg dedereg            \
+                gen                         \
+                    Call {label, op6}       \
+                yields hlhl                 \
+            with dedereg hlhlreg            \
+                gen                         \
+                    ex de, hl               \
+                    Call {label, op6}       \
+                yields hlhl
 
-    pat and $1==6
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".and6"}
-        yields hl
-
-    pat ior $1==3
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".ior3"}
-        yields hl
-
-    pat ior $1==6
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".ior6"}
-        yields hl
-
-    pat xor $1==3
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".xor3"}
-        yields hl
-
-    pat xor $1==6
-        with STACK
-        kills ALL
-        gen
-            Call {label, ".xor6"}
-        yields hl
+    ALUOP(and, ".and3", ".and6")
+    ALUOP(ior, ".ior3", ".ior6")
+    ALUOP(xor, ".xor3", ".xor6")
 
     pat com $1==3
-        with STACK
+        with hlreg
         kills ALL
         gen
             Call {label, ".com3"}
         yields hl
 
     pat com $1==6
-        with STACK
+        with hlhlreg
         kills ALL
         gen
             Call {label, ".com6"}
-        yields hl
+        yields hlhl
 
 /* Floating point arithmetic */
 
@@ -1154,9 +1139,22 @@ PATTERNS
         gen
             jp {label, ".csb3"}
             
-    pat cms
+    pat cms $1==3
+        leaving
+            cmi 3
+
+    pat cms $1==6
+        leaving
+            cmi 6
+
+    pat cms defined($1)
         with STACK
         uses bcreg={const3, $1}
+        gen
+            Call {label, ".cms"}
+
+    pat cms !defined($1)
+        with bcreg
         gen
             Call {label, ".cms"}
 

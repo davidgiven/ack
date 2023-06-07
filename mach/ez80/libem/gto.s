@@ -1,27 +1,19 @@
-.define .gto
-.sect .text
-.sect .rom
-.sect .data
-.sect .bss
+#
+#include "asm.h"
+
 .sect .text
 
+.define .gto
 .gto:
-	ld e,(hl)
-	inc hl
-	ld d,(hl)
-	push de
-	pop ix		! new pc
-	inc hl	
-	ld e,(hl)
-	inc hl
-	ld d,(hl)	! new sp
-	inc hl
-	ld c,(hl)
-	inc hl	
-	ld b,(hl)	! new lb
-	push bc
-	pop iy
-	push de	
-	pop hl
-	ld sp,hl
-	jp (ix)
+	push hl
+	pop ix
+
+	ld hl, (ix+3)	/* new sp */
+	ld sp, hl
+
+	ld hl, (ix+0)	/* new pc */
+
+	ld iy, (ix+6)	/* new fp */
+
+	jp (hl)
+
