@@ -346,6 +346,10 @@ ldargs:
                         xymem($3, ($1 << 4) | 0x07);
                         break;
 
+                    case IX:
+                        xymem($3, (($1 == IX) ^ ($3 == IY)) ? 0x37 : 0x31);
+                        break;
+
                     default:
                         serror("register error");
                 }
