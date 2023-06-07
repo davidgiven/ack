@@ -101,14 +101,15 @@ INSTRUCTIONS
     ld breg+memref1+indexref1+regind:wo, breg:ro.
     ld memref3+indexref3:wo, wreg:ro.
     ld regind:wo, wreg:ro.
-    ld spreg:wo, hlreg+memref3:ro.
+    ld spreg:wo, hlreg+memref3+xxreg+const3:ro.
     ld wreg:wo, memref3+indexref3:ro.
     ld wxreg+fpreg:wo, const1+const3+label+memref3+indexref3+regind:ro.
     ldir kills :cc.
     lea wxreg:wo:cc, stackaddr:ro.
     pea stackaddr:ro.
-    pop wreg+xreg+afreg:wo.
-    push wreg+xreg+afreg:ro.
+    pop wreg+xxreg+afreg:wo.
+    push wreg+xxreg+afreg:ro.
+    ret.
     sbc hlreg+hlhlreg:rw:cc, wreg+spreg:ro.
     xor breg:ro:cc.
 
@@ -965,17 +966,23 @@ PATTERNS
     pat ret $1==0
         with STACK
         gen
-            jp {label, ".ret"}
+            ld sp, iy
+            pop iy
+            ret.
 
     pat ret $1==3
         with dereg STACK
         gen
-            jp {label, ".ret"}
+            ld sp, iy
+            pop iy
+            ret.
 
     pat ret $1==6
         with dedereg STACK
         gen
-            jp {label, ".ret"}
+            ld sp, iy
+            pop iy
+            ret.
 
     pat lfr $1==3
         yields hl
@@ -1199,5 +1206,16 @@ PATTERNS
         leaving
             ste ".ignmask"
 
+    /* Get frame pointer */
+    pat lor $1==0
+        yields {stackaddr, 0}
+
+    /* Get stack pointer */
+    pat lor $1==1
+        uses hlreg={const3, 0}
+        gen
+            add hl, sp
+        yields hl
+        
 // vim: sw=4 ts=4 et
 
