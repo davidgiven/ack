@@ -1,5 +1,8 @@
 OPTIONS
 
+    EMIT_CONSTANTS_AS_LITTLE_ENDIAN_BYTES;
+    FLOAT_NOT_SUPPORTED;
+
 REGISTERS
 
     /* Registers are allocated top down. The odd order below is to make sure
@@ -12,22 +15,22 @@ REGISTERS
      * be moved from register to register or spilt).
      */
 
-    hl                                          int basereg hlreg volatile;
+    hl                                          int basereg hlreg indirreg volatile;
     de                                          int basereg dereg volatile iret;
     bc                                          int basereg bcreg volatile;
-    ix                                          int ixreg volatile;
+    ix                                          int ixreg indirreg volatile;
 
     hlhl aliases(hl) named("hl")                long hlhlreg volatile;
     dede aliases(de) named("de")                long dedereg volatile lret;
     bcbc aliases(bc) named("bc")                long bcbcreg volatile;
 
-    fhl                                         float volatile;
-    fde                                         float volatile fret;
-    fbc                                         float volatile;
+    fhl aliases(hl) named("hl")                 float volatile;
+    fde aliases(de) named("de")                 float volatile fret;
+    fbc aliases(bc) named("bc")                 float volatile;
 
-    dhl                                         double volatile;
-    dde                                         double volatile dret;
-    dbc                                         double volatile;
+    dhl aliases(hl) named("hl")                 double volatile;
+    dde aliases(de) named("de")                 double volatile dret;
+    dbc aliases(bc) named("bc")                 double volatile;
 
 
 
@@ -110,11 +113,15 @@ PATTERNS
         emit "exx"
         cost 10;
 
-    out:(int)reg = LOAD.I(in:(int)reg)
+    out:(int)reg = LOAD.I(in:(indirreg)reg)
         emit "ld %out, (%in)"
         cost 2;
 
-    out:(float)reg = LOAD.F(in:(int)reg)
+    out:(float)reg = LOAD.F(addr:address)
+        emit "ld %out, (%addr)"
+        cost 2;
+
+    out:(float)reg = LOAD.F(in:(indirreg)reg)
         emit "ld %out, (%in)"
         cost 2;
 
@@ -180,9 +187,9 @@ PATTERNS
 
     out:(hlreg)reg = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
         emit "and a"
-        emit "sbc %left, %right"
+        emit "sbc %out, %right"
         emit "exx"
-        emit "sbc %left, %right"
+        emit "sbc %out, %right"
         emit "exx"
         cost 12;
 

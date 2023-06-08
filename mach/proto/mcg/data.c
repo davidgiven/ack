@@ -58,22 +58,34 @@ static void writehex(arith data, int size)
 void data_int(arith data, size_t size, bool is_ro)
 {
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    //assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
-    fprintf(outputfile, "\t.data%ld ", size);
-    writehex(data, size);
-    fprintf(outputfile, "\n");
+
+    #if defined MCGG_OPTION_EMIT_CONSTANTS_AS_LITTLE_ENDIAN_BYTES
+        fprintf(outputfile, "\t.data1 ");
+        while (size--)
+        {
+            writehex(data & 0xff, 1);
+            if (size)
+                fprintf(outputfile, ", ");
+            data >>= 8;
+        }
+        fprintf(outputfile, "\n");
+    #else
+        fprintf(outputfile, "\t.data%ld ", size);
+        writehex(data, size);
+        fprintf(outputfile, "\n");
+    #endif
 }
 
 
 void data_float(const char* data, size_t size, bool is_ro)
 {
-    unsigned char buffer[8];
-    int i;
-
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
-    //assert((size == 4) || (size == 8));
 
-    fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
+    #if defined MCGG_OPTION_FLOAT_NOT_SUPPORTED
+        data_int(0, size, is_ro);
+    #else
+        fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
+    #endif
 }
 
 static bool istext(char c)
