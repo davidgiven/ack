@@ -5,9 +5,16 @@ bool burm_predicate_signed_constant(struct burm_node* node, arith size)
 	struct ir* ir = node->ir;
     arith pivot = 1<<(size-1);
     arith mask = ~((1<<size) - 1);
-	assert(ir->opcode == IR_CONST);
 
-    return ((ir->u.ivalue + pivot) & mask) == 0;
+    switch (ir->opcode)
+    {
+        case IR_CONST:
+        case IR_LOCAL:
+            return ((ir->u.ivalue + pivot) & mask) == 0;
+
+        default:
+            fatal("predicate only works on constants and locals");
+    }
 }
 
 bool burm_predicate_unsigned_constant(struct burm_node* node, arith size)

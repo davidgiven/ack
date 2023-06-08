@@ -5,8 +5,8 @@ build_as {
 	arch = "ez80",
 }
 
-build_ncg {
-	name = "ncg",
+build_mcg {
+	name = "mcg",
 	arch = "ez80",
 }
 
@@ -19,7 +19,7 @@ return installable {
 	name = "tools",
 	map = {
 		["$(PLATDEP)/agonmos/as"] = "+as",
-		["$(PLATDEP)/agonmos/ncg"] = "+ncg",
+		["$(PLATDEP)/agonmos/mcg"] = "+mcg",
 		["$(PLATDEP)/agonmos/top"] = "+top",
 		["$(PLATIND)/descr/agonmos"] = "./descr",
 		"util/opt+pkg",

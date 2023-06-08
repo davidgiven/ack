@@ -1,0 +1,232 @@
+OPTIONS
+
+REGISTERS
+
+    /* Registers are allocated top down. The odd order below is to make sure
+     * that cheap registers get allocated first.
+     *
+     * Attributes may have at most one of: int, float, long, double. These
+     * indicate that the register is used to store a value of that type. If
+     * your register can store more than one type, create an alias. Registers
+     * with none of these cannot be copied by the code generator (and so cannot
+     * be moved from register to register or spilt).
+     */
+
+    hl                                          int basereg hlreg volatile;
+    de                                          int basereg dereg volatile iret;
+    bc                                          int basereg bcreg volatile;
+    ix                                          int ixreg volatile;
+
+    hlhl aliases(hl) named("hl")                long hlhlreg volatile;
+    dede aliases(de) named("de")                long dedereg volatile lret;
+    bcbc aliases(bc) named("bc")                long bcbcreg volatile;
+
+    fhl                                         float volatile;
+    fde                                         float volatile fret;
+    fbc                                         float volatile;
+
+    dhl                                         double volatile;
+    dde                                         double volatile dret;
+    dbc                                         double volatile;
+
+
+
+DECLARATIONS
+
+    ubyteX;   /* bottom 8 bits valid, the rest undefined */
+    ubyte0;   /* bottom 8 bits valid, the rest 0 */
+
+	address fragment;
+
+
+
+PATTERNS
+
+/* Special */
+
+	PAIR(BLOCK.I, BLOCK.I);
+
+
+/* Miscellaneous special things */
+
+    out:(int)reg = POP.I
+        emit "pop %out"
+        cost 2;
+
+    out:(long)reg = POP.L
+        emit "pop %out"
+        emit "exx"
+        emit "pop %out"
+        emit "exx"
+        cost 6;
+
+    SETRET.I(in:(iret)reg)
+        emit "! setret.i"
+        cost 1;
+
+    SETRET.L(in:(lret)reg)
+        emit "! setret.l"
+        cost 1;
+
+    out:(int)reg = value:CONST.I
+        emit "ld %out, $value"
+        cost 5;
+
+    out:(int)reg = value:LABEL.I
+        emit "ld %out, $value"
+        cost 5;
+
+    out:(int)reg = value:BLOCK.I
+        emit "ld %out, $value"
+        cost 5;
+
+
+/* Locals and stack-relatives */
+
+    address = offset:LOCAL.I
+        when signed_constant(%offset, 8)
+        emit "iy+$offset"
+        cost 1;
+
+    address = in:LABEL.I
+        emit "$in"
+        cost 1;
+
+    out:(int)reg = addr:address
+        emit "lea %out, %addr"
+        cost 5;
+
+
+/* Memory loads and stores */
+
+    out:(int)reg = LOAD.I(addr:address)
+        emit "ld %out, (%addr)"
+        cost 2;
+
+    out:(long)reg = LOAD.L(addr:address)
+        emit "ld %out, (%addr+3)"
+        emit "exx"
+        emit "ld %out, (%addr+0)"
+        emit "exx"
+        cost 10;
+
+    out:(int)reg = LOAD.I(in:(int)reg)
+        emit "ld %out, (%in)"
+        cost 2;
+
+    out:(float)reg = LOAD.F(in:(int)reg)
+        emit "ld %out, (%in)"
+        cost 2;
+
+    out:(long)reg = LOAD.L(in:(ixreg)reg)
+        emit "exx"
+        emit "ld %out, (%in+3)"
+        emit "exx"
+        emit "ld %out, (%in+0)"
+        cost 8;
+
+
+
+/* Word arithmetic */
+
+    out:(int)reg = NOP.I(in:(int)reg)
+        cost 1;
+
+    out:(hlreg)reg = ADD.I(left:(hlreg)reg, right:(basereg)reg)
+    with %out == %left
+        emit "add %out, %right"
+        cost 2;
+
+    out:(int)reg = ADD.I(left:(int)reg, one:CONST.I)
+    with %out == %left
+    when specific_constant(%one, 1)
+        emit "inc %left"
+        cost 2;
+
+    out:(int)reg = SUB.I(left:(hlreg)reg, right:(basereg)reg)
+    with %out == %left
+        emit "and a"
+        emit "sbc %out, %right"
+        cost 3;
+
+    out:(int)reg = SUB.I(left:(int)reg, one:CONST.I)
+    with %out == %left
+    when specific_constant(%one, 1)
+        emit "dec %left"
+        cost 2;
+
+    out:(hlreg)reg = NEG.I(left:(basereg)reg)
+        with preserved(%left)
+        emit "ld %out, 0"
+        emit "and a"
+        emit "sbc %out, %left"
+        cost 3;
+
+    out:(int)reg = COMPARESI.I(left:(hlreg)reg, right:(basereg)reg)
+    with %out == %left
+        emit "and a"
+        emit "sbc %out, %right"
+        cost 2;
+
+
+
+/* Long arithmetic */
+
+    out:(hlhlreg)reg = NEG.L(left:(long)reg)
+        emit "ld %out, 0"
+        emit "and a"
+        emit "sbc %out, %left"
+        cost 8;
+
+    out:(hlreg)reg = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
+        emit "and a"
+        emit "sbc %left, %right"
+        emit "exx"
+        emit "sbc %left, %right"
+        emit "exx"
+        cost 12;
+
+
+
+/* Float arithmetic */
+
+    out:(float)reg = NOP.F(in:(float)reg)
+        ;
+
+    out:(float)reg = COPYI.F(in:(int)reg)
+        emit "push %in"
+        emit "pop %out"
+        ;
+
+    out:(int)reg = COPYF.I(in:(float)reg)
+        emit "push %in"
+        emit "pop %out"
+        ;
+
+    out:(int)reg = COMPAREF.I(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        ;
+
+    out:(float)reg = NEGF.F(in:(float)reg)
+        emit "call .float_unsupported"
+        ;
+
+
+/* Comparisons */
+
+    CJUMPLT(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "call .testhl"
+        emit "jp m, $true"
+        emit "jp $false"
+        ;
+
+
+
+/* Jumps */
+
+    JUMP(in:BLOCK.I)
+        emit "jp $in"
+        ;
+
+/* vim: set sw=4 ts=4 expandtab : */
+
