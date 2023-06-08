@@ -439,7 +439,7 @@ PATTERNS
             yields hl
 
     pat loc loc cii $1==3 && $2==6
-        with hlreg dereg
+        with hlreg
         gen
             Call {label, ".cii36"}
         yields hlhl
@@ -733,8 +733,8 @@ PATTERNS
             mli $1
 
     pat mli $1==3
-        with hlreg dereg
-        kills ALL
+        with bcreg dereg
+        kills hlreg a
         gen
             Call {label, ".mli3"}
         yields
@@ -971,7 +971,7 @@ PATTERNS
         yields hl
 
     pat lfr $1==6
-        yields dede
+        yields hlhl
 
 /* Comparisons */
 
