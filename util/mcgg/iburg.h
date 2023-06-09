@@ -149,7 +149,7 @@ extern FILE* infp;
 extern FILE* outfp;
 extern FILE* hdrfp;
 
-/* Stupid flex imports --- why mo header file? */
+/* Stupid flex imports --- why no header file? */
 
 extern FILE* yyin;
 extern int yylineno;

@@ -1215,9 +1215,12 @@ static void emit_output_constraints(Rule r)
 	if (outputc)
 	{
 		int index = 0;
+		Tree node;
 
-		if (!find_child_index(r->pattern, outputc->right, &index, NULL))
+		if (!find_child_index(r->pattern, outputc->right, &index, &node))
 			label_not_found(r, outputc->right);
+		if (r->attr != node->attr)
+			yyerror("equality register constraints must have the same register attribute on the left and right sides");
 
 		print("%1data->constrain_output_reg_equal_to(%d);\n", index);
 	}
