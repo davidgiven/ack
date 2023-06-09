@@ -240,7 +240,7 @@ char* hop_render(struct hop* hop)
                 struct hreg* hreg = pmap_findright(&hop->regsin, vreg);
                 if (!hreg)
                     hreg = pmap_findright(&hop->regsout, vreg);
-                if (hreg)
+                if (hreg && !hreg->is_stacked)
                     appendf("%s", hreg->brd->names[insel->index]);
                 else
                     appendf("%%%d.%d", vreg->id, insel->index);
