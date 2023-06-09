@@ -139,9 +139,9 @@ struct hop* platform_move(
 					/* Can't overwrite dest until we've finished with it
 					 * because it might overlap src. */
 					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "ld %H, (iy+%S)", src, dest + 3);
+					hop_add_insel(hop, "ld %H, (iy+%S)", dest, src + 3);
 					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "ld %H, (iy+%S)", src, dest);
+					hop_add_insel(hop, "ld %H, (iy+%S)", dest, src);
 					break;
 
 				default:
@@ -205,12 +205,36 @@ platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
 			        && (strcmp(dest->id, "hl") == 0)))
 			{
 				hop_add_insel(hop, "ex de, hl");
-				return hop;
+				break;
 			}
-			break;
-	}
 
-	fatal("can't swap");
+            if (strcmp(src->id, "hl") == 0)
+            {
+                hop_add_insel(hop, "push %H", dest);
+                hop_add_insel(hop, "ex (sp), hl");
+                hop_add_insel(hop, "pop %H", src);
+                break;
+            }
+
+            if (strcmp(dest->id, "hl") == 0)
+            {
+                hop_add_insel(hop, "push %H", src);
+                hop_add_insel(hop, "ex (sp), hl");
+                hop_add_insel(hop, "pop %H", dest);
+                break;
+            }
+
+            hop_add_insel(hop, "push %H", src);
+            hop_add_insel(hop, "push %H", dest);
+            hop_add_insel(hop, "pop %H", src);
+            hop_add_insel(hop, "pop %H", dest);
+			break;
+
+        case burm_long_ATTR:
+            fatal("can't swap longs %s to %s", src->id, dest->id);
+            break;
+    }
+
 #if 0
     switch (src->attrs & TYPE_ATTRS)
     {
