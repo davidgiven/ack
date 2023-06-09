@@ -4,6 +4,7 @@
 /* The ez80 code generator doesn't do floating point. */
 
 #define ACKCONF_WANT_STDIO_FLOAT 0
+#define ACKCONF_WANT_FLOAT 0
 
 /* We're providing a time() system call rather than wanting a wrapper around
  * gettimeofday() in the libc. */
@@ -13,9 +14,5 @@
 /* Processes? MOS? Hahahaha... */
 
 #define ACKCONF_WANT_EMULATED_POPEN 0
-
-/* We have a very small address space, so override the default buffer size. */
-
-#define BUFSIZ 256
 
 #endif
