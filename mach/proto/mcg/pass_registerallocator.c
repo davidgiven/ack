@@ -189,7 +189,8 @@ static bool allocatable_through(struct hreg* hreg, struct vreg* vreg)
 {
     return allocatable_stackable_input(hreg, vreg) &&
         allocatable_stackable_output(hreg, vreg) &&
-        !(hreg->attrs & current_hop->insndata->corrupts);
+        !(hreg->attrs & current_hop->insndata->corrupts) &&
+        constraints_match(hreg, vreg);
 }
 
 static struct hreg* find_input_reg(struct vreg* vreg)
@@ -309,6 +310,7 @@ static void add_input_register(struct vreg* vreg, struct hreg* hreg)
 static void add_output_register(struct vreg* vreg)
 {
     struct hreg* hreg;
+    struct hreg* hregout;
     int i;
     struct constraint* c;
 
@@ -341,6 +343,8 @@ static void add_output_register(struct vreg* vreg)
          * */
 
         hreg = find_through_reg(vreg);
+        if (hreg)
+            tracef('R', "R: considering throughreg %s\n", hreg->id);
         if (!hreg)
             hreg = evict(vreg);
 
@@ -574,7 +578,7 @@ static void assign_hregs_to_vregs(void)
         {
             struct hop* hop = bb->hops.item[j];
             register_assignment_t* in = &hop->regsin;
-            register_assignment_t* out = &hop->regsout;;
+            register_assignment_t* out = &hop->regsout;
 
             hop_print('R', hop);
 
