@@ -1104,7 +1104,7 @@ static void emit_predicate_expr(Rule r, struct expr* p)
 	bool first = true;
 
 	assert(p->type == PREDICATE_FUNCTION);
-	print("%1if (%Ppredicate_%s(", p->u.name);
+	print("%1if (%s%Ppredicate_%s(", p->negated ? "!" : "", p->u.name);
 
 	p = p->next;
 	while (p)

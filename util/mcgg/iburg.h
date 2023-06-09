@@ -43,6 +43,7 @@ struct expr
 {
 	int type;
 	struct expr* next;
+	bool negated;
 	union
 	{
 		const char* name;

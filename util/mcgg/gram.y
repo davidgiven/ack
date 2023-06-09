@@ -198,7 +198,8 @@ qfragments
     ;
 
 predicate
-    : ID '(' predicate_args ')'         {
+    : '!' predicate                     { $$ = $2; $$->negated = true; }
+    | ID '(' predicate_args ')'         {
                                             $$ = calloc(1, sizeof *$$);
                                             $$->type = PREDICATE_FUNCTION;
                                             $$->u.name = $1;
