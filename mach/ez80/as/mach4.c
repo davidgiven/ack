@@ -357,11 +357,28 @@ ldargs:
 
     | indir ',' R24
             {
-                if ($1 != HL)
-                    serror("register error");
+                switch ($1)
+                {
+                    case HL:
+                        emit1(0xed);
+                        emit1(($3 << 4) | 0x0f);
+                        break;
 
-                emit1(0xed);
-                emit1(($3 << 4) | 0x0f);
+                    case IX:
+                        emit1(0xdd);
+                        emit1(($3 << 4) | 0x0f);
+                        emit1(0);
+                        break;
+
+                    case IY:
+                        emit1(0xfd);
+                        emit1(($3 << 4) | 0x0f);
+                        emit1(0);
+                        break;
+                    
+                    default:
+                    serror("register error");
+                }
             }
 
     | index ',' R24
@@ -372,6 +389,11 @@ ldargs:
                     case DE:
                     case HL:
                         xymem($1, ($3 << 4) | 0x0f);
+                        break;
+
+                    case IX:
+                    case IY:
+                        xymem($1, (($3 == IX) ^ ($1 == IY)) ? 0x3f : 0x3e);
                         break;
 
                     default:
