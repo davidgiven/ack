@@ -15,10 +15,10 @@ REGISTERS
      * be moved from register to register or spilt).
      */
 
-    hl                                          int basereg hlreg indirreg volatile;
-    de                                          int basereg dereg volatile iret;
-    bc                                          int basereg bcreg volatile;
-    ix                                          int ixreg indirreg volatile;
+    hl named("hl", "l")                         int basereg bindirreg hlreg indirreg volatile;
+    de named("de", "e")                         int basereg dereg volatile iret;
+    bc named("bc", "c")                         int basereg bcreg volatile;
+    ix                                          int ixreg bindirreg indirreg volatile;
 
     hlhl aliases(hl) named("hl")                long hlhlreg volatile;
     dede aliases(de) named("de")                long dedereg volatile lret;
@@ -63,6 +63,21 @@ PATTERNS
         emit "exx"
         cost 6;
 
+    PUSH.F(in:(float)reg)
+        emit "push %in"
+        cost 2;
+
+    PUSH.I(in:(int)reg)
+        emit "push %in"
+        cost 2;
+
+    PUSH.L(in:(long)reg)
+        emit "exx"
+        emit "push %in"
+        emit "exx"
+        emit "push %in"
+        cost 6;
+
     SETRET.I(in:(iret)reg)
         emit "! setret.i"
         cost 1;
@@ -83,6 +98,35 @@ PATTERNS
         emit "ld %out, $value"
         cost 5;
 
+    STACKADJUST.I(in:(hlreg)reg)
+        emit "add hl, sp"
+        emit "ld sp, hl"
+        cost 5;
+
+    SETFP.I(in:(int)reg)
+        emit "push %in"
+        emit "pop iy"
+        cost 5;
+
+    out:(int)reg = GETFP.I
+        emit "push iy"
+        emit "pop %out"
+        cost 5;
+
+    SETSP.I(in:(hlreg)reg)
+        emit "ld sp, %in"
+        cost 5;
+
+    out:(int)reg = CHAINFP.I(in:(indirreg)reg)
+        emit "ld %out, (%in)"
+        cost 5;
+
+    out:(hlreg)reg = FPTOAB.I(in:(int)reg)
+        with preserved(%in)
+        emit "ld %out, 6"
+        emit "add hl, %in"
+        cost 5;
+
 
 /* Locals and stack-relatives */
 
@@ -90,6 +134,15 @@ PATTERNS
         when signed_constant(%offset, 8)
         emit "iy+$offset"
         cost 1;
+
+    out:(hlreg)reg = offset:LOCAL.I
+        with corrupted(bcreg)
+        when !signed_constant(%offset, 8)
+        emit "push iy"
+        emit "pop hl"
+        emit "ld bc, $offset"
+        emit "add hl, bc"
+        cost 8;
 
     address = in:LABEL.I
         emit "$in"
@@ -100,10 +153,23 @@ PATTERNS
         cost 5;
 
 
+
 /* Memory loads and stores */
 
     out:(int)reg = LOAD.I(addr:address)
         emit "ld %out, (%addr)"
+        cost 2;
+
+    STORE.I(addr:address, val:(int)reg)
+        emit "ld (%addr), %val"
+        cost 2;
+
+    out:(int)reg = LOAD.I(in:(indirreg)reg)
+        emit "ld %out, (%in)"
+        cost 2;
+
+    STORE.I(ptr:(indirreg)reg, val:(int)reg)
+        emit "ld (%ptr), %val"
         cost 2;
 
     out:(long)reg = LOAD.L(addr:address)
@@ -112,10 +178,6 @@ PATTERNS
         emit "ld %out, (%addr+0)"
         emit "exx"
         cost 10;
-
-    out:(int)reg = LOAD.I(in:(indirreg)reg)
-        emit "ld %out, (%in)"
-        cost 2;
 
     out:(float)reg = LOAD.F(addr:address)
         emit "ld %out, (%addr)"
@@ -132,11 +194,58 @@ PATTERNS
         emit "ld %out, (%in+0)"
         cost 8;
 
+    STORE.L(ptr:(ixreg)reg, val:(long)reg)
+        emit "ld (%ptr+0), %val"
+        emit "exx"
+        emit "ld (%ptr+3), %val"
+        emit "exx"
+        cost 8;
+
+
+/* Byte stuff */
+
+    out:(basereg)ubyteX = LOADB.I(in:(bindirreg)reg)
+        emit "ld %out.1, (%in)"
+        cost 2;
+
+    out:(basereg)reg = LOADB.I(in:(bindirreg)reg)
+        with preserved(%in)
+        emit "ld %out, 0"
+        emit "ld %out.1, (%in)"
+        cost 3;
+
+    STOREB.I(ptr:(bindirreg)reg, val:(basereg)reg)
+        emit "ld (%ptr), %val.1"
+        cost 3;
+
+    out:(int)reg = in:(int)ubyteX
+        with preserved(%in)
+        emit "ld %out, 0"
+        emit "ld %out.1, %in.1"
+        cost 2;
+
+    out:(hlreg)reg = EXTENDB.I(in:(hlreg)reg)
+        emit "call .extendb"
+        cost 10;
+
+    out:(hlreg)reg = EXTENDB.I(in:(hlreg)ubyteX)
+        emit "call .extendb"
+        cost 10;
+
+
 
 
 /* Word arithmetic */
 
     out:(int)reg = NOP.I(in:(int)reg)
+        cost 1;
+
+    out:(int)reg = FROMSI.I(in:(int)reg)
+        with %out == %in
+        cost 1;
+
+    out:(int)reg = FROMUI.I(in:(int)reg)
+        with %out == %in
         cost 1;
 
     out:(hlreg)reg = ADD.I(left:(hlreg)reg, right:(basereg)reg)
@@ -150,7 +259,7 @@ PATTERNS
         emit "inc %left"
         cost 2;
 
-    out:(int)reg = SUB.I(left:(hlreg)reg, right:(basereg)reg)
+    out:(hlreg)reg = SUB.I(left:(hlreg)reg, right:(basereg)reg)
     with %out == %left
         emit "and a"
         emit "sbc %out, %right"
@@ -169,21 +278,131 @@ PATTERNS
         emit "sbc %out, %left"
         cost 3;
 
-    out:(int)reg = COMPARESI.I(left:(hlreg)reg, right:(basereg)reg)
-    with %out == %left
+    out:(dereg)reg = DIV.I(left:(dereg)reg, right:(bcreg)reg)
+        emit "call .rmsdvs3"
+        cost 14;
+
+    out:(hlreg)reg = MOD.I(left:(dereg)reg, right:(bcreg)reg)
+        emit "call .rmsdvs3"
+        cost 14;
+
+    out:(dereg)reg = DIVU.I(left:(dereg)reg, right:(bcreg)reg)
+        emit "call .rmudvu3"
+        cost 14;
+
+    out:(hlreg)reg = MODU.I(left:(dereg)reg, right:(bcreg)reg)
+        emit "call .rmudvu3"
+        cost 14;
+
+    out:(hlreg)reg = MUL.I(left:(bcreg)reg, right:(dereg)reg)
+        emit "call .mli3"
+        cost 14;
+
+    out:(hlreg)reg = NOT.I(left:(hlreg)reg)
+        with %out == %left
+        emit "call .not3"
+        cost 5;
+
+    out:(hlreg)reg = COMPARESI.I(left:(hlreg)reg, right:(basereg)reg)
+        with %out == %left
         emit "and a"
         emit "sbc %out, %right"
         cost 2;
 
+    out:(hlreg)reg = COMPAREUI.I(left:(hlreg)reg, right:(basereg)reg)
+        with %out == %left
+        emit "and a"
+        emit "sbc %out, %right"
+        cost 2;
+
+    out:(int)reg = FROMSL.I(in:(long)reg)
+        emit "push %in"
+        emit "pop %out"
+        cost 5;
+
+    out:(int)reg = FROMUL.I(in:(long)reg)
+        emit "push %in"
+        emit "pop %out"
+        cost 5;
+
+
+
+
+/* Simple (call out to helper) arithmetic operations. */
+
+    #define ALUOP(op, helper) \
+        out:(hlreg)reg = op.I (left:(hlreg)reg, right:(bcreg)reg)       \
+            with %out == %left, corrupted(bcreg)                        \
+            emit "call " helper "3"                                     \
+            cost 4;                                                     \
+        out:(hlhlreg)reg = op.L (left:(hlhlreg)reg, right:(bcbcreg)reg) \
+            with %out == %left, corrupted(bcbcreg)                      \
+            emit "call " helper "6"                                     \
+            cost 4;                                                     \
+            
+
+    ALUOP(LSL, ".sli");
+    ALUOP(LSR, ".sru");
+    ALUOP(ASR, ".sri");
+    ALUOP(AND, ".and");
+    ALUOP(OR, ".ior");
+    ALUOP(EOR, ".xor");
+
+
 
 
 /* Long arithmetic */
+
+    out:(hlhlreg)reg = SUB.L(left:(hlhlreg)reg, right:(long)reg)
+        with %out == %left
+        emit "and a"
+        emit "sbc %out, %left"
+        emit "exx"
+        emit "sbc %out, %left"
+        emit "exx"
+        cost 12;
+
+    out:(hlhlreg)reg = ADD.L(left:(hlhlreg)reg, right:(long)reg)
+        with %out == %left
+        emit "add %out, %left"
+        emit "exx"
+        emit "adc %out, %left"
+        emit "exx"
+        cost 12;
 
     out:(hlhlreg)reg = NEG.L(left:(long)reg)
         emit "ld %out, 0"
         emit "and a"
         emit "sbc %out, %left"
         cost 8;
+
+    out:(dedereg)reg = DIV.L(left:(dedereg)reg, right:(bcreg)reg)
+        emit "call .rmsdvs6"
+        cost 14;
+
+    out:(hlhlreg)reg = MOD.L(left:(dedereg)reg, right:(bcbcreg)reg)
+        emit "call .rmsdvs6"
+        cost 14;
+
+    out:(dedereg)reg = DIVU.L(left:(dedereg)reg, right:(bcbcreg)reg)
+        emit "call .rmudvu6"
+        cost 14;
+
+    out:(hlhlreg)reg = MODU.L(left:(dedereg)reg, right:(bcbcreg)reg)
+        emit "call .rmudvu6"
+        cost 14;
+
+    out:(hlhlreg)reg = MUL.L(left:(bcreg)reg, right:(dedereg)reg)
+        emit "call .mli6"
+        cost 14;
+
+    out:(hlreg)reg = COMPAREUL.I(left:(hlhlreg)reg, right:(long)reg)
+        emit "and a"
+        emit "sbc %out, %right"
+        emit "exx"
+        emit "sbc %out, %right"
+        emit "exx"
+        cost 12;
 
     out:(hlreg)reg = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
         emit "and a"
@@ -193,30 +412,78 @@ PATTERNS
         emit "exx"
         cost 12;
 
+    out:(hlreg)reg = FROMSI.L(left:(hlreg)reg)
+        emit "call .cii36"
+        cost 12;
+
+    out:(long)reg = FROMSL.L(left:(long)reg)
+        with %out == %left
+        cost 1;
+
+    out:(long)reg = FROMUI.L(left:(int)reg)
+        emit "push %left"
+        emit "pop %out"
+        emit "exx"
+        emit "ld %out, 0"
+        emit "exx"
+        cost 5;
 
 
 /* Float arithmetic */
 
     out:(float)reg = NOP.F(in:(float)reg)
-        ;
+        cost 4;
 
     out:(float)reg = COPYI.F(in:(int)reg)
         emit "push %in"
         emit "pop %out"
-        ;
+        cost 5;
 
     out:(int)reg = COPYF.I(in:(float)reg)
         emit "push %in"
         emit "pop %out"
-        ;
+        cost 5;
 
     out:(int)reg = COMPAREF.I(left:(float)reg, right:(float)reg)
         emit "call .float_unsupported"
-        ;
+        cost 10;
+
+    out:(float)reg = ADDF.F(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = SUBF.F(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = MULF.F(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = DIVF.F(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
 
     out:(float)reg = NEGF.F(in:(float)reg)
         emit "call .float_unsupported"
-        ;
+        cost 10;
+
+    out:(int)reg = FROMSF.I(in:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(long)reg = FROMSF.L(in:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = FROMSL.F(in:(long)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = FROMSI.F(in:(int)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
 
 
 /* Comparisons */
@@ -227,13 +494,77 @@ PATTERNS
         emit "jp $false"
         ;
 
+    CJUMPLE(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "call .testhl"
+        emit "jp m, $true"
+        emit "jp z, $true"
+        emit "jp $false"
+        ;
+
+    CJUMPEQ(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "call .testhl"
+        emit "jp z, $true"
+        emit "jp $false"
+        ;
+
+    out:(hlreg)reg = IFEQ.I(val:(hlreg)reg)
+        with %out == %val
+        emit "call .testhl"
+        emit "ld hl, 0"
+        emit "jr nz, 1f"
+        emit "inc hl"
+        emit "1:"
+        cost 15;
+
+    out:(hlreg)reg = IFLT.I(val:(hlreg)reg)
+        with %out == %val
+        emit "call .testhl"
+        emit "ld hl, 0"
+        emit "jp p, 1f"
+        emit "inc hl"
+        emit "1:"
+        cost 15;
+
+    out:(hlreg)reg = IFLE.I(val:(hlreg)reg)
+        with %out == %val
+        emit "call .testhl"
+        emit "ld hl, 1"
+        emit "jr z, 1f"
+        emit "jp m, 1f"
+        emit "dec hl"
+        emit "1:"
+        cost 15;
 
 
-/* Jumps */
+/* Jumps and calls */
 
     JUMP(in:BLOCK.I)
         emit "jp $in"
-        ;
+        cost 10;
 
+    JUMP(in:(hlreg)reg)
+        emit "jp (hl)"
+        cost 10;
+
+    #define CALLLABEL(insn) \
+        insn (dest:LABEL.I) \
+            with corrupted(volatile) \
+            emit "call $dest" \
+            cost 10;
+
+    CALLLABEL(CALL)
+    out:(iret)reg = CALLLABEL(CALL.I)
+    out:(lret)reg = CALLLABEL(CALL.L)
+
+    #define CALLINDIRECT(insn) \
+        insn (dest:(hlreg)reg) \
+            with corrupted(volatile) \
+            emit "call .pchl" \
+            cost 10;
+
+    CALLINDIRECT(CALL)
+    out:(iret)reg = CALLINDIRECT(CALL.I);
+    out:(lret)reg = CALLINDIRECT(CALL.L);
+        
 /* vim: set sw=4 ts=4 expandtab : */
 
