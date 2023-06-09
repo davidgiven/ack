@@ -48,7 +48,6 @@ S i=ii AND
 S i=ii OR
 S i=ii EOR
 S i=ii NOT
-S i=ii ASL
 S i=ii ASR
 S i=ii LSL
 S i=ii LSR

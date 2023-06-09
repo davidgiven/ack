@@ -811,7 +811,7 @@ static void insn_ivalue(int opcode, arith value)
         case op_mli: simple_alu2(opcode, value, IR_MUL, NULL); break;
         case op_dvi: simple_alu2(opcode, value, IR_DIV, NULL); break;
         case op_rmi: simple_alu2(opcode, value, IR_MOD, NULL); break;
-        case op_sli: simple_alu2(opcode, value, IR_ASL, NULL); break;
+        case op_sli: simple_alu2(opcode, value, IR_LSL, NULL); break;
         case op_sri: simple_alu2(opcode, value, IR_ASR, NULL); break;
         case op_ngi: simple_alu1(opcode, value, IR_NEG, NULL); break;
 
