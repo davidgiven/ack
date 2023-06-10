@@ -211,6 +211,7 @@ void procedure_compile(struct procedure* proc)
 
     pass_instruction_selector();
     print_hops('7');
+    pass_eliminate_trivial_copies();
     pass_find_phi_congruence_groups();
     pass_live_vreg_analysis();
     print_hops('8');

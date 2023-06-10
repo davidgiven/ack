@@ -523,7 +523,7 @@ static void assign_hregs_to_vregs(void)
                 }
             }
 
-            fatal("couldn't find a register assignment for $%d", vreg->id);
+            fatal("couldn't find a register assignment for %%%d", vreg->id);
             nextvreg:;
         }
 

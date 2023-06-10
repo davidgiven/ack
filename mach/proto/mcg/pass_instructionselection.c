@@ -52,10 +52,7 @@ static void emit_reg(int child, int index)
     struct vreg* vreg = find_vreg_of_child(child);
 
     if (vreg)
-    {
         hop_add_vreg_insel(current_hop, vreg, index);
-        array_appendu(&vreg->used, current_hop);
-    }
 }
 
 static void emit_string(const char* data)
@@ -189,6 +186,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
 {
     struct insn* insn = calloc(1, sizeof(*insn));
     int i;
+    struct vreg* vreg;
 
     insn->ir = node->ir;
     insn->num_children = 0;
@@ -244,6 +242,18 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
                         assert(current_hop->output != NULL);
                         break;
                 }
+            }
+
+            for (i = 0; i<current_hop->ins.count; i++)
+            {
+                vreg = current_hop->ins.item[i];
+                array_appendu(&vreg->used, current_hop);
+            }
+
+            for (i = 0; i<current_hop->outs.count; i++)
+            {
+                vreg = current_hop->outs.item[i];
+                array_appendu(&vreg->used, current_hop);
             }
 
             hop_print('I', current_hop);
