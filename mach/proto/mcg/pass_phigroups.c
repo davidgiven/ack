@@ -1,72 +1,8 @@
 #include "mcg.h"
 
-static PMAPOF(struct vreg, struct vreg) phimap;
+static ARRAYOF(struct congruence) groups;
 
-static void make_phimap(void)
-{
-	int i, j;
-
-	phimap.count = 0;
-	for (i=0; i<cfg.preorder.count; i++)
-	{
-		struct basicblock* bb = cfg.preorder.item[i];
-
-		/* Registers imported through a phi can come from multiple locations. */
-		for (j=0; j<bb->phis.count; j++)
-		{
-			struct vreg* vreg = bb->phis.item[j].left;
-			struct phi* phi = bb->phis.item[j].right;
-			struct vreg* prevvreg = phi->ir->result;
-
-			pmap_add(&phimap, vreg, prevvreg);
-		}
-	}
-}
-
-static void recursively_associate_group(struct phicongruence* c, struct vreg* vreg)
-{
-	int i;
-
-	vreg->congruence = c;
-	array_appendu(&c->vregs, vreg);
-    tracef('V', "V: %%%d is a member of congruence group %d\n",
-        vreg->id, c->id);
-
-    if (vreg->defined)
-    {
-        struct constraint* constraint = pmap_findleft(&vreg->defined->constraints, vreg);
-        if (c->type == 0)
-            c->type = vreg->type;
-
-        if (c->type != vreg->type)
-            fatal("tried to add register %%%d of type 0x%x to a phi congruence group of type 0x%x",
-                vreg->id, vreg->type, c->type);
-
-        array_appendu(&c->definitions, vreg->defined);
-    }
-
-	for (;;)
-	{
-		struct vreg* child = pmap_findleft(&phimap, vreg);
-        if (!child)
-            break;
-
-        pmap_remove(&phimap, vreg, child);
-        recursively_associate_group(c, child);
-    }
-		
-    for (;;)
-    {
-		struct vreg* child = pmap_findright(&phimap, vreg);
-		if (!child)
-            break;
-
-        pmap_remove(&phimap, child, vreg);
-        recursively_associate_group(c, child);
-	}
-}
-
-static void update_vreg_types(struct phicongruence* c)
+static void update_vreg_types(struct congruence* c)
 {
     int i;
 
@@ -81,23 +17,125 @@ static void update_vreg_types(struct phicongruence* c)
     }
 }
 
-static void associate_groups(void)
+static struct congruence* create_congruence(struct vreg* member)
 {
-    static int number = 0;
+        static int number = 0;
 
-	while (phimap.count > 0)
-	{
-		struct phicongruence* c = calloc(1, sizeof(*c));
-        c->id = number++;
-		recursively_associate_group(c, phimap.item[0].left);
-        update_vreg_types(c);
-	}
+        struct congruence* g = calloc(1, sizeof(struct congruence));
+        g->id = number++;
+        array_append(&groups, g);
+
+        array_append(&g->vregs, member);
+        g->type = member->type;
+        member->congruence = g;
+
+        return g;
 }
 
-void pass_find_phi_congruence_groups(void)
+static void coalesce(struct vreg* reg1, struct vreg* reg2)
 {
-	make_phimap();
-	associate_groups();
+    struct congruence* g;
+    if (!reg1->congruence && !reg2->congruence)
+    {
+        g = create_congruence(reg1);
+        array_appendu(&g->vregs, reg2);
+    }
+    else if (reg1->congruence && !reg2->congruence)
+    {
+        g = reg1->congruence;
+        array_appendu(&g->vregs, reg2);
+    }
+    else if (!reg1->congruence && reg2->congruence)
+    {
+        g = reg2->congruence;
+        array_appendu(&g->vregs, reg1);
+    }
+    else if (reg1->congruence && (reg1->congruence == reg2->congruence))
+        return;
+    else
+    {
+        int i;
+        struct congruence* og = reg2->congruence;
+        g = reg1->congruence;
+        if (g->type != og->type)
+            fatal("congruence group with mismatched register types %x and %x",
+                g->type, og->type);
+
+        tracef('C', "C: coalescing congruence groups %d and %d\n", g->id, og->id);
+        for (i=0; i<og->vregs.count; i++)
+        {
+            struct vreg* vreg = og->vregs.item[i];
+            array_appendu(&g->vregs, vreg);
+            vreg->congruence = g;
+        }
+
+        og->vregs.count = 0;
+    }
+
+    reg1->congruence = reg2->congruence = g;
+
+}
+
+static void process(struct basicblock* bb)
+{
+    int i;
+
+    /* Coalesce the phi output registers with their sources. */
+
+    for (i=0; i<bb->phis.count; i++)
+    {
+        struct vreg* outputvreg = bb->phis.item[i].left;
+        struct vreg* inputvreg = bb->phis.item[i].right->ir->result;
+
+        coalesce(inputvreg, outputvreg);
+    }
+
+    /* Now go through the hops looking for hops with an equality contraint on
+     * their result register. */
+
+    for (i=0; i<bb->hops.count; i++)
+    {
+        struct hop* hop = bb->hops.item[i];
+        struct vreg* output = hop->output;
+        if (output)
+        {
+            tracef('C', "C: hop %d has output %%%d\n", hop->id, output->id);
+            struct constraint* c = pmap_findleft(&hop->constraints, output);
+            if (c && c->equals_to)
+                    coalesce(output, c->equals_to);
+
+            if (!output->congruence)
+                create_congruence(output);
+        }
+    }
+}
+
+void pass_find_congruence_groups(void)
+{
+    int i, j;
+
+    groups.count = 0;
+
+    for(i=0;i<dominance.preorder.count; i++)
+        process(dominance.preorder.item[i]);
+
+    for (i=0; i<groups.count; i++)
+    {
+        struct congruence* group = groups.item[i];
+        int type = 0;
+
+        for (j=0; j<group->vregs.count; j++)
+        {
+            struct vreg* vreg = group->vregs.item[j];
+            if (!vreg->type)
+                vreg->type = group->type;
+        }
+
+        tracef('C', "C: congruence group %d of type %x is:", group->id, group->type);
+        for (j=0; j<group->vregs.count; j++)
+            tracef('C', " %%%d", group->vregs.item[j]->id);
+        tracef('C', "\n");
+    }
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

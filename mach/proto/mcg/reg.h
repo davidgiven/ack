@@ -3,11 +3,10 @@
 
 #define WITH_ATTR(a) (1<<(a))
 
-struct phicongruence
+struct congruence
 {
     int id;
     ARRAYOF(struct vreg) vregs;
-    ARRAYOF(struct hop) definitions;
     uint32_t type;
     struct hreg* evicted; /* stack slot to evict to */
 };
@@ -26,7 +25,7 @@ struct vreg
 {
 	int id;
     uint32_t type;
-    struct phicongruence* congruence;
+    struct congruence* congruence;
     struct hop* defined;
     ARRAYOF(struct hop) used;
     struct hreg* evicted; /* stack slot to evict to */

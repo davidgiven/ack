@@ -107,7 +107,7 @@ extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, 
 extern void pass_convert_locals_to_ssa(void);
 extern void pass_convert_stack_ops(void);
 extern void pass_eliminate_trivial_blocks(void);
-extern void pass_find_phi_congruence_groups(void);
+extern void pass_find_congruence_groups(void);
 extern void pass_group_irs(void);
 extern void pass_infer_types(void);
 extern void pass_insert_moves(void);

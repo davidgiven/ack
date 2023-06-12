@@ -95,6 +95,10 @@ void hop_add_insel(struct hop* hop, const char* fmt, ...)
         again:
             switch (fmt[-1])
             {
+                case '%':
+                    hop_add_string_insel(hop, "%");
+                    break;
+
                 case '0':
                 case '1':
                 case '2':
