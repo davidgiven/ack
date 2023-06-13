@@ -87,7 +87,7 @@ void* array_pop(void* arrayp)
     struct array* array = arrayp;
 
     assert(array->count > 0);
-    return array->item[array->count--];
+    return array->item[--array->count];
 }
 
 void array_appendall(void* arrayp, void* srcp)
@@ -121,6 +121,12 @@ bool array_appendallu(void* arrayp, void* srcp)
         unchanged &= array_appendu(array, src->item[i]);
 
     return unchanged;
+}
+
+void array_sort(void* arrayp, int (*cb)(const void*, const void*))
+{
+    struct array* array = arrayp;
+    qsort(array->item, array->count, sizeof(void*), cb);
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

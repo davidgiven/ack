@@ -33,5 +33,8 @@ extern void array_removeall(void* dest, void* src);
 /* Returns false if *any* items were added. */
 extern bool array_appendallu(void* dest, void* src);
 
+/* Thin wrapper around qsort. */
+extern void array_sort(void* array, int (*cb)(const void*, const void*));
+
 #endif
 

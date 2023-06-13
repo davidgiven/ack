@@ -4,6 +4,7 @@ local hfiles = {
 	"./diagnostics.h",
 	"./imap.h",
 	"./pmap.h",
+	"./pset.h",
 	"./smap.h",
 	"./stringlist.h",
 }
@@ -16,6 +17,7 @@ clibrary {
 		"./diagnostics.c",
 		"./imap.c",
 		"./pmap.c",
+		"./pset.c",
 		"./smap.c",
 		"./stringlist.c",
 	},
