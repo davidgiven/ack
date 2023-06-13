@@ -238,6 +238,7 @@ PATTERNS
 /* Word arithmetic */
 
     out:(int)reg = NOP.I(in:(int)reg)
+        with %out == %in
         cost 1;
 
     out:(int)reg = FROMSI.I(in:(int)reg)
