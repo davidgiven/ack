@@ -38,16 +38,11 @@ static void print_blocks(char k)
 	}
 }
 
-static void print_vreg(char k, register_assignment_t* assignments, struct vreg* vreg)
+static void print_vreg(char k, struct vreg* vreg)
 {
-	struct hreg* hreg;
 	tracef(k, "%%%d", vreg->id);
-	if (assignments)
-	{
-		hreg = pmap_findright(assignments, vreg);
-		if (hreg)
-			tracef(k, "(%s)", hreg->id);
-	}
+	if (vreg->congruence)
+        tracef(k, "(g%d)", vreg->congruence);
 }
 
 static void print_hops(char k)
@@ -87,7 +82,7 @@ static void print_hops(char k)
             for (j=0; j<bb->liveins.count; j++)
             {
                 tracef(k, " ");
-                print_vreg(k, &bb->regsin, bb->liveins.item[j]);
+                print_vreg(k, bb->liveins.item[j]);
 			}
             tracef(k, "\n");
         }
@@ -98,7 +93,7 @@ static void print_hops(char k)
             for (j=0; j<bb->liveouts.count; j++)
             {
                 tracef(k, " ");
-                print_vreg(k, bb->regsout, bb->liveouts.item[j]);
+                print_vreg(k, bb->liveouts.item[j]);
 			}
             tracef(k, "\n");
         }
@@ -114,7 +109,7 @@ static void print_hops(char k)
                 tracef(k, " %%%d(via %s)=>",
                     phi->ir->result->id,
                     phi->prev->name);
-                print_vreg(k, &bb->regsin, vreg);
+                print_vreg(k, vreg);
             }
             tracef(k, "\n");
         }
@@ -137,7 +132,7 @@ static void emit_procedure(struct procedure* proc)
         for (j=0; j<bb->hops.count; j++)
         {
             struct hop* hop = bb->hops.item[j];
-            fprintf(outputfile, "%s", hop_render(hop));
+            fprintf(outputfile, "\n%s", hop_render(hop));
         }
     }
 }

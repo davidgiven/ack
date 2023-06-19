@@ -4,53 +4,73 @@
 enum insel_type
 {
 	INSEL_STRING,
-    INSEL_HREG,
+	INSEL_HREG,
 	INSEL_VREG,
 	INSEL_VALUE,
-    INSEL_ST_OFFSET,
-    INSEL_AB_OFFSET,
-    INSEL_LB_OFFSET,
+	INSEL_ST_OFFSET,
+	INSEL_AB_OFFSET,
+	INSEL_LB_OFFSET,
 	INSEL_EOI
 };
 
 struct insel
 {
 	enum insel_type type;
-    int index;
+	int index;
 	union
 	{
 		const char* string;
-        struct hreg* hreg;
+		struct hreg* hreg;
 		struct vreg* vreg;
 		struct ir* value;
-        int offset;
-	}
-	u;
+		int offset;
+	} u;
 };
 
 struct constraint
 {
-    uint32_t attrs;
+	/* Register must have all of these attributes. */
+
+	uint32_t attrs;
+
+	/* For input registers: this instruction may not modify this register during
+	 * execution. */
+
 	bool preserved;
-    struct vreg* equals_to;
+
+	/* For output registers: this register must be the same as the specified
+	 * input register. */
+
+	struct vreg* equals_to;
+};
+
+struct move
+{
+	struct vreg* vreg;
+	struct hreg* hreg;
+    bool spilled;
 };
 
 struct hop
 {
 	int id;
-    struct basicblock* bb;
+	struct basicblock* bb;
 	struct ir* ir;
-    const struct burm_instruction_data* insndata;
+	const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
 
-    PMAPOF(struct vreg, struct constraint) constraints;
+	PMAPOF(struct vreg, struct constraint) constraints;
 
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;
-    ARRAYOF(struct vreg) throughs;
-    register_assignment_t regsin;
-    register_assignment_t regsout;
+	ARRAYOF(struct vreg) throughs;
+
+	ARRAYOF(struct move) produces;
+	ARRAYOF(struct move) consumes;
+    PMAPOF(struct vreg, struct hreg) assignments;
+	uint32_t inputregusage;
+	uint32_t outputregusage;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
@@ -72,4 +92,3 @@ extern void hop_print(char k, struct hop* hop);
 #endif
 
 /* vim: set sw=4 ts=4 expandtab : */
-

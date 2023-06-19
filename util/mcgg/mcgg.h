@@ -64,9 +64,20 @@ extern const struct burm_instruction_data burm_instruction_data[];
 
 struct burm_register_data
 {
+    /* The primary name of this register. */
+
     const char* id;
+
+    /* The type bitfield of this register (register classes). */
+
     uint32_t attrs;
+
+    /* Any additional names this register might have (null-terminated). */
+
     const char** names;
+
+    /* A list of registers that this register is aliased with (null-terminated). */
+
     const struct burm_register_data** aliases;
 };
 

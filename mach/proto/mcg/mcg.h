@@ -21,6 +21,7 @@
 #include "array.h"
 #include "imap.h"
 #include "pmap.h"
+#include "pset.h"
 #include "diagnostics.h"
 #include "astring.h"
 #include "ir.h"
@@ -104,6 +105,7 @@ extern void tb_fileend(void);
 extern void tb_procedure(void);
 extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, int priority);
 
+extern void pass_assign_hop_producer_consumers(void);
 extern void pass_convert_locals_to_ssa(void);
 extern void pass_convert_stack_ops(void);
 extern void pass_eliminate_trivial_blocks(void);

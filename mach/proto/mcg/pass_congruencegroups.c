@@ -23,6 +23,7 @@ static struct congruence* create_congruence(struct vreg* member)
 
 	struct congruence* g = calloc(1, sizeof(struct congruence));
 	g->id = number++;
+    g->offset = -1;
 	array_append(&groups, g);
 
 	array_append(&g->vregs, member);
@@ -100,7 +101,6 @@ static void process(struct basicblock* bb)
 		struct vreg* output = hop->output;
 		if (output)
 		{
-			tracef('C', "C: hop %d has output %%%d\n", hop->id, output->id);
 			struct constraint* c = pmap_findleft(&hop->constraints, output);
 			if (c && c->equals_to)
 				coalesce(output, c->equals_to);

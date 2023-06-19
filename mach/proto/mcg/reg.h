@@ -3,22 +3,22 @@
 
 #define WITH_ATTR(a) (1<<(a))
 
-struct congruence
-{
-    int id;
-    ARRAYOF(struct vreg) vregs;
-    uint32_t type;
-    struct hreg* evicted; /* stack slot to evict to */
-};
-
 struct hreg
 {
 	const char* id;
     const struct burm_register_data* brd;
 	uint32_t attrs;
+    uint32_t usage;
 	bool is_stacked;
 	int offset;
-    ARRAYOF(struct hreg) aliases;
+};
+
+struct congruence
+{
+    int id;
+    ARRAYOF(struct vreg) vregs;
+    uint32_t type;
+    int offset;
 };
 
 struct vreg
@@ -31,12 +31,9 @@ struct vreg
     struct hreg* evicted; /* stack slot to evict to */
 };
 
-typedef PMAPOF(struct hreg, struct vreg) register_assignment_t;
-
 extern struct vreg* new_vreg(void);
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);
-extern struct hreg* new_stacked_hreg(uint32_t type);
 
 #endif
 

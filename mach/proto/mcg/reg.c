@@ -20,17 +20,5 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 	return hreg;
 }
 
-struct hreg* new_stacked_hreg(uint32_t attrs)
-{
-    static int hreg_count = 1;
-	struct hreg* hreg = calloc(1, sizeof *hreg);
-	hreg->id = aprintf("stacked_%d_id_%d", attrs, hreg_count++);
-	hreg->attrs = attrs;
-	hreg->is_stacked = true;
-	hreg->offset = -1;
-    array_append(&hreg->aliases, hreg);
-	return hreg;
-}
-
 /* vim: set sw=4 ts=4 expandtab : */
 

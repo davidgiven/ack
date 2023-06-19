@@ -13,6 +13,7 @@ void pass_add_prologue_epilogue(void)
         {
             struct hop* hop = bb->hops.item[j];
 
+            #if 0
             for (k=0; k<hop->regsin.count; k++)
             {
                 struct hreg* hreg = hop->regsin.item[k].left;
@@ -26,6 +27,7 @@ void pass_add_prologue_epilogue(void)
                 if (!hreg->is_stacked)
                     array_appendu(&current_proc->usedregs, hreg);
             }
+            #endif
         }
     }
 

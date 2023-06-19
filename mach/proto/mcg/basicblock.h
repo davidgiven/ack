@@ -24,10 +24,6 @@ struct basicblock
     ARRAYOF(struct vreg) liveins;
     ARRAYOF(struct vreg) liveouts;
 
-    /* Register assignments on entry and exit. */
-    register_assignment_t regsin;
-    register_assignment_t* regsout; /* points at regsout of the last insn. */
-
     bool is_fake : 1;
     bool is_root : 1;
     bool is_terminated : 1;
