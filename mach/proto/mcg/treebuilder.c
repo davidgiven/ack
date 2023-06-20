@@ -996,6 +996,12 @@ static void insn_ivalue(int opcode, arith value)
             );
             break;
 
+        case op_ldc:
+            push(
+                new_longir(value)
+            );
+            break;
+
         case op_loi:
         {
             struct ir* ptr = pop(EM_pointersize);

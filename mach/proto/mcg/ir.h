@@ -36,6 +36,7 @@ extern struct ir* new_ir2(int opcode, int size,
 
 extern struct ir* new_labelir(const char* label);
 extern struct ir* new_wordir(arith value);
+extern struct ir* new_longir(arith value);
 extern struct ir* new_constir(int size, arith value);
 extern struct ir* new_bbir(struct basicblock* bb);
 extern struct ir* new_anyir(int size);

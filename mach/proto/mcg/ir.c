@@ -47,6 +47,11 @@ struct ir* new_wordir(arith value)
     return new_constir(EM_wordsize, value);
 }
 
+struct ir* new_longir(arith value)
+{
+    return new_constir(EM_wordsize*2, value);
+}
+
 struct ir* new_bbir(struct basicblock* bb)
 {
 	struct ir* ir = new_ir0(IR_BLOCK, EM_pointersize);
