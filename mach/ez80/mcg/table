@@ -94,6 +94,13 @@ PATTERNS
         emit "ld %out, $value"
         cost 5;
 
+    out:(long)reg = value:CONST.L
+        emit "ld %out, $value & 0xffffff"
+        emit "exx"
+        emit "ld %out, $value >> 24"
+        emit "exx"
+        cost 5;
+
     out:(int)reg = value:LABEL.I
         emit "ld %out, $value"
         cost 5;
@@ -473,6 +480,10 @@ PATTERNS
         cost 5;
 
 /* Float arithmetic */
+
+    out:(float)reg = value:CONST.F
+        emit "call .float_unsupported"
+        cost 5;
 
     out:(float)reg = NOP.F(in:(float)reg)
         cost 4;
