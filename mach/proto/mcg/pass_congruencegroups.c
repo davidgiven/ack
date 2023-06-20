@@ -23,7 +23,7 @@ static struct congruence* create_congruence(struct vreg* member)
 
 	struct congruence* g = calloc(1, sizeof(struct congruence));
 	g->id = number++;
-    g->offset = -1;
+	g->offset = -1;
 	array_append(&groups, g);
 
 	array_append(&g->vregs, member);
@@ -92,8 +92,7 @@ static void process(struct basicblock* bb)
 		coalesce(inputvreg, outputvreg);
 	}
 
-	/* Now go through the hops looking for hops with an equality contraint on
-	 * their result register. */
+	/* Set up congruence groups for any output registers. */
 
 	for (i = 0; i < bb->hops.count; i++)
 	{
@@ -101,12 +100,19 @@ static void process(struct basicblock* bb)
 		struct vreg* output = hop->output;
 		if (output)
 		{
-			struct constraint* c = pmap_findleft(&hop->constraints, output);
-			if (c && c->equals_to)
-				coalesce(output, c->equals_to);
-
 			if (!output->congruence)
 				create_congruence(output);
+
+			if ((hop->insels.count == 0) && (hop->ins.count == 1)
+			    && (hop->outs.count == 1))
+			{
+				/* This is a trivial copy. */
+
+				tracef(
+				    'C', "C: hop %d is copy of %%%d to %%%d\n", hop->id,
+				    hop->ins.item[0]->id, hop->outs.item[0]->id);
+				coalesce(hop->ins.item[0], hop->outs.item[0]);
+			}
 		}
 	}
 }
@@ -125,19 +131,22 @@ void pass_find_congruence_groups(void)
 		struct congruence* group = groups.item[i];
 		int type = 0;
 
-		for (j = 0; j < group->vregs.count; j++)
+		if (group->vregs.count != 0)
 		{
-			struct vreg* vreg = group->vregs.item[j];
-			if (!vreg->type)
-				vreg->type = group->type;
-		}
+			for (j = 0; j < group->vregs.count; j++)
+			{
+				struct vreg* vreg = group->vregs.item[j];
+				if (!vreg->type)
+					vreg->type = group->type;
+			}
 
-		tracef(
-		    'C', "C: congruence group %d of type %x is:", group->id,
-		    group->type);
-		for (j = 0; j < group->vregs.count; j++)
-			tracef('C', " %%%d", group->vregs.item[j]->id);
-		tracef('C', "\n");
+			tracef(
+			    'C', "C: congruence group %d of type %x is:", group->id,
+			    group->type);
+			for (j = 0; j < group->vregs.count; j++)
+				tracef('C', " %%%d", group->vregs.item[j]->id);
+			tracef('C', "\n");
+		}
 	}
 }
 
