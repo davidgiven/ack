@@ -2,7 +2,7 @@
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
- * Tests _dup_ and _dus_ by loading 20 bytes from _src_, then making
+ * Tests _dup_ and _dus_ by loading SIZE bytes from _src_, then making
  * and checking some duplicates.  The compilers might never _dup_ or
  * _dus_ with large sizes, so the compilers might work even if this
  * test fails.  You can cheat this test if _cms_ always pushes zero.
@@ -13,7 +13,18 @@
 src
     con 3593880729I4, 782166578I4, 4150666996I4, 2453272937I4, 3470523049I4
 size
-    con 20I2
+#if EM_WSIZE == 2
+	con 20I2
+	#define SIZE 20
+#elif EM_WSIZE == 3
+	con 21I3
+	#define SIZE 21
+#elif EM_WSIZE == 4
+	com 20I2
+	#define SIZE 20
+#else
+	#error unsupported word size
+#endif
 
     exp $check
     exp $_m_a_i_n
@@ -21,10 +32,10 @@ size
 
     /* Push 3 copies of src on stack. */
     lae src
-    loi 20        /* 1st copy */
-    dup 20        /* 2nd copy */
+    loi SIZE      /* 1st copy */
+    dup SIZE      /* 2nd copy */
     lae size
-    loi 2
+    loi EM_WSIZE
     dus EM_WSIZE  /* 3rd copy */
 
     cal $check
@@ -45,14 +56,14 @@ size
     lal 0
     lal p3
     sti EM_PSIZE  /* p3 = 3rd copy */
-    lal 20
+    lal SIZE * 1
     lal p2
     sti EM_PSIZE  /* p2 = 2nd copy */
-    lal 40
+    lal SIZE * 2
     lal p1
     sti EM_PSIZE  /* p1 = 1st copy */
 
-    /* Loop 20 times to verify each byte. */
+    /* Loop SIZE times to verify each byte. */
     loc 0
     stl i
 4
@@ -68,10 +79,10 @@ size
     lol i
     adi EM_WSIZE  /* 0x300 + i */
     loc EM_WSIZE
-    loc 4
+    loc EM_WSIZE*2
     cuu
     cal $fail
-    asp 4
+    asp EM_WSIZE
 3
     lal p4
     loi EM_PSIZE
@@ -85,10 +96,10 @@ size
     lol i
     adi EM_WSIZE  /* 0x200 + i */
     loc EM_WSIZE
-    loc 4
+    loc EM_WSIZE*2
     cuu
     cal $fail
-    asp 4
+    asp EM_WSIZE
 2
     lal p4
     loi EM_PSIZE
@@ -102,10 +113,10 @@ size
     lol i
     adi EM_WSIZE  /* 0x100 + i */
     loc EM_WSIZE
-    loc 4
+    loc EM_WSIZE*2
     cuu
     cal $fail
-    asp 4
+    asp EM_WSIZE
 1
     lal p4
     loi EM_PSIZE
@@ -129,8 +140,8 @@ size
     sti EM_PSIZE  /* increment p1 */
     inl i
     lol i
-    loc 20
-    blt *4        /* loop 20 times */
+    loc SIZE
+    blt *4        /* loop SIZE times */
 
     ret 0
     end /* $check */
