@@ -189,8 +189,8 @@ static void allocate_remaining_registers(void)
 					    = get_constraint(hop, m->vreg);
 					uint32_t usagemask = hop->outputregusage;
 
-                    assert(!m->other);
-                    assert(constraint);
+					assert(!m->other);
+					assert(constraint);
 
 					/* For an equals-to constraint, we need to find a matching
 					 * input register. */
@@ -198,11 +198,15 @@ static void allocate_remaining_registers(void)
 					if (constraint->equals_to)
 						usagemask |= hop->inputregusage;
 
-					m->hreg = allocate_register(hop->inputregusage, constraint->attrs);
+					m->hreg = allocate_register(
+					    hop->inputregusage, constraint->attrs);
 					pmap_put(&hop->assignments, m->vreg, m->hreg);
 					tracef(
-					    'R', "R: allocate output register for %%%d g%d attrs %x: %s\n",
-					    m->vreg->id, m->vreg->congruence->id, constraint->attrs, m->hreg->id);
+					    'R',
+					    "R: allocate output register for %%%d g%d attrs %x: "
+					    "%s\n",
+					    m->vreg->id, m->vreg->congruence->id, constraint->attrs,
+					    m->hreg->id);
 					hop->outputregusage |= m->hreg->usage;
 
 					if (constraint->equals_to)
@@ -210,7 +214,7 @@ static void allocate_remaining_registers(void)
 						struct move* a = find_move(
 						    hop->consumes.item, hop->consumes.count,
 						    constraint->equals_to);
-                        
+
 						assert(a != NULL);
 						assert(a->hreg == NULL);
 
@@ -233,8 +237,8 @@ static void allocate_remaining_registers(void)
 					    = get_constraint(hop, m->vreg);
 					uint32_t usagemask = hop->inputregusage;
 
-                    assert(!m->other);
-                    assert(constraint);
+					assert(!m->other);
+					assert(constraint);
 
 					/* For a preserved constraint, we need to find a matching
 					 * output register. */
@@ -242,12 +246,16 @@ static void allocate_remaining_registers(void)
 					if (constraint->preserved)
 						usagemask |= hop->outputregusage;
 
-					m->hreg = allocate_register(hop->inputregusage, constraint->attrs);
+					m->hreg = allocate_register(
+					    hop->inputregusage, constraint->attrs);
 					hop->inputregusage |= m->hreg->usage;
 					pmap_put(&hop->assignments, m->vreg, m->hreg);
 					tracef(
-					    'R', "R: allocate input register for %%%d g%d attrs %x: %s\n",
-					    m->vreg->id, m->vreg->congruence->id, constraint->attrs, m->hreg->id);
+					    'R',
+					    "R: allocate input register for %%%d g%d attrs %x: "
+					    "%s\n",
+					    m->vreg->id, m->vreg->congruence->id, constraint->attrs,
+					    m->hreg->id);
 
 					if (constraint->preserved)
 						hop->outputregusage |= m->hreg->usage;
