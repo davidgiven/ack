@@ -136,6 +136,10 @@ PATTERNS
         emit "add hl, %in"
         cost 5;
 
+    out:(int)reg = FPTOLB.I(in:(int)reg)
+        with %out == %in
+        cost 1;
+
 
 /* Locals and stack-relatives */
 
@@ -445,7 +449,28 @@ PATTERNS
         emit "ld %out, 0"
         emit "exx"
         cost 5;
+    
+    out:(long)reg = FROMIPAIR.L(hi:(int)reg, lo:(int)reg)
+        with preserved(%lo)
+        emit "push %hi"
+        emit "exx"
+        emit "pop %out"
+        emit "exx"
+        emit "push %lo"
+        emit "pop %out"
+        cost 5;
 
+    out:(int)reg = FROML0.I(left:(long)reg)
+        emit "push %left"
+        emit "pop %out"
+        cost 5;
+
+    out:(int)reg = FROML1.I(left:(long)reg)
+        emit "exx"
+        emit "push %left"
+        emit "exx"
+        emit "pop %out"
+        cost 5;
 
 /* Float arithmetic */
 
@@ -490,6 +515,10 @@ PATTERNS
         emit "call .float_unsupported"
         cost 10;
 
+    out:(int)reg = FROMUF.I(in:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
     out:(long)reg = FROMSF.L(in:(float)reg)
         emit "call .float_unsupported"
         cost 10;
@@ -499,6 +528,10 @@ PATTERNS
         cost 10;
 
     out:(float)reg = FROMSI.F(in:(int)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = FROMUI.F(in:(int)reg)
         emit "call .float_unsupported"
         cost 10;
 
