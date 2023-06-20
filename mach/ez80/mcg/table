@@ -56,6 +56,10 @@ PATTERNS
         emit "pop %out"
         cost 2;
 
+    out:(float)reg = POP.F
+        emit "pop %out"
+        cost 2;
+
     out:(long)reg = POP.L
         emit "pop %out"
         emit "exx"
@@ -111,6 +115,11 @@ PATTERNS
     out:(int)reg = GETFP.I
         emit "push iy"
         emit "pop %out"
+        cost 5;
+
+    out:(hlreg)reg = GETSP.I
+        emit "ld hl, 0"
+        emit "add hl, sp"
         cost 5;
 
     SETSP.I(in:(hlreg)reg)
@@ -185,6 +194,10 @@ PATTERNS
 
     out:(float)reg = LOAD.F(in:(indirreg)reg)
         emit "ld %out, (%in)"
+        cost 2;
+
+    STORE.F(ptr:(indirreg)reg, val:(float)reg)
+        emit "ld (%ptr), %val"
         cost 2;
 
     out:(long)reg = LOAD.L(in:(ixreg)reg)
@@ -377,7 +390,7 @@ PATTERNS
         emit "sbc %out, %left"
         cost 8;
 
-    out:(dedereg)reg = DIV.L(left:(dedereg)reg, right:(bcreg)reg)
+    out:(dedereg)reg = DIV.L(left:(dedereg)reg, right:(bcbcreg)reg)
         emit "call .rmsdvs6"
         cost 14;
 
@@ -393,7 +406,7 @@ PATTERNS
         emit "call .rmudvu6"
         cost 14;
 
-    out:(hlhlreg)reg = MUL.L(left:(bcreg)reg, right:(dedereg)reg)
+    out:(hlhlreg)reg = MUL.L(left:(bcbcreg)reg, right:(dedereg)reg)
         emit "call .mli6"
         cost 14;
 
@@ -413,11 +426,15 @@ PATTERNS
         emit "exx"
         cost 12;
 
-    out:(hlreg)reg = FROMSI.L(left:(hlreg)reg)
+    out:(hlhlreg)reg = FROMSI.L(left:(hlreg)reg)
         emit "call .cii36"
         cost 12;
 
     out:(long)reg = FROMSL.L(left:(long)reg)
+        with %out == %left
+        cost 1;
+
+    out:(long)reg = FROMUL.L(left:(long)reg)
         with %out == %left
         cost 1;
 
