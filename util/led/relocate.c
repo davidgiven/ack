@@ -23,12 +23,20 @@ static char rcsid[] = "$Id$";
 
 static uint16_t read2(char* addr, int type)
 {
-	unsigned short word0, word1;
-
 	if (type & RELBR)
 		return (UBYTE(addr[0]) << WIDTH) + UBYTE(addr[1]);
 	else
 		return (UBYTE(addr[1]) << WIDTH) + UBYTE(addr[0]);
+}
+
+static uint32_t read3(char* addr, int type)
+{
+	if (type & RELBR)
+		return (UBYTE(addr[0]) << (WIDTH * 2)) + (UBYTE(addr[1]) << (WIDTH * 1))
+		    + UBYTE(addr[1]);
+	else
+		return (UBYTE(addr[2]) << (WIDTH * 2)) + (UBYTE(addr[1]) << (WIDTH * 1))
+		    + UBYTE(addr[0]);
 }
 
 static uint32_t read4(char* addr, int type)
@@ -149,12 +157,15 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 		/* branch instruction */
 		return opcode1 & 0x03fffffd;
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) && ((opcode2 & 0xfc000000) == 0x60000000))
+	else if (
+	    ((opcode1 & 0xfc1f0000) == 0x3c000000)
+	    && ((opcode2 & 0xfc000000) == 0x60000000))
 	{
 		/* addis / ori instruction pair */
 		return ((opcode1 & 0xffff) << 16) | (opcode2 & 0xffff);
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) && is_powerpc_memory_op(opcode2))
+	else if (
+	    ((opcode1 & 0xfc1f0000) == 0x3c000000) && is_powerpc_memory_op(opcode2))
 	{
 		/* addis / memoryop instruction pair */
 		uint16_t hi = opcode1 & 0xffff;
@@ -169,7 +180,8 @@ static uint32_t get_powerpc_valu(char* addr, uint16_t type)
 	}
 
 	fatal(
-	    "Don't know how to read from PowerPC fixup on instructions 0x%08lx+0x%08lx",
+	    "Don't know how to read from PowerPC fixup on instructions "
+	    "0x%08lx+0x%08lx",
 	    (unsigned long)opcode1, (unsigned long)opcode2);
 }
 
@@ -220,6 +232,8 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		case RELO2HI:
 		case RELO2HISAD:
 			return read2(addr, type);
+		case RELO3:
+			return read3(addr, type);
 		case RELO4:
 			return read4(addr, type);
 		case RELOPPC:
@@ -238,8 +252,6 @@ static uint32_t getvalu(char* addr, uint16_t type)
 
 static void write2(uint16_t valu, char* addr, int type)
 {
-	unsigned short word0, word1;
-
 	if (type & RELBR)
 	{
 		addr[0] = valu >> WIDTH;
@@ -249,6 +261,22 @@ static void write2(uint16_t valu, char* addr, int type)
 	{
 		addr[0] = valu;
 		addr[1] = valu >> WIDTH;
+	}
+}
+
+static void write3(uint16_t valu, char* addr, int type)
+{
+	if (type & RELBR)
+	{
+		addr[0] = valu >> (WIDTH * 2);
+		addr[1] = valu >> (WIDTH * 1);
+		addr[2] = valu;
+	}
+	else
+	{
+		addr[0] = valu;
+		addr[1] = valu >> (WIDTH * 1);
+		addr[2] = valu >> (WIDTH * 2);
 	}
 }
 
@@ -353,7 +381,9 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 		i |= value & 0x03fffffd;
 		write4(i, addr, type);
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) && ((opcode2 & 0xfc000000) == 0x60000000))
+	else if (
+	    ((opcode1 & 0xfc1f0000) == 0x3c000000)
+	    && ((opcode2 & 0xfc000000) == 0x60000000))
 	{
 		/* addis / ori instruction pair */
 		uint16_t hi = value >> 16;
@@ -362,7 +392,8 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 		write4((opcode1 & 0xffff0000) | hi, addr + 0, type);
 		write4((opcode2 & 0xffff0000) | lo, addr + 4, type);
 	}
-	else if (((opcode1 & 0xfc1f0000) == 0x3c000000) && is_powerpc_memory_op(opcode2))
+	else if (
+	    ((opcode1 & 0xfc1f0000) == 0x3c000000) && is_powerpc_memory_op(opcode2))
 	{
 		/* addis / memoryop instruction pair */
 		uint16_t hi = value >> 16;
@@ -379,7 +410,8 @@ static void put_powerpc_valu(char* addr, uint32_t value, uint16_t type)
 
 	else
 		fatal(
-		    "Don't know how to write a PowerPC fixup to instructions 0x%08lx+0x%08lx",
+		    "Don't know how to write a PowerPC fixup to instructions "
+		    "0x%08lx+0x%08lx",
 		    (unsigned long)opcode1, (unsigned long)opcode2);
 }
 
@@ -416,8 +448,7 @@ static void put_mips_valu(char* addr, uint32_t value)
 
 	/* The two bottom zero bits are implicit. */
 	if (value & 3)
-		fatal("invalid MIPS relocation value 0x%lx",
-		      (unsigned long)value);
+		fatal("invalid MIPS relocation value 0x%lx", (unsigned long)value);
 	value >>= 2;
 
 	switch (opcode >> 26)
@@ -455,6 +486,9 @@ static void putvalu(uint32_t valu, char* addr, uint16_t type)
 			break;
 		case RELO2:
 			write2(valu, addr, type);
+			break;
+		case RELO3:
+			write3(valu, addr, type);
 			break;
 		case RELO2HI:
 			write2(valu >> 16, addr, type);
@@ -497,7 +531,8 @@ extern struct orig relorig[];
  * Second case: we must update the value by the change
  * in position of the section of local.
  */
-static unsigned addrelo(relo, names, valu_out) struct outrelo* relo;
+static unsigned addrelo(relo, names, valu_out)
+struct outrelo* relo;
 struct outname* names;
 long* valu_out; /* Out variable. */
 {
@@ -549,20 +584,26 @@ long* valu_out; /* Out variable. */
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-void relocate(struct outhead *head, char* emit, struct outname names[], struct outrelo *relo, long off)
+void relocate(
+    struct outhead* head,
+    char* emit,
+    struct outname names[],
+    struct outrelo* relo,
+    long off)
 {
 	long valu;
 	int sectindex = relo->or_sect - S_MIN;
 	extern struct outhead outhead;
 	uint32_t realaddress = outsect[sectindex].os_base + relo->or_addr
-		+ relorig[sectindex].org_size;
+	    + relorig[sectindex].org_size;
 
 	/*
 	 * Pick up previous value at location to be relocated.
 	 */
 	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
-	debug("read relocation from 0x%08lx type 0x%x value 0x%08lx symbol %u\n",
-	      (unsigned long)realaddress, relo->or_type, valu, relo->or_nami);
+	debug(
+	    "read relocation from 0x%08lx type 0x%x value 0x%08lx symbol %u\n",
+	    (unsigned long)realaddress, relo->or_type, valu, relo->or_nami);
 
 	/*
 	 * Or_nami is an index in the name table of the considered module.
@@ -597,8 +638,9 @@ void relocate(struct outhead *head, char* emit, struct outname names[], struct o
 	/*
 	 * Now put the value back.
 	 */
-	debug("written fixed up relocation to 0x%08lx type 0x%x value 0x%08lx\n",
-	      (unsigned long)realaddress, relo->or_type, valu, 0);
+	debug(
+	    "written fixed up relocation to 0x%08lx type 0x%x value 0x%08lx\n",
+	    (unsigned long)realaddress, relo->or_type, valu, 0);
 	putvalu(valu, emit + (relo->or_addr - off), relo->or_type);
 
 	/*
