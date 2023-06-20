@@ -15,7 +15,6 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 	hreg->id = brd->id;
     hreg->brd = brd;
 	hreg->attrs = brd->attrs;
-	hreg->is_stacked = false;
     /* The aliases array needs to be initialised later. */
 	return hreg;
 }

@@ -52,6 +52,7 @@ struct hop* platform_prologue(void)
 	hop_add_insel(
 	    hop, "! spills @ fp-%d to fp-%d", -current_proc->fp_to_sb,
 	    current_proc->locals_size);
+    #if 0
 	for (i = saved_regs.count - 1; i >= 0; i--)
 	{
 		struct hreg* hreg = saved_regs.item[i];
@@ -59,6 +60,7 @@ struct hop* platform_prologue(void)
 		    hop, "! %s @ fp-%d", hreg->id,
 		    -(current_proc->fp_to_rb + hreg->offset));
 	}
+    #endif
 
 	hop_add_insel(hop, "push iy");
 	hop_add_insel(hop, "ld iy, 0");
@@ -85,191 +87,90 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
-struct hop* platform_move(
-    struct basicblock* bb,
-    struct vreg* vreg,
-    struct hreg* src,
-    struct hreg* dest)
+struct hop* platform_load(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
 
-	if ((src->attrs & TYPE_ATTRS) != (dest->attrs & TYPE_ATTRS))
+	if ((move->vreg->type & TYPE_ATTRS) != (move->hreg->attrs & TYPE_ATTRS))
 		fatal(
-		    "hreg move of %%%d from %s to %s with mismatched types", vreg->id,
-		    src->id, dest->id);
+		    "hreg load of %%%d in %s with mismatched types", move->vreg->id,
+		    move->hreg->id);
 	else
 	{
-		uint32_t type = src->attrs & TYPE_ATTRS;
+		uint32_t type = move->vreg->type & TYPE_ATTRS;
+		int offset = move->vreg->congruence->offset;
+
+		assert(!move->other);
+
 		tracef(
-		    'R', "R: non-converting move from %s to %s of type 0x%x\n", src->id,
-		    dest->id, type);
+		    'R', "R: load stack slot %d into %s for %%%d\n",
+		    move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
 
-		if (!src->is_stacked && dest->is_stacked)
+		switch (type)
 		{
-			switch (type)
-			{
-				case burm_int_ATTR:
-				case burm_float_ATTR:
-					hop_add_insel(hop, "ld (iy+%S), %H", dest, src);
-					break;
+			case burm_int_ATTR:
+			case burm_float_ATTR:
+				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset);
+				break;
 
-				case burm_long_ATTR:
-				case burm_double_ATTR:
-					hop_add_insel(hop, "ld (iy+%S), %H", dest, src);
-					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "ld (iy+%S), %H", dest + 3, src);
-					hop_add_insel(hop, "exx");
-					break;
+			case burm_long_ATTR:
+			case burm_double_ATTR:
+				hop_add_insel(hop, "exx");
+				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset + 3);
+				hop_add_insel(hop, "exx");
+				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset);
+				break;
 
-				default:
-					goto nomove;
-			}
+			default:
+				fatal(
+				    "cannot load %%%d with attrs %x", move->vreg->id,
+				    move->vreg->type);
 		}
-		else if (src->is_stacked && !dest->is_stacked)
-		{
-			switch (type)
-			{
-				case burm_int_ATTR:
-				case burm_float_ATTR:
-					hop_add_insel(hop, "ld %H, (iy+%S)", dest, src);
-					break;
-
-				case burm_long_ATTR:
-				case burm_double_ATTR:
-					/* Can't overwrite dest until we've finished with it
-					 * because it might overlap src. */
-					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "ld %H, (iy+%S)", dest, src + 3);
-					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "ld %H, (iy+%S)", dest, src);
-					break;
-
-				default:
-					goto nomove;
-			}
-		}
-		else if (!src->is_stacked && !dest->is_stacked)
-		{
-			switch (type)
-			{
-				case burm_int_ATTR:
-				case burm_float_ATTR:
-					hop_add_insel(hop, "push %H", src);
-					hop_add_insel(hop, "pop %H", dest);
-					break;
-
-				case burm_long_ATTR:
-				case burm_double_ATTR:
-					hop_add_insel(hop, "push %H", src);
-					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "push %H", src);
-					hop_add_insel(hop, "pop %H", dest);
-					hop_add_insel(hop, "exx");
-					hop_add_insel(hop, "pop %H", dest);
-					break;
-
-				default:
-					goto nomove;
-			}
-		}
-		else if (src->is_stacked && dest->is_stacked)
-			fatal(
-			    "tried to move stacked object %%%d of type 0x%x from %s to %s",
-			    vreg->id, type, src->id, dest->id);
-		else
-			goto nomove;
 	}
 
 	return hop;
-
-nomove:
-	fatal("cannot move %s to %s", src->id, dest->id);
 }
 
-struct hop*
-platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
+struct hop* platform_store(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
 
-	tracef('R', "R: swap of %s to %s\n", src->id, dest->id);
-	assert(!src->is_stacked);
-	assert(!dest->is_stacked);
-	assert((src->attrs & TYPE_ATTRS) == (dest->attrs & TYPE_ATTRS));
-
-	switch (src->attrs & TYPE_ATTRS)
+	if ((move->vreg->type & TYPE_ATTRS) != (move->hreg->attrs & TYPE_ATTRS))
+		fatal(
+		    "hreg store of %%%d in %s with mismatched types", move->vreg->id,
+		    move->hreg->id);
+	else
 	{
-		case burm_int_ATTR:
-		case burm_float_ATTR:
-			if (((strcmp(src->id, "hl") == 0) && (strcmp(dest->id, "de") == 0))
-			    || ((strcmp(src->id, "de") == 0)
-			        && (strcmp(dest->id, "hl") == 0)))
-			{
-				hop_add_insel(hop, "ex de, hl");
+		uint32_t type = move->vreg->type & TYPE_ATTRS;
+		int offset = move->vreg->congruence->offset;
+
+		assert(!move->other);
+
+		tracef(
+		    'R', "R: store stack slot %d from %s for %%%d\n",
+		    move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
+
+		switch (type)
+		{
+			case burm_int_ATTR:
+			case burm_float_ATTR:
+				hop_add_insel(hop, "ld (iy+%S), %H", offset, move->hreg);
 				break;
-			}
 
-            if (strcmp(src->id, "hl") == 0)
-            {
-                hop_add_insel(hop, "push %H", dest);
-                hop_add_insel(hop, "ex (sp), hl");
-                hop_add_insel(hop, "pop %H", src);
-                break;
-            }
+			case burm_long_ATTR:
+			case burm_double_ATTR:
+				hop_add_insel(hop, "ld (iy+%S), %H", offset, move->hreg);
+				hop_add_insel(hop, "exx");
+				hop_add_insel(hop, "ld (iy+%S), %H", offset + 3, move->hreg);
+				hop_add_insel(hop, "exx");
+				break;
 
-            if (strcmp(dest->id, "hl") == 0)
-            {
-                hop_add_insel(hop, "push %H", src);
-                hop_add_insel(hop, "ex (sp), hl");
-                hop_add_insel(hop, "pop %H", dest);
-                break;
-            }
-
-            hop_add_insel(hop, "push %H", src);
-            hop_add_insel(hop, "push %H", dest);
-            hop_add_insel(hop, "pop %H", src);
-            hop_add_insel(hop, "pop %H", dest);
-			break;
-
-        case burm_long_ATTR:
-            fatal("can't swap longs %s to %s", src->id, dest->id);
-            break;
-    }
-
-#if 0
-    switch (src->attrs & TYPE_ATTRS)
-    {
-        case burm_int_ATTR:
-        case burm_float_ATTR:
-            hop_add_insel(hop, "push %H", src);
-
-            hop_add_insel(hop, "mov at, %H", src);
-            hop_add_insel(hop, "mov %H, %H", src, dest);
-            hop_add_insel(hop, "mov %H, at", dest);
-            break;
-
-        case burm_long_ATTR:
-            hop_add_insel(hop, "mov at, %0H", src);
-            hop_add_insel(hop, "mov %0H, %0H", src, dest);
-            hop_add_insel(hop, "mov %0H, at", dest);
-
-            hop_add_insel(hop, "mov at, %1H", src);
-            hop_add_insel(hop, "mov %1H, %1H", src, dest);
-            hop_add_insel(hop, "mov %1H, at", dest);
-            break;
-
-        case burm_float_ATTR:
-            hop_add_insel(hop, "mov.s f30, %H", src);
-            hop_add_insel(hop, "mov.s %H, %H", src, dest);
-            hop_add_insel(hop, "mov.s %H, f30", dest);
-            break;
-
-        case burm_double_ATTR:
-            hop_add_insel(hop, "mov.d f30, %H", src);
-            hop_add_insel(hop, "mov.d %H, %H", src, dest);
-            hop_add_insel(hop, "mov.d %H, f30", dest);
-            break;
-    }
-#endif
+			default:
+				fatal(
+				    "cannot store %%%d with attrs %x", move->vreg->id,
+				    move->vreg->type);
+		}
+	}
 
 	return hop;
 }

@@ -126,8 +126,8 @@ extern void pass_wire_up_return_values(void);
 extern void platform_calculate_offsets(void);
 extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
-extern struct hop* platform_move(struct basicblock* bb, struct vreg* vreg, struct hreg* src, struct hreg* dest);
-extern struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest);
+extern struct hop* platform_load(struct basicblock* bb, struct move* move);
+extern struct hop* platform_store(struct basicblock* bb, struct move* move);
 extern const char* platform_label(const char* label);
 
 extern FILE* outputfile;

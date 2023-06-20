@@ -8,6 +8,27 @@ static int buffersize = 0;
 
 static const struct burm_emitter_data emitter_data;
 
+static char typechar(uint32_t t)
+{
+    switch (t)
+    {
+        case burm_int_ATTR:
+            return 'I';
+
+        case burm_long_ATTR:
+            return 'L';
+
+        case burm_float_ATTR:
+            return 'F';
+
+        case burm_double_ATTR:
+            return 'D';
+
+        default:
+            return '?';
+    }
+}
+
 struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 {
 	struct hop* hop = calloc(1, sizeof *hop);
@@ -176,11 +197,11 @@ static void print_header(char k, struct hop* hop)
 	tracef(k, ":");
 
 	for (i = 0; i < hop->ins.count; i++)
-		tracef(k, " r%%%d", hop->ins.item[i]->id);
+		tracef(k, " r%%%d/%c", hop->ins.item[i]->id, typechar(hop->ins.item[i]->type));
 	for (i = 0; i < hop->throughs.count; i++)
-		tracef(k, " =%%%d", hop->throughs.item[i]->id);
+		tracef(k, " =%%%d/%c", hop->throughs.item[i]->id, typechar(hop->throughs.item[i]->type));
 	for (i = 0; i < hop->outs.count; i++)
-		tracef(k, " w%%%d", hop->outs.item[i]->id);
+		tracef(k, " w%%%d/%c", hop->outs.item[i]->id, typechar(hop->outs.item[i]->type));
 	tracef(k, " ");
 }
 
@@ -258,7 +279,7 @@ char* hop_render(struct hop* hop)
 				break;
 
 			case INSEL_ST_OFFSET:
-				appendf("%d", current_proc->fp_to_sb + insel->u.hreg->offset);
+				appendf("%d", current_proc->fp_to_sb + insel->u.offset);
 				break;
 
 			case INSEL_AB_OFFSET:

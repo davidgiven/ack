@@ -2,21 +2,6 @@
 
 static ARRAYOF(struct congruence) groups;
 
-static void update_vreg_types(struct congruence* c)
-{
-	int i;
-
-	for (i = 0; i < c->vregs.count; i++)
-	{
-		struct vreg* vreg = c->vregs.item[i];
-
-		if (vreg->type == 0)
-			vreg->type = c->type;
-		assert(vreg->type == c->type);
-		assert(vreg->type != 0);
-	}
-}
-
 static struct congruence* create_congruence(struct vreg* member)
 {
 	static int number = 0;
@@ -40,16 +25,22 @@ static void coalesce(struct vreg* reg1, struct vreg* reg2)
 	{
 		g = create_congruence(reg1);
 		array_appendu(&g->vregs, reg2);
+        if (!g->type)
+            g->type = reg2->type;
 	}
 	else if (reg1->congruence && !reg2->congruence)
 	{
 		g = reg1->congruence;
 		array_appendu(&g->vregs, reg2);
+        if (!g->type)
+            g->type = reg2->type;
 	}
 	else if (!reg1->congruence && reg2->congruence)
 	{
 		g = reg2->congruence;
 		array_appendu(&g->vregs, reg1);
+        if (!g->type)
+            g->type = reg1->type;
 	}
 	else if (reg1->congruence && (reg1->congruence == reg2->congruence))
 		return;
@@ -58,6 +49,11 @@ static void coalesce(struct vreg* reg1, struct vreg* reg2)
 		int i;
 		struct congruence* og = reg2->congruence;
 		g = reg1->congruence;
+
+        if (!g->type)
+            g->type = og->type;
+        if (!og->type)
+            og->type = g->type;
 		if (g->type != og->type)
 			fatal(
 			    "congruence group with mismatched register types %x and %x",

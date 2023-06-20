@@ -48,7 +48,7 @@ struct move
 {
 	struct vreg* vreg;
 	struct hreg* hreg;
-    bool spilled;
+    struct hreg* other;
 };
 
 struct hop

@@ -9,8 +9,6 @@ struct hreg
     const struct burm_register_data* brd;
 	uint32_t attrs;
     uint32_t usage;
-	bool is_stacked;
-	int offset;
 };
 
 struct congruence
@@ -28,7 +26,6 @@ struct vreg
     struct congruence* congruence;
     struct hop* defined;
     ARRAYOF(struct hop) used;
-    struct hreg* evicted; /* stack slot to evict to */
 };
 
 extern struct vreg* new_vreg(void);
