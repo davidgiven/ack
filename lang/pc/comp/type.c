@@ -72,9 +72,9 @@ static void CheckTypeSizes(void)
 	*/
 	if( int_size != word_size )
 		fatal("integer size not equal to word size");
-	if( word_size != 2 && word_size != 4 )
+	if( word_size != 2 && word_size != 3 && word_size != 4 )
 		fatal("illegal wordsize");
-	if( pointer_size != 2 && pointer_size != 4 )
+	if( pointer_size != 2 && pointer_size != 3 && pointer_size != 4 )
 		fatal("illegal pointersize");
 	if( options['d'] ) {
 		if( long_size < int_size )
@@ -84,7 +84,7 @@ static void CheckTypeSizes(void)
 	}
 	if( pointer_size < word_size )
 		fatal("pointersize should be at least the wordsize");
-	if( real_size != 4 && real_size != 8 )
+	if( real_size != 3 && real_size != 4 && real_size != 8 )
 		fatal("illegal realsize");
 }
 
