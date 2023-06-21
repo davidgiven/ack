@@ -11,10 +11,12 @@ for _, plat in ipairs(vars.plats) do
 		srcs = {
 			"./and3.s",
 			"./and6.s",
+			"./bls.s",
 			"./cii36.s",
 			"./extendb.s",
 			"./float.s",
 			"./gto.s",
+			"./hol0.s",
 			"./ignmask.s",
 			"./ior3.s",
 			"./ior6.s",
