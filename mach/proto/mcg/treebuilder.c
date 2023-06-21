@@ -1021,7 +1021,7 @@ static void insn_ivalue(int opcode, arith value)
 			if (value > (2 * EM_wordsize))
 			{
 				push(new_wordir(value));
-				helper_function(".dus4");
+				helper_function(".dus");
 			}
 			else if (
 			    (value == (EM_wordsize * 2)) && (peek(0) == EM_wordsize)
@@ -1047,7 +1047,7 @@ static void insn_ivalue(int opcode, arith value)
 		{
 			if (value != EM_wordsize)
 				fatal("'dus %d' not supported", value);
-			helper_function(".dus4");
+			helper_function(".dus");
 			break;
 		}
 
@@ -1190,13 +1190,13 @@ static void insn_ivalue(int opcode, arith value)
 			switch (opcode)
 			{
 				case op_sar:
-					helper = ".sar4";
+					helper = ".sar";
 					break;
 				case op_lar:
-					helper = ".lar4";
+					helper = ".lar";
 					break;
 				case op_aar:
-					helper = ".aar4";
+					helper = ".aar";
 					break;
 			}
 
@@ -1228,7 +1228,8 @@ static void insn_ivalue(int opcode, arith value)
 
 			materialise_stack();
 			appendir(new_ir1(
-			    IR_CALL, 0, new_labelir((value == 4) ? ".fef4" : ".fef8")));
+			    IR_CALL, 0, new_labelir(
+                    aprintf(".fef%d", value))));
 
 			/* exit, leaving an int and then a float (or double) on the stack.
 			 */
@@ -1245,7 +1246,8 @@ static void insn_ivalue(int opcode, arith value)
 
 			materialise_stack();
 			appendir(new_ir1(
-			    IR_CALL, 0, new_labelir((value == 4) ? ".fif4" : ".fif8")));
+			    IR_CALL, 0, new_labelir(
+                    aprintf(".fif%d", value))));
 
 			/* exit, leaving two floats (or doubles) on the stack. */
 			break;
@@ -1296,25 +1298,25 @@ static void insn_ivalue(int opcode, arith value)
 
 		case op_blm:
 			push(new_wordir(value));
-			helper_function(".bls4");
+			helper_function(".bls");
 			break;
 
 		case op_bls:
 			if (value != EM_wordsize)
 				fatal("'bls %d' not supported", value);
-			helper_function(".bls4");
+			helper_function(".bls");
 			break;
 
 		case op_los:
 			if (value != EM_wordsize)
 				fatal("'los %d' not supported", value);
-			helper_function_with_arg(".los4", pop(EM_wordsize));
+			helper_function_with_arg(".los", pop(EM_wordsize));
 			break;
 
 		case op_sts:
 			if (value != EM_wordsize)
 				fatal("'sts %d' not supported", value);
-			helper_function_with_arg(".sts4", pop(EM_wordsize));
+			helper_function_with_arg(".sts", pop(EM_wordsize));
 			break;
 
 		case op_lin:
