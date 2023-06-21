@@ -1,6 +1,8 @@
 #
 #include "asm.h"
 
+.sect .text
+
 /* Computes HL = BC * DE, corrupting DE. */
 .define .mli3
 .mli3:
@@ -17,5 +19,5 @@ loop:
     add hl, bc
 noadd:
     dec a
-    jr nz, _loop
+    jr nz, loop
     ret

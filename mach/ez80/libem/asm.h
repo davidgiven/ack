@@ -8,6 +8,7 @@
         push bc;            \
         push de;            \
         push hl;            \
+        push ix;            \
                             \
         ld ix, 0;           \
         add ix, sp;         \
@@ -20,6 +21,7 @@
         inc ix;             \
         djnz loop;          \
                             \
+        pop ix;             \
         pop hl;             \
         pop de;             \
         pop bc;             \

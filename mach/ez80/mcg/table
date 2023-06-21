@@ -530,11 +530,19 @@ PATTERNS
         emit "call .float_unsupported"
         cost 10;
 
+    out:(long)reg = FROMUF.L(in:(float)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
     out:(long)reg = FROMSF.L(in:(float)reg)
         emit "call .float_unsupported"
         cost 10;
 
     out:(float)reg = FROMSL.F(in:(long)reg)
+        emit "call .float_unsupported"
+        cost 10;
+
+    out:(float)reg = FROMUL.F(in:(long)reg)
         emit "call .float_unsupported"
         cost 10;
 
@@ -551,27 +559,27 @@ PATTERNS
 /* Comparisons */
 
     CJUMPLT(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "jp m, $true"
         emit "jp $false"
         ;
 
     CJUMPLE(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "jp m, $true"
         emit "jp z, $true"
         emit "jp $false"
         ;
 
     CJUMPEQ(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "jp z, $true"
         emit "jp $false"
         ;
 
     out:(hlreg)reg = IFEQ.I(val:(hlreg)reg)
         with %out == %val
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "ld hl, 0"
         emit "jr nz, 1f"
         emit "inc hl"
@@ -580,7 +588,7 @@ PATTERNS
 
     out:(hlreg)reg = IFLT.I(val:(hlreg)reg)
         with %out == %val
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "ld hl, 0"
         emit "jp p, 1f"
         emit "inc hl"
@@ -589,7 +597,7 @@ PATTERNS
 
     out:(hlreg)reg = IFLE.I(val:(hlreg)reg)
         with %out == %val
-        emit "call .testhl"
+        emit "call .testhl3"
         emit "ld hl, 1"
         emit "jr z, 1f"
         emit "jp m, 1f"

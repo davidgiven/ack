@@ -1,6 +1,8 @@
 #
 #include "asm.h"
 
+.sect .text
+
 /* Computes HLHL = BCBC * DEDE, corrupting DEDE. */
 .define .mli6
 .mli6:
@@ -31,5 +33,5 @@ loop:
 	exx
 noadd:
     dec a
-    jr nz, _loop
+    jr nz, loop
     ret
