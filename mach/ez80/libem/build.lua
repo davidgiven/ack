@@ -30,6 +30,7 @@ for _, plat in ipairs(vars.plats) do
 			"./sru3.s",
 			"./testhl3.s",
 			"./testhlhl6.s",
+			"./trppc.s",
 		},
 		vars = { plat = plat },
 		deps = {
