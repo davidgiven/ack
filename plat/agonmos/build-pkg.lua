@@ -13,7 +13,7 @@ build_plat_libs {
 	name = "libs",
 	arch = "ez80",
 	plat = "agonmos",
-	exclude = { b=true },
+	exclude = { b=true, m2=true, pc=true },
 }
 
 installable {
