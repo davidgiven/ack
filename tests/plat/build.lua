@@ -6,7 +6,7 @@ definerule("plat_testsuite",
 		plat = { type="string" },
 		method = { type="string" },
 		-- added bugs/bug-203-ego-sr_c-O3.c
-		sets = { type="table", default={"core", "b", "bugs", "m2", "floats", "long-long"}},
+		sets = { type="table", default={"core", "b", "c", "m2", "pc", "floats", "long-long"}},
 		skipsets = { type="table", default={}},
 		tests = { type="targets", default={} },
 	},
