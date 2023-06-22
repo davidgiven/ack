@@ -70,24 +70,23 @@ zdis_put(struct zdis_ctx* ctx, enum zdis_put kind, int32_t val, bool il)
 		case ZDIS_PUT_OFF: // immediate offsets from index registers
 			if (val > 0)
 			{
-				sprintf(wp, "+%02x", val);
+				sprintf(wp, "+%02x", val & 0xff);
 			}
 			else if (val < 0)
 			{
-				sprintf(wp, "-%02x", val);
+				sprintf(wp, "-%02x", val & 0xff);
 			}
 			return true;
 
 		case ZDIS_PUT_BYTE: // byte immediates
 		case ZDIS_PUT_PORT: // immediate ports
 		case ZDIS_PUT_RST: // RST targets
-			sprintf(wp, "%02x", val);
+			sprintf(wp, "%02x", val & 0xff);
 			return true;
 
 		case ZDIS_PUT_ABS: // JP/CALL immediate targets
-			return zdis_put(
-			    ctx, ZDIS_PUT_OFF,
-			    (int32_t)(val - ctx->zdis_start_addr) << 8 >> 8, il);
+			sprintf(wp, "%06x", val);
+			return true;
 
 		case ZDIS_PUT_WORD: // word immediates (il ? 24 : 16) bits wide
 		case ZDIS_PUT_ADDR: // load/store immediate addresses
@@ -497,7 +496,7 @@ void emulator_init(void)
 	memset(ram, 0xee, sizeof(ram));
 
 	cpu_init();
-	cpu.ADL = true;
+	cpu.ADL = cpu.IL = cpu.L = true;
 	singlestepping = flag_enter_debugger;
 
 	struct sigaction action = { .sa_handler = sigusr1_cb };
