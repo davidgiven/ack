@@ -3,8 +3,8 @@
 
 .sect .text
 
-.define .sli3
-.sli3:
+.define .sli6
+.sli6:
 	push af
 	push bc
 
@@ -14,6 +14,9 @@
 
 2:
 	add hl, hl
+	exx
+	adc hl, hl
+	exx
 	djnz 2b
 
 1:

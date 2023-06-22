@@ -4,13 +4,16 @@
 .sect .text
 
 ! Shifts hl right by bc bits.
-.define .sru3
-.sru3:
+.define .sru6
+.sru6:
 	push af
+	exx
+	push hl
+	exx
 	push hl
 	push bc
 
-	ld hl, 5
+	ld hl, 8
 	add hl, sp
 
 1:
@@ -19,12 +22,24 @@
 	rr (hl)
 	dec hl
 	rr (hl)
+	dec hl
+	rr (hl)
+	dec hl
+	rr (hl)
+	dec hl
+	rr (hl)
+	inc hl
+	inc hl
+	inc hl
 	inc hl
 	inc hl
 	djnz 1b
 
 	pop bc
 	pop hl
+	exx
+	pop hl
+	exx
 	pop af
 	ret
 
