@@ -11,22 +11,38 @@ STACKSIZE = 512
 
 .sect .text
 begtext:
-	! fall through
+	ld sp, _stack_end
 
-! Exit the program.
+	! Clear the BSS.
 
-.define __exit
-__exit:
-	rst 0
+	ld hl, endbss
+	ld de, begbss
+	push de
+	and a
+	sbc hl, de
+	push hl
+	pop bc
 
-! Panic the program.
+	pop hl
+	push hl
+	pop de
+	inc de
+	
+	ld (hl), 0
+	ldir
+
+	jp __m_a_i_n
+
+! Panic and exit the program.
 
 .define _panic
 _panic:
 	ld hl, 1f
 	ld bc, 0
 	xor a
-	rst 0x8
+	rst 0x18
+.define __exit
+__exit:
 	rst 0
 
 1:
@@ -39,12 +55,17 @@ _panic:
 .define begtext, begdata, begbss
 .sect .data;       begdata:
 .sect .rom;        begrom:
-.sect .bss;        begbss:
+
+.sect .bss;
+.comm _stack, 1024		! the stack is outside the area cleared in the BSS.
+_stack_end:
+begbss:
 
 ! Some magic data. All EM systems need these.
 
 .define .ignmask, _errno
-.comm .ignmask, 2
-.comm _errno, 2
+.comm .ignmask, 3
+.comm _errno, 3
 
+! The stack.
 
