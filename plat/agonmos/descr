@@ -20,7 +20,7 @@ var ARCH=ez80
 var PLATFORM=agonmos
 var PLATFORMDIR={EM}/share/ack/{PLATFORM}
 var CPP_F=-D__unix
-var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1 -b0:0x0100
+var ALIGN=-a0:1 -a1:1 -a2:1 -a3:1 -b0:0
 var MACHOPT_F=-m8
 
 # Override the setting in fe so that files compiled for agonmos can see
