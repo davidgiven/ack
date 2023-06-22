@@ -892,6 +892,8 @@ void cpu_execute(void) {
     eZ80registers_t *r = &cpu.registers;
     eZ80context_t context;
 
+    cpu_prefetch(cpu.registers.PC, true);
+
     while (true) {
     cpu_execute_continue:
 		// dg hack: interrupt system removed.

@@ -31,6 +31,29 @@ static int zdis_read(struct zdis_ctx* ctx, uint32_t address)
 	return ram[address];
 }
 
+uint8_t mem_read_cpu(uint32_t address, bool cpu)
+{
+	if (address >= RAMSIZE)
+		fatal("out of range memory access");
+	return ram[address];
+}
+
+void mem_write_cpu(uint32_t address, uint8_t value)
+{
+	if (address >= RAMSIZE)
+		fatal("out of range memory access");
+	ram[address] = value;
+}
+
+uint8_t port_read_byte(uint32_t address)
+{
+	return 0;
+}
+
+void port_write_byte(uint32_t address, uint8_t value)
+{
+}
+
 static bool
 zdis_put(struct zdis_ctx* ctx, enum zdis_put kind, int32_t val, bool il)
 {
@@ -432,8 +455,31 @@ static void cpu_rst(uint8_t insn)
 			putchar(cpu.registers.A);
 			break;
 
+		case 0xdf: /* rst 18 */
+		{
+			uint32_t addr = cpu.registers.HL;
+			uint32_t len = cpu.registers.BC;
+			if (len)
+			{
+				while (len--)
+					putchar(mem_read_cpu(addr++, false));
+			}
+			else
+			{
+				uint8_t term = cpu.registers.A;
+				for (;;)
+				{
+					char c = mem_read_cpu(addr++, false);
+					if (c == term)
+						break;
+					putchar(c);
+				}
+			}
+			break;
+		}
+
 		default:
-			fprintf(stderr, "unsupported rst %d\n", insn);
+			fprintf(stderr, "unsupported rst %x\n", insn);
 			singlestepping = true;
 			return;
 	}
