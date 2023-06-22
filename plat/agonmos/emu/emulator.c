@@ -143,7 +143,7 @@ void showregs(void)
 
 	printf("%06x : ", cpu.registers.pc);
 	int bytes = disctx.zdis_end_addr - disctx.zdis_start_addr;
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		if (i < bytes)
 			printf("%02x ", ram[cpu.registers.PC + i]);
@@ -342,7 +342,7 @@ static void cmd_unassemble(void)
 
 			printf("%06x : ", addr);
 			int bytes = disctx.zdis_end_addr - disctx.zdis_start_addr;
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < 5; i++)
 			{
 				if (i < bytes)
 					printf("%02x ", ram[addr + i]);
