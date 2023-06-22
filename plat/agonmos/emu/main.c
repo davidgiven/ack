@@ -4,10 +4,11 @@
 #include <stdarg.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <errno.h>
 #include "globals.h"
-#include "cemu/core/cpu.h"
 
 bool flag_enter_debugger = false;
+static char* command_path = NULL;
 char* const* user_command_line = NULL;
 
 uint8_t ram[RAMSIZE];
@@ -72,26 +73,32 @@ static void parse_options(int argc, char* const* argv)
 	}
 
 end_of_flags:
+	command_path = argv[optind++];
+	if (!command_path)
+		syntax();
+
 	user_command_line = &argv[optind];
+}
+
+static void load_program(void)
+{
+	FILE* fp = fopen(command_path, "rb");
+	if (!fp)
+		fatal("could not load program: %s", strerror(errno));
+
+	fread(&ram[0], sizeof(ram), 1, fp);
+	fclose(fp);
 }
 
 int main(int argc, char* const* argv)
 {
 	parse_options(argc, argv);
-	
-	cpu_init();
 
-	#if 0
 	emulator_init();
-	bios_coldboot();
-	
+	load_program();
+
 	for (;;)
-	{
 		emulator_run();
-	}
-	#endif
 
 	return 0;
 }
-
-

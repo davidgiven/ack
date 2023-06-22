@@ -1624,6 +1624,8 @@ void cpu_execute(void) {
             cpu_inst_start();
 			// dg hack: execute a single instruction at a time.
         } while (cpu.PREFIX || cpu.SUFFIX);
+		// dg hack: execute a single instruction at a time.
+		break;
     }
 }
 

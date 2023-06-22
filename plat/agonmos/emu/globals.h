@@ -6,9 +6,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define RAMSIZE (1*1024*1024)
+#define RAMSIZE (1 * 1024 * 1024)
 
 extern uint8_t ram[RAMSIZE];
+extern bool flag_enter_debugger;
 
 extern void fatal(const char* message, ...);
 
@@ -18,5 +19,7 @@ extern void mem_write_cpu(uint32_t address, uint8_t value);
 extern uint8_t port_read_byte(uint32_t address);
 extern void port_write_byte(uint32_t address, uint8_t value);
 
-#endif
+extern void emulator_init(void);
+extern void emulator_run(void);
 
+#endif

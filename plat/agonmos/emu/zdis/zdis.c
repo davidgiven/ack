@@ -1,5 +1,3 @@
-#ifdef DEBUG_SUPPORT
-
 #include "zdis.h"
 
 #include <assert.h>
@@ -372,5 +370,3 @@ bool zdis_put_inst(struct zdis_ctx *ctx) {
     arg(ctx, inst >> 17 & ARG_MASK, inst >> 24, &separator) &&
     sep(ctx, true, true, inst >> 24, &separator);
 }
-
-#endif
