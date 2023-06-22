@@ -67,8 +67,13 @@ struct hop* platform_prologue(void)
 	hop_add_insel(hop, "add iy, sp");
 	if (spoffset)
 	{
-		hop_add_insel(hop, "ld hl, -%d", spoffset);
-		hop_add_insel(hop, "add hl, sp");
+        if (spoffset <= 128)
+            hop_add_insel(hop, "lea hl, iy-%d", spoffset);
+        else
+        {
+            hop_add_insel(hop, "ld hl, -%d", spoffset);
+            hop_add_insel(hop, "add hl, sp");
+        }
 		hop_add_insel(hop, "ld sp, hl");
 	}
 

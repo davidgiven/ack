@@ -75,6 +75,11 @@ PATTERNS
         emit "push %in"
         cost 2;
 
+    PUSH.I(offset:LOCAL.I)
+        when signed_constant(%offset, 8)
+        emit "pea iy+$offset"
+        cost 3;
+
     PUSH.L(in:(long)reg)
         emit "exx"
         emit "push %in"
@@ -109,6 +114,29 @@ PATTERNS
         emit "ld %out, $value"
         cost 5;
 
+    STACKADJUST.I(amount:CONST.I)
+        when specific_constant(%amount, 3)
+        emit "pop af"
+        cost 1;
+
+    STACKADJUST.I(amount:CONST.I)
+        when specific_constant(%amount, 6)
+        emit "pop af"
+        emit "pop af"
+        cost 2;
+
+    STACKADJUST.I(amount:CONST.I)
+        when specific_constant(%amount, 9)
+        emit "pop af"
+        emit "pop af"
+        emit "pop af"
+        cost 3;
+
+    STACKADJUST.I(in:(hlreg)reg)
+        emit "add hl, sp"
+        emit "ld sp, hl"
+        cost 5;
+
     STACKADJUST.I(in:(hlreg)reg)
         emit "add hl, sp"
         emit "ld sp, hl"
@@ -120,8 +148,7 @@ PATTERNS
         cost 5;
 
     out:(int)reg = GETFP.I
-        emit "push iy"
-        emit "pop %out"
+        emit "lea %out, iy"
         cost 5;
 
     out:(hlreg)reg = GETSP.I
@@ -155,12 +182,21 @@ PATTERNS
         emit "iy+$offset"
         cost 1;
 
+    address = GETFP.I
+        emit "iy"
+        cost 1;
+
+    address = ADD.I(GETFP.I, offset:CONST.I)
+        when signed_constant(%offset, 8)
+        emit "iy+$offset"
+        cost 1;
+
     out:(hlreg)reg = offset:LOCAL.I
         with corrupted(bcreg)
         when !signed_constant(%offset, 8)
         emit "push iy"
         emit "pop hl"
-        emit "ld bc, $offset"
+        emit "ld bc, $offset+6"
         emit "add hl, bc"
         cost 8;
 
