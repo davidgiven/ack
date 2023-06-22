@@ -2,9 +2,9 @@
 #include "asm.h"
 
 .sect .text
-.define .float_unsupported, .fef8, .fif8
-.fef8:
-.fif8:
+.define .float_unsupported, .fef3, .fif3
+.fef3:
+.fif3:
 .float_unsupported:
 	ld hl, message
 	jp _panic
