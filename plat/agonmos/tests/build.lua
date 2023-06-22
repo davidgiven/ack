@@ -8,5 +8,8 @@ plat_testsuite {
         "b",      -- B doesn't work on the ez80
         "floats", -- floats aren't supported
         "long-long",
+		"m2",
+		"pc",
+		"core",
     },
 }
