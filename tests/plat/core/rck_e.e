@@ -29,9 +29,9 @@ caught
 .1
     rom 1I4
     lae .1
-    loi 4
+    loi EM_WSIZE
     cal $fail
-    asp 4
+    asp EM_WSIZE
 1
 
     cal $next     ; increment testnr, catch next trap
@@ -94,9 +94,9 @@ caught
 .17
     rom 17I4
     lae .17
-    loi 4
+    loi EM_WSIZE
     cal $fail
-    asp 4
+    asp EM_WSIZE
 17
     ; Change the trap handler from $never to $catch.
     lpi $catch
@@ -107,9 +107,9 @@ caught
 .18
     rom 18I4
     lae .18
-    loi 4
+    loi EM_WSIZE
     cal $fail
-    asp 4
+    asp EM_WSIZE
 18
     ; Begin ignoring range traps.
     loc 2         ; 1 << ERANGE
@@ -127,9 +127,9 @@ caught
 .20
     rom 20I4
     lae .20
-    loi 4
+    loi EM_WSIZE
     cal $fail
-    asp 4
+    asp EM_WSIZE
 20
     cal $finished
     end
@@ -151,7 +151,7 @@ caught
 .101
     rom 257I4
     lae .101
-    loi 4
+    loi EM_WSIZE
     cal $fail
     ; Wrong type of trap.  _rtt_ might not work, so exit now.
     cal $finished
@@ -169,11 +169,8 @@ caught
     loc 256
     loe testnr
     adi EM_WSIZE  ; 0x100 + testnr
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    asp 4
+    asp EM_WSIZE
 2
     rtt           ; return from trap handler
     end
@@ -182,8 +179,8 @@ caught
 .200
     rom 200I4
     lae .200
-    loi 4
+    loi EM_WSIZE
     cal $fail
-    asp 4
+    asp EM_WSIZE
     rtt
     end

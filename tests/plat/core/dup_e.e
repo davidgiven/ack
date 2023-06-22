@@ -78,9 +78,6 @@ size
     loc (3 * 256)
     lol i
     adi EM_WSIZE  /* 0x300 + i */
-    loc EM_WSIZE
-    loc EM_WSIZE*2
-    cuu
     cal $fail
     asp EM_WSIZE
 3
@@ -95,9 +92,6 @@ size
     loc (2 * 256)
     lol i
     adi EM_WSIZE  /* 0x200 + i */
-    loc EM_WSIZE
-    loc EM_WSIZE*2
-    cuu
     cal $fail
     asp EM_WSIZE
 2
@@ -112,9 +106,6 @@ size
     loc (1 * 256)
     lol i
     adi EM_WSIZE  /* 0x100 + i */
-    loc EM_WSIZE
-    loc EM_WSIZE*2
-    cuu
     cal $fail
     asp EM_WSIZE
 1
@@ -145,3 +136,6 @@ size
 
     ret 0
     end /* $check */
+
+// vim: sw=4 ts=4 et ft=asm
+

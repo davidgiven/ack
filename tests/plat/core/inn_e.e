@@ -10,13 +10,10 @@
     rom 0I4
     loe .1
     loc 1       /* bit number */
-    inn 4
+    inn EM_WSIZE
     zeq *1
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
     ass EM_WSIZE
 1
@@ -34,9 +31,6 @@
     zne *2
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
     ass EM_WSIZE
 2
@@ -55,9 +49,6 @@
     zeq *3
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
     ass EM_WSIZE
 3
@@ -76,12 +67,12 @@
     zne *4
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
     ass EM_WSIZE
 4
 
     cal $finished
     end
+
+// vim: sw=4 ts=4 et ft=asm
+

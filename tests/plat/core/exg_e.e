@@ -2,11 +2,17 @@
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
- * Tests _exg_ by loading 40 bytes from _src_, then exchanging 20 and
- * 20 bytes, and checking the result.  The compilers might never _exg_
- * large sizes, so the compilers might work even if this test fails.
- * You can cheat this test if _cms_ always pushes zero.
+ * Tests _exg_ by loading 2*SIZE bytes from _src_, then exchanging SIZE and
+ * SIZE bytes, and checking the result.  The compilers might never _exg_ large
+ * sizes, so the compilers might work even if this test fails.  You can cheat
+ * this test if _cms_ always pushes zero.
  */
+
+#if EM_WSIZE == 3
+    #define SIZE 18
+#else
+    #define SIZE 20
+#endif   
 
     exa src
 src
@@ -18,8 +24,8 @@ src
     pro $_m_a_i_n, 0
 
     lae src
-    loi 40
-    exg 20
+    loi 2*SIZE
+    exg SIZE
     cal $check
     cal $finished
     end /* $_m_a_i_n */
@@ -33,11 +39,11 @@ src
     lal p2
     sti EM_PSIZE  /* p2 = src */
     lal 0
-    adp 20
+    adp SIZE
     lal p1
-    sti EM_PSIZE  /* p1 = exchanged copy + 20 */
+    sti EM_PSIZE  /* p1 = exchanged copy + SIZE */
 
-    /* Loop 40 times to verify each byte. */
+    /* Loop 2*SIZE times to verify each byte. */
     loc 0
     stl i
 1
@@ -50,11 +56,8 @@ src
     cms EM_WSIZE
     zeq *2
     lol i
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    asp 4
+    asp EM_WSIZE
 2
     lal p2
     loi EM_PSIZE
@@ -64,9 +67,9 @@ src
     lal p1
     loi EM_PSIZE  /* p1 */
     inl i
-    /* When i reaches 20, p1 would reach end of exchanged copy. */
+    /* When i reaches SIZE, p1 would reach end of exchanged copy. */
     lol i
-    loc 20
+    loc SIZE
     beq *3
     adp 1         /* p1 + 1 */
     bra *4
@@ -76,8 +79,11 @@ src
     lal p1
     sti EM_PSIZE  /* move p1 */
     lol i
-    loc 40
+    loc 2*SIZE
     blt *1
 
     ret 0
     end /* $check */
+
+// vim: sw=4 ts=4 et ft=asm
+
