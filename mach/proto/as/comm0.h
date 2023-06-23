@@ -60,7 +60,7 @@ _include	<string.h>
 
 #define	valu_t		int64_t		/* type of expression values */
 #define	uvalu_t		uint64_t	/* unsigned valu_t */
-#define	ADDR_T		unsigned short	/* type of dot */
+#define	ADDR_T		int_least32_t /* type of dot */
 #define	word_t		short		/* type of keyword value */
 /*
  * NOTE: word_t is introduced to reduce the tokenfile size for machines
@@ -75,7 +75,7 @@ _include	<string.h>
 
 #define	SETBASE(sp)	((long)(sp)->s_base)
 
-#define	VALWIDTH	4
+#define	VALWIDTH	8
 
 /* ========== Machine dependent option/constant settings ========== */
 
