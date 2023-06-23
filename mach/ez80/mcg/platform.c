@@ -15,9 +15,9 @@
  * |  --------------- <- sp, rb
  * V  ...user area...
  *
- * st indexes up; lb indexes down.
+ * sb indexes up; lb indexes down.
  *
- * Note that [fp] == old_fp and ab == fp + 8.
+ * Note that [fp] == old_fp and ab == fp + 6.
  */
 
 static ARRAYOF(struct hreg) saved_regs;
@@ -52,7 +52,7 @@ struct hop* platform_prologue(void)
 	hop_add_insel(
 	    hop, "! spills @ fp-%d to fp-%d", -current_proc->fp_to_sb,
 	    current_proc->locals_size);
-    #if 0
+#if 0
 	for (i = saved_regs.count - 1; i >= 0; i--)
 	{
 		struct hreg* hreg = saved_regs.item[i];
@@ -60,20 +60,20 @@ struct hop* platform_prologue(void)
 		    hop, "! %s @ fp-%d", hreg->id,
 		    -(current_proc->fp_to_rb + hreg->offset));
 	}
-    #endif
+#endif
 
 	hop_add_insel(hop, "push iy");
 	hop_add_insel(hop, "ld iy, 0");
 	hop_add_insel(hop, "add iy, sp");
 	if (spoffset)
 	{
-        if (spoffset <= 128)
-            hop_add_insel(hop, "lea hl, iy-%d", spoffset);
-        else
-        {
-            hop_add_insel(hop, "ld hl, -%d", spoffset);
-            hop_add_insel(hop, "add hl, sp");
-        }
+		if (spoffset <= 128)
+			hop_add_insel(hop, "lea hl, iy-%d", spoffset);
+		else
+		{
+			hop_add_insel(hop, "ld hl, -%d", spoffset);
+			hop_add_insel(hop, "add hl, sp");
+		}
 		hop_add_insel(hop, "ld sp, hl");
 	}
 
@@ -92,32 +92,33 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
-static const char* massage_offset(struct hop* hop, int* offset, int min, int max)
+static const char*
+massage_offset(struct hop* hop, int* offset, int min, int max)
 {
-    if (*offset > max)
-    {
-        hop_add_insel(hop, "ld ix, (iy+%L)", max);
-        *offset -= max;
-        while (*offset > max)
-        {
-            hop_add_insel(hop, "ld ix, (ix+%L)", max);
-            *offset -= max;
-        }
-        return "ix";
-    }
-    else if (*offset < min)
-    {
-        hop_add_insel(hop, "ld ix, (iy+%L)", min);
-        *offset -= min;
-        while (*offset < min)
-        {
-            hop_add_insel(hop, "ld ix, (ix+%L)", min);
-            *offset -= min;
-        }
-        return "ix";
-    }
-    else
-        return "iy";
+	if (*offset > max)
+	{
+		hop_add_insel(hop, "ld ix, (iy+%d)", max);
+		*offset -= max;
+		while (*offset > max)
+		{
+			hop_add_insel(hop, "ld ix, (ix+%d)", max);
+			*offset -= max;
+		}
+		return "ix";
+	}
+	else if (*offset < min)
+	{
+		hop_add_insel(hop, "ld ix, (iy+%d)", min);
+		*offset -= min;
+		while (*offset < min)
+		{
+			hop_add_insel(hop, "ld ix, (ix+%d)", min);
+			*offset -= min;
+		}
+		return "ix";
+	}
+	else
+		return "iy";
 }
 
 struct hop* platform_load(struct basicblock* bb, struct move* move)
@@ -131,7 +132,7 @@ struct hop* platform_load(struct basicblock* bb, struct move* move)
 	else
 	{
 		uint32_t type = move->vreg->type & TYPE_ATTRS;
-		int offset = move->vreg->congruence->offset;
+		int offset = move->vreg->congruence->offset + current_proc->fp_to_sb;
 
 		assert(!move->other);
 
@@ -143,22 +144,23 @@ struct hop* platform_load(struct basicblock* bb, struct move* move)
 		{
 			case burm_int_ATTR:
 			case burm_float_ATTR:
-            {
-                const char* reg = massage_offset(hop, &offset, -128, 127);
-                hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset);
+			{
+				const char* reg = massage_offset(hop, &offset, -128, 127);
+				hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
 				break;
-            }
+			}
 
 			case burm_long_ATTR:
 			case burm_double_ATTR:
-            {
-                const char* reg = massage_offset(hop, &offset, -128, 124);
+			{
+				const char* reg = massage_offset(hop, &offset, -128, 124);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset + 3);
+				hop_add_insel(
+				    hop, "ld %H, (%s+%d)", move->hreg, reg, offset + 3);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset);
+				hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
 				break;
-            }
+			}
 
 			default:
 				fatal(
@@ -181,7 +183,7 @@ struct hop* platform_store(struct basicblock* bb, struct move* move)
 	else
 	{
 		uint32_t type = move->vreg->type & TYPE_ATTRS;
-		int offset = move->vreg->congruence->offset;
+		int offset = move->vreg->congruence->offset + current_proc->fp_to_sb;
 
 		assert(!move->other);
 
@@ -193,22 +195,23 @@ struct hop* platform_store(struct basicblock* bb, struct move* move)
 		{
 			case burm_int_ATTR:
 			case burm_float_ATTR:
-            {
-                const char* reg = massage_offset(hop, &offset, -128, 127);
-				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset, move->hreg);
+			{
+				const char* reg = massage_offset(hop, &offset, -128, 127);
+				hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
 				break;
-            }
+			}
 
 			case burm_long_ATTR:
 			case burm_double_ATTR:
-            {
-                const char* reg = massage_offset(hop, &offset, -128, 124);
-				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset, move->hreg);
+			{
+				const char* reg = massage_offset(hop, &offset, -128, 124);
+				hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset + 3, move->hreg);
+				hop_add_insel(
+				    hop, "ld (%s+%d), %H", reg, offset + 3, move->hreg);
 				hop_add_insel(hop, "exx");
 				break;
-            }
+			}
 
 			default:
 				fatal(

@@ -77,7 +77,7 @@ void hop_add_value_insel(struct hop* hop, struct ir* ir)
 
 void hop_add_st_offset_insel(struct hop* hop, struct hreg* hreg)
 {
-	struct insel* insel = new_insel(INSEL_ST_OFFSET);
+	struct insel* insel = new_insel(INSEL_SB_OFFSET);
 	insel->u.hreg = hreg;
 	array_append(&hop->insels, insel);
 }
@@ -278,7 +278,7 @@ char* hop_render(struct hop* hop)
 				appendf("%s", insel->u.string);
 				break;
 
-			case INSEL_ST_OFFSET:
+			case INSEL_SB_OFFSET:
 				appendf("%d", current_proc->fp_to_sb + insel->u.offset);
 				break;
 

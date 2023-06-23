@@ -3,13 +3,13 @@
 
 enum insel_type
 {
-	INSEL_STRING,
-	INSEL_HREG,
-	INSEL_VREG,
+	INSEL_STRING, /* %s */
+	INSEL_HREG, /* %H */
+	INSEL_VREG, /* %V */
 	INSEL_VALUE,
-	INSEL_ST_OFFSET,
-	INSEL_AB_OFFSET,
-	INSEL_LB_OFFSET,
+	INSEL_SB_OFFSET, /* %S */
+	INSEL_AB_OFFSET, /* %A */
+	INSEL_LB_OFFSET, /* %L */
 	INSEL_EOI
 };
 
@@ -48,7 +48,7 @@ struct move
 {
 	struct vreg* vreg;
 	struct hreg* hreg;
-    struct hreg* other;
+	struct hreg* other;
 };
 
 struct hop
@@ -68,7 +68,7 @@ struct hop
 
 	ARRAYOF(struct move) produces;
 	ARRAYOF(struct move) consumes;
-    PMAPOF(struct vreg, struct hreg) assignments;
+	PMAPOF(struct vreg, struct hreg) assignments;
 	uint32_t inputregusage;
 	uint32_t outputregusage;
 };
