@@ -126,11 +126,6 @@ static void layout_stack_frame(void)
 	tracef('R', "R: spill size is %d bytes\n", stacksize);
 }
 
-static bool register_available(uint32_t used, struct hreg* hreg)
-{
-	return (used & hreg->usage) == 0;
-}
-
 static struct hreg* allocate_register(uint32_t used, uint32_t attrs)
 {
 	int i;
@@ -140,7 +135,7 @@ static struct hreg* allocate_register(uint32_t used, uint32_t attrs)
 	for (i = 0; i < hregs.count; i++)
 	{
 		struct hreg* hreg = hregs.item[i];
-		if (register_available(used, hreg) && ((hreg->attrs & attrs) == attrs))
+		if (!(hreg->usage & used) && ((hreg->attrs & attrs) == attrs))
 		{
 			/* This one is unused. Use it. */
 
@@ -179,6 +174,7 @@ static void allocate_remaining_registers(void)
 		for (j = 0; j < bb->hops.count; j++)
 		{
 			struct hop* hop = bb->hops.item[j];
+            tracef('R', "R: considering hop %d\n", hop->id);
 
 			for (k = 0; k < hop->produces.count; k++)
 			{
@@ -219,6 +215,7 @@ static void allocate_remaining_registers(void)
 						assert(a->hreg == NULL);
 
 						a->hreg = m->hreg;
+                        assert(!(hop->inputregusage & m->hreg->usage));
 						hop->inputregusage |= m->hreg->usage;
 						pmap_put(&hop->assignments, a->vreg, m->hreg);
 						tracef(
@@ -246,19 +243,21 @@ static void allocate_remaining_registers(void)
 					if (constraint->preserved)
 						usagemask |= hop->outputregusage;
 
-					m->hreg = allocate_register(
-					    hop->inputregusage, constraint->attrs);
+					m->hreg = allocate_register(usagemask, constraint->attrs);
 					hop->inputregusage |= m->hreg->usage;
 					pmap_put(&hop->assignments, m->vreg, m->hreg);
 					tracef(
 					    'R',
-					    "R: allocate input register for %%%d g%d attrs %x: "
+					    "R: allocate input register for %%%d g%d attrs %x usage %x from set %x: "
 					    "%s\n",
 					    m->vreg->id, m->vreg->congruence->id, constraint->attrs,
-					    m->hreg->id);
+					    m->hreg->usage, usagemask, m->hreg->id);
 
 					if (constraint->preserved)
+                    {
+                        assert(!(hop->outputregusage & m->hreg->usage));
 						hop->outputregusage |= m->hreg->usage;
+                    }
 				}
 			}
 		}
