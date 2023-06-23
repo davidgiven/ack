@@ -8,7 +8,7 @@
 	push af
 	push bc
 
-	ld a, b
+	ld a, c
 	or a
 	jr z, 1f
 

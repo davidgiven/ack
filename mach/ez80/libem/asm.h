@@ -4,16 +4,14 @@
 .sect .bss
 
 #define LOGICOP(opcode, size) \
-        push af;            \
-        push bc;            \
-        push de;            \
-        push hl;            \
         push ix;            \
+        push bc;            \
+        push hl;            \
                             \
         ld ix, 0;           \
         add ix, sp;         \
                             \
-        ld b, size;         \
+        ld c, size;         \
     loop:;                  \
         ld a, (ix+0);       \
         opcode (ix+size);   \
@@ -21,11 +19,9 @@
         inc ix;             \
         djnz loop;          \
                             \
-        pop ix;             \
         pop hl;             \
-        pop de;             \
         pop bc;             \
-        pop af;             \
+        pop ix;             \
         ret
 
 // vim: ts=4 sw=4 et
