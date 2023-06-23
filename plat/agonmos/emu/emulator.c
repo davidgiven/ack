@@ -74,7 +74,7 @@ zdis_put(struct zdis_ctx* ctx, enum zdis_put kind, int32_t val, bool il)
 			}
 			else if (val < 0)
 			{
-				sprintf(wp, "-%02x", val & 0x7f);
+				sprintf(wp, "-%02x", (-val) & 0x7f);
 			}
 			return true;
 
