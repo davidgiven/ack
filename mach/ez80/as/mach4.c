@@ -178,6 +178,15 @@ operation
                 emit1(0355); emit1(0101 | $4<<3);
             }
 
+    | LEA R24 ',' R24
+            {
+                exp_ind.typ = S_ABS;
+                exp_ind.val = 0;
+                RELOMOVE(rel_ind, relonami);
+
+                xylea($2, $4);
+            }
+
     | LEA R24 ',' R24 '+' expr
             {
                 exp_ind = $6;
@@ -190,6 +199,7 @@ operation
             {
                 fit(fitb($6.val));
                 exp_ind = $6;
+                exp_ind.val = -exp_ind.val;
                 RELOMOVE(rel_ind, relonami);
 
                 xylea($2, $4);
