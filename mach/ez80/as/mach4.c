@@ -189,6 +189,7 @@ operation
 
     | LEA R24 ',' R24 '+' expr
             {
+                fit(fitb($6.val));
                 exp_ind = $6;
                 RELOMOVE(rel_ind, relonami);
 
@@ -207,6 +208,7 @@ operation
 
     | PEA R24 '+' expr
             {
+                fit(fitb($4.val));
                 exp_ind = $4;
                 RELOMOVE(rel_ind, relonami);
 
@@ -217,6 +219,7 @@ operation
             {
                 fit(fitb($4.val));
                 exp_ind = $4;
+                exp_ind.val = -exp_ind.val;
                 RELOMOVE(rel_ind, relonami);
 
                 xylea(SP, $2);
@@ -455,6 +458,7 @@ index:
             {
                 if ($2!=IX && $2!=IY)
                     serror("register error");
+                fit(fitb($4.val));
                 exp_ind = $4;
                 RELOMOVE(rel_ind, relonami);
                 $$ = $2;
