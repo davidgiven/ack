@@ -92,6 +92,34 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
+static const char* massage_offset(struct hop* hop, int* offset, int min, int max)
+{
+    if (*offset > max)
+    {
+        hop_add_insel(hop, "ld ix, (iy+%L)", max);
+        *offset -= max;
+        while (*offset > max)
+        {
+            hop_add_insel(hop, "ld ix, (ix+%L)", max);
+            *offset -= max;
+        }
+        return "ix";
+    }
+    else if (*offset < min)
+    {
+        hop_add_insel(hop, "ld ix, (iy+%L)", min);
+        *offset -= min;
+        while (*offset < min)
+        {
+            hop_add_insel(hop, "ld ix, (ix+%L)", min);
+            *offset -= min;
+        }
+        return "ix";
+    }
+    else
+        return "iy";
+}
+
 struct hop* platform_load(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
@@ -115,16 +143,22 @@ struct hop* platform_load(struct basicblock* bb, struct move* move)
 		{
 			case burm_int_ATTR:
 			case burm_float_ATTR:
-				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset);
+            {
+                const char* reg = massage_offset(hop, &offset, -128, 127);
+                hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset);
 				break;
+            }
 
 			case burm_long_ATTR:
 			case burm_double_ATTR:
+            {
+                const char* reg = massage_offset(hop, &offset, -128, 124);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset + 3);
+				hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset + 3);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld %H, (iy+%S)", move->hreg, offset);
+				hop_add_insel(hop, "ld %H, (%s+%L)", move->hreg, reg, offset);
 				break;
+            }
 
 			default:
 				fatal(
@@ -159,16 +193,22 @@ struct hop* platform_store(struct basicblock* bb, struct move* move)
 		{
 			case burm_int_ATTR:
 			case burm_float_ATTR:
-				hop_add_insel(hop, "ld (iy+%S), %H", offset, move->hreg);
+            {
+                const char* reg = massage_offset(hop, &offset, -128, 127);
+				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset, move->hreg);
 				break;
+            }
 
 			case burm_long_ATTR:
 			case burm_double_ATTR:
-				hop_add_insel(hop, "ld (iy+%S), %H", offset, move->hreg);
+            {
+                const char* reg = massage_offset(hop, &offset, -128, 124);
+				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset, move->hreg);
 				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld (iy+%S), %H", offset + 3, move->hreg);
+				hop_add_insel(hop, "ld (%s+%L), %H", reg, offset + 3, move->hreg);
 				hop_add_insel(hop, "exx");
 				break;
+            }
 
 			default:
 				fatal(

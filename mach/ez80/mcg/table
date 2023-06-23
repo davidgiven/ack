@@ -18,7 +18,9 @@ REGISTERS
     hl named("hl", "l")                         int basereg bindirreg hlreg indirreg volatile;
     de named("de", "e")                         int basereg dereg volatile iret;
     bc named("bc", "c")                         int basereg bcreg volatile;
+    #if 0
     ix                                          int ixreg bindirreg indirreg volatile;
+    #endif
 
     hlhl aliases(hl) named("hl")                long hlhlreg volatile;
     dede aliases(de) named("de")                long dedereg volatile lret;
@@ -247,6 +249,29 @@ PATTERNS
         emit "ld (%ptr), %val"
         cost 2;
 
+    out:(lret)reg = LOAD.L(in:(hlreg)reg)
+        with preserved(%in), corrupted(hlreg)
+        emit "ld %out, (%in)"
+        emit "exx"
+        emit "inc %in"
+        emit "inc %in"
+        emit "inc %in"
+        emit "ld %out, (%in)"
+        emit "exx"
+        cost 8;
+
+    STORE.L(ptr:(hlreg)reg, val:(lret)reg)
+        with corrupted(hlreg)
+        emit "ld (%ptr), %val"
+        emit "exx"
+        emit "inc %ptr"
+        emit "inc %ptr"
+        emit "inc %ptr"
+        emit "ld (%ptr), %val"
+        emit "exx"
+        cost 8;
+
+    #if 0
     out:(long)reg = LOAD.L(in:(ixreg)reg)
         emit "exx"
         emit "ld %out, (%in+3)"
@@ -260,6 +285,7 @@ PATTERNS
         emit "ld (%ptr+3), %val"
         emit "exx"
         cost 8;
+    #endif
 
 
 /* Byte stuff */
@@ -268,11 +294,11 @@ PATTERNS
         emit "ld %out.1, (%in)"
         cost 2;
 
-    out:(basereg)reg = LOADB.I(in:(bindirreg)reg)
-        with preserved(%in)
+    out:(basereg)reg = LOADB.I(in:(basereg)reg)
+        emit "ld a, (%in)"
         emit "ld %out, 0"
-        emit "ld %out.1, (%in)"
-        cost 3;
+        emit "ld %out.1, a"
+        cost 4;
 
     STOREB.I(ptr:(bindirreg)reg, val:(basereg)reg)
         emit "ld (%ptr), %val.1"
