@@ -6,12 +6,12 @@
 .sect .bss
 
 .sect .bss
-STACKSIZE = 512
+STACKSIZE = 1024
 .comm stack, STACKSIZE
 
 .sect .text
 begtext:
-	ld sp, _stack_end
+	ld sp, _stack + STACKSIZE
 
 	! Clear the BSS.
 
@@ -19,7 +19,7 @@ begtext:
 	ld de, begbss
 	push de
 	and a
-	sbc hl, de
+	sbc hl, de			! length of BSS
 	push hl
 	pop bc
 
@@ -31,7 +31,13 @@ begtext:
 	ld (hl), 0
 	ldir
 
-	jp __m_a_i_n
+	ld hl, 0
+	push hl
+	push hl
+	push hl
+
+	call __m_a_i_n
+	rst 0
 
 ! Panic and exit the program.
 
@@ -57,8 +63,7 @@ __exit:
 .sect .rom;        begrom:
 
 .sect .bss
-.comm _stack, 4096		! the stack is outside the area cleared in the BSS.
-_stack_end:
+.comm _stack, STACKSIZE		! the stack is outside the area cleared in the BSS.
 begbss:
 
 ! Some magic data. All EM systems need these.
