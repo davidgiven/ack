@@ -800,7 +800,11 @@ static void insn_ivalue(int opcode, arith value)
 		case op_rck:
 			if (value != EM_wordsize)
 				fatal("'rck %d' not supported", value);
-			helper_function(".rck");
+            #ifdef MCGG_OPTION_NO_BOUNDS_CHECKING
+                pop(EM_pointersize);
+            #else
+                helper_function(".rck");
+            #endif
 			break;
 		case op_set:
 			push(new_wordir(value));
@@ -1182,28 +1186,72 @@ static void insn_ivalue(int opcode, arith value)
 		case op_lar:
 		case op_aar:
 		{
-			const char* helper;
+			const char* helper = NULL;
 			if (value != EM_wordsize)
 				fatal("sar/lar/aar are only supported when using "
 				      "word-size descriptors");
 
-			switch (opcode)
-			{
-				case op_sar:
-					helper = ".sar";
-					break;
-				case op_lar:
-					helper = ".lar";
-					break;
-				case op_aar:
-					helper = ".aar";
-					break;
-			}
+            #if defined MCGG_OPTION_NO_BOUNDS_CHECKING
+            /* The stack contains ( array-ptr index descriptor-ptr ) at this point. We use the same code for all options to calculate the address. */
+            {
+                struct ir* descriptor = pop(EM_pointersize);
+                struct ir* index = pop(EM_wordsize);
+                struct ir* arrayptr = pop(EM_pointersize);
+                struct ir* elementsize = load(EM_wordsize, descriptor, EM_wordsize*3);
 
-			materialise_stack();
-			/* No push here, because the helper function leaves the result on
-			 * the physical stack (which is very dubious). */
-			appendir(new_ir1(IR_CALL, 0, new_labelir(helper)));
+                appendir(arrayptr);
+                appendir(elementsize);
+                struct ir* address =
+                    new_ir2(
+                        IR_ADD, EM_pointersize,
+                        arrayptr,
+                        convert(
+                            new_ir2(
+                                IR_MUL, EM_wordsize,
+                                index,
+                                elementsize),
+                            EM_wordsize, EM_pointersize, IR_FROMUI));
+                appendir(address);
+
+                switch (opcode)
+                {
+                    case op_aar:
+                        push(address);
+                        break;
+                    case op_lar:
+                        push(address);
+                        push(elementsize);
+                        helper = ".loi";
+                        break;
+                    case op_sar:
+                        push(address);
+                        push(elementsize);
+                        helper = ".sti";
+                        break;
+                }
+            }
+            #else
+                switch (opcode)
+                {
+                    case op_sar:
+                        helper = ".sar";
+                        break;
+                    case op_lar:
+                        helper = ".lar";
+                        break;
+                    case op_aar:
+                        helper = ".aar";
+                        break;
+                }
+            #endif
+
+            if (helper)
+            {
+                materialise_stack();
+                /* No push here, because the helper function leaves the result on
+                 * the physical stack (which is very dubious). */
+                appendir(new_ir1(IR_CALL, 0, new_labelir(helper)));
+            }
 			break;
 		}
 
