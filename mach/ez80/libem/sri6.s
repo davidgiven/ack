@@ -3,7 +3,7 @@
 
 .sect .text
 
-! Shifts hl right by bc bits.
+! Shifts hlhl right by bc bits, signed.
 .define .sru6
 .sru6:
 	push af
@@ -18,7 +18,7 @@
 
 1:
 	push hl
-	srl (hl)
+	sra (hl)
 	dec hl
 	rr (hl)
 	dec hl

@@ -5,19 +5,67 @@ acklibrary {
 	}
 }
 
+local trap_calls = {
+   "EARRAY",
+    "EBADGTO",
+    "EBADLAE",
+    "EBADLIN",
+    "EBADMON",
+    "EBADPC",
+    "EBADPTR",
+    "ECASE",
+    "ECONV",
+    "EFDIVZ",
+    "EFOVFL",
+    "EFUND",
+    "EFUNFL",
+    "EHEAP",
+    "EIDIVZ",
+    "EILLINS",
+    "EIOVFL",
+    "EIUND",
+    "EMEMFLT",
+    "EODDZ",
+    "ERANGE",
+    "ESET",
+    "ESTACK",
+    "EUNIMPL",
+}
+
+local generated = {}
+for _, name in pairs(trap_calls) do
+    generated[#generated+1] = normalrule {
+        name = name,
+        ins = { "./make_trap.sh" },
+        outleaves = { name..".s" },
+        commands = {
+            "%{ins[1]} "..name:lower().." "..name.." > %{outs}"
+        }
+    }
+end
+
 for _, plat in ipairs(vars.plats) do
 	acklibrary {
 		name = "lib_"..plat,
 		srcs = {
+			generated,
+			"./and.s",
 			"./and3.s",
 			"./and6.s",
 			"./bls.s",
 			"./cii36.s",
+			"./cms.s",
+			"./dus.s",
+			"./exg.s",
 			"./extendb.s",
 			"./float.s",
 			"./gto.s",
 			"./hol0.s",
 			"./ignmask.s",
+			"./inn.s",
+			"./loi.s",
+			"./sti.s",
+			"./ior.s",
 			"./ior3.s",
 			"./ior6.s",
 			"./mli3.s",
@@ -29,13 +77,17 @@ for _, plat in ipairs(vars.plats) do
 			"./rmsdvs6.s",
 			"./rmudvu3.s",
 			"./rmudvu6.s",
+			"./set.s",
 			"./sli3.s",
 			"./sli6.s",
+			"./sri3.s",
+			"./sri6.s",
 			"./sru3.s",
 			"./sru6.s",
 			"./testhl3.s",
 			"./testhlhl6.s",
 			"./trppc.s",
+			"./xor.s",
 			"./xor3.s",
 			"./xor6.s",
 		},

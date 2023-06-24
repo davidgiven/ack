@@ -11,7 +11,7 @@
         ld ix, 0;           \
         add ix, sp;         \
                             \
-        ld c, size;         \
+        ld b, size;         \
     loop:;                  \
         ld a, (ix+0);       \
         opcode (ix+size);   \

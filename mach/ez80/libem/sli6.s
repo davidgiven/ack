@@ -12,6 +12,7 @@
 	or a
 	jr z, 1f
 
+	ld b, c
 2:
 	add hl, hl
 	exx
