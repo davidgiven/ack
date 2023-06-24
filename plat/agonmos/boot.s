@@ -56,8 +56,8 @@ __exit:
 .sect .data;       begdata:
 .sect .rom;        begrom:
 
-.sect .bss;
-.comm _stack, 1024		! the stack is outside the area cleared in the BSS.
+.sect .bss
+.comm _stack, 4096		! the stack is outside the area cleared in the BSS.
 _stack_end:
 begbss:
 

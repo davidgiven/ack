@@ -10,6 +10,5 @@ plat_testsuite {
         "long-long",
 		"m2",
 		"pc",
-		"core",
     },
 }
