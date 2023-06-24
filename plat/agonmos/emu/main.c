@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <errno.h>
+#include <string.h>
 #include "globals.h"
 
 bool flag_enter_debugger = false;
