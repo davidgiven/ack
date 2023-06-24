@@ -70,11 +70,11 @@ zdis_put(struct zdis_ctx* ctx, enum zdis_put kind, int32_t val, bool il)
 		case ZDIS_PUT_OFF: // immediate offsets from index registers
 			if (val > 0)
 			{
-				sprintf(wp, "+%02x", val & 0x7f);
+				sprintf(wp, "+%02x", val);
 			}
 			else if (val < 0)
 			{
-				sprintf(wp, "-%02x", (-val) & 0x7f);
+				sprintf(wp, "-%02x", -val);
 			}
 			return true;
 
@@ -450,7 +450,7 @@ static void cpu_rst(uint8_t insn)
 		case 0xc7: /* rst 00 */
 			exit(0);
 
-		case 0xcf: /* rst 08 */
+		case 0xd7: /* rst 10 */
 			putchar(cpu.registers.A);
 			break;
 
@@ -516,7 +516,7 @@ void emulator_run(void)
 			if (w->enabled && (ram[w->address] != w->value))
 			{
 				printf(
-				    "\nWatchpoint hit: %06 has changed from %02x to %02x\n",
+				    "\nWatchpoint hit: %x06 has changed from %02x to %02x\n",
 				    w->address, w->value, ram[w->address]);
 				w->value = ram[w->address];
 				singlestepping = true;
