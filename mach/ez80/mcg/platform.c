@@ -97,22 +97,22 @@ massage_offset(struct hop* hop, int* offset, int min, int max)
 {
 	if (*offset > max)
 	{
-		hop_add_insel(hop, "ld ix, (iy+%d)", max);
+		hop_add_insel(hop, "lea ix, iy+%d", max);
 		*offset -= max;
 		while (*offset > max)
 		{
-			hop_add_insel(hop, "ld ix, (ix+%d)", max);
+			hop_add_insel(hop, "lea ix, ix+%d", max);
 			*offset -= max;
 		}
 		return "ix";
 	}
 	else if (*offset < min)
 	{
-		hop_add_insel(hop, "ld ix, (iy+%d)", min);
+		hop_add_insel(hop, "lea ix, iy+%d", min);
 		*offset -= min;
 		while (*offset < min)
 		{
-			hop_add_insel(hop, "ld ix, (ix+%d)", min);
+			hop_add_insel(hop, "lea ix, ix+%d", min);
 			*offset -= min;
 		}
 		return "ix";
