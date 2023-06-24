@@ -46,14 +46,31 @@ operation
     |   E_ED
             {   emit1(0355); emit1($1);}
     |   ADDOP R24 ',' R24
-            {   if ($4 == $2)
-                    xyreg($2,051);
-                else {
+            {
+                if (($2 == IX) || ($2 == IY))
+                {
+                    emit1(($2 == IX) ? 0xdd : 0xfd);
+                    if ($4 == BC)
+                        emit1(0x09);
+                    else if ($4 == DE)
+                        emit1(0x19);
+                    else if ($2 == $4)
+                        emit1(0x29);
+                    else if ($4 == SP)
+                        emit1(0x39);
+                    else
+                        serror("register error");
+                }
+                else if (($2 == HL) && ($4 == $2))
+                    xyreg($2, 0x29);
+                else
+                {
                     if ($4==HL || $4>SP)
                         serror("register error");
-                    xyreg($2,011 | $4<<4);
+                    xyreg($2, 0x09 | $4<<4);
                 }
             }
+
     |   ADCSBC R24 ',' R24
             {   if ($2!=HL || $4>SP) serror("register error");
                 emit1(0355);
@@ -332,9 +349,12 @@ ldargs:
             }
 
     |   R24 ',' R24
-            {   if ($1!=SP) serror("register error");
-                xyreg($3,0371);
+            {
+                if ($1 != SP)
+                    serror("register error");
+                xyreg($3, 0xf9);
             }
+
     |   R24 ',' '(' expr ')'
             {
                 switch ($1)
