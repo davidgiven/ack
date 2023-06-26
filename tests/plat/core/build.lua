@@ -19,6 +19,7 @@ bundle {
 		"./inn_e.e",
 		"./intadd_e.c",
 		"./intcmp_e.c",
+		"./intmul_e.c",
 		"./intdiv_e.c",
 		"./intrem_e.c",
 		"./intshift_e.c",
