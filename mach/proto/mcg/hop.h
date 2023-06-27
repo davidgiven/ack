@@ -1,6 +1,8 @@
 #ifndef HOP_H
 #define HOP_H
 
+typedef uint64_t regmask_t;
+
 enum insel_type
 {
 	INSEL_STRING, /* %s */
@@ -69,8 +71,10 @@ struct hop
 	ARRAYOF(struct move) produces;
 	ARRAYOF(struct move) consumes;
 	PMAPOF(struct vreg, struct hreg) assignments;
-	uint32_t inputregusage;
-	uint32_t outputregusage;
+	regmask_t inputregusage;
+	regmask_t outputregusage;
+
+    struct vreg* vreg_being_allocated;
 };
 
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);

@@ -128,28 +128,44 @@ static void emit_procedure(struct procedure* proc)
 		{
 			struct hop* hop = bb->hops.item[j];
 
-			fprintf(outputfile, "\n");
+			fprintf(outputfile, "\n! hop %d: ", hop->id);
+            for (k=0; k<hop->assignments.count; k++)
+            {
+                fprintf(outputfile, " %%%d->%s",
+                    hop->assignments.item[k].left->id,
+                    hop->assignments.item[k].right->id);
+            }
+            fprintf(outputfile, "\n");
+
+            #if 0
 			for (k = 0; k < hop->consumes.count; k++)
 			{
 				struct move* m = hop->consumes.item[k];
-				assert(m->hreg);
-				assert(!m->other);
+                if (m->hreg)
+                {
+                    assert(!m->other);
 
-				fprintf(
-				    outputfile, "%s", hop_render(platform_load(hop->bb, m)));
+                    fprintf(
+                        outputfile, "%s", hop_render(platform_load(hop->bb, m)));
+                        }
 			}
+            #endif
 
 			fprintf(outputfile, "%s", hop_render(hop));
 
+            #if 0
 			for (k = 0; k < hop->produces.count; k++)
 			{
 				struct move* m = hop->produces.item[k];
-				assert(m->hreg);
+                if (m->hreg)
+                {
 				assert(!m->other);
 
 				fprintf(
 				    outputfile, "%s", hop_render(platform_store(hop->bb, m)));
+                   }
 			}
+            #endif
 		}
 	}
 }

@@ -156,6 +156,7 @@ static void constrain_output_reg_equal_to(int child)
     struct vreg* vreg = find_vreg_of_child(child);
 
     get_constraint(current_hop->output)->equals_to = vreg;
+    get_constraint(vreg)->equals_to = current_hop->output;
 }
 
 static const struct burm_emitter_data emitter_data =

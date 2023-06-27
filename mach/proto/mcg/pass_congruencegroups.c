@@ -86,30 +86,15 @@ static void process(struct basicblock* bb)
 		struct vreg* inputvreg = bb->phis.item[i].right->ir->result;
 
 		coalesce(inputvreg, outputvreg);
-	}
+    }
 
-	/* Set up congruence groups for any output registers. */
+    /* Ensure that any cross-bb vregs which _aren't_ used in a phi are also congruenced. */
 
-	for (i = 0; i < bb->hops.count; i++)
-	{
-		struct hop* hop = bb->hops.item[i];
-		struct vreg* output = hop->output;
-		if (output)
-		{
-			if (!output->congruence)
-				create_congruence(output);
-
-			if ((hop->insels.count == 0) && (hop->ins.count == 1)
-			    && (hop->outs.count == 1))
-			{
-				/* This is a trivial copy. */
-
-				tracef(
-				    'C', "C: hop %d is copy of %%%d to %%%d\n", hop->id,
-				    hop->ins.item[0]->id, hop->outs.item[0]->id);
-				coalesce(hop->ins.item[0], hop->outs.item[0]);
-			}
-		}
+    for (i = 0; i < bb->liveouts.count; i++)
+    {
+        struct vreg* vreg = bb->liveouts.item[i];
+        if (!vreg->congruence)
+            create_congruence(vreg);
 	}
 }
 
