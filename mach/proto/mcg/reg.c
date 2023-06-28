@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static int vreg_count = 0;
+int vreg_count = 1;
 static struct buffer renderbuf;
 static struct mempool regpool;
 
@@ -8,18 +8,13 @@ void clear_registers(void)
 {
     tracef('M', "M: reg mempool was %d bytes\n", regpool.size);
     mempool_reset(&regpool);
-    vreg_count = 0;
-}
-
-int get_vreg_count(void)
-{
-    return vreg_count;
+    vreg_count = 1;
 }
 
 struct vreg* new_vreg(void)
 {
 	struct vreg* vreg = mempool_alloc(&regpool, sizeof *vreg);
-	vreg->id = ++vreg_count;
+	vreg->id = vreg_count++;
 	return vreg;
 }
 

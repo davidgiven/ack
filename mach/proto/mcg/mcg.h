@@ -34,6 +34,7 @@
 #include "tables.h"
 #include "buffer.h"
 #include "mempool.h"
+#include "bset.h"
 
 extern char em_pseu[][4];
 extern char em_mnem[][4];
@@ -107,9 +108,11 @@ extern void tb_fileend(void);
 extern void tb_procedure(void);
 extern void tb_regvar(struct procedure* proc, arith offset, int size, int type, int priority);
 
+extern void pass_add_prologue_epilogue(void);
 extern void pass_assign_hop_producer_consumers(void);
 extern void pass_convert_locals_to_ssa(void);
 extern void pass_convert_stack_ops(void);
+extern void pass_create_transit_vregs(void);
 extern void pass_eliminate_trivial_blocks(void);
 extern void pass_find_congruence_groups(void);
 extern void pass_group_irs(void);
@@ -118,14 +121,13 @@ extern void pass_insert_moves(void);
 extern void pass_instruction_selector(void);
 extern void pass_live_vreg_analysis(void);
 extern void pass_lower_pushes(void);
-extern void pass_add_prologue_epilogue(void);
 extern void pass_register_allocator(void);
 extern void pass_remove_dead_blocks(void);
 extern void pass_remove_dead_phis(void);
 extern void pass_split_critical_edges(void);
 extern void pass_wire_up_return_values(void);
-
 extern void platform_calculate_offsets(void);
+
 extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
 extern struct hop* platform_load(struct basicblock* bb, struct move* move);

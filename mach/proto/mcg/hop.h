@@ -71,6 +71,9 @@ struct hop
 	ARRAYOF(struct move) produces;
 	ARRAYOF(struct move) consumes;
 	PMAPOF(struct vreg, struct hreg) assignments;
+    bool is_copy;
+
+    /* old allocator below */
 	regmask_t inputregusage;
 	regmask_t outputregusage;
 

@@ -1,6 +1,7 @@
 #include "mcg.h"
 
 static ARRAYOF(struct hreg) hregs;
+static struct bitset interference_graph;
 static ARRAYOF(struct hop) current_hops;
 
 static struct move* create_move(struct vreg* vreg)
@@ -39,6 +40,51 @@ static void populate_hregs(void)
 		tracef(
 		    'R', "R: found hreg %s, type %08x, aliases %08x\n", hreg->id,
 		    hreg->attrs, hreg->usage);
+	}
+}
+
+static void mark_vreg_interference(struct vreg* v1, struct vreg* v2)
+{
+	bitset_set(&interference_graph, v1->id * vreg_count + v2->id, true);
+	bitset_set(&interference_graph, v2->id * vreg_count + v1->id, true);
+}
+
+static void construct_interference_graph(void)
+{
+	int i, j, k, l;
+
+	tracef(
+	    'R', "R: creating interference graph of %dx%d vregs\n", vreg_count,
+	    vreg_count);
+	bitset_resize(&interference_graph, vreg_count * vreg_count);
+
+	for (i = 0; i < dominance.preorder.count; i++)
+	{
+		struct basicblock* bb = dominance.preorder.item[i];
+
+		for (j = 0; j < bb->hops.count; j++)
+		{
+			struct hop* hop = bb->hops.item[j];
+			static ARRAYOF(struct vreg) vregs;
+			vregs.count = 0;
+
+			for (k = 0; k < hop->ins.count; k++)
+				array_appendu(&vregs, hop->ins.item[k]);
+			for (k = 0; k < hop->outs.count; k++)
+				array_appendu(&vregs, hop->outs.item[k]);
+			for (k = 0; k < hop->throughs.count; k++)
+				array_appendu(&vregs, hop->throughs.item[k]);
+
+			for (k = 0; k < vregs.count; k++)
+			{
+				struct vreg* v1 = vregs.item[k];
+				for (l = k + 1; l < vregs.count; l++)
+				{
+					struct vreg* v2 = vregs.item[l];
+					mark_vreg_interference(v1, v2);
+				}
+			}
+		}
 	}
 }
 
@@ -369,7 +415,8 @@ static void allocate_register_for_collected_hops(int startincl, int endincl)
 
 			tracef(
 			    'R', "R: hop %d touches %%%d with attribute requirement %s\n",
-			    hop->id, hop->vreg_being_allocated->id, render_regattrs(constraint->attrs));
+			    hop->id, hop->vreg_being_allocated->id,
+			    render_regattrs(constraint->attrs));
 			attrs = attrs | constraint->attrs;
 		}
 	}
@@ -388,8 +435,8 @@ static void allocate_register_for_collected_hops(int startincl, int endincl)
 	}
 	else
 	{
-		tracef('R',
-		    "R: no registers available for attribute requirement '%s'\n",
+		tracef(
+		    'R', "R: no registers available for attribute requirement '%s'\n",
 		    render_regattrs(attrs));
 	}
 }
@@ -441,10 +488,15 @@ static void global_register_allocation(void)
 void pass_register_allocator(void)
 {
 	populate_hregs();
+
+	construct_interference_graph();
+
+#if 0
 	assign_hop_producer_consumers();
 	local_register_allocation();
     global_register_allocation();
 	//layout_stack_frame();
+#endif
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

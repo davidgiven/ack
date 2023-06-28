@@ -26,10 +26,11 @@ struct vreg
     struct congruence* congruence;
     struct hop* defined;
     ARRAYOF(struct hop) used;
+    bool in_transit;
 };
 
 extern void clear_registers(void);
-extern int get_vreg_count(void);
+extern int vreg_count;
 
 extern struct vreg* new_vreg(void);
 

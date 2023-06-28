@@ -209,6 +209,8 @@ static void print_header(char k, struct hop* hop)
 	for (i = 0; i < hop->outs.count; i++)
 		tracef(k, " w%%%d/%c", hop->outs.item[i]->id, typechar(hop->outs.item[i]->type));
 	tracef(k, " ");
+    if (hop->is_copy)
+        tracef(k, "(COPY) ");
 }
 
 static void appendf(const char* fmt, ...)
