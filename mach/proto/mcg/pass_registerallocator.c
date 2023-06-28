@@ -368,8 +368,8 @@ static void allocate_register_for_collected_hops(int startincl, int endincl)
 			}
 
 			tracef(
-			    'R', "R: hop %d touches %%%d with attribute requirement %x\n",
-			    hop->id, hop->vreg_being_allocated->id, constraint->attrs);
+			    'R', "R: hop %d touches %%%d with attribute requirement %s\n",
+			    hop->id, hop->vreg_being_allocated->id, render_regattrs(constraint->attrs));
 			attrs = attrs | constraint->attrs;
 		}
 	}
@@ -389,8 +389,8 @@ static void allocate_register_for_collected_hops(int startincl, int endincl)
 	else
 	{
 		fatal(
-		    "R: no registers available for attribute requirement %x\n",
-		    attrs);
+		    "R: no registers available for attribute requirement '%s'\n",
+		    render_regattrs(attrs));
 	}
 }
 

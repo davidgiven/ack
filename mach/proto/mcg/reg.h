@@ -32,6 +32,8 @@ extern struct vreg* new_vreg(void);
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);
 
+extern const char* render_regattrs(uint32_t attrs);
+
 #endif
 
 /* vim: set sw=4 ts=4 expandtab : */

@@ -2,9 +2,7 @@
 
 static int hop_count = 1;
 static struct hop* current_hop;
-static char* buffer = NULL;
-static int bufferlen = 0;
-static int buffersize = 0;
+static struct buffer renderbuf;
 
 static const struct burm_emitter_data emitter_data;
 
@@ -205,39 +203,20 @@ static void print_header(char k, struct hop* hop)
 	tracef(k, " ");
 }
 
-static char* appendf(const char* fmt, ...)
+static void appendf(const char* fmt, ...)
 {
-	int n;
-	char* p;
 	va_list ap;
 
 	va_start(ap, fmt);
-	n = bufferlen + vsnprintf(NULL, 0, fmt, ap) + 1;
+    buffer_appendfv(&renderbuf, fmt, ap);
 	va_end(ap);
-
-	if (n > buffersize)
-	{
-		buffersize *= 2;
-		if (buffersize < n)
-			buffersize = n * 2;
-		buffer = realloc(buffer, buffersize);
-	}
-
-	va_start(ap, fmt);
-	vsprintf(buffer + bufferlen, fmt, ap);
-	va_end(ap);
-
-	bufferlen = n - 1; /* remember the \0 at the end */
-	return p;
 }
 
 char* hop_render(struct hop* hop)
 {
 	int i;
 
-	appendf(""); /* ensure the buffer has been allocated */
-	bufferlen = 0;
-	buffer[0] = '\0';
+    buffer_clear(&renderbuf);
 
 	for (i = 0; i < hop->insels.count; i++)
 	{
@@ -327,7 +306,7 @@ char* hop_render(struct hop* hop)
 		}
 	}
 
-	return buffer;
+	return renderbuf.ptr;
 }
 
 void hop_print(char k, struct hop* hop)
@@ -338,7 +317,7 @@ void hop_print(char k, struct hop* hop)
 
 	hop_render(hop);
 
-	p = strtok(buffer, "\n");
+	p = strtok(renderbuf.ptr, "\n");
 	print_header(k, hop);
 	while (p)
 	{
