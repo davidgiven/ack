@@ -1,6 +1,7 @@
 local hfiles = {
 	"./array.h",
 	"./astring.h",
+	"./bset.h",
 	"./buffer.h",
 	"./diagnostics.h",
 	"./imap.h",
@@ -16,6 +17,7 @@ clibrary {
 	srcs = {
 		"./array.c",
 		"./astring.c",
+		"./bset.c",
 		"./buffer.c",
 		"./diagnostics.c",
 		"./imap.c",
