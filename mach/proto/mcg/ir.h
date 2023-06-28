@@ -28,6 +28,8 @@ struct ir
 
 extern const char* ir_names[];
 
+extern void clear_ir(void);
+
 extern struct ir* new_ir0(int opcode, int size);
 extern struct ir* new_ir1(int opcode, int size, struct ir* c1);
 extern struct ir* new_ir2(int opcode, int size, struct ir* c1, struct ir* c2);

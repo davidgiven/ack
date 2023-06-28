@@ -77,6 +77,7 @@ struct hop
     struct vreg* vreg_being_allocated;
 };
 
+extern void clear_hops(void);
 extern struct hop* new_hop(struct basicblock* bb, struct ir* ir);
 
 extern void hop_add_string_insel(struct hop* hop, const char* string);

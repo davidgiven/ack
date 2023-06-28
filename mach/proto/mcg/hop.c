@@ -1,8 +1,9 @@
 #include "mcg.h"
 
-static int hop_count = 1;
+static int hop_count = 0;
 static struct hop* current_hop;
 static struct buffer renderbuf;
+static struct mempool hoppool;
 
 static const struct burm_emitter_data emitter_data;
 
@@ -27,10 +28,17 @@ static char typechar(uint32_t t)
     }
 }
 
+void clear_hops(void)
+{
+    tracef('M', "M: hop mempool was %d bytes\n", hoppool.size);
+    mempool_reset(&hoppool);
+    hop_count = 0;
+}
+
 struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 {
-	struct hop* hop = calloc(1, sizeof *hop);
-	hop->id = hop_count++;
+	struct hop* hop = mempool_alloc(&hoppool, sizeof *hop);
+	hop->id = ++hop_count;
 	hop->bb = bb;
 	hop->ir = ir;
 	return hop;
@@ -38,7 +46,7 @@ struct hop* new_hop(struct basicblock* bb, struct ir* ir)
 
 static struct insel* new_insel(enum insel_type type)
 {
-	struct insel* insel = calloc(1, sizeof(*insel));
+	struct insel* insel = mempool_alloc(&hoppool, sizeof(*insel));
 	insel->type = type;
 	return insel;
 }

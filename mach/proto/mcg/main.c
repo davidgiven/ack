@@ -118,6 +118,7 @@ int main(int argc, char* const argv[])
      * symbol table is complete (we may need to refer to it). */
 
     symbol_walk(find_procedures_cb, NULL);
+    clear_ir();
 
     if (outputfilename)
         fclose(outputfile);

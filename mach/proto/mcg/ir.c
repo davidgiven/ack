@@ -1,10 +1,18 @@
 #include "mcg.h"
 
 static int next_id = 0;
+static struct mempool irpool;
+
+void clear_ir(void)
+{
+    tracef('M', "M: ir mempool was %d bytes\n", irpool.size);
+    mempool_reset(&irpool);
+    next_id = 0;
+}
 
 struct ir* new_ir0(int opcode, int size)
 {
-	struct ir* ir = calloc(sizeof(struct ir), 1);
+	struct ir* ir = mempool_alloc(&irpool, sizeof(struct ir));
 	ir->id = next_id++;
 	ir->opcode = opcode;
 	ir->size = size;

@@ -388,7 +388,7 @@ static void allocate_register_for_collected_hops(int startincl, int endincl)
 	}
 	else
 	{
-		fatal(
+		tracef('R',
 		    "R: no registers available for attribute requirement '%s'\n",
 		    render_regattrs(attrs));
 	}

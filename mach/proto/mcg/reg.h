@@ -28,6 +28,9 @@ struct vreg
     ARRAYOF(struct hop) used;
 };
 
+extern void clear_registers(void);
+extern int get_vreg_count(void);
+
 extern struct vreg* new_vreg(void);
 
 extern struct hreg* new_hreg(const struct burm_register_data* brd);

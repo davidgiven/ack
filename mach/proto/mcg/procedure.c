@@ -254,6 +254,9 @@ void procedure_compile(struct procedure* proc)
 		write_cfg_graph(proc->name);
 	if (dominance_dot_file)
 		write_dominance_graph(proc->name);
+
+    clear_hops();
+    clear_registers();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

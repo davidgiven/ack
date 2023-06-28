@@ -33,6 +33,7 @@
 #include "graph.h"
 #include "tables.h"
 #include "buffer.h"
+#include "mempool.h"
 
 extern char em_pseu[][4];
 extern char em_mnem[][4];
