@@ -4,6 +4,7 @@
 #include "em_arith.h"
 #include "stringlist.h"
 #include "array.h"
+#include "diagnostics.h"
 
 extern char* stringf(char* fmt, ...);
 
