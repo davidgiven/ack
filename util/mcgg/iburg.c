@@ -344,7 +344,7 @@ static void addonewayregalias(struct reg* r1, struct reg* r2)
 		int i;
 
 		for (i = 0; i < r1->aliases.count; i++)
-			addregalias(r1->aliases.item[i], r2);
+			addonewayregalias(r1->aliases.item[i], r2);
 	}
 }
 
