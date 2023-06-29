@@ -17,6 +17,7 @@ struct array
 		int max; \
 	}
 
+extern void array_resize(void* array, size_t size);
 extern void array_append(void* array, void* value);
 extern bool array_appendu(void* array, void* value);
 extern void array_insert(void* array, void* value, int before);
