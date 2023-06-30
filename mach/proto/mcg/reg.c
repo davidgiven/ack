@@ -23,12 +23,17 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 	struct hreg* hreg = mempool_alloc(&regpool, sizeof *hreg);
 	hreg->id = brd->id;
     hreg->brd = brd;
-	hreg->attrs = brd->attrs;
+	hreg->regclasses = brd->attrs;
     /* The aliases array needs to be initialised later. */
 	return hreg;
 }
 
-const char* render_regattrs(uint32_t attrs)
+const char* render_regclass(regclass_t regclass)
+{
+    return burm_register_class_names[regclass];
+}
+
+const char* render_regclasses(uint32_t attrs)
 {
     int i = 0;
 
@@ -39,7 +44,7 @@ const char* render_regattrs(uint32_t attrs)
         {
             if (renderbuf.len != 0)
                 buffer_appendf(&renderbuf, "+");
-            buffer_appendf(&renderbuf, "%s", burm_register_class_names[i]);
+            buffer_appendf(&renderbuf, "%s", render_regclass(i));
         }
 
         i++;

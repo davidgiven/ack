@@ -9,7 +9,7 @@ REGISTERS
     /* Registers are allocated top down. The odd order below is to make sure
      * that cheap registers get allocated first.
      *
-     * Attributes may have at most one of: int, float, long, double. These
+     * Registers may have at most one of: int, float, long, double. These
      * indicate that the register is used to store a value of that type. If
      * your register can store more than one type, create an alias. Registers
      * with none of these cannot be copied by the code generator (and so cannot

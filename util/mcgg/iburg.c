@@ -652,7 +652,9 @@ static void emitregisterattrs(void)
 		printh("64");
 	else
 		fatal("too many register classes");
-	printh("_t regattr_t;\n");
+	printh("_t regclasses_t;\n");
+
+    printh("#define BURM_REGISTER_CLASS_COUNT %d\n", registerattrs.count);
 
 	print("const char* %Pregister_class_names[] = {\n");
 	for (i = 0; i < registerattrs.count; i++)
@@ -754,6 +756,8 @@ static void emitregisters(void)
 	else
 		fatal("too many registers");
 	printh("_t regbits_t;\n");
+
+    printh("#define BURM_REGISTER_COUNT %d\n", registers.count);
 
 	for (i = 0; i < registers.count; i++)
 	{
@@ -1321,12 +1325,9 @@ static void emit_input_regs(Tree node, int* index)
 	    && !node->right)
 	{
 		if (node->attr)
-		{
-			uint32_t attr = 1 << node->attr->number;
 			print(
-			    "%1data->constrain_input_reg(%d, 0x%x /* %s */);\n", *index,
-			    attr, node->attr->name);
-		}
+			    "%1data->constrain_input_reg(%d, %d /* %s */);\n", *index,
+                node->attr->number, node->attr->name);
 	}
 
 	if (!node->left && !node->right)
@@ -1425,8 +1426,8 @@ static void emitinsndata(Rule rules)
 
 		if (r->attr)
 			print(
-			    "%1data->constrain_output_reg(0x%x /* %s */);\n",
-			    1 << r->attr->number, r->attr->name);
+			    "%1data->constrain_output_reg(%d /* %s */);\n",
+			    r->attr->number, r->attr->name);
 
 		{
 			int index = 0;

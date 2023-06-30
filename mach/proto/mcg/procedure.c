@@ -38,9 +38,7 @@ static void print_blocks(char k)
 
 static void print_vreg(char k, struct vreg* vreg)
 {
-	tracef(k, "%%%d(t%x)", vreg->id, vreg->type);
-	if (vreg->congruence)
-		tracef(k, "(g%d)", vreg->congruence->id);
+	tracef(k, "%%%d()", vreg->id, render_regclass(vreg->regclass));
 }
 
 static void print_hops(char k)
@@ -242,7 +240,7 @@ void procedure_compile(struct procedure* proc)
 	print_hops('7');
 	pass_create_transit_vregs();
 	pass_live_vreg_analysis();
-	pass_find_congruence_groups();
+	//pass_find_congruence_groups();
 	print_hops('8');
 	pass_register_allocator();
 	pass_add_prologue_epilogue();

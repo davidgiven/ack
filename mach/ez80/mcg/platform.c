@@ -125,49 +125,42 @@ struct hop* platform_load(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
 
-	if ((move->vreg->type & TYPE_ATTRS) != (move->hreg->attrs & TYPE_ATTRS))
-		fatal(
-		    "hreg load of %%%d in %s with mismatched types", move->vreg->id,
-		    move->hreg->id);
-	else
-	{
-		uint32_t type = move->vreg->type & TYPE_ATTRS;
-		int offset = move->vreg->congruence->offset + current_proc->fp_to_sb;
+    regclasses_t type = move->hreg->regclasses & TYPE_ATTRS;
+    int offset = 0; //move->vreg->congruence->offset + current_proc->fp_to_sb;
 
-		assert(!move->other);
+    assert(!move->other);
 
-		tracef(
-		    'R', "R: load stack slot %d into %s for %%%d\n",
-		    move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
+    tracef(
+        'R', "R: load stack slot %d into %s for %%%d\n",
+        move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
 
-		switch (type)
-		{
-			case burm_int_ATTR:
-			case burm_float_ATTR:
-			{
-				const char* reg = massage_offset(hop, &offset, -128, 127);
-				hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
-				break;
-			}
+    switch (type)
+    {
+        case burm_int_ATTR:
+        case burm_float_ATTR:
+        {
+            const char* reg = massage_offset(hop, &offset, -128, 127);
+            hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
+            break;
+        }
 
-			case burm_long_ATTR:
-			case burm_double_ATTR:
-			{
-				const char* reg = massage_offset(hop, &offset, -128, 124);
-				hop_add_insel(hop, "exx");
-				hop_add_insel(
-				    hop, "ld %H, (%s+%d)", move->hreg, reg, offset + 3);
-				hop_add_insel(hop, "exx");
-				hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
-				break;
-			}
+        case burm_long_ATTR:
+        case burm_double_ATTR:
+        {
+            const char* reg = massage_offset(hop, &offset, -128, 124);
+            hop_add_insel(hop, "exx");
+            hop_add_insel(
+                hop, "ld %H, (%s+%d)", move->hreg, reg, offset + 3);
+            hop_add_insel(hop, "exx");
+            hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
+            break;
+        }
 
-			default:
-				fatal(
-				    "cannot load %%%d with attrs %x", move->vreg->id,
-				    move->vreg->type);
-		}
-	}
+        default:
+            fatal(
+                "cannot load %%%d with attrs %s", move->vreg->id,
+                render_regclasses(move->hreg->regclasses));
+    }
 
 	return hop;
 }
@@ -176,49 +169,42 @@ struct hop* platform_store(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
 
-	if ((move->vreg->type & TYPE_ATTRS) != (move->hreg->attrs & TYPE_ATTRS))
-		fatal(
-		    "hreg store of %%%d in %s with mismatched types", move->vreg->id,
-		    move->hreg->id);
-	else
-	{
-		uint32_t type = move->vreg->type & TYPE_ATTRS;
-		int offset = move->vreg->congruence->offset + current_proc->fp_to_sb;
+    regclasses_t type = move->hreg->regclasses & TYPE_ATTRS;
+    int offset = 0; //move->vreg->congruence->offset + current_proc->fp_to_sb;
 
-		assert(!move->other);
+    assert(!move->other);
 
-		tracef(
-		    'R', "R: store stack slot %d from %s for %%%d\n",
-		    move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
+    tracef(
+        'R', "R: store stack slot %d from %s for %%%d\n",
+        move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
 
-		switch (type)
-		{
-			case burm_int_ATTR:
-			case burm_float_ATTR:
-			{
-				const char* reg = massage_offset(hop, &offset, -128, 127);
-				hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
-				break;
-			}
+    switch (type)
+    {
+        case burm_int_ATTR:
+        case burm_float_ATTR:
+        {
+            const char* reg = massage_offset(hop, &offset, -128, 127);
+            hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
+            break;
+        }
 
-			case burm_long_ATTR:
-			case burm_double_ATTR:
-			{
-				const char* reg = massage_offset(hop, &offset, -128, 124);
-				hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
-				hop_add_insel(hop, "exx");
-				hop_add_insel(
-				    hop, "ld (%s+%d), %H", reg, offset + 3, move->hreg);
-				hop_add_insel(hop, "exx");
-				break;
-			}
+        case burm_long_ATTR:
+        case burm_double_ATTR:
+        {
+            const char* reg = massage_offset(hop, &offset, -128, 124);
+            hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
+            hop_add_insel(hop, "exx");
+            hop_add_insel(
+                hop, "ld (%s+%d), %H", reg, offset + 3, move->hreg);
+            hop_add_insel(hop, "exx");
+            break;
+        }
 
-			default:
-				fatal(
-				    "cannot store %%%d with attrs %x", move->vreg->id,
-				    move->vreg->type);
-		}
-	}
+        default:
+            fatal(
+                "cannot store %%%d with attrs %s", move->vreg->id,
+                render_regclasses(move->hreg->regclasses));
+    }
 
 	return hop;
 }

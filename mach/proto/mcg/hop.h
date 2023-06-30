@@ -31,17 +31,17 @@ struct insel
 
 struct constraint
 {
-	/* Register must have all of these attributes. */
+	/* The required register class for input parameters. */
 
-	uint32_t attrs;
+	regclass_t regclass;
 
 	/* For input registers: this instruction may not modify this register during
 	 * execution. */
 
 	bool preserved;
 
-	/* For output registers: this register must be the same as the specified
-	 * input register. */
+    /* For input or output registers: this register must be the same as the
+     * specified output or input register. */
 
 	struct vreg* equals_to;
 };
@@ -93,6 +93,8 @@ extern void hop_add_lb_offset_insel(struct hop* hop, int offset);
 extern void hop_add_eoi_insel(struct hop* hop);
 
 extern void hop_add_insel(struct hop* hop, const char* fmt, ...);
+
+extern struct constraint* get_constraint(struct hop* hop, struct vreg* vreg);
 
 extern char* hop_render(struct hop* hop);
 extern void hop_print(char k, struct hop* hop);

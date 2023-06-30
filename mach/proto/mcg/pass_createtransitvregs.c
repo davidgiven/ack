@@ -32,6 +32,14 @@ static void replace_vreg(struct hop* hop, struct vreg* oldvreg, struct vreg* new
 			insel->u.vreg = newvreg;
 	}
 
+	for (i=0; i<hop->constraints.count; i++)
+	{
+		if (hop->constraints.item[i].left == oldvreg)
+			hop->constraints.item[i].left = newvreg;
+		if (hop->constraints.item[i].right->equals_to == oldvreg)
+			hop->constraints.item[i].right->equals_to = newvreg;
+	}
+
 }
 
 static struct hop* create_copy(struct basicblock* bb, struct vreg* oldvreg, struct vreg* newvreg)
@@ -39,6 +47,7 @@ static struct hop* create_copy(struct basicblock* bb, struct vreg* oldvreg, stru
 	struct hop* hop = new_hop(bb, NULL);
 	hop->output = newvreg;
 	array_append(&hop->ins, oldvreg);
+	get_constraint(hop, oldvreg)->regclass = oldvreg->regclass;
 	array_append(&hop->outs, newvreg);
 	hop->is_copy = true;
 }
@@ -57,7 +66,10 @@ static void rewrite_hops(struct basicblock* bb)
 			{
 				struct vreg* oldvreg = hop->ins.item[i];
 				struct vreg* newvreg = new_vreg();
-				newvreg->type = oldvreg->type;
+				struct constraint* constraint = get_constraint(hop, oldvreg);
+				newvreg->regclass = oldvreg->regclass;
+				oldvreg->regclass = constraint->regclass;
+				oldvreg->in_transit = true;
 
 				replace_vreg(hop, oldvreg, newvreg);
 
@@ -69,7 +81,7 @@ static void rewrite_hops(struct basicblock* bb)
 			{
 				struct vreg* oldvreg = hop->outs.item[i];
 				struct vreg* newvreg = new_vreg();
-				newvreg->type = oldvreg->type;
+				newvreg->regclass = oldvreg->regclass;
 
 				replace_vreg(hop, oldvreg, newvreg);
 

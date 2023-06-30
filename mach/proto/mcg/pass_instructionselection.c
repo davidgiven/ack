@@ -75,18 +75,7 @@ static void emit_eoi(void)
 	hop_add_eoi_insel(current_hop);
 }
 
-static struct constraint* get_constraint(struct vreg* vreg)
-{
-    struct constraint* c = pmap_findleft(&current_hop->constraints, vreg);
-    if (!c)
-    {
-        c = calloc(1, sizeof(*c));
-        pmap_put(&current_hop->constraints, vreg, c);
-    }
-    return c;
-}
-
-static void constrain_input_reg(int child, uint32_t attr)
+static void constrain_input_reg(int child, regclass_t regclass)
 {
     struct vreg* vreg = find_vreg_of_child(child);
     struct constraint* c;
@@ -94,7 +83,7 @@ static void constrain_input_reg(int child, uint32_t attr)
     assert(vreg);
 
     array_appendu(&current_hop->ins, vreg);
-    get_constraint(vreg)->attrs = attr;
+    get_constraint(current_hop, vreg)->regclass = regclass;
 }
 
 static void constrain_input_reg_preserved(int child)
@@ -106,38 +95,10 @@ static void constrain_input_reg_preserved(int child)
 		fatal("child %d of instruction is not a register and cannot be constrained", child);
 
     array_appendu(&current_hop->throughs, vreg);
-    get_constraint(vreg)->preserved = true;
+    get_constraint(current_hop, vreg)->preserved = true;
 }
 
-static uint32_t find_type_from_constraint(uint32_t attr)
-{
-    /* Looks through the registers and finds a concrete register implementing
-     * that attribute, and returns the type. We assume that all registers
-     * implementing an attribute (which anyone is going to ask for, 'volatile'
-     * doesn't count) will have the same type. TODO: mcgg should check for
-     * this. */
-
-    const struct burm_register_data* brd = burm_register_data;
-    while (brd->id)
-    {
-        if (brd->attrs & attr)
-        {
-            const uint32_t type_attrs = 
-                (burm_int_ATTR | burm_float_ATTR |
-                 burm_long_ATTR | burm_double_ATTR);
-
-            if (brd->attrs & type_attrs)
-                return brd->attrs & type_attrs;
-            return attr;
-        }
-        brd++;
-    }
-
-    fatal("unable to find a register matching attribute 0x%x", attr);
-    return 0;
-}
-
-static void constrain_output_reg(uint32_t attr)
+static void constrain_output_reg(regclass_t regclass)
 {
     struct vreg* vreg = current_hop->output;
 
@@ -146,17 +107,15 @@ static void constrain_output_reg(uint32_t attr)
 
     array_appendu(&current_hop->outs, vreg);
     vreg->defined = current_hop;
-    vreg->type = find_type_from_constraint(attr);
-
-    get_constraint(vreg)->attrs = attr;
+    vreg->regclass = regclass;
 }
 
 static void constrain_output_reg_equal_to(int child)
 {
     struct vreg* vreg = find_vreg_of_child(child);
 
-    get_constraint(current_hop->output)->equals_to = vreg;
-    get_constraint(vreg)->equals_to = current_hop->output;
+    get_constraint(current_hop, current_hop->output)->equals_to = vreg;
+    get_constraint(current_hop, vreg)->equals_to = current_hop->output;
 }
 
 static const struct burm_emitter_data emitter_data =

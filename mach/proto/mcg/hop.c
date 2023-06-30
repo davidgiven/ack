@@ -7,32 +7,22 @@ static struct mempool hoppool;
 
 static const struct burm_emitter_data emitter_data;
 
-static char typechar(uint32_t t)
-{
-    switch (t)
-    {
-        case burm_int_ATTR:
-            return 'I';
-
-        case burm_long_ATTR:
-            return 'L';
-
-        case burm_float_ATTR:
-            return 'F';
-
-        case burm_double_ATTR:
-            return 'D';
-
-        default:
-            return '?';
-    }
-}
-
 void clear_hops(void)
 {
     tracef('M', "M: hop mempool was %d bytes\n", hoppool.size);
     mempool_reset(&hoppool);
     hop_count = 0;
+}
+
+struct constraint* get_constraint(struct hop* hop, struct vreg* vreg)
+{
+    struct constraint* c = pmap_findleft(&hop->constraints, vreg);
+    if (!c)
+    {
+        c = mempool_alloc(&hoppool, sizeof(*c));
+        pmap_put(&hop->constraints, vreg, c);
+    }
+    return c;
 }
 
 struct hop* new_hop(struct basicblock* bb, struct ir* ir)
@@ -203,11 +193,11 @@ static void print_header(char k, struct hop* hop)
 	tracef(k, ":");
 
 	for (i = 0; i < hop->ins.count; i++)
-		tracef(k, " r%%%d/%c", hop->ins.item[i]->id, typechar(hop->ins.item[i]->type));
+		tracef(k, " r%%%d", hop->ins.item[i]->id);
 	for (i = 0; i < hop->throughs.count; i++)
-		tracef(k, " =%%%d/%c", hop->throughs.item[i]->id, typechar(hop->throughs.item[i]->type));
+		tracef(k, " =%%%d", hop->throughs.item[i]->id);
 	for (i = 0; i < hop->outs.count; i++)
-		tracef(k, " w%%%d/%c", hop->outs.item[i]->id, typechar(hop->outs.item[i]->type));
+		tracef(k, " w%%%d", hop->outs.item[i]->id);
 	tracef(k, " ");
     if (hop->is_copy)
         tracef(k, "(COPY) ");
@@ -257,8 +247,15 @@ char* hop_render(struct hop* hop)
 				else
 				{
 					appendf("%%%d.%d", vreg->id, insel->index);
-					if (vreg->congruence)
-						appendf("=g%d", vreg->congruence->id);
+                    if (vreg->coalesced_with)
+                    {
+                        vreg = vreg->next_coalesced_register;
+                        while (vreg)
+                        {
+                            appendf("+%%%d", vreg->id);
+                            vreg = vreg->next_coalesced_register;
+                        }
+                    }
 				}
 				break;
 			}
@@ -325,10 +322,25 @@ void hop_print(char k, struct hop* hop)
 	bool soi = false;
 	char* p;
 
+    print_header(k, hop);
+    tracef(k, "constraints:");
+    for (i=0; i<hop->constraints.count; i++)
+    {
+        struct vreg* vreg = hop->constraints.item[i].left;
+        struct constraint* constraint = hop->constraints.item[i].right;
+        tracef(k, " %%%d:%s", vreg->id, render_regclass(constraint->regclass));
+        if (constraint->equals_to)
+            tracef(k, ":=%%%d", constraint->equals_to->id);
+        if (constraint->preserved)
+            tracef(k, ":preserved");
+    }
+    tracef(k, "\n");
+
 	hop_render(hop);
 
 	p = strtok(renderbuf.ptr, "\n");
 	print_header(k, hop);
+    tracef(k, "insels: ");
 	while (p)
 	{
 		tracef(k, "%s", p);
@@ -337,6 +349,7 @@ void hop_print(char k, struct hop* hop)
 		{
 			tracef(k, "\n");
 			print_header(k, hop);
+            tracef(k, "insels: ");
 		}
 	}
 	tracef(k, "\n");

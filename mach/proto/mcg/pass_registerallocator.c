@@ -2,7 +2,9 @@
 
 static ARRAYOF(struct hreg) hregs;
 static struct bitset interference_graph;
+static ARRAYOF(struct vreg) all_vregs;
 static ARRAYOF(struct hop) current_hops;
+static ARRAYOF(struct vreg) register_stack;
 
 static struct move* create_move(struct vreg* vreg)
 {
@@ -38,15 +40,82 @@ static void populate_hregs(void)
 		}
 
 		tracef(
-		    'R', "R: found hreg %s, type %08x, aliases %08x\n", hreg->id,
-		    hreg->attrs, hreg->usage);
+		    'R', "R: found hreg %s, attrs %s, aliases %08x\n", hreg->id,
+		    render_regclasses(hreg->regclasses), hreg->usage);
+	}
+}
+
+static void coalesce_registers(struct vreg* v1, struct vreg* v2)
+{
+	if (v1->coalesced_with)
+		v1 = v1->coalesced_with;
+	if (v2->coalesced_with)
+		v2 = v2->coalesced_with;
+	if (v1 == v2)
+		return;
+
+	tracef('R', "R: coalescing %%%d and %%%d\n", v1->id, v2->id);
+	while (v2)
+	{
+		struct vreg* nextv = v2->next_coalesced_register;
+		v2->coalesced_with = v1;
+		v2->next_coalesced_register = v1->next_coalesced_register;
+		v1->next_coalesced_register = v2;
+		v2 = nextv;
+	}
+	v1->coalesced_with = v1;
+}
+
+static void coalesce_equal_registers(void)
+{
+	int i, j, k, l;
+
+	for (i = 0; i < dominance.preorder.count; i++)
+	{
+		struct basicblock* bb = dominance.preorder.item[i];
+
+		for (j = 0; j < bb->hops.count; j++)
+		{
+			struct hop* hop = bb->hops.item[j];
+
+			for (k = 0; k < hop->constraints.count; k++)
+			{
+				struct vreg* vreg = hop->constraints.item[k].left;
+				struct constraint* constraint = hop->constraints.item[k].right;
+				if (constraint->equals_to)
+					coalesce_registers(vreg, constraint->equals_to);
+			}
+		}
 	}
 }
 
 static void mark_vreg_interference(struct vreg* v1, struct vreg* v2)
 {
+	if (v1->coalesced_with)
+		v1 = v1->coalesced_with;
+	if (v2->coalesced_with)
+		v2 = v2->coalesced_with;
+
+	assert(v1->id != 0);
+	assert(v2->id != 0);
 	bitset_set(&interference_graph, v1->id * vreg_count + v2->id, true);
 	bitset_set(&interference_graph, v2->id * vreg_count + v1->id, true);
+}
+
+static void mark_vreg_list_interference(
+    struct vreg** v1, size_t v1n, struct vreg** v2, size_t v2n)
+{
+	size_t i, j;
+
+	for (i = 0; i < v1n; i++)
+	{
+		struct vreg* r1 = v1[i];
+		for (j = 0; j < v2n; j++)
+		{
+			struct vreg* r2 = v2[j];
+			mark_vreg_interference(r1, r2);
+		}
+	}
 }
 
 static void construct_interference_graph(void)
@@ -57,6 +126,9 @@ static void construct_interference_graph(void)
 	    'R', "R: creating interference graph of %dx%d vregs\n", vreg_count,
 	    vreg_count);
 	bitset_resize(&interference_graph, vreg_count * vreg_count);
+	bitset_clear(&interference_graph);
+	array_resize(&all_vregs, vreg_count);
+	array_clear(&all_vregs);
 
 	for (i = 0; i < dominance.preorder.count; i++)
 	{
@@ -65,58 +137,94 @@ static void construct_interference_graph(void)
 		for (j = 0; j < bb->hops.count; j++)
 		{
 			struct hop* hop = bb->hops.item[j];
-			static ARRAYOF(struct vreg) vregs;
-			vregs.count = 0;
+			struct vreg** ins = hop->ins.item;
+			int nins = hop->ins.count;
+			struct vreg** outs = hop->outs.item;
+			int nouts = hop->outs.count;
+			struct vreg** throughs = hop->throughs.item;
+			int nthroughs = hop->throughs.count;
 
-			for (k = 0; k < hop->ins.count; k++)
-				array_appendu(&vregs, hop->ins.item[k]);
-			for (k = 0; k < hop->outs.count; k++)
-				array_appendu(&vregs, hop->outs.item[k]);
-			for (k = 0; k < hop->throughs.count; k++)
-				array_appendu(&vregs, hop->throughs.item[k]);
+			/* Record all used vregs. */
 
-			for (k = 0; k < vregs.count; k++)
+			for (k = 0; k < nins; k++)
+				all_vregs.item[ins[k]->id] = ins[k];
+			for (k = 0; k < nthroughs; k++)
+				all_vregs.item[throughs[k]->id] = throughs[k];
+			for (k = 0; k < nouts; k++)
+				all_vregs.item[outs[k]->id] = outs[k];
+
+			/* Each list of registers interferences with itself. */
+
+			mark_vreg_list_interference(ins, nins, ins, nins);
+			mark_vreg_list_interference(
+			    throughs, nthroughs, throughs, nthroughs);
+			mark_vreg_list_interference(outs, nouts, outs, nouts);
+
+			/* Ins and outs both interfere with throughs. */
+
+			mark_vreg_list_interference(ins, nins, throughs, nthroughs);
+			mark_vreg_list_interference(outs, nouts, throughs, nthroughs);
+
+			/* Any preserved input registers interfere with all output
+			 * registers. */
+
+			for (k = 0; k < nins; k++)
 			{
-				struct vreg* v1 = vregs.item[k];
-				for (l = k + 1; l < vregs.count; l++)
+				struct vreg* v = ins[k];
+				struct constraint* constraint = get_constraint(hop, v);
+				if (constraint && constraint->preserved)
+					mark_vreg_list_interference(&v, 1, outs, nouts);
+			}
+		}
+	}
+}
+
+static void simplify_graph(void)
+{
+	int i, j;
+
+	register_stack.count = 0;
+	for (i = 0; i < vreg_count; i++)
+	{
+		struct vreg* vreg = all_vregs.item[i];
+		if (vreg)
+		{
+			size_t bitoffset = i * vreg_count;
+			int qvalue = 0;
+			int pvalue = burm_register_class_p_table[vreg->regclass];
+
+			for (j = 0; j < vreg_count; j++)
+			{
+				if ((i != j) && bitset_get(&interference_graph, bitoffset + j))
 				{
-					struct vreg* v2 = vregs.item[l];
-					mark_vreg_interference(v1, v2);
+					struct vreg* other = all_vregs.item[j];
+					if (other)
+						qvalue += burm_register_class_q_table
+						    [(vreg->regclass * BURM_REGISTER_CLASS_COUNT)
+						     + other->regclass];
+				}
+			}
+
+			if (qvalue != 0)
+			{
+				tracef(
+				    'R',
+				    "R: vreg %%%d of class %s has qvalue %d and pvalue %d\n",
+				    vreg->id, render_regclass(vreg->regclass), qvalue, pvalue);
+
+				/* Perform the colourability test. */
+
+				if (qvalue >= pvalue)
+				{
+					tracef('R', "R: not colourable, spill required\n");
+					return false;
 				}
 			}
 		}
 	}
 }
 
-static void assign_hop_producer_consumers(void)
-{
-	int i, j, k;
-
-	for (i = 0; i < dominance.preorder.count; i++)
-	{
-		struct basicblock* bb = dominance.preorder.item[i];
-
-		for (j = 0; j < bb->hops.count; j++)
-		{
-			struct hop* hop = bb->hops.item[j];
-
-			for (k = 0; k < hop->ins.count; k++)
-			{
-				struct vreg* vreg = hop->ins.item[k];
-				struct move* m = create_move(vreg);
-				array_append(&hop->consumes, m);
-			}
-
-			for (k = 0; k < hop->outs.count; k++)
-			{
-				struct vreg* vreg = hop->outs.item[k];
-				struct move* m = create_move(vreg);
-				array_append(&hop->produces, m);
-			}
-		}
-	}
-}
-
+#if 0
 static int
 pack_hreg(int stacksize, int size, uint32_t attr, struct congruence* g)
 {
@@ -192,311 +300,26 @@ static struct hreg* allocate_register(regmask_t used, uint32_t attrs)
 
 	return NULL;
 }
-
-static struct constraint* get_constraint(struct hop* hop, struct vreg* vreg)
-{
-	return pmap_findleft(&hop->constraints, vreg);
-}
-
-static struct move* find_move(struct move** ptr, int count, struct vreg* vreg)
-{
-	while (count--)
-	{
-		struct move* m = *ptr++;
-		if (m->vreg == vreg)
-			return m;
-	}
-
-	return NULL;
-}
-
-/* Returns false if the range spans a basic block. */
-static bool collect_hops_for_vreg(struct basicblock* bb, struct vreg* vreg)
-{
-	struct constraint* constraint;
-	struct hop* hop;
-	int i;
-	struct hop* lasthop = vreg->used.item[vreg->used.count - 1];
-	struct vreg* nextvreg;
-
-	/* Find the location of hop where this vreg is defined. */
-
-	i = -1;
-	do
-	{
-		i++;
-		if (i == bb->hops.count)
-			return false;
-
-		hop = bb->hops.item[i];
-	} while (hop != vreg->defined);
-	if (hop == lasthop)
-		return false;
-	tracef(
-	    'R', "R: vreg %%%d is defined at hop %d, ends at hop %d, index %d\n",
-	    vreg->id, hop->id, lasthop->id, i);
-
-	/* Copy hops until we reach the last one. */
-
-	for (;;)
-	{
-		array_append(&current_hops, hop);
-		hop->vreg_being_allocated = vreg;
-
-		if (hop == lasthop)
-			break;
-
-		i++;
-		if (i == bb->hops.count)
-			return false;
-		hop = bb->hops.item[i];
-
-		if (hop->bb != bb)
-			return false;
-	}
-
-	return true;
-}
-
-static regmask_t compute_allocation_bitmap(int startincl, int endincl)
-{
-	struct hop* hop = current_hops.item[0];
-	struct vreg* vreg = NULL;
-	struct constraint* constraint;
-	regmask_t mask = 0;
-	int i;
-
-	constraint = get_constraint(hop, hop->vreg_being_allocated);
-	if (constraint && constraint->equals_to)
-		mask = hop->inputregusage;
-
-	for (i = startincl; i <= endincl; i++)
-	{
-		hop = current_hops.item[i];
-		vreg = hop->vreg_being_allocated;
-
-		if (i != 0)
-			mask |= hop->inputregusage;
-		if (i != (current_hops.count - 1))
-			mask |= hop->outputregusage;
-	}
-
-	constraint = get_constraint(hop, vreg);
-	if (constraint && (constraint->preserved || constraint->equals_to))
-		mask |= hop->outputregusage;
-
-	return mask;
-}
-
-#if 0
-static uint32_t compute_constraints(
-    struct basicblock* bb, int hopindex)
-{
-	uint32_t mask = 0;
-	int count = vreg->used.count;
-	struct hop* lasthop = vreg->used.item[count - 1];
-	struct hop** hops = bb->hops.item;
-
-	for (;;)
-	{
-		struct hop* hop = hops[hopindex];
-		mask |= hop->outputregusage;
-		if (hop == lasthop)
-			break;
-
-		hopindex++;
-		hop = hops[hopindex];
-		mask |= hop->inputregusage;
-	}
-
-	return mask;
-}
 #endif
 
-static void assign_register_for_hop(
-    struct hop* hop, struct vreg* vreg, struct hreg* hreg, bool write)
+static bool iterate(void)
 {
-	struct constraint* constraint = get_constraint(hop, vreg);
-	if (constraint && constraint->equals_to)
-	{
-		struct hreg* other
-		    = pmap_findleft(&hop->assignments, constraint->equals_to);
-		if (other)
-		{
-			tracef(
-			    'R',
-			    "R: hop %d couldn't allocate %%%d and %%%d to %s for equals-to "
-			    "read/write because they are already assigned to %s\n",
-			    hop->id, vreg->id, constraint->equals_to->id, hreg->id,
-			    other->id);
-		}
-		else
-		{
-			tracef(
-			    'R',
-			    "R: hop %d allocated %%%d and %%%d to %s for equals-to "
-			    "read/write\n",
-			    hop->id, vreg->id, constraint->equals_to->id, hreg->id);
-			pmap_put(&hop->assignments, vreg, hreg);
-			pmap_put(&hop->assignments, constraint->equals_to, hreg);
-			hop->inputregusage |= hreg->usage;
-			hop->outputregusage |= hreg->usage;
-		}
-	}
-	else if (constraint && constraint->preserved)
-	{
-		tracef(
-		    'R', "R: hop %d allocated %%%d to %s for preserved read\n", hop->id,
-		    vreg->id, hreg->id);
-		assert(!pmap_findleft(&hop->assignments, vreg));
-		hop->outputregusage |= hreg->usage;
-		pmap_put(&hop->assignments, vreg, hreg);
-		hop->inputregusage |= hreg->usage;
-		hop->outputregusage |= hreg->usage;
-	}
-	else if (write)
-	{
-		tracef(
-		    'R', "R: hop %d allocated %%%d to %s for write\n", hop->id,
-		    vreg->id, hreg->id);
-		assert(!pmap_findleft(&hop->assignments, vreg));
-		pmap_put(&hop->assignments, vreg, hreg);
-		hop->outputregusage |= hreg->usage;
-	}
-	else
-	{
-		tracef(
-		    'R', "R: hop %d allocated %%%d to %s for read\n", hop->id, vreg->id,
-		    hreg->id);
-		assert(!pmap_findleft(&hop->assignments, vreg));
-		pmap_put(&hop->assignments, vreg, hreg);
-		hop->inputregusage |= hreg->usage;
-	}
-}
-
-static void allocate_register_for_collected_hops(int startincl, int endincl)
-{
-	int i;
-	uint32_t attrs = 0;
-	struct hreg* hreg;
-	struct constraint* constraint;
-	regmask_t hint;
-	regmask_t allocation_bitmap;
-
-	for (i = startincl; i <= endincl; i++)
-	{
-		struct hop* hop = current_hops.item[i];
-		constraint = get_constraint(hop, hop->vreg_being_allocated);
-		if (constraint)
-		{
-			hreg = pmap_findleft(&hop->assignments, hop->vreg_being_allocated);
-			if (hreg)
-			{
-				tracef(
-				    'R', "R: hop %d already has %%%d allocated to %s\n",
-				    hop->id, hop->vreg_being_allocated->id, hreg->id);
-				hint |= hreg->usage;
-			}
-
-			if (constraint->equals_to)
-			{
-				hreg = pmap_findleft(&hop->assignments, constraint->equals_to);
-				if (hreg)
-				{
-					tracef(
-					    'R',
-					    "R: hop %d has %%%d equals_to %%%d which is allocated "
-					    "to %s\n",
-					    hop->id, hop->vreg_being_allocated->id,
-					    constraint->equals_to->id, hreg->id);
-					hint |= hreg->usage;
-				}
-			}
-
-			tracef(
-			    'R', "R: hop %d touches %%%d with attribute requirement %s\n",
-			    hop->id, hop->vreg_being_allocated->id,
-			    render_regattrs(constraint->attrs));
-			attrs = attrs | constraint->attrs;
-		}
-	}
-
-	allocation_bitmap = compute_allocation_bitmap(startincl, endincl);
-	hreg = allocate_register(allocation_bitmap, attrs);
-	if (hreg)
-	{
-		for (i = startincl; i <= endincl; i++)
-		{
-			struct hop* hop = current_hops.item[i];
-
-			assign_register_for_hop(
-			    hop, hop->vreg_being_allocated, hreg, i == startincl);
-		}
-	}
-	else
-	{
-		tracef(
-		    'R', "R: no registers available for attribute requirement '%s'\n",
-		    render_regattrs(attrs));
-	}
-}
-
-static void local_register_allocation(void)
-{
-	int i, j;
-
-	for (i = 0; i < dominance.preorder.count; i++)
-	{
-		struct basicblock* bb = dominance.preorder.item[i];
-		tracef('R', "R: considering block %s\n", bb->name);
-
-		/* Going through the hops in reverse means that we'll naturally
-		 * allocate the shortest live regions first. */
-
-		for (j = bb->hops.count - 1; j >= 0; j--)
-		{
-			struct vreg* vreg;
-			struct hop* hop = bb->hops.item[j];
-			if (hop->outs.count == 0)
-				continue;
-
-			assert(hop->outs.count == 1);
-			vreg = hop->outs.item[0];
-			assert(vreg->defined == hop);
-
-			/* Collect all hops during the vreg's live range. */
-
-			current_hops.count = 0;
-			if (!collect_hops_for_vreg(bb, vreg))
-				continue;
-
-			tracef(
-			    'R',
-			    "R: considering candidate vreg %%%d with a %d-hop live range "
-			    "from %d to %d\n",
-			    vreg->id, current_hops.count, current_hops.item[0]->id,
-			    current_hops.item[current_hops.count - 1]->id);
-			allocate_register_for_collected_hops(0, current_hops.count - 1);
-		}
-	}
-}
-
-static void global_register_allocation(void)
-{
+	construct_interference_graph();
+	simplify_graph();
+	return true;
 }
 
 void pass_register_allocator(void)
 {
+	int count = 1;
 	populate_hregs();
 
-	construct_interference_graph();
-
-#if 0
-	assign_hop_producer_consumers();
-	local_register_allocation();
-    global_register_allocation();
-	//layout_stack_frame();
-#endif
+	coalesce_equal_registers();
+	do
+	{
+		tracef('R', "R: beginning graph colouring iteration %d\n", count);
+		count++;
+	} while (!iterate());
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

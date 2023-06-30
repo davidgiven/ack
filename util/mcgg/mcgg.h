@@ -36,6 +36,8 @@ extern const short *burm_nts[];
 extern NODEPTR_TYPE* burm_kids(NODEPTR_TYPE p, int eruleno, NODEPTR_TYPE kids[]);
 extern void burm_trace(NODEPTR_TYPE p, int ruleno, int cost, int bestcost);
 
+typedef uint8_t regclass_t;
+
 struct burm_emitter_data
 {
     void (*emit_string)(const char* data);
@@ -44,9 +46,9 @@ struct burm_emitter_data
     void (*emit_reg)(int child, int index);
     void (*emit_value)(int child);
     void (*emit_eoi)(void);
-    void (*constrain_input_reg)(int child, uint32_t attr);
+    void (*constrain_input_reg)(int child, regclass_t regclass);
     void (*constrain_input_reg_preserved)(int child);
-    void (*constrain_output_reg)(uint32_t attr);
+    void (*constrain_output_reg)(regclass_t regclass);
     void (*constrain_output_reg_equal_to)(int child);
 };
 
@@ -61,6 +63,8 @@ struct burm_instruction_data
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];
+extern const uint8_t burm_register_class_p_table[];
+extern const uint8_t burm_register_class_q_table[];
 
 struct burm_register_data
 {
