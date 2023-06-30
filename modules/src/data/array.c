@@ -30,6 +30,13 @@ void array_resize(void* arrayp, size_t size)
 	array->count = size;
 }
 
+void array_clear(void* arrayp)
+{
+	struct array* array = arrayp;
+    if (array->count)
+        memset(array->item, 0, array->count * sizeof(void*));
+}
+
 void array_append(void* arrayp, void* value)
 {
 	struct array* array = arrayp;
