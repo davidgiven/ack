@@ -24,7 +24,7 @@ void bitset_set(struct bitset* bitset, size_t index, bool value)
 	uint8_t bitfield;
 
 	assert(index < bitset->bits);
-	bitfield = ~(1 << (index % 8));
+	bitfield = 1 << (index % 8);
 	b = &bitset->data[index / 8];
 
 	if (value)
@@ -35,12 +35,6 @@ void bitset_set(struct bitset* bitset, size_t index, bool value)
 
 bool bitset_get(struct bitset* bitset, size_t index)
 {
-	uint8_t* b;
-	uint8_t bitfield;
-
 	assert(index < bitset->bits);
-	bitfield = ~(1 << (index % 8));
-	b = &bitset->data[index / 8];
-
-	return *b & bitfield;
+	return bitset->data[index / 8] & (1 << (index % 8));
 }
