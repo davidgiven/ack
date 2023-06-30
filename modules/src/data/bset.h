@@ -14,4 +14,3 @@ extern void bitset_set(struct bitset* bitset, size_t index, bool value);
 extern bool bitset_get(struct bitset* bitset, size_t index);
 
 #endif
-
