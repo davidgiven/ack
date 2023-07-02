@@ -126,15 +126,6 @@ static void emit_procedure(struct procedure* proc)
 		{
 			struct hop* hop = bb->hops.item[j];
 
-			fprintf(outputfile, "\n! hop %d: ", hop->id);
-            for (k=0; k<hop->assignments.count; k++)
-            {
-                fprintf(outputfile, " %%%d->%s",
-                    hop->assignments.item[k].left->id,
-                    hop->assignments.item[k].right->id);
-            }
-            fprintf(outputfile, "\n");
-
             #if 0
 			for (k = 0; k < hop->consumes.count; k++)
 			{

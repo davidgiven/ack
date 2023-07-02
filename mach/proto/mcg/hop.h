@@ -46,13 +46,6 @@ struct constraint
 	struct vreg* equals_to;
 };
 
-struct move
-{
-	struct vreg* vreg;
-	struct hreg* hreg;
-	struct hreg* other;
-};
-
 struct hop
 {
 	int id;
@@ -68,16 +61,7 @@ struct hop
 	ARRAYOF(struct vreg) outs;
 	ARRAYOF(struct vreg) throughs;
 
-	ARRAYOF(struct move) produces;
-	ARRAYOF(struct move) consumes;
-	PMAPOF(struct vreg, struct hreg) assignments;
     bool is_copy;
-
-    /* old allocator below */
-	regmask_t inputregusage;
-	regmask_t outputregusage;
-
-    struct vreg* vreg_being_allocated;
 };
 
 extern void clear_hops(void);

@@ -121,6 +121,7 @@ massage_offset(struct hop* hop, int* offset, int min, int max)
 		return "iy";
 }
 
+#if 0
 struct hop* platform_load(struct basicblock* bb, struct move* move)
 {
 	struct hop* hop = new_hop(bb, NULL);
@@ -208,6 +209,7 @@ struct hop* platform_store(struct basicblock* bb, struct move* move)
 
 	return hop;
 }
+#endif
 
 const char* platform_label(const char* label)
 {

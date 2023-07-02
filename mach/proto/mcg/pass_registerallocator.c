@@ -6,13 +6,6 @@ static ARRAYOF(struct vreg) all_vregs;
 static ARRAYOF(struct hop) current_hops;
 static ARRAYOF(struct vreg) register_stack;
 
-static struct move* create_move(struct vreg* vreg)
-{
-	struct move* m = calloc(1, sizeof(struct move));
-	m->vreg = vreg;
-	return m;
-}
-
 static void populate_hregs(void)
 {
 	int i;
