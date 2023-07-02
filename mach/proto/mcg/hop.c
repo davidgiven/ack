@@ -328,9 +328,9 @@ void hop_print(char k, struct hop* hop)
     {
         struct vreg* vreg = hop->constraints.item[i].left;
         struct constraint* constraint = hop->constraints.item[i].right;
-        tracef(k, " %%%d:%s", vreg->id, render_regclass(constraint->regclass));
+        tracef(k, " %s:%s", render_vreg(vreg), render_regclass(constraint->regclass));
         if (constraint->equals_to)
-            tracef(k, ":=%%%d", constraint->equals_to->id);
+            tracef(k, ":=%s", render_vreg(constraint->equals_to));
         if (constraint->preserved)
             tracef(k, ":preserved");
     }

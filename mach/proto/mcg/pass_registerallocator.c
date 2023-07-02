@@ -74,6 +74,22 @@ static void coalesce_equal_registers(void)
 	{
 		struct basicblock* bb = dominance.preorder.item[i];
 
+		/* Coalesce the block's phis with their parents. */
+
+		for (j = 0; j < bb->phis.count; j++)
+		{
+			struct vreg* vreg = bb->phis.item[j].left;
+			struct phi* phi = bb->phis.item[j].right;
+			tracef(
+			    'R', "R: coalescing phi registers %%%d and %%%d\n", vreg->id,
+			    phi->ir->result->id);
+			vreg->in_transit = true;
+			phi->ir->result->in_transit = true;
+			coalesce_registers(vreg, phi->ir->result);
+		}
+
+		/* Handle any equals_to constraints. */
+
 		for (j = 0; j < bb->hops.count; j++)
 		{
 			struct hop* hop = bb->hops.item[j];
@@ -95,6 +111,8 @@ static void mark_vreg_interference(struct vreg* v1, struct vreg* v2)
 		v1 = v1->coalesced_with;
 	if (v2->coalesced_with)
 		v2 = v2->coalesced_with;
+	if (v1->is_spilt || v2->is_spilt)
+		return;
 
 	assert(v1->id != 0);
 	assert(v2->id != 0);
@@ -123,7 +141,7 @@ static void construct_interference_graph(void)
 	int i, j, k, l;
 
 	tracef(
-	    'R', "R: creating interference graph of %dx%d vregs\n", vreg_count,
+	    'R', "R: creating interference matrix of %dx%d vregs\n", vreg_count,
 	    vreg_count);
 	bitset_resize(&interference_graph, vreg_count * vreg_count);
 	bitset_clear(&interference_graph);
@@ -133,6 +151,8 @@ static void construct_interference_graph(void)
 	for (i = 0; i < dominance.preorder.count; i++)
 	{
 		struct basicblock* bb = dominance.preorder.item[i];
+
+		/* Process each hop in the basic block. */
 
 		for (j = 0; j < bb->hops.count; j++)
 		{
@@ -179,9 +199,110 @@ static void construct_interference_graph(void)
 	}
 }
 
-static void simplify_graph(void)
+static void account_register(struct hop* hop, struct vreg* vreg)
 {
-	int i, j;
+	if (vreg->coalesced_with)
+		vreg = vreg->coalesced_with;
+	if (vreg->is_spilt)
+		return;
+
+	if (hop->id < vreg->min_hop)
+		vreg->min_hop = hop->id;
+	if (hop->id > vreg->max_hop)
+		vreg->max_hop = hop->id;
+	vreg->use_count++;
+}
+
+static void spill_conflicting_register(struct vreg* conflicts_with)
+{
+	int i, j, k;
+	struct vreg* bestvreg;
+	float bestscore;
+
+	for (i = 0; i < all_vregs.count; i++)
+	{
+		struct vreg* vreg = all_vregs.item[i];
+		if (vreg && (!vreg->coalesced_with || (vreg->coalesced_with == vreg)))
+		{
+			vreg->min_hop = INT_MAX;
+			vreg->max_hop = 0;
+			vreg->use_count = 0;
+		}
+	}
+
+	for (i = 0; i < dominance.preorder.count; i++)
+	{
+		struct basicblock* bb = dominance.preorder.item[i];
+
+		for (j = 0; j < bb->hops.count; j++)
+		{
+			struct hop* hop = bb->hops.item[j];
+
+			/* Record all used vregs. */
+
+			for (k = 0; k < hop->ins.count; k++)
+				account_register(hop, hop->ins.item[k]);
+			for (k = 0; k < hop->throughs.count; k++)
+				account_register(hop, hop->throughs.item[k]);
+			for (k = 0; k < hop->outs.count; k++)
+				account_register(hop, hop->outs.item[k]);
+		}
+	}
+
+	for (;;)
+	{
+		bestvreg = NULL;
+		bestscore = 0.0;
+		for (i = 0; i < all_vregs.count; i++)
+		{
+			if (!conflicts_with
+			    || bitset_get(
+			        &interference_graph, conflicts_with->id * vreg_count + i))
+			{
+				struct vreg* vreg = all_vregs.item[i];
+				if (vreg && vreg->in_transit && !vreg->is_spilt
+				    && (!vreg->coalesced_with
+				        || (vreg->coalesced_with == vreg)))
+				{
+					float score = (float)(vreg->max_hop - vreg->min_hop)
+					    / vreg->use_count;
+					tracef(
+					    'R',
+					    "R: %%%d has minhop %d maxhop %d usecount %d score "
+					    "%f\n",
+					    vreg->id, vreg->min_hop, vreg->max_hop, vreg->use_count,
+					    score);
+					if (score > bestscore)
+					{
+						bestvreg = vreg;
+						bestscore = score;
+					}
+				}
+			}
+		}
+
+		if (bestvreg)
+			break;
+		if (conflicts_with)
+		{
+			tracef(
+			    'R',
+			    "R: cannot find a register to spill which conflicts with %%%d, "
+			    "so widening search\n",
+			    conflicts_with->id);
+			conflicts_with = NULL;
+		}
+		else
+			fatal("cannot find a register to spill");
+	}
+
+	tracef('R', "R: selected %%%d for spilling\n", bestvreg->id);
+	bestvreg->is_spilt = true;
+}
+
+static bool colour_graph(void)
+{
+	int i, j, k;
 
 	register_stack.count = 0;
 	for (i = 0; i < vreg_count; i++)
@@ -209,19 +330,45 @@ static void simplify_graph(void)
 			{
 				tracef(
 				    'R',
-				    "R: vreg %%%d of class %s has qvalue %d and pvalue %d\n",
+				    "R: vreg %%%d of class %s has qvalue %d and pvalue %d and "
+				    "intersects with ",
 				    vreg->id, render_regclass(vreg->regclass), qvalue, pvalue);
+				for (k = 0; k < vreg_count; k++)
+				{
+					if (bitset_get(
+					        &interference_graph, vreg->id * vreg_count + k))
+					{
+						struct vreg* other = all_vregs.item[k];
+						tracef('R', " %s", render_vreg(other));
+					}
+				}
+				tracef('R', "\n");
 
 				/* Perform the colourability test. */
 
-				if (qvalue >= pvalue)
+				if (qvalue > pvalue)
 				{
 					tracef('R', "R: not colourable, spill required\n");
+					spill_conflicting_register(vreg);
 					return false;
+				}
+
+				/* Remove this register from the interference matrix. */
+
+				for (k = 0; k < vreg_count; k++)
+				{
+					bitset_set(
+					    &interference_graph, vreg->id * vreg_count + k, false);
+					bitset_set(
+					    &interference_graph, k * vreg_count + vreg->id, false);
 				}
 			}
 		}
 	}
+
+	tracef('R', "R: colouring successful\n");
+
+	return true;
 }
 
 #if 0
@@ -305,7 +452,9 @@ static struct hreg* allocate_register(regmask_t used, uint32_t attrs)
 static bool iterate(void)
 {
 	construct_interference_graph();
-	simplify_graph();
+	if (!colour_graph())
+		return false;
+
 	return true;
 }
 

@@ -38,7 +38,7 @@ static void print_blocks(char k)
 
 static void print_vreg(char k, struct vreg* vreg)
 {
-	tracef(k, "%%%d()", vreg->id, render_regclass(vreg->regclass));
+	tracef(k, "%s", render_vreg(vreg));
 }
 
 static void print_hops(char k)
