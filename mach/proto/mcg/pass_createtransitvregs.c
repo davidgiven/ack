@@ -67,8 +67,7 @@ static void rewrite_hops(struct basicblock* bb)
 				struct vreg* oldvreg = hop->ins.item[i];
 				struct vreg* newvreg = new_vreg();
 				struct constraint* constraint = get_constraint(hop, oldvreg);
-				newvreg->regclass = oldvreg->regclass;
-				oldvreg->regclass = constraint->regclass;
+				newvreg->regclass = constraint->regclass;
 				oldvreg->in_transit = true;
 
 				replace_vreg(hop, oldvreg, newvreg);

@@ -136,6 +136,13 @@ static void mark_vreg_list_interference(
 	}
 }
 
+static struct vreg* root_vreg(struct vreg* vreg)
+{
+	if (vreg->coalesced_with)
+		return vreg->coalesced_with;
+	return vreg;
+}
+
 static void construct_interference_graph(void)
 {
 	int i, j, k, l;
@@ -167,11 +174,11 @@ static void construct_interference_graph(void)
 			/* Record all used vregs. */
 
 			for (k = 0; k < nins; k++)
-				all_vregs.item[ins[k]->id] = ins[k];
+				all_vregs.item[ins[k]->id] = root_vreg(ins[k]);
 			for (k = 0; k < nthroughs; k++)
-				all_vregs.item[throughs[k]->id] = throughs[k];
+				all_vregs.item[throughs[k]->id] = root_vreg(throughs[k]);
 			for (k = 0; k < nouts; k++)
-				all_vregs.item[outs[k]->id] = outs[k];
+				all_vregs.item[outs[k]->id] = root_vreg(outs[k]);
 
 			/* Each list of registers interferences with itself. */
 
@@ -213,7 +220,7 @@ static void account_register(struct hop* hop, struct vreg* vreg)
 	vreg->use_count++;
 }
 
-static void spill_conflicting_register(struct vreg* conflicts_with)
+static void spill_conflicting_register(void)
 {
 	int i, j, k;
 	struct vreg* bestvreg;
@@ -227,6 +234,11 @@ static void spill_conflicting_register(struct vreg* conflicts_with)
 			vreg->min_hop = INT_MAX;
 			vreg->max_hop = 0;
 			vreg->use_count = 0;
+
+			vreg->interference_count = 0;
+			for (j = 0; j < all_vregs.count; j++)
+				vreg->interference_count
+				    += bitset_get(&interference_graph, i * vreg_count + j);
 		}
 	}
 
@@ -249,52 +261,39 @@ static void spill_conflicting_register(struct vreg* conflicts_with)
 		}
 	}
 
-	for (;;)
+	bestvreg = NULL;
+	bestscore = 0.0;
+	for (i = 0; i < all_vregs.count; i++)
 	{
-		bestvreg = NULL;
-		bestscore = 0.0;
-		for (i = 0; i < all_vregs.count; i++)
+		struct vreg* vreg = all_vregs.item[i];
+		if (vreg && vreg->in_transit && !vreg->is_spilt)
 		{
-			if (!conflicts_with
-			    || bitset_get(
-			        &interference_graph, conflicts_with->id * vreg_count + i))
+			float score
+			    = (float)(vreg->max_hop - vreg->min_hop) / vreg->use_count;
+			assert(!vreg->coalesced_with || (vreg->coalesced_with == vreg));
+			tracef(
+			    'R',
+			    "R: %%%d has minhop %d maxhop %d usecount %d interference %d "
+			    "score %f\n",
+			    vreg->id, vreg->min_hop, vreg->max_hop, vreg->use_count,
+			    vreg->interference_count, score);
+			if (score > bestscore)
 			{
-				struct vreg* vreg = all_vregs.item[i];
-				if (vreg && vreg->in_transit && !vreg->is_spilt
-				    && (!vreg->coalesced_with
-				        || (vreg->coalesced_with == vreg)))
-				{
-					float score = (float)(vreg->max_hop - vreg->min_hop)
-					    / vreg->use_count;
-					tracef(
-					    'R',
-					    "R: %%%d has minhop %d maxhop %d usecount %d score "
-					    "%f\n",
-					    vreg->id, vreg->min_hop, vreg->max_hop, vreg->use_count,
-					    score);
-					if (score > bestscore)
-					{
-						bestvreg = vreg;
-						bestscore = score;
-					}
-				}
+				bestvreg = vreg;
+				bestscore = score;
 			}
 		}
-
-		if (bestvreg)
-			break;
-		if (conflicts_with)
+		else if (vreg)
 		{
 			tracef(
 			    'R',
-			    "R: cannot find a register to spill which conflicts with %%%d, "
-			    "so widening search\n",
-			    conflicts_with->id);
-			conflicts_with = NULL;
+			    "R: ignoring %%%d for spill with transit %d and spill %d\n",
+			    vreg->id, vreg->in_transit, vreg->is_spilt);
 		}
-		else
-			fatal("cannot find a register to spill");
 	}
+
+	if (!bestvreg)
+		fatal("cannot find a register to spill");
 
 	tracef('R', "R: selected %%%d for spilling\n", bestvreg->id);
 	bestvreg->is_spilt = true;
@@ -303,72 +302,105 @@ static void spill_conflicting_register(struct vreg* conflicts_with)
 static bool colour_graph(void)
 {
 	int i, j, k;
+	int stacked;
+	bool spilled;
 
 	register_stack.count = 0;
-	for (i = 0; i < vreg_count; i++)
+	do
 	{
-		struct vreg* vreg = all_vregs.item[i];
-		if (vreg)
+		stacked = 0;
+		spilled = false;
+		for (i = 0; i < vreg_count; i++)
 		{
-			size_t bitoffset = i * vreg_count;
-			int qvalue = 0;
-			int pvalue = burm_register_class_p_table[vreg->regclass];
-
-			for (j = 0; j < vreg_count; j++)
+			struct vreg* vreg = all_vregs.item[i];
+			if (vreg && !vreg->is_spilt)
 			{
-				if ((i != j) && bitset_get(&interference_graph, bitoffset + j))
-				{
-					struct vreg* other = all_vregs.item[j];
-					if (other)
-						qvalue += burm_register_class_q_table
-						    [(vreg->regclass * BURM_REGISTER_CLASS_COUNT)
-						     + other->regclass];
-				}
-			}
+				size_t bitoffset = i * vreg_count;
+				int qvalue = 0;
+				int pvalue = burm_register_class_p_table[vreg->regclass];
+				int count;
 
-			if (qvalue != 0)
-			{
-				tracef(
-				    'R',
-				    "R: vreg %%%d of class %s has qvalue %d and pvalue %d and "
-				    "intersects with ",
-				    vreg->id, render_regclass(vreg->regclass), qvalue, pvalue);
-				for (k = 0; k < vreg_count; k++)
+				assert(!vreg->coalesced_with || (vreg->coalesced_with == vreg));
+				for (j = 0; j < vreg_count; j++)
 				{
-					if (bitset_get(
-					        &interference_graph, vreg->id * vreg_count + k))
+					if (bitset_get(&interference_graph, bitoffset + j))
 					{
-						struct vreg* other = all_vregs.item[k];
-						tracef('R', " %s", render_vreg(other));
+						struct vreg* other = all_vregs.item[j];
+						if (other && !other->is_spilt)
+							qvalue += burm_register_class_q_table
+							    [(vreg->regclass * BURM_REGISTER_CLASS_COUNT)
+							     + other->regclass];
 					}
 				}
-				tracef('R', "\n");
 
-				/* Perform the colourability test. */
-
-				if (qvalue > pvalue)
+				if (qvalue != 0)
 				{
-					tracef('R', "R: not colourable, spill required\n");
-					spill_conflicting_register(vreg);
-					return false;
-				}
+					tracef(
+					    'R',
+					    "R: vreg %s of class %s has q=%d and p="
+					    "%d "
+					    "and "
+					    "intersects with:",
+					    render_vreg(vreg), render_regclass(vreg->regclass),
+					    qvalue, pvalue);
+					count = 0;
+					for (k = 0; k < vreg_count; k++)
+					{
+						if ((k != vreg->id)
+						    && bitset_get(
+						        &interference_graph, vreg->id * vreg_count + k))
+						{
+							struct vreg* other = all_vregs.item[k];
+							tracef('R', " %s", render_vreg(other));
+							count++;
+						}
+					}
+					tracef('R', " (%d registers) ", count);
 
-				/* Remove this register from the interference matrix. */
+					/* Perform the colourability test. */
 
-				for (k = 0; k < vreg_count; k++)
-				{
-					bitset_set(
-					    &interference_graph, vreg->id * vreg_count + k, false);
-					bitset_set(
-					    &interference_graph, k * vreg_count + vreg->id, false);
+					if (qvalue > pvalue)
+					{
+						tracef('R', "\n");
+						spilled = true;
+					}
+					else
+					{
+						/* Stack this register and remove it from the
+						 * interference matrix.
+						 */
+
+						tracef('R', "STACKING\n");
+						stacked++;
+						array_push(&register_stack, vreg);
+						for (k = 0; k < vreg_count; k++)
+						{
+							bitset_set(
+							    &interference_graph, vreg->id * vreg_count + k,
+							    false);
+							bitset_set(
+							    &interference_graph, k * vreg_count + vreg->id,
+							    false);
+						}
+					}
 				}
 			}
 		}
-	}
+		tracef(
+		    'R', "R: %s scan with %d stacked\n",
+		    spilled ? "failed" : "successful", stacked);
+	} while (stacked);
 
-	tracef('R', "R: colouring successful\n");
+	/* If we reach the end of the list, we've either stacked everything (in
+	 * which case colouring has succeeded) or else some registers are
+	 * uncolourable. */
 
-	return true;
+	if (spilled)
+		tracef('R', "R: colouring failed\n");
+	else
+		tracef('R', "R: colouring successful\n");
+
+	return !spilled;
 }
 
 #if 0
@@ -449,12 +481,60 @@ static struct hreg* allocate_register(regmask_t used, uint32_t attrs)
 }
 #endif
 
+static void assign_registers(void)
+{
+	int i;
+
+	tracef('R', "R: assigning %d registers\n", register_stack.count);
+	while (register_stack.count != 0)
+	{
+		struct vreg* vreg = array_pop(&register_stack);
+		regbits_t usage = 0;
+
+		assert(!vreg->is_spilt);
+		for (i = 0; i < vreg_count; i++)
+		{
+			if (bitset_get(&interference_graph, vreg->id * vreg_count + i))
+			{
+				struct vreg* other = all_vregs.item[i];
+				if (other->hreg)
+					usage |= other->hreg->usage;
+			}
+		}
+
+		for (i = 0; i < hregs.count; i++)
+		{
+			struct hreg* hreg = hregs.item[i];
+			if (!(hreg->usage & usage)
+			    && (hreg->regclasses & (1 << vreg->regclass)))
+			{
+				tracef(
+				    'R', "R: assigning %s to %s\n", hreg->id,
+				    render_vreg(vreg));
+				vreg->hreg = hreg;
+				break;
+			}
+		}
+		if (!vreg->hreg)
+			fatal(
+			    "failed to get a register for %s with class %s; usage "
+			    "bitmap "
+			    "%x",
+			    render_vreg(vreg), render_regclass(vreg->regclass), usage);
+	}
+}
+
 static bool iterate(void)
 {
 	construct_interference_graph();
 	if (!colour_graph())
+	{
+		spill_conflicting_register();
 		return false;
+	}
 
+	construct_interference_graph();
+	assign_registers();
 	return true;
 }
 

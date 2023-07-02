@@ -8,7 +8,7 @@ struct hreg
 	const char* id;
 	const struct burm_register_data* brd;
 	regclasses_t regclasses;
-	uint32_t usage;
+	regbits_t usage;
 };
 
 struct congruence
@@ -35,7 +35,9 @@ struct vreg
 	int min_hop;
 	int max_hop;
 	int use_count;
+    int interference_count;
 	bool is_spilt;
+    struct hreg* hreg;
 };
 
 extern void clear_registers(void);
