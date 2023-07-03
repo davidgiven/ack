@@ -132,6 +132,7 @@ extern void platform_calculate_offsets(void);
 extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
 extern const char* platform_label(const char* label);
+extern void platform_copy(struct hreg* src, struct hreg* dest);
 
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;

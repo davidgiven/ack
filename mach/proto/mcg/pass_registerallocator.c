@@ -501,10 +501,17 @@ static void assign_registers(void)
 			if (!(hreg->usage & usage)
 			    && (hreg->regclasses & (1 << vreg->regclass)))
 			{
+				struct vreg* v = vreg;
+
 				tracef(
 				    'R', "R: assigning %s to %s\n", hreg->id,
 				    render_vreg(vreg));
-				vreg->hreg = hreg;
+
+				while (v)
+				{
+					v->hreg = hreg;
+					v = v->next_coalesced_register;
+				}
 				break;
 			}
 		}

@@ -3,26 +3,26 @@
 
 struct local
 {
-    int size;
-    int offset;
-    bool is_register;
+	int size;
+	int offset;
+	bool is_register;
 };
 
 struct procedure
 {
-    const char* name;
-    struct basicblock* entry;
-    struct basicblock* exit;
-    int locals_size;
-    int spills_size;
-    int saved_size;
-    int fp_to_ab; /* argument base (indexes up) */
-    int fp_to_lb; /* locals base (indexes down) */
-    int fp_to_sb; /* spill base (indexes up) */
-    int fp_to_rb; /* saved registers base (indexes up) */
-    ARRAYOF(struct basicblock) blocks;
-    IMAPOF(struct local) locals;
-    ARRAYOF(struct hreg) usedregs;
+	const char* name;
+	struct basicblock* entry;
+	struct basicblock* exit;
+	int locals_size;
+	int spills_size;
+	int saved_size;
+	int fp_to_ab; /* argument base (indexes up) */
+	int fp_to_lb; /* locals base (indexes down) */
+	int fp_to_sb; /* spill base (indexes up) */
+	int fp_to_rb; /* saved registers base (indexes up) */
+	ARRAYOF(struct basicblock) blocks;
+	IMAPOF(struct local) locals;
+	ARRAYOF(struct hreg) usedregs;
 };
 
 extern void procedure_compile(struct procedure* proc);

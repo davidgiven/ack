@@ -121,6 +121,33 @@ massage_offset(struct hop* hop, int* offset, int min, int max)
 		return "iy";
 }
 
+void platform_copy(struct hreg* src, struct hreg* dest)
+{
+	regclasses_t type = src->regclasses & TYPE_ATTRS;
+	switch (type)
+	{
+		case burm_int_ATTR:
+		case burm_float_ATTR:
+		{
+			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			break;
+		}
+
+		case burm_long_ATTR:
+		case burm_double_ATTR:
+		{
+			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			fprintf(outputfile, "exx\n");
+			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			fprintf(outputfile, "exx\n");
+			break;
+		}
+
+		default:
+			fatal("cannot copy %s -> %s", src->id, dest->id);
+	}
+}
+
 #if 0
 struct hop* platform_load(struct basicblock* bb, struct move* move)
 {

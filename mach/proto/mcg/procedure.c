@@ -126,35 +126,23 @@ static void emit_procedure(struct procedure* proc)
 		{
 			struct hop* hop = bb->hops.item[j];
 
-            #if 0
-			for (k = 0; k < hop->consumes.count; k++)
+			if (hop->is_copy)
 			{
-				struct move* m = hop->consumes.item[k];
-                if (m->hreg)
-                {
-                    assert(!m->other);
-
-                    fprintf(
-                        outputfile, "%s", hop_render(platform_load(hop->bb, m)));
-                        }
+				struct hreg* src = hop->ins.item[0]->hreg;
+				struct hreg* dest = hop->outs.item[0]->hreg;
+				if (src && !dest)
+					fprintf(
+					    outputfile, "spill %s -> %%%d\n", src->id,
+					    hop->ins.item[0]->id);
+				else if (!src && dest)
+					fprintf(
+					    outputfile, "reload %%%d -> %s\n",
+					    hop->outs.item[0]->id, dest->id);
+				else if ((src && dest) && (src != dest))
+					platform_copy(src, dest);
 			}
-            #endif
-
-			fprintf(outputfile, "%s", hop_render(hop));
-
-            #if 0
-			for (k = 0; k < hop->produces.count; k++)
-			{
-				struct move* m = hop->produces.item[k];
-                if (m->hreg)
-                {
-				assert(!m->other);
-
-				fprintf(
-				    outputfile, "%s", hop_render(platform_store(hop->bb, m)));
-                   }
-			}
-            #endif
+			else
+				fprintf(outputfile, "%s", hop_render(hop));
 		}
 	}
 }
@@ -231,7 +219,7 @@ void procedure_compile(struct procedure* proc)
 	print_hops('7');
 	pass_create_transit_vregs();
 	pass_live_vreg_analysis();
-	//pass_find_congruence_groups();
+	// pass_find_congruence_groups();
 	print_hops('8');
 	pass_register_allocator();
 	pass_add_prologue_epilogue();
@@ -244,8 +232,8 @@ void procedure_compile(struct procedure* proc)
 	if (dominance_dot_file)
 		write_dominance_graph(proc->name);
 
-    clear_hops();
-    clear_registers();
+	clear_hops();
+	clear_registers();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

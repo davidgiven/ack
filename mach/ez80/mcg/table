@@ -549,7 +549,8 @@ PATTERNS
         cost 5;
 
     out:(float)reg = NOP.F(in:(float)reg)
-        cost 4;
+        with %out == %in
+        cost 1;
 
     out:(float)reg = COPYI.F(in:(int)reg)
         emit "push %in"
