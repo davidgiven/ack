@@ -133,6 +133,8 @@ extern struct hop* platform_prologue(void);
 extern struct hop* platform_epilogue(void);
 extern const char* platform_label(const char* label);
 extern void platform_copy(struct hreg* src, struct hreg* dest);
+extern void platform_spill(struct hreg* hreg, int lboffset);
+extern void platform_reload(struct hreg* hreg, int lboffset);
 
 extern FILE* outputfile;
 extern FILE* dominance_dot_file;

@@ -131,13 +131,13 @@ static void emit_procedure(struct procedure* proc)
 				struct hreg* src = hop->ins.item[0]->hreg;
 				struct hreg* dest = hop->outs.item[0]->hreg;
 				if (src && !dest)
-					fprintf(
-					    outputfile, "spill %s -> %%%d\n", src->id,
-					    hop->ins.item[0]->id);
+					platform_spill(
+					    src,
+					    hop->outs.item[0]->spillslot + current_proc->fp_to_sb);
 				else if (!src && dest)
-					fprintf(
-					    outputfile, "reload %%%d -> %s\n",
-					    hop->outs.item[0]->id, dest->id);
+					platform_reload(
+					    dest,
+					    hop->ins.item[0]->spillslot + current_proc->fp_to_sb);
 				else if ((src && dest) && (src != dest))
 					platform_copy(src, dest);
 			}

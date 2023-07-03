@@ -15,6 +15,7 @@ struct vreg* new_vreg(void)
 {
 	struct vreg* vreg = mempool_alloc(&regpool, sizeof *vreg);
 	vreg->id = vreg_count++;
+    vreg->spillslot = -1;
 	return vreg;
 }
 

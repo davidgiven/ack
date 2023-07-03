@@ -276,13 +276,6 @@ static void spill_conflicting_register(void)
 				bestscore = score;
 			}
 		}
-		else if (vreg)
-		{
-			tracef(
-			    'R',
-			    "R: ignoring %%%d for spill with transit %d and spill %d\n",
-			    vreg->id, vreg->in_transit, vreg->is_spilt);
-		}
 	}
 
 	if (!bestvreg)
@@ -396,45 +389,22 @@ static bool colour_graph(void)
 	return !spilled;
 }
 
-#if 0
-static int
-pack_hreg(int stacksize, int size, uint32_t attr, struct congruence* g)
-{
-	if ((g->type & attr) && (g->offset == -1))
-	{
-		g->offset = stacksize;
-		stacksize += size;
-	}
-
-	return stacksize;
-}
-
 static int pack_stackframe(int stacksize, int size, uint32_t attr)
 {
 	int i, j, k;
 
-	for (i = 0; i < dominance.preorder.count; i++)
+	for (i = 0; i < all_vregs.count; i++)
 	{
-		struct basicblock* bb = dominance.preorder.item[i];
-
-		for (j = 0; j < bb->hops.count; j++)
-		{
-			struct hop* hop = bb->hops.item[j];
-
-			for (k = 0; k < hop->produces.count; k++)
-			{
-				struct move* m = hop->produces.item[k];
-				if (!m->other)
-					stacksize
-					    = pack_hreg(stacksize, size, attr, m->vreg->congruence);
-			}
-
-			for (k = 0; k < hop->consumes.count; k++)
-			{
-				struct move* m = hop->consumes.item[k];
-				if (!m->other)
-					stacksize
-					    = pack_hreg(stacksize, size, attr, m->vreg->congruence);
+        struct vreg* vreg = all_vregs.item[i];
+        if (vreg && !vreg->hreg)
+        {
+            int8_t sizebits = burm_register_class_data[ vreg->regclass].sizebits;
+            assert(sizebits != -1);
+            if ((vreg->spillslot == -1) && (sizebits & attr))
+            {
+                vreg->spillslot = stacksize;
+                tracef('R', "R: %%%d spilt to slot %d\n", vreg->id, vreg->spillslot);
+                stacksize += size;
 			}
 		}
 	}
@@ -452,27 +422,6 @@ static void layout_stack_frame(void)
 	current_proc->spills_size = stacksize;
 	tracef('R', "R: spill size is %d bytes\n", stacksize);
 }
-
-static struct hreg* allocate_register(regmask_t used, uint32_t attrs)
-{
-	int i;
-
-	/* Find an unused register of the appropriate type. */
-
-	for (i = 0; i < hregs.count; i++)
-	{
-		struct hreg* hreg = hregs.item[i];
-		if (!(hreg->usage & used) && ((hreg->attrs & attrs) == attrs))
-		{
-			/* This one is unused. Use it. */
-
-			return hreg;
-		}
-	}
-
-	return NULL;
-}
-#endif
 
 static void assign_registers(void)
 {
@@ -549,6 +498,8 @@ void pass_register_allocator(void)
 		tracef('R', "R: beginning graph colouring iteration %d\n", count);
 		count++;
 	} while (!iterate());
+    
+    layout_stack_frame();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

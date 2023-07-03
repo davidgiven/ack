@@ -92,27 +92,26 @@ struct hop* platform_epilogue(void)
 	return hop;
 }
 
-static const char*
-massage_offset(struct hop* hop, int* offset, int min, int max)
+static const char* massage_offset(int* offset, int min, int max)
 {
 	if (*offset > max)
 	{
-		hop_add_insel(hop, "lea ix, iy+%d", max);
+		fprintf(outputfile, "lea ix, iy+%d\n", max);
 		*offset -= max;
 		while (*offset > max)
 		{
-			hop_add_insel(hop, "lea ix, ix+%d", max);
+			fprintf(outputfile, "lea ix, ix+%d\n", max);
 			*offset -= max;
 		}
 		return "ix";
 	}
 	else if (*offset < min)
 	{
-		hop_add_insel(hop, "lea ix, iy+%d", min);
+		fprintf(outputfile, "lea ix, iy+%d\n", min);
 		*offset -= min;
 		while (*offset < min)
 		{
-			hop_add_insel(hop, "lea ix, ix+%d", min);
+			fprintf(outputfile, "lea ix, ix+%d\n", min);
 			*offset -= min;
 		}
 		return "ix";
@@ -129,16 +128,22 @@ void platform_copy(struct hreg* src, struct hreg* dest)
 		case burm_int_ATTR:
 		case burm_float_ATTR:
 		{
-			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			fprintf(
+			    outputfile, "push %s\npop %s\n", src->brd->names[0],
+			    dest->brd->names[0]);
 			break;
 		}
 
 		case burm_long_ATTR:
 		case burm_double_ATTR:
 		{
-			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			fprintf(
+			    outputfile, "push %s\npop %s\n", src->brd->names[0],
+			    dest->brd->names[0]);
 			fprintf(outputfile, "exx\n");
-			fprintf(outputfile, "push %s\npop %s\n", src->id, dest->id);
+			fprintf(
+			    outputfile, "push %s\npop %s\n", src->brd->names[0],
+			    dest->brd->names[0]);
 			fprintf(outputfile, "exx\n");
 			break;
 		}
@@ -148,95 +153,75 @@ void platform_copy(struct hreg* src, struct hreg* dest)
 	}
 }
 
-#if 0
-struct hop* platform_load(struct basicblock* bb, struct move* move)
+void platform_spill(struct hreg* hreg, int lboffset)
 {
-	struct hop* hop = new_hop(bb, NULL);
+	regclasses_t type = hreg->regclasses & TYPE_ATTRS;
+	switch (type)
+	{
+		case burm_int_ATTR:
+		case burm_float_ATTR:
+		{
+			const char* reg = massage_offset(&lboffset, -128, 127);
+			fprintf(
+			    outputfile, "ld (%s+%d), %s\n", reg, lboffset,
+			    hreg->brd->names[0]);
+			break;
+		}
 
-    regclasses_t type = move->hreg->regclasses & TYPE_ATTRS;
-    int offset = 0; //move->vreg->congruence->offset + current_proc->fp_to_sb;
+		case burm_long_ATTR:
+		case burm_double_ATTR:
+		{
+			const char* reg = massage_offset(&lboffset, -128, 124);
+			fprintf(
+			    outputfile, "ld (%s+%d), %s\n", reg, lboffset,
+			    hreg->brd->names[0]);
+			fprintf(outputfile, "exx\n");
+			fprintf(
+			    outputfile, "ld (%s+%d), %s\n", reg, lboffset + 3,
+			    hreg->brd->names[0]);
+			fprintf(outputfile, "exx\n");
+			break;
+		}
 
-    assert(!move->other);
-
-    tracef(
-        'R', "R: load stack slot %d into %s for %%%d\n",
-        move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
-
-    switch (type)
-    {
-        case burm_int_ATTR:
-        case burm_float_ATTR:
-        {
-            const char* reg = massage_offset(hop, &offset, -128, 127);
-            hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
-            break;
-        }
-
-        case burm_long_ATTR:
-        case burm_double_ATTR:
-        {
-            const char* reg = massage_offset(hop, &offset, -128, 124);
-            hop_add_insel(hop, "exx");
-            hop_add_insel(
-                hop, "ld %H, (%s+%d)", move->hreg, reg, offset + 3);
-            hop_add_insel(hop, "exx");
-            hop_add_insel(hop, "ld %H, (%s+%d)", move->hreg, reg, offset);
-            break;
-        }
-
-        default:
-            fatal(
-                "cannot load %%%d with attrs %s", move->vreg->id,
-                render_regclasses(move->hreg->regclasses));
-    }
-
-	return hop;
+		default:
+			fatal("cannot spill %s", hreg->id);
+	}
 }
 
-struct hop* platform_store(struct basicblock* bb, struct move* move)
+void platform_reload(struct hreg* hreg, int lboffset)
 {
-	struct hop* hop = new_hop(bb, NULL);
+	regclasses_t type = hreg->regclasses & TYPE_ATTRS;
+	switch (type)
+	{
+		case burm_int_ATTR:
+		case burm_float_ATTR:
+		{
+			const char* reg = massage_offset(&lboffset, -128, 127);
+			fprintf(
+			    outputfile, "ld %s, (%s+%d)\n", hreg->brd->names[0], reg,
+			    lboffset);
+			break;
+		}
 
-    regclasses_t type = move->hreg->regclasses & TYPE_ATTRS;
-    int offset = 0; //move->vreg->congruence->offset + current_proc->fp_to_sb;
+		case burm_long_ATTR:
+		case burm_double_ATTR:
+		{
+			const char* reg = massage_offset(&lboffset, -128, 124);
+			fprintf(
+			    outputfile, "ld %s, (%s+%d)\n", hreg->brd->names[0], reg,
+			    lboffset);
+			fprintf(outputfile, "exx\n");
+			fprintf(
+			    outputfile, "ld %s, (%s+%d)\n", hreg->brd->names[0], reg,
+			    lboffset + 3);
+			fprintf(outputfile, "exx\n");
+			break;
+		}
 
-    assert(!move->other);
-
-    tracef(
-        'R', "R: store stack slot %d from %s for %%%d\n",
-        move->vreg->congruence->offset, move->hreg->id, move->vreg->id);
-
-    switch (type)
-    {
-        case burm_int_ATTR:
-        case burm_float_ATTR:
-        {
-            const char* reg = massage_offset(hop, &offset, -128, 127);
-            hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
-            break;
-        }
-
-        case burm_long_ATTR:
-        case burm_double_ATTR:
-        {
-            const char* reg = massage_offset(hop, &offset, -128, 124);
-            hop_add_insel(hop, "ld (%s+%d), %H", reg, offset, move->hreg);
-            hop_add_insel(hop, "exx");
-            hop_add_insel(
-                hop, "ld (%s+%d), %H", reg, offset + 3, move->hreg);
-            hop_add_insel(hop, "exx");
-            break;
-        }
-
-        default:
-            fatal(
-                "cannot store %%%d with attrs %s", move->vreg->id,
-                render_regclasses(move->hreg->regclasses));
-    }
-
-	return hop;
+		default:
+			fatal("cannot spill %s", hreg->id);
+	}
 }
-#endif
 
 const char* platform_label(const char* label)
 {

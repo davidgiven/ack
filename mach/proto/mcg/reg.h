@@ -37,6 +37,7 @@ struct vreg
 	int use_count;
     int interference_count;
 	bool is_spilt;
+    int spillslot;
     struct hreg* hreg;
 };
 
