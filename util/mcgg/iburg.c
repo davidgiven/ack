@@ -378,6 +378,34 @@ struct regattr* getregattr(const char* id)
 	return p;
 }
 
+void validate_registers(void)
+{
+	int i, j;
+
+	/* For every register class, determine whether there is a unique size
+	 * associated with it. */
+
+	for (i = 0; i < registerattrs.count; i++)
+	{
+		struct regattr* rc = registerattrs.item[i].right;
+		for (j = 0; j < registers.count; j++)
+		{
+			struct reg* reg = registers.item[j].right;
+			if (reg->attrs & (1 << i))
+			{
+				uint8_t size = reg->attrs & TYPE_ATTRS;
+				if (size)
+				{
+					if (rc->sizebits && (rc->sizebits != size))
+						rc->sizebits = -1;
+					else
+						rc->sizebits = size;
+				}
+			}
+		}
+	}
+}
+
 /* nonterm - create a new terminal id, if necessary */
 Nonterm nonterm(const char* id, bool allocate)
 {
@@ -547,6 +575,9 @@ Rule rule(const struct terminfo* ti, Tree pattern)
 		if (!r->attr)
 			yyerror(
 			    "'%s' doesn't seem to be a known register attribute", ti->attr);
+        if (r->attr->sizebits == -1)
+            yyerror(
+                "'%s' has an ambiguous size and can't be used here", ti->attr);
 	}
 
 	return r;
@@ -648,25 +679,24 @@ static void emitregisterattrs(void)
 		printh("16");
 	else if (registerattrs.count <= 32)
 		printh("32");
-	else if (registerattrs.count <= 64)
-		printh("64");
 	else
 		fatal("too many register classes");
 	printh("_t regclasses_t;\n");
 
-    printh("#define BURM_REGISTER_CLASS_COUNT %d\n", registerattrs.count);
+	printh("#define BURM_REGISTER_CLASS_COUNT %d\n", registerattrs.count);
 
-	print("const char* %Pregister_class_names[] = {\n");
+	print("const struct %Pregister_class_data %Pregister_class_data[] = {\n");
 	for (i = 0; i < registerattrs.count; i++)
 	{
 		struct regattr* rc = registerattrs.item[i].right;
 		assert(rc->number == i);
 
-		print("%1\"%s\",\n", rc->name);
+		print("%1{ \"%s\", %d },\n", rc->name, rc->sizebits);
 		if (rc->number > REGATTR_DOUBLE)
 			printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
 	}
 	print("};\n\n");
+
 	printh("\n");
 }
 
@@ -757,7 +787,7 @@ static void emitregisters(void)
 		fatal("too many registers");
 	printh("_t regbits_t;\n");
 
-    printh("#define BURM_REGISTER_COUNT %d\n", registers.count);
+	printh("#define BURM_REGISTER_COUNT %d\n", registers.count);
 
 	for (i = 0; i < registers.count; i++)
 	{
@@ -1327,7 +1357,7 @@ static void emit_input_regs(Tree node, int* index)
 		if (node->attr)
 			print(
 			    "%1data->constrain_input_reg(%d, %d /* %s */);\n", *index,
-                node->attr->number, node->attr->name);
+			    node->attr->number, node->attr->name);
 	}
 
 	if (!node->left && !node->right)
@@ -1426,8 +1456,8 @@ static void emitinsndata(Rule rules)
 
 		if (r->attr)
 			print(
-			    "%1data->constrain_output_reg(%d /* %s */);\n",
-			    r->attr->number, r->attr->name);
+			    "%1data->constrain_output_reg(%d /* %s */);\n", r->attr->number,
+			    r->attr->name);
 
 		{
 			int index = 0;

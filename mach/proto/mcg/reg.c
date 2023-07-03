@@ -30,7 +30,7 @@ struct hreg* new_hreg(const struct burm_register_data* brd)
 
 const char* render_regclass(regclass_t regclass)
 {
-	return burm_register_class_names[regclass];
+	return burm_register_class_data[regclass].name;
 }
 
 const char* render_regclasses(uint32_t attrs)

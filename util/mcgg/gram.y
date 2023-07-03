@@ -69,6 +69,7 @@ extern int yylex(void);
 spec
     : optionaloptions
       REGISTERS registers
+        { validate_registers(); }
       DECLARATIONS declarations
       PATTERNS patterns
 	;
