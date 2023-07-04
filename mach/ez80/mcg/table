@@ -501,7 +501,7 @@ PATTERNS
         cost 12;
 
     out:(hlhlreg)reg = FROMSI.L(left:(hlreg)reg)
-        emit "call .cii36"
+        emit "call .extendw"
         cost 12;
 
     out:(long)reg = FROMSL.L(left:(long)reg)

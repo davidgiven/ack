@@ -1,5 +1,5 @@
 
-/* 8080 desciptor table for ACK target optimizer */
+/* ez80 desciptor table for ACK target optimizer */
 
 MAXOP 2;
 
@@ -7,6 +7,8 @@ MAXOP 2;
 
 X, Y, Z             { TRUE };
 %%;
+
+jp X : labdef X         -> labdef X ;
 
 
 %%;

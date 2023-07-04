@@ -1,9 +1,11 @@
 #
 #include "asm.h"
 
+! Extends HLHL.
+
 .sect .text
-.define .cii36
-.cii36:
+.define .extendw
+.extendw:
 	push de
 
 	ld de, 0

@@ -6,13 +6,14 @@
     exp $_m_a_i_n
     pro $_m_a_i_n, 0
 
-oneshort
 onebyte
-    rom 1
+    rom 1I1
+oneshort
+	rom 1
 moneshort
-    rom 65535
+    rom -1
 monebyte
-    rom 255
+    rom 255I1
 
     /* Positive byte->word */
 
@@ -52,8 +53,7 @@ monebyte
     loc 1
     loc W*2
     cii
-    loc 0
-    loc 1
+    ldc 1
 	cmu W*2
 	zeq *3
 
@@ -68,8 +68,7 @@ monebyte
     loc 1
     loc W*2
     cii
-    loc -1
-    loc -1
+    ldc -1
 	cmu W*2
 	zeq *4
 
@@ -82,8 +81,7 @@ monebyte
     loc W
     loc W*2
     cii
-    loc 0
-    loc 1
+    ldc 1
 	cmu W*2
 	zeq *5
 
@@ -91,14 +89,13 @@ monebyte
     cal $fail
 5
 
-    /* Negative word->short */
+    /* Negative word->dword */
 
     loe moneshort
     loc W
     loc W*2
     cii
-    loc -1
-    loc -1
+    ldc -1
 	cmu W*2
 	zeq *6
 
