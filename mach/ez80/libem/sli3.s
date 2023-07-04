@@ -3,6 +3,8 @@
 
 .sect .text
 
+! Shift HL left by C bits.
+
 .define .sli3
 .sli3:
 	push af
