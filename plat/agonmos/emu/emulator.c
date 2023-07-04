@@ -133,7 +133,13 @@ void showregs(void)
 	    cpu.registers.HL, cpu.registers.BC, cpu.registers.DE, cpu.registers.IX,
 	    cpu.registers.IY);
 	printf(
-	    "          hl:%06x bc:%06x de:%06x PC:%06x SP:%06x\n",
+	    "%c%c0%c0%c%c%c  hl:%06x bc:%06x de:%06x PC:%06x SP:%06x\n",
+		(cpu.registers.F & (1<<7)) ? 'S' : 's',
+		(cpu.registers.F & (1<<6)) ? 'Z' : 'z',
+		(cpu.registers.F & (1<<4)) ? 'H' : 'h',
+		(cpu.registers.F & (1<<2)) ? 'P' : 'p',
+		(cpu.registers.F & (1<<1)) ? 'N' : 'n',
+		(cpu.registers.F & (1<<0)) ? 'C' : 'c',
 	    cpu.registers._HL, cpu.registers._BC, cpu.registers._DE,
 	    cpu.registers.PC, cpu.registers.SPL);
 
