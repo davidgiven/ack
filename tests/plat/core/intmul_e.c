@@ -19,7 +19,7 @@ void _m_a_i_n(void)
     ASSERT((-3  * two) == -6);
 
     ASSERT(((unsigned int)two * (unsigned int)one)      == 2);
-    ASSERT(((unsigned int)two * (unsigned int)minusone) == -1);
+    ASSERT(((unsigned int)two * (unsigned int)minusone) == -2);
 
     ASSERT(((unsigned int)two * (unsigned int) 3) == 6);
     ASSERT(((unsigned int)two * (unsigned int)-3) == -6);
