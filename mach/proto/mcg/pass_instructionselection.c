@@ -142,7 +142,7 @@ static void emit(struct insn* insn)
     current_insn = old;
 }
 
-static struct insn* walk_instructions(struct burm_node* node, int goal)
+static struct insn* walk_instructions(struct burm_node* node, int goal, bool top)
 {
     struct insn* insn = calloc(1, sizeof(*insn));
     int i;
@@ -167,7 +167,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
             if (!children[i])
                 break;
 
-            insn->children[i] = walk_instructions(children[i], nts[i]);
+            insn->children[i] = walk_instructions(children[i], nts[i], false);
             insn->num_children++;
             i++;
         }
@@ -182,6 +182,7 @@ static struct insn* walk_instructions(struct burm_node* node, int goal)
         if (!insn->insndata->is_fragment)
         {
             insn->hop = current_hop = new_hop(current_bb, insn->ir);
+            current_hop->top = top;
             current_hop->insndata = insn->insndata;
             emit(insn);
 
@@ -290,7 +291,7 @@ static void select_instructions(void)
             if (!insnno)
                 burm_panic_cannot_match(shadow);
 
-            walk_instructions(shadow, burm_stmt_NT);
+            walk_instructions(shadow, burm_stmt_NT, true);
         }
 	}
 }

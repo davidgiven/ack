@@ -68,6 +68,7 @@ static void rewrite_hops(struct basicblock* bb)
 				struct vreg* newvreg = new_vreg();
 				struct constraint* constraint = get_constraint(hop, oldvreg);
 				newvreg->regclass = constraint->regclass;
+				oldvreg->regclass = find_generic_class_for(oldvreg->regclass);
 				oldvreg->in_transit = true;
 
 				replace_vreg(hop, oldvreg, newvreg);
@@ -81,6 +82,7 @@ static void rewrite_hops(struct basicblock* bb)
 				struct vreg* oldvreg = hop->outs.item[i];
 				struct vreg* newvreg = new_vreg();
 				newvreg->regclass = oldvreg->regclass;
+				oldvreg->regclass = find_generic_class_for(oldvreg->regclass);
 				oldvreg->in_transit = true;
 
 				replace_vreg(hop, oldvreg, newvreg);

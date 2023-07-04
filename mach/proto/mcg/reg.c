@@ -15,7 +15,7 @@ struct vreg* new_vreg(void)
 {
 	struct vreg* vreg = mempool_alloc(&regpool, sizeof *vreg);
 	vreg->id = vreg_count++;
-    vreg->spillslot = -1;
+	vreg->spillslot = -1;
 	return vreg;
 }
 
@@ -74,5 +74,32 @@ const char* render_vreg(struct vreg* vreg)
 
 	return renderbuf.ptr;
 }
+
+/* Given a register class, finds the most generic compatible class for it. */
+
+regclass_t find_generic_class_for(regclass_t regclass)
+{
+	int sizebits = burm_register_class_data[regclass].sizebits;
+	switch (sizebits)
+	{
+		case burm_int_ATTR:
+			return burm_int_CLASS;
+		case burm_float_ATTR:
+			return burm_float_CLASS;
+		case burm_long_ATTR:
+			return burm_long_CLASS;
+		case burm_double_ATTR:
+			return burm_double_CLASS;
+	}
+	fatal("register class %x has an ambiguous or unset size");
+}
+
+struct vreg* root_vreg_of(struct vreg* vreg)
+{
+	if (vreg->coalesced_with)
+		return vreg->coalesced_with;
+	return vreg;
+}
+
 
 /* vim: set sw=4 ts=4 expandtab : */

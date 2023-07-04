@@ -16,11 +16,6 @@
 #include "smap.h"
 #include "mcgg.h"
 
-#define REGATTR_INT 0
-#define REGATTR_LONG 1
-#define REGATTR_FLOAT 2
-#define REGATTR_DOUBLE 3
-
 int maxcost = SHRT_MAX / 2;
 
 FILE* infp = NULL;
@@ -173,13 +168,13 @@ int main(int argc, char* argv[])
 
 	{
 		struct regattr* attr = makeregattr("int");
-		assert(attr->number == REGATTR_INT);
+		assert(attr->number == burm_int_CLASS);
 		attr = makeregattr("long");
-		assert(attr->number == REGATTR_LONG);
+		assert(attr->number == burm_long_CLASS);
 		attr = makeregattr("float");
-		assert(attr->number == REGATTR_FLOAT);
+		assert(attr->number == burm_float_CLASS);
 		attr = makeregattr("double");
-		assert(attr->number == REGATTR_DOUBLE);
+		assert(attr->number == burm_double_CLASS);
 	}
 
 	yyin = infp;
@@ -692,8 +687,11 @@ static void emitregisterattrs(void)
 		assert(rc->number == i);
 
 		print("%1{ \"%s\", %d },\n", rc->name, rc->sizebits);
-		if (rc->number > REGATTR_DOUBLE)
-			printh("#define %P%s_ATTR (1U<<%d)\n", rc->name, rc->number);
+        if (rc->number > burm_double_CLASS)
+        {
+        printh("#define %P%s_CLASS %d\n", rc->name, rc->number);
+        printh("#define %P%s_ATTR (1U<<%P%s_CLASS)\n", rc->name, rc->name);
+        }
 	}
 	print("};\n\n");
 

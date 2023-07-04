@@ -116,7 +116,7 @@ static void emit_procedure(struct procedure* proc)
 {
 	int i, j, k;
 
-	fprintf(outputfile, "\n.sect .text\n");
+	fprintf(outputfile, "\n\n.sect .text\n");
 	for (i = 0; i < dominance.preorder.count; i++)
 	{
 		struct basicblock* bb = dominance.preorder.item[i];
@@ -125,24 +125,36 @@ static void emit_procedure(struct procedure* proc)
 		for (j = 0; j < bb->hops.count; j++)
 		{
 			struct hop* hop = bb->hops.item[j];
-
 			if (hop->is_copy)
 			{
-				struct hreg* src = hop->ins.item[0]->hreg;
-				struct hreg* dest = hop->outs.item[0]->hreg;
+				struct vreg* srcv = root_vreg_of(hop->ins.item[0]);
+				struct vreg* destv = root_vreg_of(hop->outs.item[0]);
+				struct hreg* src = srcv->hreg;
+				struct hreg* dest = destv->hreg;
 				if (src && !dest)
+				{
+					fprintf(
+					    outputfile, "! spill %%%d -> slot %d\n", srcv->id,
+					    destv->spillslot);
 					platform_spill(
-					    src,
-					    hop->outs.item[0]->spillslot + current_proc->fp_to_sb);
+					    src, destv->spillslot + current_proc->fp_to_sb);
+				}
 				else if (!src && dest)
+				{
+					fprintf(
+					    outputfile, "! reload %%%d -> slot %d\n", destv->id,
+					    srcv->spillslot);
 					platform_reload(
-					    dest,
-					    hop->ins.item[0]->spillslot + current_proc->fp_to_sb);
+					    dest, srcv->spillslot + current_proc->fp_to_sb);
+				}
 				else if ((src && dest) && (src != dest))
 					platform_copy(src, dest);
 			}
 			else
 				fprintf(outputfile, "%s", hop_render(hop));
+
+			if (hop->ir && hop->top)
+				fprintf(outputfile, "! %s\n\n", ir_render(hop->ir));
 		}
 	}
 }

@@ -129,13 +129,6 @@ static void mark_vreg_list_interference(
 	}
 }
 
-static struct vreg* root_vreg(struct vreg* vreg)
-{
-	if (vreg->coalesced_with)
-		return vreg->coalesced_with;
-	return vreg;
-}
-
 static void construct_interference_graph(void)
 {
 	int i, j, k, l;
@@ -167,11 +160,11 @@ static void construct_interference_graph(void)
 			/* Record all used vregs. */
 
 			for (k = 0; k < nins; k++)
-				all_vregs.item[ins[k]->id] = root_vreg(ins[k]);
+				all_vregs.item[ins[k]->id] = root_vreg_of(ins[k]);
 			for (k = 0; k < nthroughs; k++)
-				all_vregs.item[throughs[k]->id] = root_vreg(throughs[k]);
+				all_vregs.item[throughs[k]->id] = root_vreg_of(throughs[k]);
 			for (k = 0; k < nouts; k++)
-				all_vregs.item[outs[k]->id] = root_vreg(outs[k]);
+				all_vregs.item[outs[k]->id] = root_vreg_of(outs[k]);
 
 			/* Each list of registers interferences with itself. */
 
@@ -395,16 +388,18 @@ static int pack_stackframe(int stacksize, int size, uint32_t attr)
 
 	for (i = 0; i < all_vregs.count; i++)
 	{
-        struct vreg* vreg = all_vregs.item[i];
-        if (vreg && !vreg->hreg)
-        {
-            int8_t sizebits = burm_register_class_data[ vreg->regclass].sizebits;
-            assert(sizebits != -1);
-            if ((vreg->spillslot == -1) && (sizebits & attr))
-            {
-                vreg->spillslot = stacksize;
-                tracef('R', "R: %%%d spilt to slot %d\n", vreg->id, vreg->spillslot);
-                stacksize += size;
+		struct vreg* vreg = all_vregs.item[i];
+		if (vreg && !vreg->hreg)
+		{
+			int8_t sizebits = burm_register_class_data[vreg->regclass].sizebits;
+			assert(sizebits != -1);
+			if ((vreg->spillslot == -1) && (sizebits & attr))
+			{
+				vreg->spillslot = stacksize;
+				tracef(
+				    'R', "R: %%%d spilt to slot %d\n", vreg->id,
+				    vreg->spillslot);
+				stacksize += size;
 			}
 		}
 	}
@@ -498,8 +493,8 @@ void pass_register_allocator(void)
 		tracef('R', "R: beginning graph colouring iteration %d\n", count);
 		count++;
 	} while (!iterate());
-    
-    layout_stack_frame();
+
+	layout_stack_frame();
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

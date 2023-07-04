@@ -2,6 +2,7 @@
 
 static int next_id = 0;
 static struct mempool irpool;
+static struct buffer renderbuf;
 
 void clear_ir(void)
 {
@@ -113,28 +114,28 @@ struct ir* ir_find(struct ir* ir, int opcode)
 	return ir_walk(ir, finder_cb, &opcode);
 }
 
-static void print_expr(char k, const struct ir* ir)
+static void render_expr(const struct ir* ir)
 {
-	tracef(k, "%s", ir_data[ir->opcode].name);
+	buffer_appendf(&renderbuf, "%s", ir_data[ir->opcode].name);
 	if (ir->type)
-		tracef(k, ".%c", ir->type);
+		buffer_appendf(&renderbuf, ".%c", ir->type);
 	else if (ir->size)
-		tracef(k, "%d", ir->size);
-	tracef(k, "(");
+		buffer_appendf(&renderbuf, "%d", ir->size);
+	buffer_appendf(&renderbuf, "(");
 
 	switch (ir->opcode)
 	{
 		case IR_CONST:
 		case IR_LOCAL:
-			tracef(k, "%d", ir->u.ivalue);
+			buffer_appendf(&renderbuf, "%d", ir->u.ivalue);
 			break;
 
 		case IR_LABEL:
-			tracef(k, "%s", ir->u.lvalue);
+			buffer_appendf(&renderbuf, "%s", ir->u.lvalue);
 			break;
 
 		case IR_BLOCK:
-			tracef(k, "%s", ir->u.bvalue->name);
+			buffer_appendf(&renderbuf, "%s", ir->u.bvalue->name);
 			break;
 
 		case IR_PHI:
@@ -144,9 +145,9 @@ static void print_expr(char k, const struct ir* ir)
 			for (i = 0; i < ir->u.phivalue.count; i++)
 			{
 				if (i > 0)
-					tracef(k, ", ");
-				tracef(
-				    k, "%s=>$%d", ir->u.phivalue.item[i].left->name,
+					buffer_appendf(&renderbuf, ", ");
+				buffer_appendf(&renderbuf,
+				    "%s=>$%d", ir->u.phivalue.item[i].left->name,
 				    ir->u.phivalue.item[i].right->id);
 			}
 			break;
@@ -156,28 +157,34 @@ static void print_expr(char k, const struct ir* ir)
 			if (ir->left)
 			{
 				if (ir->left->root != ir->root)
-					tracef(k, "$%d", ir->left->id);
+					buffer_appendf(&renderbuf, "$%d", ir->left->id);
 				else
-					print_expr(k, ir->left);
+					render_expr(ir->left);
 			}
 			if (ir->right)
 			{
-				tracef(k, ", ");
+				buffer_appendf(&renderbuf, ", ");
 				if (ir->right->root != ir->root)
-					tracef(k, "$%d", ir->right->id);
+					buffer_appendf(&renderbuf, "$%d", ir->right->id);
 				else
-					print_expr(k, ir->right);
+					render_expr(ir->right);
 			}
 	}
 
-	tracef(k, ")");
+	buffer_appendf(&renderbuf, ")");
+}
+
+const char* ir_render(const struct ir* ir)
+{
+	buffer_clear(&renderbuf);
+    buffer_appendf(&renderbuf, "$%d = ", ir->id);
+    render_expr(ir);
+    return renderbuf.ptr;
 }
 
 void ir_print(char k, const struct ir* ir)
 {
-	tracef(k, "%c: $%d = ", k, ir->id);
-	print_expr(k, ir);
-	tracef(k, "\n");
+	tracef(k, "%c: %s\n", k, ir_render(ir));
 }
 
 /* vim: set sw=4 ts=4 expandtab : */

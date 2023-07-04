@@ -46,6 +46,7 @@ typedef bool ir_walker_t(struct ir* node, void* user);
 extern struct ir* ir_walk(struct ir* ir, ir_walker_t* callback, void* user);
 extern struct ir* ir_find(struct ir* ir, int opcode);
 
+extern const char* ir_render(const struct ir* ir);
 extern void ir_print(char k, const struct ir* ir);
 
 #endif

@@ -51,6 +51,8 @@ extern struct hreg* new_hreg(const struct burm_register_data* brd);
 extern const char* render_regclass(regclass_t regclass);
 extern const char* render_regclasses(regclasses_t regclasses);
 extern const char* render_vreg(struct vreg* vreg);
+extern regclass_t find_generic_class_for(regclass_t regclass);
+extern struct vreg* root_vreg_of(struct vreg* vreg);
 
 #endif
 

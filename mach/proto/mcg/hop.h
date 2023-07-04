@@ -51,6 +51,7 @@ struct hop
 	int id;
 	struct basicblock* bb;
 	struct ir* ir;
+    bool top;
 	const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
