@@ -371,20 +371,46 @@ ldargs:
                 emit3($4.val);
             }
 
-    | R24 ',' ind
+    | R24 ',' index
             {
                 switch ($1)
                 {
-                    case BC: case DE: case HL:
+                    case BC:
+                    case DE:
+                    case HL:
                         xymem($3, ($1 << 4) | 0x07);
                         break;
 
-                    case IX: case IY:
+                    case IX:
+                    case IY:
                         xymem($3, (($1 == IX) ^ ($3 == IY)) ? 0x37 : 0x31);
                         break;
 
                     default:
                         serror("register error");
+                }
+            }
+
+    | R24 ',' indir
+            {
+                switch ($3)
+                {
+                    case HL:
+                        emit1(0xed);
+                        emit1(($1 << 4) | 0x07);
+                        break;
+
+                    case IX:
+                        emit1(0xdd);
+                        emit1(($1 << 4) | 0x07);
+                        emit1(0);
+                        break;
+
+                    case IY:
+                        emit1(0xfd);
+                        emit1(($1 << 4) | 0x07);
+                        emit1(0);
+                        break;
                 }
             }
 
