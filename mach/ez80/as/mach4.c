@@ -516,6 +516,7 @@ index:
                     serror("register error");
                 fit(fitb($4.val));
                 exp_ind = $4;
+                exp_ind.val = -exp_ind.val;
                 RELOMOVE(rel_ind, relonami);
                 $$ = $2;
             }
