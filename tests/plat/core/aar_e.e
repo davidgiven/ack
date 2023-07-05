@@ -1,5 +1,8 @@
 #
-    mes 2, EM_WSIZE, EM_PSIZE
+#define W EM_WSIZE
+#define P EM_PSIZE
+
+    mes 2, W, P
 
 /*
  * Does basic testing of aar. Unfortunately, aar throws ERANGE on
@@ -9,12 +12,12 @@
  */
 
 array
-	bss 3*EM_WSIZE, 0, 0
+	bss 3*W, 0, 0
 
 descriptor
 	con -1			; lower bound
 	con 2			; range, *inclusive*
-	con EM_WSIZE	; size of element
+	con W	        ; size of element
 
 
 	exp $_m_a_i_n
@@ -25,15 +28,15 @@ descriptor
 	lae array
 	loc -1
 	lae descriptor
-	aar EM_WSIZE
+	aar W
 
 	lae array
-	cmu EM_WSIZE
+	cmu W
 	zeq *1
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	ass W
 1
 
 	/* Access element 0 */
@@ -41,16 +44,16 @@ descriptor
 	lae array
 	loc 0
 	lae descriptor
-	aar EM_WSIZE
+	aar W
 
 	lae array
-	adp EM_WSIZE
-	cmu EM_WSIZE
+	adp W
+	cmu W
 	zeq *2
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	ass W
 2
 
 	/* Access element 1 */
@@ -58,18 +61,19 @@ descriptor
 	lae array
 	loc 1
 	lae descriptor
-	aar EM_WSIZE
+	aar W
 
 	lae array
-	adp EM_WSIZE*2
-	cmu EM_WSIZE
+	adp W*2
+	cmu W
 	zeq *3
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	ass W
 3
 
     cal $finished
     end
 
+/* vim: set sw=4 ts=4 et ft=asm: */
