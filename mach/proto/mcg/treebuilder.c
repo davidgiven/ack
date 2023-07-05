@@ -1197,7 +1197,8 @@ static void insn_ivalue(int opcode, arith value)
                 struct ir* descriptor = pop(EM_pointersize);
                 struct ir* index = pop(EM_wordsize);
                 struct ir* arrayptr = pop(EM_pointersize);
-                struct ir* elementsize = load(EM_wordsize, descriptor, EM_wordsize*3);
+                struct ir* elementsize = load(EM_wordsize, descriptor, EM_wordsize*2);
+                struct ir* baseindex = load(EM_wordsize, descriptor, 0);
 
                 appendir(arrayptr);
                 appendir(elementsize);
@@ -1208,7 +1209,10 @@ static void insn_ivalue(int opcode, arith value)
                         convert(
                             new_ir2(
                                 IR_MUL, EM_wordsize,
-                                index,
+                                new_ir2(
+                                    IR_SUB, EM_wordsize,
+                                    index,
+                                    baseindex),
                                 elementsize),
                             EM_wordsize, EM_pointersize, IR_FROMUI));
                 appendir(address);
