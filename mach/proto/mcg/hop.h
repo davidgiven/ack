@@ -40,8 +40,8 @@ struct constraint
 
 	bool preserved;
 
-    /* For input or output registers: this register must be the same as the
-     * specified output or input register. */
+	/* For input or output registers: this register must be the same as the
+	 * specified output or input register. */
 
 	struct vreg* equals_to;
 };
@@ -51,7 +51,7 @@ struct hop
 	int id;
 	struct basicblock* bb;
 	struct ir* ir;
-    bool top;
+	bool top;
 	const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
 	struct vreg* output;
@@ -62,7 +62,7 @@ struct hop
 	ARRAYOF(struct vreg) outs;
 	ARRAYOF(struct vreg) throughs;
 
-    bool is_copy;
+	bool is_copy;
 };
 
 extern void clear_hops(void);
@@ -80,6 +80,8 @@ extern void hop_add_eoi_insel(struct hop* hop);
 extern void hop_add_insel(struct hop* hop, const char* fmt, ...);
 
 extern struct constraint* get_constraint(struct hop* hop, struct vreg* vreg);
+extern void replace_vregs_in_hop(
+    struct hop* hop, struct vreg* oldvreg, struct vreg* newvreg);
 
 extern char* hop_render(struct hop* hop);
 extern void hop_print(char k, struct hop* hop);

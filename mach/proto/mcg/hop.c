@@ -354,4 +354,40 @@ void hop_print(char k, struct hop* hop)
 	tracef(k, "\n");
 }
 
+void replace_vregs_in_hop(
+    struct hop* hop, struct vreg* oldvreg, struct vreg* newvreg)
+{
+	int i;
+
+	if (hop->output == oldvreg)
+		hop->output = newvreg;
+
+	for (i = 0; i < hop->ins.count; i++)
+	{
+		if (hop->ins.item[i] == oldvreg)
+			hop->ins.item[i] = newvreg;
+	}
+
+	for (i = 0; i < hop->outs.count; i++)
+	{
+		if (hop->outs.item[i] == oldvreg)
+			hop->outs.item[i] = newvreg;
+	}
+
+	for (i = 0; i < hop->insels.count; i++)
+	{
+		struct insel* insel = hop->insels.item[i];
+		if ((insel->type == INSEL_VREG) && (insel->u.vreg == oldvreg))
+			insel->u.vreg = newvreg;
+	}
+
+	for (i = 0; i < hop->constraints.count; i++)
+	{
+		if (hop->constraints.item[i].left == oldvreg)
+			hop->constraints.item[i].left = newvreg;
+		if (hop->constraints.item[i].right->equals_to == oldvreg)
+			hop->constraints.item[i].right->equals_to = newvreg;
+	}
+}
+
 /* vim: set sw=4 ts=4 expandtab : */

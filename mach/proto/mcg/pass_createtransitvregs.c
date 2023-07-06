@@ -6,42 +6,6 @@
  * instructions other than copies, and therefore which don't need to be in
  * registers). */
 
-static void
-replace_vreg(struct hop* hop, struct vreg* oldvreg, struct vreg* newvreg)
-{
-	int i;
-
-	if (hop->output == oldvreg)
-		hop->output = newvreg;
-
-	for (i = 0; i < hop->ins.count; i++)
-	{
-		if (hop->ins.item[i] == oldvreg)
-			hop->ins.item[i] = newvreg;
-	}
-
-	for (i = 0; i < hop->outs.count; i++)
-	{
-		if (hop->outs.item[i] == oldvreg)
-			hop->outs.item[i] = newvreg;
-	}
-
-	for (i = 0; i < hop->insels.count; i++)
-	{
-		struct insel* insel = hop->insels.item[i];
-		if ((insel->type == INSEL_VREG) && (insel->u.vreg == oldvreg))
-			insel->u.vreg = newvreg;
-	}
-
-	for (i = 0; i < hop->constraints.count; i++)
-	{
-		if (hop->constraints.item[i].left == oldvreg)
-			hop->constraints.item[i].left = newvreg;
-		if (hop->constraints.item[i].right->equals_to == oldvreg)
-			hop->constraints.item[i].right->equals_to = newvreg;
-	}
-}
-
 static struct hop*
 create_copy(struct basicblock* bb, struct vreg* oldvreg, struct vreg* newvreg)
 {
@@ -71,7 +35,7 @@ static void rewrite_hops(struct basicblock* bb)
 				oldvreg->regclass = find_generic_class_for(oldvreg->regclass);
 				oldvreg->in_transit = true;
 
-				replace_vreg(hop, oldvreg, newvreg);
+				replace_vregs_in_hop(hop, oldvreg, newvreg);
 
 				array_insert(&bb->hops, create_copy(bb, oldvreg, newvreg), j);
 				j++;
@@ -85,7 +49,7 @@ static void rewrite_hops(struct basicblock* bb)
 				oldvreg->regclass = find_generic_class_for(oldvreg->regclass);
 				oldvreg->in_transit = true;
 
-				replace_vreg(hop, oldvreg, newvreg);
+				replace_vregs_in_hop(hop, oldvreg, newvreg);
 
 				array_insert(
 				    &bb->hops, create_copy(bb, newvreg, oldvreg), j + 1);

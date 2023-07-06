@@ -420,7 +420,7 @@ PATTERNS
 
     #define ALUOP(op, helper) \
         out:(hlreg)reg = op.I (left:(hlreg)reg, right:(bcreg)reg)       \
-            with %out == %left, corrupted(bcreg)                        \
+            with %out == %left                                          \
             emit "call " helper "3"                                     \
             cost 4;                                                     \
         out:(hlhlreg)reg = op.L (left:(hlhlreg)reg, right:(bcbcreg)reg) \
