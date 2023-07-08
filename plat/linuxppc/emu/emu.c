@@ -325,6 +325,12 @@ void dump_state(FILE* stream)
 			fprintf(stream, "\n");
 		fprintf(stream, "gpr%02d=0x%08x ", i, cpu.gpr[i]);
 	}
+	for (i=0; i<32; i++)
+	{
+		if ((i % 3) == 0)
+			fprintf(stream, "\n");
+		fprintf(stream, "fpr%02d=0x%016lx ", i, cpu.fpr[i]);
+	}
 	fprintf(stderr, "\n");
 
 	/* This might fail and cause a reentrant trap if cia is invalid, so
