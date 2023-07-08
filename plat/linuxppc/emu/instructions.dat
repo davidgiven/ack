@@ -207,5 +207,5 @@
 
 # Floating point conversions
 
-<63--><FRT>.....<FRB><14------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);
-<63--><FRT>.....<FRB><15------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)fpr(FRB);
+<63--><FRT>.....<FRB><14------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)(int32_t)fpr(FRB);
+<63--><FRT>.....<FRB><15------>R setcr1(R, fpr(FRB)); cpu.fpr[FRT] = (uint32_t)(int32_t)fpr(FRB);
