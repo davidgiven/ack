@@ -10,6 +10,11 @@
 	push hl
 	push bc
 
+	ld a, c
+	or a
+	jr z, exit
+	ld b, a
+
 	ld hl, 5
 	add hl, sp
 
@@ -23,6 +28,7 @@
 	inc hl
 	djnz 1b
 
+exit:
 	pop bc
 	pop hl
 	pop af
