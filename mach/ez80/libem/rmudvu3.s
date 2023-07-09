@@ -12,7 +12,7 @@
 	ld hl, 0			/* reset remainder */
 	jr entry
 loop1:
-	add hl, de
+	add hl, bc
 loop2:
 	dec a
 	ret z
