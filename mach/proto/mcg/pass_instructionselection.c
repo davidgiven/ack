@@ -108,8 +108,8 @@ static void connect_input_reg(int child, regclass_t regclass)
 
 static void constrain_input_reg_preserved(int child)
 {
-	struct vreg* vreg = find_vreg_of_child(child);
-	struct constraint* c;
+	struct vreg* vreg = imap_get(&current_hop->inputmap, child);
+	assert(vreg);
 
 	if (!vreg)
 		fatal(

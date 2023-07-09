@@ -459,6 +459,7 @@ PATTERNS
         cost 12;
 
     out:(hlhlreg)reg = NEG.L(left:(long)reg)
+        with preserved(%left)
         emit "ld %out, 0"
         emit "and a"
         emit "sbc %out, %left"
