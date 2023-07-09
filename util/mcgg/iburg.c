@@ -1354,7 +1354,7 @@ static void emit_input_regs(Tree node, int* index)
 	{
 		if (node->attr)
 			print(
-			    "%1data->constrain_input_reg(%d, %d /* %s */);\n", *index,
+			    "%1data->connect_input_reg(%d, %d /* %s */);\n", *index,
 			    node->attr->number, node->attr->name);
 	}
 
@@ -1454,7 +1454,7 @@ static void emitinsndata(Rule rules)
 
 		if (r->attr)
 			print(
-			    "%1data->constrain_output_reg(%d /* %s */);\n", r->attr->number,
+			    "%1data->connect_output_reg(%d /* %s */);\n", r->attr->number,
 			    r->attr->name);
 
 		{

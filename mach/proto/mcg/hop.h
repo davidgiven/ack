@@ -31,10 +31,6 @@ struct insel
 
 struct constraint
 {
-	/* The required register class for input parameters. */
-
-	regclass_t regclass;
-
 	/* For input registers: this instruction may not modify this register during
 	 * execution. */
 
@@ -54,10 +50,21 @@ struct hop
 	bool top;
 	const struct burm_instruction_data* insndata;
 	ARRAYOF(struct insel) insels;
+
+	/* The real output of this instruction. */
+
 	struct vreg* output;
 
-	PMAPOF(struct vreg, struct constraint) constraints;
+	/* The transit vreg which will be wired into anything which consumes this
+	 * output. */
 
+	struct vreg* toutput;
+
+	/* Map of child index to local inputs for this instruction. */
+
+	IMAPOF(struct vreg) inputmap;
+
+	PMAPOF(struct vreg, struct constraint) constraints;
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;
 	ARRAYOF(struct vreg) throughs;

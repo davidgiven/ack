@@ -229,7 +229,7 @@ void procedure_compile(struct procedure* proc)
 
 	pass_instruction_selector();
 	print_hops('7');
-	pass_create_transit_vregs();
+//	pass_create_transit_vregs();
 	pass_live_vreg_analysis();
 	// pass_find_congruence_groups();
 	print_hops('8');
