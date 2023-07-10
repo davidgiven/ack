@@ -221,6 +221,13 @@ compare(struct ir* left, struct ir* right, int size, int opcode)
 {
 	if (size == EM_wordsize)
 	{
+        if ((opcode == IR_COMPARESI)
+            && ((left->opcode == IR_COMPARESI) || (left->opcode == IR_COMPAREUI)
+                || (left->opcode == IR_COMPARESL) || (left->opcode == IR_COMPAREUL)
+                || (left->opcode == IR_COMPAREF) || (left->opcode == IR_COMPARED))
+            && (right->opcode == IR_CONST)
+            && (right->u.ivalue == 0))
+            return left;
 	}
 	else if (size == (2 * EM_wordsize))
 		opcode++;
