@@ -35,12 +35,14 @@ REGISTERS
     dde aliases(de) named("de")                 double volatile dret;
     dbc aliases(bc) named("bc")                 double volatile;
 
+    flags                                       flags;
 
 
 DECLARATIONS
 
     ubyteX;   /* bottom 8 bits valid, the rest undefined */
     ubyte0;   /* bottom 8 bits valid, the rest 0 */
+    flags;    /* flags set after a comparison */
 
 	address fragment;
 
@@ -393,18 +395,6 @@ PATTERNS
         emit "call .not3"
         cost 5;
 
-    out:(hlreg)reg = COMPARESI.I(left:(hlreg)reg, right:(basereg)reg)
-        with %out == %left
-        emit "and a"
-        emit "sbc %out, %right"
-        cost 2;
-
-    out:(hlreg)reg = COMPAREUI.I(left:(hlreg)reg, right:(basereg)reg)
-        with %out == %left
-        emit "and a"
-        emit "sbc %out, %right"
-        cost 2;
-
     out:(int)reg = FROMSL.I(in:(long)reg)
         emit "push %in"
         emit "pop %out"
@@ -491,24 +481,6 @@ PATTERNS
     out:(hlhlreg)reg = MUL.L(left:(bcbcreg)reg, right:(dedereg)reg)
         emit "call .mli6"
         cost 14;
-
-    out:(hlreg)reg = COMPAREUL.I(left:(hlhlreg)reg, right:(long)reg)
-        emit "and a"
-        emit "sbc %out, %right"
-        emit "exx"
-        emit "sbc %out, %right"
-        emit "exx"
-        emit "call .tristateu6"
-        cost 12;
-
-    out:(hlreg)reg = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
-        emit "and a"
-        emit "sbc %out, %right"
-        emit "exx"
-        emit "sbc %out, %right"
-        emit "exx"
-        emit "call .tristates6"
-        cost 12;
 
     out:(hlhlreg)reg = FROMSI.L(left:(hlreg)reg)
         emit "call .extendw"
@@ -632,53 +604,75 @@ PATTERNS
 
 /* Comparisons */
 
-    CJUMPLT(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl3"
-        emit "jp m, $true"
+    out:(hlreg)flags = COMPARESI.I(left:(hlreg)reg, right:(basereg)reg)
+        emit "and a"
+        emit "sbc %left, %right"
+        emit "call .signedcmp"
+        ;
+
+    out:(hlreg)flags = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
+        emit "and a"
+        emit "sbc %left, %right"
+        emit "exx"
+        emit "sbc %left, %right"
+        emit "exx"
+        emit "call .signedcmp"
+        ;
+
+    out:(hlreg)flags = COMPAREUI.I(left:(hlreg)reg, right:(basereg)reg)
+        emit "and a"
+        emit "sbc %left, %right"
+        ;
+
+    out:(hlreg)flags = COMPAREUL.I(left:(hlhlreg)reg, right:(long)reg)
+        emit "and a"
+        emit "sbc %left, %right"
+        emit "exx"
+        emit "sbc %left, %right"
+        emit "exx"
+        ;
+
+    out:(hlreg)flags = COMPAREF.I(left:(float)reg, right:(float)reg)
+        emit "call .float_unsupported"
+        ;
+
+    CJUMPLT(flags:(int)flags, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "jp c, $true"
         emit "jp $false"
         ;
 
-    CJUMPLE(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl3"
-        emit "jp m, $true"
+    CJUMPLE(flags:(int)flags, PAIR(true:BLOCK.I, false:BLOCK.I))
+        emit "jp c, $true"
         emit "jp z, $true"
         emit "jp $false"
         ;
 
-    CJUMPEQ(left:(hlreg)reg, PAIR(true:BLOCK.I, false:BLOCK.I))
-        emit "call .testhl3"
+    CJUMPEQ(flags:(int)flags, PAIR(true:BLOCK.I, false:BLOCK.I))
         emit "jp z, $true"
         emit "jp $false"
         ;
 
-    out:(hlreg)reg = IFEQ.I(val:(hlreg)reg)
-        with %out == %val
-        emit "call .testhl3"
-        emit "ld hl, 0"
+    out:(basereg)reg = IFEQ.I(flags:(int)flags)
+        emit "ld %out, 0"
         emit "jr nz, 1f"
-        emit "inc hl"
+        emit "inc %out"
         emit "1:"
         cost 15;
 
-    out:(hlreg)reg = IFLT.I(val:(hlreg)reg)
-        with %out == %val
-        emit "call .testhl3"
-        emit "ld hl, 0"
-        emit "jp p, 1f"
-        emit "inc hl"
+    out:(basereg)reg = IFLT.I(flags:(int)flags)
+        emit "ld %out, 0"
+        emit "jp c, 1f"
+        emit "inc %out"
         emit "1:"
         cost 15;
 
-    out:(hlreg)reg = IFLE.I(val:(hlreg)reg)
-        with %out == %val
-        emit "call .testhl3"
-        emit "ld hl, 1"
-        emit "jr z, 1f"
-        emit "jp m, 1f"
-        emit "dec hl"
+    out:(basereg)reg = IFLE.I(flags:(int)flags)
+        emit "ld %out, 0"
+        emit "jp z, 1f"
+        emit "jp c, 1f"
+        emit "inc %out"
         emit "1:"
         cost 15;
-
 
 /* Jumps and calls */
 
