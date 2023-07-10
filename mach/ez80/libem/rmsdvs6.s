@@ -19,33 +19,33 @@
 	exx
 
 	ld a, (iy-1)
+	or a
 	jp p, 1f
-	ld hl, 0			/* invert de to make it positive */
+
+	ld hl, 0			/* invert DEDE to make it positive */
 	push hl
-	exx
-	pop hl
-	exx
 	and a
 	sbc hl, de
 	ex de, hl
 	exx
+	pop hl
 	sbc hl, de
 	ex de, hl
 	exx
 1:
 
 	ld a, (iy-4)
+	or a
 	jp p, 1f
-	ld hl, 0			/* invert bc to make it positive */
+
+	ld hl, 0			/* invert BCBC to make it positive */
 	push hl
-	exx
-	pop hl
-	exx
 	and a
 	sbc hl, bc
 	push hl
 	pop bc
 	exx
+	pop hl
 	sbc hl, bc
 	push hl
 	pop bc
@@ -55,19 +55,40 @@
 	call .rmudvu6		/* actually do the division */
 
 	ld a, (iy-4)
-	xor (iy-1)			/* discover sign of remainder */
+	xor (iy-1)			/* discover sign of result */
 	jp p, 1f
-	push hl				/* invert remainder if it should be negative */
-	pop bc
+
+	push hl
+	ld hl, 0			/* invert result if it should be negative */
 	exx
 	push hl
-	pop bc
-	exx
 	ld hl, 0
-	push hl
 	exx
+
+	and a
+	sbc hl, de
+	ex de, hl
 	pop hl
 	exx
+	sbc hl, de
+	ex de, hl
+	pop hl
+	exx
+1:
+
+	ld a, (iy-1)		/* discover sign of remainder */
+	or a
+	jp p, 1f
+
+	push hl				/* invert remainder if it should be negative */
+	pop bc
+	ld hl, 0
+	exx
+	push hl
+	pop bc
+	ld hl, 0
+	exx
+
 	and a
 	sbc hl, bc
 	exx

@@ -9,6 +9,8 @@ int minusone = -1;
 /* Bypasses the CRT, so there's no stdio. */
 void _m_a_i_n(void)
 {
+	/* Adds */
+
     ASSERT((two + one)      == 3);
     ASSERT((two + minusone) == 1);
 
@@ -29,5 +31,9 @@ void _m_a_i_n(void)
 
     ASSERT(((unsigned int)two + (unsigned int)256) == 258);
 
+	/* Simple operators */
+
+	ASSERT(-two == -2);
+	
     finished();
 }

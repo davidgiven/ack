@@ -8,16 +8,17 @@
 .sect .text
 .define .rmudvu6
 .rmudvu6:
-	ld a, 24			/* bit count */
+	ld a, 48			/* bit count */
 	ld hl, 0			/* reset remainder */
+	push hl
 	exx
-	ld hl, 0
+	pop hl
 	exx
 	jr entry
 loop1:
-	add hl, de
+	add hl, bc
 	exx
-	adc hl, de
+	adc hl, bc
 	exx
 loop2:
 	dec a

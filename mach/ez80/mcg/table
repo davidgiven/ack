@@ -232,10 +232,10 @@ PATTERNS
         cost 2;
 
     out:(long)reg = LOAD.L(addr:address)
+        emit "exx"
         emit "ld %out, (%addr+3)"
         emit "exx"
         emit "ld %out, (%addr+0)"
-        emit "exx"
         cost 10;
 
     out:(float)reg = LOAD.F(addr:address)
@@ -262,14 +262,16 @@ PATTERNS
         cost 8;
 
     STORE.L(ptr:(hlreg)reg, val:(lret)reg)
-        with corrupted(hlreg)
+        with corrupted(hlreg), corrupted(lret)
         emit "ld (%ptr), %val"
         emit "exx"
+        emit "push %val"
+        emit "exx"
+        emit "pop %val"
         emit "inc %ptr"
         emit "inc %ptr"
         emit "inc %ptr"
         emit "ld (%ptr), %val"
-        emit "exx"
         cost 8;
 
     #if 0
@@ -444,26 +446,31 @@ PATTERNS
     out:(hlhlreg)reg = SUB.L(left:(hlhlreg)reg, right:(long)reg)
         with %out == %left
         emit "and a"
-        emit "sbc %out, %left"
+        emit "sbc %out, %right"
         emit "exx"
-        emit "sbc %out, %left"
+        emit "sbc %out, %right"
         emit "exx"
         cost 12;
 
     out:(hlhlreg)reg = ADD.L(left:(hlhlreg)reg, right:(long)reg)
         with %out == %left
-        emit "add %out, %left"
+        emit "add %out, %right"
         emit "exx"
-        emit "adc %out, %left"
+        emit "adc %out, %right"
         emit "exx"
         cost 12;
 
     out:(hlhlreg)reg = NEG.L(left:(long)reg)
         with preserved(%left)
         emit "ld %out, 0"
+        emit "push %out"
         emit "and a"
         emit "sbc %out, %left"
-        cost 8;
+        emit "exx"
+        emit "pop %out"
+        emit "sbc %out, %left"
+        emit "exx"
+        cost 13;
 
     out:(dedereg)reg = DIV.L(left:(dedereg)reg, right:(bcbcreg)reg)
         emit "call .rmsdvs6"
@@ -491,6 +498,7 @@ PATTERNS
         emit "exx"
         emit "sbc %out, %right"
         emit "exx"
+        emit "call .tristateu6"
         cost 12;
 
     out:(hlreg)reg = COMPARESL.I(left:(hlhlreg)reg, right:(long)reg)
@@ -499,6 +507,7 @@ PATTERNS
         emit "exx"
         emit "sbc %out, %right"
         emit "exx"
+        emit "call .tristates6"
         cost 12;
 
     out:(hlhlreg)reg = FROMSI.L(left:(hlreg)reg)

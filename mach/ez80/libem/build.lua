@@ -86,6 +86,8 @@ for _, plat in ipairs(vars.plats) do
 			"./sru6.s",
 			"./testhl3.s",
 			"./testhlhl6.s",
+			"./tristates6.s",
+			"./tristateu6.s",
 			"./trppc.s",
 			"./xor.s",
 			"./xor3.s",
