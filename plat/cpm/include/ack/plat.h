@@ -23,4 +23,8 @@
 
 #define BUFSIZ 256
 
+/* The eZ80 port doesn't do bounds changing. */
+
+#define ACKCONF_HAS_BOUNDS_CHECKING 0
+
 #endif

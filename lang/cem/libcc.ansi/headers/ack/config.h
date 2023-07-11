@@ -3,6 +3,8 @@
 
 #include <ack/plat.h>
 
+/* These configure how the stdlib is built. */
+
 #ifndef ACKCONF_WANT_FLOAT
 #define ACKCONF_WANT_FLOAT 1
 #endif
@@ -70,6 +72,13 @@
 #ifndef ACKCONF_WANT_EMULATED_FILE
 /* Implement FILE* on top of read()/write() file descriptors. */
 #define ACKCONF_WANT_EMULATED_FILE 1
+#endif
+
+/* These are tested to report features of the system. */
+
+#ifndef ACKCONF_HAS_BOUNDS_CHECKING
+/* The code generator supports bounds checking in the rck, aar, lar and sar instructions. */
+#define ACKCONF_HAS_BOUNDS_CHECKING 1
 #endif
 
 #endif

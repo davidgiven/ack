@@ -1,4 +1,6 @@
 #
+#include <ack/config.h>
+
     mes 2, EM_WSIZE, EM_PSIZE
 
 /*
@@ -17,8 +19,7 @@ caught
     exp $_m_a_i_n
     pro $_m_a_i_n,0
 
-/* These architecture ignore _rck_. */
-#if defined i80
+#if !ACK_CONFIG_HAS_BOUNDS_CHECKING
     cal $finished
 #endif
 
