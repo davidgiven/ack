@@ -196,6 +196,8 @@ static void print_header(char k, struct hop* hop)
 		tracef(k, " r%%%d", hop->ins.item[i]->id);
 	for (i = 0; i < hop->throughs.count; i++)
 		tracef(k, " =%%%d", hop->throughs.item[i]->id);
+	for (i = 0; i < hop->corrupts.count; i++)
+		tracef(k, " !%%%d", hop->corrupts.item[i]->id);
 	for (i = 0; i < hop->outs.count; i++)
 		tracef(k, " w%%%d", hop->outs.item[i]->id);
 	tracef(k, " ");

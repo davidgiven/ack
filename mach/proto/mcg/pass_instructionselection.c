@@ -142,12 +142,27 @@ static void constrain_output_reg_equal_to(int child)
 	get_constraint(current_hop, vreg)->equals_to = current_hop->output;
 }
 
+static void constrain_through_reg_corrupts(regclass_t regclass)
+{
+    struct vreg* vreg = new_vreg();
+    vreg->defined = current_hop;
+    vreg->regclass = regclass;
+
+    array_appendu(&current_hop->corrupts, vreg);
+}
+
 static const struct burm_emitter_data emitter_data = {
-	&emit_string,        &emit_fragment,
-	&emit_return_reg,    &emit_reg,
-	&emit_value,         &emit_eoi,
-	&connect_input_reg,  &constrain_input_reg_preserved,
-	&connect_output_reg, &constrain_output_reg_equal_to,
+	&emit_string,
+	&emit_fragment,
+	&emit_return_reg,
+	&emit_reg,
+	&emit_value,
+	&emit_eoi,
+	&connect_input_reg,
+	&constrain_input_reg_preserved,
+	&connect_output_reg,
+	&constrain_output_reg_equal_to,
+	&constrain_through_reg_corrupts,
 };
 
 static void emit(struct insn* insn)

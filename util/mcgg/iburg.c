@@ -570,9 +570,9 @@ Rule rule(const struct terminfo* ti, Tree pattern)
 		if (!r->attr)
 			yyerror(
 			    "'%s' doesn't seem to be a known register attribute", ti->attr);
-        if (r->attr->sizebits == -1)
-            yyerror(
-                "'%s' has an ambiguous size and can't be used here", ti->attr);
+		if (r->attr->sizebits == -1)
+			yyerror(
+			    "'%s' has an ambiguous size and can't be used here", ti->attr);
 	}
 
 	return r;
@@ -687,11 +687,11 @@ static void emitregisterattrs(void)
 		assert(rc->number == i);
 
 		print("%1{ \"%s\", %d },\n", rc->name, rc->sizebits);
-        if (rc->number > burm_double_CLASS)
-        {
-        printh("#define %P%s_CLASS %d\n", rc->name, rc->number);
-        printh("#define %P%s_ATTR (1U<<%P%s_CLASS)\n", rc->name, rc->name);
-        }
+		if (rc->number > burm_double_CLASS)
+		{
+			printh("#define %P%s_CLASS %d\n", rc->name, rc->number);
+			printh("#define %P%s_ATTR (1U<<%P%s_CLASS)\n", rc->name, rc->name);
+		}
 	}
 	print("};\n\n");
 
@@ -1425,6 +1425,25 @@ static void emit_input_constraints(Rule r)
 	}
 }
 
+static void emit_through_constraints(Rule r)
+{
+	int i;
+
+	for (i = 0; i < r->constraints.count; i++)
+	{
+		struct constraint* c = r->constraints.item[i];
+
+		if (c->type == CONSTRAINT_CORRUPTED_ATTR)
+		{
+			struct regattr* p = smap_get(&registerattrs, c->left);
+			if (!p)
+				yyerror("no such register attribute '%s'", c->left);
+
+			print("%1data->constrain_through_regclass_corrupted(%d);\n", p->number);
+		}
+	}
+}
+
 /* emitinsndata - emit the code generation data */
 static void emitinsndata(Rule rules)
 {
@@ -1464,6 +1483,7 @@ static void emitinsndata(Rule rules)
 
 		emit_output_constraints(r);
 		emit_input_constraints(r);
+		emit_through_constraints(r);
 
 		while (f)
 		{
@@ -1551,27 +1571,6 @@ static void emitinsndata(Rule rules)
 		print("%2&%Pemitter_%d,\n", r->ern);
 
 		print("%2%s,\n", r->lhs->is_fragment ? "true" : "false");
-
-		{
-			int i;
-			uint32_t attrs = 0;
-
-			for (i = 0; i < r->constraints.count; i++)
-			{
-				struct constraint* c = r->constraints.item[i];
-
-				if (c->type == CONSTRAINT_CORRUPTED_ATTR)
-				{
-					struct regattr* p = smap_get(&registerattrs, c->left);
-					if (!p)
-						yyerror("no such register attribute '%s'", c->left);
-
-					attrs |= 1 << (p->number);
-				}
-			}
-
-			print("%2%d, /* corruption attrs */\n", attrs);
-		}
 
 		print("%1},\n");
 		r = r->link;

@@ -156,6 +156,8 @@ static void construct_interference_graph(void)
 			int nouts = hop->outs.count;
 			struct vreg** throughs = hop->throughs.item;
 			int nthroughs = hop->throughs.count;
+            struct vreg** corrupts = hop->corrupts.item;
+            int ncorrupts = hop->corrupts.count;
 
 			/* Record all used vregs. */
 
@@ -177,6 +179,11 @@ static void construct_interference_graph(void)
 
 			mark_vreg_list_interference(ins, nins, throughs, nthroughs);
 			mark_vreg_list_interference(outs, nouts, throughs, nthroughs);
+
+            /* Corrupted registers interfere with throughs, but are still
+             * available for inputs and outputs. */
+
+			mark_vreg_list_interference(corrupts, ncorrupts, throughs, nthroughs);
 
 			/* Any preserved input registers interfere with all output
 			 * registers. */

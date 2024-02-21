@@ -35,7 +35,7 @@ REGISTERS
     dde aliases(de) named("de")                 double volatile dret;
     dbc aliases(bc) named("bc")                 double volatile;
 
-    flags                                       flags;
+    flags                                       flags volatile;
 
 
 DECLARATIONS

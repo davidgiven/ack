@@ -68,6 +68,7 @@ struct hop
 	ARRAYOF(struct vreg) ins;
 	ARRAYOF(struct vreg) outs;
 	ARRAYOF(struct vreg) throughs;
+    ARRAYOF(struct vreg) corrupts;
 
 	bool is_copy;
 };

@@ -53,6 +53,7 @@ struct burm_emitter_data
 	void (*constrain_input_reg_preserved)(int child);
 	void (*connect_output_reg)(regclass_t regclass);
 	void (*constrain_output_reg_equal_to)(int child);
+    void (*constrain_through_regclass_corrupted)(regclass_t regclass);
 };
 
 typedef void burm_emitter_t(const struct burm_emitter_data* data);
@@ -62,7 +63,6 @@ struct burm_instruction_data
 	const char* name;
 	burm_emitter_t* emitter;
 	bool is_fragment;
-	uint32_t corrupts;
 };
 
 extern const struct burm_instruction_data burm_instruction_data[];
