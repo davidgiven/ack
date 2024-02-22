@@ -6,19 +6,21 @@ vars.ackcflags = {
 }
 vars.ackldflags = {}
 vars.plats = {
+	-- keep sorted
 	"cpm",
+	"em22",
 	"linux386",
 	"linux68k",
-	"linuxppc",
 	"linuxmips",
-	"msdos86",
+	"linuxppc",
 	"msdos386",
+	"msdos86",
 	"osx386",
 	"osxppc",
 	"pc86",
-	"rpi",
 	"pdpv7",
-	"em22",
+	"rpi",
+	"spectrum",
 }
 vars.plats_with_tests = {
 	"cpm",

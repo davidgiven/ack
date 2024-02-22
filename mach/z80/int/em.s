@@ -57,7 +57,7 @@
    EILLINS=18
    EILLSIZE=19
    ECASE=20
-   EMON=25
+   EBADMON=25
 
 !--------------------------- Initialization ---------------------------
 
@@ -3615,7 +3615,7 @@ e.case:
 	ld hl,ECASE
 	jr 9b
 e.mon:
-	ld hl,EMON
+	ld hl,EBADMON
 	jr 9b
 e.array:
 	push af
