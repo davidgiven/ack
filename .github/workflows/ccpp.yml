@@ -34,9 +34,9 @@ jobs:
         msystem: MINGW32
         install: >-
           make
-          mingw-w64-i686-gcc
-          mingw-w64-i686-lua
-          mingw-w64-i686-nsis
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-lua
+          mingw-w64-ucrt-x86_64-nsis
           ninja
           bison
           flex
