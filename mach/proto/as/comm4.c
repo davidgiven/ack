@@ -16,6 +16,7 @@
 #include	"comm1.h"
 #include	"y.tab.h"
 #include	"object.h"
+#include <errno.h>
 
 extern YYSTYPE	yylval;
 
