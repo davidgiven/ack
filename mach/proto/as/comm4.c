@@ -142,10 +142,17 @@ pass_1(int argc, char **argv)
 #endif
 
 	tempfile = tmpfile();
+	if (!tempfile)
+		fatal("couldn't create temporary file: %s", strerror(errno));
+
 #ifdef LISTING
 	listmode = dflag;
 	if (listmode & 0440)
+	{
 		listfile = tmpfile();
+		if (!listfile)
+			fatal("couldn't create temporary file: %s", strerror(errno));
+	}
 #endif
 	for (ip = keytab; ip->i_type; ip++)
 		item_insert(ip, H_KEY+hash(ip->i_name));
