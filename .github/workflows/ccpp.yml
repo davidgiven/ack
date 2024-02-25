@@ -35,8 +35,8 @@ jobs:
         install: >-
           make
           mingw-w64-ucrt-x86_64-gcc
-          mingw-w64-ucrt-x86_64-lua
-          mingw-w64-ucrt-x86_64-nsis
+          mingw-w64-i686-lua
+          mingw-w64-i686-nsis
           ninja
           bison
           flex
