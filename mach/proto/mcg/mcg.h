@@ -95,7 +95,7 @@ extern struct symbol* symbol_walk(symbol_walker_t* walker, void* user);
 extern void data_label(const char* name);
 extern void data_int(arith data, size_t size, bool is_ro);
 extern void data_float(const char* data, size_t size, bool is_ro);
-extern void data_block(const uint8_t* data, size_t size, bool is_ro);
+extern void data_block(const uint8_t* data, size_t datalen, size_t size, bool is_ro);
 extern void data_offset(const char* label, arith offset, bool is_ro);
 extern void data_bss(arith size, int init);
 
