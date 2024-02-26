@@ -1,0 +1,73 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches
+      - "default"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        msystem: UCRT64
+        install: >-
+          make
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-lua
+          mingw-w64-ucrt-x86_64-nsis
+          ninja
+          bison
+          flex
+          zip
+          git
+
+    - uses: actions/checkout@v3
+
+    - name: build
+      run: |
+        make LDFLAGS="-s -static" CFLAGS=-Os
+
+    - name: package
+      run: |
+        make ack-setup.exe
+
+    - name: date
+      run: |
+        echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
+  
+    - name: tag
+      run: |
+        cd cpm65
+        git config user.name "davidgiven"
+        git config user.email "dg@cowlark.com"
+        git tag -f dev
+        git push -f origin dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+    - name: delete-old-assets
+      uses: mknejp/delete-release-assets@v1
+      with:
+        token: ${{ github.token }}
+        tag: dev
+        assets: | 
+          ack-setup.exe
+        fail-if-no-assets: false
+  
+    - name: release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Nightly development build ${{ env.RELEASE_DATE }}
+        files: |
+          ack-setup.exe
+        tag_name: dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  
