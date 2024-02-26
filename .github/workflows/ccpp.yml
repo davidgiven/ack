@@ -1,7 +1,7 @@
 name: C/C++ CI
 
 concurrency: 
-  group: environment-release-${{ github.head_ref }}
+  group: environment-${{ github.head_ref }}
   cancel-in-progress: true
 
 on: [push, pull_request]
