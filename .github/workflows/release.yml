@@ -47,7 +47,6 @@ jobs:
   
     - name: tag
       run: |
-        cd cpm65
         git config user.name "davidgiven"
         git config user.email "dg@cowlark.com"
         git tag -f dev
