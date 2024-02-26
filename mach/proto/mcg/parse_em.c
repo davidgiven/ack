@@ -281,7 +281,7 @@ static void parse_pseu(void)
                 }
 
 				case str_ptyp:
-                    data_block((const uint8_t*) strdup(em.em_string), em.em_size, ro);
+                    data_block((const uint8_t*) em.em_string, strlen(em.em_string), em.em_size, ro);
 					break;
 
                 case cst_ptyp:

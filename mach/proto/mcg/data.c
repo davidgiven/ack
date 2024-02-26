@@ -81,10 +81,10 @@ static bool istext(char c)
     return isprint(c) && (c != '"');
 }
 
-void data_block(const uint8_t* data, size_t size, bool is_ro)
+void data_block(const uint8_t* data, size_t datalen, size_t size, bool is_ro)
 {
     const uint8_t* start = data;
-    const uint8_t* end = data + size;
+    const uint8_t* end = data + datalen;
     const uint8_t* p = data;
 
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
@@ -100,7 +100,9 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
             fprintf(outputfile, "\t.ascii \"");
             while (start < p)
             {
-                fprintf(outputfile, "%c", *start);
+                if ((*start == '\\') || (*start == '"'))
+                    fputc('\\', outputfile);
+                fputc(*start, outputfile);
                 start++;
             }
             fprintf(outputfile, "\"\n");
@@ -125,6 +127,9 @@ void data_block(const uint8_t* data, size_t size, bool is_ro)
             fprintf(outputfile, "\n");
         }
     }
+
+    for (size_t zeroes = 0; zeroes < (size - datalen); zeroes++)
+        fprintf(outputfile, "\t.data1 0\n");
 }
 
 void data_offset(const char* label, arith offset, bool is_ro)
