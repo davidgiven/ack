@@ -1,8 +1,12 @@
-name: C/C++ CI
+name: Autorelease
+
+concurrency: 
+  group: environment-release-${{ github.head_ref }}
+  cancel-in-progress: true
 
 on:
   push:
-    branches
+    branches:
       - "default"
 
 jobs:
