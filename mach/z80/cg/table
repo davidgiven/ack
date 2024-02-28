@@ -1347,7 +1347,7 @@ gto		| |		remove(ALL)
 				move({EXTENDED_ADDR,$1},HL)
 				"call .gto"
 							| | |
-lim		| | 		| {EXTENDED,"ignmask"} | |
+lim		| | 		| {EXTENDED,".ignmask"} | |
 lin        | |			  remove(ALL) allocate(HL_REG)
 				move({IMMEDIATE,$1},HL)
 				"ld (hol0),hl"
@@ -1369,12 +1369,12 @@ rck $1 == 2 | STACK |		 allocate(ALL_REG)
 rtt		| |		|			| ret 0|
 sig		| HL_REG_SCR |			
 
-				"ld (trapproc),hl"	
-				"ld hl,trapproc"
+				"ld (.trapproc),hl"	
+				"ld hl,.trapproc"
 							| HL | |
 sim	| HL_REG | 		remove(MEM_ALL)
 				 "pop hl"
-				 "ld (ignmask),hl"		| | |
+				 "ld (.ignmask),hl"		| | |
 str $1 == 0 | |			"pop iy" | | |
 str $1 == 1 | STACK |		 allocate(HL_REG)
 				"pop hl"
