@@ -39,7 +39,6 @@ extern int do_preprocess;
 
 /* Internal declarations */
 
-
 static void do_define(void);
 static void do_elif(void);
 static void do_else(void);
@@ -49,21 +48,20 @@ static void do_if(void);
 static void do_ifdef(int);
 static void do_include(void);
 static void do_line(unsigned int);
-static int find_name(char* , char* []);
-static char* get_text(char* [], int* );
-static int getparams(char* [], char []);
+static int find_name(char*, char*[]);
+static char* get_text(char*[], int*);
+static int getparams(char*[], char[]);
 static int ifexpr(void);
-static int macroeq(register char*, register char *);
+static int macroeq(register char*, register char*);
 static void skip_block(int);
 static void do_error(void);
 
 /* External dependencies to C files with no include files */
 extern void If_expr(void);
-extern void add_dependency(char *);
-
+extern void add_dependency(char*);
 
 char* GetIdentifier(int skiponerr /* skip the rest of the line on error */
- )
+)
 {
 	/*	Returns a pointer to the identifier that is read from the
 	    input stream. When the input does not contain an
@@ -88,7 +86,6 @@ char* GetIdentifier(int skiponerr /* skip the rest of the line on error */
 	}
 	return tk.tk_str;
 }
-
 
 void domacro(void)
 {
@@ -346,7 +343,7 @@ static int ifexpr(void)
 static void do_include(void)
 {
 	/*	do_include() performs the inclusion of a file.
-	*/
+	 */
 	char* filenm;
 	char* result;
 	int tok;
@@ -390,7 +387,7 @@ static void do_include(void)
 static void do_define(void)
 {
 	/*	do_define() interprets a #define control line.
-	*/
+	 */
 	register char* str; /* the #defined identifier's descriptor	*/
 	int nformals = -1; /* keep track of the number of formals	*/
 	char* formals[NPARAMS]; /* pointers to the names of the formals	*/
@@ -505,7 +502,7 @@ static void do_ifdef(int how)
 	register char* str;
 
 	/*	how == 1 : ifdef; how == 0 : ifndef
-	*/
+	 */
 	push_if();
 	if (!(str = GetIdentifier(1)))
 	{
@@ -697,7 +694,7 @@ void macro_def(register struct idf* id, char* text, int nformals, int length, in
 	newdef->mc_flag = flags; /* special flags	*/
 }
 
-static int find_name(char* nm, char *index[])
+static int find_name(char* nm, char* index[])
 {
 	/*	find_name() returns the index of "nm" in the namelist
 	    "index" if it can be found there.  0 is returned if it is
@@ -888,7 +885,7 @@ static char* get_text(char* formals[], int* length)
     as strings, without taking care of the leading and trailing
     blanks (spaces and tabs).
 */
-static int macroeq(register char* s, register char *t)
+static int macroeq(register char* s, register char* t)
 {
 
 	/* skip leading spaces	*/
