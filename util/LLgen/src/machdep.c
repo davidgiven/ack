@@ -15,13 +15,13 @@
  * machdep.c
  * Machine dependant things
  */
+#if defined WIN32
+#include <io.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#if defined WIN32
-#include <io.h>
-#endif
 # include "extern.h"
 # include "types.h"
 
