@@ -11,6 +11,7 @@
 #include "input.h"
 #include "error.h"
 #include "replace.h"
+#include "domacro.h"
 
 #define INP_PUSHBACK 3
 #define INP_TYPE struct file_info
@@ -56,14 +57,6 @@ int AtEoIT(void)
 
 int AtEoIF(void)
 {
-	extern int nestlevel;
-	extern int nestcount;
-	extern int svnestlevel[];
-
-	if (nestlevel > svnestlevel[nestcount])
-		warning("missing #endif");
-	else if (NoUnstack)
-		warning("unexpected EOF");
-	nestlevel = svnestlevel[nestcount--];
-	return 0;
+	/* Configure inp_pkg to always return EOIs at the end of source files. */
+	return 1;
 }
