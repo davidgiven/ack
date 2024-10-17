@@ -89,6 +89,10 @@ struct INP_i_buf {
 
 #endif /* not INP_READ_IN_ONE */
 
+/* Used for the pushback buffer when between input files, where INP_head isn't
+ * valid. */
+static char INP_pushbackbuf[INP_NPUSHBACK + 1];
+
 char *_ipp;
 INP_PRIVATE struct INP_buffer_header *INP_head, *INP_free;
 
@@ -331,6 +335,13 @@ int InsertText(char *text, int length)
 	return 1;
 }
 
+void INP_pushback(void)
+{
+	if ((_ipp == INP_head->bh_text) || (_ipp == &INP_pushbackbuf[0]))
+		fatal("inp underflow\n");
+	_ipp--;
+}
+
 #define RAWLOAD(dest) \
 	((void)((dest = *_ipp++) || (dest = loadbuf())))
 
@@ -361,7 +372,6 @@ int loadchar(void)
 int loadbuf(void)
 {
 	register struct INP_buffer_header *bh = INP_head;
-	static char buf[INP_NPUSHBACK + 1];
 	int FromFile;
 
 	if (!bh) {		/* stack exhausted, EOF on sourcefile */
@@ -404,7 +414,7 @@ int loadbuf(void)
 #if INP_NPUSHBACK > 1
 		{
 			register char *so = &(bh->bh_text[bh->bh_size]);
-			register char *de = &buf[INP_NPUSHBACK - 1];
+			register char *de = &INP_pushbackbuf[INP_NPUSHBACK - 1];
 			register int i = INP_NPUSHBACK - 1;
 
 			if (i >= bh->bh_size) i = bh->bh_size - 1;
@@ -414,8 +424,8 @@ int loadbuf(void)
 			}
 		}
 #endif
-		buf[INP_NPUSHBACK-1] = 0;	/* make PushBack work on EOI */
-		_ipp = &buf[INP_NPUSHBACK];
+		INP_pushbackbuf[INP_NPUSHBACK-1] = 0;	/* make PushBack work on EOI */
+		_ipp = &INP_pushbackbuf[INP_NPUSHBACK];
 
 		if (bh->bh_fd) {	/* unstack a file */
 #ifndef INP_READ_IN_ONE
@@ -428,7 +438,7 @@ int loadbuf(void)
 			free(bh->bh_text);
 #endif /* INP_READ_IN_ONE */
 		}
-		bh->bh_text = buf;
+		bh->bh_text = INP_pushbackbuf;
 		bh->bh_size = INP_NPUSHBACK - 1;
 		if (FromFile) {
 			if (AtEoIF()) {
@@ -444,7 +454,7 @@ int loadbuf(void)
 		}
 	}
 
-	if (bh->bh_eofreturned && _ipp == &buf[INP_NPUSHBACK]) {
+	if (bh->bh_eofreturned && _ipp == &INP_pushbackbuf[INP_NPUSHBACK]) {
 		return EOI;
 	}
 
@@ -453,6 +463,6 @@ int loadbuf(void)
 		LoadChar(c);
 		return c;
 	}
-	_ipp = &buf[INP_NPUSHBACK];
+	_ipp = &INP_pushbackbuf[INP_NPUSHBACK];
 	return EOI;
 }

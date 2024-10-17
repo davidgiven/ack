@@ -9,6 +9,7 @@ struct f_info	file_info;
 #include	"input.h"
 #include	<em_arith.h>
 #include	"idf.h"
+#include	"error.h"
 #include	<inp_pkg.body>
 
 

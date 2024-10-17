@@ -13,7 +13,7 @@
 #include "replace.h"
 #include "domacro.h"
 
-#define INP_PUSHBACK 3
+#define INP_NPUSHBACK 3
 #define INP_TYPE struct file_info
 #define INP_VAR finfo
 struct file_info finfo;
@@ -23,7 +23,6 @@ struct file_info finfo;
 char* getwdir(register char* fn)
 {
 	register char* p;
-	char* strrchr();
 
 	p = strrchr(fn, '/');
 	while (p && *(p + 1) == '\0')
