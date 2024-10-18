@@ -54,7 +54,6 @@ int sys_system(const char* prog, const char* const* argv);
 int sys_lock(char *);
 int sys_unlock(char *);
 #endif
-char *sys_break(int);
 void sys_stop(int);
 time_t sys_modtime(char *);
 
