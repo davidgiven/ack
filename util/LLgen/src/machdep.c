@@ -15,7 +15,7 @@
  * machdep.c
  * Machine dependant things
  */
-#if defined WIN32
+#if defined _WIN32
 #include <io.h>
 #endif
 #include <stdio.h>
