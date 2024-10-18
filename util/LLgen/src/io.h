@@ -21,16 +21,16 @@
 
 /* FILES */
 
-# define OUTFILE	"%s/%s.output"	/* -v option */
-# define HFILE		"%s/%spars.h"	/* file for "#define's " */
-# define RFILE		"%s/%spars.c"	/* Error recovery */
+#define OUTFILE "%s/%s.output" /* -v option */
+#define HFILE "%s/%spars.h" /* file for "#define's " */
+#define RFILE "%s/%spars.c" /* Error recovery */
 #ifdef NON_CORRECTING
-# define NCFILE		"%s/%sncor.c"	/* Non-corrcting error recovery */
+#define NCFILE "%s/%sncor.c" /* Non-corrcting error recovery */
 #endif
-extern FILE *finput;
-extern FILE *fpars;
-extern FILE *fact;
-extern FILE *fout;
+extern FILE* finput;
+extern FILE* fpars;
+extern FILE* fact;
+extern FILE* fout;
 extern string f_dir;
 extern string f_pars;
 extern string f_temp;
