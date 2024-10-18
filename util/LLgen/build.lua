@@ -3,7 +3,7 @@ clibrary {
 	hdrs = {
 		"./src/cclass.h",
 		"./src/extern.h",
-		"./src/io.h",
+		"./src/fileio.h",
 		"./src/Lpars.h",
 		"./src/sets.h",
 		"./src/types.h",

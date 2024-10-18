@@ -21,7 +21,7 @@
 #include <string.h>
 #include "types.h"
 #include "extern.h"
-#include "io.h"
+#include "fileio.h"
 #include "sets.h"
 #include "assert.h"
 

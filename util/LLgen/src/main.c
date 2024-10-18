@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 # include "types.h"
-# include "io.h"
+# include "fileio.h"
 # include "extern.h"
 # include "sets.h"
 # include "assert.h"

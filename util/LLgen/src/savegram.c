@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include "types.h"
 #include "extern.h"
-#include "io.h"
+#include "fileio.h"
 #include "assert.h"
 #include "sets.h"
 

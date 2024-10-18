@@ -19,7 +19,7 @@
 #include  <stdio.h>
 # include "types.h"
 # include "extern.h"
-# include "io.h"
+# include "fileio.h"
 
 # ifndef NORCSID
 static string rcsid4 = "$Id$";
