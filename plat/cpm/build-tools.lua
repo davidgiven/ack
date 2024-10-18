@@ -26,5 +26,6 @@ return installable {
 		["$(PLATDEP)/cpm/top"] = "+top",
 		["$(PLATIND)/descr/cpm"] = "./descr",
 		"util/opt+pkg",
+		"util/amisc+aslod-pkg",
 	}
 }

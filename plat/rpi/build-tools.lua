@@ -17,5 +17,6 @@ return installable {
 		["$(PLATDEP)/rpi/ncg"] = "+ncg",
 		["$(PLATIND)/descr/rpi"] = "./descr",
 		"util/opt+pkg",
+		"util/amisc+aslod-pkg",
 	}
 }
