@@ -21,8 +21,11 @@
 /* INPUT PRIMITIVES */
 
 #define	LoadChar(dest)	(dest = loadchar())
-#define	PushBack()	(--_ipp)
-#define ChPushBack(ch)	(*--_ipp = (ch))
+
+extern void INP_pushback(void);
+#define PushBack INP_pushback
+
+#define ChPushBack(ch) (INP_pushback(), *_ipp = (ch))
 
 /*	EOI may be defined as -1 in most programs but the character -1 may
 	be expanded to the int -1 which causes troubles with indexing.

@@ -23,7 +23,7 @@
 # include "extern.h"
 # include "sets.h"
 # include "assert.h"
-# include "io.h"
+# include "fileio.h"
 
 # ifndef NORCSID
 static string rcsid = "$Id$";

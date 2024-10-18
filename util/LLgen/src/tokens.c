@@ -56,7 +56,7 @@ extern void LLnc_recover(void);
 
 #include <string.h>
 #include "types.h"
-# include "io.h"
+# include "fileio.h"
 # include "extern.h"
 # include "assert.h"
 # include "cclass.h"

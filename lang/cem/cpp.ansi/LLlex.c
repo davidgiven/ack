@@ -7,6 +7,8 @@
 
 #include "parameters.h"
 
+#include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <alloc.h>
 #include "input.h"
@@ -19,8 +21,9 @@
 #include "class.h"
 #include "error.h"
 #include "bits.h"
+#include "domacro.h"
 
-#define BUFSIZ 1024
+#define BUFFERSIZE 1024
 
 struct token dot;
 
@@ -32,19 +35,16 @@ int AccFileSpecifier = 0; /* return filespecifier <...>		*/
 int LexSave = 0; /* last character read by GetChar       */
 extern int InputLevel; /* # of current macro expansions	*/
 
-
 #define FLG_ESEEN 0x01 /* possibly a floating point number */
 #define FLG_DOTSEEN 0x02 /* certainly a floating point number */
-
 
 /* Private forward definitions */
 
 static arith char_constant(char*);
-static char* string_token(char *, int);
+static char* string_token(char*, int);
 static int quoted(register int);
 static int val_in_base(register int, int);
 static int trigraph(void);
-
 
 int LLlex(void)
 {
@@ -58,7 +58,7 @@ int GetToken(register struct token* ptok)
 	    combination. Macro replacement is also performed if it is
 	    needed.
 	*/
-	char buf[BUFSIZ];
+	char buf[BUFFERSIZE];
 	register int ch, nch;
 
 again: /* rescan the input after an error or replacement	*/
@@ -433,9 +433,10 @@ void skiplinecomment(void)
 {
 	/*	The last character read has been the '/' of '//'. We read
 	    and discard all characters up to but not including the next
-		NL. */
-	
-	for (;;) {
+	    NL. */
+
+	for (;;)
+	{
 		int c = GetChar();
 		if ((class(c) == STNL) || (c == EOI))
 		{
@@ -479,7 +480,7 @@ static arith char_constant(char* nm)
 	return val;
 }
 
-static char* string_token(char *nm, int stop_char)
+static char* string_token(char* nm, int stop_char)
 {
 	register int ch;
 	register int str_size;
@@ -597,9 +598,32 @@ int GetChar(void)
 	    sequences and removes occurences of \\\n.
 	*/
 	register int ch;
+	static bool atnewline = true;
 
 again:
 	LoadChar(ch);
+	if (ch == EOI)
+	{
+		if (!atnewline)
+		{
+			PushBack();
+			ch = '\n';
+		}
+		else
+		{
+			if (nestcount > 0)
+			{
+				nestlevel = svnestlevel[nestcount--];
+				goto again;
+			}
+
+			if (nestlevel > svnestlevel[nestcount])
+				warning("missing #endif");
+			else if (NoUnstack)
+				warning("unexpected EOF");
+		}
+	}
+	atnewline = (ch == '\n');
 
 	/* possible trigraph sequence */
 	if (ch == '?')

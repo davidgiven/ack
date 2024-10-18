@@ -11,28 +11,30 @@
 #include "input.h"
 #include "error.h"
 #include "replace.h"
+#include "domacro.h"
 
-#define INP_PUSHBACK	3
-#define INP_TYPE	struct file_info
-#define INP_VAR		finfo
-struct file_info	finfo;
+#define INP_NPUSHBACK 3
+#define INP_TYPE struct file_info
+#define INP_VAR finfo
+struct file_info finfo;
 #include <inp_pkg.body>
 #include <alloc.h>
 
-char *getwdir(register char *fn)
+char* getwdir(register char* fn)
 {
-	register char *p;
-	char *strrchr();
+	register char* p;
 
 	p = strrchr(fn, '/');
-	while (p && *(p + 1) == '\0') {	/* remove trailing /'s */
+	while (p && *(p + 1) == '\0')
+	{ /* remove trailing /'s */
 		*p = '\0';
 		p = strrchr(fn, '/');
 	}
 
 	if (fn[0] == '\0' || (fn[0] == '/' && p == &fn[0])) /* absolute path */
 		return "";
-	if (p) {
+	if (p)
+	{
 		*p = '\0';
 		fn = Salloc(fn, (unsigned)(p - &fn[0] + 1));
 		*p = '/';
@@ -41,8 +43,8 @@ char *getwdir(register char *fn)
 	return ".";
 }
 
-int	NoUnstack;
-int	InputLevel;
+int NoUnstack;
+int InputLevel;
 
 int AtEoIT(void)
 {
@@ -54,12 +56,6 @@ int AtEoIT(void)
 
 int AtEoIF(void)
 {
-	extern int nestlevel;
-	extern int nestcount;
-	extern int svnestlevel[];
-
-	if (nestlevel > svnestlevel[nestcount]) warning("missing #endif");
-	else if (NoUnstack) warning("unexpected EOF");
-	nestlevel = svnestlevel[nestcount--];
-	return 0;
+	/* Configure inp_pkg to always return EOIs at the end of source files. */
+	return 1;
 }

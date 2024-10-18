@@ -15,24 +15,23 @@
  * machdep.c
  * Machine dependant things
  */
+#if defined _WIN32
+#include <io.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#if defined WIN32
-#include <io.h>
-#endif
-# include "extern.h"
-# include "types.h"
+#include "extern.h"
+#include "types.h"
 
-# ifndef NORCSID
+#ifndef NORCSID
 static string rcsid5 = "$Id$";
-# endif
+#endif
 
 #ifndef LIBDIR
 #define LIBDIR "lib"
 #endif
-
 
 string libpath(string s)
 {
@@ -55,7 +54,7 @@ string maketempfile()
 	string filename = aprintf("%s/llgen-XXXXXX", tmp);
 	int fd = mkstemp(filename);
 	if (fd == -1)
-	   fatal(1, "Cannot create temporary file.", NULL);
+		fatal(1, "Cannot create temporary file.", NULL);
 
 	close(fd);
 	return filename;

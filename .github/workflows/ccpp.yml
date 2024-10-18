@@ -54,7 +54,7 @@ jobs:
       run: |
         make ack-setup.exe
     - name: upload setup
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}.${{ github.sha }}
         path: ack-setup.exe
