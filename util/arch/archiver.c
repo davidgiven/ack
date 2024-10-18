@@ -477,7 +477,8 @@ void get(int argc, char *argv[])
 				if (verbose)
 				{
 					char *mode = get_mode(member->ar_mode);
-					char *date = ctime(&(member->ar_date));
+					time_t datet = member->ar_date;
+					char *date = ctime(&datet);
 
 					*(date + 16) = '\0';
 					*(date + 24) = '\0';
