@@ -17,5 +17,6 @@ return installable {
 		["$(PLATDEP)/msdos386/ncg"] = "+ncg",
 		["$(PLATIND)/descr/msdos386"] = "./descr",
 		"util/opt+pkg",
+		"util/amisc+aslod-pkg",
 	}
 }

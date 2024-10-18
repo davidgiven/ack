@@ -6,8 +6,6 @@
 /* Made into arch/aal by Ceriel Jacobs
  */
 
-
-
 /*
  * Usage: [arch|aal] [qdprtx][vlcu] archive [file] ...
  * possible key
@@ -44,7 +42,8 @@
 #include "ranlib.h"
 
 /* UNIX specific */
-#if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
+#if !defined(_WIN32)                                                                               \
+    && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__)))
 #ifndef unix
 #define unix
 #endif
@@ -53,43 +52,43 @@
 #ifdef unix
 #include <unistd.h>
 #else
-#define getuid()    0
-#define getgid()    0
+#define getuid() 0
+#define getgid() 0
 #endif
 
 #ifdef AAL
 #include "out.h"
-#define MAGIC_NUMBER    AALMAG
+#define MAGIC_NUMBER AALMAG
 long offset;
-struct ranlib *tab;
+struct ranlib* tab;
 unsigned int tnum = 0;
-char *tstrtab;
+char* tstrtab;
 unsigned int tssiz = 0;
 unsigned int tabsz, strtabsz;
 #else
-#define MAGIC_NUMBER    ARMAG
+#define MAGIC_NUMBER ARMAG
 #endif
 
-#define odd(nr)     (nr & 01)
-#define even(nr)    (odd(nr) ? nr + 1 : nr)
+#define odd(nr) (nr & 01)
+#define even(nr) (odd(nr) ? nr + 1 : nr)
 
 typedef char BOOL;
-#define FALSE       0
-#define TRUE        1
+#define FALSE 0
+#define TRUE 1
 
-#define READ        0
-#define APPEND      2
-#define CREATE      1
+#define READ 0
+#define APPEND 2
+#define CREATE 1
 
-#define MEMBER      struct ar_hdr
+#define MEMBER struct ar_hdr
 
-#define NIL_PTR     ((char *) 0)
-#define NIL_MEM     ((MEMBER *) 0)
-#define NIL_LONG    ((long *) 0)
+#define NIL_PTR ((char*)0)
+#define NIL_MEM ((MEMBER*)0)
+#define NIL_LONG ((long*)0)
 
-#define IO_SIZE     (10 * 1024)
+#define IO_SIZE (10 * 1024)
 
-#define equal(str1, str2)   (!strncmp((str1), (str2), AR_NAME_MAX))
+#define equal(str1, str2) (!strncmp((str1), (str2), AR_NAME_MAX))
 
 BOOL verbose;
 BOOL app_fl;
@@ -118,29 +117,28 @@ time_t distr_time;
 
 char io_buffer[IO_SIZE];
 
-char *progname;
+char* progname;
 
-char *temp_arch;
+char* temp_arch;
 
 void do_object(FILE* f, long size);
-void do_names(struct outhead *headp);
-void enter_name(struct outname *namep);
-void write_symdef(FILE *ar);
+void do_names(struct outhead* headp);
+void enter_name(struct outname* namep);
+void write_symdef(FILE* ar);
 
-void error(BOOL quit, char *str1, char *str2);
-FILE* open_archive(char *name, int mode);
-void
-catch(int param);
-MEMBER *get_member(FILE*);
-void get(int argc, char *argv[]);
-void add(char *name, FILE* ar, FILE* dst, char *mess);
-void extract(FILE* ar, MEMBER *member);
-void copy_member(MEMBER *member, FILE* from, FILE* to, BOOL extracting);
-char *get_mode(int mode);
+void error(BOOL quit, char* str1, char* str2);
+FILE* open_archive(char* name, int mode);
+void catch (int param);
+MEMBER* get_member(FILE*);
+void get(int argc, char* argv[]);
+void add(char* name, FILE* ar, FILE* dst, char* mess);
+void extract(FILE* ar, MEMBER* member);
+void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting);
+char* get_mode(int mode);
 void wr_fatal(void);
 void rd_fatal(void);
 void mwrite(FILE* f, void* address, size_t bytes);
-void show(char *s, char *name);
+void show(char* s, char* name);
 
 /* Conversion utilities. */
 static mode_t ar2mode(short mode);
@@ -154,22 +152,14 @@ struct modemap
 };
 
 /** Mapping table to map an AR mode to a system mode. */
-static const struct modemap armodes[MODE_COUNT] =
-{
-{ AR_IRUSR, S_IRUSR },
-{ AR_IWUSR, S_IWUSR },
-{ AR_IXUSR, S_IXUSR },
+static const struct modemap armodes[MODE_COUNT]
+    = { { AR_IRUSR, S_IRUSR }, { AR_IWUSR, S_IWUSR }, { AR_IXUSR, S_IXUSR },
 
-{ AR_IRGRP, S_IRGRP },
-{ AR_IWGRP, S_IWGRP },
-{ AR_IXGRP, S_IXGRP },
+	    { AR_IRGRP, S_IRGRP }, { AR_IWGRP, S_IWGRP }, { AR_IXGRP, S_IXGRP },
 
-{ AR_IROTH, S_IROTH },
-{ AR_IWOTH, S_IWOTH },
-{ AR_IXOTH, S_IXOTH },
+	    { AR_IROTH, S_IROTH }, { AR_IWOTH, S_IWOTH }, { AR_IXOTH, S_IXOTH },
 
-{ AR_ISUID, S_ISUID },
-{ AR_ISGID, S_ISGID } };
+	    { AR_ISUID, S_ISUID }, { AR_ISGID, S_ISGID } };
 
 /** Convert an "ar" mode to a system specific
  *  mode.
@@ -211,7 +201,7 @@ static void usage(void)
 }
 
 /*VARARGS2*/
-void error(BOOL quit, char *str1, char *str2)
+void error(BOOL quit, char* str1, char* str2)
 {
 	char errbuf[256];
 
@@ -225,7 +215,7 @@ void error(BOOL quit, char *str1, char *str2)
 }
 
 /** Opens the specified archive. */
-FILE* open_archive(char *name, int mode)
+FILE* open_archive(char* name, int mode)
 {
 	unsigned short magic = 0;
 	FILE* file = NULL;
@@ -270,16 +260,15 @@ FILE* open_archive(char *name, int mode)
 	return file;
 }
 
-void
-catch(int param)
+void catch (int param)
 {
 	remove(temp_arch);
 	exit(2);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-	register char *ptr;
+	register char* ptr;
 	int needs_arg = 0;
 
 	progname = argv[0];
@@ -291,48 +280,48 @@ int main(int argc, char *argv[])
 	{
 		switch (*ptr)
 		{
-		case 't':
-			show_fl = TRUE;
-			break;
-		case 'v':
-			verbose = TRUE;
-			break;
-		case 'x':
-			ex_fl = TRUE;
-			break;
-		case 'q':
-			needs_arg = 1;
-			app_fl = TRUE;
-			break;
-		case 'c':
-			nocr_fl = TRUE;
-			break;
-		case 'u':
-			u_fl = TRUE;
-			break;
-		case 'p':
-			needs_arg = 1;
-			pr_fl = TRUE;
-			break;
-		case 'd':
-			needs_arg = 1;
-			del_fl = TRUE;
-			break;
-		case 'r':
-			needs_arg = 1;
-			rep_fl = TRUE;
-			break;
+			case 't':
+				show_fl = TRUE;
+				break;
+			case 'v':
+				verbose = TRUE;
+				break;
+			case 'x':
+				ex_fl = TRUE;
+				break;
+			case 'q':
+				needs_arg = 1;
+				app_fl = TRUE;
+				break;
+			case 'c':
+				nocr_fl = TRUE;
+				break;
+			case 'u':
+				u_fl = TRUE;
+				break;
+			case 'p':
+				needs_arg = 1;
+				pr_fl = TRUE;
+				break;
+			case 'd':
+				needs_arg = 1;
+				del_fl = TRUE;
+				break;
+			case 'r':
+				needs_arg = 1;
+				rep_fl = TRUE;
+				break;
 #ifdef DISTRIBUTION
-			case 'D' :
-			distr_fl = TRUE;
-			break;
+			case 'D':
+				distr_fl = TRUE;
+				break;
 #endif
 #ifdef AAL
-		case 's':
-			break;
+			case 's':
+				break;
 #endif
-		default:
-			usage();
+			default:
+				usage();
 		}
 	}
 
@@ -357,14 +346,14 @@ int main(int argc, char *argv[])
 
 	if (rep_fl || del_fl
 #ifdef AAL
-			|| app_fl
+	    || app_fl
 #endif
-			)
+	)
 	{
 		/*fclose(mkstemp(temp_arch));*/
 	}
 #ifdef AAL
-	tab = (struct ranlib *) malloc(512 * sizeof(struct ranlib));
+	tab = (struct ranlib*)malloc(512 * sizeof(struct ranlib));
 	tstrtab = malloc(4096);
 	if (!tab || !tstrtab)
 		error(TRUE, "Out of core\n", NULL);
@@ -372,24 +361,23 @@ int main(int argc, char *argv[])
 	strtabsz = 4096;
 #endif
 
-	signal(SIGINT,
-	catch);
+	signal(SIGINT, catch);
 	get(argc, argv);
 
 	return 0;
 }
 
 /* Read next member of in the archive file "f". */
-MEMBER *get_member(FILE *f)
+MEMBER* get_member(FILE* f)
 {
 	static MEMBER member;
 
-	again:
+again:
 	if (rd_arhdr(f, &member) == 0)
-	return NIL_MEM;
+		return NIL_MEM;
 	if (member.ar_size < 0)
 	{
-		error(TRUE, "archive has member with negative size\n",NULL);
+		error(TRUE, "archive has member with negative size\n", NULL);
 	}
 	if (equal(SYMDEF, member.ar_name))
 	{
@@ -399,10 +387,10 @@ MEMBER *get_member(FILE *f)
 	return &member;
 }
 
-void get(int argc, char *argv[])
+void get(int argc, char* argv[])
 {
-	register MEMBER *member;
-	FILE *ar_f;
+	register MEMBER* member;
+	FILE* ar_f;
 	int i = 0;
 	char buffer[FILENAME_MAX];
 	size_t read_chars;
@@ -411,17 +399,17 @@ void get(int argc, char *argv[])
 	ar_f = open_archive(argv[2], (show_fl || pr_fl || ex_fl) ? READ : APPEND);
 	if (rep_fl || del_fl
 #ifdef AAL
-			|| app_fl
+	    || app_fl
 #endif
 	)
-	temp_fd = open_archive(temp_arch, CREATE);
+		temp_fd = open_archive(temp_arch, CREATE);
 	while ((member = get_member(ar_f)) != NIL_MEM)
 	{
 		if (argc > 3)
 		{
 			for (i = 3; i < argc; i++)
 			{
-				sys_basename(argv[i],buffer);
+				sys_basename(argv[i], buffer);
 				if (equal(buffer, member->ar_name))
 					break;
 			}
@@ -429,7 +417,7 @@ void get(int argc, char *argv[])
 			{
 				if (rep_fl || del_fl
 #ifdef AAL
-						|| app_fl
+				    || app_fl
 #endif
 				)
 				{
@@ -452,13 +440,13 @@ void get(int argc, char *argv[])
 						argv[i] = "";
 					}
 #endif
-					fseek(ar_f, even(member->ar_size),SEEK_CUR);
+					fseek(ar_f, even(member->ar_size), SEEK_CUR);
 				}
 				continue;
 			}
 		}
 		if (ex_fl || pr_fl)
-		extract(ar_f,member);
+			extract(ar_f, member);
 		else
 		{
 			if (rep_fl)
@@ -468,7 +456,7 @@ void get(int argc, char *argv[])
 				char buf[sizeof(member->ar_name) + 2];
 				register char *p = buf, *q = member->ar_name;
 
-				while (q <= &member->ar_name[sizeof(member->ar_name)-1] && *q)
+				while (q <= &member->ar_name[sizeof(member->ar_name) - 1] && *q)
 				{
 					*p++ = *q++;
 				}
@@ -476,22 +464,20 @@ void get(int argc, char *argv[])
 				*p = '\0';
 				if (verbose)
 				{
-					char *mode = get_mode(member->ar_mode);
-					char *date = ctime(&(member->ar_date));
+					char* mode = get_mode(member->ar_mode);
+					time_t datet = member->ar_date;
+					char* date = ctime(&datet);
 
 					*(date + 16) = '\0';
 					*(date + 24) = '\0';
 
-					print("%s%3u/%u%7ld %s %s %s",
-							mode,
-							(unsigned) (member->ar_uid & 0377),
-							(unsigned) (member->ar_gid & 0377),
-							member->ar_size,
-							date+4,
-							date+20,
-							buf);
+					print(
+					    "%s%3u/%u%7ld %s %s %s", mode, (unsigned)(member->ar_uid & 0377),
+					    (unsigned)(member->ar_gid & 0377), member->ar_size, date + 4, date + 20,
+					    buf);
 				}
-				else print(buf);
+				else
+					print(buf);
 			}
 			else if (del_fl)
 			{
@@ -505,29 +491,29 @@ void get(int argc, char *argv[])
 	if (argc > 3)
 	{
 		for (i = 3; i < argc; i++)
-		if (argv[i][0] != '\0')
-		{
-#ifndef AAL
-			if (app_fl)
-			add(argv[i], ar_f, "a - %s\n");
-			else
-#endif
-			if (rep_fl
-#ifdef AAL
-					|| app_fl
-#endif
-			)
-			add(argv[i], ar_f, temp_fd, "a - %s\n");
-			else
+			if (argv[i][0] != '\0')
 			{
-				print("%s: not found\n", argv[i]);
+#ifndef AAL
+				if (app_fl)
+					add(argv[i], ar_f, "a - %s\n");
+				else
+#endif
+				    if (rep_fl
+#ifdef AAL
+				        || app_fl
+#endif
+				    )
+					add(argv[i], ar_f, temp_fd, "a - %s\n");
+				else
+				{
+					print("%s: not found\n", argv[i]);
+				}
 			}
-		}
 	}
 
 	if (rep_fl || del_fl
 #ifdef AAL
-			|| app_fl
+	    || app_fl
 #endif
 	)
 	{
@@ -540,7 +526,7 @@ void get(int argc, char *argv[])
 		write_symdef(ar_f);
 #endif
 		while ((read_chars = fread(io_buffer, 1, IO_SIZE, temp_fd)) > 0)
-		mwrite(ar_f, io_buffer, read_chars);
+			mwrite(ar_f, io_buffer, read_chars);
 		fclose(temp_fd);
 		remove(temp_arch);
 	}
@@ -554,7 +540,7 @@ void get(int argc, char *argv[])
  *  @param[in] dst Archive name that will have its file added.
  *
  */
-void add(char *name, FILE* ar, FILE* dst, char *mess)
+void add(char* name, FILE* ar, FILE* dst, char* mess)
 {
 	static MEMBER member;
 	size_t read_chars;
@@ -585,7 +571,7 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
 	}
 
 	sys_basename(name, buffer);
-	strncpy (member.ar_name, buffer, sizeof(member.ar_name));
+	strncpy(member.ar_name, buffer, sizeof(member.ar_name));
 	member.ar_uid = status.st_uid;
 	member.ar_gid = status.st_gid;
 	member.ar_mode = mode2ar(status.st_mode);
@@ -618,10 +604,11 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
 			status.st_size = 0;
 			x = even(x);
 		}
-		else status.st_size -= x;
+		else
+			status.st_size -= x;
 		if (fread(io_buffer, 1, read_chars, src_fd) != read_chars)
 		{
-			error(FALSE,"%s seems to shrink\n", name);
+			error(FALSE, "%s seems to shrink\n", name);
 			break;
 		}
 		mwrite(dst, io_buffer, x);
@@ -636,7 +623,7 @@ void add(char *name, FILE* ar, FILE* dst, char *mess)
  *  either standard output or to a file.
  *
  */
-void extract(FILE* ar, MEMBER *member)
+void extract(FILE* ar, MEMBER* member)
 {
 	FILE* file = stdout;
 	char buf[sizeof(member->ar_name) + 1];
@@ -669,7 +656,7 @@ void extract(FILE* ar, MEMBER *member)
 		chmod(buf, ar2mode(member->ar_mode));
 }
 
-void copy_member(MEMBER *member, FILE* from, FILE* to, BOOL extracting)
+void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting)
 {
 	size_t rest;
 	long mem_size = member->ar_size;
@@ -687,7 +674,7 @@ void copy_member(MEMBER *member, FILE* from, FILE* to, BOOL extracting)
 #endif
 	do
 	{
-		rest = mem_size > (size_t) IO_SIZE ? IO_SIZE : (size_t) mem_size;
+		rest = mem_size > (size_t)IO_SIZE ? IO_SIZE : (size_t)mem_size;
 		if (fread(io_buffer, 1, rest, from) != rest)
 		{
 			char buf[sizeof(member->ar_name) + 1];
@@ -698,7 +685,7 @@ void copy_member(MEMBER *member, FILE* from, FILE* to, BOOL extracting)
 		}
 		if (to != NULL)
 			mwrite(to, io_buffer, rest);
-		mem_size -= (long) rest;
+		mem_size -= (long)rest;
 	} while (mem_size > 0L);
 
 	if (is_odd)
@@ -709,7 +696,7 @@ void copy_member(MEMBER *member, FILE* from, FILE* to, BOOL extracting)
 	}
 }
 
-char *get_mode(int mode)
+char* get_mode(int mode)
 {
 	static char mode_buf[11];
 	register int tmp = mode;
@@ -746,7 +733,7 @@ void mwrite(FILE* f, void* address, size_t bytes)
 		error(TRUE, "write error\n", NULL);
 }
 
-void show(char *s, char *name)
+void show(char* s, char* name)
 {
 	MEMBER x;
 	char buf[sizeof(x.ar_name) + 1];
@@ -765,9 +752,9 @@ void show(char *s, char *name)
  * then 4 bytes giving the size of the string table, followed by the string
  * table itself.
  */
-void write_symdef(FILE *ar)
+void write_symdef(FILE* ar)
 {
-	register struct ranlib *ran;
+	register struct ranlib* ran;
 	register int i;
 	register long delta;
 	time_t time_value;
@@ -780,9 +767,9 @@ void write_symdef(FILE *ar)
 	for (i = 0; i < sizeof(arbuf.ar_name); i++)
 		arbuf.ar_name[i] = '\0';
 	strcpy(arbuf.ar_name, SYMDEF);
-	arbuf.ar_size = 4 + 2 * 4 * (long) tnum + 4 + (long) tssiz;
+	arbuf.ar_size = 4 + 2 * 4 * (long)tnum + 4 + (long)tssiz;
 	time(&time_value);
-	arbuf.ar_date = (long) time_value;
+	arbuf.ar_date = (long)time_value;
 	arbuf.ar_uid = getuid();
 	arbuf.ar_gid = getgid();
 	arbuf.ar_mode = AR_IRUSR | AR_IRGRP | AR_IROTH;
@@ -795,7 +782,7 @@ void write_symdef(FILE *ar)
 	}
 #endif
 	wr_arhdr(ar, &arbuf);
-	wr_int4(ar, (long) tnum);
+	wr_int4(ar, (long)tnum);
 	/*
 	 * Account for the space occupied by the magic number
 	 * and the ranlib table.
@@ -806,16 +793,16 @@ void write_symdef(FILE *ar)
 		ran->ran_pos += delta;
 	}
 
-	wr_ranlib(ar, tab, (long) tnum);
-	wr_int4(ar, (long) tssiz);
-	wr_bytes(ar, tstrtab, (long) tssiz);
+	wr_ranlib(ar, tab, (long)tnum);
+	wr_int4(ar, (long)tssiz);
+	wr_bytes(ar, tstrtab, (long)tssiz);
 }
 
 /*
  * Return whether the bytes in `buf' form a good object header.
  * The header is put in `headp'.
  */
-int is_outhead(struct outhead *headp)
+int is_outhead(struct outhead* headp)
 {
 	return !BADMAGIC(*headp) && headp->oh_nname != 0;
 }
@@ -849,16 +836,16 @@ void do_object(FILE* f, long size)
  * name table and read and write the names one by one. Update the ranlib table
  * accordingly.
  */
-void do_names(struct outhead *headp)
+void do_names(struct outhead* headp)
 {
-	register char *strings = NULL;
+	register char* strings = NULL;
 	register int nnames = headp->oh_nname;
 #define NNAMES 100
 	struct outname namebuf[NNAMES];
 	long xxx = OFF_CHAR(*headp);
 
-	if ( (headp->oh_nchar != (unsigned int) headp->oh_nchar)
-			|| ((strings = malloc((unsigned int) headp->oh_nchar))) == NULL)
+	if ((headp->oh_nchar != (unsigned int)headp->oh_nchar)
+	    || ((strings = malloc((unsigned int)headp->oh_nchar))) == NULL)
 	{
 		error(TRUE, "string table too big\n", NULL);
 	}
@@ -866,14 +853,14 @@ void do_names(struct outhead *headp)
 	while (nnames)
 	{
 		int i = nnames >= NNAMES ? NNAMES : nnames;
-		register struct outname *p = namebuf;
+		register struct outname* p = namebuf;
 
 		nnames -= i;
 		rd_name(namebuf, i);
 		while (i--)
 		{
 			long off = p->on_foff - xxx;
-			if (p->on_foff == (long) 0)
+			if (p->on_foff == (long)0)
 			{
 				p++;
 				continue; /* An unrecognizable name. */
@@ -895,14 +882,13 @@ void do_names(struct outhead *headp)
 	free(strings);
 }
 
-void enter_name(struct outname *namep)
+void enter_name(struct outname* namep)
 {
-	register char *cp;
+	register char* cp;
 
 	if (tnum >= tabsz)
 	{
-		tab = (struct ranlib *) realloc((char *) tab,
-				(tabsz += 512) * sizeof(struct ranlib));
+		tab = (struct ranlib*)realloc((char*)tab, (tabsz += 512) * sizeof(struct ranlib));
 		if (!tab)
 			error(TRUE, "Out of core\n", NULL);
 	}
