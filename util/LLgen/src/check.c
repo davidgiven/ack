@@ -19,15 +19,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-# include "types.h"
-# include "extern.h"
-# include "io.h"
-# include "sets.h"
-# include "assert.h"
+#include "types.h"
+#include "extern.h"
+#include "io.h"
+#include "sets.h"
+#include "assert.h"
 
-# ifndef NORCSID
+#ifndef NORCSID
 static string rcsid1 = "$Id$";
-# endif
+#endif
 
 static string c_first = "> firstset   ";
 static string c_contains = "> containset ";
@@ -37,7 +37,7 @@ static int level;
 
 /* In this file are defined : */
 void conflchecks(void);
-STATIC void prline(char *);
+STATIC void prline(char*);
 STATIC void printset(register p_set, string);
 STATIC int check(register p_gram);
 STATIC void moreverbose(register p_set);
@@ -93,8 +93,7 @@ void conflchecks(void)
 			p = &nonterms[s];
 			if (p->n_flags & RECURSIVE)
 			{
-				error(p->n_lineno, "Recursion in default for nonterminal %s",
-						p->n_name);
+				error(p->n_lineno, "Recursion in default for nonterminal %s", p->n_name);
 			}
 			/*
 			 * If a printout is needed for this rule in
@@ -106,8 +105,7 @@ void conflchecks(void)
 				printset(p->n_first, c_first);
 				printset(p->n_contains, c_contains);
 				printset(p->n_follow, c_follow);
-				fprintf(fout, "> rule%s\n\t",
-						p->n_flags & EMPTY ? "\t(EMPTY producing)" : "");
+				fprintf(fout, "> rule%s\n\t", p->n_flags & EMPTY ? "\t(EMPTY producing)" : "");
 				level = 8;
 				prrule(p->n_rule);
 				level = 0;
@@ -123,7 +121,7 @@ void conflchecks(void)
 		fclose(fout);
 }
 
-STATIC void prline(char *s)
+STATIC void prline(char* s)
 {
 	fputs(s, fout);
 	spaces();
@@ -204,105 +202,101 @@ STATIC int check(register p_gram p)
 	{
 		switch (g_gettype(p))
 		{
-		case EORULE:
-			return retval;
-		case NONTERM:
-		{
-			register p_nont n;
-
-			n = &nonterms[g_getcont(p)];
-			if (g_getnpar(p) != getntparams(n))
+			case EORULE:
+				return retval;
+			case NONTERM:
 			{
-				error(p->g_lineno, "Call of %s: parameter count mismatch",
-						n->n_name);
-			}
-			break;
-		}
-		case TERM:
-		{
-			register p_term q;
+				register p_nont n;
 
-			q = g_getterm(p);
-			retval |= check(q->t_rule);
-			if (r_getkind(q) == FIXED)
+				n = &nonterms[g_getcont(p)];
+				if (g_getnpar(p) != getntparams(n))
+				{
+					error(p->g_lineno, "Call of %s: parameter count mismatch", n->n_name);
+				}
 				break;
-			if (setempty(q->t_first))
-			{
-				q->t_flags |= EMPTYFIRST;
-				retval = 1;
-				error(p->g_lineno, "No symbols in term", NULL);
 			}
-			if (empty(q->t_rule))
+			case TERM:
 			{
-				q->t_flags |= EMPTYTERM;
-				retval = 1;
-				error(p->g_lineno,
-						"Term with variable repetition count produces empty",
-						NULL);
-			}
-			temp = setalloc();
-			setunion(temp, q->t_first);
-			if (!setintersect(temp, q->t_follow))
-			{
-				/*
-				 * q->t_first * q->t_follow != EMPTY
-				 */
-				if (!(q->t_flags & RESOLVER))
+				register p_term q;
+
+				q = g_getterm(p);
+				retval |= check(q->t_rule);
+				if (r_getkind(q) == FIXED)
+					break;
+				if (setempty(q->t_first))
+				{
+					q->t_flags |= EMPTYFIRST;
+					retval = 1;
+					error(p->g_lineno, "No symbols in term", NULL);
+				}
+				if (empty(q->t_rule))
+				{
+					q->t_flags |= EMPTYTERM;
+					retval = 1;
+					error(p->g_lineno, "Term with variable repetition count produces empty", NULL);
+				}
+				temp = setalloc();
+				setunion(temp, q->t_first);
+				if (!setintersect(temp, q->t_follow))
 				{
 					/*
-					 * No conflict resolver
+					 * q->t_first * q->t_follow != EMPTY
 					 */
-					error(p->g_lineno, "Repetition conflict", NULL);
-					retval = 1;
-					moreverbose(temp);
+					if (!(q->t_flags & RESOLVER))
+					{
+						/*
+						 * No conflict resolver
+						 */
+						error(p->g_lineno, "Repetition conflict", NULL);
+						retval = 1;
+						moreverbose(temp);
+					}
 				}
-			}
-			else
-			{
-				if (q->t_flags & RESOLVER)
+				else
 				{
-					q->t_flags |= NOCONF;
-					warning(p->g_lineno, "%%while without conflict", NULL);
+					if (q->t_flags & RESOLVER)
+					{
+						q->t_flags |= NOCONF;
+						warning(p->g_lineno, "%%while without conflict", NULL);
+					}
 				}
+				free((p_mem)temp);
+				break;
 			}
-			free((p_mem) temp);
-			break;
-		}
-		case ALTERNATION:
-		{
-			register p_link l;
+			case ALTERNATION:
+			{
+				register p_link l;
 
-			l = g_getlink(p);
-			temp = setalloc();
-			setunion(temp, l->l_symbs);
-			if (!setintersect(temp, l->l_others))
-			{
-				/*
-				 * temp now contains the conflicting
-				 * symbols
-				 */
-				if (!(l->l_flag & (COND | PREFERING | AVOIDING)))
+				l = g_getlink(p);
+				temp = setalloc();
+				setunion(temp, l->l_symbs);
+				if (!setintersect(temp, l->l_others))
 				{
-					error(p->g_lineno, "Alternation conflict", NULL);
-					retval = 1;
-					moreverbose(temp);
+					/*
+					 * temp now contains the conflicting
+					 * symbols
+					 */
+					if (!(l->l_flag & (COND | PREFERING | AVOIDING)))
+					{
+						error(p->g_lineno, "Alternation conflict", NULL);
+						retval = 1;
+						moreverbose(temp);
+					}
 				}
-			}
-			else
-			{
-				if (l->l_flag & (COND | PREFERING | AVOIDING))
+				else
 				{
-					l->l_flag |= NOCONF;
-					warning(p->g_lineno, "Conflict resolver without conflict",
-							NULL);
+					if (l->l_flag & (COND | PREFERING | AVOIDING))
+					{
+						l->l_flag |= NOCONF;
+						warning(p->g_lineno, "Conflict resolver without conflict", NULL);
+					}
 				}
+				free((p_mem)temp);
+				if (l->l_flag & PREFERING)
+					propagate(l->l_symbs, p + 1);
+				retval |= check(l->l_rule);
+				break;
 			}
-			free((p_mem) temp);
-			if (l->l_flag & PREFERING)
-				propagate(l->l_symbs, p + 1);
-			retval |= check(l->l_rule);
-			break;
-		}
 		}
 		p++;
 	}
@@ -331,7 +325,7 @@ STATIC void prrule(p_gram p)
 	/*
 	 * Create a verbose printout of grammar rule p
 	 */
-	register FILE *f;
+	register FILE* f;
 	int present = 0;
 	int firstalt = 1;
 
@@ -340,120 +334,118 @@ STATIC void prrule(p_gram p)
 	{
 		switch (g_gettype(p))
 		{
-		case EORULE:
-			fputs("\n", f);
-			return;
-		case TERM:
-		{
-			register p_term q;
-			register int c;
+			case EORULE:
+				fputs("\n", f);
+				return;
+			case TERM:
+			{
+				register p_term q;
+				register int c;
 
-			q = g_getterm(p);
-			if (present)
-				prline("\n");
-			fputs("[   ", f);
-			level += 4;
-			if (q->t_flags & RESOLVER)
-			{
-				prline("%while (..)\n");
-			}
-			if (q->t_flags & PERSISTENT)
-			{
-				prline("%persistent\n");
-			}
-			if (r_getkind(q) != FIXED)
-			{
-				if (!(q->t_flags & PERSISTENT))
+				q = g_getterm(p);
+				if (present)
+					prline("\n");
+				fputs("[   ", f);
+				level += 4;
+				if (q->t_flags & RESOLVER)
 				{
-					prline("> continue repetition on the\n");
+					prline("%while (..)\n");
 				}
-				printset(q->t_first, c_first);
 				if (q->t_flags & PERSISTENT)
 				{
-					prline("> continue repetition on the\n");
+					prline("%persistent\n");
 				}
-				printset(q->t_contains, c_contains);
-				prline("> terminate repetition on the\n");
-				printset(q->t_follow, c_follow);
-				if (q->t_flags & EMPTYFIRST)
+				if (r_getkind(q) != FIXED)
 				{
-					prline(">>> empty first\n");
+					if (!(q->t_flags & PERSISTENT))
+					{
+						prline("> continue repetition on the\n");
+					}
+					printset(q->t_first, c_first);
+					if (q->t_flags & PERSISTENT)
+					{
+						prline("> continue repetition on the\n");
+					}
+					printset(q->t_contains, c_contains);
+					prline("> terminate repetition on the\n");
+					printset(q->t_follow, c_follow);
+					if (q->t_flags & EMPTYFIRST)
+					{
+						prline(">>> empty first\n");
+					}
+					if (q->t_flags & EMPTYTERM)
+					{
+						prline(">>> term produces empty\n");
+					}
+					cfcheck(q->t_first, q->t_follow, q->t_flags & RESOLVER);
 				}
-				if (q->t_flags & EMPTYTERM)
+				prrule(q->t_rule);
+				level -= 4;
+				spaces();
+				c = r_getkind(q);
+				fputs(c == STAR ? "]*" : c == PLUS ? "]+" : c == OPT ? "]?" : "]", f);
+				if ((c = r_getnum(q)))
 				{
-					prline(">>> term produces empty\n");
+					fprintf(f, "%d", c);
 				}
-				cfcheck(q->t_first, q->t_follow, q->t_flags & RESOLVER);
+				prline("\n");
+				break;
 			}
-			prrule(q->t_rule);
-			level -= 4;
-			spaces();
-			c = r_getkind(q);
-			fputs(c == STAR ? "]*" : c == PLUS ? "]+" : c == OPT ? "]?" : "]",
-					f);
-			if ((c = r_getnum(q)))
+			case ACTION:
+				fputs("{..} ", f);
+				break;
+			case ALTERNATION:
 			{
-				fprintf(f, "%d", c);
-			}
-			prline("\n");
-			break;
-		}
-		case ACTION:
-			fputs("{..} ", f);
-			break;
-		case ALTERNATION:
-		{
-			register p_link l;
+				register p_link l;
 
-			l = g_getlink(p);
-			if (firstalt)
-			{
-				firstalt = 0;
+				l = g_getlink(p);
+				if (firstalt)
+				{
+					firstalt = 0;
+				}
+				else
+					prline("|\n");
+				printset(l->l_symbs, "> alternative on ");
+				cfcheck(l->l_symbs, l->l_others, (int)(l->l_flag & (COND | PREFERING | AVOIDING)));
+				fputs("    ", f);
+				level += 4;
+				if (l->l_flag & DEF)
+				{
+					prline("%default\n");
+				}
+				if (l->l_flag & AVOIDING)
+				{
+					prline("%avoid\n");
+				}
+				if (l->l_flag & PREFERING)
+				{
+					prline("%prefer\n");
+				}
+				if (l->l_flag & COND)
+				{
+					prline("%if ( ... )\n");
+				}
+				prrule(l->l_rule);
+				level -= 4;
+				if (g_gettype(p + 1) == EORULE)
+				{
+					return;
+				}
+				spaces();
+				p++;
+				continue;
 			}
-			else
-				prline("|\n");
-			printset(l->l_symbs, "> alternative on ");
-			cfcheck(l->l_symbs, l->l_others,
-					(int) (l->l_flag & (COND | PREFERING | AVOIDING)));
-			fputs("    ", f);
-			level += 4;
-			if (l->l_flag & DEF)
+			case LITERAL:
+			case TERMINAL:
 			{
-				prline("%default\n");
-			}
-			if (l->l_flag & AVOIDING)
-			{
-				prline("%avoid\n");
-			}
-			if (l->l_flag & PREFERING)
-			{
-				prline("%prefer\n");
-			}
-			if (l->l_flag & COND)
-			{
-				prline("%if ( ... )\n");
-			}
-			prrule(l->l_rule);
-			level -= 4;
-			if (g_gettype(p+1) == EORULE)
-			{
-				return;
-			}
-			spaces();
-			p++;
-			continue;
-		}
-		case LITERAL:
-		case TERMINAL:
-		{
-			register p_token pt = &tokens[g_getcont(p)];
+				register p_token pt = &tokens[g_getcont(p)];
 
-			fprintf(f, pt->t_tokno < 0400 ? "'%s' " : "%s ", pt->t_string);
-			break;
-		}
-		case NONTERM:
-			fprintf(f, "%s ", nonterms[g_getcont(p)].n_name);
-			break;
+				fprintf(f, pt->t_tokno < 0400 ? "'%s' " : "%s ", pt->t_string);
+				break;
+			}
+			case NONTERM:
+				fprintf(f, "%s ", nonterms[g_getcont(p)].n_name);
+				break;
 		}
 		p++;
 		present = 1;
@@ -487,7 +479,7 @@ STATIC void cfcheck(p_set s1, p_set s2, int flag)
 			prline(">>> %if/%while, no conflict\n");
 		}
 	}
-	free((p_mem) temp);
+	free((p_mem)temp);
 }
 
 STATIC void resolve(p_gram p)
@@ -499,34 +491,34 @@ STATIC void resolve(p_gram p)
 	{
 		switch (g_gettype(p))
 		{
-		case EORULE:
-			return;
-		case TERM:
-			resolve(g_getterm(p)->t_rule);
-			break;
-		case ALTERNATION:
-		{
-			register p_link l;
+			case EORULE:
+				return;
+			case TERM:
+				resolve(g_getterm(p)->t_rule);
+				break;
+			case ALTERNATION:
+			{
+				register p_link l;
 
-			l = g_getlink(p);
-			if (l->l_flag & AVOIDING)
-			{
-				/*
-				 * On conflicting symbols, this rule
-				 * is never chosen
-				 */
-				setminus(l->l_symbs, l->l_others);
+				l = g_getlink(p);
+				if (l->l_flag & AVOIDING)
+				{
+					/*
+					 * On conflicting symbols, this rule
+					 * is never chosen
+					 */
+					setminus(l->l_symbs, l->l_others);
+				}
+				if (setempty(l->l_symbs))
+				{
+					/*
+					 * This may be caused by the statement above
+					 */
+					error(p->g_lineno, "Alternative never chosen", NULL);
+				}
+				resolve(l->l_rule);
+				break;
 			}
-			if (setempty(l->l_symbs))
-			{
-				/*
-				 * This may be caused by the statement above
-				 */
-				error(p->g_lineno, "Alternative never chosen", NULL);
-			}
-			resolve(l->l_rule);
-			break;
-		}
 		}
 		p++;
 	}
