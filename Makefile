@@ -9,11 +9,15 @@ DEFAULT_PLATFORM ?= pc86
 
 # Where should the ACK put its temporary files?
 
+ifeq ($(TMPDIR),)
 ACK_TEMP_DIR ?= /tmp
+else
+ACK_TEMP_DIR ?= $(TMPDIR)
+endif
 
 # Where is the ACK going to be installed, eventually? If you don't want to
 # install it and just want to run the ACK from the build directory
-# (/tmp/ack-build/staging, by default), leave this as $(INSDIR).
+# ($(TMPDIR)/ack-build/staging, by default), leave this as $(INSDIR).
 
 ifeq ($(OS),Windows_NT)
 PREFIX ?= c:/ack
