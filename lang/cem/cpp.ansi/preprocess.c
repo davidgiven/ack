@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <system.h>
 #include <alloc.h>
+#include <limits.h>
+#include <string.h>
 #include "preprocess.h"
 #include "input.h"
 #include "parameters.h"
@@ -126,7 +128,22 @@ void do_pragma(void)
 	LineNumber++;
 }
 
-char Xbuf[256];
+char *Xbuf = NULL;
+size_t Xbufsize = 0;
+
+static char *line_directive(unsigned int lineno)
+{
+	size_t needsize = sizeof(LINE_PREFIX " - \"\"\n") + (sizeof(int) * CHAR_BIT + 2) / 3 + strlen(FileName);
+	if (Xbufsize < needsize)
+	{
+		if (Xbuf)
+			free(Xbuf);
+		Xbuf = Malloc(needsize);
+		Xbufsize = needsize;
+	}
+	sprint(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)lineno, FileName);
+	return Xbuf;
+}
 
 void preprocess(char *fn)
 {
@@ -156,9 +173,7 @@ void preprocess(char *fn)
 		/* Generate a line directive communicating the
 		   source filename
 		*/
-		register char* p = Xbuf;
-
-		sprint(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
+		register char* p = line_directive(1);
 		while (*p)
 		{
 			echo(*p++);
@@ -172,8 +187,7 @@ void preprocess(char *fn)
 		lineno = LineNumber;                                                                       \
 		if (!options['P'])                                                                         \
 		{                                                                                          \
-			register char* p = Xbuf;                                                               \
-			sprint(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
+			register char* p = line_directive(LineNumber);                                         \
 			op--;                                                                                  \
 			while (op >= _obuf && (class(*op) == STSKIP || *op == '\n'))                           \
 				op--;                                                                              \
