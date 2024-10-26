@@ -24,14 +24,13 @@
 #include "error.h"
 #include "bits.h"
 #include "skip.h"
+#include "print.h"
 
 char _obuf[OBUFSIZE];
 #ifdef DOBITS
 char bits[128];
 #endif
 extern int InputLevel;
-
-extern char* sprint();
 
 void Xflush(void)
 {
