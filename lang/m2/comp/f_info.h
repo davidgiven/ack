@@ -9,6 +9,8 @@
 
 /* $Id$ */
 
+#include "print.h"
+
 struct f_info {
 	unsigned short f_lineno;
 	char *f_filename;

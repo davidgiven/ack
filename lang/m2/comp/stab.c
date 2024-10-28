@@ -28,13 +28,13 @@
 #include	"error.h"
 #include	"stab.h"
 #include	"main.h"
+#include	"print.h"
 
 extern int	gdb_flag;
 
 #define INCR_SIZE	64
 
 extern int	proclevel;
-extern char	*sprint();
 
 static struct db_str {
 	unsigned	sz;

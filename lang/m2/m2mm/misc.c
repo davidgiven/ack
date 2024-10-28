@@ -23,7 +23,6 @@ gen_anon_idf()
 	*/
 	static int name_cnt;
 	char buff[100];
-	char *sprint();
 
 	sprint(buff, "#%d in %s, line %u",
 			++name_cnt, FileName, LineNumber);

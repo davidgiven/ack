@@ -118,7 +118,6 @@ void EnterVarList(struct node *Idlist, struct type *type, int local)
 	register struct node *idlist = Idlist;
 	register struct scopelist *sc = CurrVis;
 	char buf[256];
-	extern char *sprint();
 
 	if (local) {
 		/* Find the closest enclosing open scope. This

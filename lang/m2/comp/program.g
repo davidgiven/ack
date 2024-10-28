@@ -144,7 +144,6 @@ DefinitionModule
 	int		dummy;
 	extern struct idf	*DefId;
 	extern int	ForeignFlag;
-	extern char	*sprint();
 	register struct scope *currscope = CurrentScope;
 	char buf[512];
 } :
