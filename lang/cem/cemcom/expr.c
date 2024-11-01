@@ -94,7 +94,7 @@ rank_of(oper)
 	case ',':
 		return 15;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 #ifndef NOROPTION
@@ -151,7 +151,7 @@ dot2expr(expp)
 #endif /* NOFLOAT */
 	default:
 		crash("bad conversion to expression");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -315,7 +315,7 @@ fill_int_expr(ex, ivalue, fund)
 		break;
 	default:
 		crash("(intexpr) bad fund %s\n", symbol2str(fund));
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	ex->ex_class = Value;
 	ex->VL_CLASS = Const;

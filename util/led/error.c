@@ -18,7 +18,7 @@ static char rcsid[] = "$Id$";
 static short	nerrors = 0;
 static void	diag(char *, char *, va_list);
 
-void stop(void)
+NORETURN void stop(void)
 {
 	extern char	*outputname;
 	extern int	exitstatus;
@@ -32,7 +32,7 @@ void stop(void)
 }
 
 /* VARARGS1 */
-void fatal(char *format, ...)
+NORETURN void fatal(char *format, ...)
 {
 	va_list ap;
 	va_start(ap, format);

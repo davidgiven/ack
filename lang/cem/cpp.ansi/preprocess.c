@@ -536,7 +536,7 @@ void preprocess(char *fn)
 			break;
 		}
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static char* SkipComment(char *op, int *lineno)

@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	}
 	compile(argc - 1, &argv[1]);
 	sys_stop(err_occurred ? S_EXIT : S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 void compile(int argc, char *argv[])

@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 		sys_stop(S_EXIT);
 	}
 	sys_stop(Compile(Nargv[1], Nargv[2]) ? S_END : S_EXIT);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 int Compile(char *src, char *dst)

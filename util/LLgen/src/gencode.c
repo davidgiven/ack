@@ -460,7 +460,7 @@ STATIC void prset(p_set p)
 			}
 		}
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC void macro(string s, p_nont n)

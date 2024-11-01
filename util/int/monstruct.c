@@ -30,15 +30,12 @@ struct timeb {	/* non-existing; we use an ad-hoc definition */
 	long time;
 	unsigned short millitm;
 	short timezone, dstflag;
-}
+};
 #endif	/* SYS_V */
 
 /******** System to EM memory ********/
 
-PRIVATE mem_stfld(addr, offset, length, val)
-	ptr addr;
-	size offset, length;
-	long val;
+PRIVATE void mem_stfld(ptr addr, size offset, size length, long val)
 {
 	mem_stn(addr + offset, val, length);
 }

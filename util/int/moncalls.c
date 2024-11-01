@@ -127,7 +127,7 @@ struct timeb {			/* non-existing; we use an ad-hoc definition */
 PRIVATE size buf_cnt[5];		/* Current sizes of the buffers */
 PRIVATE char *buf[5];			/* Pointers to the buffers */
 
-PRIVATE check_buf();
+PRIVATE void check_buf(int n, size sz);
 PRIVATE int savestr(int n, ptr addr);
 PRIVATE int vec();
 
@@ -1023,9 +1023,7 @@ void moncall(void)
 
 /* Buffer administration */
 
-PRIVATE check_buf(n, sz)
-	int n;
-	size sz;
+PRIVATE void check_buf(int n, size sz)
 {
 	if (buf_cnt[n] == 0) {
 		buf_cnt[n] = max(128, sz);

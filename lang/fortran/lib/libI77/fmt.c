@@ -430,5 +430,5 @@ char *ap_end(s) char *s;
 		return(NULL);
 	}
 	fatal(100, "bad string");
-	/*NOTREACHED*/ return 0;
+	UNREACHABLE_CODE; return 0;
 }

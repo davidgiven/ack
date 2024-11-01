@@ -388,7 +388,7 @@ STATIC call_p find_origin(c)
 		if (x->cl_id == c->cl_id) return x;
 	}
 	assert(FALSE);
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

@@ -99,7 +99,7 @@ int checkscale(valu_t val)
                 serror("bad scale");
                 return 0;
         }
-        /*NOTREACHED*/
+        UNREACHABLE_CODE;
 }
 
 void reverse(void) {

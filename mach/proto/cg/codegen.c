@@ -118,7 +118,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 		{
 			default:
 				assert(FALSE);
-				/* NOTREACHED */
+				UNREACHABLE_CODE;
 			case DO_NEXTEM:
 				DEBUG("NEXTEM")
 				;

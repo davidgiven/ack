@@ -306,7 +306,7 @@ STATIC int readline(short *instr_out, line_p *lnp_out)
 				return PRO_INSTR;
 			return NORMAL;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC line_p readoperand(short instr)
@@ -587,5 +587,5 @@ STATIC line_p inpseudo(short n)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }

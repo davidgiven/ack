@@ -97,7 +97,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 		{
 			default:
 				assert(FALSE);
-/* NOTREACHED */
+				UNREACHABLE_CODE;
 #ifdef TABLEDEBUG
 			case DO_DLINE:
 			{

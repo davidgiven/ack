@@ -210,7 +210,7 @@ STATIC short cum_profits(alloc)
 
 
 
-STATIC alloc_p best_cumprofits(list,x_out,prev_out)
+STATIC void best_cumprofits(list,x_out,prev_out)
 	alloc_p list, *x_out, *prev_out;
 {
 	/* Find the allocation with the best cummulative profits */

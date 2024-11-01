@@ -517,7 +517,7 @@ static void macro_func(register struct idf *idef)
 		break;
 	default:
 		crash("(macro_func)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

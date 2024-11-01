@@ -486,5 +486,5 @@ int oursmall(int fitsmall, int gain)
             assert(0);
             
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

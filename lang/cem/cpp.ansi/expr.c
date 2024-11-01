@@ -53,5 +53,5 @@ int rank_of(int oper)
 	case ',':
 		return 15;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

@@ -74,7 +74,7 @@ STATIC bool uses_arg(int class)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

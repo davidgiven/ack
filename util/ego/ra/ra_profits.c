@@ -30,6 +30,7 @@ STATIC bool test_cond(short cond, offset val)
 		case IN_0_8:
 			return val >= 0 && val <= 8;
 	}
+	UNREACHABLE_CODE;
 }
 
 STATIC short map_value(struct cond_tab tab[], offset val, bool time)

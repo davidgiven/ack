@@ -410,7 +410,7 @@ noscale:
 
 		return tk->tk_symb = REAL;
 
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	case STEOI:
@@ -419,7 +419,7 @@ noscale:
 	case STCHAR:
 	default:
 		crash("(LLlex) Impossible character class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

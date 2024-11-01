@@ -9,8 +9,8 @@
 #ifndef __ERROR_H_INCLUDED__
 #define __ERROR_H_INCLUDED__
 
-void stop(void);
-void fatal(char *format, ...);
+NORETURN void stop(void);
+NORETURN void fatal(char *format, ...);
 void warning(char *format, ...);
 void error(char *format, ...);
 int do_debug(char *format, ...);

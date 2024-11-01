@@ -210,6 +210,6 @@ int main(int argc, char *argv[])
 		message("program exits with undefined status");
 		close_down(0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 

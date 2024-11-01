@@ -141,7 +141,7 @@ void CodeMove(register struct desig *rhs, register struct node *left, struct typ
 	}
 	default:
 		crash("(CodeMove)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -190,7 +190,7 @@ void CodeValue(register struct desig *ds, register struct type *tp)
 
 	default:
 		crash("(CodeValue)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	if (size < word_size && tp->tp_fund == T_SUBRANGE &&
@@ -247,7 +247,7 @@ void CodeStore(register struct desig *ds, register struct type *tp)
 
 	default:
 		crash("(CodeStore)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	ds->dsg_kind = DSG_INIT;
@@ -296,7 +296,7 @@ void CodeAddress(register struct desig *ds)
 
 	default:
 		crash("(CodeAddress)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	ds->dsg_offset = 0;

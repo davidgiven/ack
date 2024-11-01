@@ -32,8 +32,14 @@ BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 
 # What build flags do you want to use for native code?
 
-CFLAGS ?= -g -Werror=return-type
-LDFLAGS ?= 
+CFLAGS ?= -g \
+	-Werror=return-type \
+	-fsanitize=unreachable \
+	-DUNREACHABLE_CODE='__builtin_unreachable()' \
+	-DNORETURN=_Noreturn
+
+LDFLAGS ?= -g \
+	-fsanitize=unreachable
 
 # Various commands.
 

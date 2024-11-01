@@ -306,7 +306,7 @@ bool is_copy(def)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

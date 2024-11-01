@@ -687,7 +687,7 @@ static long con(int t) {
 		return(argval);
 	}
 	assert(FALSE);
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 extern char *segname[];

@@ -14,7 +14,7 @@
 #include "arch.h"
 #include "ranlib.h"
 #include "object.h"
-#include "diagnostics.h"
+#include "warnings.h"
 #include "stringlist.h"
 
 int	numsort_flg;

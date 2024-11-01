@@ -114,7 +114,7 @@ int getfile(char* filename)
 	default:
 		fatal("%s: wrong magic number", filename);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 void closefile(char* filename)

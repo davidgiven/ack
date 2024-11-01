@@ -96,7 +96,7 @@ void MkCoercion(struct node **pnd, register struct type *tp)
 				break;
 			default:
 				crash("MkCoercion");
-				/*NOTREACHED*/
+				UNREACHABLE_CODE;
 			}
 			if (flt_status == FLT_OVFL) {
 				wmess = "conversion";
@@ -816,7 +816,7 @@ static int AllowedTypes(int operator)
 	default:
 		crash("(AllowedTypes)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static int ChkAddressOper(

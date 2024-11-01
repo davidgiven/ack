@@ -238,7 +238,7 @@ int small(int fitsmall, int gain)
 		default:
 			assert(0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 #endif
 

@@ -493,7 +493,7 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		default:
 			crash("bad local storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 	}
 }

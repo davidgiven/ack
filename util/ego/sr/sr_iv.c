@@ -112,7 +112,7 @@ STATIC int sign(lnp)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

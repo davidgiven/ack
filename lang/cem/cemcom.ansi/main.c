@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 #endif	/* DEBUG */
 
 	sys_stop(err_occurred ? S_EXIT : S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 char *source = 0;

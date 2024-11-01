@@ -132,7 +132,7 @@ static void fatal(const char *s, ...)
 	fprint(STDERR, "\n");
 	cleanup();
 	sys_stop(S_EXIT);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static void
@@ -427,5 +427,5 @@ int main(int argc, char* argv[])
 	run_phase(CA);
 	cleanup();
 	sys_stop(S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

@@ -239,7 +239,7 @@ go_on: /* rescan, the following character has been read	*/
 					break;
 				default:
 					crash("bad class for char 0%o", ch);
-					/* NOTREACHED */
+					UNREACHABLE_CODE;
 			}
 			UnGetChar();
 			return ptok->tk_symb = ch;
@@ -385,7 +385,7 @@ go_on: /* rescan, the following character has been read	*/
 		default: /* this cannot happen	*/
 			crash("bad class for char 0%o", ch);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static arith char_constant(char* nm)

@@ -21,7 +21,7 @@
 #include "array.h"
 #include "imap.h"
 #include "pmap.h"
-#include "diagnostics.h"
+#include "warnings.h"
 #include "astring.h"
 #include "ir.h"
 #include "mcgg.h"

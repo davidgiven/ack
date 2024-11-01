@@ -119,7 +119,7 @@ value2state(expr, val)
 
 	default:
 		NOTREACHED();
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -398,7 +398,7 @@ add_expr_state(value, to_state, espp)
 		break;
 	default:
 		NOTREACHED();
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 

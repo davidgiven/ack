@@ -69,11 +69,11 @@ void do_trap(int nr, int L, char *F)
 	{
 	case TR_ABORT:
 		fatal("trap \"%s\" before program started", trap2text(nr));
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 
 	case TR_HALT:
 		fatal("trap \"%s\" not caught at %s", trap2text(nr), position());
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 
 	case TR_TRAP:
 		/* execute the trap */
@@ -99,7 +99,7 @@ void do_trap(int nr, int L, char *F)
 		call(tpi, (nonreturnable(nr) ? RSB_NRT : RSB_RTT));
 		rec_trap = 0;
 		longjmp(trapbuf, 1);
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -120,6 +120,6 @@ PRIVATE int nonreturnable(int nr)
 	default:
 		return 0;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 

@@ -655,7 +655,7 @@ lexwarning(W_ORDINARY, "overflow in floating point constant");
 		}
 		return tk->tk_symb = REAL;
 
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	case STEOI:
@@ -664,7 +664,7 @@ lexwarning(W_ORDINARY, "overflow in floating point constant");
 	case STCHAR:
 	default:
 		crash("(LLlex) Impossible character class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

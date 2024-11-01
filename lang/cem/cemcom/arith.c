@@ -445,7 +445,7 @@ is_test_op(oper)
 	default:
 		return 0;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 any2opnd(expp, oper)

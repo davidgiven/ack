@@ -531,7 +531,7 @@ code_declaration(
 			break;
 		default:
 			crash("bad local storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 	}
 }

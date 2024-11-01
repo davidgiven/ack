@@ -368,7 +368,7 @@ output_def(od)
 		break;
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	printf(":");
 	outargtype(od->od_type);
@@ -437,7 +437,7 @@ outarg(arg)
 
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -514,7 +514,7 @@ outargtype(tp)
 		break;
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

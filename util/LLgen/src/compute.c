@@ -1319,7 +1319,7 @@ int t_safety(int rep, int count, int persistent, int safety)
 			return safety;
 		return SCANDONE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 int t_after(int rep, int count, int outsafety)

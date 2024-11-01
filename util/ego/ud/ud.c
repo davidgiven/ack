@@ -83,7 +83,7 @@ STATIC bool test_cond(cond,val)
 			return val >= -128 && val < 128;
 	}
 	assert(FALSE);
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

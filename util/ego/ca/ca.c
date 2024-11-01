@@ -174,7 +174,7 @@ STATIC void getpnames(dumpp)
 	}
 }
 
-STATIC int new_name(s) char** s;
+STATIC void new_name(s) char** s;
 {
 	static int nn = 0;
 	char buf[20];
@@ -190,7 +190,7 @@ STATIC int new_name(s) char** s;
 	strcpy(*s, buf);
 }
 
-STATIC int uniq_names()
+STATIC void uniq_names()
 {
 	/* The names of all internal procedures and data blocks
 	 * are made different. As the optimizer combines several

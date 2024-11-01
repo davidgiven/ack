@@ -107,14 +107,14 @@ ReadString(buf, delim, maxsize)
 			break;
 		if (ch == '\n') {
 			panic("incomplete line in intermediate file");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		buf[nread++] = (char)ch;
 	}
 	buf[nread++] = '\0';
 	if (ch != delim) {
 		panic("line too long in intermediate file");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	return 1;
 }
@@ -218,6 +218,6 @@ PRIVATE SkipChar(ch)
 	panic("bad format in intermediate file, '%c' expected; '%c' read",
 		ch, c
 	);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 

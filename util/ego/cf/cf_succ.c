@@ -172,7 +172,7 @@ STATIC line_p case_descr(lnp)
 		l = l->l_next;
 	}
 	error("cannot find rom pseudo for case descriptor");
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

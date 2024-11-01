@@ -29,9 +29,9 @@ void lexerror(char *fmt, ...);
 /*VARARGS*/
 void lexwarning(int class, char *fmt, ...);
 /*VARARGS*/
-void fatal(char *fmt, ...);
+NORETURN void fatal(char *fmt, ...);
 /*VARARGS*/
-void crash(char *fmt, ...);
+NORETURN void crash(char *fmt, ...);
 #else
 
 #ifdef DEBUG

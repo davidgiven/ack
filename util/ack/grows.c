@@ -19,7 +19,7 @@ static char rcs_id[] = "$Id$" ;
 static char rcs_grows[] = RCS_GROWS ;
 #endif
 
-int gr_add(growstring *id, int c) {
+void gr_add(growstring *id, int c) {
 	if ( id->gr_size==id->gr_max) {
 		if ( id->gr_size==0 ) { /* The first time */
 			id->gr_max= 2*GR_MORE ;
@@ -32,7 +32,7 @@ int gr_add(growstring *id, int c) {
 	*(id->gr_string+id->gr_size++)= c ;
 }
 
-int gr_cat(growstring *id, const char *string) {
+void gr_cat(growstring *id, const char *string) {
 	const char *ptr ;
 
 #ifdef DEBUG

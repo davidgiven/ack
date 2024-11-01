@@ -183,7 +183,7 @@ static int ChkValue(register struct node *expp)
 		default:
 		crash("(ChkValue)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 #endif
 
@@ -403,7 +403,7 @@ static int AllowedTypes(int operator)
 	default:
 		crash("(AllowedTypes)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static int Boolean(int operator)
@@ -748,7 +748,7 @@ char *ChkAllowedVar(register struct node *nd, int reading)
 
 	default:
 		crash("(ChkAllowedVar)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	MarkDef(nd, D_SET, 1);
 	return message;

@@ -34,7 +34,7 @@ STATIC valnum base_valno(entity_p enp)
 		case ENARRELEM:
 			return enp->en_arbase;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC entity_p find_base(valnum vn)

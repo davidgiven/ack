@@ -644,7 +644,7 @@ static int getparams(char* buf[], char parbuf[])
 		c = GetChar();
 		c = skipspaces(c, 0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 void macro_def(register struct idf* id, char* text, int nformals, int length, int flags)

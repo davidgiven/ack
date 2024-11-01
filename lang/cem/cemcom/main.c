@@ -136,7 +136,7 @@ main(argc, argv)
 	}
 #endif
 	sys_stop(err_occurred ? S_EXIT : S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 #ifndef NOPP

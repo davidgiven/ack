@@ -344,7 +344,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case GLOBAL:
@@ -359,7 +359,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case STATIC:
@@ -373,7 +373,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case ENUM:
@@ -382,7 +382,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 		break;
 	default:
 		crash("bad storage class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

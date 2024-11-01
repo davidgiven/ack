@@ -380,7 +380,7 @@ again:
 
 		default :
 			crash("(LLlex, STCOMP)");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		if( nch == EOI ) eofseen = 1;
 		else PushBack();
@@ -558,7 +558,7 @@ again:
 		toktype = real_type;
 		return tk->tk_symb = REAL;
 
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	case STEOI:
@@ -567,7 +567,7 @@ again:
 	case STCHAR:
 	default:
 		crash("(LLlex) Impossible character class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

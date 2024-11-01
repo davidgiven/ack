@@ -236,7 +236,7 @@ static char* findnop(int instr)
 		currc++;
 	}
 	fatal("Cannot find interpreter opcode");
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 	return NULL;
 }
 
@@ -285,7 +285,7 @@ int opfit(int flag, int number, cons_t val, int i_flag)
 	default:
 		fatal("illegal OPTYPE value");
 		return -1;
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -433,6 +433,6 @@ static int valid(register line_t *lnp)
 	default:
 		fatal("Unknown parameter type");
 		return -1;
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }

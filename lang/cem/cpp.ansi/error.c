@@ -71,7 +71,7 @@ void strict(char *fmt, ...)
 }
 
 /*VARARGS*/
-void crash(char *fmt, ...)
+NORETURN void crash(char *fmt, ...)
 {
 	va_list ap;
 
@@ -84,7 +84,7 @@ void crash(char *fmt, ...)
 }
 
 /*VARARGS*/
-void fatal(char *fmt, ...)
+NORETURN void fatal(char *fmt, ...)
 {
 	va_list ap;
 

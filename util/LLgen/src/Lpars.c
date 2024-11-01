@@ -455,7 +455,7 @@ void LLread(void) {
 		if ((LLcsymb = LLindex[(LLsymb = LL_LEXI())]) >= 0) return;
 		LLmessage(0);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 void LLerror(int t)
@@ -689,7 +689,7 @@ static int LLdoskip(int e)
 		retval = 1;
 		LLread();
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 void LLnewlevel(unsigned int *LLsinfo) {

@@ -233,7 +233,7 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		default:
 			fatal("can't read relocation type %x", type & RELSZ);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 static void write2(uint16_t valu, char* addr, int type)

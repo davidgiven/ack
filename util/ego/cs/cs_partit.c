@@ -242,7 +242,7 @@ offset op11size(line_p lnp)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 offset op12size(line_p lnp)
@@ -257,7 +257,7 @@ offset op12size(line_p lnp)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 offset op22size(line_p lnp)
@@ -272,7 +272,7 @@ offset op22size(line_p lnp)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 /* Ternary operators are op_aar and conversions between types and/or sizes. */
@@ -350,7 +350,7 @@ offset avsize(line_p lnp)
 			assert(FALSE);
 			break;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 int regtype(byte instr)
@@ -365,5 +365,5 @@ int regtype(byte instr)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }

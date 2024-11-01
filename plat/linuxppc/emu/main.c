@@ -44,7 +44,7 @@ uint32_t brkbase = RAM_BASE;
 uint32_t brkpos = RAM_BASE;
 uint32_t entrypoint = RAM_BASE;
 
-void fatal(char* fmt, ...)
+NORETURN void fatal(char* fmt, ...)
 {
 	static bool guard = false;
 

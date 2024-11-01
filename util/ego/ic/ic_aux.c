@@ -47,7 +47,7 @@ offset opr_size(short instr)
 		default:
 			error("illegal operand of opr_size: %d", instr);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -91,7 +91,7 @@ STATIC offset argsize(arg)
 		default:
 			assert(FALSE);
 		}
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 }
 
 
@@ -120,7 +120,7 @@ STATIC offset blocksize(byte pseudo, arg_p args)
 	   default:
 		assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

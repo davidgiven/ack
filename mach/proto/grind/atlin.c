@@ -374,7 +374,7 @@ start:
 	__Set_HP(BUFTOA(message.m_buf+HP_OFF));
 	if (! ureceive(__Get_Hol0(), BUFTOL(message.m_buf+1))) {}
 	___topload(BUFTOA(message.m_buf + SP_OFF));
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
   }
   send_ok(fail ? M_FAIL : M_OK);
   return fail ? -1 : 0;

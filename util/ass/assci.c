@@ -331,7 +331,7 @@ static cons_t valsize(void)
 	default:
 		fatal("value expected");
 		return 0;
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -446,7 +446,7 @@ static void inpseudo(int instr_no)
 		case ms_err:
 			error("module with error");
 			ertrap();
-			/* NOTREACHED */
+			UNREACHABLE_CODE;
 		case ms_emx:
 			if (oksizes)
 			{
@@ -551,7 +551,7 @@ static void compact_line(void)
 	switch (table1())
 	{
 	default:
-		fatal("unknown byte at start of \"line\""); /* NOTREACHED */
+		fatal("unknown byte at start of \"line\""); UNREACHABLE_CODE;
 	case EOF:
 		eof_seen++;
 		while (pstate.s_prevstat != pst_cast 0)
@@ -605,7 +605,7 @@ static void compact_line(void)
 	switch (table2())
 	{
 	default:
-		fatal("unknown byte at start of argument"); /*NOTREACHED*/
+		fatal("unknown byte at start of argument"); UNREACHABLE_CODE;
 	case sp_cst2:
 		if ((em_flag[instr_no] & EM_PAR) == PAR_B)
 		{
@@ -847,7 +847,7 @@ static void putval(void)
 		return;
 	default:
 		fatal("putval notreached");
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 

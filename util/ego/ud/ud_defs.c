@@ -51,7 +51,7 @@ bool does_expl_def(l)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

@@ -70,7 +70,7 @@ STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 				avp1->av_osecond == avp2->av_osecond &&
 				avp1->av_othird == avp2->av_othird;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC void check_local(avail_p avp)

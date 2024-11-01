@@ -103,7 +103,7 @@ register struct proto *pl)
 		break;
 	default:
 		crash("bad constructor in construct_type");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	return dtp;
 }

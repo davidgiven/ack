@@ -78,7 +78,7 @@ int	unlink(s) char *s; { return(0); }
 int	utime(f, t) char *f; time_t t[2]; { return(0); }
 int	wait(s) int *s; { return(0); }
 int	write(f, b, l) char *b; { return(0); }
-int	abort() {/*NOTREACHED*/ }
+int	abort() {UNREACHABLE_CODE; }
 
 /* Some definitions of format functions */
 /* FORMAT0 $

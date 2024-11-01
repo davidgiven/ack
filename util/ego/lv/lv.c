@@ -83,7 +83,7 @@ STATIC bool is_dir_use(l)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -111,7 +111,7 @@ STATIC bool is_indir_use(l)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -132,7 +132,7 @@ STATIC bool is_def(l)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

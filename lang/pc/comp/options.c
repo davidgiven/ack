@@ -81,7 +81,7 @@ void DoOption(register char *text)
 		text = t;
 		if( idfsize <= 0 || *t ) {
 			fatal("malformed -M option");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		if( idfsize > IDFSIZE )	{
 			idfsize = IDFSIZE;

@@ -209,7 +209,7 @@ STATIC short reg_type(item)
 			return reg_any;
 		default: assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -233,7 +233,7 @@ STATIC short item_size(item)
 			return 2 * ws; /* 2 * word size */
 		default: assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

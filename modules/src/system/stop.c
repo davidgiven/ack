@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "system.h"
 
-void sys_stop(int how)
+NORETURN void sys_stop(int how)
 {
 	switch(how) {
 	case S_END:

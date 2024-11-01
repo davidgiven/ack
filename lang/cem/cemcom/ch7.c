@@ -248,7 +248,7 @@ ch7cast(expp, oper, tp)
 #else /* NOFLOAT */
 		else {
 			crash("(ch7cast) floats not implemented\n");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 #endif /* NOFLOAT */
 	}

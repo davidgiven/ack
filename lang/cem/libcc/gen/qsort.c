@@ -109,7 +109,7 @@ again:
 		*/
 		a1 = righteq + width;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static

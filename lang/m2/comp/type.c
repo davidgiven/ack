@@ -306,7 +306,7 @@ int in_range(arith i, register struct type *tp)
 			chk_bounds(tp->sub_lb, i, SubBaseType(tp)->tp_fund);
 	}
 	assert(0);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 struct type *subr_type(struct node *lb, struct node *ub, struct type *base)

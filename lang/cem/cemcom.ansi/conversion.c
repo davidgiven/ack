@@ -106,7 +106,7 @@ void conversion(register struct type *from_type, register struct type *to_type)
 		break;
 	    default:
 		crash("(conversion) illegal type conversion");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	    }
 	}
 	if ((int)(to_type->tp_size) < (int)word_size

@@ -29,7 +29,7 @@ offset off_set(line_p lnp)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

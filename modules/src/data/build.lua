@@ -1,7 +1,7 @@
 local hfiles = {
 	"./array.h",
 	"./astring.h",
-	"./diagnostics.h",
+	"./warnings.h",
 	"./imap.h",
 	"./pmap.h",
 	"./smap.h",

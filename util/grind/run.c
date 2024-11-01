@@ -473,7 +473,7 @@ could_send(m, stop_message)
 	}
 	return 1;
   }
-  /*NOTREACHED*/
+  UNREACHABLE_CODE;
 }
 
 static int
@@ -506,7 +506,7 @@ getbytes(size, from, to, kind, errmess)
   default:
 	assert(0);
   }
-  /*NOTREACHED*/
+  UNREACHABLE_CODE;
 }
 
 int
@@ -689,7 +689,7 @@ set_pc(PC)
   default:
 	assert(0);
   }
-  /*NOTREACHED*/
+  UNREACHABLE_CODE;
 }
 
 int

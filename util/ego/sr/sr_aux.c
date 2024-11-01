@@ -62,7 +62,7 @@ bool is_caddress(lnp,vars)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

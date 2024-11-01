@@ -392,6 +392,6 @@ STATIC void save_set(p_set p)
 			}
 		}
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 #endif

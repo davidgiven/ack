@@ -51,7 +51,7 @@ STATIC int regtyp(code)
 		default:
 			return reg_pointer;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -425,7 +425,7 @@ STATIC bool same_code(c1,c2,vars)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 

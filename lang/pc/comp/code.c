@@ -243,7 +243,7 @@ arith CodeBeginBlock(register struct def *df)
 	else
 	{
 		crash("(CodeBeginBlock)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	if (offset)
@@ -309,7 +309,7 @@ void CodeEndBlock(register struct def *df, arith StackAdjustment)
 	else
 	{
 		crash("(CodeEndBlock)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 
 	C_end(-df->prc_vis->sc_scope->sc_off);
@@ -348,7 +348,7 @@ void CodeExpr(register struct node *nd, register struct desig *ds,
 			break;
 		default:
 			crash("(CodeExpr Value)");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		ds->dsg_kind = DSG_LOADED;
 		break;
@@ -456,7 +456,7 @@ void CodeExpr(register struct node *nd, register struct desig *ds,
 	}
 	default:
 		crash("(CodeExpr : bad node type)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	} /* switch class */
 
 	if (true_label)
@@ -493,7 +493,7 @@ static void CodeUoper(register struct node *nd)
 
 	default:
 		crash("(CodeUoper)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -522,7 +522,7 @@ static void truthvalue(int relop)
 		break;
 	default:
 		crash("(truthvalue)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -976,7 +976,7 @@ static void CodeStd(struct node *nd)
 			break;
 		default:
 			crash("(CodeStd)");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		C_asp(real_size);
 		C_lfr(real_size);
@@ -1143,7 +1143,7 @@ static void CodeStd(struct node *nd)
 
 	default:
 		crash("(CodeStd)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

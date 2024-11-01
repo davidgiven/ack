@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	exit(0);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 char* Salloc(char* s)

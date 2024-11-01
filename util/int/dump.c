@@ -199,7 +199,7 @@ PRIVATE char *displ_code(int rsbcode)
 	case RSB_NRT:	return "NRT";
 	default:	return ">>Bad RSB code<<";
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 PRIVATE void std_left_undefs(int nundef, ptr addr)

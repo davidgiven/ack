@@ -25,7 +25,7 @@ int		linecount;	/* # lines in this file */
 bool verbose_flag = FALSE;  /* generate verbose output ? */
 
 /* VARARGS1 */
-void error(const char *s, ...)
+NORETURN void error(const char *s, ...)
 {
 	va_list ap;
 

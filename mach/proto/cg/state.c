@@ -39,10 +39,10 @@ static void bmove(register short *from, register short *to, register int nbytes)
 }
 
 #ifdef STONSTACK
-state_p savestatus(register state_p sp)
+void savestatus(register state_p sp)
 {
 #else
-state_p state_p savestatus(void)
+void savestatus(void)
 {
 	register state_p sp;
 
@@ -64,9 +64,6 @@ state_p state_p savestatus(void)
 	sp->st_se = saveemp;
 	sp->st_tl = tokpatlen;
 	sp->st_ns = nstab;
-#ifndef STONSTACK
-	return(sp);
-#endif
 }
 
 void restorestatus(register state_p sp)

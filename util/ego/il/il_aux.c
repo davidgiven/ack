@@ -39,7 +39,7 @@ int tsize(type)
 		case POINTER:	return ps;
 		default:	assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 
@@ -134,7 +134,7 @@ void rem_call(c)
 
 /* remunit */
 
-STATIC short remlines(l)
+STATIC void remlines(l)
 	line_p l;
 {
 

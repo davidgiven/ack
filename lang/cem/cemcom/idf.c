@@ -465,7 +465,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case GLOBAL:
@@ -497,7 +497,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case STATIC:
@@ -520,7 +520,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case IMPLICIT:
@@ -539,7 +539,7 @@ global_redecl(idf, new_sc, tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case ENUM:
@@ -548,7 +548,7 @@ global_redecl(idf, new_sc, tp)
 		break;
 	default:
 		crash("bad storage class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

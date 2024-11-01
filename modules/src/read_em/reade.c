@@ -67,7 +67,7 @@ PRIVATE void pre_hash(int i, char *s)
 			return;
 		}
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 
@@ -634,5 +634,5 @@ PRIVATE void gethead(register struct e_instr *p)
 		checkeol();
 		if (p->em_type == EM_ERROR || p->em_type == EM_FATAL) return;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
