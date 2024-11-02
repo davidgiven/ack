@@ -21,9 +21,9 @@ static char rcsid[] = "$Id$";
 
 static void generate_section_names(void);
 
-extern struct outhead	outhead;
-extern bool		incore;
-extern int		flagword;
+extern struct outhead outhead;
+extern bool incore;
+extern int flagword;
 
 /*
  * We have counted all relocation structs but we know only now if
@@ -33,21 +33,25 @@ extern int		flagword;
  */
 void beginoutput(void)
 {
-	extern long	NLChars, NGChars;
-	extern char	*outputname;
+	extern long NLChars, NGChars;
+	extern char* outputname;
 
-	if (! wr_open(outputname)) {
+	if (!wr_open(outputname))
+	{
 		fatal("can't create %s", outputname);
 	}
 	if (incore)
 		generate_section_names();
 
-	if (!(flagword & (CFLAG|RFLAG)))
+	if (!(flagword & (CFLAG | RFLAG)))
 		outhead.oh_nrelo = (unsigned short)0;
-	if (flagword & SFLAG) {
+	if (flagword & SFLAG)
+	{
 		outhead.oh_nname = (unsigned short)0;
 		outhead.oh_nchar = (long)0;
-	} else {
+	}
+	else
+	{
 		outhead.oh_nname = NLocals + NGlobals + outhead.oh_nsect;
 		outhead.oh_nchar = NLChars + NGChars;
 	}
@@ -61,18 +65,19 @@ void beginoutput(void)
  */
 static void generate_section_names(void)
 {
-	register struct outname	*name;
-	register int		sectindex;
-	register size_t		size;
-	extern struct outsect	outsect[];
+	register struct outname* name;
+	register int sectindex;
+	register size_t size;
+	extern struct outsect outsect[];
 
 	size = outhead.oh_nsect * sizeof(struct outname);
-	name = (struct outname *)core_alloc(ALLOGLOB, size);
-	if (name == (struct outname *)0)
+	name = (struct outname*)core_alloc(ALLOGLOB, size);
+	if (name == (struct outname*)0)
 		return;
 
-	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++, name++) {
-		name->on_foff = (long)0;	/* No string name. */
+	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++, name++)
+	{
+		name->on_foff = (long)0; /* No string name. */
 		name->on_type = (S_MIN + sectindex) | S_SCT;
 		name->on_desc = (unsigned short)0;
 		name->on_valu = outsect[sectindex].os_base;
@@ -86,10 +91,13 @@ static void generate_section_names(void)
  */
 void endoutput(void)
 {
-	if (!incore) {
+	if (!incore)
+	{
 		if (!(flagword & SFLAG))
 			end_write();
-	} else {
+	}
+	else
+	{
 		write_bytes();
 	}
 	wr_close();

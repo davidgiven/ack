@@ -15,15 +15,16 @@ static char rcsid[] = "$Id$";
 #include <out.h>
 #include "const.h"
 
-static short	nerrors = 0;
-static void	diag(char *, char *, va_list);
+static short nerrors = 0;
+static void diag(char*, char*, va_list);
 
 NORETURN void stop(void)
 {
-	extern char	*outputname;
-	extern int	exitstatus;
+	extern char* outputname;
+	extern int exitstatus;
 
-	if (nerrors) {
+	if (nerrors)
+	{
 		remove(outputname);
 		exit(nerrors);
 	}
@@ -32,7 +33,7 @@ NORETURN void stop(void)
 }
 
 /* VARARGS1 */
-NORETURN void fatal(char *format, ...)
+NORETURN void fatal(char* format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
@@ -42,7 +43,7 @@ NORETURN void fatal(char *format, ...)
 }
 
 /* VARARGS1 */
-void warning(char *format, ...)
+void warning(char* format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
@@ -51,7 +52,7 @@ void warning(char *format, ...)
 }
 
 /* VARARGS1 */
-void error(char *format, ...)
+void error(char* format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
@@ -61,7 +62,7 @@ void error(char *format, ...)
 }
 
 /* VARARGS1 */
-int do_debug(char *format, ...)
+int do_debug(char* format, ...)
 {
 	/* printf() and return 1 */
 	va_list ap;
@@ -72,18 +73,18 @@ int do_debug(char *format, ...)
 }
 
 /* VARARGS1 */
-int do_verbose(char *format, ...)
+int do_verbose(char* format, ...)
 {
 	va_list ap;
 	va_start(ap, format);
-	diag((char *) 0, format, ap);
+	diag((char*)0, format, ap);
 	va_end(ap);
 	return 1;
 }
 
-static void diag(char *tail, char *format, va_list ap)
+static void diag(char* tail, char* format, va_list ap)
 {
-	extern char	*progname, *archname, *modulname;
+	extern char *progname, *archname, *modulname;
 
 	fprintf(stderr, "%s: ", progname);
 	if (archname && modulname)
@@ -93,6 +94,8 @@ static void diag(char *tail, char *format, va_list ap)
 	else if (modulname)
 		fprintf(stderr, "%s: ", modulname);
 	vfprintf(stderr, format, ap);
-	if (tail) fprintf(stderr, " (%s)\n", tail);
-	else putc('\n', stderr);
+	if (tail)
+		fprintf(stderr, " (%s)\n", tail);
+	else
+		putc('\n', stderr);
 }

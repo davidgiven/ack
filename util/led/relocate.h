@@ -15,7 +15,7 @@
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-void relocate(struct outhead *head, char* emit, struct outname names[], struct outrelo *relo, long off);
-
+void relocate(
+    struct outhead* head, char* emit, struct outname names[], struct outrelo* relo, long off);
 
 #endif /* __RELOCATE_H_INCLUDED__ */

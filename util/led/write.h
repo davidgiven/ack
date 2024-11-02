@@ -13,9 +13,8 @@
 void wr_fatal(void);
 void begin_write(void);
 void end_write(void);
-void wrt_emit(char *emit, int sectindex, long cnt);
+void wrt_emit(char* emit, int sectindex, long cnt);
 void wrt_nulls(int sectindex, long cnt);
-void wrt_name(struct outname *name, int writename);
-
+void wrt_name(struct outname* name, int writename);
 
 #endif /* __WRITE_H_INCLUDED__ */

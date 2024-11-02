@@ -9,6 +9,6 @@
 #define __FINISH_H_INCLUDED__
 
 void finish(void);
-void do_crs(struct outname *base, unsigned int count);
+void do_crs(struct outname* base, unsigned int count);
 
 #endif /* __FINISH_H_INCLUDED__ */
