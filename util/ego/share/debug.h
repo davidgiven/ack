@@ -8,22 +8,21 @@
 /* TEMPORARY: */
 /* #define DEBUG */
 
-extern int		linecount;	/* # lines in this file */
-extern bool		verbose_flag;  /* generate verbose output ? */
+extern int linecount; /* # lines in this file */
+extern bool verbose_flag; /* generate verbose output ? */
 
 /* VARARGS 1 */
-NORETURN void error(const char *, ...);
-
+NORETURN void error(const char*, ...);
 
 #ifdef TRACE
-void OUTTRACE(const char *, int);
+void OUTTRACE(const char*, int);
 #else
-#define OUTTRACE(s,n)
+#define OUTTRACE(s, n)
 #endif
 #ifdef VERBOSE
-void OUTVERBOSE(const char *, int, int);
+void OUTVERBOSE(const char*, int, int);
 #else
-#define OUTVERBOSE(s,n1,n2)
+#define OUTVERBOSE(s, n1, n2)
 #endif
 #ifdef DEBUG
 
@@ -37,7 +36,7 @@ void OUTVERBOSE(const char *, int, int);
 void VI(short);
 void VL(line_p);
 void VD(dblock_p);
-void VA(short *);
+void VA(short*);
 void VO(obj_p);
 void VP(proc_p);
 

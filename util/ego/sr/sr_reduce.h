@@ -6,6 +6,6 @@
 /* S R _ R E D U C E . H */
 
 void strength_reduction(loop_p loop, lset ivs, lset vars);
-				/*
-				 * Perform strength reduction.
-				 */
+/*
+ * Perform strength reduction.
+ */

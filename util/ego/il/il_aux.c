@@ -25,23 +25,25 @@
 #include "../share/map.h"
 #include "il_aux.h"
 
-
 int tsize(int type)
 {
 	/* Determine the size of a variable of the
 	 *  given type.
 	 */
 
-	switch(type) {
-		case SINGLE:	return ws;
-		case DOUBLE:	return 2*ws;
-		case POINTER:	return ps;
-		default:	assert(FALSE);
+	switch (type)
+	{
+		case SINGLE:
+			return ws;
+		case DOUBLE:
+			return 2 * ws;
+		case POINTER:
+			return ps;
+		default:
+			assert(FALSE);
 	}
 	UNREACHABLE_CODE;
 }
-
-
 
 line_p duplicate(line_p lnp)
 {
@@ -53,7 +55,8 @@ line_p duplicate(line_p lnp)
 
 	l = newline(TYPE(lnp));
 	l->l_instr = INSTR(lnp);
-	switch(TYPE(l)) {
+	switch (TYPE(l))
+	{
 		case OPNO:
 			break;
 		case OPSHORT:
@@ -77,22 +80,23 @@ line_p duplicate(line_p lnp)
 	return l;
 }
 
-
-
-
 line_p copy_expr(line_p l1)
 {
 	/* copy the expression */
 
 	line_p head, tail, l, lnp;
 
-	head = (line_p) 0;
-	for (lnp = l1; lnp != (line_p) 0; lnp = lnp->l_next) {
+	head = (line_p)0;
+	for (lnp = l1; lnp != (line_p)0; lnp = lnp->l_next)
+	{
 		l = duplicate(lnp);
-		if (head == (line_p) 0) {
+		if (head == (line_p)0)
+		{
 			head = tail = l;
-			PREV(l) = (line_p) 0;
-		} else {
+			PREV(l) = (line_p)0;
+		}
+		else
+		{
 			tail->l_next = l;
 			PREV(l) = tail;
 			tail = l;
@@ -101,17 +105,17 @@ line_p copy_expr(line_p l1)
 	return head;
 }
 
-
-
 void rem_call(call_p c)
 {
 	actual_p act, nexta;
-	call_p   nc,nextc;
-	line_p   l,   nextl;
+	call_p nc, nextc;
+	line_p l, nextl;
 
-	for (act = c->cl_actuals; act != (actual_p) 0; act = nexta) {
+	for (act = c->cl_actuals; act != (actual_p)0; act = nexta)
+	{
 		nexta = act->ac_next;
-		for (l = act->ac_exp; l != (line_p) 0; l = nextl) {
+		for (l = act->ac_exp; l != (line_p)0; l = nextl)
+		{
 			nextl = l->l_next;
 			oldline(l);
 		}
@@ -119,14 +123,13 @@ void rem_call(call_p c)
 	}
 	nc = c->cl_car;
 	oldcall(c);
-	for (; nc != (call_p) 0; nc = nextc) {
+	for (; nc != (call_p)0; nc = nextc)
+	{
 		/* Take care of nested calls */
 		nextc = nc->cl_cdr;
 		rem_call(nc);
 	}
 }
-
-
 
 /* remunit */
 
@@ -136,25 +139,26 @@ STATIC void remlines(line_p l)
 	register line_p lnp;
 	line_p next;
 
-	for (lnp = l; lnp != (line_p) 0; lnp = next) {
+	for (lnp = l; lnp != (line_p)0; lnp = next)
+	{
 		next = lnp->l_next;
 		oldline(lnp);
 	}
 }
 
-
-
 void remunit(short kind, proc_p p, line_p l)
 {
 	register bblock_p b;
 	bblock_p next;
-	Lindex   pi;
+	Lindex pi;
 
-	if (kind == LDATA) {
+	if (kind == LDATA)
+	{
 		remlines(l);
 		return;
 	}
-	for (b = p->p_start; b != (bblock_p) 0; b = next) {
+	for (b = p->p_start; b != (bblock_p)0; b = next)
+	{
 		next = b->b_next;
 		remlines(b->b_start);
 		Ldeleteset(b->b_loops);
@@ -162,67 +166,67 @@ void remunit(short kind, proc_p p, line_p l)
 		Ldeleteset(b->b_pred);
 		oldbblock(b);
 	}
-	for (pi = Lfirst(p->p_loops); pi != (Lindex) 0;
-					 pi = Lnext(pi,p->p_loops)) {
+	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
+	{
 		oldloop(Lelem(pi));
 	}
 	Ldeleteset(p->p_loops);
-	oldmap((void **) lmap,llength);
-	oldmap((void **) lbmap,llength);
-	oldmap((void **) bmap,blength);
-	oldmap((void **) lpmap,lplength);
+	oldmap((void**)lmap, llength);
+	oldmap((void**)lbmap, llength);
+	oldmap((void**)bmap, blength);
+	oldmap((void**)lpmap, lplength);
 }
 
 void remcc(calcnt_p head)
 {
 	calcnt_p cc, next;
 
-	for (cc = head; cc != (calcnt_p) 0; cc = next) {
+	for (cc = head; cc != (calcnt_p)0; cc = next)
+	{
 		next = cc->cc_next;
 		oldcalcnt(cc);
 	}
 }
 
-
 /* Extra I/O routines */
 
-call_p getcall(FILE *cf)
+call_p getcall(FILE* cf)
 {
 	/* read a call from the call-file */
 
 	call_p c;
 	proc_p voided;
-	actual_p act,*app;
-	short n,m;
+	actual_p act, *app;
+	short n, m;
 
 	curinp = cf;
 	c = newcall();
 	n = getshort(); /* void nesting level */
-	if (feof(curinp)) return (call_p) 0;
+	if (feof(curinp))
+		return (call_p)0;
 	c->cl_caller = pmap[getshort()];
-	c->cl_id     = getshort();
-	c->cl_proc   = pmap[getshort()];
+	c->cl_id = getshort();
+	c->cl_proc = pmap[getshort()];
 	c->cl_looplevel = getbyte();
 	c->cl_flags = getbyte();
-	c->cl_ratio  = getshort();
+	c->cl_ratio = getshort();
 	app = &c->cl_actuals;
 	n = getshort();
-	while(n--) {
+	while (n--)
+	{
 		act = newactual();
 		m = getshort();
 		act->ac_size = getoff();
 		act->ac_inl = getbyte();
-		act->ac_exp = getlines(cf,m,&voided,FALSE);
+		act->ac_exp = getlines(cf, m, &voided, FALSE);
 		*app = act;
 		app = &act->ac_next;
 	}
-	*app = (actual_p) 0;
+	*app = (actual_p)0;
 	return c;
 }
 
-
-
-line_p get_text(FILE *lf,proc_p *p_out)
+line_p get_text(FILE* lf, proc_p* p_out)
 {
 	/* Read the EM text of one unit
 	 * If it is a procedure, set p_out to
@@ -231,26 +235,30 @@ line_p get_text(FILE *lf,proc_p *p_out)
 	 */
 
 	line_p dumhead, l, lprev;
-	loop_p *oldlpmap = lpmap;
-	line_p *oldlmap = lmap;
+	loop_p* oldlpmap = lpmap;
+	line_p* oldlmap = lmap;
 	short oldllength = llength;
 	short oldlastlabid = lastlabid;
 
 	curinp = lf;
-	*p_out = (proc_p) 0;
+	*p_out = (proc_p)0;
 	dumhead = newline(OPNO);
 	/* The list of instructions is preceeded by a dummy
 	 * line, to simplify list manipulation
 	 */
 	dumhead->l_instr = op_nop; /* just for fun */
 	lprev = dumhead;
-	for (;;) {
+	for (;;)
+	{
 		l = read_line(p_out);
-		if (feof(curinp)) return (line_p) 0;
+		if (feof(curinp))
+			return (line_p)0;
 		lprev->l_next = l;
 		PREV(l) = lprev;
-		if (INSTR(l) == ps_end) break;
-		if (INSTR(l) == ps_mes) {
+		if (INSTR(l) == ps_end)
+			break;
+		if (INSTR(l) == ps_mes)
+		{
 			message(l);
 		}
 		lprev = l;
@@ -258,9 +266,10 @@ line_p get_text(FILE *lf,proc_p *p_out)
 	/* The tables that map labels to instructions
 	 * and labels to basic blocks are not used.
 	 */
-	if (*p_out != (proc_p) 0) {
-		oldmap((void **) lmap,llength);
-		oldmap((void **) lbmap,llength);
+	if (*p_out != (proc_p)0)
+	{
+		oldmap((void**)lmap, llength);
+		oldmap((void**)lbmap, llength);
 		lmap = oldlmap;
 		lpmap = oldlpmap;
 	}
@@ -269,20 +278,19 @@ line_p get_text(FILE *lf,proc_p *p_out)
 	return dumhead;
 }
 
-
-
-calcnt_p getcc(FILE *ccf,proc_p p)
+calcnt_p getcc(FILE* ccf, proc_p p)
 {
 	/* Get call-count info of procedure p */
 
-	calcnt_p head,cc,*ccp;
+	calcnt_p head, cc, *ccp;
 	short i;
 
-	fseek(ccf,p->p_extend->px_il.p_ccaddr,0);
+	fseek(ccf, p->p_extend->px_il.p_ccaddr, 0);
 	curinp = ccf;
-	head = (calcnt_p) 0;
+	head = (calcnt_p)0;
 	ccp = &head;
-	for (i = getshort(); i != (short) 0; i--) {
+	for (i = getshort(); i != (short)0; i--)
+	{
 		cc = *ccp = newcalcnt();
 		cc->cc_proc = pmap[getshort()];
 		cc->cc_count = getshort();
@@ -291,61 +299,60 @@ calcnt_p getcc(FILE *ccf,proc_p p)
 	return head;
 }
 
-
 /* The following routines are only used by the Inline Substitution phase */
 
-
-STATIC void putactuals(actual_p alist,FILE     *cfile)
+STATIC void putactuals(actual_p alist, FILE* cfile)
 {
 	/* output a list of actual parameters */
 
-	actual_p a,next;
+	actual_p a, next;
 	line_p l;
 	int count;
 
 	count = 0;
-	for (a = alist; a != (actual_p) 0; a = a->ac_next) count++;
+	for (a = alist; a != (actual_p)0; a = a->ac_next)
+		count++;
 	outshort(count); /* number of actuals */
-	for (a = alist; a != (actual_p) 0; a = next) {
+	for (a = alist; a != (actual_p)0; a = next)
+	{
 		next = a->ac_next;
 		count = 0;
-		for (l = a->ac_exp; l != (line_p) 0; l= l->l_next) count++;
+		for (l = a->ac_exp; l != (line_p)0; l = l->l_next)
+			count++;
 		outshort(count); /* length of actual */
 		outoff(a->ac_size);
 		outbyte(a->ac_inl);
-		count = putlines(a->ac_exp,cfile);
+		count = putlines(a->ac_exp, cfile);
 		oldactual(a);
 	}
 }
 
-
-
-void putcall(call_p c, FILE *cfile, short level)
+void putcall(call_p c, FILE* cfile, short level)
 {
 	/* output a call */
 
-	call_p nc,nextc;
-
+	call_p nc, nextc;
 
 	curoutp = cfile;
-	outshort(level);  /* nesting level */
-	outshort(c->cl_caller->p_id);	/* calling proc */
+	outshort(level); /* nesting level */
+	outshort(c->cl_caller->p_id); /* calling proc */
 	outshort(c->cl_id);
-	outshort(c->cl_proc->p_id);	/* called proc */
+	outshort(c->cl_proc->p_id); /* called proc */
 	outbyte(c->cl_looplevel);
 	outbyte(c->cl_flags);
 	outshort(c->cl_ratio);
-	putactuals(c->cl_actuals,cfile);
+	putactuals(c->cl_actuals, cfile);
 	nc = c->cl_car;
 	oldcall(c);
-	for (; nc != (call_p) 0; nc = nextc) {
+	for (; nc != (call_p)0; nc = nextc)
+	{
 		/* take care of nested calls */
 		nextc = nc->cl_cdr;
-		putcall(nc,cfile,level+1);
+		putcall(nc, cfile, level + 1);
 	}
 }
 
-long putcc(calcnt_p head,FILE     *ccf)
+long putcc(calcnt_p head, FILE* ccf)
 {
 	/* Write call-count information to file ccf.
 	 * Return the disk address of the info written.
@@ -358,9 +365,11 @@ long putcc(calcnt_p head,FILE     *ccf)
 	addr = ftell(ccf);
 	curoutp = ccf;
 	cnt = 0;
-	for (cc = head; cc != (calcnt_p) 0;cc = cc->cc_next) cnt++;
+	for (cc = head; cc != (calcnt_p)0; cc = cc->cc_next)
+		cnt++;
 	outshort(cnt);
-	for (cc = head; cc != (calcnt_p) 0; cc = cc->cc_next) {
+	for (cc = head; cc != (calcnt_p)0; cc = cc->cc_next)
+	{
 		outproc(cc->cc_proc);
 		outshort(cc->cc_count);
 	}

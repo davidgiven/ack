@@ -10,15 +10,15 @@
  */
 
 line_p scan_to_cal(line_p lines, short n);
-				/*
-				 * Find the n-th cal instruction.
-				 */
-void substitute(FILE *lf, call_p c, line_p cal, line_p firstline);
-			/*
-			 * Perform in line substitution of the call described
-	 		 * by c. The EM text of the called routine is fetched
-	 		 * and modified, the calling sequence is changed,
-	 		 * the modified routine is put at the place of the call
-	 		 * and all global information (proctable etc.) is kept
-	 		 * up to date.
-	 		 */
+/*
+ * Find the n-th cal instruction.
+ */
+void substitute(FILE* lf, call_p c, line_p cal, line_p firstline);
+/*
+ * Perform in line substitution of the call described
+ * by c. The EM text of the called routine is fetched
+ * and modified, the calling sequence is changed,
+ * the modified routine is put at the place of the call
+ * and all global information (proctable etc.) is kept
+ * up to date.
+ */

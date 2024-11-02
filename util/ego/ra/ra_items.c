@@ -23,68 +23,65 @@
 #include "ra_aux.h"
 #include "ra_items.h"
 
-
 #include "itemtab.h"
 /* Maps EM mnemonics onto item types, e.g. op_lol -> LOCALVAR, op_ldc->DCONST,
  * generated from em_mmen.h and itemtab.src files.
  */
 
-#define SMALL_CONSTANT(c)	(c >= 0 && c <= 8)
+#define SMALL_CONSTANT(c) (c >= 0 && c <= 8)
 /* prevent small constants from being put in a register */
-
 
 void clean_tab(item_p items[])
 {
 	int t;
 
-	for (t = 0; t < NRITEMTYPES;t++) {
-		items[t] = (item_p) 0;
+	for (t = 0; t < NRITEMTYPES; t++)
+	{
+		items[t] = (item_p)0;
 	}
 }
-
-
-
 
 short item_type(line_p l)
 {
 	int instr = INSTR(l);
 	int t;
 
-	if (instr < sp_fmnem || instr > sp_lmnem) return NO_ITEM;
-	t =  itemtab[instr - sp_fmnem].id_type;
-	if (t == CONST && SMALL_CONSTANT(off_set(l))) return NO_ITEM;
+	if (instr < sp_fmnem || instr > sp_lmnem)
+		return NO_ITEM;
+	t = itemtab[instr - sp_fmnem].id_type;
+	if (t == CONST && SMALL_CONSTANT(off_set(l)))
+		return NO_ITEM;
 	return t;
 }
-
-
 
 bool is_item(line_p l)
 {
 	return item_type(l) != NO_ITEM;
 }
 
-
-item_p item_of(offset off,item_p items[])
+item_p item_of(offset off, item_p items[])
 {
 	register item_p x;
 
-	for (x = items[LOCALVAR]; x != (item_p) 0; x = x->it_next) {
-		if (off == x->i_t.it_off) {
-			if (!x->it_desirable) break; 
-					/* don't put this item in reg */
+	for (x = items[LOCALVAR]; x != (item_p)0; x = x->it_next)
+	{
+		if (off == x->i_t.it_off)
+		{
+			if (!x->it_desirable)
+				break;
+			/* don't put this item in reg */
 			return x;
 		}
 	}
-	return (item_p) 0;
+	return (item_p)0;
 }
 
-
-
-void fill_item(item_p item,line_p l)
+void fill_item(item_p item, line_p l)
 {
-	item->it_type = item_type(l); 
+	item->it_type = item_type(l);
 	item->it_desirable = TRUE;
-	switch(item->it_type) {
+	switch (item->it_type)
+	{
 		case GLOBL_ADDR:
 			item->i_t.it_obj = OBJ(l);
 			break;
@@ -96,18 +93,18 @@ void fill_item(item_p item,line_p l)
 	}
 }
 
-
-
 STATIC bool desirable(line_p l)
 {
 	/* See if it is really desirable to put the item of line l
 	 * in a register. We do not put an item in a register if it
 	 * is used as 'address of array descriptor' of an array
 	 * instruction.
-	*/
+	 */
 
-	if (l->l_next != (line_p) 0) {
-		switch(INSTR(l->l_next)) {
+	if (l->l_next != (line_p)0)
+	{
+		switch (INSTR(l->l_next))
+		{
 			case op_aar:
 			case op_lar:
 			case op_sar:
@@ -117,26 +114,25 @@ STATIC bool desirable(line_p l)
 	return TRUE;
 }
 
-
-
 STATIC int cmp_items(item_p a, item_p b)
 {
 	/* This routine defines the <, = and > relations between items,
 	 * used to sort them for fast lookup.
 	 */
 
-	offset n1,n2;
+	offset n1, n2;
 
-	switch(a->it_type) {
+	switch (a->it_type)
+	{
 		case GLOBL_ADDR:
 			assert(b->it_type == GLOBL_ADDR);
-			n1 = (offset) a->i_t.it_obj->o_id;
-			n2 = (offset) b->i_t.it_obj->o_id;
+			n1 = (offset)a->i_t.it_obj->o_id;
+			n2 = (offset)b->i_t.it_obj->o_id;
 			break;
 		case PROC_ADDR:
 			assert(b->it_type == PROC_ADDR);
-			n1 = (offset) a->i_t.it_proc->p_id;
-			n2 = (offset) b->i_t.it_proc->p_id;
+			n1 = (offset)a->i_t.it_proc->p_id;
+			n2 = (offset)b->i_t.it_proc->p_id;
 			break;
 		default:
 			n1 = a->i_t.it_off;
@@ -145,20 +141,15 @@ STATIC int cmp_items(item_p a, item_p b)
 	return (n1 == n2 ? 0 : (n1 > n2 ? 1 : -1));
 }
 
-
-
 bool same_item(item_p a, item_p b)
 {
-	return cmp_items(a,b) == 0;
+	return cmp_items(a, b) == 0;
 }
-
 
 STATIC bool lt_item(item_p a, item_p b)
 {
-	return cmp_items(a,b) == -1;
+	return cmp_items(a, b) == -1;
 }
-
-
 
 /* build_itemlist()
  *
@@ -174,17 +165,14 @@ STATIC bool lt_item(item_p a, item_p b)
  * considered to be a usage of its address.
  */
 
-
-
-static item_p items[NRITEMTYPES];  /* items[i] points to the list of type i */
-
-
+static item_p items[NRITEMTYPES]; /* items[i] points to the list of type i */
 
 STATIC short reg_type(item_p item)
 {
 	/* See which type of register the item should best be assigned to */
 
-	switch(item->it_type) {
+	switch (item->it_type)
+	{
 		case LOCALVAR:
 			return regv_type(item->i_t.it_off);
 			/* use type mentioned in reg. message for local */
@@ -195,18 +183,18 @@ STATIC short reg_type(item_p item)
 		case CONST:
 		case DCONST:
 			return reg_any;
-		default: assert(FALSE);
+		default:
+			assert(FALSE);
 	}
 	UNREACHABLE_CODE;
 }
-
-
 
 STATIC short item_size(item_p item)
 {
 	/* Determine the size of the item (in bytes) */
 
-	switch(item->it_type) {
+	switch (item->it_type)
+	{
 		case LOCALVAR:
 			return regv_size(item->i_t.it_off);
 			/* use size mentioned in reg. message for local */
@@ -218,17 +206,17 @@ STATIC short item_size(item_p item)
 			return ws; /* word size */
 		case DCONST:
 			return 2 * ws; /* 2 * word size */
-		default: assert(FALSE);
+		default:
+			assert(FALSE);
 	}
 	UNREACHABLE_CODE;
 }
 
-
-
 STATIC void init_item(item_p a, item_p b)
 {
 	a->it_type = b->it_type;
-	switch(a->it_type) {
+	switch (a->it_type)
+	{
 		case GLOBL_ADDR:
 			a->i_t.it_obj = b->i_t.it_obj;
 			break;
@@ -244,9 +232,7 @@ STATIC void init_item(item_p a, item_p b)
 	a->it_desirable = b->it_desirable;
 }
 
-
-
-STATIC void add_item(item_p item,time_p t,item_p items[])
+STATIC void add_item(item_p item, time_p t, item_p items[])
 {
 	/* See if there was already a list element for item. In any
 	 * case record the fact that item is used at 't'.
@@ -255,16 +241,20 @@ STATIC void add_item(item_p item,time_p t,item_p items[])
 	register item_p x, *q;
 
 	q = &items[item->it_type]; /* each type has its own list */
-	for (x = *q; x != (item_p) 0; x = *q) {
-		if (same_item(x,item)) {
+	for (x = *q; x != (item_p)0; x = *q)
+	{
+		if (same_item(x, item))
+		{
 			/* found */
-			if (!item->it_desirable) {
+			if (!item->it_desirable)
+			{
 				x->it_desirable = FALSE;
 			}
-			Ladd(t,&x->it_usage);
+			Ladd(t, &x->it_usage);
 			return; /* done */
 		}
-		if (lt_item(item,x)) break;
+		if (lt_item(item, x))
+			break;
 		q = &x->it_next;
 	}
 	/* not found, allocate new item; q points to it_next field of
@@ -273,13 +263,11 @@ STATIC void add_item(item_p item,time_p t,item_p items[])
 	x = newitem();
 	x->it_next = *q;
 	*q = x;
-	init_item(x,item);
-	Ladd(t,&x->it_usage);
+	init_item(x, item);
+	Ladd(t, &x->it_usage);
 }
 
-
-
-STATIC void add_usage(line_p l,bblock_p b,item_p items[])
+STATIC void add_usage(line_p l, bblock_p b, item_p items[])
 {
 	/* An item is used at line l. Add it to the list of items.
 	 * A local variable is only considered to be an item, if
@@ -289,21 +277,21 @@ STATIC void add_usage(line_p l,bblock_p b,item_p items[])
 
 	struct item thisitem;
 
-	fill_item(&thisitem,l); /* fill in some fields */
-	if (!desirable(l)) {
+	fill_item(&thisitem, l); /* fill in some fields */
+	if (!desirable(l))
+	{
 		thisitem.it_desirable = FALSE; /* don't put item in reg. */
 	}
-	if (thisitem.it_type == LOCALVAR && !is_regvar(thisitem.i_t.it_off)) {
+	if (thisitem.it_type == LOCALVAR && !is_regvar(thisitem.i_t.it_off))
+	{
 		/* Use address of local instead of local itself */
 		thisitem.it_type = LOCAL_ADDR;
 		thisitem.it_regtype = reg_pointer;
 	}
-	add_item(&thisitem,cons_time(l,b),items);
+	add_item(&thisitem, cons_time(l, b), items);
 }
 
-
-
-void build_itemlist(proc_p p,item_p items[],int    *nrinstr_out)
+void build_itemlist(proc_p p, item_p items[], int* nrinstr_out)
 {
 	/* Make a list of all items used in procedure p.
 	 * An item is anything that can be put in a register,
@@ -313,13 +301,16 @@ void build_itemlist(proc_p p,item_p items[],int    *nrinstr_out)
 
 	register line_p l;
 	register bblock_p b;
-	register int cnt= 0;
+	register int cnt = 0;
 
 	clean_tab(items);
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		for (l = b->b_start; l != (line_p) 0; l = l->l_next) {
-			if (is_item(l)) {
-				add_usage(l,b,items);
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		for (l = b->b_start; l != (line_p)0; l = l->l_next)
+		{
+			if (is_item(l))
+			{
+				add_usage(l, b, items);
 			}
 			cnt++;
 		}

@@ -5,7 +5,7 @@
  */
 /*  S H A R E D   F I L E
  *
- *  F I L E S . C 
+ *  F I L E S . C
  */
 
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include "debug.h"
 #include "files.h"
 
-struct files* findfiles(int argc, char * const *argv)
+struct files* findfiles(int argc, char* const* argv)
 {
 	static struct files files;
 
@@ -49,12 +49,13 @@ struct files* findfiles(int argc, char * const *argv)
 	return &files;
 }
 
-FILE *openfile(const char *name, const char *mode)
+FILE* openfile(const char* name, const char* mode)
 {
-	FILE *f;
+	FILE* f;
 
-	if ((f = fopen(name,mode)) == NULL) {
-		error("cannot open %s",name);
+	if ((f = fopen(name, mode)) == NULL)
+	{
+		error("cannot open %s", name);
 	}
 	return f;
 }

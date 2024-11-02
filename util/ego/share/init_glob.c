@@ -16,11 +16,10 @@
 #include "alloc.h"
 #include "map.h"
 
-
 extern short nrglobals;
 
 /* ARGSUSED */
-void init_globals(void *vp)
+void init_globals(void* vp)
 {
 	/* Assign a 'global variable number (o_globnr) to
 	 * every global variable for which we want to
@@ -36,28 +35,35 @@ void init_globals(void *vp)
 	short nr = 1;
 	offset ill_zone, x;
 
-	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
-		ill_zone = (offset) 0;
-		for (obj = d->d_objlist; obj != (obj_p) 0; obj = obj->o_next) {
-			if (d->d_pseudo == DROM ||
-			    obj->o_size == UNKNOWN_SIZE) {
+	for (d = fdblock; d != (dblock_p)0; d = d->d_next)
+	{
+		ill_zone = (offset)0;
+		for (obj = d->d_objlist; obj != (obj_p)0; obj = obj->o_next)
+		{
+			if (d->d_pseudo == DROM || obj->o_size == UNKNOWN_SIZE)
+			{
 				obj->o_globnr = 0; /* var. not considered */
 				continue;
 			}
-			if (obj->o_off < ill_zone) {
+			if (obj->o_off < ill_zone)
+			{
 				obj->o_globnr = 0; /* var. not considered */
-				if (prev != (obj_p) 0 && prev->o_globnr != 0) {
+				if (prev != (obj_p)0 && prev->o_globnr != 0)
+				{
 					prev->o_globnr = 0;
 					nr--;
 				}
-			} else {
+			}
+			else
+			{
 				obj->o_globnr = nr++;
 			}
-			if ((x = obj->o_off + obj->o_size) > ill_zone) {
+			if ((x = obj->o_off + obj->o_size) > ill_zone)
+			{
 				ill_zone = x;
 			}
 			prev = obj;
 		}
 	}
-	nrglobals = nr -1;
+	nrglobals = nr - 1;
 }

@@ -9,8 +9,8 @@
  */
 
 void control_flow(bblock_p head);
-				/*
-				 * Compute for every basic block
-				 * its successors and predecessors
-				 * in the control flow graph.
-				 */
+/*
+ * Compute for every basic block
+ * its successors and predecessors
+ * in the control flow graph.
+ */

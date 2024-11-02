@@ -17,17 +17,15 @@
 #include "il1_aux.h"
 #include "il1_formal.h"
 
-#define NOT_USED(f)	(!(f->f_flags & USEMASK))
-#define USED_ONCE(f)	f->f_flags |= FF_ONCEUSED
-#define USED_OFTEN(f)	f->f_flags |= FF_OFTENUSED
-#define BADFORMAL(f)	f->f_flags |= FF_BAD
+#define NOT_USED(f) (!(f->f_flags & USEMASK))
+#define USED_ONCE(f) f->f_flags |= FF_ONCEUSED
+#define USED_OFTEN(f) f->f_flags |= FF_OFTENUSED
+#define BADFORMAL(f) f->f_flags |= FF_BAD
 
-#define OUTSIDE_LOOP(b)	(Lnrelems(b->b_loops) == 0)
-#define IS_FORMAL(x)	(x >= 0)
+#define OUTSIDE_LOOP(b) (Lnrelems(b->b_loops) == 0)
+#define IS_FORMAL(x) (x >= 0)
 
-
-
-formal_p find_formal(proc_p  p,int	type,offset  off)
+formal_p find_formal(proc_p p, int type, offset off)
 {
 	/* Find a formal parameter of p
 	 * If the formal overlaps with an existing formal
@@ -35,37 +33,43 @@ formal_p find_formal(proc_p  p,int	type,offset  off)
 	 * 0 is returned.
 	 */
 
-	formal_p f,prev,nf;
+	formal_p f, prev, nf;
 
-	if (type == UNKNOWN) return (formal_p) 0;
-	prev = (formal_p) 0;
-	for (f = p->P_FORMALS; f != (formal_p) 0; f = f->f_next) {
-		if (f->f_offset >= off) break;
+	if (type == UNKNOWN)
+		return (formal_p)0;
+	prev = (formal_p)0;
+	for (f = p->P_FORMALS; f != (formal_p)0; f = f->f_next)
+	{
+		if (f->f_offset >= off)
+			break;
 		prev = f;
 	}
-	if (f != (formal_p) 0 && f->f_offset == off) {
-		return (same_size(f->f_type,type) ? f : (formal_p) 0);
+	if (f != (formal_p)0 && f->f_offset == off)
+	{
+		return (same_size(f->f_type, type) ? f : (formal_p)0);
 	}
-	if (f != (formal_p) 0 && par_overlap(off,type,f->f_offset,f->f_type)) {
-		return (formal_p) 0;
+	if (f != (formal_p)0 && par_overlap(off, type, f->f_offset, f->f_type))
+	{
+		return (formal_p)0;
 	}
-	if (prev != (formal_p) 0 && par_overlap(prev->f_offset,prev->f_type,
-					off,type)) {
-		return (formal_p) 0;
+	if (prev != (formal_p)0 && par_overlap(prev->f_offset, prev->f_type, off, type))
+	{
+		return (formal_p)0;
 	}
 	nf = newformal();
 	nf->f_type = type;
 	nf->f_offset = off;
-	if (prev == (formal_p) 0) {
+	if (prev == (formal_p)0)
+	{
 		p->P_FORMALS = nf;
-	} else {
+	}
+	else
+	{
 		prev->f_next = nf;
 	}
 	nf->f_next = f;
 	return nf;
 }
-
-
 
 STATIC void no_inl_pars(proc_p p)
 {
@@ -75,9 +79,7 @@ STATIC void no_inl_pars(proc_p p)
 	remov_formals(p);
 }
 
-
-
-STATIC void inc_use(formal_p f,bblock_p b)
+STATIC void inc_use(formal_p f, bblock_p b)
 {
 	/* Increment the use count of formal f.
 	 * The counter has only three states: not used,
@@ -88,22 +90,20 @@ STATIC void inc_use(formal_p f,bblock_p b)
 	 * is always set to more than once.
 	 */
 
-	if (NOT_USED(f) && OUTSIDE_LOOP(b)) {
+	if (NOT_USED(f) && OUTSIDE_LOOP(b))
+	{
 		USED_ONCE(f);
-	} else {
+	}
+	else
+	{
 		USED_OFTEN(f);
 	}
 }
 
-
-
-void
-formal(p,b,off,type,usage)
-	proc_p    p;
-	bblock_p  b;
-	offset    off;
-	int       type,
-		  usage;
+void formal(p, b, off, type, usage) proc_p p;
+bblock_p b;
+offset off;
+int type, usage;
 {
 	/* Analyze a reference to a parameter of p
 	 * (occurring within basic block b).
@@ -116,26 +116,33 @@ formal(p,b,off,type,usage)
 
 	formal_p f;
 
-	if (!IS_FORMAL(off) || !SUITABLE(p) || !INLINE_PARS(p)) return;
+	if (!IS_FORMAL(off) || !SUITABLE(p) || !INLINE_PARS(p))
+		return;
 	/* We are not interested in formal parameters of
 	 * proccedures that will never be expanded in line,
 	 * or whose parameters will not be expanded in line.
 	 */
-	f = find_formal(p,type,off);
+	f = find_formal(p, type, off);
 	/* Find the formal; if not found, create one;
 	 * if inconsistent with previous formals (e.g.
 	 * overlapping formals) then return 0;
 	 * also fills in its type.
 	 */
-	if (f == (formal_p) 0) {
+	if (f == (formal_p)0)
+	{
 		no_inl_pars(p);
 		/* parameters of p may not be expanded in line */
-	} else {
-		if (usage == CHANGE) {
+	}
+	else
+	{
+		if (usage == CHANGE)
+		{
 			/* don't expand f in line */
 			BADFORMAL(f);
-		} else {
-			inc_use(f,b); /* increment use count */
+		}
+		else
+		{
+			inc_use(f, b); /* increment use count */
 		}
 	}
 }

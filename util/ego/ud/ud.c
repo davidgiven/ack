@@ -30,50 +30,51 @@
 #include "ud_copy.h"
 
 /* core allocation macros */
-#define newudbx()	(bext_p) newstruct(bext_ud)
-#define oldudbx(x)	oldstruct(bext_ud,x)
+#define newudbx() (bext_p) newstruct(bext_ud)
+#define oldudbx(x) oldstruct(bext_ud, x)
 
 short nrvars;
 
-int Svalue,Svariable;
+int Svalue, Svariable;
 
-cond_p globl_cond_tab,local_cond_tab;
+cond_p globl_cond_tab, local_cond_tab;
 
-STATIC cond_p getcondtab(FILE *f)
+STATIC cond_p getcondtab(FILE* f)
 {
-	int l,i;
+	int l, i;
 	cond_p tab;
 
-	fscanf(f,"%d",&l);
+	fscanf(f, "%d", &l);
 	tab = newcondtab(l);
-	for (i = 0; i < l; i++) {
-		fscanf(f,"%hd %hd %hd",&tab[i].mc_cond,&tab[i].mc_tval,
-			 &tab[i].mc_sval);
+	for (i = 0; i < l; i++)
+	{
+		fscanf(f, "%hd %hd %hd", &tab[i].mc_cond, &tab[i].mc_tval, &tab[i].mc_sval);
 	}
-	assert(tab[l-1].mc_cond == DEFAULT);
+	assert(tab[l - 1].mc_cond == DEFAULT);
 	return tab;
 }
 
-
-STATIC void ud_machinit(void *vp)
+STATIC void ud_machinit(void* vp)
 {
-	FILE *f = vp;
+	FILE* f = vp;
 	char s[100];
 
-	for (;;) {
-		while(getc(f) != '\n');
-		fscanf(f,"%99s",s);
-		if (strcmp(s,"%%UD") == 0)break;
+	for (;;)
+	{
+		while (getc(f) != '\n')
+			;
+		fscanf(f, "%99s", s);
+		if (strcmp(s, "%%UD") == 0)
+			break;
 	}
 	globl_cond_tab = getcondtab(f);
 	local_cond_tab = getcondtab(f);
 }
 
-
-
-STATIC bool test_cond(short cond,offset val)
+STATIC bool test_cond(short cond, offset val)
 {
-	switch(cond) {
+	switch (cond)
+	{
 		case DEFAULT:
 			return TRUE;
 		case FITBYTE:
@@ -83,18 +84,18 @@ STATIC bool test_cond(short cond,offset val)
 	UNREACHABLE_CODE;
 }
 
-
-STATIC short map_value(struct cond_tab tab[],offset val,bool time)
+STATIC short map_value(struct cond_tab tab[], offset val, bool time)
 {
 	cond_p p;
 
-	for (p = &tab[0]; ; p++) {
-		if (test_cond(p->mc_cond,val)) {
+	for (p = &tab[0];; p++)
+	{
+		if (test_cond(p->mc_cond, val))
+		{
 			return (time ? p->mc_tval : p->mc_sval);
 		}
 	}
 }
-
 
 STATIC void init_root(bblock_p root)
 {
@@ -108,24 +109,24 @@ STATIC void init_root(bblock_p root)
 
 	short v;
 
-	for (v = 1; v <= nrglobals; v++) {
+	for (v = 1; v <= nrglobals; v++)
+	{
 		Cadd(IMPLICIT_DEF(GLOB_TO_VARNR(v)), &IN(root));
 	}
-	for (v = 1; v <= nrlocals; v++) {
-		if (locals[v]->lc_off >= 0) {
-			Cadd(IMPLICIT_DEF(LOC_TO_VARNR(v)),&IN(root));
+	for (v = 1; v <= nrlocals; v++)
+	{
+		if (locals[v]->lc_off >= 0)
+		{
+			Cadd(IMPLICIT_DEF(LOC_TO_VARNR(v)), &IN(root));
 		}
 	}
 	/* OUT(root) = IN(root) - KILL(root) + GEN(root) */
-	Ccopy_set(IN(root),&OUT(root));
-	Csubtract(KILL(root),&OUT(root));
-	Cjoin(GEN(root),&OUT(root));
+	Ccopy_set(IN(root), &OUT(root));
+	Csubtract(KILL(root), &OUT(root));
+	Cjoin(GEN(root), &OUT(root));
 }
 
-
-
-
-STATIC void unite_outs(lset bbset,cset *setp)
+STATIC void unite_outs(lset bbset, cset* setp)
 {
 	/* Take the union of OUT(b), for all b in bbset,
 	 * and put the result in setp.
@@ -134,12 +135,11 @@ STATIC void unite_outs(lset bbset,cset *setp)
 	Lindex i;
 
 	Cclear_set(setp);
-	for (i = Lfirst(bbset); i != (Lindex) 0; i = Lnext(i,bbset)) {
-		Cjoin(OUT((bblock_p) Lelem(i)), setp);
+	for (i = Lfirst(bbset); i != (Lindex)0; i = Lnext(i, bbset))
+	{
+		Cjoin(OUT((bblock_p)Lelem(i)), setp);
 	}
 }
-
-
 
 STATIC void solve_equations(proc_p p)
 {
@@ -147,19 +147,20 @@ STATIC void solve_equations(proc_p p)
 	 * definitions of procedure p.
 	 * These equations are:
 	 *  (1)  OUT(b) = IN(b) - KILL(b) + GEN(b)
-	 *  (2)  IN(b)  = OUT(p1) + .. + OUT(pn) ; 
+	 *  (2)  IN(b)  = OUT(p1) + .. + OUT(pn) ;
 	 *       where PRED(b) = {p1, .. , pn}
 	 * We use the iterative algorithm of Aho&Ullman to
 	 * solve the equations.
 	 */
 
 	register bblock_p b;
-	bool     change;
-	cset     newin;
+	bool change;
+	cset newin;
 
 	/* initializations */
 	newin = Cempty_set(nrdefs);
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		IN(b) = Cempty_set(nrdefs);
 		OUT(b) = Cempty_set(nrdefs);
 		Ccopy_set(GEN(b), &OUT(b));
@@ -170,44 +171,44 @@ STATIC void solve_equations(proc_p p)
 	 */
 	change = TRUE;
 	/* main loop */
-	while (change) {
+	while (change)
+	{
 		change = FALSE;
-		for (b = p->p_start->b_next; b != (bblock_p) 0; b = b->b_next) {
+		for (b = p->p_start->b_next; b != (bblock_p)0; b = b->b_next)
+		{
 			unite_outs(b->b_pred, &newin);
 			/* newin = OUT(p1) + .. + OUT(pn) */
-			if (!Cequal(newin,IN(b))) {
+			if (!Cequal(newin, IN(b)))
+			{
 				change = TRUE;
 				Ccopy_set(newin, &IN(b));
-				Ccopy_set(IN(b),   &OUT(b));
+				Ccopy_set(IN(b), &OUT(b));
 				Csubtract(KILL(b), &OUT(b));
-				Cjoin(GEN(b),      &OUT(b));
+				Cjoin(GEN(b), &OUT(b));
 			}
 		}
 	}
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		Cdeleteset(KILL(b));
 		Cdeleteset(OUT(b));
 	}
 	Cdeleteset(newin);
 }
 
-
-
 short global_addr_cost(void)
 {
-	return add_timespace(map_value(globl_cond_tab,(offset) 0,TRUE),
-			     map_value(globl_cond_tab,(offset) 0,FALSE));
+	return add_timespace(
+	    map_value(globl_cond_tab, (offset)0, TRUE), map_value(globl_cond_tab, (offset)0, FALSE));
 }
 
 short local_addr_cost(offset off)
 {
-	return add_timespace(map_value(local_cond_tab,off,TRUE),
-			     map_value(local_cond_tab,off,FALSE));
+	return add_timespace(
+	    map_value(local_cond_tab, off, TRUE), map_value(local_cond_tab, off, FALSE));
 }
 
-
-
-STATIC bool fold_is_desirable(line_p old,line_p new)
+STATIC bool fold_is_desirable(line_p old, line_p new)
 {
 	/* See if it is desirable to replace the variable used by the
 	 * EM instruction 'old' by the variable used by 'new'.
@@ -221,48 +222,47 @@ STATIC bool fold_is_desirable(line_p old,line_p new)
 	 * least as many times as the second one.
 	 */
 
-	local_p oldloc,newloc;
-	short old_cost,new_cost,nr;
+	local_p oldloc, newloc;
+	short old_cost, new_cost, nr;
 	bool ok;
 
-	if (TYPE(old) == OPOBJECT) {
+	if (TYPE(old) == OPOBJECT)
+	{
 		/* old variable is a global variable */
-		return TYPE(new) != OPOBJECT && 
-		       global_addr_cost() >=
-		       local_addr_cost(off_set(new));
+		return TYPE(new) != OPOBJECT && global_addr_cost() >= local_addr_cost(off_set(new));
 	}
-	find_local(off_set(old),&nr,&ok);
+	find_local(off_set(old), &nr, &ok);
 	assert(ok);
 	oldloc = locals[nr];
 	old_cost = local_addr_cost(off_set(old));
-	if (TYPE(new) == OPOBJECT) {
+	if (TYPE(new) == OPOBJECT)
+	{
 		return oldloc->lc_score == 2 || /* old var. can be eliminated */
-		       old_cost > global_addr_cost();
+		    old_cost > global_addr_cost();
 	}
-	find_local(off_set(new),&nr,&ok);
+	find_local(off_set(new), &nr, &ok);
 	assert(ok);
 	newloc = locals[nr];
 	new_cost = local_addr_cost(off_set(new));
-	return old_cost > new_cost ||
-	       (old_cost == new_cost && oldloc->lc_score < newloc->lc_score);
+	return old_cost > new_cost || (old_cost == new_cost && oldloc->lc_score < newloc->lc_score);
 }
-
-
 
 #ifdef TRACE
 /*********** TRACING ROUTINES ***********/
 
-pr_localtab() {
+pr_localtab()
+{
 	short i;
 	local_p lc;
 
-	fprintf(stderr,"LOCAL-TABLE (%d)\n\n",nrlocals);
-	for (i = 1; i <= nrlocals; i++) {
+	fprintf(stderr, "LOCAL-TABLE (%d)\n\n", nrlocals);
+	for (i = 1; i <= nrlocals; i++)
+	{
 		lc = locals[i];
-		fprintf(stderr,"LOCAL %d\n",i);
-		fprintf(stderr,"\toffset= %ld\n",lc->lc_off);
-		fprintf(stderr,"\tsize=   %d\n",lc->lc_size);
-		fprintf(stderr,"\tflags=  %d\n",lc->lc_flags);
+		fprintf(stderr, "LOCAL %d\n", i);
+		fprintf(stderr, "\toffset= %ld\n", lc->lc_off);
+		fprintf(stderr, "\tsize=   %d\n", lc->lc_size);
+		fprintf(stderr, "\tflags=  %d\n", lc->lc_flags);
 	}
 }
 
@@ -271,13 +271,15 @@ pr_globals()
 	dblock_p d;
 	obj_p obj;
 
-	fprintf(stderr,"GLOBALS (%d)\n\n",nrglobals);
-	fprintf(stderr,"ID\tGLOBNR\n");
-	for (d = fdblock; d != (dblock_p) 0; d = d->d_next) {
-		for (obj = d->d_objlist; obj != (obj_p) 0; obj = obj->o_next) {
-			if (obj->o_globnr != 0) {
-				fprintf(stderr,"%d\t%d\n",
-				    obj->o_id,obj->o_globnr);
+	fprintf(stderr, "GLOBALS (%d)\n\n", nrglobals);
+	fprintf(stderr, "ID\tGLOBNR\n");
+	for (d = fdblock; d != (dblock_p)0; d = d->d_next)
+	{
+		for (obj = d->d_objlist; obj != (obj_p)0; obj = obj->o_next)
+		{
+			if (obj->o_globnr != 0)
+			{
+				fprintf(stderr, "%d\t%d\n", obj->o_id, obj->o_globnr);
 			}
 		}
 	}
@@ -290,20 +292,21 @@ pr_defs()
 	short i;
 	line_p l;
 
-	fprintf(stderr,"DEF TABLE\n\n");
-	for (i = 1; i <= nrexpldefs; i++) {
+	fprintf(stderr, "DEF TABLE\n\n");
+	for (i = 1; i <= nrexpldefs; i++)
+	{
 		l = defs[i];
-		fprintf(stderr,"%d\t%s ",EXPL_TO_DEFNR(i),
-			&em_mnem[(INSTR(l)-sp_fmnem)*4]);
-		switch(TYPE(l)) {
+		fprintf(stderr, "%d\t%s ", EXPL_TO_DEFNR(i), &em_mnem[(INSTR(l) - sp_fmnem) * 4]);
+		switch (TYPE(l))
+		{
 			case OPSHORT:
-				fprintf(stderr,"%d\n",SHORT(l));
+				fprintf(stderr, "%d\n", SHORT(l));
 				break;
 			case OPOFFSET:
-				fprintf(stderr,"%ld\n",OFFSET(l));
+				fprintf(stderr, "%ld\n", OFFSET(l));
 				break;
 			case OPOBJECT:
-				fprintf(stderr,"%d\n",OBJ(l)->o_id);
+				fprintf(stderr, "%d\n", OBJ(l)->o_id);
 				break;
 			default:
 				assert(FALSE);
@@ -311,37 +314,37 @@ pr_defs()
 	}
 }
 
-
-pr_set(name,k,s,n)
-	char *name;
-	cset s;
-	short k,n;
+pr_set(name, k, s, n) char* name;
+cset s;
+short k, n;
 {
 	short i;
 
-	fprintf(stderr,"%s(%d) =\t{",name,k);
-	for (i = 1; i <= n; i++) {
-		if (Cis_elem(i,s)) {
-			fprintf(stderr,"%d ",i);
+	fprintf(stderr, "%s(%d) =\t{", name, k);
+	for (i = 1; i <= n; i++)
+	{
+		if (Cis_elem(i, s))
+		{
+			fprintf(stderr, "%d ", i);
 		}
 	}
-	fprintf(stderr,"}\n");
+	fprintf(stderr, "}\n");
 }
 
-pr_blocks(p)
-	proc_p p;
+pr_blocks(p) proc_p p;
 {
 	bblock_p b;
 	short n;
 
-	for (b = p->p_start; b != 0; b = b->b_next) {
-		fprintf(stderr,"\n");
+	for (b = p->p_start; b != 0; b = b->b_next)
+	{
+		fprintf(stderr, "\n");
 		n = b->b_id;
-		pr_set("GEN",n,GEN(b),nrdefs);
-		pr_set("KILL",n,KILL(b),nrdefs);
-		pr_set("IN ",n,IN(b),nrdefs);
-		pr_set("OUT",n,OUT(b),nrdefs);
-		pr_set("CHGVARS",n,CHGVARS(b),nrvars);
+		pr_set("GEN", n, GEN(b), nrdefs);
+		pr_set("KILL", n, KILL(b), nrdefs);
+		pr_set("IN ", n, IN(b), nrdefs);
+		pr_set("OUT", n, OUT(b), nrdefs);
+		pr_set("CHGVARS", n, CHGVARS(b), nrvars);
 	}
 }
 
@@ -349,27 +352,29 @@ pr_copies()
 {
 	short i;
 
-	fprintf(stderr,"\nCOPY TABLE\n\n");
-	for (i = 1; i <= nrdefs; i++) {
-		if (def_to_copynr[i] != 0) {
-			fprintf(stderr,"%d\t%d\n",i,def_to_copynr[i]);
+	fprintf(stderr, "\nCOPY TABLE\n\n");
+	for (i = 1; i <= nrdefs; i++)
+	{
+		if (def_to_copynr[i] != 0)
+		{
+			fprintf(stderr, "%d\t%d\n", i, def_to_copynr[i]);
 		}
 	}
 }
 
-pr_cblocks(p)
-	proc_p p;
+pr_cblocks(p) proc_p p;
 {
 	bblock_p b;
 	short n;
 
-	for (b = p->p_start; b != 0; b = b->b_next) {
-		fprintf(stderr,"\n");
+	for (b = p->p_start; b != 0; b = b->b_next)
+	{
+		fprintf(stderr, "\n");
 		n = b->b_id;
-		pr_set("CGEN",n,C_GEN(b),nrcopies);
-		pr_set("CKILL",n,C_KILL(b),nrcopies);
-		pr_set("CIN ",n,C_IN(b),nrcopies);
-		pr_set("COUT",n,C_OUT(b),nrcopies);
+		pr_set("CGEN", n, C_GEN(b), nrcopies);
+		pr_set("CKILL", n, C_KILL(b), nrcopies);
+		pr_set("CIN ", n, C_IN(b), nrcopies);
+		pr_set("COUT", n, C_OUT(b), nrcopies);
 	}
 }
 
@@ -381,12 +386,12 @@ STATIC void ud_analysis(proc_p p)
 {
 	/* Perform use-definition analysis on procedure p */
 
-	make_localtab(p);  /* See for which local we'll keep ud-info */
+	make_localtab(p); /* See for which local we'll keep ud-info */
 #ifdef TRACE
 	pr_localtab();
 #endif
 	nrvars = nrglobals + nrlocals;
-	make_defs(p);  /* Make a table of all useful definitions in p */
+	make_defs(p); /* Make a table of all useful definitions in p */
 #ifdef TRACE
 	pr_defs();
 #endif
@@ -399,27 +404,25 @@ STATIC void ud_analysis(proc_p p)
 #endif
 }
 
-
-
 STATIC void clean_maps(void)
 {
-	local_p *p;
-	cset *v;
+	local_p* p;
+	cset* v;
 
-	oldmap((void **) defs,nrexpldefs);
-	for (p = &locals[1]; p <= &locals[nrlocals]; p++) {
+	oldmap((void**)defs, nrexpldefs);
+	for (p = &locals[1]; p <= &locals[nrlocals]; p++)
+	{
 		oldlocal(*p);
 	}
-	oldmap((void **) locals,nrlocals);
-	for (v = &vardefs[1]; v <= &vardefs[nrvars]; v++) {
+	oldmap((void**)locals, nrlocals);
+	for (v = &vardefs[1]; v <= &vardefs[nrvars]; v++)
+	{
 		Cdeleteset(*v);
 	}
-	oldmap((void **) vardefs,nrvars);
+	oldmap((void**)vardefs, nrvars);
 }
 
-
-
-STATIC bool try_optim(line_p l,bblock_p b)
+STATIC bool try_optim(line_p l, bblock_p b)
 {
 	/* Try copy propagation and constant propagation */
 
@@ -427,22 +430,24 @@ STATIC bool try_optim(line_p l,bblock_p b)
 	offset val;
 	short defnr;
 
-
-	if (is_use(l) && (def = unique_def(l,b,&defnr)) != (line_p) 0) {
-		if (is_copy(def)) {
-			if (value_retained(def,defnr,l,b) &&
-			    fold_is_desirable(l,PREV(def))) {
-				fold_var(l,PREV(def),b);
-				OUTVERBOSE("vp:variable folded in proc %d",
-					    curproc->p_id,0);
+	if (is_use(l) && (def = unique_def(l, b, &defnr)) != (line_p)0)
+	{
+		if (is_copy(def))
+		{
+			if (value_retained(def, defnr, l, b) && fold_is_desirable(l, PREV(def)))
+			{
+				fold_var(l, PREV(def), b);
+				OUTVERBOSE("vp:variable folded in proc %d", curproc->p_id, 0);
 				Svariable++;
 				return TRUE;
 			}
-		} else {
-			if (value_known(def,&val)) {
-				fold_const(l,b,val);
-				OUTVERBOSE("vp:value folded in proc %d",
-				   curproc->p_id,0);
+		}
+		else
+		{
+			if (value_known(def, &val))
+			{
+				fold_const(l, b, val);
+				OUTVERBOSE("vp:value folded in proc %d", curproc->p_id, 0);
 				Svalue++;
 				return TRUE;
 			}
@@ -451,15 +456,13 @@ STATIC bool try_optim(line_p l,bblock_p b)
 	return FALSE;
 }
 
-
-
 STATIC void value_propagation(proc_p p)
 {
 	/* Apply value propagation to procedure p */
 
-	bool	changes;
+	bool changes;
 	bblock_p b;
-	line_p	l, next;
+	line_p l, next;
 
 	changes = TRUE;
 	/* If a statement like A := B is folded to A := constant,
@@ -467,21 +470,24 @@ STATIC void value_propagation(proc_p p)
 	 * e.g. the value of A might be statically known too now.
 	 */
 
-	while (changes) {
+	while (changes)
+	{
 		changes = FALSE;
-		for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-			for (l = b->b_start; l != (line_p) 0; l = next) {
+		for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+		{
+			for (l = b->b_start; l != (line_p)0; l = next)
+			{
 				next = l->l_next;
-				if (try_optim(l,b)) {
+				if (try_optim(l, b))
+				{
 					changes = TRUE;
 				}
 			}
 		}
 	}
-	oldmap((void **) copies,nrcopies);
-	oldtable(def_to_copynr,nrdefs);
+	oldmap((void**)copies, nrcopies);
+	oldtable(def_to_copynr, nrdefs);
 }
-
 
 STATIC void ud_extend(proc_p p)
 {
@@ -489,11 +495,11 @@ STATIC void ud_extend(proc_p p)
 
 	register bblock_p b;
 
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		b->b_extend = newudbx();
 	}
 }
-
 
 STATIC void ud_cleanup(proc_p p)
 {
@@ -501,7 +507,8 @@ STATIC void ud_cleanup(proc_p p)
 
 	register bblock_p b;
 
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		Cdeleteset(GEN(b));
 		Cdeleteset(IN(b));
 		Cdeleteset(C_GEN(b));
@@ -513,16 +520,16 @@ STATIC void ud_cleanup(proc_p p)
 	}
 }
 
-
-void ud_optimize(void *vp)
+void ud_optimize(void* vp)
 {
 	proc_p p = vp;
 
-	if (IS_ENTERED_WITH_GTO(p)) return;
+	if (IS_ENTERED_WITH_GTO(p))
+		return;
 	ud_extend(p);
-	locals = (local_p *) 0;
-	vardefs = (cset *) 0;
-	defs = (line_p *) 0;
+	locals = (local_p*)0;
+	vardefs = (cset*)0;
+	defs = (line_p*)0;
 	ud_analysis(p);
 	copy_analysis(p);
 #ifdef TRACE
@@ -534,13 +541,10 @@ void ud_optimize(void *vp)
 	clean_maps();
 }
 
-int main(int argc,char *argv[])
+int main(int argc, char* argv[])
 {
-	go(argc,argv,init_globals,ud_optimize,ud_machinit,no_action);
-	report("values folded",Svalue);
-	report("variables folded",Svariable);
+	go(argc, argv, init_globals, ud_optimize, ud_machinit, no_action);
+	report("values folded", Svalue);
+	report("variables folded", Svariable);
 	exit(0);
 }
-
-
-

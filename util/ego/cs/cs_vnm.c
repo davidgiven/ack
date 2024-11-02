@@ -34,11 +34,10 @@ STATIC void push_entity(entity_p enp, line_p lfirst)
 	Push(&tk);
 }
 
-STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst,
-			       entity_p enp)
+STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	av.av_instr = INSTR(lnp);
 	av.av_size = enp->en_size;
@@ -55,7 +54,7 @@ STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 	 * the ENARRELEM, and AAR computes its address.
 	 */
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	assert(INSTR(lnp) == op_lar || INSTR(lnp) == op_sar);
 	assert(enp->en_kind == ENARRELEM);
@@ -69,7 +68,8 @@ STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 	 * may convert this LAR/SAR to AAR LOI/STI.  This is so we
 	 * don't LOI/STI a large or unknown size.
 	 */
-	if (may_become_aar(&av)) {
+	if (may_become_aar(&av))
+	{
 		ocp = newoccur(lfirst, lnp, bp);
 		av_enter(&av, ocp, TERNAIR_OP);
 	}
@@ -88,7 +88,7 @@ STATIC void push_avail(avail_p avp, line_p lfirst)
 STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 {
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	av.av_instr = INSTR(lnp);
 	av.av_size = avsize(lnp);
@@ -102,7 +102,7 @@ STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 {
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	av.av_instr = INSTR(lnp);
 	av.av_size = avsize(lnp);
@@ -114,11 +114,10 @@ STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 	push_avail(av_enter(&av, ocp, BINAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1,
-			    token_p tkp2, token_p tkp3)
+STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2, token_p tkp3)
 {
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	av.av_instr = INSTR(lnp);
 	av.av_size = avsize(lnp);
@@ -137,7 +136,7 @@ STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 	 * then push the remainder tkp1 % tkp2.
 	 */
 	struct avail av;
-	occur_p	ocp;
+	occur_p ocp;
 
 	assert(INSTR(lnp) == op_rmi || INSTR(lnp) == op_rmu);
 	av.av_size = avsize(lnp);
@@ -145,7 +144,8 @@ STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 	av.av_oright = tkp2->tk_vn;
 
 	/* Check whether we may convert RMI/RMU to DVI/DVU. */
-	if (may_become_dv()) {
+	if (may_become_dv())
+	{
 		/* The division is DVI in RMI, or DVU in RMU. */
 		av.av_instr = (INSTR(lnp) == op_rmi ? op_dvi : op_dvu);
 
@@ -172,18 +172,23 @@ STATIC void fiddle_stack(line_p lnp)
 	/* Partly initialize dummy. */
 	dummy.tk_lfirst = lnp;
 
-	switch (INSTR(lnp)) {
+	switch (INSTR(lnp))
+	{
 		default:
 			assert(FALSE);
 			break;
 		case op_lor:
-			dummy.tk_vn = newvalnum(); dummy.tk_size = ps;
+			dummy.tk_vn = newvalnum();
+			dummy.tk_size = ps;
 			Push(&dummy);
 			break;
 		case op_asp:
-			if ((size = off_set(lnp)) > 0) {
+			if ((size = off_set(lnp)) > 0)
+			{
 				Pop(&dummy, size);
-			} else {
+			}
+			else
+			{
 				dummy.tk_vn = newvalnum();
 				dummy.tk_size = size;
 				Push(&dummy);
@@ -200,7 +205,7 @@ STATIC void fiddle_stack(line_p lnp)
 			clr_stack();
 			break;
 		case op_sig:
-			Pop(&dummy, (offset) ps);
+			Pop(&dummy, (offset)ps);
 			break;
 		case op_lfr:
 			dummy.tk_vn = newvalnum();
@@ -213,15 +218,15 @@ STATIC void fiddle_stack(line_p lnp)
 		case op_bne:
 		case op_ble:
 		case op_blt:
-			Pop(&dummy, (offset) ws);
-			Pop(&dummy, (offset) ws);
+			Pop(&dummy, (offset)ws);
+			Pop(&dummy, (offset)ws);
 			break;
 		case op_bra:
-		case op_csa:/* ??? */
-		case op_csb:/* ??? */
-		case op_gto:/* ??? */
-		case op_ret:/* ??? */
-		case op_rtt:/* ??? */
+		case op_csa: /* ??? */
+		case op_csb: /* ??? */
+		case op_gto: /* ??? */
+		case op_ret: /* ??? */
+		case op_rtt: /* ??? */
 			break;
 		case op_zeq:
 		case op_zge:
@@ -230,10 +235,10 @@ STATIC void fiddle_stack(line_p lnp)
 		case op_zle:
 		case op_zlt:
 		case op_trp:
-			Pop(&dummy, (offset) ws);
+			Pop(&dummy, (offset)ws);
 			break;
 		case op_rck:
-			Pop(&dummy, (offset) ps);
+			Pop(&dummy, (offset)ps);
 			break;
 	}
 }
@@ -246,10 +251,10 @@ STATIC proc_p find_proc(valnum vn)
 
 	enp = find_entity(vn);
 
-	if (enp != (entity_p) 0 && enp->en_kind == ENPROC)
+	if (enp != (entity_p)0 && enp->en_kind == ENPROC)
 		return enp->en_pro;
 
-	return (proc_p) 0;
+	return (proc_p)0;
 }
 
 STATIC void side_effects(line_p lnp)
@@ -260,16 +265,22 @@ STATIC void side_effects(line_p lnp)
 	struct token tk;
 	proc_p pp;
 
-	if (INSTR(lnp) == op_cai) {
-		Pop(&tk, (offset) ps);
+	if (INSTR(lnp) == op_cai)
+	{
+		Pop(&tk, (offset)ps);
 		pp = find_proc(tk.tk_vn);
-	} else {
+	}
+	else
+	{
 		assert(INSTR(lnp) == op_cal);
 		pp = PROC(lnp);
 	}
-	if (pp != (proc_p) 0) {
+	if (pp != (proc_p)0)
+	{
 		kill_call(pp);
-	} else {
+	}
+	else
+	{
 		kill_much();
 	}
 }
@@ -279,13 +290,14 @@ STATIC void hopeless(int instr)
 	/* The effect of `instr' is too difficult to
 	 * compute. We assume worst case behaviour.
 	 */
-	switch (instr) {
+	switch (instr)
+	{
 		default:
 			assert(FALSE);
 			break;
 		case op_mon:
 		case op_str:
-		case op_nop:	/* for volatiles */
+		case op_nop: /* for volatiles */
 			/* We can't even trust "static" entities. */
 			kill_all();
 			clr_stack();
@@ -306,11 +318,13 @@ void vnm(bblock_p bp)
 	line_p lfirst;
 	struct token tk, tk1, tk2, tk3;
 
-	for (lnp = bp->b_start; lnp != (line_p) 0; lnp = lnp->l_next) {
+	for (lnp = bp->b_start; lnp != (line_p)0; lnp = lnp->l_next)
+	{
 
 		rep = getentity(lnp, &lfirst);
-		switch (instrgroup(lnp)) {
-			case SIMPLE_LOAD:	
+		switch (instrgroup(lnp))
+		{
+			case SIMPLE_LOAD:
 				push_entity(rep, lfirst);
 				break;
 			case LOAD_ARRAY:

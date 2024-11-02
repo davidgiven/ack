@@ -22,20 +22,20 @@
 #include "../share/alloc.h"
 #include "../share/utils.h"
 
-short nrdefs;		/* total number of definitions */
-short nrexpldefs;	/* number of explicit definitions */
-line_p *defs;
-cset *vardefs;
+short nrdefs; /* total number of definitions */
+short nrexpldefs; /* number of explicit definitions */
+line_p* defs;
+cset* vardefs;
 
 STATIC cset all_globl_defs, all_indir_defs;
 /* auxiliary sets, used by gen_sets */
-
 
 bool does_expl_def(line_p l)
 {
 	/* See if instruction l does an explicit definition */
 
-	switch(INSTR(l)) {
+	switch (INSTR(l))
+	{
 		case op_stl:
 		case op_sdl:
 		case op_ste:
@@ -53,13 +53,12 @@ bool does_expl_def(line_p l)
 	UNREACHABLE_CODE;
 }
 
-
-
 bool does_impl_def(line_p l)
 {
 	/* See if instruction l does an implicit definition */
 
-	switch(INSTR(l)) {
+	switch (INSTR(l))
+	{
 		case op_cal:
 		case op_cai:
 		case op_sil:
@@ -77,7 +76,6 @@ bool does_impl_def(line_p l)
 	}
 }
 
-
 void make_defs(proc_p p)
 {
 	/* Make a map of all explicit definitions
@@ -91,45 +89,52 @@ void make_defs(proc_p p)
 	 */
 
 	register bblock_p b;
-	register  line_p l;
+	register line_p l;
 	short v, i, cnt = 0;
-	bool  found;
+	bool found;
 
 	/* first count the number of definitions */
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		for (l = b->b_start; l != (line_p) 0 ; l = l->l_next) {
-			if (does_expl_def(l)) {
-				var_nr(l,&v,&found);
-				if (!found) continue; /* no ud for this var */
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		for (l = b->b_start; l != (line_p)0; l = l->l_next)
+		{
+			if (does_expl_def(l))
+			{
+				var_nr(l, &v, &found);
+				if (!found)
+					continue; /* no ud for this var */
 				cnt++;
 			}
 		}
 	}
 	nrexpldefs = cnt;
 	/* now allocate the defs table and the vardefs table*/
-	defs = (line_p *) newmap(nrexpldefs);
-	vardefs = (cset *) newmap(nrvars);
-	for (i = 1; i <= nrvars; i++) {
+	defs = (line_p*)newmap(nrexpldefs);
+	vardefs = (cset*)newmap(nrvars);
+	for (i = 1; i <= nrvars; i++)
+	{
 		vardefs[i] = Cempty_set(nrexpldefs);
 	}
 	cnt = 1;
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		CHGVARS(b) =Cempty_set(nrvars);
-		for (l = b->b_start; l != (line_p) 0 ; l = l->l_next) {
-			if (does_expl_def(l)) {
-				var_nr(l,&v,&found);
-				if (!found) continue;
-				assert (v <= nrvars);
-				Cadd(v,&CHGVARS(b));
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		CHGVARS(b) = Cempty_set(nrvars);
+		for (l = b->b_start; l != (line_p)0; l = l->l_next)
+		{
+			if (does_expl_def(l))
+			{
+				var_nr(l, &v, &found);
+				if (!found)
+					continue;
+				assert(v <= nrvars);
+				Cadd(v, &CHGVARS(b));
 				defs[cnt] = l;
-				Cadd(cnt,&vardefs[v]);
+				Cadd(cnt, &vardefs[v]);
 				cnt++;
 			}
 		}
 	}
 }
-
-
 
 STATIC void init_gen(short nrdefs)
 {
@@ -144,18 +149,19 @@ STATIC void init_gen(short nrdefs)
 
 	all_globl_defs = Cempty_set(nrdefs);
 	all_indir_defs = Cempty_set(nrdefs);
-	for (v = 1; v <= nrglobals; v++) {
+	for (v = 1; v <= nrglobals; v++)
+	{
 		Cadd(IMPLICIT_DEF(GLOB_TO_VARNR(v)), &all_globl_defs);
 		Cadd(IMPLICIT_DEF(GLOB_TO_VARNR(v)), &all_indir_defs);
 	}
-	for (v = 1; v <= nrlocals; v++) {
-		if (!IS_REGVAR(locals[v])) {
+	for (v = 1; v <= nrlocals; v++)
+	{
+		if (!IS_REGVAR(locals[v]))
+		{
 			Cadd(IMPLICIT_DEF(LOC_TO_VARNR(v)), &all_indir_defs);
 		}
 	}
 }
-
-
 
 STATIC void clean_gen(void)
 {
@@ -163,59 +169,59 @@ STATIC void clean_gen(void)
 	Cdeleteset(all_indir_defs);
 }
 
-
-
-STATIC bool same_target(line_p l,short  defnr)
+STATIC bool same_target(line_p l, short defnr)
 {
 	/* See if l defines the same variable as def */
 
 	line_p def;
-	short  v;
+	short v;
 
-	if (IS_IMPL_DEF(defnr)) {
+	if (IS_IMPL_DEF(defnr))
+	{
 		/* An implicitly generated definition */
 		v = IMPL_VAR(TO_IMPLICIT(defnr));
-		if (IS_GLOBAL(v)) {
-			return TYPE(l) == OPOBJECT &&
-				OBJ(l)->o_globnr == TO_GLOBAL(v);
-		} else {
-			return TYPE(l) != OPOBJECT &&
-				locals[TO_LOCAL(v)]->lc_off == off_set(l);
+		if (IS_GLOBAL(v))
+		{
+			return TYPE(l) == OPOBJECT && OBJ(l)->o_globnr == TO_GLOBAL(v);
+		}
+		else
+		{
+			return TYPE(l) != OPOBJECT && locals[TO_LOCAL(v)]->lc_off == off_set(l);
 		}
 	}
 	/* explicit definition */
 	def = defs[TO_EXPLICIT(defnr)];
-	if (TYPE(l) == OPOBJECT) {
+	if (TYPE(l) == OPOBJECT)
+	{
 		return TYPE(def) == OPOBJECT && OBJ(def) == OBJ(l);
-	} else {
+	}
+	else
+	{
 		return TYPE(def) != OPOBJECT && off_set(def) == off_set(l);
 	}
 }
 
-
-
-STATIC void rem_prev_defs(line_p l,cset   *gen_p)
+STATIC void rem_prev_defs(line_p l, cset* gen_p)
 {
 	/* Remove all definitions in gen that define the
 	 * same variable as l.
 	 */
 
 	cset gen;
-	Cindex i,next;
+	Cindex i, next;
 
 	gen = *gen_p;
-	for (i = Cfirst(gen); i != (Cindex) 0; i = next) {
-		next = Cnext(i,gen);
-		if (same_target(l,Celem(i))) {
-			Cremove(Celem(i),gen_p);
+	for (i = Cfirst(gen); i != (Cindex)0; i = next)
+	{
+		next = Cnext(i, gen);
+		if (same_target(l, Celem(i)))
+		{
+			Cremove(Celem(i), gen_p);
 		}
 	}
 }
 
-
-
-
-STATIC void impl_globl_defs(proc_p p,cset   *gen_p)
+STATIC void impl_globl_defs(proc_p p, cset* gen_p)
 {
 	/* Add all definitions of global variables
 	 * that are generated implicitly by a call
@@ -226,20 +232,20 @@ STATIC void impl_globl_defs(proc_p p,cset   *gen_p)
 	short v;
 	cset ext = p->p_change->c_ext;
 
-	for (i = Cfirst(ext); i != (Cindex) 0; i = Cnext(i,ext)) {
-		if (( v = omap[Celem(i)]->o_globnr) != (short) 0) {
+	for (i = Cfirst(ext); i != (Cindex)0; i = Cnext(i, ext))
+	{
+		if ((v = omap[Celem(i)]->o_globnr) != (short)0)
+		{
 			/* the global variable v, for which we do
 			 * maintain ud-info is changed by p, so a
 			 * definition of v is generated implicitly.
 			 */
-			Cadd(IMPLICIT_DEF(GLOB_TO_VARNR(v)),gen_p);
+			Cadd(IMPLICIT_DEF(GLOB_TO_VARNR(v)), gen_p);
 		}
 	}
 }
 
-
-
-STATIC void impl_gen_defs(line_p l,cset   *gen_p)
+STATIC void impl_gen_defs(line_p l, cset* gen_p)
 {
 	/* Add all definitions generated implicitly by instruction l
 	 * to gen_p. l may be a call or some kind of indirect
@@ -248,12 +254,15 @@ STATIC void impl_gen_defs(line_p l,cset   *gen_p)
 
 	proc_p p;
 
-	switch(INSTR(l)) {
+	switch (INSTR(l))
+	{
 		case op_cal:
 			p = PROC(l);
-			if (BODY_KNOWN(p)) {
-				impl_globl_defs(p,gen_p);
-				if (!CHANGE_INDIR(p)) return;
+			if (BODY_KNOWN(p))
+			{
+				impl_globl_defs(p, gen_p);
+				if (!CHANGE_INDIR(p))
+					return;
 				break;
 			}
 			/* else fall through ... */
@@ -265,15 +274,12 @@ STATIC void impl_gen_defs(line_p l,cset   *gen_p)
 			 * the called proc. does a store-
 			 * indirect.
 			 */
-			Cjoin(all_globl_defs,gen_p);
+			Cjoin(all_globl_defs, gen_p);
 			break;
-		/* default: indir. assignment */
+			/* default: indir. assignment */
 	}
-	Cjoin(all_indir_defs,gen_p);
+	Cjoin(all_indir_defs, gen_p);
 }
-
-
-
 
 void gen_sets(proc_p p)
 {
@@ -281,40 +287,44 @@ void gen_sets(proc_p p)
 	 * set GEN(b) of definitions in b (explicit as
 	 * well as implicit) that reach the end of b.
 	 */
-	
+
 	register bblock_p b;
-	register line_p   l;
+	register line_p l;
 	short defnr = 1;
 
-	init_gen(nrdefs);  /* compute all_globl_defs and all_indir_defs */
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	init_gen(nrdefs); /* compute all_globl_defs and all_indir_defs */
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		GEN(b) = Cempty_set(nrdefs);
-		for (l = b->b_start; l != (line_p) 0; l = l->l_next) {
-			if (does_impl_def(l)) {
-				impl_gen_defs(l,&GEN(b));
+		for (l = b->b_start; l != (line_p)0; l = l->l_next)
+		{
+			if (does_impl_def(l))
+			{
+				impl_gen_defs(l, &GEN(b));
 				/* add definitions implicitly
 				 * generated by subroutine call
 				 * or indir. pointer assignment.
 				 */
-			} else {
-				if (does_expl_def(l)) {
-					if (defnr <= nrdefs && defs[defnr] == l) {
-						rem_prev_defs(l,&GEN(b));
+			}
+			else
+			{
+				if (does_expl_def(l))
+				{
+					if (defnr <= nrdefs && defs[defnr] == l)
+					{
+						rem_prev_defs(l, &GEN(b));
 						/* previous defs. of same var
 						 * don't reach the end of b.
 						 */
-						Cadd(EXPL_TO_DEFNR(defnr),&GEN(b));
+						Cadd(EXPL_TO_DEFNR(defnr), &GEN(b));
 						defnr++;
 					}
 				}
 			}
 		}
 	}
-	clean_gen();  /* clean up */
+	clean_gen(); /* clean up */
 }
-
-
-
 
 STATIC void killed_defs(short v, bblock_p b)
 {
@@ -327,18 +337,17 @@ STATIC void killed_defs(short v, bblock_p b)
 	Cindex i;
 	short d;
 
-	for (i = Cfirst(vardefs[v]); i != (Cindex) 0; i = Cnext(i,vardefs[v])) {
-		d = Celem(i);  /* d is an explicit definition of v */
-		if (!Cis_elem(EXPL_TO_DEFNR(d),GEN(b))) {
-			Cadd(EXPL_TO_DEFNR(d),&KILL(b));
+	for (i = Cfirst(vardefs[v]); i != (Cindex)0; i = Cnext(i, vardefs[v]))
+	{
+		d = Celem(i); /* d is an explicit definition of v */
+		if (!Cis_elem(EXPL_TO_DEFNR(d), GEN(b)))
+		{
+			Cadd(EXPL_TO_DEFNR(d), &KILL(b));
 		}
 	}
 	/* Also add implicit definition of v to KILL(b) */
-	Cadd(IMPLICIT_DEF(v),&KILL(b));
+	Cadd(IMPLICIT_DEF(v), &KILL(b));
 }
-
-
-
 
 void kill_sets(proc_p p)
 {
@@ -353,12 +362,13 @@ void kill_sets(proc_p p)
 	Cindex i;
 	short v;
 
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		KILL(b) = Cempty_set(nrdefs);
-		for (i = Cfirst(CHGVARS(b)); i != (Cindex) 0;
-						i = Cnext(i,CHGVARS(b))) {
+		for (i = Cfirst(CHGVARS(b)); i != (Cindex)0; i = Cnext(i, CHGVARS(b)))
+		{
 			v = Celem(i); /* v is a variable changed in b */
-			killed_defs(v,b);
+			killed_defs(v, b);
 		}
 	}
 }

@@ -40,19 +40,8 @@ static const struct
 	bool needsdescr;
 
 } phase_data[] = {
-	{},
-	{ "ic" },
-	{ "cf" },
-	{ "il" },
-	{ "cs", true },
-	{ "sr" },
-	{ "ud", true },
-	{ "lv" },
-	{ "ra" },
-	{ "sp" },
-	{ "bo" },
-	{ "cj" },
-	{ "ca" },
+	{},       { "ic" }, { "cf" }, { "il" }, { "cs", true }, { "sr" }, { "ud", true },
+	{ "lv" }, { "ra" }, { "sp" }, { "bo" }, { "cj" },       { "ca" },
 };
 
 #define MAXUPHASES 64 /* max # of phases to be run */
@@ -65,15 +54,15 @@ static char pdump[PATH_MAX]; /* procedure name dump file */
 static char tmpbufs[NTEMPS * 2][PATH_MAX];
 
 static int O2phases[] = { /* Passes for -O2 */
-	CJ, BO, SP, 0
+	                      CJ, BO, SP, 0
 };
 
 static int O3phases[] = { /* Passes for -O3 */
-	CS, SR, CJ, BO, SP, UD, LV, RA, 0
+	                      CS, SR, CJ, BO, SP, UD, LV, RA, 0
 };
 
 static int O4phases[] = { /* Passes for -O4 */
-	IL, CF, CS, SR, CJ, BO, SP, UD, LV, RA, 0
+	                      IL, CF, CS, SR, CJ, BO, SP, UD, LV, RA, 0
 };
 
 static int* Ophase = &O2phases[0]; /* default : -O2 */
@@ -95,8 +84,7 @@ static const char* prog_name;
 
 static int v_flag;
 
-static void
-cleanup(void)
+static void cleanup(void)
 {
 	/*	Cleanup temporaries */
 
@@ -120,7 +108,7 @@ cleanup(void)
 }
 
 /*VARARGS1*/
-static void fatal(const char *s, ...)
+static void fatal(const char* s, ...)
 {
 	/*	A fatal error occurred; exit gracefully */
 
@@ -135,8 +123,7 @@ static void fatal(const char *s, ...)
 	UNREACHABLE_CODE;
 }
 
-static void
-    add_file(char* s)
+static void add_file(char* s)
 {
 	/*	Add an input file to the list */
 
@@ -145,8 +132,7 @@ static void
 	phargs[nfiles++] = s;
 }
 
-static void
-    add_uphase(int p)
+static void add_uphase(int p)
 {
 	/*	Add an optimizer phase to the list of phases to run */
 
@@ -163,8 +149,7 @@ static void catch (int signum)
 	sys_stop(S_EXIT);
 }
 
-static void
-old_infiles(void)
+static void old_infiles(void)
 {
 	/*	Remove old input files unless we have to keep them around. */
 
@@ -177,8 +162,7 @@ old_infiles(void)
 		(void)unlink(phargs[i]);
 }
 
-static void
-get_infiles(void)
+static void get_infiles(void)
 {
 	/*	Make output temps from previous phase input temps of next phase. */
 
@@ -192,8 +176,7 @@ get_infiles(void)
 	}
 }
 
-static void
-new_outfiles(void)
+static void new_outfiles(void)
 {
 	static int tmpindex = 0;
 	static int Bindex = 0;
@@ -222,8 +205,7 @@ new_outfiles(void)
 	}
 }
 
-static void
-    run_phase(int phase)
+static void run_phase(int phase)
 {
 	/*	Run one phase of the global optimizer; special cases are
 	IC and CA.
@@ -280,10 +262,10 @@ static void
 			if (descr_file)
 			{
 				phargs[argc++] = "-M";
-				phargs[argc++] = (char*) descr_file;
+				phargs[argc++] = (char*)descr_file;
 			}
 
-			for (i=0; i<nphase_args; i++)
+			for (i = 0; i < nphase_args; i++)
 				phargs[argc++] = phase_args[i];
 
 			phargs[argc] = NULL;
@@ -303,7 +285,7 @@ static void
 		fprint(STDERR, "\n");
 	}
 
-	status = sys_system(phargs[0], (const char* const*) phargs);
+	status = sys_system(phargs[0], (const char* const*)phargs);
 	if ((status & 0177) != 0)
 	{
 		fatal("%s got a unix signal", phargs[0]);
@@ -405,7 +387,7 @@ int main(int argc, char* argv[])
 	(void)strcat(pdump, "pd");
 
 	(void)strcat(tmpbufs[0], "A.BB");
-	for (i=1; i<(2 * NTEMPS); i++)
+	for (i = 1; i < (2 * NTEMPS); i++)
 		(void)strcpy(tmpbufs[i], tmpbufs[0]);
 
 	i = strlen(tmpbufs[0]) - 4;

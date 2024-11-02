@@ -10,7 +10,7 @@
  */
 
 void compute_profits(alloc_p alloclist, bool time_opt);
-			/*
-			 * Compute the profits attribute of every allocation.
-			 */
-void regsave_cost(short regs[], short *time_out, short *space_out);
+/*
+ * Compute the profits attribute of every allocation.
+ */
+void regsave_cost(short regs[], short* time_out, short* space_out);

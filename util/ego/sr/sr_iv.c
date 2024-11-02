@@ -9,7 +9,6 @@
  *
  */
 
-
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include "../share/types.h"
@@ -24,9 +23,7 @@
 #include "sr_cand.h"
 #include "sr_iv.h"
 
-
-
-STATIC lset ivvars;	/* set of induction variables */
+STATIC lset ivvars; /* set of induction variables */
 
 STATIC short nature(line_p lnp)
 {
@@ -38,28 +35,26 @@ STATIC short nature(line_p lnp)
 
 	bool size_ok;
 
-	assert(lnp != (line_p) 0);
+	assert(lnp != (line_p)0);
 	size_ok = (TYPE(lnp) == OPSHORT && SHORT(lnp) == ws);
-	switch(INSTR(lnp)) {
+	switch (INSTR(lnp))
+	{
 		case op_inc:
 		case op_dec:
 			return 1;
 		case op_adi:
 		case op_adu:
-			return (size_ok? 2:0);
+			return (size_ok ? 2 : 0);
 		case op_sbi:
 		case op_sbu:
-			return (size_ok? 3:0);
+			return (size_ok ? 3 : 0);
 	}
 	return 0;
 }
 
-
-
-#define is_add(l)	(nature(l) == 2)
-#define plus_or_min(l)	(nature(l) > 1)
-#define inc_or_dec(l)	(nature(l) == 1)
-
+#define is_add(l) (nature(l) == 2)
+#define plus_or_min(l) (nature(l) > 1)
+#define inc_or_dec(l) (nature(l) == 1)
 
 STATIC bool is_same(line_p l, line_p lnp)
 {
@@ -69,12 +64,10 @@ STATIC bool is_same(line_p l, line_p lnp)
 	 */
 
 	assert(INSTR(lnp) == op_stl);
-	return l != (line_p) 0 && INSTR(l) == op_lol && 
-		off_set(l) == off_set(lnp);
+	return l != (line_p)0 && INSTR(l) == op_lol && off_set(l) == off_set(lnp);
 }
 
-
-STATIC void ivar(line_p	lnp,int	step)
+STATIC void ivar(line_p lnp, int step)
 {
 	/* Record the fact that we've found a new induction variable.
 	 * lnp points to the last instruction of the code that
@@ -84,16 +77,16 @@ STATIC void ivar(line_p	lnp,int	step)
 	iv_p i;
 
 	i = newiv();
-	i->iv_off = (TYPE(lnp) == OPSHORT ? (offset) SHORT(lnp) : OFFSET(lnp));
-	i->iv_incr = lnp;	/* last instruction of increment code */
-	i->iv_step = step;	/* step value */
-	Ladd(i,&ivvars);
+	i->iv_off = (TYPE(lnp) == OPSHORT ? (offset)SHORT(lnp) : OFFSET(lnp));
+	i->iv_incr = lnp; /* last instruction of increment code */
+	i->iv_step = step; /* step value */
+	Ladd(i, &ivvars);
 }
-
 
 STATIC int sign(line_p lnp)
 {
-	switch(INSTR(lnp)) {
+	switch (INSTR(lnp))
+	{
 		case op_inc:
 		case op_inl:
 		case op_adi:
@@ -110,7 +103,6 @@ STATIC int sign(line_p lnp)
 	UNREACHABLE_CODE;
 }
 
-
 STATIC void try_patterns(line_p lnp)
 {
 	/* lnp is a STL x; try to recognize
@@ -124,30 +116,36 @@ STATIC void try_patterns(line_p lnp)
 	line_p l, l2;
 
 	l = PREV(lnp); /* instruction before lnp*/
-	if (l == (line_p) 0) return;  /* no match possible */
+	if (l == (line_p)0)
+		return; /* no match possible */
 	l2 = PREV(l);
-	if (inc_or_dec(l)) {
-		if (is_same(l2,lnp)) {
+	if (inc_or_dec(l))
+	{
+		if (is_same(l2, lnp))
+		{
 			/* e.g. LOL iv ; INC ; STL iv */
-			ivar(lnp,sign(l));
+			ivar(lnp, sign(l));
 		}
 		return;
 	}
-	if (is_add(lnp)) {
-		if(is_same(l2,lnp) && is_const(PREV(l2))) {
-			ivar(lnp,SHORT(PREV(l2)));
+	if (is_add(lnp))
+	{
+		if (is_same(l2, lnp) && is_const(PREV(l2)))
+		{
+			ivar(lnp, SHORT(PREV(l2)));
 			return;
 		}
 	}
-	if (plus_or_min(l)) {
-		if (is_const(l2) && is_same(PREV(l2),lnp)) {
-			ivar(lnp,sign(l) * SHORT(l2));
+	if (plus_or_min(l))
+	{
+		if (is_const(l2) && is_same(PREV(l2), lnp))
+		{
+			ivar(lnp, sign(l) * SHORT(l2));
 		}
 	}
 }
 
-
-void induc_vars(loop_p loop,lset   *ivar_out, lset *vars_out)
+void induc_vars(loop_p loop, lset* ivar_out, lset* vars_out)
 {
 	/* Construct the set of induction variables. We use several
 	 * global variables computed by 'candidates'.
@@ -164,12 +162,17 @@ void induc_vars(loop_p loop,lset   *ivar_out, lset *vars_out)
 	 * Also find all remaining local variables that are changed
 	 * within the loop.
 	 */
-	if (Lnrelems(cand_iv) > 0) {
-		for (i = Lfirst(cand_iv); i != (Lindex) 0; i = Lnext(i,cand_iv)) {
-			lnp = (line_p) Lelem(i);
-			if (INSTR(lnp) == op_inl || INSTR(lnp) == op_del) {
-				ivar(lnp,sign(lnp));
-			} else {
+	if (Lnrelems(cand_iv) > 0)
+	{
+		for (i = Lfirst(cand_iv); i != (Lindex)0; i = Lnext(i, cand_iv))
+		{
+			lnp = (line_p)Lelem(i);
+			if (INSTR(lnp) == op_inl || INSTR(lnp) == op_del)
+			{
+				ivar(lnp, sign(lnp));
+			}
+			else
+			{
 				try_patterns(lnp);
 			}
 		}

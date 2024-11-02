@@ -59,7 +59,7 @@ STATIC void skip_arguments(void)
 	}
 }
 
-STATIC bool proc_wanted(const char *name)
+STATIC bool proc_wanted(const char* name)
 {
 	/* See if 'name' is the name of an external procedure
 	 * that has been used before, but for which no body
@@ -78,7 +78,7 @@ STATIC bool proc_wanted(const char *name)
 	}
 }
 
-STATIC bool data_wanted(const char *name)
+STATIC bool data_wanted(const char* name)
 {
 	/* See if 'name' is the name of an externally visible
 	 * data block that has been used before, but for which
@@ -226,7 +226,7 @@ STATIC bool read_hdr(void)
 STATIC int argcnt = 0;
 STATIC short arstate = NO_ARCHIVE;
 
-FILE* next_file(int argc,char* argv[])
+FILE* next_file(int argc, char* argv[])
 {
 	/* See if there are more EM input files. The file names
 	 * are given via argv. If a file is an archive file
@@ -272,8 +272,7 @@ FILE* next_file(int argc,char* argv[])
 				else
 				{
 					/* skip this module */
-					fseek(curfile,
-					    ptr + hdr.ar_size, 0);
+					fseek(curfile, ptr + hdr.ar_size, 0);
 				}
 			}
 			else

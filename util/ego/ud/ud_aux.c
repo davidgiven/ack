@@ -3,11 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* C O P Y   P R O P A G A T I O N 
+/* C O P Y   P R O P A G A T I O N
  *
  * A U X I L I A R Y   R O U T I N E S
  */
-
 
 #include <em_mnem.h>
 #include <em_pseu.h>
@@ -24,23 +23,25 @@
 #include "../share/utils.h"
 #include "ud_defs.h"
 
-void repl_line(line_p old,line_p new,bblock_p b)
+void repl_line(line_p old, line_p new, bblock_p b)
 {
 	/* Replace 'old' by 'new' */
 
-	if (PREV(old) == (line_p) 0) {
+	if (PREV(old) == (line_p)0)
+	{
 		b->b_start = new;
-	} else {
+	}
+	else
+	{
 		PREV(old)->l_next = new;
 	}
 	PREV(new) = PREV(old);
-	if ((new->l_next = old->l_next) != (line_p) 0) {
+	if ((new->l_next = old->l_next) != (line_p)0)
+	{
 		PREV(new->l_next) = new;
 	}
 	oldline(old);
 }
-
-
 
 bool same_var(line_p use, line_p def)
 {
@@ -49,9 +50,12 @@ bool same_var(line_p use, line_p def)
 	 * See if 'def' references the same variable.
 	 */
 
-	if (TYPE(use) == OPOBJECT) {
+	if (TYPE(use) == OPOBJECT)
+	{
 		return TYPE(def) == OPOBJECT && OBJ(use) == OBJ(def);
-	} else {
+	}
+	else
+	{
 		return TYPE(def) != OPOBJECT && off_set(use) == off_set(def);
 	}
 }

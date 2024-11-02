@@ -24,9 +24,9 @@ STATIC void dlink(line_p l1, line_p l2)
 {
 	/* Doubly link the lines in l1 and l2. */
 
-	if (l1 != (line_p) 0)
+	if (l1 != (line_p)0)
 		l1->l_next = l2;
-	if (l2 != (line_p) 0)
+	if (l2 != (line_p)0)
 		l2->l_prev = l1;
 }
 
@@ -37,8 +37,9 @@ STATIC void remove_lines(line_p first, line_p last)
 	 */
 	register line_p lnp, next;
 
-	last->l_next = (line_p) 0; /* Delimit the list. */
-	for (lnp = first; lnp != (line_p) 0; lnp = next) {
+	last->l_next = (line_p)0; /* Delimit the list. */
+	for (lnp = first; lnp != (line_p)0; lnp = next)
+	{
 		next = lnp->l_next;
 		oldline(lnp);
 	}
@@ -50,10 +51,12 @@ STATIC bool contained(occur_p ocp1, occur_p ocp2)
 
 	register line_p lnp, next;
 
-	for (lnp = ocp2->oc_lfirst; lnp != (line_p) 0; lnp = next) {
-		next = lnp != ocp2->oc_llast ? lnp->l_next : (line_p) 0;
+	for (lnp = ocp2->oc_lfirst; lnp != (line_p)0; lnp = next)
+	{
+		next = lnp != ocp2->oc_llast ? lnp->l_next : (line_p)0;
 
-		if (lnp == ocp1->oc_llast) return TRUE;
+		if (lnp == ocp1->oc_llast)
+			return TRUE;
 	}
 	return FALSE;
 }
@@ -67,17 +70,20 @@ STATIC void delete(occur_p ocp, avail_p start)
 	 * are postfix.
 	 */
 	register avail_p ravp;
-	register Lindex	i, next;
+	register Lindex i, next;
 
-	for (ravp = start; ravp != (avail_p) 0; ravp = ravp->av_before) {
-		for (i = Lfirst(ravp->av_occurs); i != (Lindex) 0; i = next) {
+	for (ravp = start; ravp != (avail_p)0; ravp = ravp->av_before)
+	{
+		for (i = Lfirst(ravp->av_occurs); i != (Lindex)0; i = next)
+		{
 			next = Lnext(i, ravp->av_occurs);
 
-			if (contained(occ_elem(i), ocp)) {
+			if (contained(occ_elem(i), ocp))
+			{
 				OUTTRACE("delete contained occurrence", 0);
-#				ifdef TRACE
-					SHOWOCCUR(occ_elem(i));
-#				endif
+#ifdef TRACE
+				SHOWOCCUR(occ_elem(i));
+#endif
 				oldoccur(occ_elem(i));
 				Lremove(Lelem(i), &ravp->av_occurs);
 			}
@@ -116,9 +122,10 @@ STATIC void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
 	bool s;
 
 	size = avp->av_size;
-	s = (avp->av_instr == (byte) op_dvi);
-	assert(s || avp->av_instr == (byte) op_dvu);
-	if (first) {
+	s = (avp->av_instr == (byte)op_dvi);
+	assert(s || avp->av_instr == (byte)op_dvu);
+	if (first)
+	{
 		/* Prepend our DUP to avp->av_found, to get before the
 		 * DVI if lnp points to the LOL in DVI STL LOL.
 		 */
@@ -146,19 +153,22 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 	line_p lol, first, last;
 	int instr;
 
-	assert(avp->av_size == ws || avp->av_size == 2*ws);
+	assert(avp->av_size == ws || avp->av_size == 2 * ws);
 
-	first = ocp->oc_lfirst; last = ocp->oc_llast;
+	first = ocp->oc_lfirst;
+	last = ocp->oc_llast;
 
 	lol = int_line(tmp);
 	lol->l_instr = avp->av_size == ws ? op_lol : op_ldl;
 	dlink(lol, last->l_next);
 
-	if (first->l_prev == (line_p) 0) ocp->oc_belongs->b_start = lol;
+	if (first->l_prev == (line_p)0)
+		ocp->oc_belongs->b_start = lol;
 	dlink(first->l_prev, lol);
 
 	instr = INSTR(last);
-	switch (avp->av_instr & 0377) {
+	switch (avp->av_instr & 0377)
+	{
 		case op_aar:
 			/* There may actually be a LAR or a SAR
 			 * instruction; in that case we have to
@@ -188,15 +198,16 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 	 * expr2 before we replace expr2 LOI.  Then the occurrence of
 	 * expr2 LOI must not point to the eliminated lines of expr2.
 	 */
-	for (ravp = avp->av_before; ravp != (avail_p) 0;
-	     ravp = ravp->av_before) {
+	for (ravp = avp->av_before; ravp != (avail_p)0; ravp = ravp->av_before)
+	{
 		/* We only check LOI expressions. */
-		if (ravp->av_instr == op_loi) {
+		if (ravp->av_instr == op_loi)
+		{
 			occur_p rocp;
 			Lindex i;
 
-			for (i = Lfirst(ravp->av_occurs); i != (Lindex) 0;
-			     i = Lnext(i, ravp->av_occurs)) {
+			for (i = Lfirst(ravp->av_occurs); i != (Lindex)0; i = Lnext(i, ravp->av_occurs))
+			{
 				rocp = occ_elem(i);
 				if (rocp->oc_lfirst == first)
 					rocp->oc_lfirst = lol;
@@ -210,7 +221,7 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 
 STATIC void append(avail_p avp, offset tmp)
 {
-	/* Avp->av_found points to a line with an operator in it. This 
+	/* Avp->av_found points to a line with an operator in it. This
 	 * routine emits a sequence of instructions that saves the result
 	 * in a local with offset tmp. In most cases we just append
 	 * avp->av_found with stl/sdl tmp and lol/ldl tmp depending on
@@ -220,7 +231,7 @@ STATIC void append(avail_p avp, offset tmp)
 	register line_p stl, lol;
 	register int instr;
 
-	assert(avp->av_size == ws || avp->av_size == 2*ws);
+	assert(avp->av_size == ws || avp->av_size == 2 * ws);
 
 	stl = int_line(tmp);
 	stl->l_instr = avp->av_size == ws ? op_stl : op_sdl;
@@ -232,21 +243,25 @@ STATIC void append(avail_p avp, offset tmp)
 	dlink(avp->av_found, stl);
 
 	instr = INSTR(avp->av_found);
-	switch (avp->av_instr & 0377) {
+	switch (avp->av_instr & 0377)
+	{
 		case op_aar:
-			if (instr != op_aar) {
+			if (instr != op_aar)
+			{
 				complete_aar(lol, instr, avp->av_othird);
 				avp->av_found->l_instr = op_aar;
 			}
 			break;
 		case op_dvi:
-			if (instr == op_rmi) {
+			if (instr == op_rmi)
+			{
 				complete_dv_as_rm(lol, avp, TRUE);
 				avp->av_found->l_instr = op_dvi;
 			}
 			break;
 		case op_dvu:
-			if (instr == op_rmu) {
+			if (instr == op_rmu)
+			{
 				complete_dv_as_rm(lol, avp, TRUE);
 				avp->av_found->l_instr = op_dvu;
 			}
@@ -265,11 +280,12 @@ STATIC void set_replace(avail_p avp, offset tmp)
 	register Lindex i;
 	register lset s = avp->av_occurs;
 
-	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i, s)) {
+	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
+	{
 		OUTVERBOSE("eliminate duplicate", 0, 0);
 		SHOWOCCUR(occ_elem(i));
 		Scs++;
-		delete(occ_elem(i), avp->av_before);
+		delete (occ_elem(i), avp->av_before);
 		replace(occ_elem(i), tmp, avp);
 	}
 }
@@ -291,7 +307,7 @@ STATIC line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
 	 */
 	register line_p reg;
 
-	reg = reg_mes(off, (short) avp->av_size, regtype(avp->av_instr), 0);
+	reg = reg_mes(off, (short)avp->av_size, regtype(avp->av_instr), 0);
 	appnd_line(reg, pp->p_start->b_start);
 
 	return reg;
@@ -327,25 +343,34 @@ void eliminate(proc_p pp)
 	register offset tmp;
 	register line_p mes;
 
-	for (ravp = avails; ravp != (avail_p) 0; ravp = ravp->av_before) {
+	for (ravp = avails; ravp != (avail_p)0; ravp = ravp->av_before)
+	{
 
-		if (ravp->av_size != ws && ravp->av_size != 2*ws) continue;
+		if (ravp->av_size != ws && ravp->av_size != 2 * ws)
+			continue;
 
-		if (ravp->av_saveloc == (entity_p) 0) {
+		if (ravp->av_saveloc == (entity_p)0)
+		{
 			/* We save it ourselves. */
 			score = 2; /* Stl and lol. */
-		} else {
+		}
+		else
+		{
 			score = reg_score(ravp->av_saveloc);
 		}
-		if (desirable(ravp)) {
+		if (desirable(ravp))
+		{
 			score += Lnrelems(ravp->av_occurs);
 			OUTTRACE("temporary local score %d", score);
-			if (ravp->av_saveloc != (entity_p) 0) {
+			if (ravp->av_saveloc != (entity_p)0)
+			{
 				tmp = ravp->av_saveloc->en_loc;
 				mes = find_mesreg(tmp);
 				OUTVERBOSE("re-using %ld(LB)", tmp, 0);
-			} else {
-				tmp = tmplocal(pp,  ravp->av_size);
+			}
+			else
+			{
+				tmp = tmplocal(pp, ravp->av_size);
 				mes = gen_mesreg(tmp, ravp, pp);
 				append(ravp, tmp);
 			}

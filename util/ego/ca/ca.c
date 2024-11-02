@@ -33,10 +33,10 @@
 short dlength;
 dblock_p* dmap;
 
-char** dnames, **pnames; /* Dynamically allocated arrays of strings.
-			 * pnames[i] contains a pointer to the name
-			 * of the procedure  with proc_id i.
-			 */
+char **dnames, **pnames; /* Dynamically allocated arrays of strings.
+                          * pnames[i] contains a pointer to the name
+                          * of the procedure  with proc_id i.
+                          */
 
 STATIC line_p get_ca_lines(FILE* lf, proc_p* p_out)
 {
@@ -221,8 +221,8 @@ int main(int argc, char* argv[])
 	 */
 	struct files* files = findfiles(argc, argv);
 
-	FILE* f, *f2; /* The EM input and output. */
-	FILE* df, *pf; /* The dump files */
+	FILE *f, *f2; /* The EM input and output. */
+	FILE *df, *pf; /* The dump files */
 	line_p lnp;
 
 	/* The names of the input files of every phase are passed as

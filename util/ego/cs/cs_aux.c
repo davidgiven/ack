@@ -23,7 +23,7 @@ offset array_elemsize(valnum vn)
 
 	enp = find_entity(vn);
 
-	if (enp == (entity_p) 0)
+	if (enp == (entity_p)0)
 		return UNKNOWN_SIZE;
 
 	if (enp->en_kind != ENAEXTERNAL)
@@ -37,12 +37,12 @@ offset array_elemsize(valnum vn)
 
 occur_p occ_elem(Lindex i)
 {
-	return (occur_p) Lelem(i);
+	return (occur_p)Lelem(i);
 }
 
 entity_p en_elem(Lindex i)
 {
-	return (entity_p) Lelem(i);
+	return (entity_p)Lelem(i);
 }
 
 /* The value numbers associated with each distinct value
