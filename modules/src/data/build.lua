@@ -13,7 +13,7 @@ clibrary {
 	srcs = {
 		"./array.c",
 		"./astring.c",
-		"./diagnostics.c",
+		"./warnings.c",
 		"./imap.c",
 		"./pmap.c",
 		"./smap.c",
