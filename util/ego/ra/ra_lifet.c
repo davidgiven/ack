@@ -33,7 +33,7 @@
 #define is_deadmsg(l)                                                                              \
 	(INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_ego && aoff(ARG(l), 1) == ego_dead)
 
-void build_lifetimes(items) item_p items[];
+void build_lifetimes(item_p items[])
 {
 	/* compute the it_lives attribute of every item; this is
 	 * a list of intervals during which the item is live,

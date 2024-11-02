@@ -165,7 +165,7 @@ void make_hex(char* buff, uint32_t pc, uint32_t length)
 	}
 }
 
-void disassemble_program()
+void disassemble_program(void)
 {
 	uint32_t pc;
 	uint32_t instr_size;

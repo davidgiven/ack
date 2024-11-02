@@ -63,7 +63,7 @@ void prolog(full nlocals)
 		fprintf(codefile, "\tcall .proword\n\t.data2 %d\n", adjustment);
 }
 
-void mes(type) word type;
+void mes(word type)
 {
 	int argt;
 

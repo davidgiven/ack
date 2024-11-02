@@ -3,9 +3,7 @@
 #include "flt_misc.h"
 
 void
-flt_split(e, p)
-	register flt_arith *e;
-	register unsigned short *p;
+flt_split(flt_arith* e, unsigned short* p)
 {
 	/*	Split mantissa of e into the array p
 	*/

@@ -8,9 +8,7 @@
 #include "system.h"
 
 int
-sys_access(path, mode)
-	char *path;
-	int mode;
+sys_access(char* path, int mode)
 {
 	return access(path, mode) == 0;
 }

@@ -105,7 +105,7 @@ regscore(long off, int size, int typ, int score, int totyp)
 }
 
 void
-i_regsave()
+i_regsave(void)
 {
 	si_off = -1;
 	di_off = -1;
@@ -113,7 +113,7 @@ i_regsave()
 }
 
 void
-f_regsave()
+f_regsave(void)
 {
 	if (si_off != di_off) {
 		if (si_off == -lbytes) lbytes -= 4;
@@ -149,7 +149,7 @@ regsave(const char* regstr, long off, int size)
 }
 
 void
-regreturn()
+regreturn(void)
 {
 	if (firstreg == 1) {
 		if (si_off != -1) fputs("pop esi\n", codefile);

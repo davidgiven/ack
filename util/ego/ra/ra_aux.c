@@ -21,9 +21,7 @@
 #include "ra.h"
 #include "ra_aux.h"
 
-time_p cons_time(l, b)
-line_p l;
-bblock_p b;
+time_p cons_time(line_p l, bblock_p b)
 {
 	/* Construct a time */
 

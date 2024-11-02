@@ -15,8 +15,7 @@
 #include "../share/global.h"
 #include "il3_aux.h"
 
-line_p last_line(lines)
-line_p lines;
+line_p last_line(line_p lines)
 {
 	/* Determine the last line of a list */
 
@@ -28,7 +27,7 @@ line_p lines;
 	return l;
 }
 
-void app_list(list, l) line_p list, l;
+void app_list(line_p list, line_p l)
 {
 	/* Append the list after line l */
 
@@ -46,7 +45,7 @@ void app_list(list, l) line_p list, l;
 	PREV(list) = l;
 }
 
-void rem_line(l) line_p l;
+void rem_line(line_p l)
 {
 	/* Remove a line from the list */
 

@@ -247,7 +247,7 @@ void fillemlines(void) {
 }
 
 void
-dopseudo() {
+dopseudo(void) {
 	int b,t;
 	full n;
 	long save;

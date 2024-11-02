@@ -76,12 +76,12 @@ short get_int(void)
 	}
 }
 
-char readchar()
+char readchar(void)
 {
 	return (readbyte());
 }
 
-offset get_off()
+offset get_off(void)
 {
 
 	switch (table2())
@@ -119,8 +119,7 @@ STATIC void inident(void)
 	*p++ = 0;
 }
 
-int table3(n)
-int n;
+int table3(int n)
 {
 
 	switch (n)
@@ -170,7 +169,7 @@ int n;
 	}
 }
 
-int table1()
+int table1(void)
 {
 	register int n;
 
@@ -195,7 +194,7 @@ int table1()
 	return (table3(n));
 }
 
-int table2()
+int table2(void)
 {
 	register int n;
 

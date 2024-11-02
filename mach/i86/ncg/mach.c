@@ -61,8 +61,8 @@ full lbytes;
 #endif
 
 void
-prolog(nlocals) full nlocals; {
-
+prolog(full nlocals)
+{
 	fputs("\tpush\tbp\n\tmov\tbp,sp\n", codefile);
 #ifdef REGVARS
 	lbytes = nlocals;
@@ -95,7 +95,7 @@ regscore(long off, int size, int typ, int score, int totyp)
 }
 
 void
-i_regsave()
+i_regsave(void)
 {
 	si_off = -1;
 	di_off = -1;
@@ -103,7 +103,7 @@ i_regsave()
 }
 
 void
-f_regsave()
+f_regsave(void)
 {
 	if (si_off != di_off) {
 		if (di_off == -lbytes) lbytes -= 2;
@@ -145,7 +145,7 @@ regsave(const char* regstr, long off, int size)
 }
 
 void
-regreturn()
+regreturn(void)
 {
 	if (firstreg == 1) {
 		if (si_off != -1) fputs("jmp .sdret\n", codefile);
@@ -160,7 +160,8 @@ regreturn()
 #endif /* REGVARS */
 
 void
-mes(type) word type ; {
+mes(word type)
+{
 	int argt ;
 
 	switch ( (int)type ) {

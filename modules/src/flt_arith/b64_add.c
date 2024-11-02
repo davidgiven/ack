@@ -9,8 +9,7 @@
 #include "flt_misc.h"
 
 int
-flt_b64_add(e1,e2)
-	register struct flt_mantissa *e1,*e2;
+flt_b64_add(struct flt_mantissa* e1,struct flt_mantissa* e2)
 {
 	int	overflow;
 	int	carry;

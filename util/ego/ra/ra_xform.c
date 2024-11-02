@@ -519,8 +519,7 @@ void rem_locals(proc_p p, alloc_p allocs)
 	p->p_localbytes = nrlocals;
 }
 
-void rem_formals(p, allocs) proc_p p;
-alloc_p allocs;
+void rem_formals(proc_p p, alloc_p allocs)
 {
 	/* Try to decrease the number of formals of procedure p, by
 	 * looking at which formals are always stored in a register.

@@ -71,8 +71,7 @@ clr SREG : bisb X,SREG : tst SREG : jne LAB
 
 /* auxiliary routines: */
 
-int no_side_effects(s)
-	register char *s;
+int no_side_effects(char* s)
 {
 
 	for(;;) {
@@ -85,20 +84,17 @@ int no_side_effects(s)
 	/* NOTREACHED */
 }
 
-int is_register(s)
-	register char *s;
+int is_register(char* s)
 {
 	return *s++ == 'r' && *s >= '0' && *s <= '5';
 }
 
-int is_scratchreg(s)
-	register char *s;
+int is_scratchreg(char* s)
 {
 	return *s++ == 'r' && (*s == '0' || *s == '1' || *s == '3');
 }
 
-int carry_dead(s)
-	char *s;
+int carry_dead(char* s)
 {
 	switch(*s++) {
 		case 'a':	/* adc and adcb */

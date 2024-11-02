@@ -19,7 +19,7 @@ static struct idf* IDF_hashtable[IDF_HASHSIZE];
 
 static struct idf* IDF_new(char* tg, int size, int cpy);
 
-void init_idf()
+void init_idf(void)
 {
 }
 

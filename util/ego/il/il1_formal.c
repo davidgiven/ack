@@ -100,10 +100,7 @@ STATIC void inc_use(formal_p f, bblock_p b)
 	}
 }
 
-void formal(p, b, off, type, usage) proc_p p;
-bblock_p b;
-offset off;
-int type, usage;
+void formal(proc_p p, bblock_p b, offset off, int type, int usage)
 {
 	/* Analyze a reference to a parameter of p
 	 * (occurring within basic block b).

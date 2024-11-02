@@ -198,7 +198,7 @@ STATIC void last2_instrs(bblock_p b, line_p* last_out, line_p* prev_out)
 	}
 }
 
-void control_flow(head) bblock_p head;
+void control_flow(bblock_p head)
 {
 	/* compute the successor and predecessor relation
 	 * for every basic block.

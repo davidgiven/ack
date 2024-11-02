@@ -184,8 +184,7 @@ dblock_p symlookup(const char* name, int status)
 
 /* getsym */
 
-dblock_p getsym(status)
-int status;
+dblock_p getsym(int status)
 {
 	if (table2() != DLBX)
 	{
@@ -196,8 +195,7 @@ int status;
 
 /* getproc */
 
-proc_p getproc(status)
-int status;
+proc_p getproc(int status)
 {
 	if (table2() != sp_pnam)
 	{
@@ -279,7 +277,7 @@ proc_p proclookup(const char* name, int status)
 
 /* cleaninstrlabs */
 
-void cleaninstrlabs()
+void cleaninstrlabs(void)
 {
 	register num_p *npp, np, next;
 
@@ -298,9 +296,7 @@ void cleaninstrlabs()
 
 /* dump_procnames */
 
-void dump_procnames(hash, n, f) prc_p hash[];
-int n;
-FILE* f;
+void dump_procnames(prc_p hash[], int n, FILE* f)
 {
 	/* Save the names of the EM procedures in file f.
 	 * Note that the Optimizer Intermediate Code does not
@@ -337,8 +333,7 @@ FILE* f;
 
 /* cleanprocs */
 
-void cleanprocs(hash, n, mask) prc_p hash[];
-int n, mask;
+void cleanprocs(prc_p hash[], int n, int mask)
 {
 	/* After an EM input file has been processed, the names
 	 * of those procedures that are internal (i.e. not visible
@@ -386,9 +381,7 @@ int n, mask;
 
 /* dump_dblocknames */
 
-void dump_dblocknames(hash, n, f) sym_p hash[];
-int n;
-FILE* f;
+void dump_dblocknames(sym_p hash[], int n, FILE* f)
 {
 	/* Save the names of the EM data blocks in file f.
 	 * The output consists of tuples (dblock_id, name).
@@ -419,8 +412,7 @@ FILE* f;
 
 /* cleandblocks */
 
-void cleandblocks(hash, n, mask) sym_p hash[];
-int n, mask;
+void cleandblocks(sym_p hash[], int n, int mask)
 {
 	/* After an EM input file has been processed, the names
 	 * of those data blocks that are internal must be removed.

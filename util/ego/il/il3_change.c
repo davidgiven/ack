@@ -472,7 +472,7 @@ STATIC line_p first_nonpseudo(line_p l)
 	return l;
 }
 
-void insert(text, l, firstline) line_p text, l, firstline;
+void insert(line_p text, line_p l, line_p firstline)
 {
 	/* Insert the modified EM text of the called
 	 * routine in the calling routine. Pseudos are

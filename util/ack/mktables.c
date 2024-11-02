@@ -75,7 +75,7 @@ FILE *do_open(const char *file) {
 }
 
 void
-readm() {
+readm(void) {
 	register int i ;
 	register int token ;
 	register FILE *in ;

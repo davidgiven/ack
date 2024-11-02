@@ -1601,7 +1601,7 @@ static void fbcc32(void)
 }
 
 
-void m68040_fpu_op0()
+void m68040_fpu_op0(void)
 {
   m68ki_cpu.fpu_just_reset = 0;
 
@@ -1708,7 +1708,7 @@ static void do_frestore_null(void)
   m68ki_cpu.fpu_just_reset = 1;
 }
 
-void m68040_fpu_op1()
+void m68040_fpu_op1(void)
 {
   int ea = REG_IR & 0x3f;
   int mode = (ea >> 3) & 0x7;

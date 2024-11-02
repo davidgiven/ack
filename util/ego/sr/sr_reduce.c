@@ -653,7 +653,7 @@ STATIC void clean_avail(void)
 }
 
 void strength_reduction(loop_p lp, lset ivs, lset vars) /* description of the loop */
-    /* set of induction variables of the loop */ /* set of local variables changed in loop */
+/* set of induction variables of the loop */ /* set of local variables changed in loop */
 {
 	/* Find all expensive instructions (leftshift, multiply, array) and see
 	 * if they can be reduced. We branch to several instruction-specific

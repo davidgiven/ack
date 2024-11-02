@@ -79,7 +79,7 @@ void remov_formals(proc_p p)
 	p->P_FORMALS = (formal_p)0;
 }
 
-void rem_indir_acc(p) proc_p p;
+void rem_indir_acc(proc_p p)
 {
 	/* Formals that may be accessed indirectly
 	 * cannot be expanded in line, so they are
