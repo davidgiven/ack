@@ -1,38 +1,39 @@
 /** @file
-	Core dumping routines
+    Core dumping routines
 */
 
-#include	"logging.h"
-#include	"global.h"
-#include	"warn.h"
-#include	"shadow.h"
-#include	"fra.h"
+#include "logging.h"
+#include "global.h"
+#include "warn.h"
+#include "shadow.h"
+#include "fra.h"
 
-#include	<stdio.h>
+#include <stdio.h>
 
 void core_dump(void)
 {
-	FILE *core_file;
-	
+	FILE* core_file;
+
 	core_file = fopen("int.core", "wb");
-	if (!core_file) {
+	if (!core_file)
+	{
 		/* no point in giving a fatal error again! */
 		return;
 	}
 
-/******** EM Machine capacity parameters ********/
+	/******** EM Machine capacity parameters ********/
 
 	fprintf(core_file, "wsize=%ld\n", wsize);
 	fprintf(core_file, "psize=%ld\n", psize);
 
-/******** EM program parameters ********/
+	/******** EM program parameters ********/
 
 	fprintf(core_file, "ML=%lu\n", ML);
 	fprintf(core_file, "HB=%lu\n", HB);
 	fprintf(core_file, "DB=%lu\n", DB);
 	fprintf(core_file, "NProc=%ld\n", NProc);
 
-/******** EM machine registers ********/
+	/******** EM machine registers ********/
 
 	fprintf(core_file, "PI=%ld\n", PI);
 	fprintf(core_file, "PC=%lu\n", PC);
@@ -55,20 +56,19 @@ void core_dump(void)
 	fprintf(core_file, "HL=%lu\n", HL);
 	fprintf(core_file, "SL=%lu\n", SL);
 
-/******** The EM machine memory ********/
+	/******** The EM machine memory ********/
 
 	fwrite(text, 1, (int)(DB), core_file);
 	fwrite(data, 1, (int)(HL), core_file);
-	fwrite(stack, 1, (int)(ML+1-SL), core_file);
+	fwrite(stack, 1, (int)(ML + 1 - SL), core_file);
 	fwrite(FRA, 1, (int)(FRALimit), core_file);
 
-#ifdef	LOGGING
+#ifdef LOGGING
 	fwrite(FRA_sh, 1, (int)(FRALimit), core_file);
 	fwrite(data_sh, 1, (int)(HL), core_file);
-	fwrite(stack_sh, 1, (int)(ML+1-SL), core_file);
-#endif	/* LOGGING */
-	
+	fwrite(stack_sh, 1, (int)(ML + 1 - SL), core_file);
+#endif /* LOGGING */
+
 	fclose(core_file);
 	core_file = 0;
 }
-

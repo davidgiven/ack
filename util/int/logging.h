@@ -1,8 +1,8 @@
 /* $Id$ */
 
-#define	LOGGING		1		/* Includes logging when defined */
+#define LOGGING 1 /* Includes logging when defined */
 
-#ifdef	LOGGING
+#ifdef LOGGING
 /* warn.c */
 void warningcont(int);
-#endif	/* LOGGING */
+#endif /* LOGGING */

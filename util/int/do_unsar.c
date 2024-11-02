@@ -4,16 +4,16 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"warn.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "warn.h"
+#include "text.h"
+#include "fra.h"
+#include "switch.h"
 
 /************************************************************************
  *	No checking is performed, except for division by zero.		*
@@ -24,77 +24,77 @@
  *	the highest unsigned number for the given size plus 1.		*
  ************************************************************************/
 
-#ifdef	LOGGING
+#ifdef LOGGING
 extern int must_test;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
-#define	adu(w1,w2)	(unsigned long)(w1 + w2)
-#define	sbu(w1,w2)	(unsigned long)(w1 - w2)
-#define	mlu(w1,w2)	(unsigned long)(w1 * w2)
+#define adu(w1, w2) (unsigned long)(w1 + w2)
+#define sbu(w1, w2) (unsigned long)(w1 - w2)
+#define mlu(w1, w2) (unsigned long)(w1 * w2)
 
-PRIVATE unsigned long dvu(
-	unsigned long w1,
-	unsigned long w2)
+PRIVATE unsigned long dvu(unsigned long w1, unsigned long w2)
 {
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
+	if (w2 == 0)
+	{
+		if (!(IgnMask & BIT(EIDIVZ)))
+		{
 			trap(EIDIVZ);
 		}
-		else	return (0L);
+		else
+			return (0L);
 	}
 	return (w1 / w2);
 }
 
-PRIVATE unsigned long rmu(
-	unsigned long w1,
-	unsigned long w2)
+PRIVATE unsigned long rmu(unsigned long w1, unsigned long w2)
 {
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
+	if (w2 == 0)
+	{
+		if (!(IgnMask & BIT(EIDIVZ)))
+		{
 			trap(EIDIVZ);
 		}
-		else	return (0L);
+		else
+			return (0L);
 	}
 	return (w1 % w2);
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long slu(
-		unsigned long w1,
-		unsigned long w2,
-		size nbytes)
+PRIVATE unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
 {
-		/* w1 << w2 */
-#ifdef	LOGGING
-	if (must_test) {
+	/* w1 << w2 */
+#ifdef LOGGING
+	if (must_test)
+	{
 		/* check shift distance */
-		if (w2 >= nbytes*8)	{
+		if (w2 >= nbytes * 8)
+		{
 			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
+			w2 = nbytes * 8 - 1;
 		}
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	/* calculate result */
 	return (w1 << w2);
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long sru(
-	unsigned long w1,
-	unsigned long w2,
-	size nbytes)
+PRIVATE unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
 {
 	/* w1 >> w2 */
-#ifdef	LOGGING
-	if (must_test) {
+#ifdef LOGGING
+	if (must_test)
+	{
 		/* check shift distance */
-		if (w2 >= nbytes*8)	{
+		if (w2 >= nbytes * 8)
+		{
 			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
+			w2 = nbytes * 8 - 1;
 		}
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	/* calculate result */
 	return (w1 >> w2);
@@ -107,7 +107,7 @@ void DoADU(register size l)
 
 	LOG(("@U6 DoADU(%ld)", l));
 	spoilFRA();
-	npush((long) adu(upop(l), t), l);
+	npush((long)adu(upop(l), t), l);
 }
 
 /** SBU w: Subtraction */
@@ -117,7 +117,7 @@ void DoSBU(register size l)
 
 	LOG(("@U6 DoSBU(%ld)", l));
 	spoilFRA();
-	npush((long) sbu(upop(l), t), l);
+	npush((long)sbu(upop(l), t), l);
 }
 
 /** MLU w: Multiplication */
@@ -127,7 +127,7 @@ void DoMLU(register size l)
 
 	LOG(("@U6 DoMLU(%ld)", l));
 	spoilFRA();
-	npush((long) mlu(upop(l), t), l);
+	npush((long)mlu(upop(l), t), l);
 }
 
 /** DVU w: Division */
@@ -137,7 +137,7 @@ void DoDVU(register size l)
 
 	LOG(("@U6 DoDVU(%ld)", l));
 	spoilFRA();
-	npush((long) dvu(upop(l), t), l);
+	npush((long)dvu(upop(l), t), l);
 }
 
 /** RMU w: Remainder */
@@ -147,7 +147,7 @@ void DoRMU(register size l)
 
 	LOG(("@U6 DoRMU(%ld)", l));
 	spoilFRA();
-	npush((long) rmu(upop(l), t), l);
+	npush((long)rmu(upop(l), t), l);
 }
 
 /** SLU w: Shift left */
@@ -158,7 +158,7 @@ void DoSLU(register size l)
 	LOG(("@U6 DoSLU(%ld)", l));
 	spoilFRA();
 	l = arg_wi(l);
-	npush((long) slu(upop(l), t, l), l);
+	npush((long)slu(upop(l), t, l), l);
 }
 
 /** SRU w: Shift right */
@@ -169,7 +169,5 @@ void DoSRU(register size l)
 	LOG(("@U6 DoSRU(%ld)", l));
 	spoilFRA();
 	l = arg_wi(l);
-	npush((long) sru(upop(l), t, l), l);
+	npush((long)sru(upop(l), t, l), l);
 }
-
-

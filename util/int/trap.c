@@ -4,21 +4,21 @@
 
 /* $Id$ */
 
-#include	<setjmp.h>
+#include <setjmp.h>
 
-#include	<em_abs.h>
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"trap.h"
-#include	"io.h"
-#include	"warn.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"linfil.h"
-#include	"rsb.h"
-#include	"fra.h"
-#include	"whatever.h"
+#include <em_abs.h>
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "trap.h"
+#include "io.h"
+#include "warn.h"
+#include "mem.h"
+#include "shadow.h"
+#include "linfil.h"
+#include "rsb.h"
+#include "fra.h"
+#include "whatever.h"
 
 extern jmp_buf trapbuf; /* from main.c */
 
@@ -27,16 +27,16 @@ int signalled;
 
 PRIVATE int nonreturnable(int nr);
 
-PRIVATE char *trap_msg[] =
-{
-#include	"trap_msg"		/* generated from $(EM)/etc/traps */
-		"" };
+PRIVATE char* trap_msg[] = {
+#include "trap_msg" /* generated from $(EM)/etc/traps */
+	""
+};
 
-char *trap2text(int nr)
+char* trap2text(int nr)
 {
-	if ( /* trap number in predefined range */
-	nr < sizeof(trap_msg) / sizeof(trap_msg[0]) && /* trap message not the empty string */
-	trap_msg[nr][0])
+	if (/* trap number in predefined range */
+	    nr < sizeof(trap_msg) / sizeof(trap_msg[0]) && /* trap message not the empty string */
+	    trap_msg[nr][0])
 	{
 		return trap_msg[nr];
 	}
@@ -50,7 +50,7 @@ char *trap2text(int nr)
 }
 
 /*ARGSUSED*/
-void do_trap(int nr, int L, char *F)
+void do_trap(int nr, int L, char* F)
 {
 	/*
 	 1.	The trap has not been masked.
@@ -67,39 +67,38 @@ void do_trap(int nr, int L, char *F)
 
 	switch (OnTrap)
 	{
-	case TR_ABORT:
-		fatal("trap \"%s\" before program started", trap2text(nr));
-		UNREACHABLE_CODE;
+		case TR_ABORT:
+			fatal("trap \"%s\" before program started", trap2text(nr));
+			UNREACHABLE_CODE;
 
-	case TR_HALT:
-		fatal("trap \"%s\" not caught at %s", trap2text(nr), position());
-		UNREACHABLE_CODE;
+		case TR_HALT:
+			fatal("trap \"%s\" not caught at %s", trap2text(nr), position());
+			UNREACHABLE_CODE;
 
-	case TR_TRAP:
-		/* execute the trap */
-		if (rec_trap)
-		{
-			fatal("recursive trap; first trap number was \"%s\"",
-					trap2text(rec_nr));
-		}
-		rec_trap = 1;
-		rec_nr = nr;
+		case TR_TRAP:
+			/* execute the trap */
+			if (rec_trap)
+			{
+				fatal("recursive trap; first trap number was \"%s\"", trap2text(rec_nr));
+			}
+			rec_trap = 1;
+			rec_nr = nr;
 
-		/* save the Function Return Area */
-		pushFRA(FRASize);
-		wpush((long) FRASize);
-		wpush((long) FRA_def);
+			/* save the Function Return Area */
+			pushFRA(FRASize);
+			wpush((long)FRASize);
+			wpush((long)FRA_def);
 
-		/* set up the trap number as the only parameter */
-		wpush((long) nr);
+			/* set up the trap number as the only parameter */
+			wpush((long)nr);
 
-		tpi = TrapPI; /* allowed since OnTrap == TR_TRAP */
-		TrapPI = 0;
-		OnTrap = TR_HALT;
-		call(tpi, (nonreturnable(nr) ? RSB_NRT : RSB_RTT));
-		rec_trap = 0;
-		longjmp(trapbuf, 1);
-		UNREACHABLE_CODE;
+			tpi = TrapPI; /* allowed since OnTrap == TR_TRAP */
+			TrapPI = 0;
+			OnTrap = TR_HALT;
+			call(tpi, (nonreturnable(nr) ? RSB_NRT : RSB_RTT));
+			rec_trap = 0;
+			longjmp(trapbuf, 1);
+			UNREACHABLE_CODE;
 	}
 }
 
@@ -107,19 +106,18 @@ PRIVATE int nonreturnable(int nr)
 {
 	switch (nr)
 	{
-	case ESTACK:
-	case EILLINS:
-	case EODDZ:
-	case ECASE:
-	case EMEMFLT:
-	case EBADPTR:
-	case EBADPC:
-	case EBADLAE:
-	case EBADGTO:
-		return 1;
-	default:
-		return 0;
+		case ESTACK:
+		case EILLINS:
+		case EODDZ:
+		case ECASE:
+		case EMEMFLT:
+		case EBADPTR:
+		case EBADPC:
+		case EBADLAE:
+		case EBADGTO:
+			return 1;
+		default:
+			return 0;
 	}
 	UNREACHABLE_CODE;
 }
-

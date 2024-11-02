@@ -4,16 +4,16 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"rsb.h"
-#include	"warn.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "text.h"
+#include "fra.h"
+#include "rsb.h"
+#include "warn.h"
+#include "switch.h"
 
 PRIVATE ptr lexback_LB(unsigned long);
 
@@ -75,7 +75,6 @@ void DoLOF(register long l)
 /** LAL l: Load address of local or parameter */
 void DoLAL(register long l)
 {
-
 
 	LOG(("@L6 DoLAL(%ld)", l));
 	spoilFRA();
@@ -184,11 +183,11 @@ PRIVATE ptr lexback_LB(unsigned long n)
 {
 	/* LB n static levels back */
 	register ptr lb = LB;
-	
-	while (n != 0) {
+
+	while (n != 0)
+	{
 		lb = st_lddp(lb + rsbsize);
 		n--;
 	}
 	return lb;
 }
-

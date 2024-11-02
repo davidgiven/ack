@@ -4,31 +4,31 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"memdirect.h"
-#include	"segment.h"
-#include	"trap.h"
-#include	"warn.h"
-#include	"text.h"
-#include	"proctab.h"
-#include	"fra.h"
-#include	"rsb.h"
-#include	"linfil.h"
-#include	"switch.h"
-#include	"whatever.h"
+#include "em_abs.h"
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "shadow.h"
+#include "memdirect.h"
+#include "segment.h"
+#include "trap.h"
+#include "warn.h"
+#include "text.h"
+#include "proctab.h"
+#include "fra.h"
+#include "rsb.h"
+#include "linfil.h"
+#include "switch.h"
+#include "whatever.h"
 
-extern int running;			/* from main.c */
+extern int running; /* from main.c */
 
 /* Forward declarations */
 PRIVATE void lfr(size), ret(size);
 
 /** CAI -: Call procedure (procedure identifier on stack) */
-void DoCAI(void)				/* proc identifier on top of stack */
+void DoCAI(void) /* proc identifier on top of stack */
 {
 	register long pi = spop(psize);
 
@@ -67,7 +67,7 @@ void call(long new_PI, int rsbcode)
 	register size nloc = proctab[new_PI].pr_nloc;
 	register ptr ep = proctab[new_PI].pr_ep;
 
-	push_frame(SP);			/* remember AB */
+	push_frame(SP); /* remember AB */
 	pushrsb(rsbcode);
 
 	/* do the call */
@@ -75,8 +75,7 @@ void call(long new_PI, int rsbcode)
 	st_inc(nloc);
 	newPC(ep);
 	spoilFRA();
-	LOG(("@p5 call: new_PI = %lu, nloc = %lu, ep = %lu",
-				new_PI, nloc, ep));
+	LOG(("@p5 call: new_PI = %lu, nloc = %lu, ep = %lu", new_PI, nloc, ep));
 }
 
 /************************************************************************
@@ -85,20 +84,23 @@ void call(long new_PI, int rsbcode)
 
 PRIVATE void lfr(size sz)
 {
-	if (sz > FRALimit) {
+	if (sz > FRALimit)
+	{
 		wtrap(WILLLFR, EILLINS);
 	}
 
 	LOG(("@p5 lfr: size = %ld", sz));
 
-#ifdef	LOGGING
-	if (!FRA_def) {
+#ifdef LOGGING
+	if (!FRA_def)
+	{
 		warning(WRFUNGAR);
 	}
-	if (sz != FRASize) {
+	if (sz != FRASize)
+	{
 		warning(FRASize < sz ? WRFUNSML : WRFUNLAR);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	pushFRA(sz);
 	spoilFRA();
@@ -110,7 +112,8 @@ PRIVATE void lfr(size sz)
 
 PRIVATE void ret(size sz)
 {
-	if (sz > FRALimit) {
+	if (sz > FRALimit)
+	{
 		wtrap(WILLRET, EILLINS);
 	}
 
@@ -121,26 +124,27 @@ PRIVATE void ret(size sz)
 	FRASize = sz;
 	popFRA(FRASize);
 
-	switch (poprsb(0)) {
-	case RSB_STP:
-		if (sz == wsize) {
-			ES_def = DEFINED;
-			ES = btol(FRA[sz-1]);
-					/* one byte only */
-		}
-		running = 0;		/* stop the machine */
-		return;
-	case RSB_CAL:
-		/* OK */
-		break;
-	case RSB_RTT:
-	case RSB_NRT:
-		warning(WRETTRAP);
-		running = 0;		/* stop the machine */
-		return;
-	default:
-		warning(WRETBAD);
-		return;
+	switch (poprsb(0))
+	{
+		case RSB_STP:
+			if (sz == wsize)
+			{
+				ES_def = DEFINED;
+				ES = btol(FRA[sz - 1]);
+				/* one byte only */
+			}
+			running = 0; /* stop the machine */
+			return;
+		case RSB_CAL:
+			/* OK */
+			break;
+		case RSB_RTT:
+		case RSB_NRT:
+			warning(WRETTRAP);
+			running = 0; /* stop the machine */
+			return;
+		default:
+			warning(WRETBAD);
+			return;
 	}
 }
-

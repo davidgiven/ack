@@ -1,20 +1,21 @@
 /*
-	Handling the proctable
+    Handling the proctable
 */
 #ifndef PROCTAB_H_
 #define PROCTAB_H_
 
 /* $Id$ */
 
-#include	"global.h"
+#include "global.h"
 
-struct proc {
+struct proc
+{
 	size pr_nloc;
 	ptr pr_ep;
-	ptr pr_ff;			/* first address not in proc */
+	ptr pr_ff; /* first address not in proc */
 };
 
-extern struct proc *proctab;
+extern struct proc* proctab;
 
 void init_proctab(void);
 void add_proc(size, ptr);

@@ -1,20 +1,20 @@
 /* $Id$ */
 
 /*	The Return Status Block contains, in push order:
-	FIL, LIN, LB, PC, PI, rsbcode
+    FIL, LIN, LB, PC, PI, rsbcode
 */
 
-#include	"logging.h"
-#include	"global.h"
-#include	"mem.h"
-#include	"rsb.h"
-#include	"proctab.h"
-#include	"linfil.h"
-#include	"shadow.h"
-#include	"segment.h"
-#include	"text.h"
-#include	"warn.h"
-#include	"whatever.h"
+#include "logging.h"
+#include "global.h"
+#include "mem.h"
+#include "rsb.h"
+#include "proctab.h"
+#include "linfil.h"
+#include "shadow.h"
+#include "segment.h"
+#include "text.h"
+#include "warn.h"
+#include "whatever.h"
 
 /* offsets to be added to a local base */
 int rsb_rsbcode;
@@ -68,7 +68,7 @@ int poprsb(int rtt) /* set to 1 if working for RTT */
 	/* pops the RSB and returns the rsbcode, for further testing */
 	register int rsbcode;
 
-#ifdef	LOGGING
+#ifdef LOGGING
 	{
 		/* check SP */
 		register ptr properSP = LB - proctab[PI].pr_nloc;
@@ -78,24 +78,25 @@ int poprsb(int rtt) /* set to 1 if working for RTT */
 		if (SP > properSP)
 			warning(rtt ? WRTTSTS : WRETSTS);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	/* discard stack up to RSB */
 	newSP(LB);
 
 	/* get RSB code and test it for applicability */
 	rsbcode = st_lduw(SP + rsb_rsbcode);
-	if ((rsbcode & RSBMASK) != RSBCODE)	/* no RSB at all */
+	if ((rsbcode & RSBMASK) != RSBCODE) /* no RSB at all */
 		return rsbcode;
 
-	if (rsbcode != RSB_STP) {
+	if (rsbcode != RSB_STP)
+	{
 		/*	Restore registers PI, PC, LB, LIN and FIL
-			from Return Status Block
+		    from Return Status Block
 		*/
 		PI = st_lds(SP + rsb_PI, psize);
 		newPC(st_ldip(SP + rsb_PC));
 		newLB(st_lddp(SP + rsb_LB));
-		putLIN((long) st_ldu(SP + rsb_LIN, LINSIZE));
+		putLIN((long)st_ldu(SP + rsb_LIN, LINSIZE));
 		putFIL(st_lddp(SP + rsb_FIL));
 
 		/* remove RSB */
@@ -106,4 +107,3 @@ int poprsb(int rtt) /* set to 1 if working for RTT */
 
 	return rsbcode;
 }
-

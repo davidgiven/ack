@@ -4,33 +4,33 @@
 
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-#include	"em_abs.h"
-#include	"logging.h"
-#include	"nofloat.h"
-#include	"global.h"
-#include	"log.h"
-#include	"warn.h"
-#include	"trap.h"
-#include	"alloc.h"
-#include	"memdirect.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"stack.h"
-#include	"data.h"
-#include	"rsb.h"
+#include "em_abs.h"
+#include "logging.h"
+#include "nofloat.h"
+#include "global.h"
+#include "log.h"
+#include "warn.h"
+#include "trap.h"
+#include "alloc.h"
+#include "memdirect.h"
+#include "mem.h"
+#include "shadow.h"
+#include "stack.h"
+#include "data.h"
+#include "rsb.h"
 
 /** initial stack size in bytes */
-#define	STACKSIZE	1000L
+#define STACKSIZE 1000L
 
 extern size maxstack; /* from main.c */
 
-#ifdef	LOGGING
-char *stack_sh; 	/* stadowbytes */
-char *stackML_sh; 	/* speed up access of stadowbytes */
+#ifdef LOGGING
+char* stack_sh; /* stadowbytes */
+char* stackML_sh; /* speed up access of stadowbytes */
 PRIVATE void st_clear_area(ptr, ptr);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 PRIVATE void warn_stbits(ptr, size);
 
@@ -46,11 +46,11 @@ void init_stack(void)
 	SL = ML + 1 - STACKSIZE; /* initialize Stack Limit */
 	stack = Malloc(STACKSIZE, "stack space");
 	stackML = stack + ML;
-#ifdef	LOGGING
+#ifdef LOGGING
 	stack_sh = Malloc(STACKSIZE, "shadowspace for stack");
 	stackML_sh = stack_sh + ML;
 	st_clear_area(ML, SL);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 }
 
 /************************************************************************
@@ -102,18 +102,17 @@ void newSP(ptr ap)
 
 			stacksize = allocfrac(stacksize);
 			SL = ML + 1 - stacksize;
-			stack = Realloc(stack, (size) (stacksize), "stack space");
+			stack = Realloc(stack, (size)(stacksize), "stack space");
 			stackML = stack + ML;
-#ifdef	LOGGING
-			stack_sh = Realloc(stack_sh, (size) (stacksize),
-					"shadowspace for stack");
+#ifdef LOGGING
+			stack_sh = Realloc(stack_sh, (size)(stacksize), "shadowspace for stack");
 			stackML_sh = stack_sh + ML;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 		}
 
-#ifdef	LOGGING
+#ifdef LOGGING
 		st_clear_area(SP - 1, p);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	}
 	SP = p;
 }
@@ -197,19 +196,18 @@ void newLB(ptr p)
 void st_stdp(register ptr addr, ptr ap)
 {
 	register int i;
-	register long p = (long) ap;
+	register long p = (long)ap;
 
 	LOG(("@s6 st_stdp(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
 	ch_wordaligned(addr);
-	for (i = (int) psize; i > 0; i--, addr++)
+	for (i = (int)psize; i > 0; i--, addr++)
 	{
 		ch_st_prot(addr);
-		stack_loc(addr) = (char) (p);
+		stack_loc(addr) = (char)(p);
 		st_dp(addr);
 		p = p >> 8;
 	}
-
 }
 
 /** Store code pointer "ap" in stack address "addr".
@@ -218,15 +216,15 @@ void st_stdp(register ptr addr, ptr ap)
 void st_stip(register ptr addr, ptr ap)
 {
 	register int i;
-	register long p = (long) ap;
+	register long p = (long)ap;
 
 	LOG(("@s6 st_stip(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
 	ch_wordaligned(addr);
-	for (i = (int) psize; i > 0; i--, addr++)
+	for (i = (int)psize; i > 0; i--, addr++)
 	{
 		ch_st_prot(addr);
-		stack_loc(addr) = (char) (p);
+		stack_loc(addr) = (char)(p);
 		st_ip(addr);
 		p = p >> 8;
 	}
@@ -249,13 +247,13 @@ void st_stn(register ptr addr, long al, size n)
 	ch_aligned(addr, n);
 
 	/* store the bytes */
-	for (i = (int) n; i > 0; i--, addr++)
+	for (i = (int)n; i > 0; i--, addr++)
 	{
 		ch_st_prot(addr);
-		stack_loc(addr) = (char) l;
-#ifdef	LOGGING
+		stack_loc(addr) = (char)l;
+#ifdef LOGGING
 		st_sh(addr) = sh_flags;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 		l = l >> 8;
 	}
 }
@@ -277,43 +275,43 @@ void st_stw(register ptr addr, long al)
 	ch_wordaligned(addr);
 
 	/* store the bytes */
-	for (i = (int) wsize; i > 0; i--, addr++)
+	for (i = (int)wsize; i > 0; i--, addr++)
 	{
 		ch_st_prot(addr);
-		stack_loc(addr) = (char) l;
-#ifdef	LOGGING
+		stack_loc(addr) = (char)l;
+#ifdef LOGGING
 		st_sh(addr) = sh_flags;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 		l = l >> 8;
 	}
 }
 
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 /** Store a real value "f" of "n" bytes in size in stack at address "addr".
  *  Full validation is done on "addr" before storing into it.
  */
 void st_stf(register ptr addr, double f, size n)
 {
-	register char *cp = (char *) &f;
+	register char* cp = (char*)&f;
 	float fl;
 	register int i;
 
 	LOG(("@s6 st_stf(%lu, %g, %lu)", addr, f, n));
 	ch_in_stack(addr, n);
 	ch_wordaligned(addr);
-	if ((int) n == 4)
+	if ((int)n == 4)
 	{
 		fl = f;
-		cp = (char *) &fl;
+		cp = (char*)&fl;
 	}
-	for (i = (int) n; i > 0; i--, addr++)
+	for (i = (int)n; i > 0; i--, addr++)
 	{
 		ch_st_prot(addr);
 		stack_loc(addr) = *(cp++);
 		st_fl(addr);
 	}
 }
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 
 /************************************************************************
  *	Stack load division.						*
@@ -340,13 +338,13 @@ ptr st_lddp(register ptr addr)
 
 	ch_in_stack(addr, psize);
 	ch_wordaligned(addr);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, psize, SH_DATAP))
 	{
 		warning(WLDPEXP);
 		warn_stbits(addr, psize);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	p = p_in_stack(addr);
 	LOG(("@s6 st_lddp() returns %lu", p));
@@ -364,13 +362,13 @@ ptr st_ldip(register ptr addr)
 
 	ch_in_stack(addr, psize);
 	ch_wordaligned(addr);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, psize, SH_INSP))
 	{
 		warning(WLIPEXP);
 		warn_stbits(addr, psize);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	p = p_in_stack(addr);
 	LOG(("@s6 st_ldip() returns %lu", p));
@@ -390,16 +388,16 @@ unsigned long st_ldu(register ptr addr, size n)
 
 	ch_in_stack(addr, n);
 	ch_aligned(addr, n);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, n, SH_INT))
 	{
 		warning(n == 1 ? WLCEXP : WLIEXP);
 		warn_stbits(addr, n);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	addr += n - 1;
-	for (i = (int) n - 1; i >= 0; i--, addr--)
+	for (i = (int)n - 1; i >= 0; i--, addr--)
 	{
 		u = (u << 8) | (btou(stack_loc(addr)));
 	}
@@ -420,16 +418,16 @@ unsigned long st_lduw(register ptr addr)
 
 	ch_w_in_stack(addr);
 	ch_wordaligned(addr);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, wsize, SH_INT))
 	{
 		warning(WLIEXP);
 		warn_stbits(addr, wsize);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	addr += wsize - 1;
-	for (i = (int) wsize - 1; i >= 0; i--, addr--)
+	for (i = (int)wsize - 1; i >= 0; i--, addr--)
 	{
 		u = (u << 8) | (btou(stack_loc(addr)));
 	}
@@ -450,13 +448,13 @@ long st_lds(register ptr addr, size n)
 
 	ch_in_stack(addr, n);
 	ch_aligned(addr, n);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, n, SH_INT))
 	{
 		warning(n == 1 ? WLCEXP : WLIEXP);
 		warn_stbits(addr, n);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	addr += n - 2;
 	l = btos(stack_loc(addr + 1));
@@ -481,16 +479,16 @@ long st_ldsw(register ptr addr)
 
 	ch_w_in_stack(addr);
 	ch_wordaligned(addr);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, wsize, SH_INT))
 	{
 		warning(WLIEXP);
 		warn_stbits(addr, wsize);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	addr += wsize - 2;
-	l = btos(stack_loc(addr+1));
+	l = btos(stack_loc(addr + 1));
 	for (i = wsize - 2; i >= 0; i--, addr--)
 	{
 		l = (l << 8) | btol(stack_loc(addr));
@@ -499,7 +497,7 @@ long st_ldsw(register ptr addr)
 	return (l);
 }
 
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 /** Loads and returns a real value of "n" bytes
  * stored in the stack at address "addr".
  */
@@ -507,40 +505,40 @@ double st_ldf(register ptr addr, size n)
 {
 	double f;
 	float fl;
-	register char *cp;
+	register char* cp;
 	register int i;
 
 	LOG(("@s6 st_ldf(%lu, %lu)", addr, n));
 
-	if ((int) n == 4)
+	if ((int)n == 4)
 	{
-		cp = (char *) &fl;
+		cp = (char*)&fl;
 	}
 	else
 	{
-		cp = (char *) &f;
+		cp = (char*)&f;
 	}
 	ch_in_stack(addr, n);
 	ch_wordaligned(addr);
-#ifdef	LOGGING
+#ifdef LOGGING
 	if (!is_st_set(addr, n, SH_FLOAT))
 	{
 		warning(WLFEXP);
 		warn_stbits(addr, n);
 	}
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
-	for (i = (int) n; i > 0; i--, addr++)
+	for (i = (int)n; i > 0; i--, addr++)
 	{
 		*(cp++) = stack_loc(addr);
 	}
-	if ((int) n == 4)
+	if ((int)n == 4)
 	{
 		f = fl;
 	}
 	return (f);
 }
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 
 /************************************************************************
  *	Stack move division						*
@@ -563,7 +561,7 @@ double st_ldf(register ptr addr, size n)
  * stack address "s2".
  */
 void st_mvs(register ptr s2, register ptr s1, size n)
-	/* s1 -> s2 */
+/* s1 -> s2 */
 {
 	register int i;
 
@@ -572,14 +570,14 @@ void st_mvs(register ptr s2, register ptr s1, size n)
 	ch_in_stack(s2, n);
 	ch_wordaligned(s2);
 
-	for (i = (int) n; i > 0; i--, s1++, s2++)
+	for (i = (int)n; i > 0; i--, s1++, s2++)
 	{
 		ch_st_prot(s2);
 		ch_st_prot(s1);
 		stack_loc(s2) = stack_loc(s1);
-#ifdef	LOGGING
+#ifdef LOGGING
 		st_sh(s2) = st_sh(s1) & ~SH_PROT;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	}
 }
 
@@ -587,7 +585,7 @@ void st_mvs(register ptr s2, register ptr s1, size n)
  * stack address "s".
  */
 void st_mvd(ptr s, ptr d, size n)
-	/* d -> s */
+/* d -> s */
 {
 	register int i;
 
@@ -596,13 +594,13 @@ void st_mvd(ptr s, ptr d, size n)
 	ch_in_stack(s, n);
 	ch_wordaligned(s);
 
-	for (i = (int) n; i > 0; i--, s++, d++)
+	for (i = (int)n; i > 0; i--, s++, d++)
 	{
 		ch_st_prot(s);
 		stack_loc(s) = data_loc(d);
-#ifdef	LOGGING
+#ifdef LOGGING
 		st_sh(s) = dt_sh(d) & ~SH_PROT;
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	}
 }
 
@@ -685,7 +683,7 @@ long swpop(void)
 void pop_dt(ptr d, size n)
 {
 	if (n < wsize)
-		dt_stn(d, (long) upop(n), n);
+		dt_stn(d, (long)upop(n), n);
 	else
 	{
 		dt_mvs(d, SP, n);
@@ -706,7 +704,7 @@ void popw_dt(ptr d)
 void pop_st(ptr s, size n)
 {
 	if (n < wsize)
-		st_stn(s, (long) upop(n), n);
+		st_stn(s, (long)upop(n), n);
 	else
 	{
 		st_mvs(s, SP, n);
@@ -723,7 +721,7 @@ void popw_st(ptr s)
 	decSP(wsize);
 }
 
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 /** Pop a real value of "n" bytes from the stack. */
 double fpop(size n)
 {
@@ -733,7 +731,7 @@ double fpop(size n)
 	decSP(n);
 	return (d);
 }
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 
 /** Pop a word size value, independently of its type. */
 long wpop(void)
@@ -800,7 +798,7 @@ void push_dt(ptr d, size n)
 {
 	if (n < wsize)
 	{
-		npush((long) dt_ldu(d, n), n);
+		npush((long)dt_ldu(d, n), n);
 	}
 	else
 	{
@@ -825,7 +823,7 @@ void push_st(ptr s, size n)
 {
 	if (n < wsize)
 	{
-		npush((long) st_ldu(s, n), n);
+		npush((long)st_ldu(s, n), n);
 	}
 	else
 	{
@@ -843,16 +841,16 @@ void pushw_st(ptr s)
 	st_mvs(SP, s, wsize);
 }
 
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 /** Push a real value of "n" bytes unto the stack. */
 void fpush(double f, size n)
 {
 	incSP(n);
 	st_stf(SP, f, n);
 }
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 
-#ifdef	LOGGING
+#ifdef LOGGING
 
 PRIVATE void warn_stbits(ptr addr, size n)
 {
@@ -889,11 +887,10 @@ PRIVATE void st_clear_area(ptr from, ptr to)
 	/* includes both *from and *to (since ML+1 is unexpressible) */
 	register ptr a;
 
-	for (a = from; a >= to; a--) {
+	for (a = from; a >= to; a--)
+	{
 		st_undef(a);
 	}
 }
 
-
-#endif	/* LOGGING */
-
+#endif /* LOGGING */

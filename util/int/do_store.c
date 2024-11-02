@@ -4,15 +4,15 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"warn.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "text.h"
+#include "fra.h"
+#include "warn.h"
+#include "switch.h"
 
 /** STL l: Store local or parameter */
 void DoSTL(register long l)

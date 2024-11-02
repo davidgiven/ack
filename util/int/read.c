@@ -4,23 +4,23 @@
 
 /* $Id$ */
 
-#include	<stdio.h>
-#include	"local.h"		/* for VERSION */
-#include	"em_spec.h"
-#include	"as_spec.h"		/* for as_magic */
+#include <stdio.h>
+#include "local.h" /* for VERSION */
+#include "em_spec.h"
+#include "as_spec.h" /* for as_magic */
 
-#include	"logging.h"
-#include	"nofloat.h"
-#include	"global.h"
-#include	"log.h"
-#include	"io.h"
-#include	"data.h"
-#include	"proctab.h"
-#include	"warn.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"read.h"
-#include	"text.h"
+#include "logging.h"
+#include "nofloat.h"
+#include "global.h"
+#include "log.h"
+#include "io.h"
+#include "data.h"
+#include "proctab.h"
+#include "warn.h"
+#include "mem.h"
+#include "shadow.h"
+#include "read.h"
+#include "text.h"
 
 /************************************************************************
  *	Read object file contents.					*
@@ -48,14 +48,14 @@ long ENTRY;
 long NLINE;
 size SZDATA;
 
-PRIVATE FILE *load_fp; /* Filepointer of load file */
+PRIVATE FILE* load_fp; /* Filepointer of load file */
 
 PRIVATE ptr rd_repeat(ptr, size, ptr);
 PRIVATE ptr rd_descr(int, size, ptr);
 PRIVATE int rd_byte(void);
 PRIVATE long rd_int(size);
 
-void rd_open(char *fname)
+void rd_open(char* fname)
 { /* Open loadfile */
 	if ((load_fp = fopen(fname, "rb")) == NULL)
 	{
@@ -118,7 +118,7 @@ void rd_header(void)
 
 void rd_text(void)
 {
-	fread(text, 1, (int) DB, load_fp);
+	fread(text, 1, (int)DB, load_fp);
 }
 
 void rd_gda(void)
@@ -215,10 +215,10 @@ PRIVATE ptr rd_repeat(ptr pos, size count, ptr prev_pos)
 		for (i = 0; i < diff; i++)
 		{
 			data_loc(pos) = data_loc(pos - diff);
-#ifdef	LOGGING
+#ifdef LOGGING
 			/* copy shadow byte, including protection bit */
 			dt_sh(pos) = dt_sh(pos - diff);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 			pos++;
 		}
 	}
@@ -233,74 +233,74 @@ PRIVATE ptr rd_descr(int type, size count, ptr pos)
 
 	switch (type)
 	{
-	case 1: /* m uninitialized words */
-		j = count;
-		while (j--)
-		{
-			dt_stw(pos, 0L);
-			pos += wsize;
-		}
-		break;
-	case 2: /* m initialized bytes */
-		j = count;
-		while (j--)
-		{
-			dt_stn(pos++, btol(rd_byte()), 1L);
-		}
-		break;
-	case 3: /* m initialized wordsize integers */
-		for (j = 0; j < count; j++)
-		{
-			dt_stw(pos, rd_int(wsize));
-			pos += wsize;
-		}
-		break;
-	case 4: /* m initialized data pointers */
-		for (j = 0; j < count; j++)
-		{
-			dt_stdp(pos, i2p(rd_int(psize)));
-			pos += psize;
-		}
-		break;
-	case 5: /* m initialized instruction pointers */
-		for (j = 0; j < count; j++)
-		{
-			dt_stip(pos, i2p(rd_int(psize)));
-			pos += psize;
-		}
-		break;
-	case 6: /* initialized integer of size m */
-	case 7: /* initialized unsigned int of size m */
-		if ((j = count) != 1 && j != 2 && j != 4)
-			fatal("Bad integersize during initialisation");
-		dt_stn(pos, rd_int(j), j);
-		pos += j;
-		break;
-	case 8: /* initialized float of size m */
-		if ((j = count) != 4 && j != 8)
-			fatal("Bad floatsize during initialisation");
-		/* get fp representation */
-		fl_cnt = 0;
-		while ( (fl_rep[fl_cnt] = rd_byte()) )
-		{
-			fl_cnt++;
-			if (fl_cnt >= sizeof(fl_rep))
+		case 1: /* m uninitialized words */
+			j = count;
+			while (j--)
 			{
-				fatal("Initialized float longer than %d chars", sizeof(fl_rep));
+				dt_stw(pos, 0L);
+				pos += wsize;
 			}
-		}
-#ifndef	NOFLOAT
-		/* store the float */
-		dt_stf(pos, str2double(fl_rep), j);
-#else	/* NOFLOAT */
-		/* we cannot store the float */
-		warning(WFLINIT);
-#endif	/* NOFLOAT */
-		pos += j;
-		break;
-	default:
-		fatal("Unknown initializer type in global data.");
-		break;
+			break;
+		case 2: /* m initialized bytes */
+			j = count;
+			while (j--)
+			{
+				dt_stn(pos++, btol(rd_byte()), 1L);
+			}
+			break;
+		case 3: /* m initialized wordsize integers */
+			for (j = 0; j < count; j++)
+			{
+				dt_stw(pos, rd_int(wsize));
+				pos += wsize;
+			}
+			break;
+		case 4: /* m initialized data pointers */
+			for (j = 0; j < count; j++)
+			{
+				dt_stdp(pos, i2p(rd_int(psize)));
+				pos += psize;
+			}
+			break;
+		case 5: /* m initialized instruction pointers */
+			for (j = 0; j < count; j++)
+			{
+				dt_stip(pos, i2p(rd_int(psize)));
+				pos += psize;
+			}
+			break;
+		case 6: /* initialized integer of size m */
+		case 7: /* initialized unsigned int of size m */
+			if ((j = count) != 1 && j != 2 && j != 4)
+				fatal("Bad integersize during initialisation");
+			dt_stn(pos, rd_int(j), j);
+			pos += j;
+			break;
+		case 8: /* initialized float of size m */
+			if ((j = count) != 4 && j != 8)
+				fatal("Bad floatsize during initialisation");
+			/* get fp representation */
+			fl_cnt = 0;
+			while ((fl_rep[fl_cnt] = rd_byte()))
+			{
+				fl_cnt++;
+				if (fl_cnt >= sizeof(fl_rep))
+				{
+					fatal("Initialized float longer than %d chars", sizeof(fl_rep));
+				}
+			}
+#ifndef NOFLOAT
+			/* store the float */
+			dt_stf(pos, str2double(fl_rep), j);
+#else /* NOFLOAT */
+			/* we cannot store the float */
+			warning(WFLINIT);
+#endif /* NOFLOAT */
+			pos += j;
+			break;
+		default:
+			fatal("Unknown initializer type in global data.");
+			break;
 	}
 	return pos;
 }
@@ -326,4 +326,3 @@ PRIVATE long rd_int(size n)
 	}
 	return (l);
 }
-
