@@ -12,7 +12,7 @@
 #include "sim.h"
 #include "m68k.h"
 
-void disassemble_program();
+void disassemble_program(void);
 
 #define ADDRESS_MASK 0xffffffff
 #define RAM_BASE 0x08000000

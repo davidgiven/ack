@@ -54,11 +54,10 @@ offset mespar = UNKNOWN_SIZE;
 
 STATIC void process_lines(FILE *);
 STATIC int readline(short *, line_p *);
-STATIC line_p readoperand(short);
+STATIC line_p readoperand(short instr);
 STATIC line_p inpseudo(short);
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc,char* argv[])
 {
 	/* The input files must be legal EM Compact
 	 * Assembly Language files, as produced by the EM Peephole
@@ -133,7 +132,7 @@ char* argv[];
 #define END_INSTR 4
 #define DELETED_INSTR 5
 
-STATIC void add_end()
+STATIC void add_end(void)
 {
 	/* Add an end-pseudo to the current instruction list */
 
@@ -142,8 +141,7 @@ STATIC void add_end()
 	lastline->l_instr = ps_end;
 }
 
-STATIC void process_lines(fout)
-    FILE* fout;
+STATIC void process_lines(FILE* fout)
 {
 	line_p lnp;
 	short instr;
@@ -403,7 +401,7 @@ STATIC line_p readoperand(short instr)
 	return lnp;
 }
 
-static char* hol_label()
+static char* hol_label(void)
 {
 	static int holno;
 	line_p lnp;

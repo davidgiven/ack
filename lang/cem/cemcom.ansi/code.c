@@ -74,10 +74,8 @@ static int	pro_id;
 #endif /* USE_TMP */
 
 extern char options[];
-extern char *symbol2str();
-extern char *source;
 
-void loc_init();
+extern char *source;
 
 #ifndef	LINT
 void init_code(char *dst_file)

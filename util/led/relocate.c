@@ -497,9 +497,8 @@ extern struct orig relorig[];
  * Second case: we must update the value by the change
  * in position of the section of local.
  */
-static unsigned addrelo(relo, names, valu_out) struct outrelo* relo;
-struct outname* names;
-long* valu_out; /* Out variable. */
+static unsigned addrelo(struct outrelo* relo, /* Out variable. */
+struct outname* names,long* valu_out)
 {
 	register struct outname* local = &names[relo->or_nami];
 	register unsigned short index = NLocals;
@@ -516,9 +515,6 @@ long* valu_out; /* Out variable. */
 	else
 	{
 		register struct outname* name;
-		extern int hash();
-		extern struct outname* searchname();
-		extern unsigned indexof();
 		extern struct outhead outhead;
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));

@@ -27,9 +27,6 @@
 #include	"Lpars.h"
 #include	"misc.h"
 
-extern char		*symbol2str();
-
-
 void LLmessage(register int tk)
 {
 	if (tk > 0)	{

@@ -421,7 +421,7 @@ static void CodeParameters(struct paramlist *param, register struct node *arg)
 			CodeDAddress(arg, IsVarParam(param));
 			break;
 		default:{
-			arith tmp, TmpSpace();
+			arith tmp;
 			arith sz = WA(arg->nd_type->tp_size);
 
 			CodePExpr(arg);

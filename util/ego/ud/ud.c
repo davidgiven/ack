@@ -39,8 +39,7 @@ int Svalue,Svariable;
 
 cond_p globl_cond_tab,local_cond_tab;
 
-STATIC cond_p getcondtab(f)
-	FILE *f;
+STATIC cond_p getcondtab(FILE *f)
 {
 	int l,i;
 	cond_p tab;
@@ -72,9 +71,7 @@ STATIC void ud_machinit(void *vp)
 
 
 
-STATIC bool test_cond(cond,val)
-	short cond;
-	offset val;
+STATIC bool test_cond(short cond,offset val)
 {
 	switch(cond) {
 		case DEFAULT:
@@ -87,10 +84,7 @@ STATIC bool test_cond(cond,val)
 }
 
 
-STATIC short map_value(tab,val,time)
-	struct cond_tab tab[];
-	offset val;
-	bool time;
+STATIC short map_value(struct cond_tab tab[],offset val,bool time)
 {
 	cond_p p;
 
@@ -102,8 +96,7 @@ STATIC short map_value(tab,val,time)
 }
 
 
-STATIC void init_root(root)
-	bblock_p root;
+STATIC void init_root(bblock_p root)
 {
 	/* Initialise the IN OUT sets of the entry block of the
 	 * current procedure. Global variables and parameters
@@ -132,9 +125,7 @@ STATIC void init_root(root)
 
 
 
-STATIC void unite_outs(bbset,setp)
-	lset bbset;
-	cset *setp;
+STATIC void unite_outs(lset bbset,cset *setp)
 {
 	/* Take the union of OUT(b), for all b in bbset,
 	 * and put the result in setp.
@@ -150,8 +141,7 @@ STATIC void unite_outs(bbset,setp)
 
 
 
-STATIC void solve_equations(p)
-	proc_p p;
+STATIC void solve_equations(proc_p p)
 {
 	/* Solve the data flow equations for reaching
 	 * definitions of procedure p.
@@ -203,14 +193,13 @@ STATIC void solve_equations(p)
 
 
 
-short global_addr_cost()
+short global_addr_cost(void)
 {
 	return add_timespace(map_value(globl_cond_tab,(offset) 0,TRUE),
 			     map_value(globl_cond_tab,(offset) 0,FALSE));
 }
 
-short local_addr_cost(off)
-	offset off;
+short local_addr_cost(offset off)
 {
 	return add_timespace(map_value(local_cond_tab,off,TRUE),
 			     map_value(local_cond_tab,off,FALSE));
@@ -218,8 +207,7 @@ short local_addr_cost(off)
 
 
 
-STATIC bool fold_is_desirable(old,new)
-	line_p old,new;
+STATIC bool fold_is_desirable(line_p old,line_p new)
 {
 	/* See if it is desirable to replace the variable used by the
 	 * EM instruction 'old' by the variable used by 'new'.
@@ -389,8 +377,7 @@ pr_cblocks(p)
 
 #endif
 
-STATIC void ud_analysis(p)
-	proc_p p;
+STATIC void ud_analysis(proc_p p)
 {
 	/* Perform use-definition analysis on procedure p */
 
@@ -414,7 +401,7 @@ STATIC void ud_analysis(p)
 
 
 
-STATIC void clean_maps()
+STATIC void clean_maps(void)
 {
 	local_p *p;
 	cset *v;
@@ -432,9 +419,7 @@ STATIC void clean_maps()
 
 
 
-STATIC bool try_optim(l,b)
-	line_p l;
-	bblock_p b;
+STATIC bool try_optim(line_p l,bblock_p b)
 {
 	/* Try copy propagation and constant propagation */
 
@@ -468,8 +453,7 @@ STATIC bool try_optim(l,b)
 
 
 
-STATIC void value_propagation(p)
-	proc_p p;
+STATIC void value_propagation(proc_p p)
 {
 	/* Apply value propagation to procedure p */
 
@@ -499,8 +483,7 @@ STATIC void value_propagation(p)
 }
 
 
-STATIC void ud_extend(p)
-	proc_p p;
+STATIC void ud_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
@@ -512,8 +495,7 @@ STATIC void ud_extend(p)
 }
 
 
-STATIC void ud_cleanup(p)
-	proc_p p;
+STATIC void ud_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 
@@ -552,9 +534,7 @@ void ud_optimize(void *vp)
 	clean_maps();
 }
 
-int main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc,char *argv[])
 {
 	go(argc,argv,init_globals,ud_optimize,ud_machinit,no_action);
 	report("values folded",Svalue);

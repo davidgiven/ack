@@ -59,8 +59,9 @@ extern int err_occurred;	/* "error.c"	*/
 
 #define EOF	(-1)
 
-int GetChar(void);
-int LLlex(void);
-int GetToken(register struct token* ptok);
+extern int GetChar(void);
+extern int LLlex(void);
+extern int GetToken(register struct token* ptok);
+extern char* symbol2str(int tok);
 
 #endif /* LLLEX_H_ */

@@ -96,7 +96,7 @@ static const char* prog_name;
 static int v_flag;
 
 static void
-cleanup()
+cleanup(void)
 {
 	/*	Cleanup temporaries */
 
@@ -136,7 +136,7 @@ static void fatal(const char *s, ...)
 }
 
 static void
-    add_file(s) char* s;
+    add_file(char* s)
 {
 	/*	Add an input file to the list */
 
@@ -146,7 +146,7 @@ static void
 }
 
 static void
-    add_uphase(p) int p;
+    add_uphase(int p)
 {
 	/*	Add an optimizer phase to the list of phases to run */
 
@@ -155,7 +155,7 @@ static void
 	uphases[nuphases++] = p;
 }
 
-static void catch ()
+static void catch (int signum)
 {
 	/*	Catch interrupts and exit gracefully */
 
@@ -164,7 +164,7 @@ static void catch ()
 }
 
 static void
-old_infiles()
+old_infiles(void)
 {
 	/*	Remove old input files unless we have to keep them around. */
 
@@ -178,7 +178,7 @@ old_infiles()
 }
 
 static void
-get_infiles()
+get_infiles(void)
 {
 	/*	Make output temps from previous phase input temps of next phase. */
 
@@ -193,7 +193,7 @@ get_infiles()
 }
 
 static void
-new_outfiles()
+new_outfiles(void)
 {
 	static int tmpindex = 0;
 	static int Bindex = 0;
@@ -223,7 +223,7 @@ new_outfiles()
 }
 
 static void
-    run_phase(phase) int phase;
+    run_phase(int phase)
 {
 	/*	Run one phase of the global optimizer; special cases are
 	IC and CA.

@@ -27,12 +27,11 @@
 #include	"scope.h"
 #include	"main.h"
 #include	"node.h"
+#include	"print.h"
 
 #define INCR_SIZE	64
 
 extern int	proclevel;
-
-extern char	*sprint();
 
 static struct db_str {
 	unsigned	sz;

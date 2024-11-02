@@ -129,7 +129,7 @@ PRIVATE char *buf[5];			/* Pointers to the buffers */
 
 PRIVATE void check_buf(int n, size sz);
 PRIVATE int savestr(int n, ptr addr);
-PRIVATE int vec();
+PRIVATE int vec(int n1, int n2,ptr addr,char ***vecvec);
 
 void moncall(void)
 {
@@ -1063,10 +1063,7 @@ PRIVATE int savestr(int n, ptr addr)
 	return 1;
 }
 
-PRIVATE int vec(n1, n2, addr, vecvec)
-	int n1, n2;
-	ptr addr;
-	char ***vecvec;
+PRIVATE int vec(int n1, int n2,ptr addr,char ***vecvec)
 {
 	register char *cp1, *cp2;
 	ptr p, ldp;

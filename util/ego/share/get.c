@@ -144,7 +144,7 @@ STATIC lset getlset(void *(*p)(short))
 }
 
 
-STATIC cset getcset()
+STATIC cset getcset(void)
 {
 	/* Read a 'compact' set. Such a set is represented externally
 	 * a row of bytes (its bitvector) preceded by its length.

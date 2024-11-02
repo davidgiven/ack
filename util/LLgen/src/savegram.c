@@ -36,13 +36,10 @@
 
 static int nt_highest;
 extern int nbytes;
-extern p_mem alloc();
 extern p_set start_firsts;
-extern p_set setalloc();
-extern p_gram search();
 
-STATIC void save_rule();
-STATIC void save_set();
+STATIC void save_rule(register p_gram p, int tail);
+STATIC void save_set(p_set p);
 
 /* t_list will contain terms to be `flattened' */
 static struct t_list

@@ -71,7 +71,3 @@ extern label	err_goto_label;
 extern int 	dataused;
 
 extern Linerecord *currline;
-
-
-extern char *myitoa();
-extern char *salloc();

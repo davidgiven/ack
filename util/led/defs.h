@@ -16,5 +16,7 @@
 
 #define mustsavelocal(name)	(!((name)->on_type & S_SCT))
 
+extern void addbase(struct outname *name);
+
 
 #endif /* __DEFS_H_INCLUDED__ */

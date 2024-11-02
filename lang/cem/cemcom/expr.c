@@ -24,7 +24,7 @@
 #include	"noRoption.h"
 #include	"use_tmp.h"
 
-extern char *symbol2str();
+
 extern char options[];
 
 int

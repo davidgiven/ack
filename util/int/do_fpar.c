@@ -18,8 +18,6 @@
 
 #ifndef	NOFLOAT
 
-extern double fpop();
-
 #ifdef __STDC__
 #include <float.h>
 #define MAXDOUBLE DBL_MAX

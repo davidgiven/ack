@@ -7,20 +7,20 @@
 
 #include "types.h"
 
-extern line_p 	newline();
-extern offset	*newrom();
-extern sym_p	newsym();
-extern num_p	newnum();
-extern arg_p	newarg();
-extern argb_p	newargb();
-extern reg_p	newreg();
+extern line_p 	newline(int optype);
+extern offset	*newrom(void);
+extern sym_p	newsym(int len);
+extern num_p	newnum(void);
+extern arg_p	newarg(int kind);
+extern argb_p	newargb(void);
+extern reg_p	newreg(void);
 
-void oldline(register line_p lnp);
-void oldreg(reg_p rp);
-void oldargs(register arg_p ap);
-void oldargb(register argb_p abp);
-void oldnum(num_p lp);
-void coreinit(void);
+extern void oldline(register line_p lnp);
+extern void oldreg(reg_p rp);
+extern void oldargs(register arg_p ap);
+extern void oldargb(register argb_p abp);
+extern void oldnum(num_p lp);
+extern void coreinit(void);
 
 #define USEMALLOC	/* if defined malloc() and free() are used */
 

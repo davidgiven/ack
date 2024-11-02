@@ -29,7 +29,6 @@
 static string rcsid = "$Id$";
 # endif
 
-p_set get_set();
 typedef struct lngth
 {
 	/* Structure used to compute the shortest possible
@@ -45,7 +44,7 @@ typedef struct lngth
 void do_compute(void);
 STATIC void createsets(void);
 STATIC void walk(p_set u, register p_gram p);
-STATIC void co_trans(int (*fc)());
+STATIC void co_trans(int (*fc)(p_nont p));
 STATIC int nempty(register p_nont p);
 int empty(register p_gram p);
 STATIC int nfirst(register p_nont p);
@@ -192,7 +191,6 @@ void do_compute(void)
 	register p_start st;
 	register int i;
 	int n = NINTS(NBYTES(nnonterms));
-	p_mem alloc();
 
 	for (f = files; f < maxfiles; f++)
 	{
@@ -285,7 +283,7 @@ STATIC void walk(p_set u, register p_gram p)
 	}
 }
 
-STATIC void co_trans(int (*fc)())
+STATIC void co_trans(int (*fc)(p_nont p))
 {
 	register p_nont p;
 	register int change;
@@ -857,7 +855,6 @@ STATIC void do_lengthcomp(void)
 {
 	register p_length pl;
 	register p_nont p;
-	p_mem alloc();
 
 	length = (p_length) alloc(nnonterms * sizeof(*length));
 	for (pl = &length[nnonterms - 1]; pl >= length; pl--)

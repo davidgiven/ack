@@ -14,8 +14,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-extern FILE *popen();
-
 char *progname;
 
 FILE	*ifp;			/* Input File Pointer */
@@ -32,10 +30,7 @@ int in(char *flgs, char c)
 }
 
 
-void NoArgs(base, first, mnem)
-	char *base;
-	int first;
-	char *mnem;
+void NoArgs(char *base,int first,char *mnem)
 {
 	fprintf(ofp, "\t\tcase %s+%d:\t%s%sz(); break;\n",
 		base, first, Prefix, mnem);
@@ -45,12 +40,7 @@ void NoArgs(base, first, mnem)
 	}
 }
 
-void Mini(i, flgs, base, first, mnem)
-	int i;
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
+void Mini(int i,char *flgs,char *base,int first,char *mnem)
 {
 	char arg[16];
 	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
@@ -82,12 +72,7 @@ void Mini(i, flgs, base, first, mnem)
 	}
 }
 
-void Shortie(i, flgs, base, first, mnem)
-	int i;
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
+void Shortie(int i,char *flgs,char *base,int first,char *mnem)
 {
 	char arg[16];
 	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
@@ -104,11 +89,7 @@ void Shortie(i, flgs, base, first, mnem)
 	}
 }
 
-void TwoSgn(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
+void TwoSgn(char *flgs,char *base,int first,char *mnem)
 {
 	char *xy = in(flgs, 'P') ? "p2" : in(flgs, 'N') ? "n2" : "l2";
 
@@ -123,11 +104,7 @@ void TwoSgn(flgs, base, first, mnem)
 	}
 }
 
-void TwoUns(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
+void TwoUns(char *flgs,char *base,int first,char *mnem)
 {
 	char *xy = "u";
 
@@ -142,11 +119,7 @@ void TwoUns(flgs, base, first, mnem)
 	}
 }
 
-void FourSgn(flgs, base, first, mnem)
-	char *flgs;
-	char *base;
-	int first;
-	char *mnem;
+void FourSgn(char *flgs,char *base,int first,char *mnem)
 {
 	char *xy = in(flgs, 'P') ? "p4" : in(flgs, 'N') ? "n4" : "l4";
 
@@ -170,9 +143,7 @@ void fatal(char *fmt, char *str)
 	exit(1);
 }
 
-int main(argc, argv)
-	int argc;
-	char **argv;
+int main(int argc,char **argv)
 {
 	char	mnem[8];		/* Mnemonic */
 	char	flgs[8];		/* Flags */

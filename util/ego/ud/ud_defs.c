@@ -31,8 +31,7 @@ STATIC cset all_globl_defs, all_indir_defs;
 /* auxiliary sets, used by gen_sets */
 
 
-bool does_expl_def(l)
-	line_p l;
+bool does_expl_def(line_p l)
 {
 	/* See if instruction l does an explicit definition */
 
@@ -56,8 +55,7 @@ bool does_expl_def(l)
 
 
 
-bool does_impl_def(l)
-	line_p l;
+bool does_impl_def(line_p l)
 {
 	/* See if instruction l does an implicit definition */
 
@@ -80,8 +78,7 @@ bool does_impl_def(l)
 }
 
 
-void make_defs(p)
-	proc_p p;
+void make_defs(proc_p p)
 {
 	/* Make a map of all explicit definitions
 	 * occurring in p.
@@ -134,8 +131,7 @@ void make_defs(p)
 
 
 
-STATIC void init_gen(nrdefs)
-	short nrdefs;
+STATIC void init_gen(short nrdefs)
 {
 	/* Initializing routine of gen_sets. Compute the set
 	 * of all implicit definitions to global variables
@@ -161,7 +157,7 @@ STATIC void init_gen(nrdefs)
 
 
 
-STATIC void clean_gen()
+STATIC void clean_gen(void)
 {
 	Cdeleteset(all_globl_defs);
 	Cdeleteset(all_indir_defs);
@@ -169,9 +165,7 @@ STATIC void clean_gen()
 
 
 
-STATIC bool same_target(l,defnr)
-	line_p l;
-	short  defnr;
+STATIC bool same_target(line_p l,short  defnr)
 {
 	/* See if l defines the same variable as def */
 
@@ -200,9 +194,7 @@ STATIC bool same_target(l,defnr)
 
 
 
-STATIC void rem_prev_defs(l,gen_p)
-	line_p l;
-	cset   *gen_p;
+STATIC void rem_prev_defs(line_p l,cset   *gen_p)
 {
 	/* Remove all definitions in gen that define the
 	 * same variable as l.
@@ -223,9 +215,7 @@ STATIC void rem_prev_defs(l,gen_p)
 
 
 
-STATIC void impl_globl_defs(p,gen_p)
-	proc_p p;
-	cset   *gen_p;
+STATIC void impl_globl_defs(proc_p p,cset   *gen_p)
 {
 	/* Add all definitions of global variables
 	 * that are generated implicitly by a call
@@ -249,9 +239,7 @@ STATIC void impl_globl_defs(p,gen_p)
 
 
 
-STATIC void impl_gen_defs(l,gen_p)
-	line_p l;
-	cset   *gen_p;
+STATIC void impl_gen_defs(line_p l,cset   *gen_p)
 {
 	/* Add all definitions generated implicitly by instruction l
 	 * to gen_p. l may be a call or some kind of indirect
@@ -287,8 +275,7 @@ STATIC void impl_gen_defs(l,gen_p)
 
 
 
-void gen_sets(p)
-	proc_p p;
+void gen_sets(proc_p p)
 {
 	/* Compute for every basic block b of p the
 	 * set GEN(b) of definitions in b (explicit as
@@ -353,8 +340,7 @@ STATIC void killed_defs(short v, bblock_p b)
 
 
 
-void kill_sets(p)
-	proc_p p;
+void kill_sets(proc_p p)
 {
 	/* For every basic block b of p compute the set
 	 * KILL(b) of definitions outside b that define

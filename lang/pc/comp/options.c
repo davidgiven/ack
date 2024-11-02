@@ -2,6 +2,7 @@
 
 #include	<em_arith.h>
 #include	<em_label.h>
+#include	<string.h>
 
 #include    "parameters.h"
 #include	"class.h"
@@ -108,8 +109,6 @@ void DoOption(register char *text)
 		char c, *t;
 
 		while( (c = *text++) !=0 )	{
-			char *strchr();
-
 			t = text;
 			size = txt2int(&t);
 			align = 0;

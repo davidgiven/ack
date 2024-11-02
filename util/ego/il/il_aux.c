@@ -26,8 +26,7 @@
 #include "il_aux.h"
 
 
-int tsize(type)
-	int type;
+int tsize(int type)
 {
 	/* Determine the size of a variable of the
 	 *  given type.
@@ -44,8 +43,7 @@ int tsize(type)
 
 
 
-line_p duplicate(lnp)
-	line_p lnp;
+line_p duplicate(line_p lnp)
 {
 	/* Make a duplicate of an EM instruction.
 	 * Pseudos may not be passed as argument.
@@ -82,8 +80,7 @@ line_p duplicate(lnp)
 
 
 
-line_p copy_expr(l1)
-	line_p l1;
+line_p copy_expr(line_p l1)
 {
 	/* copy the expression */
 
@@ -106,8 +103,7 @@ line_p copy_expr(l1)
 
 
 
-void rem_call(c)
-	call_p c;
+void rem_call(call_p c)
 {
 	actual_p act, nexta;
 	call_p   nc,nextc;
@@ -134,8 +130,7 @@ void rem_call(c)
 
 /* remunit */
 
-STATIC void remlines(l)
-	line_p l;
+STATIC void remlines(line_p l)
 {
 
 	register line_p lnp;
@@ -178,8 +173,7 @@ void remunit(short kind, proc_p p, line_p l)
 	oldmap((void **) lpmap,lplength);
 }
 
-void remcc(head)
-	calcnt_p head;
+void remcc(calcnt_p head)
 {
 	calcnt_p cc, next;
 
@@ -192,8 +186,7 @@ void remcc(head)
 
 /* Extra I/O routines */
 
-call_p getcall(cf)
-	FILE *cf;
+call_p getcall(FILE *cf)
 {
 	/* read a call from the call-file */
 
@@ -229,9 +222,7 @@ call_p getcall(cf)
 
 
 
-line_p get_text(lf,p_out)
-	FILE *lf;
-	proc_p *p_out;
+line_p get_text(FILE *lf,proc_p *p_out)
 {
 	/* Read the EM text of one unit
 	 * If it is a procedure, set p_out to
@@ -280,9 +271,7 @@ line_p get_text(lf,p_out)
 
 
 
-calcnt_p getcc(ccf,p)
-	FILE *ccf;
-	proc_p p;
+calcnt_p getcc(FILE *ccf,proc_p p)
 {
 	/* Get call-count info of procedure p */
 
@@ -306,9 +295,7 @@ calcnt_p getcc(ccf,p)
 /* The following routines are only used by the Inline Substitution phase */
 
 
-STATIC void putactuals(alist,cfile)
-	actual_p alist;
-	FILE     *cfile;
+STATIC void putactuals(actual_p alist,FILE     *cfile)
 {
 	/* output a list of actual parameters */
 
@@ -358,9 +345,7 @@ void putcall(call_p c, FILE *cfile, short level)
 	}
 }
 
-long putcc(head,ccf)
-	calcnt_p head;
-	FILE     *ccf;
+long putcc(calcnt_p head,FILE     *ccf)
 {
 	/* Write call-count information to file ccf.
 	 * Return the disk address of the info written.

@@ -15,6 +15,6 @@ extern ptr FIL;				/* address in data[] */
 #define	getLIN()	(LIN)
 #define	getFIL()	(FIL)
 
-extern char *dt_fname();
-extern char *position();
+extern char *dt_fname(ptr p);
+extern char *position(void);
 

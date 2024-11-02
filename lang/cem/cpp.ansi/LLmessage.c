@@ -5,13 +5,11 @@
 /* $Id$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"Lpars.h"
-#include    "skip.h"
-#include    "error.h"
-
-extern char *symbol2str();
+#include "arith.h"
+#include "LLlex.h"
+#include "Lpars.h"
+#include "skip.h"
+#include "error.h"
 
 void LLmessage(int tk)
 {

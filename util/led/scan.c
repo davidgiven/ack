@@ -68,7 +68,6 @@ static void scan_modul(void);
  */
 int getfile(char* filename)
 {
-	unsigned int	rd_unsigned2();
 	struct ar_hdr	archive_header;
 	unsigned short	magic_number;
 #ifdef SYMDBUG

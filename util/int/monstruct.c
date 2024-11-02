@@ -83,9 +83,7 @@ int tms2mem(ptr addr, struct tms *tmsb)
 #ifdef WANT_SGTTY
 /* FIXME: see the related fixme in sysidf.h. --- dtrg */
 
-int sgttyb2mem(addr, sgttybb)
-	ptr addr;
-	struct sgttyb *sgttybb;
+int sgttyb2mem(ptr addr,struct sgttyb *sgttybb)
 {
 	if (memfault(addr, V7sg_sz))
 		return 0;
@@ -99,9 +97,7 @@ int sgttyb2mem(addr, sgttybb)
 #endif
 
 #ifdef	BSD_X				/* from system.h */
-int tchars2mem(addr, tcharsb)
-	ptr addr;
-	struct tchars *tcharsb;
+int tchars2mem(ptr addr,struct tchars *tcharsb)
 {
 	if (memfault(addr, V7t_sz_tch))
 		return 0;
@@ -115,9 +111,7 @@ int tchars2mem(addr, tcharsb)
 }
 
 #ifndef	V7IOCTL
-int ltchars2mem(addr, ltcharsb)
-	ptr addr;
-	struct ltchars *ltcharsb;
+int ltchars2mem(ptr addr,struct ltchars *ltcharsb)
 {
 	if (memfault(addr, V7t_sz_ltch))
 		return 0;
@@ -135,9 +129,7 @@ int ltchars2mem(addr, ltcharsb)
 
 /******** EM memory to system ********/
 
-PRIVATE unsigned long mem_ldfld(addr, offset, length)
-	ptr addr;
-	size offset, length;
+PRIVATE unsigned long mem_ldfld(ptr addr,size offset, size length)
 {
 	return mem_ldu(addr + offset, length);
 }
@@ -145,9 +137,7 @@ PRIVATE unsigned long mem_ldfld(addr, offset, length)
 #ifdef WANT_SGTTY
 /* FIXME: see the related fixme in sysidf.h. --- dtrg */
 
-int mem2sgtty(addr, sgttybb)
-	ptr addr;
-	struct sgttyb *sgttybb;
+int mem2sgtty(ptr addr,struct sgttyb *sgttybb)
 {
 	if (memfault(addr, V7sg_sz))
 		return 0;
@@ -161,9 +151,7 @@ int mem2sgtty(addr, sgttybb)
 #endif
 
 #ifdef	BSD_X				/* from system.h */
-int mem2tchars(addr, tcharsb)
-	ptr addr;
-	struct tchars *tcharsb;
+int mem2tchars(ptr addr,struct tchars *tcharsb)
 {
 	if (memfault(addr, V7t_sz_tch))
 		return 0;
@@ -177,9 +165,7 @@ int mem2tchars(addr, tcharsb)
 }
 
 #ifndef	V7IOCTL
-int mem2ltchars(addr, ltcharsb)
-	ptr addr;
-	struct ltchars *ltcharsb;
+int mem2ltchars(ptr addr,struct ltchars *ltcharsb)
 {
 	if (memfault(addr, V7t_sz_ltch))
 		return 0;

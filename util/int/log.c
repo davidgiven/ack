@@ -21,11 +21,8 @@
 #ifdef	LOGGING
 
 extern long mess_id; /* from io.c */
-extern FILE *fcreat_high(); /* from io.c */
 
 /******** The Logging Machine Variables ********/
-
-extern long atol();
 
 long inr; /* current instruction number */
 

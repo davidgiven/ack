@@ -210,7 +210,7 @@ declare_idf(ds, dc, lvl)
 				/* the type is not yet known,
 				   but it has to be:
 				*/
-				extern char *symbol2str();
+				
 				error("unknown %s-type",
 					symbol2str(type->tp_fund));
 			}

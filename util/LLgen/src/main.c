@@ -227,7 +227,6 @@ STATIC void readgrammar(int argc, char *argv[])
 	 * Do just what the name suggests : read the grammar
 	 */
 	register p_file p;
-	p_mem alloc();
 
 	linecount = 0;
 	f_input = "no filename";

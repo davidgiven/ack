@@ -44,9 +44,7 @@ STATIC void make_actual(line_p l1, line_p l2, offset size)
 
 
 
-STATIC bool chck_asp(p,l)
-	proc_p p;
-	line_p l;
+STATIC bool chck_asp(proc_p p,line_p l)
 {
 	/* We require a call to a procedure p that has n formal
 	 * parameters to be followed by an 'asp n' instruction
@@ -59,8 +57,7 @@ STATIC bool chck_asp(p,l)
 
 
 
-STATIC void inc_count(caller,callee)
-	proc_p caller, callee;
+STATIC void inc_count(proc_p caller, proc_p callee)
 {
 	/* Update the call-count information.
 	 * Record the fact that there is one more call
@@ -92,11 +89,7 @@ STATIC void inc_count(caller,callee)
 
 
 
-void anal_cal(p,call,b,cf)
-	proc_p p;
-	line_p call;
-	bblock_p b;
-	FILE   *cf;
+void anal_cal(proc_p p,line_p call,bblock_p b,FILE   *cf)
 {
 	/* Analyze a call instruction. If the called
 	 * routine may be expanded in line, try to

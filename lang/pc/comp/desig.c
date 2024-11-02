@@ -25,7 +25,7 @@
 #include	"code.h"
 #include	"error.h"
 
-struct desig	InitDesig = {DSG_INIT, 0, 0, NULLDEF, 0};
+struct desig	InitDesig = {DSG_INIT, 0, 0, NULL, 0};
 struct withdesig *WithDesigs;
 
 

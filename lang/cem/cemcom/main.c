@@ -32,7 +32,7 @@
 #include	"macro.h"
 
 extern struct tokenname tkidf[], tkother[];
-extern char *symbol2str();
+
 extern char options[128];
 
 

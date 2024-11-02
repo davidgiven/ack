@@ -40,15 +40,6 @@ int Xstackflag=0; /* set in coercions, moves, and tests. %1 means something
 		     different then.
 		   */
 
-struct varinfo *gen_inst(),*gen_move(),*gen_test(),*gen_preturn(),*gen_tlab();
-struct varinfo *gen_label(), *make_erase();
-expr_t make_expr(),ident_expr(),subreg_expr(),tokm_expr(),all_expr();
-expr_t perc_ident_expr(),sum_expr(),regvar_expr();
-
-set_t ident_to_set(),setproduct(),setsum(),setdiff();
-
-iocc_t subr_iocc(),tokm_iocc(),ident_iocc(),all_iocc(),percident_iocc(), descr_iocc();
-
 extern int narexpr;
 extern expr_t arexp[];
 

@@ -22,8 +22,7 @@
 #include "../share/files.h"
 #include "ic_lib.h"
 
-STATIC void skip_string(n)
-    offset n;
+STATIC void skip_string(offset n)
 {
 	/* Read a string of length n and void it */
 
@@ -33,7 +32,7 @@ STATIC void skip_string(n)
 	}
 }
 
-STATIC void skip_arguments()
+STATIC void skip_arguments(void)
 {
 	/* Skip the arguments of a MES pseudo. The argument
 	 * list is terminated by a sp_cend byte.
@@ -98,7 +97,7 @@ STATIC bool data_wanted(const char *name)
 	}
 }
 
-STATIC bool wanted_names()
+STATIC bool wanted_names(void)
 {
 	/* Read the names of procedures and data labels,
 	 * appearing in a 'MES ms_ext' pseudo. Those are
@@ -138,7 +137,7 @@ STATIC bool wanted_names()
 }
 
 STATIC FILE* curfile = NULL;
-STATIC bool useful()
+STATIC bool useful(void)
 {
 	/* Determine if any entity imported by the current
 	 * compact EM assembly file  (which will usually be
@@ -173,7 +172,7 @@ STATIC bool useful()
 	}
 }
 
-STATIC bool is_archive(name) char* name;
+STATIC bool is_archive(char* name)
 {
 	/* See if 'name' is the name of an archive file, i.e. it
 	 * should end on ".ma" and should at least be four characters
@@ -189,7 +188,7 @@ STATIC bool is_archive(name) char* name;
 
 STATIC struct ar_hdr hdr;
 
-STATIC bool read_hdr()
+STATIC bool read_hdr(void)
 {
 	/* Read the header of an archive module */
 
@@ -227,8 +226,7 @@ STATIC bool read_hdr()
 STATIC int argcnt = 0;
 STATIC short arstate = NO_ARCHIVE;
 
-FILE* next_file(argc, argv) int argc;
-char* argv[];
+FILE* next_file(int argc,char* argv[])
 {
 	/* See if there are more EM input files. The file names
 	 * are given via argv. If a file is an archive file

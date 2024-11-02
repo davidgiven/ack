@@ -8,10 +8,13 @@
 #ifndef IO_H_
 #define IO_H_
 
+#include <stdio.h>
+
 extern void fatal(char *fmt, ...);
 extern void message(char *fmt, ...);
 extern void init_ofiles(int firsttime);
 extern void close_down(int rc);
 extern void incr_mess_id(void);
+extern FILE *fcreat_high(char *fn);
 
 #endif /* IO_H_ */

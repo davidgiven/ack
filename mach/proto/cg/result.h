@@ -20,4 +20,4 @@ struct result {
 
 typedef struct result result_t;
 
-extern result_t compute();
+extern result_t compute(node_p);

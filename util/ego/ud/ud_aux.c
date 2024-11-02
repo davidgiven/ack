@@ -24,9 +24,7 @@
 #include "../share/utils.h"
 #include "ud_defs.h"
 
-void repl_line(old,new,b)
-	line_p old,new;
-	bblock_p b;
+void repl_line(line_p old,line_p new,bblock_p b)
 {
 	/* Replace 'old' by 'new' */
 
@@ -44,8 +42,7 @@ void repl_line(old,new,b)
 
 
 
-bool same_var(use,def)
-	line_p use,def;
+bool same_var(line_p use, line_p def)
 {
 	/* 'use' is an instruction that uses a variable
 	 * for which we maintain ud-info (e.g. a LOL).

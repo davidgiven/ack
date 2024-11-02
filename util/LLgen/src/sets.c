@@ -33,7 +33,6 @@ static int	setsize;
 int		tsetsize;
 p_set		*setptr, *maxptr;
 static t_info	set_info;
-p_mem		alloc();
 
 /*
  * Initialises some variables needed for setcomputations
@@ -161,7 +160,6 @@ int findindex(p_set set)
 	 * sets is examined with linear search.
 	 */
 	register p_set	*t;
-	p_mem		new_mem();
 	register p_set	a;
 	register p_set	b;
 	register int	i;

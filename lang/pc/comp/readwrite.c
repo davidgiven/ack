@@ -19,6 +19,7 @@
 #include	"typequiv.h"
 #include	"error.h"
 #include	"readwrite.h"
+#include	"lookup.h"
 
 
 /* DEBUG */

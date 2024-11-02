@@ -25,7 +25,7 @@
 
 int Scs; /* Number of optimizations found. */
 
-STATIC void cs_clear()
+STATIC void cs_clear(void)
 {
 	clr_avails();
 	clr_entities();

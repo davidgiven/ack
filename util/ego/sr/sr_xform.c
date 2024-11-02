@@ -29,9 +29,7 @@
 
 /* Transformations on EM texts */
 
-line_p move_pointer(tmp,dir)
-	offset tmp;
-	int    dir;
+line_p move_pointer(offset tmp,int    dir)
 {
 	/* Generate EM code to load/store a pointer variable
 	 * onto/from the stack, depending on dir(ection).
@@ -66,9 +64,7 @@ line_p move_pointer(tmp,dir)
 
 /* make_header */
 
-STATIC void copy_loops(b1,b2,except)
-	bblock_p b1,b2;
-	loop_p except;
+STATIC void copy_loops(bblock_p b1,bblock_p b2,loop_p except)
 {
 	/* Copy the loopset of b2 to b1, except for 'except' */
 
@@ -84,8 +80,7 @@ STATIC void copy_loops(b1,b2,except)
 }
 
 
-STATIC lab_id label(b)
-	bblock_p b;
+STATIC lab_id label(bblock_p b)
 {
 	/* Find the label at the head of block b. If there is
 	 * no such label yet, create one.
@@ -108,8 +103,7 @@ STATIC lab_id label(b)
 }
 
 
-STATIC void adjust_jump(newtarg,oldtarg,c)
-	bblock_p newtarg,oldtarg,c;
+STATIC void adjust_jump(bblock_p newtarg,bblock_p oldtarg,bblock_p c)
 {
 	/* If the last instruction of c is a jump to the
 	 * old target, then change it into a jump to the

@@ -12,9 +12,9 @@
 #include	"alloc.h"
 #include	"warn.h"
 #include	"linfil.h"
+#include 	"trap.h"
 
 extern FILE *mess_fp;			/* from io.c */
-extern char *trap2text();		/* from trap.c */
 
 /********  The warnings  ********/
 

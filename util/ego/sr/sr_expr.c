@@ -35,8 +35,7 @@ STATIC iv_p last_iv;
 STATIC int  iv_sign;
 STATIC lset ivars, loopvars;
 
-STATIC bool is_loadiv(lnp)
-	line_p lnp;
+STATIC bool is_loadiv(line_p lnp)
 {
 	/* See if lnp is a LOL iv instruction, where iv is an
 	 * induction variable of the set ivars. If so, set the
@@ -66,9 +65,7 @@ STATIC bool is_loadiv(lnp)
 #define size_ok(l)	(TYPE(l) == OPSHORT && SHORT(l) == ws)
 
 
-STATIC int me_kind(l,sign_in,sign_out)
-	line_p l;
-	int    sign_in, *sign_out;
+STATIC int me_kind(line_p l,int    sign_in, int *sign_out)
 {
 	if (l != (line_p) 0) {
 		switch(INSTR(l)) {
@@ -178,11 +175,7 @@ match_expr(line_p l, bool iv_allowed, line_p *lbegin, bool *iv_seen,
 }
 
 
-bool is_ivexpr(l,ivs,vars,lbegin_out,iv_out,sign_out)
-	line_p l, *lbegin_out;
-	lset   ivs,vars;
-	iv_p   *iv_out;
-	int    *sign_out;
+bool is_ivexpr(line_p l, lset   ivs,lset vars,line_p*lbegin_out,iv_p   *iv_out,int    *sign_out)
 {
 	line_p l2;
 	bool iv_seen;

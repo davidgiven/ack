@@ -32,7 +32,73 @@ extern int must_test;
 #define	sbu(w1,w2)	(unsigned long)(w1 - w2)
 #define	mlu(w1,w2)	(unsigned long)(w1 * w2)
 
-PRIVATE unsigned long dvu(), rmu(), slu(), sru();
+PRIVATE unsigned long dvu(
+	unsigned long w1,
+	unsigned long w2)
+{
+	if (w2 == 0) {
+		if (!(IgnMask&BIT(EIDIVZ))) {
+			trap(EIDIVZ);
+		}
+		else	return (0L);
+	}
+	return (w1 / w2);
+}
+
+PRIVATE unsigned long rmu(
+	unsigned long w1,
+	unsigned long w2)
+{
+	if (w2 == 0) {
+		if (!(IgnMask&BIT(EIDIVZ))) {
+			trap(EIDIVZ);
+		}
+		else	return (0L);
+	}
+	return (w1 % w2);
+}
+
+/*ARGSUSED*/
+PRIVATE unsigned long slu(
+		unsigned long w1,
+		unsigned long w2,
+		size nbytes)
+{
+		/* w1 << w2 */
+#ifdef	LOGGING
+	if (must_test) {
+		/* check shift distance */
+		if (w2 >= nbytes*8)	{
+			warning(WSHLARGE);
+			w2 = nbytes*8 - 1;
+		}
+	}
+#endif	/* LOGGING */
+
+	/* calculate result */
+	return (w1 << w2);
+}
+
+/*ARGSUSED*/
+PRIVATE unsigned long sru(
+	unsigned long w1,
+	unsigned long w2,
+	size nbytes)
+{
+	/* w1 >> w2 */
+#ifdef	LOGGING
+	if (must_test) {
+		/* check shift distance */
+		if (w2 >= nbytes*8)	{
+			warning(WSHLARGE);
+			w2 = nbytes*8 - 1;
+		}
+	}
+#endif	/* LOGGING */
+
+	/* calculate result */
+	return (w1 >> w2);
+}
 
 /** ADU w: Addition */
 void DoADU(register size l)
@@ -106,71 +172,4 @@ void DoSRU(register size l)
 	npush((long) sru(upop(l), t, l), l);
 }
 
-PRIVATE unsigned long dvu(
-	unsigned long w1,
-	unsigned long w2)
-{
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
-			trap(EIDIVZ);
-		}
-		else	return (0L);
-	}
-	return (w1 / w2);
-}
-
-PRIVATE unsigned long rmu(
-	unsigned long w1,
-	unsigned long w2)
-{
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
-			trap(EIDIVZ);
-		}
-		else	return (0L);
-	}
-	return (w1 % w2);
-}
-
-/*ARGSUSED*/
-PRIVATE unsigned long slu(
-		unsigned long w1,
-		unsigned long w2,
-		size nbytes)
-{
-		/* w1 << w2 */
-#ifdef	LOGGING
-	if (must_test) {
-		/* check shift distance */
-		if (w2 >= nbytes*8)	{
-			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
-		}
-	}
-#endif	/* LOGGING */
-
-	/* calculate result */
-	return (w1 << w2);
-}
-
-/*ARGSUSED*/
-PRIVATE unsigned long sru(
-	unsigned long w1,
-	unsigned long w2,
-	size nbytes)
-{
-	/* w1 >> w2 */
-#ifdef	LOGGING
-	if (must_test) {
-		/* check shift distance */
-		if (w2 >= nbytes*8)	{
-			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
-		}
-	}
-#endif	/* LOGGING */
-
-	/* calculate result */
-	return (w1 >> w2);
-}
 

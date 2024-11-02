@@ -96,4 +96,8 @@ extern void sys_setbinarymode(FILE* fp);
  * right size for the result. */
 extern char* aprintf(const char* format, ...);
 
+/* Implementation definitions. */
+
+extern File *_get_entry(void);
+
 #endif /* __SYSTEM_INCLUDED__ */

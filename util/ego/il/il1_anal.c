@@ -39,8 +39,7 @@
 
 
 
-void apriori(proctab)
-	proc_p proctab;
+void apriori(proc_p proctab)
 {
 	/* For every procedure, see if we can determine
 	 * from the information provided by the previous
@@ -69,9 +68,7 @@ void apriori(proctab)
 }
 
 
-STATIC void check_labels(p,arglist)
-	proc_p p;
-	arg_p arglist;
+STATIC void check_labels(proc_p p,arg_p arglist)
 {
 	/* Check if any of the arguments contains an instruction
 	 * label; if so, make p unsuitable.
@@ -92,10 +89,7 @@ STATIC void check_labels(p,arglist)
 
 
 
-STATIC void anal_instr(p,b,cf)
-	proc_p   p;
-	bblock_p b;
-	FILE     *cf;
+STATIC void anal_instr(proc_p   p,bblock_p b,FILE     *cf)
 {
 	/* Analyze the instructions of block b
 	 * within procedure p.
@@ -153,9 +147,7 @@ STATIC void anal_instr(p,b,cf)
 
 
 
-void anal_proc(p,cf,ccf)
-	proc_p p;
-	FILE   *cf,*ccf;
+void anal_proc(proc_p p,FILE   *cf,FILE *ccf)
 {
 	/* Analyze a procedure; use information
 	 * stored in its basic blocks or in

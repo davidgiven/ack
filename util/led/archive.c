@@ -24,6 +24,7 @@ static char rcsid[] = "$Id$";
 #include "scan.h"
 #include "error.h"
 #include "save.h"
+#include "sym.h"
 
 #define ENDLIB		((long)0)
 
@@ -45,7 +46,6 @@ static long getsymdeftable(void)
 	register struct ranlib	*ran;
 	register long		count;
 	register long		nran, nchar;
-	extern long		rd_int4();
 	extern FILE*		infile;
 
 	count = nran = rd_int4(infile);
@@ -111,8 +111,6 @@ void arch(void)
 			register char		*string;
 			register struct outname	*name;
 			register long		pos;
-			extern int		hash();
-			extern struct outname	*searchname();
 
 			ran = (struct ranlib *)address(ALLORANL, ranindex);
 			string = address(ALLORANL, (ind_t)ran->ran_off);

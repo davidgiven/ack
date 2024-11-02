@@ -566,7 +566,6 @@ void do_undef(char* argstr)
 static void do_error(void)
 {
 	int len;
-	char* get_text();
 	char* bp = get_text((char**)0, &len);
 
 	error("user error: %s", bp);

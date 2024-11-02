@@ -90,17 +90,13 @@ STATIC short rev_cond(short cond)
 	return op_nop;
 }
 
-STATIC bool is_bcc(l)
-	line_p l;
+STATIC bool is_bcc(line_p l)
 {
 	return rev_cond(INSTR(l)) != op_nop;
 }
 
 
-STATIC void bo_optloop(p,b,x,bra,bcc)
-	proc_p p;
-	bblock_p b,x;
-	line_p bra,bcc;
+STATIC void bo_optloop(proc_p p, bblock_p b, bblock_p x, line_p bra, line_p bcc)
 {
 	bblock_p prevb,n;
 	line_p l;
@@ -147,9 +143,7 @@ STATIC void bo_optloop(p,b,x,bra,bcc)
 
 			
 
-STATIC void bo_tryloop(p,loop)
-	proc_p p;
-	lset loop;
+STATIC void bo_tryloop(proc_p p, lset loop)
 {
 	Lindex i,j;
 	bblock_p b,x;
@@ -177,8 +171,7 @@ OUTVERBOSE("branch optimization proc %d block %d\n", curproc->p_id,x->b_id);
 
 
 
-STATIC void bo_loops(p)
-	proc_p p;
+STATIC void bo_loops(proc_p p)
 {
 	Lindex i;
 	loop_p lp;
@@ -189,8 +182,7 @@ STATIC void bo_loops(p)
 	}
 }
 
-STATIC void mv_code(b1,b2)
-	bblock_p b1,b2;
+STATIC void mv_code(bblock_p b1, bblock_p b2)
 {
 	line_p l,x;
 
@@ -204,8 +196,7 @@ STATIC void mv_code(b1,b2)
 	}
 }
 
-STATIC void bo_switch(b)
-	bblock_p b;
+STATIC void bo_switch(bblock_p b)
 {
 	bblock_p s,x;
 	Lindex i;
@@ -252,8 +243,7 @@ OUTVERBOSE("branch optimization in proc %d, block %d",curproc->p_id,b->b_id);
 	}
 }
 
-STATIC void bo_extproc(p)
-	proc_p p;
+STATIC void bo_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
@@ -268,8 +258,7 @@ STATIC void bo_extproc(p)
 }
 
 
-STATIC void loop_blocks(p)
-	proc_p p;
+STATIC void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
@@ -284,8 +273,7 @@ STATIC void loop_blocks(p)
 	}
 }
 
-STATIC void bo_cleanproc(p)
-	proc_p p;
+STATIC void bo_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
@@ -317,9 +305,8 @@ void bo_optimize(void *vp)
 
 
 
-int main(argc,argv)
-	int argc;
-	char *argv[];
+int 
+main (int argc, char *argv[])
 {
 	go(argc,argv,no_action,bo_optimize,no_action,no_action);
 	report("branch optimizations", Sbo);

@@ -39,8 +39,7 @@ STATIC lset avail;
  * be available.
  */
 
-STATIC int regtyp(code)
-	code_p code;
+STATIC int regtyp(code_p code)
 {
 	switch(code->co_instr) {
 		case op_mli:
@@ -55,11 +54,7 @@ STATIC int regtyp(code)
 }
 
 
-STATIC void gen_regmes(tmp,score,code,p)
-	offset tmp;
-	int score;
-	code_p code;
-	proc_p p;
+STATIC void gen_regmes(offset tmp,int score,code_p code,proc_p p)
 {
 	/* generate a register message for the temporary variable and
 	 * insert it at the start of the procedure.
@@ -76,9 +71,7 @@ STATIC void gen_regmes(tmp,score,code,p)
 }
 
 
-STATIC line_p newcode(code,tmp)
-	code_p code;
-	offset tmp;
+STATIC line_p newcode(code_p code,offset tmp)
 {
 	/* Construct the EM code that will replace the reducible code,
 	 * e.g.   iv * c   ->   tmp
@@ -121,9 +114,7 @@ STATIC line_p newcode(code,tmp)
 
 
 
-STATIC void replcode(code,text)
-	code_p code;
-	line_p text;
+STATIC void replcode(code_p code,line_p text)
 {
 	/* Replace old code (extending from code->co_lfirst to
 	 * code->co_llast) by new code (headed by 'text').
@@ -150,8 +141,7 @@ STATIC void replcode(code,text)
 	/* Note that the old code is still accessible via code->co_lfirst */
 }
 
-STATIC line_p add_code(pl, l)
-	line_p pl, l;
+STATIC line_p add_code(line_p pl, line_p l)
 {
 	if (! pl) {
 		PREV(l) = 0;
@@ -236,9 +226,7 @@ STATIC void init_code(code_p code, offset tmp)
 	}
 }
 
-STATIC void incr_code(code,tmp)
-	code_p  code;
-	offset  tmp;
+STATIC void incr_code(code_p  code,offset  tmp)
 {
 	/* Generate code to increment the temporary local variable.
 	 * The variable is incremented by
@@ -319,8 +307,7 @@ STATIC void incr_code(code,tmp)
 }
 
 
-STATIC void remcode(c)
-	code_p c;
+STATIC void remcode(code_p c)
 {
 	line_p l, next;
 
@@ -332,9 +319,7 @@ STATIC void remcode(c)
 }
 
 
-STATIC bool same_address(l1,l2,vars)
-	line_p l1,l2;
-	lset   vars;
+STATIC bool same_address(line_p l1,line_p l2,lset   vars)
 {
 	/* See if l1 and l2 load the same address */
 
@@ -358,8 +343,7 @@ STATIC bool same_address(l1,l2,vars)
 }
 
 
-STATIC bool same_expr(lb1,le1,lb2,le2)
-	line_p lb1,le1,lb2,le2;
+STATIC bool same_expr(line_p lb1,line_p le1,line_p lb2,line_p le2)
 {
 	/* See if the code from lb1 to le1 is the same
 	 * expression as the code from lb2 to le2.
@@ -393,9 +377,7 @@ STATIC bool same_expr(lb1,le1,lb2,le2)
 	}
 }
 
-STATIC bool same_code(c1,c2,vars)
-	code_p c1,c2;
-	lset   vars;
+STATIC bool same_code(code_p c1,code_p c2,lset   vars)
 {
 	/* See if c1 and c2 compute the same expression. Two array
 	 * references can be the same even if one is e.g a fetch
@@ -429,9 +411,7 @@ STATIC bool same_code(c1,c2,vars)
 }
 
 
-STATIC code_p available(c,vars)
-	code_p c;
-	lset   vars;
+STATIC code_p available(code_p c,lset   vars)
 {
 	/* See if the code is already available.
 	 * If so, return a pointer to the first occurrence
@@ -504,11 +484,7 @@ STATIC void reduce(code_p code, lset vars)
 
 
 
-STATIC void try_multiply(lp,ivs,vars,b,mul)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   mul;
+STATIC void try_multiply(loop_p   lp,lset	 ivs,lset vars,bblock_p b,line_p   mul)
 {
 	/* See if we can reduce the strength of the multiply
 	 * instruction. If so, then set up the global common
@@ -566,11 +542,7 @@ STATIC void try_multiply(lp,ivs,vars,b,mul)
 
 
 
-STATIC void try_leftshift(lp,ivs,vars,b,shft)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   shft;
+STATIC void try_leftshift(loop_p   lp,lset	 ivs, lset vars,bblock_p b,line_p   shft)
 {
 	/* See if we can reduce the strength of the leftshift
 	 * instruction. If so, then set up the global common
@@ -617,11 +589,7 @@ STATIC void try_leftshift(lp,ivs,vars,b,shft)
 }
 
 
-STATIC void try_array(lp,ivs,vars,b,arr)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   arr;
+STATIC void try_array(loop_p   lp,lset	 ivs,lset vars,bblock_p b,line_p   arr)
 {
 	/* See if we can reduce the strength of the array reference
 	 * instruction 'arr'.
@@ -671,7 +639,7 @@ STATIC void try_array(lp,ivs,vars,b,arr)
 
 
 
-STATIC void clean_avail()
+STATIC void clean_avail(void)
 {
 	Lindex i;
 
@@ -683,10 +651,7 @@ STATIC void clean_avail()
 
 
 
-void strength_reduction(lp,ivs,vars)
-	loop_p lp;	/* description of the loop */
-	lset    ivs;	/* set of induction variables of the loop */
-	lset	vars;	/* set of local variables changed in loop */
+void strength_reduction(loop_p lp,lset    ivs,lset	vars)	/* description of the loop */	/* set of induction variables of the loop */	/* set of local variables changed in loop */
 {
 	/* Find all expensive instructions (leftshift, multiply, array) and see
 	 * if they can be reduced. We branch to several instruction-specific

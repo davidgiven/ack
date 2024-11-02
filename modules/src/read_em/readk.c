@@ -9,6 +9,8 @@
 
 #include <ctype.h>
 
+PRIVATE struct string *getstring(int isident);
+
 /* get16, get32: read a signed constant
 */
 PRIVATE int get16(void)
@@ -33,8 +35,6 @@ PRIVATE arith get32(void)
 	if (h_byte >= 128) h_byte -= 256;
 	return l | ((arith) h_byte << 24);
 }
-
-PRIVATE struct string *getstring();
 
 /* getarg : read an argument of any type, and check it against "typset"
    if neccesary. Put result in "ap".

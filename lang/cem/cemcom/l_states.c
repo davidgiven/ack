@@ -39,7 +39,7 @@
 #define	dbg_lint_stack(m)
 #endif	/* DEBUG */
 
-extern char *symbol2str();
+
 extern char *func_name;
 extern struct type *func_type;
 extern int func_notypegiven;

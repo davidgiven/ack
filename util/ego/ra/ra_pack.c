@@ -30,7 +30,7 @@ short regs_occupied[NRREGTYPES];	/* #occupied registers for reg_pointer,
 					 */
 #define reg_available(t)	(regs_available[t] > regs_occupied[t])
 
-STATIC void initregcount()
+STATIC void initregcount(void)
 {
 	int t;
 
@@ -39,7 +39,7 @@ STATIC void initregcount()
 	}
 }
 
-STATIC alloc_p make_dummy()
+STATIC alloc_p make_dummy(void)
 {
 	alloc_p x;
 
@@ -73,8 +73,7 @@ STATIC bool fits_in(alloc_p a, alloc_p b, bool *cont_item)
 }
 
 
-STATIC alloc_p find_fitting_alloc(alloc,packed)
-	alloc_p alloc,packed;
+STATIC alloc_p find_fitting_alloc(alloc_p alloc, alloc_p packed)
 {
 	/* Try to find and already packed allocation that is assigned
 	 * a register that may also be used for alloc.
@@ -95,8 +94,7 @@ STATIC alloc_p find_fitting_alloc(alloc,packed)
 }
 
 
-STATIC bool room_for(alloc,packed)
-	alloc_p alloc,packed;
+STATIC bool room_for(alloc_p alloc, alloc_p packed)
 {
 	/* See if there is any register available for alloc */
 
@@ -106,9 +104,7 @@ STATIC bool room_for(alloc,packed)
 
 
 
-STATIC alloc_p best_alloc(unpacked,packed,time_opt)
-	alloc_p unpacked,packed;
-	bool time_opt;	/* now unused */
+STATIC alloc_p best_alloc(alloc_p unpacked, alloc_p packed,bool time_opt)	/* now unused */
 {
 	/* Find the next best candidate */
 
@@ -128,9 +124,7 @@ STATIC alloc_p best_alloc(unpacked,packed,time_opt)
 
 
 
-STATIC alloc_p choose_location(alloc,packed,p)
-	alloc_p alloc,packed;
-	proc_p p;
+STATIC alloc_p choose_location(alloc_p alloc, alloc_p packed,proc_p p)
 {
 	/* Decide in which register to put alloc */
 
@@ -152,8 +146,7 @@ STATIC alloc_p choose_location(alloc,packed,p)
 
 
 
-STATIC void update_lists(alloc,unpacked,packed,fit)
-	alloc_p alloc,unpacked,packed,fit;
+STATIC void update_lists(alloc_p alloc, alloc_p unpacked, alloc_p packed, alloc_p fit)
 {
 	/* 'alloc' has been granted a register; move it from the 'unpacked'
 	 * list to the 'packed' list. Also remove any allocation from 'unpacked'
@@ -192,8 +185,7 @@ STATIC void update_lists(alloc,unpacked,packed,fit)
 
 
 
-STATIC short cum_profits(alloc)
-	alloc_p alloc;
+STATIC short cum_profits(alloc_p alloc)
 {
 	/* Add the profits of all allocations packed in the same
 	 * register as alloc (i.e. alloc and all its 'mates').
@@ -210,8 +202,7 @@ STATIC short cum_profits(alloc)
 
 
 
-STATIC void best_cumprofits(list,x_out,prev_out)
-	alloc_p list, *x_out, *prev_out;
+STATIC void best_cumprofits(alloc_p list, alloc_p *x_out, alloc_p *prev_out)
 {
 	/* Find the allocation with the best cummulative profits */
 
@@ -237,8 +228,7 @@ STATIC void best_cumprofits(list,x_out,prev_out)
 
 
 
-STATIC void account_regsave(packed,unpacked)
-	alloc_p packed,unpacked;
+STATIC void account_regsave(alloc_p packed, alloc_p unpacked)
 {
 	/* After all packing has been done, we check for every allocated
 	 * register whether it is really advantageous to use this
@@ -284,9 +274,7 @@ STATIC void account_regsave(packed,unpacked)
 
 
 
-STATIC bool in_single_reg(item,packed)
-	item_p item;
-	alloc_p packed;
+STATIC bool in_single_reg(item_p item,alloc_p packed)
 {
 	/* See if item is allocated in only one register (i.e. not in
 	 * several different registers during several parts of its lifetime.
@@ -309,8 +297,7 @@ STATIC bool in_single_reg(item,packed)
 
 
 
-STATIC alloc_p find_prev(alloc,list)
-	alloc_p alloc,list;
+STATIC alloc_p find_prev(alloc_p alloc,alloc_p list)
 {
 	register alloc_p x;
 
@@ -327,8 +314,7 @@ STATIC alloc_p find_prev(alloc,list)
  * account_regsave from rejecting it.
  */
 
-STATIC void repl_allocs(new,old,packed)
-	alloc_p new,old,packed;
+STATIC void repl_allocs(alloc_p new,alloc_p old, alloc_p packed)
 {
 	alloc_p x,next,prev,*p;
 	short prof = 0;
@@ -356,8 +342,7 @@ STATIC void repl_allocs(new,old,packed)
 
 
 
-STATIC void assemble_allocs(packed)
-	alloc_p packed;
+STATIC void assemble_allocs(alloc_p packed)
 {
 	register alloc_p x,m,next;
 	alloc_p e;

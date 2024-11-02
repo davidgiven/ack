@@ -28,7 +28,6 @@
 #include	"mes.h"
 #include	"noRoption.h"
 
-extern char *symbol2str();
 extern char options[];
 
 arithbalance(e1p, oper, e2p)	/* RM 6.6 */

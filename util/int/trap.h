@@ -20,7 +20,8 @@ extern int must_test;			/* must trap on overfl./out of range*/
  * number, "L" is the line number and "F" is the filename
  * where the trap occurred.
  */
-void do_trap(int nr, int L, char *F);
+extern void do_trap(int nr, int L, char *F);
+extern char *trap2text(int nr);
 
 #endif /* TRAP_H_ */
 

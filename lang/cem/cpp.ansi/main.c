@@ -24,8 +24,7 @@
 #include	"preprocess.h"
 
 
-extern char *symbol2str();
-extern char *getwdir();
+
 extern int err_occurred;
 extern int do_dependencies;
 extern char *dep_file;

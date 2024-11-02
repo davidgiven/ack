@@ -36,7 +36,7 @@
 #include	"l_outdef.h"
 #include	"l_class.h"
 
-extern char *symbol2str();
+
 
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;

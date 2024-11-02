@@ -34,8 +34,7 @@ short	dfs_nr;
 bblock_p *vertex;  /* dynamically allocated array */
 
 
-STATIC void dfs(v)
-	bblock_p v;
+STATIC void dfs(bblock_p v)
 {
 	/* Depth First Search */
 
@@ -56,8 +55,7 @@ STATIC void dfs(v)
 
 
 
-STATIC void compress(v)
-	bblock_p v;
+STATIC void compress(bblock_p v)
 {
 	if (v->B_ANCESTOR->B_ANCESTOR != (bblock_p) 0) {
 		compress(v->B_ANCESTOR);
@@ -70,8 +68,7 @@ STATIC void compress(v)
 
 
 
-STATIC bblock_p eval(v)
-	bblock_p v;
+STATIC bblock_p eval(bblock_p v)
 {
 	if (v->B_ANCESTOR == (bblock_p) 0) {
 		return v;
@@ -83,8 +80,7 @@ STATIC bblock_p eval(v)
 
 
 
-STATIC void linkblocks(v,w)
-	bblock_p v,w;
+STATIC void linkblocks(bblock_p v, bblock_p w)
 {
 	w->B_ANCESTOR = v;
 }

@@ -27,10 +27,7 @@
 
 
 
-formal_p find_formal(p,type,off)
-	proc_p  p;
-	int	type;
-	offset  off;
+formal_p find_formal(proc_p  p,int	type,offset  off)
 {
 	/* Find a formal parameter of p
 	 * If the formal overlaps with an existing formal
@@ -70,8 +67,7 @@ formal_p find_formal(p,type,off)
 
 
 
-STATIC void no_inl_pars(p)
-	proc_p p;
+STATIC void no_inl_pars(proc_p p)
 {
 	/* p may not have any in line parameters */
 
@@ -81,9 +77,7 @@ STATIC void no_inl_pars(p)
 
 
 
-STATIC void inc_use(f,b)
-	formal_p f;
-	bblock_p b;
+STATIC void inc_use(formal_p f,bblock_p b)
 {
 	/* Increment the use count of formal f.
 	 * The counter has only three states: not used,

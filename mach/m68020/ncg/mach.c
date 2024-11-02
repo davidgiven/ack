@@ -201,8 +201,7 @@ prolog(n) full n; {
 static int gdb_flag = 0;
 
 void
-mach_option(s)
-	char *s;
+mach_option(char* s)
 {
 	if (! strcmp(s, "-gdb")) {
 		gdb_flag = 1;
@@ -214,7 +213,7 @@ mach_option(s)
 #endif /* MACH_OPTIONS */
 
 void
-mes(type) word type ; {
+mes(word type) {
 	int argt, a1, a2 ;
 
 	switch ( (int)type ) {

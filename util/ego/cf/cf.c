@@ -76,7 +76,7 @@ STATIC short state; /* We use a finite state machine with the
 			 *  INIT:   initial state
 			 */
 
-STATIC void nextblock()
+STATIC void nextblock(void)
 {
 	/* allocate a new basic block structure and
 	 * set b, bp and lp.
@@ -96,8 +96,7 @@ STATIC void nextblock()
 #endif
 }
 
-STATIC short kind(lnp)
-    line_p lnp;
+STATIC short kind(line_p lnp)
 {
 	/* determine if lnp is a label, branch, end or otherwise */
 
@@ -115,8 +114,7 @@ STATIC short kind(lnp)
 	return (short)NORMAL;
 }
 
-STATIC line_p doread_line(p_out)
-    proc_p* p_out;
+STATIC line_p doread_line(proc_p* p_out)
 {
 	/* read a line, and check pseudos for procedure addresses */
 
@@ -250,8 +248,7 @@ getbblocks(FILE *fp, short *kind_out, short *n_out, bblock_p *g_out,
 	}
 }
 
-STATIC void interproc_analysis(p)
-    proc_p p;
+STATIC void interproc_analysis(proc_p p)
 {
 	/* Interprocedural analysis of a procedure p determines:
 	 *  - all procedures called by p (the 'call graph')
@@ -360,8 +357,7 @@ STATIC void interproc_analysis(p)
 	}
 }
 
-STATIC void cf_cleanproc(p)
-    proc_p p;
+STATIC void cf_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures of p */
 
@@ -386,9 +382,7 @@ STATIC void cf_cleanproc(p)
 #define CALLS_UNKNOWN(p) (p->p_flags1 & (byte)PF_CALUNKNOWN)
 #define ENVIRON(p) (p->p_flags1 & (byte)PF_ENVIRON)
 
-STATIC bool add_info(q, p)
-    proc_p q,
-    p;
+STATIC bool add_info(proc_p q, proc_p p)
 {
 	/* Determine the consequences for used/changed variables info
 	 * of the fact that p calls q. If e.g. q changes a variable X
@@ -475,8 +469,7 @@ STATIC bool add_info(q, p)
 	return diff;
 }
 
-STATIC void trans_clos(head)
-    proc_p head;
+STATIC void trans_clos(proc_p head)
 {
 	/* Compute the transitive closure of the used/changed
 	 * variable information.
@@ -506,7 +499,7 @@ STATIC void trans_clos(head)
 	}
 }
 
-STATIC void indir_calls()
+STATIC void indir_calls(void)
 {
 	Cindex i;
 	proc_p p;
@@ -520,8 +513,7 @@ STATIC void indir_calls()
 	Cdeleteset(cai_set);
 }
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc, char* argv[])
 {
 	FILE* f, *f2, *gf2; /* The EM input, EM output, basic block output */
 	bblock_p g;

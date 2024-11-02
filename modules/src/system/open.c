@@ -13,13 +13,8 @@
 #define O_BINARY 0
 #endif
 
-extern File *_get_entry();
-
 int
-sys_open(path, flag, filep)
-	char *path;
-	int flag;
-	File **filep;
+sys_open(char* path, int flag, File** filep)
 {
 	register int fd;
 	register File *fp;

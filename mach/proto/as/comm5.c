@@ -404,7 +404,7 @@ char* readident(int c)
 }
 #endif
 
-static void need_stringbuf()
+static void need_stringbuf(void)
 {
 	if (!maxstring)
 	{

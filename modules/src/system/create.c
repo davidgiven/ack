@@ -7,13 +7,8 @@
 #include <fcntl.h>
 #include "system.h"
 
-extern File *_get_entry();
-
 int
-sys_create(filep, path, mode)
-	File **filep;
-	char *path;
-	int mode;
+sys_create(File** filep, char* path, int mode)
 {
 	register int fd;
 	register File *fp;

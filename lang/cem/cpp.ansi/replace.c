@@ -24,7 +24,6 @@
 #include	"replace.h"
 #include    "error.h"
 
-;
 extern int InputLevel;
 struct repl *ReplaceList;	/* list of currently active macros */
 
@@ -555,7 +554,6 @@ static void macro2buffer(
 	register char *ptr = idf->id_macro->mc_text;
 	int err = 0;
 	int func = idf->id_macro->mc_nps != -1;
-	char *stringify();
 
 	assert(ptr[idf->id_macro->mc_length] == '\0');
 	while (*ptr) {

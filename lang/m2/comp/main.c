@@ -40,6 +40,7 @@
 #include	"options.h"
 #include	"warning.h"
 #include	"SYSTEMM2.h"
+#include	"enter.h"
 
 int		state;			/* either IMPLEMENTATION or PROGRAM */
 char	options[128];
@@ -145,7 +146,7 @@ int Compile(char *src, char *dst)
 void LexScan(void)
 {
 	register t_token *tkp = &dot;
-	extern char *symbol2str();
+	
 
 	while (LLlex() > 0) {
 		print(">>> %s ", symbol2str(tkp->tk_symb));
@@ -211,8 +212,6 @@ static struct stdproc sysprocs[] = {
 	{ "ADR",	S_ADR },
 	{ 0,		0 }
 };
-
-extern struct def *Enter(), *EnterType();
 
 static void AddProcs(register struct stdproc *p)
 {

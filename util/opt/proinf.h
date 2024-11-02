@@ -25,7 +25,6 @@ struct num {
 #define NUMFALLTHROUGH	000200
 
 #define NNUMHASH	37
-extern num_p	numlookup();
 
 struct regs {
 	reg_p	r_next;

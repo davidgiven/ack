@@ -24,8 +24,7 @@
 #define IS_INSTR(c)	(c >= sp_fmnem && c <= sp_lmnem)
 
 
-bool same_size(t1,t2)
-	int t1, t2;
+bool same_size(int t1, int t2)
 {
 	/* See if the two types have the same size */
 
@@ -34,9 +33,7 @@ bool same_size(t1,t2)
 
 
 
-STATIC bool is_reg(off,s)
-	offset off;
-	int    s;
+STATIC bool is_reg(offset off,int    s)
 {
 	/* See if there is a register message
 	 * for the local or parameter at offset off
@@ -57,8 +54,7 @@ STATIC bool is_reg(off,s)
 }
 
 
-void rem_actuals(acts)
-	actual_p acts;
+void rem_actuals(actual_p acts)
 {
 	/* remove the actual-list */
 
@@ -73,8 +69,7 @@ void rem_actuals(acts)
 
 
 
-void remov_formals(p)
-	proc_p p;
+void remov_formals(proc_p p)
 {
 	/* Remove the list of formals of p */
 
@@ -120,9 +115,7 @@ rem_indir_acc(p)
 
 
 
-bool par_overlap(off1,t1,off2,t2)
-	offset off1,off2;
-	int    t1,t2;
+bool par_overlap(offset off1, int t1, offset off2,int t2)
 {
 	/* See if the parameter at offset off1 and type t1
 	 * overlaps the paramete at offset off2 and type t2.
@@ -141,8 +134,7 @@ bool par_overlap(off1,t1,off2,t2)
 
 
 
-short looplevel(b)
-	bblock_p b;
+short looplevel(bblock_p b)
 {
 	/* determine the loop nesting level of basic block b;
 	 * this is the highest nesting level of all blocks
@@ -165,8 +157,7 @@ short looplevel(b)
 
 
 
-int proclength(p)
-	proc_p p;
+int proclength(proc_p p)
 {
 	/* count the number of EM instructions of p */
 
@@ -190,8 +181,7 @@ int proclength(p)
 
 
 
-line_p copy_code(l1,l2)
-	line_p l1,l2;
+line_p copy_code(line_p l1, line_p l2)
 {
 	/* copy the code between l1 and l2 */
 

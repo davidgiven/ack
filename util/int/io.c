@@ -43,7 +43,7 @@ extern long inr;			/* from log.c */
 
 /********  General file handling  ********/
 
-PRIVATE int highestfd();
+PRIVATE int highestfd(int fd);
 
 int fd_limit = 100;			/* first non-available file descriptor */
 
@@ -191,8 +191,7 @@ char *position(void)			/* transient */
 	return buff;
 }
 
-char *dt_fname(p)
-	ptr p;
+char *dt_fname(ptr p)
 {
 	return (p ? &data_loc(p) : "<unknown>");
 }

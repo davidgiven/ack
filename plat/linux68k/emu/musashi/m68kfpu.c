@@ -1544,7 +1544,7 @@ static void fmovem(uint16 w2)
 }
 
 
-static void fscc()
+static void fscc(void)
 {
   // added by JFF, this seems to work properly now 
   int condition = OPER_I_16() & 0x3f;
@@ -1690,7 +1690,7 @@ static void perform_fsave(uint32 addr, int inc)
 }
 
 // FRESTORE on a NULL frame reboots the FPU - all registers to NaN, the 3 status regs to 0
-static void do_frestore_null()
+static void do_frestore_null(void)
 {
   int i;
 

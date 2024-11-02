@@ -493,7 +493,7 @@ void chk_forw_types(void)
 	/* check all forward references (in pointer types) */
 
 	register struct def *df = CurrentScope->sc_def;
-	register struct def *ldf = NULLDEF;
+	register struct def *ldf = NULL;
 	struct type *tp;
 
 	while( df )	{

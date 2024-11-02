@@ -12,7 +12,7 @@
 #include	"Lpars.h"
 #include    "error.h"
 
-extern char *symbol2str();
+
 
 static void insert_token(int );
 

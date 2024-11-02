@@ -21,6 +21,7 @@
 #define ARITH_H_
 
 #include    <em_arith.h>		/* obtain definition of "arith"	*/
+#include <em_label.h>		/* obtain definition of "label" */
 
 #define	writh		long long
 /* The compiler also uses "unsigned writh". */
@@ -55,5 +56,6 @@ void any2parameter(register struct expr **expp);
 void field2arith(register struct expr **expp);
 void switch_sign_fp(register struct expr *expr);
 char *writh2str(writh val, int uns);
+label code_string(char * val, int len);
 
 #endif /* ARITH_H_ */

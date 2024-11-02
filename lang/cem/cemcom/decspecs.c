@@ -17,7 +17,7 @@
 
 extern char options[];
 extern int level;
-extern char *symbol2str();
+
 
 struct decspecs null_decspecs;
 

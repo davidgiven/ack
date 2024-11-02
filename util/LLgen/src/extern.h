@@ -99,6 +99,10 @@ extern int	in_production;
 /* LLgen.g */
 extern void LLparse(void);
 
+/* alloc.c */
+extern p_mem alloc(size_t size);
+extern p_mem ralloc(p_mem p,size_t size);
+
 /* check.c */
 extern void conflchecks(void);
 

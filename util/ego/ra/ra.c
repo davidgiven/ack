@@ -60,8 +60,7 @@ short regs_available[] = {
 
 short use_any_as_pointer = 0;
 
-STATIC cond_p getcondtab(f)
-	FILE *f;
+STATIC cond_p getcondtab(FILE *f)
 {
 	int l,i;
 	cond_p tab;
@@ -76,9 +75,7 @@ STATIC cond_p getcondtab(f)
 	return tab;
 }
 
-STATIC void get_atab(f,tab)
-	FILE *f;
-	cond_p tab[NRREGTYPES][NRREGTYPES];
+STATIC void get_atab(FILE *f,cond_p tab[NRREGTYPES][NRREGTYPES])
 {
 	int i,cnt,totyp,regtyp;
 	
@@ -92,9 +89,7 @@ STATIC void get_atab(f,tab)
 }
 
 
-STATIC void get_otab(f,tab)
-	FILE *f;
-	cond_p tab[NRREGTYPES];
+STATIC void get_otab(FILE *f,cond_p tab[NRREGTYPES])
 {
 	int i,cnt,regtyp;
 	
@@ -139,8 +134,7 @@ STATIC void ra_machinit(void *vp)
 }
 
 
-STATIC bblock_p header(lp)
-	loop_p lp;
+STATIC bblock_p header(loop_p lp)
 {
 	/* Try to determine the 'header' block of loop lp.
 	 * If 'e' is the entry block of loop L, then block 'b' is
@@ -159,8 +153,7 @@ STATIC bblock_p header(lp)
 }
 
 
-STATIC void ra_extproc(p)
-	proc_p p;
+STATIC void ra_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
@@ -182,8 +175,7 @@ STATIC void ra_extproc(p)
 
 
 
-STATIC void ra_cleanproc(p)
-	proc_p p;
+STATIC void ra_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
@@ -203,8 +195,7 @@ STATIC void ra_cleanproc(p)
 
 
 
-STATIC void loop_blocks(p)
-	proc_p p;
+STATIC void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
@@ -222,9 +213,7 @@ STATIC void loop_blocks(p)
 
 
 
-STATIC void make_instrmap(p,map)
-	proc_p p;
-	line_p map[];
+STATIC void make_instrmap(proc_p p,line_p map[])
 {
 	/* make the instructions map of procedure p */
 
@@ -243,8 +232,7 @@ STATIC void make_instrmap(p,map)
 
 
 
-STATIC bool useful_item(item)
-	item_p item;
+STATIC bool useful_item(item_p item)
 {
 	/* See if it may be useful to put the item in a register.
 	 * A local variable may always be put in a register.
@@ -257,8 +245,7 @@ STATIC bool useful_item(item)
 }
 
 
-STATIC void cleantimeset(s)
-	lset s;
+STATIC void cleantimeset(lset s)
 {
 	register Lindex i;
 	register time_p t;
@@ -272,8 +259,7 @@ STATIC void cleantimeset(s)
 
 
 
-STATIC item_p cat_items(items)
-	item_p items[];
+STATIC item_p cat_items(item_p items[])
 {
 	/* Make one item list out of an array of itemlists.
 	 * Remove items that are used only once.
@@ -304,8 +290,7 @@ STATIC item_p cat_items(items)
 
 
 
-STATIC void clean_interval(list)
-	interv_p list;
+STATIC void clean_interval(interv_p list)
 {
 	register interv_p x,next;
 
@@ -317,8 +302,7 @@ STATIC void clean_interval(list)
 
 
 
-STATIC void clean_allocs(list)
-	alloc_p list;
+STATIC void clean_allocs(alloc_p list)
 {
 	register alloc_p x,next;
 
@@ -335,8 +319,7 @@ STATIC void clean_allocs(list)
 
 
 
-STATIC void cleanitems(list)
-	item_p list;
+STATIC void cleanitems(item_p list)
 {
 	register item_p x,next;
 
@@ -400,9 +383,7 @@ void ra_optimize(void *vp)
 
 
 
-int main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc,char *argv[])
 {
 	go(argc,argv,ra_initialize,ra_optimize,ra_machinit,no_action);
 	exit(0);
@@ -522,8 +503,7 @@ print_allocs(list)
 
 
 STATIC short regs_needed[4];
-STATIC void stat_regusage(list)
-	alloc_p list;
+STATIC void stat_regusage(alloc_p list)
 {
 	int i;
 	alloc_p x;

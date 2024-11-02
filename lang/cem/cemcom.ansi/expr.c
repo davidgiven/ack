@@ -26,7 +26,7 @@
 #include    "cstoper.h"
 #include    "error.h"
 
-extern char *symbol2str();
+
 extern char options[];
 extern int InSizeof;
 

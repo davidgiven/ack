@@ -52,7 +52,8 @@ extern int tokenseen;
 
 #define	ASIDE	aside.tk_symb
 
-void CheckForLineDirective(void);
-int LLlex(void);
+extern void CheckForLineDirective(void);
+extern int LLlex(void);
+extern char* symbol2str(int tok);
 
 #endif

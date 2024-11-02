@@ -27,8 +27,7 @@
 extern char em_flag[];
 
 
-STATIC void succeeds(succ,pred)
-	bblock_p succ, pred;
+STATIC void succeeds(bblock_p succ,bblock_p pred)
 {
 	assert(pred != (bblock_p) 0);
 	if (succ != (bblock_p) 0) {
@@ -47,8 +46,7 @@ STATIC void succeeds(succ,pred)
 
 
 
-STATIC arg_p skip_const(arg)
-	arg_p arg;
+STATIC arg_p skip_const(arg_p arg)
 {
 	assert(arg != (arg_p) 0);
 	switch(arg->a_type) {
@@ -63,9 +61,7 @@ STATIC arg_p skip_const(arg)
 }
 
 
-STATIC arg_p use_label(arg,b)
-	arg_p arg;
-	bblock_p b;
+STATIC arg_p use_label(arg_p arg, bblock_p b)
 {
 	if (arg->a_type == ARGINSTRLAB) {
 		/* arg is a non-null label */
@@ -76,10 +72,7 @@ STATIC arg_p use_label(arg,b)
 
 
 
-STATIC void case_flow(instr,desc,b)
-	short    instr;
-	line_p   desc;
-	bblock_p b;
+STATIC void case_flow(short instr, line_p desc, bblock_p b)
 {
 	/* Analyse the case descriptor (given as a ROM pseudo instruction).
 	 * Every instruction label appearing in the descriptor
@@ -121,8 +114,7 @@ STATIC void case_flow(instr,desc,b)
 
 
 
-STATIC line_p case_descr(lnp)
-	line_p lnp;
+STATIC line_p case_descr(line_p lnp)
 {
 	/* lnp is the instruction just before a csa or csb,
 	 * so it is the instruction that pushes the address
@@ -177,9 +169,7 @@ STATIC line_p case_descr(lnp)
 
 
 
-STATIC void last2_instrs(b,last_out,prev_out)
-	bblock_p b;
-	line_p   *last_out,*prev_out;
+STATIC void last2_instrs(bblock_p b, line_p* last_out, line_p* prev_out)
 {
 	/* Determine the last and one-but-last instruction
 	 * of basic block b. An end-pseudo is not regarded

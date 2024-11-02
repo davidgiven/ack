@@ -156,5 +156,6 @@ extern ptr SL;			/* Stack Limit */
 #define	max(i,j)	(((i) > (j)) ? (i) : (j))
 #define	min(i,j)	(((i) < (j)) ? (i) : (j))
 
+extern double str2double(char *str);
 
 #endif /* GLOBAL_H_ */

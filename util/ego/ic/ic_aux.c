@@ -54,8 +54,7 @@ offset opr_size(short instr)
 
 /* dblockdef */
 
-STATIC offset argsize(arg)
-	arg_p arg;
+STATIC offset argsize(arg_p arg)
 {
 	/* Compute the size (in bytes) that the given initializer
 	 * will occupy.
@@ -124,8 +123,7 @@ STATIC offset blocksize(byte pseudo, arg_p args)
 }
 
 
-STATIC arg_p copy_arg(arg)
-	arg_p arg;
+STATIC arg_p copy_arg(arg_p arg)
 {
 	/* Copy one argument */
 
@@ -139,8 +137,7 @@ STATIC arg_p copy_arg(arg)
 
 
 
-STATIC arg_p copy_rom(args)
-	arg_p args;
+STATIC arg_p copy_rom(arg_p args)
 {
 	/* Make a copy of the values of a rom,
 	 * provided that the rom contains only integer values,
@@ -164,10 +161,7 @@ STATIC arg_p copy_rom(args)
 
 
 
-void dblockdef(db,n,lnp)
-	dblock_p db;
-	int	 n;
-	line_p	 lnp;
+void dblockdef(dblock_p db,int	 n,line_p	 lnp)
 {
 	/* Process a data block defining occurrence */
 
@@ -252,9 +246,7 @@ void combine(dblock_p db, line_p l1, line_p l2, byte pseu)
 
 /* arglist */
 
-STATIC void arg_string(length,abp)
-	offset  length;
-	register argb_p abp;
+STATIC void arg_string(offset  length,register argb_p abp)
 {
 
 	while (length--) {
@@ -265,8 +257,7 @@ STATIC void arg_string(length,abp)
 }
 
 
-line_p arglist(n)
-	int n;
+line_p arglist(int n)
 {
 	line_p	lnp;
 	register arg_p ap,*app;
@@ -349,8 +340,7 @@ line_p arglist(n)
 
 /* is_datalabel */
 
-bool is_datalabel(l)
-	line_p l;
+bool is_datalabel(line_p l)
 {
 	VL(l);
 	return (l->l_instr == (byte) ps_sym);
@@ -360,8 +350,7 @@ bool is_datalabel(l)
 
 /* block_of_lab */
 
-dblock_p block_of_lab(ident)
-	char *ident;
+dblock_p block_of_lab(char *ident)
 {
 	dblock_p dbl;
 
@@ -381,10 +370,7 @@ dblock_p block_of_lab(ident)
 
 /* object */
 
-STATIC obj_p make_object(dbl,off,size)
-	dblock_p dbl;
-	offset   off;
-	offset   size;
+STATIC obj_p make_object(dblock_p dbl,offset   off,offset   size)
 {
 	/* Allocate an obj struct with the given attributes
 	 * (if it did not exist already).

@@ -80,8 +80,7 @@ void add_interval(short t1, short t2, interv_p *list)
 
 
 
-interv_p loop_lifetime(lp)
-	loop_p lp;
+interv_p loop_lifetime(loop_p lp)
 {
 	/* Determine the timespan of the loop, expressed as a list
 	 * of intervals.
@@ -100,8 +99,7 @@ interv_p loop_lifetime(lp)
 }
 
 
-interv_p proc_lifetime(p)
-	proc_p p;
+interv_p proc_lifetime(proc_p p)
 {
 	/* Determine the lifetime of an entire procedure */
 
@@ -113,8 +111,7 @@ interv_p proc_lifetime(p)
 
 
 
-STATIC void set_min_max(iv1,iv2)
-	interv_p *iv1,*iv2;
+STATIC void set_min_max(interv_p *iv1,interv_p *iv2)
 {
 	/* Auxiliary routine of intersect */
 
@@ -131,8 +128,7 @@ STATIC void set_min_max(iv1,iv2)
 
 
 
-interv_p intersect(list1,list2)
-	interv_p list1,list2;
+interv_p intersect(interv_p list1,interv_p list2)
 {
 	/* Intersect two lifetimes, each denoted by a list of intervals.
 	 * We maintain two pointers, pmin and pmax, pointing to the
@@ -175,8 +171,7 @@ interv_p intersect(list1,list2)
 
 
 
-bool not_disjoint(list1,list2)
-	interv_p list1,list2;
+bool not_disjoint(interv_p list1, interv_p list2)
 {
 	/* See if list1 and list2 do overlap somewhere */
 
@@ -210,8 +205,7 @@ bool contains(short t, interv_p timespan)
 
 
 
-interv_p copy_timespan(list)
-	interv_p list;
+interv_p copy_timespan(interv_p list)
 {
 	/* copy the time span */
 

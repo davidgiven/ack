@@ -56,15 +56,14 @@
 
 STATIC int Scj;  /* number of optimizations found */
 
-STATIC void showinstr();
+STATIC void showinstr(line_p lnp);
 
 
 
 #define DLINK(l1,l2)	l1->l_next=l2; l2->l_prev=l1
 
 
-STATIC bool same_instr(l1,l2)
-	line_p l1,l2;
+STATIC bool same_instr(line_p l1, line_p l2)
 {
 	/* See if l1 and l2 are the same instruction */
 
@@ -83,8 +82,7 @@ STATIC bool same_instr(l1,l2)
 
 
 
-STATIC line_p last_mnem(b)
-	bblock_p b;
+STATIC line_p last_mnem(bblock_p b)
 {
 	/* Determine the last line of a list */
 
@@ -98,8 +96,7 @@ STATIC line_p last_mnem(b)
 }
 
 
-STATIC bool is_desirable(text)
-	line_p text;
+STATIC bool is_desirable(line_p text)
 {
 	/* We avoid to generate a BRAnch in the middle of some expression,
 	 * as the code generator will write the contents of the fakestack
@@ -134,8 +131,7 @@ STATIC bool is_desirable(text)
 }
 
 
-STATIC void cp_loops(b1,b2)
-	bblock_p b1,b2;
+STATIC void cp_loops(bblock_p b1,bblock_p b2)
 {
 	/* Copy the loopset of b2 to b1 */
 
@@ -149,9 +145,7 @@ STATIC void cp_loops(b1,b2)
 }
 
 
-STATIC void jump_cross(l1,l2,b1,b2)
-	line_p l1,l2;
-	bblock_p b1,b2;
+STATIC void jump_cross(line_p l1,line_p l2,bblock_p b1,bblock_p b2)
 {
 	/* A cross-jump from block b2 to block b1 is found; the code in
 	 * block b2 from line l2 up to the BRAnch is removed; block b1 is
@@ -214,8 +208,7 @@ STATIC void jump_cross(l1,l2,b1,b2)
 }
 
 
-STATIC bool try_tail(b1,b2)
-	bblock_p b1,b2;
+STATIC bool try_tail(bblock_p b1,bblock_p b2)
 {
 	/* See if b1 and b2 end on the same sequence of instructions */
 
@@ -263,8 +256,7 @@ STATIC bool try_tail(b1,b2)
 
 
 
-STATIC bool try_pred(b)
-	bblock_p b;
+STATIC bool try_pred(bblock_p b)
 {
 	/* See if there is any pair (b1,b2), both in PRED(b) for
 	 * which we can perform cross jumping.
@@ -317,9 +309,7 @@ void cj_optimize(void *vp)
 }
 
 
-int main(argc,argv)
-	int argc;
-	char *argv[];
+int main(int argc,char* argv[])
 {
 	go(argc,argv,no_action,cj_optimize,no_action,no_action);
 	report("cross jumps",Scj);

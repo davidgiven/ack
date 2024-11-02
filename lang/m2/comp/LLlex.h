@@ -69,4 +69,5 @@ extern struct type *toktype;
 extern int	token_nmb;
 extern int	tk_nmb_at_last_syn_err;
 
-void CheckForLineDirective(void);
+extern void CheckForLineDirective(void);
+extern char* symbol2str(int tok);

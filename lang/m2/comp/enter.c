@@ -35,6 +35,7 @@
 #include	"lookup.h"
 #include	"misc.h"
 #include	"f_info.h"
+#include	"defmodule.h"
 
 
 static struct def *DoImport(register struct def *, struct scope *, int);
@@ -509,7 +510,6 @@ void EnterImportList(struct node *idlist, int local, struct scope *sc)
 		If the import is not local, definition modules must be read
 		for "idlist".
 	*/
-	extern struct def *GetDefinitionModule();
 	struct f_info f;
 	
 	f = file_info;

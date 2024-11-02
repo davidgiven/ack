@@ -22,9 +22,7 @@
 #include "il3_change.h"
 #include "il3_subst.h"
 
-STATIC line_p fetch_text(lf,c)
-	FILE *lf;
-	call_p c;
+STATIC line_p fetch_text(FILE *lf,call_p c)
 {
 	/* Read the EM text of the called procedure.
 	 * We use random access I/O here.
@@ -63,10 +61,7 @@ line_p scan_to_cal(line_p lines, short n)
 
 
 
-void substitute(lf,c,cal,firstline)
-	FILE *lf;
-	call_p c;
-	line_p cal,firstline;
+void substitute(FILE *lf,call_p c,line_p cal, line_p firstline)
 {
 	/* Perform in line substitution of the call described
 	 * by c. The EM text of the called routine is fetched

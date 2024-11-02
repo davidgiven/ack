@@ -47,8 +47,8 @@
 
 extern char **environ;
 
-PRIVATE ptr storestring();
-PRIVATE size alignedstrlen();
+PRIVATE size alignedstrlen(char *s);
+PRIVATE ptr storestring(ptr addr, char *s);
 
 char *load_name;
 

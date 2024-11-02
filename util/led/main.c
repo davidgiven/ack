@@ -47,7 +47,7 @@ static void		setbase(int, uint32_t);
 static struct outname	*makename(char*);
 static void     pass1(char*);
 static void     evaluate(void);
-static void		norm_commons();
+static void		norm_commons(void);
 static void     complete_sections(void);
 static void		change_names(void);
 static void     enterundef(const char *, int);
@@ -130,8 +130,6 @@ static void first_pass(register char **argv)
 	register char		*argp;
 	int			sectno;
 	int			h;
-	extern int		hash();
-	extern struct outname	*searchname();
 
 	while (*++argv) {
 		argp = *argv;
@@ -303,8 +301,6 @@ static uint32_t	sect_lign[MAXSECT];
  */
 static void setlign(int sectno, uint32_t lign)
 {
-	extern bool	setbit();
-
 	if (setbit(sectno, lignmap) && sect_lign[sectno] != lign)
 		fatal("section has different alignments");
 	if (lign == (long)0)
@@ -319,8 +315,6 @@ static void setlign(int sectno, uint32_t lign)
 static void
 setbase(int sectno, uint32_t base)
 {
-	extern bool	setbit();
-
 	if (setbit(sectno, basemap) && sect_base[sectno] != base)
 		fatal("section has different bases");
 	sect_base[sectno] = base;

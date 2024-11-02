@@ -22,10 +22,6 @@
 #include	"read.h"
 #include	"text.h"
 
-#ifndef	NOFLOAT
-extern double str2double();
-#endif	/* NOFLOAT */
-
 /************************************************************************
  *	Read object file contents.					*
  ************************************************************************

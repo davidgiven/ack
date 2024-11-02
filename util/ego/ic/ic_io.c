@@ -27,7 +27,7 @@ STATIC long  bytecnt;
 
 STATIC FILE *infile;  /* The current EM input file */
 
-STATIC int readbyte()
+STATIC int readbyte(void)
 {
 	if (libstate == ARCHIVE && bytecnt-- == 0L) {
 		/* If we're reading from an archive file, we'll
@@ -42,7 +42,7 @@ STATIC int readbyte()
 
 
 
-short readshort() {
+short readshort(void) {
 	register int l_byte, h_byte;
 
 	l_byte = readbyte();
@@ -52,7 +52,7 @@ short readshort() {
 }
 
 #ifdef LONGOFF
-offset readoffset() {
+offset readoffset(void) {
 	register long l;
 	register int h_byte;
 
@@ -66,7 +66,7 @@ offset readoffset() {
 #endif
 
 
-short get_int() {
+short get_int(void) {
 
 	switch(table2()) {
 	default: error("int expected");
@@ -95,12 +95,12 @@ offset get_off() {
 	}
 }
 
-STATIC void make_string(n) int n; {
+STATIC void make_string(int n){
 	
 	sprintf(string,".%u",n);
 }
 
-STATIC void inident() {
+STATIC void inident(void) {
 	register int n;
 	register char *p = string;
 	register int c;
@@ -190,8 +190,7 @@ void file_init(FILE *f, short state, long length)
 
 
 
-void arch_init(arch)
-	FILE *arch;
+void arch_init(FILE *arch)
 {
 	short n;
 

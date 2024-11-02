@@ -19,6 +19,7 @@
 #include "reg.h"
 #include "salloc.h"
 #include "fillem.h"
+#include "codegen.h"
 
 #define SHORTCUT	/* Stop searching at distance 0 */
 
@@ -35,7 +36,6 @@ byte startupcode[] =
 { DO_NEXTEM };
 
 extern byte *nextem(int);
-string tostring();
 
 extern int move(token_p,token_p,int,int,unsigned int);
 extern struct perm* tuples(rl_p*, int);

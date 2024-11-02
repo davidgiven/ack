@@ -25,7 +25,7 @@ extern jmp_buf trapbuf; /* from main.c */
 int must_test; /* TEST-bit on in EM header word 2 */
 int signalled;
 
-PRIVATE int nonreturnable();
+PRIVATE int nonreturnable(int nr);
 
 PRIVATE char *trap_msg[] =
 {

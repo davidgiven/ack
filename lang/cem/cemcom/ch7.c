@@ -20,7 +20,7 @@
 #include	"assert.h"
 
 extern char options[];
-extern char *symbol2str();
+
 
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer

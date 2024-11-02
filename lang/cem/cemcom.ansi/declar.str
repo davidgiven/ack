@@ -40,7 +40,6 @@ struct decl_unary	{
 
 /* ALLOCDEF "decl_unary" 10 */
 
-extern struct type *declare_type();
 extern struct declarator null_declarator;
 
 #endif

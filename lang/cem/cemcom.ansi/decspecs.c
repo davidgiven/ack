@@ -9,6 +9,7 @@
 #include	"decspecs.h"
 #include	"Lpars.h"
 #include	"arith.h"
+#include	"LLlex.h"
 #include	"type.h"
 #include	"level.h"
 #include	"def.h"
@@ -16,8 +17,6 @@
 
 extern char options[];
 extern int level;
-extern char *symbol2str();
-extern struct type *qualifier_type();
 
 struct decspecs null_decspecs;
 

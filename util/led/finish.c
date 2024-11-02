@@ -27,8 +27,6 @@ static char rcsid[] = "$Id$";
 extern bool	incore;
 extern unsigned short	NLocals;
 extern int	flagword;
-extern struct outname	*searchname();
-extern void addbase(struct outname *name);
 
 static void adjust_names(register struct outname *, struct outhead	*, register char *);
 static void handle_relos(struct outhead *, struct outsect *, struct outname *);

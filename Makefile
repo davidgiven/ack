@@ -34,6 +34,8 @@ BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 
 CFLAGS ?= -g \
 	-Werror=return-type \
+	-Werror=implicit-function-declaration \
+	-Werror=strict-prototypes \
 	-fsanitize=unreachable \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn

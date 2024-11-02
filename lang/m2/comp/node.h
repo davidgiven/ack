@@ -55,7 +55,9 @@ struct node {
 #define	new_node() ((struct node*) calloc(1, sizeof(struct node)))
 #define	free_node(p) free(p)
 
-extern struct node *dot2node(), *dot2leaf(), *getnode();
+extern struct node *getnode(int class);
+extern struct node *dot2node(int class, struct node *left, struct node *right);
+extern struct node *dot2leaf(int class);
 
 #define NULLNODE ((struct node *) 0)
 

@@ -20,6 +20,7 @@ static char rcsid[] = "$Id$";
 #include "save.h"
 #include "sym.h"
 #include "error.h"
+#include "extract.h"
 
 static void getexternal(register struct outname	*);
 static void get_names(register struct outhead *);
@@ -29,10 +30,7 @@ static void transfer(register struct outname *, register struct outname *);
 static void process(register struct outhead	*);
 
 
-extern ind_t savechar();
 extern struct orig	relorig[];
-
-void namerelocate();
 
 /*
  * Get section sizes and symboltable information from present module.
@@ -178,8 +176,6 @@ static void getexternal(register struct outname	*name)
 	register char		*string;
 	register int		h;
 	register struct outname	*old;
-	extern int		hash();
-	extern struct outname	*searchname();
 
 	string = modulptr((ind_t)name->on_foff);
 	h = hash(string);

@@ -18,11 +18,11 @@
 #include "em_arith.h"
 #include "insert.h"
 #include "em_private.h"
+#include "ack_string.h"
 
 int		C_ontmpfile = 0;
 int		C_sequential = 1;
 Part		*C_curr_part;
-int		(*C_outpart)(), (*C_swtout)(), (*C_swttmp)();
 
 #ifdef INCORE
 char		*C_BASE;
@@ -36,6 +36,10 @@ char		*C_tmpfile;
 char		*C_ibuf = 0;
 long		C_current_out;
 #endif
+
+int (*C_outpart)(int);
+int (*C_swtout)(void);
+int (*C_swttmp)(void);
 
 #if BUFSIZ <= 1024 && BIGMACHINE
 #define BUFFERSIZ	8*BUFSIZ
@@ -215,7 +219,6 @@ void C_pt_scon(char *x, arith y)
 {
 	char xbuf[1024];
 	register char *p;
-	char *bts2str();
 
 	C_putbyte('\'');
 	p = bts2str(x, (int) y, xbuf);

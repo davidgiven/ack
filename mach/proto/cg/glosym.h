@@ -12,7 +12,7 @@ typedef struct glosym {
 	word	       gl_rom[MAXROM+1];
 } glosym_t,*glosym_p;
 
-void enterglo(string name, word *romp);
-glosym_p lookglo();
+extern void enterglo(string name, word *romp);
+extern glosym_p lookglo(string name);
 
 #endif /* GLOSYM_H_ */

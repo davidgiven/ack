@@ -30,9 +30,7 @@ char	*Prefix;		/* Prefix for function name */
 
 
 int
-in(flgs, c)
-	char *flgs;
-	char c;
+in(char* flgs, char c)
 {
 	while (*flgs)
 		if (c == *flgs++)
@@ -42,12 +40,7 @@ in(flgs, c)
 
 
 
-void OutCase(mnem, base, first, i, argstr)
-	char *mnem;
-	char *base;
-	int first;
-	int i;
-	char *argstr;
+void OutCase(char *mnem,char *base,int first,int i,char *argstr)
 {
 	/* Output a case in the switch statement */
 	fprintf(ofp, "\t\tcase %s+%d:\t%s%s(%s); break;\n",
@@ -57,22 +50,17 @@ void OutCase(mnem, base, first, i, argstr)
 
 
 
-void ImplicitArg(argstr)
-	char *argstr;
+void ImplicitArg(char *argstr)
 {
 	sprintf(argstr, "uwpop()");
 }
 
-void NoArgs(argstr)
-	char *argstr;
+void NoArgs(char *argstr)
 {
 	sprintf(argstr, "");
 }
 
-void Mini(argstr, i, flgs)
-	char *argstr;
-	int i;
-	char *flgs;
+void Mini(char *argstr,int i,char *flgs)
 {
 	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
 
@@ -95,10 +83,7 @@ void Mini(argstr, i, flgs)
 	}
 }
 
-void Shortie(argstr, i, flgs)
-	char *argstr;
-	int i;
-	char *flgs;
+void Shortie(char *argstr,int i,char *flgs)
 {
 	int newi = in(flgs, 'N') ? (-i-1) : in(flgs, 'o') ? (i+1) : i;
 
@@ -106,27 +91,21 @@ void Shortie(argstr, i, flgs)
 		newi, in(flgs, 'w') ? "wsize" : "1L");
 }
 
-void TwoSgn(argstr, flgs)
-	char *argstr;
-	char *flgs;
+void TwoSgn(char *argstr,char *flgs)
 {
 
 	sprintf(argstr, "%s*%s", in(flgs, 'P') ? "P_arg_2()" : in(flgs, 'N') ? "N_arg_2()" : "L_arg_2()",
 			in(flgs, 'w') ? "wsize" : "1L");
 }
 
-void TwoUns(argstr, flgs)
-	char *argstr;
-	char *flgs;
+void TwoUns(char *argstr,char *flgs)
 {
 
 	sprintf(argstr,	"%s*%s", "U_arg()",
 			in(flgs, 'w') ? "wsize" : "((unsigned long) 1)");
 }
 
-void FourSgn(argstr, flgs)
-	char *argstr;
-	char *flgs;
+void FourSgn(char *argstr,char *flgs)
 {
 
 	sprintf(argstr,	"%s*%s", in(flgs, 'P') ? "P_arg_4()" : in(flgs, 'N') ? "N_arg_4()" : "L_arg_4()",
@@ -134,16 +113,14 @@ void FourSgn(argstr, flgs)
 }
 
 
-void fatal(fmt, str)
-	char *fmt;
-	char *str;
+void fatal(char *fmt,char *str)
 {
 	fprintf(stderr, "%s, (fatal error): ", progname);
 	fprintf(stderr, fmt, str);
 	fprintf(stderr, "\n");
 	exit(1);
 }
-int getmnem(str) char *str ; {
+int getmnem(char* str){
 	char (*ptr)[4] ;
 
 	for ( ptr = em_mnem ; *ptr<= &em_mnem[sp_lmnem][0] ; ptr++ ) {
@@ -153,9 +130,7 @@ int getmnem(str) char *str ; {
 	return 0 ;
 }
 
-int main(argc, argv)
-	int argc;
-	char **argv;
+int main(int argc,char **argv)
 {
 	char	mnem[8];		/* Mnemonic */
 	char	flgs[8];		/* Flags */

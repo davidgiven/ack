@@ -51,7 +51,7 @@
 
 int err_occurred;
 
-extern char *symbol2str();
+
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages

@@ -238,8 +238,7 @@ STATIC void fiddle_stack(line_p lnp)
 	}
 }
 
-STATIC proc_p find_proc(vn)
-	valnum vn;
+STATIC proc_p find_proc(valnum vn)
 {
 	/* Find the procedure-identifier with valuenumber vn. */
 

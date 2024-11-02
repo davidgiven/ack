@@ -152,8 +152,7 @@ void regsave_cost(short regs[], short *time_out, short *space_out)
 
 
 
-STATIC short dyn_inits(inits)
-	lset inits;
+STATIC short dyn_inits(lset inits)
 {
 	Lindex i;
 	short sum = 0;

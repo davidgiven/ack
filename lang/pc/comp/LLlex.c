@@ -185,8 +185,6 @@ static struct string *GetString(register int delim)
 		}
 		*p++ = ch;
 		if( p - str->s_str == len )	{
-			extern char *Srealloc();
-
 			str->s_str = Srealloc(str->s_str,
 					(unsigned int) len + RSTRSIZE);
 			p = str->s_str + len;
@@ -390,7 +388,6 @@ again:
 		char buf[IDFSIZE + 1];
 		register char *tag = &buf[0];
 		register struct idf *id;
-		extern struct idf *str2idf();
 
 		do	{
 			if( !options['C'] )	/* -C : cases are different */
@@ -452,7 +449,6 @@ again:
 		char buf[NUMSIZE+2];
 		register char *np = &buf[1];
 		register int state = INT_MODE;
-		extern char *Salloc();
 
 		buf[0] = '-';
 		do	{

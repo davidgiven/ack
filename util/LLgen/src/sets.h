@@ -37,40 +37,40 @@ extern int	nbytes;
 /*
  * Initialises some variables needed for setcomputations
  */
-void setinit(int nt_needed);
+extern void setinit(int nt_needed);
 /*
  * Allocate a set that cannot be freed
  */
-p_set get_set(void);
+extern p_set get_set(void);
 /*
  * Allocate a set which can later be freed.
  */
-p_set setalloc(void);
+extern p_set setalloc(void);
 /*
  * a = a union b.
  * Return 1 if the set a changed
  */
-int setunion(register p_set a,register p_set b);
+extern int setunion(register p_set a,register p_set b);
 /*
  * a = a intersect b.
  * return 1 if the result is empty
  */
-int setintersect(register p_set a,register p_set b);
+extern int setintersect(register p_set a,register p_set b);
 /*
  * a = a setminus b
  */
-void setminus(register p_set a,register p_set b);
+extern void setminus(register p_set a,register p_set b);
 /*
  * Return 1 if the set p is empty
  */
-int setempty(register p_set p);
+extern int setempty(register p_set p);
 /*
  * The set "set" will serve as a recovery set.
  * Search for it in the table. If not present, enter it.
  * Here is room for improvement. At the moment, the list of
  * sets is examined with linear search.
  */
-int findindex(p_set set);
-int setcount(register p_set set, int *saved);
+extern int findindex(p_set set);
+extern int setcount(register p_set set, int *saved);
 
 #endif /* SETS_H_ */

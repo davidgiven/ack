@@ -247,8 +247,7 @@ void pass3(const char *lnam, const char *lnam2)
 	}
 }
 
-STATIC void il_extptab(ptab)
-    proc_p ptab;
+STATIC void il_extptab(proc_p ptab)
 {
 	/* Allocate space for extension of proctable entries.
 	 * Also, initialise some of the fields just allocated.
@@ -264,8 +263,7 @@ STATIC void il_extptab(ptab)
 	}
 }
 
-STATIC void il_cleanptab(ptab)
-    proc_p ptab;
+STATIC void il_cleanptab(proc_p ptab)
 {
 	/* De-allocate space for extensions */
 
@@ -278,7 +276,7 @@ STATIC void il_cleanptab(ptab)
 }
 
 #ifdef VERBOSE
-STATIC void Sdiagnostics()
+STATIC void Sdiagnostics(void)
 {
 	/* print statictical information */
 
@@ -327,8 +325,7 @@ void il_flags(void *vp)
 	}
 }
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc,char* argv[])
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f;

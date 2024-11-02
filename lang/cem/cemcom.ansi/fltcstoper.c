@@ -17,10 +17,11 @@
 #include	"expr.h"
 #include	"sizes.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include    "error.h"
 
 extern int ResultKnown;
-extern char *symbol2str();
+
 
 void fltcstbin(register struct expr **expp, int oper, register struct expr *expr)
 {

@@ -42,9 +42,7 @@ short nrcopies;		/* number of copies in the current procedure
 #define COUNT 0
 #define MAP 1
 
-STATIC void traverse_defs(p,action)
-	proc_p p;
-	int action;
+STATIC void traverse_defs(proc_p p,int action)
 {
 	bblock_p b;
 	line_p l;
@@ -83,8 +81,7 @@ STATIC void traverse_defs(p,action)
 
 
 
-STATIC void make_copytab(p)
-	proc_p p;
+STATIC void make_copytab(proc_p p)
 {
 	/* Make a table of all copies appearing in procedure p.
 	 * We first count how many there are, because we
@@ -97,8 +94,7 @@ STATIC void make_copytab(p)
 
 
 
-STATIC bool is_changed(varl,start,stop)
-	line_p varl, start, stop;
+STATIC bool is_changed(line_p varl, line_p start, line_p stop)
 {
 	/* See if the variable used by instruction varl
 	 * is changed anywhere between 'start' and 'stop'
@@ -121,8 +117,7 @@ STATIC bool is_changed(varl,start,stop)
 
 
 
-STATIC void gen_kill_copies(p)
-	proc_p p;
+STATIC void gen_kill_copies(proc_p p)
 {
 	/* Compute C_GEN and C_KILL for every basic block
 	 * of p.
@@ -165,9 +160,7 @@ STATIC void gen_kill_copies(p)
 
 
 
-STATIC void intersect_outs(bbset,setp,full_set)
-	lset bbset;
-	cset *setp,full_set;
+STATIC void intersect_outs(lset bbset,cset *setp,cset full_set)
 {
 	/* Take the intersection of C_OUT(b), for all b in bbset,
 	 * and put the result in setp.
@@ -183,9 +176,7 @@ STATIC void intersect_outs(bbset,setp,full_set)
 
 
 
-STATIC void init_cin(p,full_set)
-	proc_p p;
-	cset full_set;
+STATIC void init_cin(proc_p p,cset full_set)
 {
 	/* Initialize C_IN(b) and C_OUT(b), for every basic block b.
 	 * C_IN of the root of the CFG (i.e. the procedure entry block)
@@ -218,8 +209,7 @@ STATIC void init_cin(p,full_set)
 
 
 
-STATIC void solve_cin(p)
-	proc_p p;
+STATIC void solve_cin(proc_p p)
 {
 	/* Solve the data flow equations for reaching
 	 * definitions of procedure p.
@@ -267,8 +257,7 @@ STATIC void solve_cin(p)
 
 
 
-void copy_analysis(p)
-	proc_p p;
+void copy_analysis(proc_p p)
 {
 	/* Determine which copies procedure p has. Compute C_IN(b),
 	 * for every basic block b.
@@ -281,8 +270,7 @@ void copy_analysis(p)
 
 
 
-bool is_copy(def)
-	line_p def;
+bool is_copy(line_p def)
 {
 	/* See if the definition def is also a 'copy', i.e. an
 	 * statement of the form 'A := B' (or, in EM terminology:
@@ -311,9 +299,7 @@ bool is_copy(def)
 
 
 
-void fold_var(old,new,b)
-	line_p old, new;
-	bblock_p b;
+void fold_var(line_p old, line_p new,bblock_p b)
 {
 	/* The variable referenced by the EM instruction 'old'
 	 * must be replaced by the variable referenced by 'new'.

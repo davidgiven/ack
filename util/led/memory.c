@@ -200,9 +200,7 @@ void init_core(void)
  * Move up as much as possible, if "incr" fails.
  */
 static ind_t
-move_up(piece, incr)
-	register int		piece;
-	register ind_t		incr;
+move_up(int piece, ind_t incr)
 {
 #ifdef USEMALLOC
 	size_t oldsize = mems[piece].mem_full + mems[piece].mem_left;

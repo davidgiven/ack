@@ -277,8 +277,7 @@ offset op22size(line_p lnp)
 
 /* Ternary operators are op_aar and conversions between types and/or sizes. */
 
-offset op13size(lnp)
-	line_p lnp;
+offset op13size(line_p lnp)
 {
 	/* When the instruction is a conversion, the size of the first
 	 * operand is the value of the second operand.
@@ -296,8 +295,7 @@ offset op13size(lnp)
 		return UNKNOWN_SIZE;
 }
 
-offset op23size(lnp)
-	line_p lnp;
+offset op23size(line_p lnp)
 {
 	if (INSTR(lnp) == op_aar)
 		return argw(lnp);
@@ -305,8 +303,7 @@ offset op23size(lnp)
 		return ws;
 }
 
-offset op33size(lnp)
-	line_p lnp;
+offset op33size(line_p lnp)
 {
 	if (INSTR(lnp) == op_aar)
 		return ps;

@@ -25,8 +25,6 @@ extern int inproc;
 extern set_t l_sets[];
 extern inst_t l_instances[];
 
-extern expr_t subreg_expr(), regno_expr();
-
 static struct varinfo * setcoco(int n)
 {
 	struct varinfo *vi;

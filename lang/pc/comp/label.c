@@ -13,6 +13,7 @@
 #include	"type.h"
 #include	"label.h"
 #include	"error.h"
+#include	"lookup.h"
 
 static void CodeLabel(register struct def *df, int local);
 

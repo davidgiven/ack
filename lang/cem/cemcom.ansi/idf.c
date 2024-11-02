@@ -23,6 +23,7 @@
 #include	"proto.h"
 #include	"struct.h"
 #include	"declar.h"
+#include	"declarator.h"
 #include	"decspecs.h"
 #include	"sizes.h"
 #include    "print.h"
@@ -34,8 +35,7 @@
 #include	"Lpars.h"
 
 extern char options[];
-extern arith NewLocal();
-extern char *symbol2str();
+
 
 #ifdef DEBUG
 #define IDF_DEBUG

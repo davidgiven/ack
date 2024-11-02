@@ -31,8 +31,7 @@
 #include	"def.h"
 #include	"type.h"
 #include	"warning.h"
-
-extern char *getwdir();
+#include	"defmodule.h"
 
 t_token		dot,
 		aside;
@@ -239,7 +238,7 @@ void CheckForLineDirective(void)
 	}
 }
 
-static void CheckForLet()
+static void CheckForLet(void)
 {
 	register int ch;
 

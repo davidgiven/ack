@@ -23,7 +23,6 @@ static char rcsid[] = "$Id$";
 #include "memory.h"
 
 extern bool	incore;
-extern char	*core_alloc();
 
 long	NLChars = 0;	/* Size of string area for local names. */
 long	NGChars = 0;	/* Idem for global names. */

@@ -38,6 +38,7 @@ int	narg;
 
 static void process(FILE *);
 static void do_file(FILE *);
+static int compare(const void *p1, const void *p2);
 
 int main(int argc, char **argv)
 {
@@ -144,7 +145,6 @@ static void do_file(FILE *fd)
 	long		n;
 	unsigned	readcount;
 	int		i,j;
-	int		compare();
 
 	read_error = 0;
 	rd_fdopen(fd);
@@ -295,8 +295,10 @@ static void do_file(FILE *fd)
 		free((char *)cbufp);
 }
 
-int compare(struct outname *p1, struct outname *p2)
+static int compare(const void* v1, const void* v2)
 {
+	const struct outname* p1 = v1;
+	const struct outname* p2 = v2;
 	int	i;
 
 	if (sectsort_flg) {
