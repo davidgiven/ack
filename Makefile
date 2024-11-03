@@ -42,10 +42,10 @@ MANDATORYCFLAGS = \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn
 
-LDFLAGS ?= -g
-
-MANDATORYLDFLAGS = \
+LDFLAGS ?= -g \
 	-fsanitize=unreachable
+
+MANDATORYLDFLAGS =
 
 # Various commands.
 
