@@ -58,7 +58,7 @@ struct timeb
 
 /* Detect supported system calls. */
 
-#if !defined __CYGWIN__
+#if !defined __CYGWIN__ && !defined __HAIKU__
 #define HAS_ACCT 1
 #else
 #define HAS_ACCT 0
