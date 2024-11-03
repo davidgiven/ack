@@ -34,7 +34,7 @@ jobs:
         run: container-init & timeout 600 vmshell exit 0
 
       - name: pkgman
-        run: 'vmshell pkgman install -y make lua5.1 bison flex'
+        run: 'vmshell pkgman install -y make lua5.1 bison flex gcc ninja'
 
       - name: checkout
         uses: 'actions/checkout@v3'
@@ -45,7 +45,7 @@ jobs:
           tar -cf - ./ | vmshell tar -xf - -C ./src/
 
       - name: build
-        run: vmshell make -C src LUA=lua5.1
+        run: vmshell make -C src LUA=lua5.1 CFLAGS=-g LDFLAGS=-s
 
   build-windows:
     runs-on: windows-latest
