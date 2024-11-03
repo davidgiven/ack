@@ -27,12 +27,12 @@
 #include	"Lpars.h"
 #include	"misc.h"
 
-void LLmessage(register int tk)
+void LLmessage(int tk)
 {
 	if (tk > 0)	{
 		/* if (tk > 0), it represents the token to be inserted.
 		*/
-		register t_token *dotp = &dot;
+		t_token *dotp = &dot;
 
 #ifndef LLNONCORR
 		error("%s missing before %s", symbol2str(tk), symbol2str(dotp->tk_symb));

@@ -18,10 +18,10 @@
 #include <em_mes.h>
 #include "ext.h"
 
-void regvar(register arg_p ap)
+void regvar(arg_p ap)
 {
-	register reg_p rp;
-	register int i;
+	reg_p rp;
+	int i;
 
 	rp = newreg();
 	i = 0;
@@ -55,7 +55,7 @@ void regvar(register arg_p ap)
 
 int inreg(offset off)
 {
-	register reg_p rp;
+	reg_p rp;
 
 	for (rp = curpro.freg; rp != (reg_p) 0; rp = rp->r_next)
 		if (rp->r_par[0] == off)
@@ -65,8 +65,8 @@ int inreg(offset off)
 
 void outregs(void)
 {
-	register reg_p rp, tp;
-	register int i;
+	reg_p rp, tp;
+	int i;
 
 	for (rp = curpro.freg; rp != (reg_p) 0; rp = tp)
 	{
@@ -91,7 +91,7 @@ void outregs(void)
 /* outtes() handles the output of the top elt. messages */
 void outtes(void)
 {
-	register num_p *npp, np;
+	num_p *npp, np;
 
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
 	{
@@ -112,7 +112,7 @@ void outtes(void)
 
 void incregusage(offset off)
 {
-	register reg_p rp;
+	reg_p rp;
 
 #ifndef GLOBAL_OPT
 	/* If we're optimizing the output of the global optimizer

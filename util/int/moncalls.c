@@ -255,7 +255,7 @@ void moncall(void)
 #ifdef LOGGING
 			if (check_log("@m6"))
 			{
-				register int i;
+				int i;
 
 				for (i = 0; i < n; i++)
 				{
@@ -346,7 +346,7 @@ void moncall(void)
 #ifdef LOGGING
 			if (check_log("@m6"))
 			{
-				register int i;
+				int i;
 
 				for (i = 0; i < nbytes; i++)
 				{
@@ -1080,8 +1080,8 @@ static void check_buf(int n, size sz)
 
 static int savestr(int n, ptr addr)
 {
-	register size len;
-	register char *cp, ch;
+	size len;
+	char *cp, ch;
 
 	/* determine the length, carefully */
 	len = 0;
@@ -1111,10 +1111,10 @@ static int savestr(int n, ptr addr)
 
 static int vec(int n1, int n2, ptr addr, char*** vecvec)
 {
-	register char *cp1, *cp2;
+	char *cp1, *cp2;
 	ptr p, ldp;
-	register int n_ent = 0; /* number of entries */
-	register size str = 0; /* total string length */
+	int n_ent = 0; /* number of entries */
+	size str = 0; /* total string length */
 
 	/* determine number of elements n_ent */
 	p = addr;

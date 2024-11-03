@@ -9,7 +9,7 @@
  */
 
 
-void con_part(register int sz, word w)
+void con_part(int sz, word w)
 {
 
 	while (part_size % sz)

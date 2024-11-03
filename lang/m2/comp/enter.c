@@ -38,7 +38,7 @@
 #include	"defmodule.h"
 
 
-static struct def *DoImport(register struct def *, struct scope *, int);
+static struct def *DoImport(struct def *, struct scope *, int);
 
 struct def *Enter(char *name, int kind, struct type *type, int pnam)
 {
@@ -46,7 +46,7 @@ struct def *Enter(char *name, int kind, struct type *type, int pnam)
 		"type" in the Current Scope. If it is a standard name, also
 		put its number in the definition structure.
 	*/
-	register struct def *df;
+	struct def *df;
 
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
@@ -66,7 +66,7 @@ struct def *EnterType(char *name, struct type *type)
 	return Enter(name, D_TYPE, type, 0);
 }
 
-void EnterEnumList(struct node *Idlist, register struct type *type)
+void EnterEnumList(struct node *Idlist, struct type *type)
 {
 	/*	Put a list of enumeration literals in the symbol table.
 		They all have type "type".
@@ -75,8 +75,8 @@ void EnterEnumList(struct node *Idlist, register struct type *type)
 		be exported, in which case its literals must also be exported.
 		Thus, we need an easy way to get to them.
 	*/
-	register struct def *df, *df1 = 0;
-	register struct node *idlist = Idlist;
+	struct def *df, *df1 = 0;
+	struct node *idlist = Idlist;
 
 	type->enm_ncst = 0;
 	for (; idlist; idlist = idlist->nd_NEXT) {
@@ -92,7 +92,7 @@ void EnterEnumList(struct node *Idlist, register struct type *type)
 	FreeNode(Idlist);
 }
 
-void EnterFieldList(struct node *Idlist, register struct type *type, struct scope *scope,
+void EnterFieldList(struct node *Idlist, struct type *type, struct scope *scope,
 	arith *addr)
 {
 	/*	Put a list of fields in the symbol table.
@@ -100,8 +100,8 @@ void EnterFieldList(struct node *Idlist, register struct type *type, struct scop
 		Mark them as QUALIFIED EXPORT, because that's exactly what
 		fields are, you can get to them by qualifying them.
 	*/
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	struct def *df;
+	struct node *idlist = Idlist;
 
 	for (; idlist; idlist = idlist->nd_NEXT) {
 		df = define(idlist->nd_IDF, scope, D_FIELD);
@@ -115,9 +115,9 @@ void EnterFieldList(struct node *Idlist, register struct type *type, struct scop
 
 void EnterVarList(struct node *Idlist, struct type *type, int local)
 {
-	register struct def *df;
-	register struct node *idlist = Idlist;
-	register struct scopelist *sc = CurrVis;
+	struct def *df;
+	struct node *idlist = Idlist;
+	struct scopelist *sc = CurrVis;
 	char buf[256];
 
 	if (local) {
@@ -133,7 +133,7 @@ void EnterVarList(struct node *Idlist, struct type *type, int local)
 		if (idlist->nd_LEFT->nd_NEXT) {
 			/* An address was supplied
 			*/
-			register struct type *tp = idlist->nd_LEFT->nd_NEXT->nd_type;
+			struct type *tp = idlist->nd_LEFT->nd_NEXT->nd_type;
 
 			df->df_flags |= D_ADDRGIVEN | D_NOREG;
 			if (tp != error_type && !(tp->tp_fund & T_CARDINAL)){
@@ -186,9 +186,9 @@ void EnterParamList(struct paramlist **ppr,
 	int VARp,
 	arith *off)
 {
-	register struct paramlist *pr;
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	struct paramlist *pr;
+	struct def *df;
+	struct node *idlist = Idlist;
 	struct node *dummy = 0;
 	static struct paramlist *last;
 
@@ -230,14 +230,14 @@ void EnterParamList(struct paramlist **ppr,
 }
 
 
-static void ImportEffects(register struct def *idef, struct scope *scope, int flag)
+static void ImportEffects(struct def *idef, struct scope *scope, int flag)
 {
 	/*	Handle side effects of an import:
 		- a module could have unqualified exports ???
 		- importing an enumeration type also imports literals
 	*/
-	register struct def *df = idef;
-	register struct type *tp;
+	struct def *df = idef;
+	struct type *tp;
 
 	while ((df->df_kind & D_IMPORTED) && df->imp_def != df) {
 		/* The second condition could occur on some (erroneous and
@@ -296,11 +296,11 @@ static void ImportEffects(register struct def *idef, struct scope *scope, int fl
 	}
 }
 
-static struct def *DoImport(register struct def *df, struct scope *scope, int flag)
+static struct def *DoImport(struct def *df, struct scope *scope, int flag)
 {
 	/*	Definition "df" is imported to scope "scope".
 	*/
-	register struct def *idef = define(df->df_idf, scope, D_IMPORT);
+	struct def *idef = define(df->df_idf, scope, D_IMPORT);
 
 	idef->imp_def = df;
 	idef->df_flags |= flag;
@@ -309,13 +309,13 @@ static struct def *DoImport(register struct def *df, struct scope *scope, int fl
 }
 
 
-static void  ForwModule(register struct def *df, struct node *nd)
+static void  ForwModule(struct def *df, struct node *nd)
 {
 	/*	An import is done from a not yet defined module "df".
 		We could also end up here for not found DEFINITION MODULES.
 		Create a declaration and a scope for this module.
 	*/
-	register struct scopelist *vis;
+	struct scopelist *vis;
 
 	if (df->df_scope != GlobalScope) {
 		df->df_scope = enclosing(CurrVis)->sc_scope;
@@ -334,12 +334,12 @@ static void  ForwModule(register struct def *df, struct node *nd)
 	df->for_node = nd;
 }
 
-static struct def *ForwDef(register struct node *ids, struct scope *scope)
+static struct def *ForwDef(struct node *ids, struct scope *scope)
 {
 	/*	Enter a forward definition of "ids" in scope "scope",
 		if it is not already defined.
 	*/
-	register struct def *df;
+	struct def *df;
 
 	if (!(df = lookup(ids->nd_IDF, scope, 0, 0))) {
 		df = define(ids->nd_IDF, scope, D_FORWARD);
@@ -352,8 +352,8 @@ static struct def *ForwDef(register struct node *ids, struct scope *scope)
 
 void EnterExportList(struct node *Idlist, int qualified)
 {
-	register struct node *idlist = Idlist;
-	register struct def *df, *df1;
+	struct node *idlist = Idlist;
+	struct def *df, *df1;
 
 	for (;idlist; idlist = idlist->nd_NEXT) {
 		df = lookup(idlist->nd_IDF, CurrentScope, 0, 0);
@@ -431,11 +431,11 @@ void CheckForImports(struct def *df)
 	/*	We have a definition for "df"; check all imports of
 		it for side-effects
 	*/
-	register struct def *df1 = df->df_idf->id_def;
+	struct def *df1 = df->df_idf->id_def;
 
 	while (df1) {
 		if (df1->df_kind & D_IMPORTED) {
-			register struct def *df2 = df1->imp_def;
+			struct def *df2 = df1->imp_def;
 
 			while (df2->df_kind & D_IMPORTED) df2 = df2->imp_def;
 			if (df2 == df) {
@@ -451,7 +451,7 @@ void EnterFromImportList(struct node *idlist, struct def *FromDef, struct node *
 	/*	Import the list Idlist from the module indicated by Fromdef.
 	*/
 	struct scope *sc;
-	register struct def *df;
+	struct def *df;
 	char *module_name = FromDef->df_idf->id_text;
 
 	switch(FromDef->df_kind) {

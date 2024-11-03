@@ -86,7 +86,7 @@ void init_replacements(short psize, short wsize)
 	 * as a 'Load pointer' instruction.
 	 */
 
-	register int i, j;
+	int i, j;
 	short load_pointer;
 	struct repl* r;
 
@@ -165,7 +165,7 @@ static alloc_p find_alloc(alloc_p alloclist, line_p l, short t)
 	 * l at time t.
 	 */
 
-	register alloc_p alloc, m;
+	alloc_p alloc, m;
 
 	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
 	{
@@ -321,7 +321,7 @@ static line_p store_local(short size, offset off)
 static line_p init_place(bblock_p b)
 {
 
-	register line_p l, prev;
+	line_p l, prev;
 
 	prev = (line_p)0;
 	for (l = b->b_start; l != (line_p)0; l = l->l_next)
@@ -372,7 +372,7 @@ static void emit_init_code(alloc_p list)
 	 * "LOC 25 ; STL -10" in EM terminology.
 	 */
 
-	register alloc_p alloc, m;
+	alloc_p alloc, m;
 	Lindex bi;
 	bblock_p b;
 
@@ -412,8 +412,8 @@ static void emit_mesregs(proc_p p, alloc_p alloclist)
 
 static void rem_mes(proc_p p)
 {
-	register bblock_p b;
-	register line_p l, next;
+	bblock_p b;
+	line_p l, next;
 	offset m;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
@@ -437,9 +437,9 @@ void xform_proc(proc_p p, alloc_p alloclist, short nrinstrs, line_p instrmap[])
 	 * at a point where the item is kept in a register.
 	 */
 
-	register short now = 0;
-	register line_p l, next;
-	register bblock_p b;
+	short now = 0;
+	line_p l, next;
+	bblock_p b;
 	alloc_p alloc;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

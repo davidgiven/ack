@@ -11,21 +11,21 @@
 #include "data.h"
 #include "types.h"
 
-int match(register token_p tp, register set_p tep, int optexp);
-void instance(int instno,register token_p token);
-void cinstance(int instno,register token_p token,
+int match(token_p tp, set_p tep, int optexp);
+void instance(int instno, token_p token);
+void cinstance(int instno, token_p token,
 		 register token_p tp,int regno);
 int eqtoken(token_p tp1,token_p tp2);
 int distance(int cindex);
 unsigned costcalc(cost_t cost);
 int ssize(int tokexpno);
-int tsize(register token_p tp);
+int tsize(token_p tp);
 
 #ifdef MAXSPLIT
 int instsize(int tinstno,token_p tp);
 #endif /* MAXSPLIT */
 
-void tref(register token_p tp,int amount);
+void tref(token_p tp,int amount);
 
 #ifdef MAXSPLIT
 int split(token_p tp,int *ip,int ply,int toplevel);

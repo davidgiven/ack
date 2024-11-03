@@ -113,7 +113,7 @@ int is_reg( str, op)
 char *str;
 struct t_operand *op;
 {
-	register struct regnam *p = regnam;
+	struct regnam *p = regnam;
 
 	while (p->regstr) {
 		if (! strcmp(p->regstr, str)) {

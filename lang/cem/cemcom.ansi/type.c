@@ -36,7 +36,7 @@ struct type *create_type(int fund)
 	/*	A brand new struct type is created, and its tp_fund set
 	 to fund.
 	 */
-	register struct type *ntp = new_type();
+	struct type *ntp = new_type();
 
 	ntp->tp_fund = fund;
 	ntp->tp_size = (arith) -1;
@@ -59,14 +59,14 @@ struct type *promoted_type(struct type *tp)
 		return tp;
 }
 
-struct type *construct_type(int fund, register struct type *tp, int qual,
+struct type *construct_type(int fund, struct type *tp, int qual,
 arith count, /* for fund == ARRAY only */
-register struct proto *pl)
+struct proto *pl)
 {
 	/*	fund must be a type constructor: FIELD, FUNCTION, POINTER or
 	 ARRAY. The pointer to the constructed type is returned.
 	 */
-	register struct type *dtp;
+	struct type *dtp;
 
 	switch (fund)
 	{
@@ -108,13 +108,13 @@ register struct proto *pl)
 	return dtp;
 }
 
-struct type *function_of(register struct type *tp, struct proto *pl, int qual)
+struct type *function_of(struct type *tp, struct proto *pl, int qual)
 {
 #if 0
 	/* See comment below */
-	register struct type *dtp = tp->tp_function;
+	struct type *dtp = tp->tp_function;
 #else
-	register struct type *dtp;
+	struct type *dtp;
 #endif
 
 	/* look for a type with the right qualifier */
@@ -151,9 +151,9 @@ struct type *function_of(register struct type *tp, struct proto *pl, int qual)
 	return dtp;
 }
 
-struct type *pointer_to(register struct type *tp, int qual)
+struct type *pointer_to(struct type *tp, int qual)
 {
-	register struct type *dtp = tp->tp_pointer;
+	struct type *dtp = tp->tp_pointer;
 
 	/* look for a type with the right qualifier */
 	while (dtp && dtp->tp_typequal != qual)
@@ -173,9 +173,9 @@ struct type *pointer_to(register struct type *tp, int qual)
 	return dtp;
 }
 
-struct type * array_of(register struct type *tp, arith count, int qual)
+struct type * array_of(struct type *tp, arith count, int qual)
 {
-	register struct type *dtp = tp->tp_array;
+	struct type *dtp = tp->tp_array;
 
 	/* look for a type with the right size */
 	while (dtp && (dtp->tp_nel != count || dtp->tp_typequal != qual))
@@ -201,9 +201,9 @@ struct type * array_of(register struct type *tp, arith count, int qual)
 }
 
 #ifndef NOBITFIELD
-struct type * field_of(register struct type *tp, int qual)
+struct type * field_of(struct type *tp, int qual)
 {
-	register struct type *dtp = create_type(FIELD);
+	struct type *dtp = create_type(FIELD);
 
 	dtp->tp_up = tp;
 	dtp->tp_align = tp->tp_align;
@@ -232,7 +232,7 @@ void idf2type(struct idf *idf, struct type **tpp)
 	 descriptor to prevent garbage at the initialisation of
 	 arrays with unknown size.
 	 */
-	register struct type *tp = idf->id_def->df_type;
+	struct type *tp = idf->id_def->df_type;
 
 	if (*tpp)
 		error("multiple types in declaration");
@@ -255,7 +255,7 @@ arith align(arith pos, int al)
 
 struct type * standard_type(int fund, int sgn, int algn, arith sz)
 {
-	register struct type *tp = create_type(fund);
+	struct type *tp = create_type(fund);
 
 	tp->tp_unsigned = sgn != 0;
 	tp->tp_align = algn;
@@ -266,8 +266,8 @@ struct type * standard_type(int fund, int sgn, int algn, arith sz)
 
 void completed(struct type *tp)
 {
-	register struct type *atp = tp->tp_array;
-	register struct type *etp = tp;
+	struct type *atp = tp->tp_array;
+	struct type *etp = tp;
 
 	switch (etp->tp_fund)
 	{

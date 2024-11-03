@@ -9,8 +9,8 @@ static char buf[34];
 
 char * __ultostr(unsigned long val, int radix)
 {
-   register char *p;
-   register int c;
+   char *p;
+   int c;
 
    if( radix > 36 || radix < 2 ) return 0;
 

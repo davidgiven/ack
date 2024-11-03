@@ -60,8 +60,8 @@ int logarg(char* str)
 
 	 The string is interesting if it contains a '='.
 	 */
-	register char* arg = str;
-	register char ch;
+	char* arg = str;
+	char ch;
 
 	while ((ch = *arg) && (ch != '='))
 	{
@@ -189,12 +189,12 @@ void close_log(void)
 
 static void set_lmask(char* mask)
 {
-	register char* mp = mask;
+	char* mp = mask;
 
 	while (*mp != 0)
 	{
-		register char* lvp;
-		register int lev;
+		char* lvp;
+		int lev;
 
 		while (layout(*mp))
 		{
@@ -210,7 +210,7 @@ static void set_lmask(char* mask)
 		/* find classes */
 		while (mp != lvp)
 		{
-			register int mc = *mp;
+			int mc = *mp;
 
 			if (inrange(mc, 'a', 'z') || inrange(mc, 'A', 'Z') || mc == '+' || mc == '*')
 			{
@@ -219,7 +219,7 @@ static void set_lmask(char* mask)
 			}
 			else if (mc == '-')
 			{
-				register char c;
+				char c;
 
 				for (c = *(mp - 1) + 1; c <= *(mp + 1); c++)
 				{
@@ -315,12 +315,12 @@ static char* getpar(char* var)
 {
 	/*	Looks up the name in the argument list.
 	 */
-	register int count;
-	register int ln = strlen(var);
+	int count;
+	int ln = strlen(var);
 
 	for (count = 0; count < argcount; count++)
 	{
-		register char* arg = arglist[count];
+		char* arg = arglist[count];
 
 		if (strncmp(var, arg, ln) == 0 && arg[ln] == '=')
 		{
@@ -336,7 +336,7 @@ static long longpar(
     long def /* default value */
 )
 {
-	register char* res = getpar(var);
+	char* res = getpar(var);
 
 	return (res ? atol(res) : def);
 }

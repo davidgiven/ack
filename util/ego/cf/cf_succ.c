@@ -75,7 +75,7 @@ static void case_flow(short instr, line_p desc, bblock_p b)
 	 * in which the case instruction appears (b).
 	 */
 
-	register arg_p arg;
+	arg_p arg;
 
 	assert(instr == op_csa || instr == op_csb);
 	assert(TYPE(desc) == OPLIST);
@@ -122,7 +122,7 @@ static line_p case_descr(line_p lnp)
 	 * of the procedure in which the csa/csb occurs.
 	 */
 
-	register line_p l;
+	line_p l;
 	dblock_p d;
 	obj_p obj;
 	dblock_id id;
@@ -177,7 +177,7 @@ static void last2_instrs(bblock_p b, line_p* last_out, line_p* prev_out)
 	 * instruction, prev_out is 0.
 	 */
 
-	register line_p l1, l2;
+	line_p l1, l2;
 
 	l2 = b->b_start; /* first instruction of b */
 	assert(l2 != (line_p)0); /* block can not be empty */
@@ -204,7 +204,7 @@ void control_flow(bblock_p head)
 	 * for every basic block.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	line_p lnp, prev;
 	short instr;
 

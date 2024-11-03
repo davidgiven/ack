@@ -17,7 +17,7 @@ static void idinit(char *, int, int);
 
 void initlex(void)
 {
-	register int i,j;
+	int i,j;
 	init_idf();
 	idinit("lab",op_lab,DEFILB);
 	for(i=sp_fmnem;i<=sp_lmnem;i++) {

@@ -63,8 +63,8 @@ static void coutoff(offset off)
 
 static void outsym(const char* s, int t)
 {
-	register byte* p;
-	register unsigned num;
+	byte* p;
+	unsigned num;
 
 	if (s[0] == '.')
 	{
@@ -187,8 +187,8 @@ static void coutobject(obj_p obj)
 
 static void cputstr(argb_p abp)
 {
-	register argb_p tbp;
-	register int length;
+	argb_p tbp;
+	int length;
 
 	length = 0;
 	tbp = abp;
@@ -234,7 +234,7 @@ static void numlab(int n)
 
 static void cputargs(line_p lnp)
 {
-	register arg_p ap;
+	arg_p ap;
 	int cnt = 0;
 	ap = ARG(lnp);
 	while (ap != (arg_p)0)

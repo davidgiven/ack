@@ -145,18 +145,18 @@ struct def	{		/* list of definitions for a name */
 
 /* ALLOCDEF "def" 50 */
 
-extern struct def *MkDef(register struct idf *id, register struct scope *scope,
+extern struct def *MkDef(struct idf *id, register struct scope *scope,
 		long kind);
-extern struct def *define(register struct idf *id, register struct scope *scope,
+extern struct def *define(struct idf *id, register struct scope *scope,
 		long kind);
 extern void DoDirective(struct idf *directive, struct node *nd, struct type *tp,
 		struct scopelist *scl, int function);
-extern struct def *DeclProc(register struct node *nd, struct type *tp,
+extern struct def *DeclProc(struct node *nd, struct type *tp,
 		register struct scopelist *scl);
 extern struct def *
-DeclFunc(register struct node *nd, struct type *tp,
+DeclFunc(struct node *nd, struct type *tp,
 		register struct scopelist *scl);
-extern void EndFunc(register struct def *df);
-extern void EndBlock(register struct def *block_df);
+extern void EndFunc(struct def *df);
+extern void EndBlock(struct def *block_df);
 
 #endif

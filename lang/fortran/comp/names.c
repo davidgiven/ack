@@ -335,7 +335,7 @@ FILE *outfile;
 
  ftnint
 commlen(vl)
- register chainp vl;
+ chainp vl;
 {
 	ftnint size;
 	int type;
@@ -359,8 +359,8 @@ commlen(vl)
 pad_common(c)
  Extsym *c;
 {
-	register chainp cvl;
-	register Namep v;
+	chainp cvl;
+	Namep v;
 	long L = c->maxleng;
 	int type;
 	struct Dimblock *t;

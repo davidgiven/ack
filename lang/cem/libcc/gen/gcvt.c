@@ -11,9 +11,9 @@ gcvt(value, ndigit, buf)
 	int ndigit;
 {
 	int sign, dp;
-	register char *s1, *s2;
-	register int i;
-	register int nndigit = ndigit;
+	char *s1, *s2;
+	int i;
+	int nndigit = ndigit;
 
 	s1 = ecvt(value, ndigit, &dp, &sign);
 	s2 = buf;

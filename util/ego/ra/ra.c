@@ -156,9 +156,9 @@ static void ra_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
-	register bblock_p b;
+	loop_p lp;
+	Lindex pi;
+	bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -176,9 +176,9 @@ static void ra_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
-	register bblock_p b;
+	loop_p lp;
+	Lindex pi;
+	bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -195,8 +195,8 @@ static void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
-	register bblock_p b;
-	register Lindex i;
+	bblock_p b;
+	Lindex i;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -211,9 +211,9 @@ static void make_instrmap(proc_p p, line_p map[])
 {
 	/* make the instructions map of procedure p */
 
-	register bblock_p b;
-	register line_p l;
-	register int i = 0;
+	bblock_p b;
+	line_p l;
+	int i = 0;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -240,8 +240,8 @@ static bool useful_item(item_p item)
 
 static void cleantimeset(lset s)
 {
-	register Lindex i;
-	register time_p t;
+	Lindex i;
+	time_p t;
 
 	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
 	{
@@ -257,7 +257,7 @@ static item_p cat_items(item_p items[])
 	 * Remove items that are used only once.
 	 */
 
-	register item_p it;
+	item_p it;
 	item_p *ip, head, next;
 	int t;
 
@@ -285,7 +285,7 @@ static item_p cat_items(item_p items[])
 
 static void clean_interval(interv_p list)
 {
-	register interv_p x, next;
+	interv_p x, next;
 
 	for (x = list; x != (interv_p)0; x = next)
 	{
@@ -296,7 +296,7 @@ static void clean_interval(interv_p list)
 
 static void clean_allocs(alloc_p list)
 {
-	register alloc_p x, next;
+	alloc_p x, next;
 
 	for (x = list; x != (alloc_p)0; x = next)
 	{
@@ -312,7 +312,7 @@ static void clean_allocs(alloc_p list)
 
 static void cleanitems(item_p list)
 {
-	register item_p x, next;
+	item_p x, next;
 
 	for (x = list; x != (item_p)0; x = next)
 	{
@@ -501,7 +501,7 @@ int cnt_regtypes[reg_float+1];
 statistics(items)
 	item_p items[];
 {
-	register item_p item,next;
+	item_p item,next;
 	int t,r;
 	int cnt;
 

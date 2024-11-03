@@ -18,7 +18,7 @@ short opt_line; /* max_line_no - # lines removed from end
  */
 
 /* Forward declarations. */
-static int valid(register line_t *);
+static int valid(line_t *);
 static char *findfit(int, cons_t);
 static char *findnop(int);
 
@@ -28,13 +28,13 @@ static char *findnop(int);
  */
 void pass_3(void)
 {
-	register line_t *lnp, *rev_lnp;
+	line_t *lnp, *rev_lnp;
 	line_t *tmp_lnp;
 	locl_t *lbp;
 	int min_l, max_l, min_bytes;
 	short last_line;
 	short hol_err_line;
-	register int insno;
+	int insno;
 
 	pass = 3;
 	opt_line = line_num;
@@ -147,8 +147,8 @@ int oplength(int flag)
 void determine_props(line_t *lnp, int *min_len, int *max_len)
 {
 	cons_t val;
-	register int insno;
-	register char *f_off, *l_off;
+	int insno;
+	char *f_off, *l_off;
 	char defined;
 
 	insno = ctrunc(lnp->instr_num);
@@ -194,7 +194,7 @@ void determine_props(line_t *lnp, int *min_len, int *max_len)
 
 static char *findfit(int instr, cons_t val)
 {
-	register char *currc, *endc;
+	char *currc, *endc;
 	int found, flags, number;
 	char *opc;
 
@@ -220,7 +220,7 @@ static char *findfit(int instr, cons_t val)
 
 static char* findnop(int instr)
 {
-	register char *currc, *endc;
+	char *currc, *endc;
 
 	endc = opindex[instr + 1];
 	for (currc = opindex[instr]; currc < endc; currc++)
@@ -294,9 +294,9 @@ int opfit(int flag, int number, cons_t val, int i_flag)
  */
 cons_t parval(line_t *lnp, char *defined)
 {
-	register int type;
-	register locl_t *lbp;
-	register glob_t *gbp;
+	int type;
+	locl_t *lbp;
+	glob_t *gbp;
 	cons_t offs;
 
 	*defined = TRUE;
@@ -374,7 +374,7 @@ cons_t parval(line_t *lnp, char *defined)
 	return (0);
 }
 
-static int valid(register line_t *lnp)
+static int valid(line_t *lnp)
 {
 	cons_t val;
 	int type;

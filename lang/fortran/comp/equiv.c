@@ -32,7 +32,7 @@ LOCAL eqvcommon(), eqveqv(), nsubs();
  */
 doequiv()
 {
-	register int i;
+	int i;
 	int inequiv;			/* True if one namep occurs in
 					   several EQUIV declarations */
 	int comno;		/* Index into Extsym table of the last
@@ -42,10 +42,10 @@ doequiv()
 	ftnint comoffset;	/* Index into the COMMON block */
 	ftnint offset;		/* Offset from array base */
 	ftnint leng;
-	register struct Equivblock *equivdecl;
-	register struct Eqvchain *q;
+	struct Equivblock *equivdecl;
+	struct Eqvchain *q;
 	struct Primblock *primp;
-	register Namep np;
+	Namep np;
 	int k, k1, ns, pref, t;
 	chainp cp;
 	extern int type_pref[];
@@ -235,8 +235,8 @@ ftnint comoffset;
 {
 	int ovarno;
 	ftnint k, offq;
-	register Namep np;
-	register struct Eqvchain *q;
+	Namep np;
+	struct Eqvchain *q;
 
 	if(comoffset + p->eqvbottom < 0)
 	{
@@ -308,8 +308,8 @@ LOCAL eqveqv(nvarno, ovarno, delta)
 int ovarno, nvarno;
 ftnint delta;
 {
-	register struct Equivblock *neweqv, *oldeqv;
-	register Namep np;
+	struct Equivblock *neweqv, *oldeqv;
+	Namep np;
 	struct Eqvchain *q, *q1;
 
 	neweqv = eqvclass + nvarno;
@@ -338,9 +338,9 @@ ftnint delta;
 
 
 freqchain(p)
-register struct Equivblock *p;
+struct Equivblock *p;
 {
-	register struct Eqvchain *q, *oq;
+	struct Eqvchain *q, *oq;
 
 	for(q = p->equivs ; q ; q = oq)
 	{
@@ -358,10 +358,10 @@ register struct Equivblock *p;
    list) */
 
 LOCAL nsubs(p)
-register struct Listblock *p;
+struct Listblock *p;
 {
-	register int n;
-	register chainp q;
+	int n;
+	chainp q;
 
 	n = 0;
 	if(p)

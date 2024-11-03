@@ -31,10 +31,10 @@ this software.
 
  int
 memcmp(s1, s2, n)
- register char *s1, *s2;
+ char *s1, *s2;
  int n;
 {
-	register char *se;
+	char *se;
 
 	for(se = s1 + n; s1 < se; s1++, s2++)
 		if (*s1 != *s2)
@@ -44,10 +44,10 @@ memcmp(s1, s2, n)
 
  char *
 memcpy(s1, s2, n)
- register char *s1, *s2;
+ char *s1, *s2;
  int n;
 {
-	register char *s0 = s1, *se = s1 + n;
+	char *s0 = s1, *se = s1 + n;
 
 	while(s1 < se)
 		*s1++ = *s2++;
@@ -55,11 +55,11 @@ memcpy(s1, s2, n)
 	}
 
 memset(s, c, n)
- register char *s;
- register int c;
+ char *s;
+ int c;
  int n;
 {
-	register char *se = s + n;
+	char *se = s + n;
 
 	while(s < se)
 		*s++ = c;

@@ -47,8 +47,8 @@ void rd_rew_relos(struct outhead *head);
 void rd_name(struct outname* name, unsigned int cnt);
 void rd_string(char* addr, long len);
 
-int rd_arhdr(FILE* fd, register struct ar_hdr *arhdr);
-void rd_ranlib(FILE* fd, register struct ranlib *ran, register long cnt);
+int rd_arhdr(FILE* fd, struct ar_hdr *arhdr);
+void rd_ranlib(FILE* fd, struct ranlib *ran, long cnt);
 int rd_int2(FILE* fd);
 long rd_int4(FILE* fd);
 unsigned int rd_unsigned2(FILE* fd);

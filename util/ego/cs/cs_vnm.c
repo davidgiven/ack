@@ -313,8 +313,8 @@ static void hopeless(int instr)
 
 void vnm(bblock_p bp)
 {
-	register line_p lnp;
-	register entity_p rep;
+	line_p lnp;
+	entity_p rep;
 	line_p lfirst;
 	struct token tk, tk1, tk2, tk3;
 

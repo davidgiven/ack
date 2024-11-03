@@ -142,8 +142,8 @@ static void def_use(proc_p p)
 	 * the basic block from beginning till end.
 	 */
 
-	register bblock_p b;
-	register line_p l;
+	bblock_p b;
+	line_p l;
 	short v;
 	bool found;
 	cset all_ind_uses;
@@ -224,7 +224,7 @@ static void solve_lv(proc_p p)
 	 *        where SUCC(b) = {s1, ... , sn}
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	cset newout = Cempty_set(nrvars);
 	bool change = TRUE;
 
@@ -267,7 +267,7 @@ static void init_live_dead(bblock_p b)
 	 * live or dead at the end of b.
 	 */
 
-	register short v;
+	short v;
 	local_p loc;
 
 	for (v = 1; v <= nrlocals; v++)
@@ -293,7 +293,7 @@ static line_p make_mesg(short mesg, local_p loc)
 	 */
 
 	line_p l = newline(OPLIST);
-	register arg_p ap;
+	arg_p ap;
 
 	l->l_instr = ps_mes;
 	ap = ARG(l) = newarg(ARGOFF);
@@ -389,7 +389,7 @@ static void definition(line_p l, bool* useless_out, short* v_out, bool mesgflag)
 			/*	Tricky stuff here. Make sure that a variable
 			    that is assigned to is alive, at least for
 			    a very very short time. Otherwize, the
-			    register allocation pass might think that it
+			    allocation pass might think that it
 			    is never alive, and (incorrectly) use the
 			    same register for this variable as for
 			    another variable, that is alive at this point.
@@ -503,8 +503,8 @@ static void lv_mesg(proc_p p, bool mesgflag)
 	 * On the fly, useless assignments are removed.
 	 */
 
-	register bblock_p b;
-	register line_p l;
+	bblock_p b;
+	line_p l;
 	line_p lnp, prev;
 	bblock_p prevb = (bblock_p)0;
 	short v;
@@ -559,7 +559,7 @@ static void lv_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -571,7 +571,7 @@ static void lv_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{

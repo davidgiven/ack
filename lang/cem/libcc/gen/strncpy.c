@@ -1,7 +1,7 @@
 /* $Id$ */
 char
 *strncpy(s1, s2, n)
-register char *s1, *s2;
+char *s1, *s2;
 int n;
 {
 /* Copy s2 to s1, but at most n characters. */

@@ -35,10 +35,10 @@ void (*_doscan_unget)(int c);
  * according to the format of the number. At the end of the function, base
  * is then set to 0, so strtol() will get the right argument.
  */
-static char* o_collect(register int c, char type, int width, int* basep)
+static char* o_collect(int c, char type, int width, int* basep)
 {
-	register char* bufp = inp_buf;
-	register int base;
+	char* bufp = inp_buf;
+	int base;
 
 	switch (type)
 	{
@@ -120,9 +120,9 @@ static char* o_collect(register int c, char type, int width, int* basep)
  * not necessary, although the use of the width field can cause incomplete
  * numbers to be passed to strtod(). (e.g. 1.3e+)
  */
-static char* f_collect(register int c, register int width)
+static char* f_collect(int c, int width)
 {
-	register char* bufp = inp_buf;
+	char* bufp = inp_buf;
 	int digit_seen = 0;
 
 	if (c == '-' || c == '+')
@@ -206,13 +206,13 @@ int _doscan(const char* format, va_list ap)
 	int conv = 0; /* # of conversions */
 	int base; /* conversion base */
 	unsigned long val; /* an integer value */
-	register char* str; /* temporary pointer */
+	char* str; /* temporary pointer */
 	char* tmp_string; /* ditto */
 	unsigned width; /* width of field */
 	int flags; /* some flags */
 	int reverse; /* reverse the checking in [...] */
 	int kind;
-	register int ic; /* the input character */
+	int ic; /* the input character */
 #if ACKCONF_WANT_STDIO_FLOAT
 	long double ld_val;
 #endif

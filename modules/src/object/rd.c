@@ -47,7 +47,7 @@ static int sectionnr;
 static void
 OUTREAD(int p, char* b, long n)
 {
-	register long l = outseek[p];
+	long l = outseek[p];
 
 	if (currpos != l) {
 		fseek(outfile, l, SEEK_SET);
@@ -73,7 +73,7 @@ static int offcnt;
 
 int rd_fdopen(FILE* fd)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < NPARTS; i++) outseek[i] = 0;
 	offcnt = 0;
@@ -103,11 +103,11 @@ FILE* rd_fd(void)
 void
 rd_ohead(struct outhead* head)
 {
-	register long off;
+	long off;
 
 	OUTREAD(PARTEMIT, (char *) head, (long) SZ_HEAD);
 	{
-		register char *c = (char *) head + (SZ_HEAD-4);
+		char *c = (char *) head + (SZ_HEAD-4);
 
 		head->oh_nchar = get4(c);
 		c -= 4; head->oh_nemit = get4(c);
@@ -133,7 +133,7 @@ rd_ohead(struct outhead* head)
 void
 rd_rew_relos(struct outhead* head)
 {
-	register long off = OFF_RELO(*head) + rd_base;
+	long off = OFF_RELO(*head) + rd_base;
 
 	BEGINSEEK(PARTRELO, off);
 }
@@ -141,7 +141,7 @@ rd_rew_relos(struct outhead* head)
 void
 rd_sect(struct outsect* sect, unsigned int cnt)
 {
-	register char *c = (char *) sect + cnt * SZ_SECT;
+	char *c = (char *) sect + cnt * SZ_SECT;
 
 	OUTREAD(PARTEMIT, (char *) sect, (long)cnt * SZ_SECT);
 	sect += cnt;
@@ -182,7 +182,7 @@ rd_relo(struct outrelo* relo, unsigned int cnt)
 
 	OUTREAD(PARTRELO, (char *) relo, (long) cnt * SZ_RELO);
 	{
-		register char *c = (char *) relo + (long) cnt * SZ_RELO;
+		char *c = (char *) relo + (long) cnt * SZ_RELO;
 
 		relo += cnt;
 		while (cnt--) {
@@ -201,7 +201,7 @@ rd_name(struct outname* name, unsigned int cnt)
 
 	OUTREAD(PARTNAME, (char *) name, (long) cnt * SZ_NAME);
 	{
-		register char *c = (char *) name + (long) cnt * SZ_NAME;
+		char *c = (char *) name + (long) cnt * SZ_NAME;
 
 		name += cnt;
 		while (cnt--) {

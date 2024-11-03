@@ -12,15 +12,15 @@ execvp(name, argv)
 char *name, **argv;
 {
 	char *path = getenv("PATH");
-	register char *c = "";
+	char *c = "";
 	char progname[1024];
 
 	if (path == 0) path = ":/bin:/usr/bin";
 	if (! index(name, '/')) c = path;
 
 	do {
-		register char *p = progname;
-		register char *n = name;
+		char *p = progname;
+		char *n = name;
 		char *c1 = c;
 
 		while (*c && *c != ':') {

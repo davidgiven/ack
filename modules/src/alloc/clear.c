@@ -10,9 +10,9 @@
 
 /* instead of Calloc: */
 
-void clear(register char *ptr, register unsigned int n)
+void clear(char *ptr, unsigned int n)
 {
-	register long *q = (long *) ptr;
+	long *q = (long *) ptr;
 
 	while (n >= 8*sizeof (long))	{
 			/* high-speed clear loop */

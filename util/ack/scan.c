@@ -55,7 +55,7 @@ static  int     suf_found;      /* Was the suffix at least recognized ? */
 /********************       The hard work          ********************/
 
 static void start_scan(void) {
-	register list_elem *scan ;
+	list_elem *scan ;
 
 	scanlist(l_first(tr_list),scan) {
 		t_cont(*scan)->t_scan=NO ;
@@ -69,8 +69,8 @@ static void start_scan(void) {
 }
 
 static void try(list_elem *f_scan, const char *suffix) {
-	register list_elem *scan ;
-	register trf  *trafo ;
+	list_elem *scan ;
+	trf  *trafo ;
 	/* Try to find a transformation path starting at f_scan for a
 	   file with the indicated suffix.
 	   If the suffix is already reached or a combiner is found
@@ -111,7 +111,7 @@ static void try(list_elem *f_scan, const char *suffix) {
 				/* We know what happens from this phase on,
 				   so take a shortcut.
 				*/
-				register trf *sneak ;
+				trf *sneak ;
 				sneak= trafo ;
 				while( (sneak=sneak->t_next) ) {
 					sneak->t_scan=YES ;
@@ -139,7 +139,7 @@ static void try(list_elem *f_scan, const char *suffix) {
 }
 
 static void scan_found(void) {
-	register list_elem *scan;
+	list_elem *scan;
 	int ncount, ocount, pcount ;
 
 	suf_found= 1;
@@ -187,7 +187,7 @@ static void scan_found(void) {
 }
 
 static int satisfy(trf *trafo, const char *suffix) {
-	register char *f_char, *l_char ;
+	char *f_char, *l_char ;
 	/* Check whether this transformation is present for
 	   the current machine and the parameter suffix is among
 	   the input suffices. If so, return 1. 0 otherwise
@@ -216,8 +216,8 @@ static enum f_path scan_end(trf **first) {    /* Finalization */
 	/* Set the flags for the transformation up to, but not including,
 	   the combiner
 	*/
-	register trf *prev, *curr ;
-	register list_elem *scan;
+	trf *prev, *curr ;
+	list_elem *scan;
 
 #ifdef DEBUG
 	if ( debug>=3 ) vprint("End_scan\n");
@@ -253,7 +253,7 @@ static enum f_path scan_end(trf **first) {    /* Finalization */
 }
 
 static void find_cpp(void) {
-	register list_elem *elem ;
+	list_elem *elem ;
 	scanlist( l_first(tr_list), elem ) {
 		if ( t_cont(*elem)->t_isprep ) {
 			if ( cpp_trafo ) fuerror("Multiple cpp's present") ;

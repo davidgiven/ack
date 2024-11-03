@@ -40,11 +40,11 @@ byte transl[op_plast - op_pfirst + 1][3] =
 { op_SEP, op_ste, op_sde } };
 
 /* Forward declarations */
-static int repl_mul(register line_p, line_p *, line_p *);
+static int repl_mul(line_p, line_p *, line_p *);
 static int optimize(void);
 static int basicblock(line_p *);
 
-static void opcheck(register byte *bp)
+static void opcheck(byte *bp)
 {
 	if (((*bp) & BMASK) >= op_pfirst)
 		*bp = transl[((*bp) & BMASK) - op_pfirst][opind];
@@ -62,8 +62,8 @@ static void opcheck(register byte *bp)
 static void hashpatterns(void)
 {
 	short index;
-	register byte *bp, *tp;
-	register short i;
+	byte *bp, *tp;
+	short i;
 	unsigned short hashvalue;
 	byte *save;
 	int patlen;
@@ -146,8 +146,8 @@ int peephole(void)
 
 static int optimize(void)
 {
-	register num_p *npp, np;
-	register int instr;
+	num_p *npp, np;
+	int instr;
 	bool madeopt;
 
 	madeopt = basicblock(&instrs);
@@ -175,9 +175,9 @@ static offset oabs(offset off)
 
 static line_p repline(eval_t ev, int patlen)
 {
-	register line_p lp;
-	register iarg_p iap;
-	register sym_p sp;
+	line_p lp;
+	iarg_p iap;
+	sym_p sp;
 	offset diff, newdiff;
 
 	assert(ev.e_typ != EV_UNDEF);
@@ -274,11 +274,11 @@ static offset rotate(offset w, offset amount)
 eval_t undefres =
 { EV_UNDEF };
 
-static eval_t compute(register expr_p pexp)
+static eval_t compute(expr_p pexp)
 {
 	eval_t leaf1, leaf2, res;
-	register int i;
-	register sym_p sp;
+	int i;
+	sym_p sp;
 	offset mask;
 
 	switch (nparam[pexp->ex_operator])
@@ -483,10 +483,10 @@ static eval_t compute(register expr_p pexp)
 extern bool special();
 #endif
 
-static bool tryrepl(line_p *lpp, register byte *bp, int patlen)
+static bool tryrepl(line_p *lpp, byte *bp, int patlen)
 {
 	int rpllen, instr, rplval;
-	register line_p lp;
+	line_p lp;
 	line_p replacement, *rlpp, tp;
 
 	rpllen = *bp++ & BMASK;
@@ -547,11 +547,11 @@ static bool tryrepl(line_p *lpp, register byte *bp, int patlen)
 	return (TRUE);
 }
 
-static bool trypat(line_p *lpp, register byte *bp, int len)
+static bool trypat(line_p *lpp, byte *bp, int len)
 {
-	register iarg_p iap;
+	iarg_p iap;
 	int i, patlen;
-	register line_p lp;
+	line_p lp;
 	eval_t result;
 
 	patlen = *bp++ & BMASK;
@@ -649,10 +649,10 @@ static bool trypat(line_p *lpp, register byte *bp, int len)
 
 static int basicblock(line_p *alpp)
 {
-	register line_p *lpp, lp;
+	line_p *lpp, lp;
 	unsigned short hash[3];
 	line_p *next;
-	register byte *bp;
+	byte *bp;
 	int i;
 	short index;
 	bool madeopt;
@@ -760,9 +760,9 @@ static int basicblock(line_p *alpp)
 	return madeopt;
 }
 
-static int repl_mul(register line_p lp, line_p *b, line_p *e)
+static int repl_mul(line_p lp, line_p *b, line_p *e)
 {
-	register line_p next = lp->l_next;
+	line_p next = lp->l_next;
 	int ins;
 	int sz;
 	unsigned long n;

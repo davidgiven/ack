@@ -136,7 +136,7 @@ void rem_call(call_p c)
 static void remlines(line_p l)
 {
 
-	register line_p lnp;
+	line_p lnp;
 	line_p next;
 
 	for (lnp = l; lnp != (line_p)0; lnp = next)
@@ -148,7 +148,7 @@ static void remlines(line_p l)
 
 void remunit(short kind, proc_p p, line_p l)
 {
-	register bblock_p b;
+	bblock_p b;
 	bblock_p next;
 	Lindex pi;
 

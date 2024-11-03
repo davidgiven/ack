@@ -32,7 +32,7 @@ is_library_dir(d)
 		"system" definition modules. Return 1 if it is, 0 otherwise.
 	*/
 
-	register struct liblist *p = lblist;
+	struct liblist *p = lblist;
 
 	while (p) {
 		if (! strcmp(DEFPATH[p->libno], d)) return 1;
@@ -56,7 +56,7 @@ init_lib()
 
 set_libdir(n)
 {
-	register struct liblist *p = 
+	struct liblist *p = 
 		(struct liblist *) Malloc(sizeof(struct liblist));
 
 	p->libnext = lblist;

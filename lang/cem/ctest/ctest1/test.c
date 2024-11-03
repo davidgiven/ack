@@ -40,7 +40,7 @@ char alstr[1000] ;
 char *alptr = alstr ;
 
 char *alloc(size) {
-	register char *retval ;
+	char *retval ;
 
 	retval=alptr ;
 	alptr += size ;

@@ -55,10 +55,10 @@ tzset()
 
 	{
 	extern char *getenv();
-	register char *p = getenv("TZ");
+	char *p = getenv("TZ");
 
 	if (p && *p) {
-		register int n = 0;
+		int n = 0;
 		int sign = 1;
 
 		strncpy(__tzname[0], p, 3);

@@ -12,6 +12,6 @@ void hallverbose(void);
 void inithall(void);
 int hall(void);
 void checkhall(void);
-void nexthall(register short *sp);
+void nexthall(short *sp);
 
 #endif /* HALL_H_ */

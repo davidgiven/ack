@@ -20,12 +20,12 @@ extern int level;
 
 struct decspecs null_decspecs;
 
-void do_decspecs(register struct decspecs *ds)
+void do_decspecs(struct decspecs *ds)
 {
 	/*	The provisional decspecs ds as obtained from the program
 	 is turned into a legal consistent decspecs.
 	 */
-	register struct type *tp = ds->ds_type;
+	struct type *tp = ds->ds_type;
 
 	assert(level != L_FORMAL1);
 
@@ -101,7 +101,7 @@ void do_decspecs(register struct decspecs *ds)
 	}
 	if (ds->ds_unsigned)
 	{
-		register int ds_isunsigned = (ds->ds_unsigned == UNSIGNED);
+		int ds_isunsigned = (ds->ds_unsigned == UNSIGNED);
 
 		if (ds->ds_typedef)
 			goto SIGN_ERROR;
@@ -151,10 +151,10 @@ void do_decspecs(register struct decspecs *ds)
  In case of a complex type the top of the type list will be
  replaced by a qualified version.
  */
-struct type *qualifier_type(register struct type *tp, int typequal)
+struct type *qualifier_type(struct type *tp, int typequal)
 {
-	register struct type *dtp = tp;
-	register int fund = tp->tp_fund;
+	struct type *dtp = tp;
+	int fund = tp->tp_fund;
 
 	while (dtp && dtp->tp_typequal != typequal)
 		dtp = dtp->next;

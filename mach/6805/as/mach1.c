@@ -12,4 +12,4 @@ extern int opt_cmos;
 
 #define	fitj(z)		((unsigned)z + 0x80 <= 0xFF)
 
-void branch(register int opc,expr_t exp,expr_t cell);
+void branch(int opc,expr_t exp,expr_t cell);

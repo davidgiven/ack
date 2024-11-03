@@ -25,10 +25,10 @@ extern FILE	*db_out;
 p_symbol
 NewSymbol(s, scope, class, nam)
   char	*s;
-  register p_scope scope;
+  p_scope scope;
   struct outname *nam;
 {
-  register p_symbol sym;
+  p_symbol sym;
   
   sym = new_symbol();
   sym->sy_idf = str2idf(s, 0);
@@ -63,7 +63,7 @@ Lookup(id, scope, class)
   p_scope scope;
   int	class;
 {
-  register p_symbol p = id ? id->id_def : 0;
+  p_symbol p = id ? id->id_def : 0;
 
   while (p) {
 	if (p->sy_scope == scope && (p->sy_class & class)) {
@@ -79,14 +79,14 @@ Lookup(id, scope, class)
 */
 p_symbol
 Lookfromscope(id, class, sc)
-  register struct idf *id;
+  struct idf *id;
   int	class;
-  register p_scope	sc;
+  p_scope	sc;
 {
   if (! id) return (p_symbol) 0;
 
   while (sc) {
-	register p_symbol sym = id->id_def;
+	p_symbol sym = id->id_def;
 	while (sym) {
 		if (sym->sy_scope == sc && (sym->sy_class & class)) {
 			return sym;
@@ -104,11 +104,11 @@ p_symbol
 add_file(s)
   char	*s;
 {
-  register p_symbol sym = NewSymbol(s,
+  p_symbol sym = NewSymbol(s,
 				    PervasiveScope,
 				    FILESYM,
 				    (struct outname *) 0);
-  register char *p;
+  char *p;
 
   sym->sy_file = new_file();
   sym->sy_file->f_sym = sym;
@@ -216,7 +216,7 @@ identify(p, class_set)
   int		class_set;
 {
   p_symbol	sym = 0, sym1 = 0;
-  register p_symbol s;
+  p_symbol s;
   p_tree	arg;
   int precise = 0;
 
@@ -342,7 +342,7 @@ pr_sym(s)
 resolve_cross(tp)
   p_type	tp;
 {
-  register p_symbol	sym = tp->ty_sym->sy_idf->id_def;
+  p_symbol	sym = tp->ty_sym->sy_idf->id_def;
 
   while (sym) {
 	if (sym->sy_class == TAG &&

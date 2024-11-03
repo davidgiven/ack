@@ -188,7 +188,7 @@ static bool okay_lines(avail_p avp, occur_p ocp)
 	/* Check whether all lines in this occurrence can in
 	 * principle be eliminated; no stores, messages, calls etc.
 	 */
-	register line_p lnp, next;
+	line_p lnp, next;
 
 	for (lnp = ocp->oc_lfirst; lnp != (line_p)0; lnp = next)
 	{
@@ -208,7 +208,7 @@ static bool okay_lines(avail_p avp, occur_p ocp)
 
 bool desirable(avail_p avp)
 {
-	register Lindex i, next;
+	Lindex i, next;
 
 	if (!gains(avp))
 	{

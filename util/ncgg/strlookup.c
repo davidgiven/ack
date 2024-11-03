@@ -16,7 +16,7 @@ char *l_strings[MAXSTRINGS];
 
 int strlookup(char *str)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < nstrings; i++)
 		if (strcmp(str, l_strings[i]) == 0)

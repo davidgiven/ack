@@ -47,8 +47,8 @@ int level;	/* Always equal to local_level->sl_level. */
 void stack_level(void)	{
 	/*	A new level is added on top of the identifier stack.
 	*/
-	register struct stack_level *stl = new_stack_level();
-	register struct stack_level *loclev = local_level;
+	struct stack_level *stl = new_stack_level();
+	struct stack_level *loclev = local_level;
 	
 	loclev->sl_next = stl;
 	stl->sl_previous = loclev;
@@ -62,12 +62,12 @@ void stack_level(void)	{
 
 void stack_idf(
 	struct idf *idf,
-	register struct stack_level *stl)
+	struct stack_level *stl)
 {
 	/*	The identifier idf is inserted in the stack on level stl,
 		but only if it is not already present at this level.
 	*/
-	register struct stack_entry *se;
+	struct stack_entry *se;
 	
 	se = stl->sl_entry;
 	while (se) {
@@ -89,7 +89,7 @@ struct stack_level *stack_level_of(int lvl)
 		The stack should probably be an array, to be extended with
 		realloc where needed.
 	*/
-	register struct stack_level *stl;
+	struct stack_level *stl;
 
 	if (lvl == level)
 		return local_level;
@@ -120,11 +120,11 @@ void unstack_level(void)
 		necessary. Optimists may optimize it afterwards.
 	*/
 	while (local_level->sl_entry)	{
-		register struct stack_entry *se = local_level->sl_entry;
-		register struct idf *idf = se->se_idf;
-		register struct def *def;
-		register struct sdef *sdef;
-		register struct tag *tag;
+		struct stack_entry *se = local_level->sl_entry;
+		struct idf *idf = se->se_idf;
+		struct def *def;
+		struct sdef *sdef;
+		struct tag *tag;
 
 		/* unlink it from the local stack level */
 		local_level->sl_entry = se->next;
@@ -184,7 +184,7 @@ void unstack_world(void)
 		have already been encoded while the uninitialised ones
 		are not and have to be encoded at this moment.
 	*/
-	register struct stack_entry *se = local_level->sl_entry;
+	struct stack_entry *se = local_level->sl_entry;
 
 #ifdef	LINT
 	lint_end_global(local_level);
@@ -195,8 +195,8 @@ void unstack_world(void)
 #endif /* GEN_NM_LIST */
 
 	while (se)	{
-		register struct idf *idf = se->se_idf;
-		register struct def *def = idf->id_def;
+		struct idf *idf = se->se_idf;
+		struct def *def = idf->id_def;
 		
 		if (!def)	{
 			/* global selectors, etc. */

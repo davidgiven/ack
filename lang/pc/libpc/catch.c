@@ -82,7 +82,7 @@ static struct errm
 
 void _catch(unsigned int erno)
 {
-	register struct errm* ep = &errors[0];
+	struct errm* ep = &errors[0];
 	char *p, *q, *s, **qq;
 	char buf[20];
 	unsigned i;

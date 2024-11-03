@@ -86,7 +86,7 @@ i_regsave() {
 }
 
 f_regsave() {
-	register i;
+	i;
 
 	if (n_regvars==0 || lbytes==0) {
 #ifdef REGPATCH

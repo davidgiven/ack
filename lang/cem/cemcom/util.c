@@ -54,7 +54,7 @@ arith
 LocalSpace(sz, al)
 	arith sz;
 {
-	register struct stack_level *stl = local_level;
+	struct stack_level *stl = local_level;
 
 	stl->sl_max_block = - align(sz - stl->sl_max_block, al);
 	return stl->sl_max_block;
@@ -67,9 +67,9 @@ arith
 NewLocal(sz, al, regtype, sc)
 	arith sz;
 {
-	register struct localvar *tmp = FreeTmps;
+	struct localvar *tmp = FreeTmps;
 	struct localvar *prev = 0;
-	register int index;
+	int index;
 
 	while (tmp) {
 		if (tmp->t_align >= al &&
@@ -104,7 +104,7 @@ FreeLocal(off)
 	arith off;
 {
 	int index = (int) (off >> 2) & (TABSIZ - 1);
-	register struct localvar *tmp = regs[index];
+	struct localvar *tmp = regs[index];
 	struct localvar *prev = 0;
 
 	while (tmp && tmp->t_offset != off) {
@@ -121,8 +121,8 @@ FreeLocal(off)
 
 LocalFinish()
 {
-	register struct localvar *tmp, *tmp1;
-	register int i;
+	struct localvar *tmp, *tmp1;
+	int i;
 
 #ifdef USE_TMP
 	C_beginpart(loc_id);
@@ -166,7 +166,7 @@ LocalFinish()
 RegisterAccount(offset, size, regtype, sc)
 	arith offset, size;
 {
-	register struct localvar *p;
+	struct localvar *p;
 	int index;
 
 	if (regtype < 0) return;
@@ -186,7 +186,7 @@ static struct localvar *
 find_reg(off)
 	arith off;
 {
-	register struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
+	struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
 
 	while (p && p->t_offset != off) p = p->next;
 	return p;
@@ -195,7 +195,7 @@ find_reg(off)
 LoadLocal(off, sz)
 	arith off, sz;
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
@@ -214,7 +214,7 @@ LoadLocal(off, sz)
 StoreLocal(off, sz)
 	arith off, sz;
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
@@ -234,7 +234,7 @@ StoreLocal(off, sz)
 AddrLocal(off)
 	arith off;
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 	if (p) p->t_regtype = -1;
 	C_lal(off);

@@ -33,7 +33,7 @@
 
 FILE* fopen(const char* name, const char* mode)
 {
-	register int i;
+	int i;
 	int rwmode = 0, rwflags = 0;
 	FILE* stream;
 	int fd, flags = 0;

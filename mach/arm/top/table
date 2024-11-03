@@ -677,7 +677,7 @@ ANY R11,X1,X2 : MOV R10,Y1    : MOV R9,Z1    : MOV R8,V1    : STMFD R12<,WW : BA
 %%;
  
 int is_register(s)
-register char *s;
+char *s;
 { if (*s++ == 'R' && *s >= '0' && *s <= '9') {
       if (*s++ == '1' && (*s >= '0' && *s <= '5')) s++;
       return *s == '\0';
@@ -715,7 +715,7 @@ char *s,*t1,*t2;
 }
   
 int no_side_effects(s)
-register char *s;
+char *s;
 {
 	for (;;) {
 		switch(*s++) {
@@ -727,7 +727,7 @@ register char *s;
 }
 
 int is_greater(s1, s2, rl)
-register char *s1, *s2, *rl;
+char *s1, *s2, *rl;
 {
 	long a1, a2;
 
@@ -743,14 +743,14 @@ register char *s1, *s2, *rl;
 }
 
 int is_local(s)
-register char *s;
+char *s;
 {
 	if (strcmp(s, "[R13") == 0) return(TRUE);
 	return(FALSE);
 }
 
 int is_reglist_11(s)
-register char *s;
+char *s;
 {
 	if (strcmp(s, "{R11}") == 0){
 		return(TRUE);
@@ -759,14 +759,14 @@ register char *s;
 }
 
 int is_reglist(s)
-register char *s;
+char *s;
 {
 	if (*s == '{') return(TRUE);
 	return(FALSE);
 }
 
 int is_reglist1(s)
-register char *s;
+char *s;
 {
 	if (*s != '{') return(FALSE);
 	for (;;) {
@@ -778,7 +778,7 @@ register char *s;
 }
 
 int is_lams(s)
-register char *s;
+char *s;
 {
 /*	if (strcmp(s,"LDR") == 0) return(TRUE);
 	if (strcmp(s,"ADD") == 0) return(TRUE);
@@ -791,7 +791,7 @@ return(TRUE);
 }
 
 int is_unequal(s1, s2)
-register char *s1, *s2;
+char *s1, *s2;
 {
 	long a1, a2;
 
@@ -803,7 +803,7 @@ register char *s1, *s2;
 }
 
 int is_unequal3(s1, s2, s3)
-register char *s1, *s2, *s3;
+char *s1, *s2, *s3;
 {
 	long a1, a2, a3;
 
@@ -818,28 +818,28 @@ register char *s1, *s2, *s3;
 }
 
 int list_f_10(s)
-register char *s;
+char *s;
 {
 	sprintf(s,"{R10,R11}");
 	return(TRUE);
 }
 
 int list_f_9(s)
-register char *s;
+char *s;
 {
 	sprintf(s,"{R9,R10,R11}");
 	return(TRUE);
 }
 
 int list_f_8(s)
-register char *s;
+char *s;
 {
 	sprintf(s,"{R8,R9,R10,R11}");
 	return(TRUE);
 }
 
 int ok_regcheck1(r, s1)
-register char *s1;
+char *s1;
 int r;
 {
 	int a1;
@@ -853,7 +853,7 @@ int r;
 }
 
 int ok_regcheck2(r, s1, s2)
-register char *s1, *s2;
+char *s1, *s2;
 int r;
 {
 	if (ok_regcheck1(r,s1))
@@ -863,7 +863,7 @@ int r;
 }
 
 int ok_regcheck3(r, s1, s2, s3)
-register char *s1, *s2, *s3;
+char *s1, *s2, *s3;
 int r;
 {
 	if (ok_regcheck1(r,s1))
@@ -873,7 +873,7 @@ int r;
 }
 
 int ok_regcheck4(r, s1, s2, s3, s4)
-register char *s1, *s2, *s3, *s4;
+char *s1, *s2, *s3, *s4;
 int r;
 {
 	if (ok_regcheck2(r,s1,s2))
@@ -883,7 +883,7 @@ int r;
 }
 
 int ok_regcheck5(r, s1, s2, s3, s4, s5)
-register char *s1, *s2, *s3, *s4, *s5;
+char *s1, *s2, *s3, *s4, *s5;
 int r;
 {
 	if (ok_regcheck2(r,s1,s2))
@@ -893,7 +893,7 @@ int r;
 }
 
 int ok_regcheck6(r, s1, s2, s3, s4, s5, s6)
-register char *s1, *s2, *s3, *s4, *s5, *s6;
+char *s1, *s2, *s3, *s4, *s5, *s6;
 int r;
 {
 	if (ok_regcheck2(r,s1,s2))
@@ -903,7 +903,7 @@ int r;
 }
 
 int ok_regcheck7(r, s1, s2, s3, s4, s5, s6, s7)
-register char *s1, *s2, *s3, *s4, *s5, *s6, *s7;
+char *s1, *s2, *s3, *s4, *s5, *s6, *s7;
 int r;
 {
 	if (ok_regcheck4(r,s1,s2,s3,s4))
@@ -913,7 +913,7 @@ int r;
 }
 
 int ok_regcheck8(r, s1, s2, s3, s4, s5, s6, s7, s8)
-register char *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8;
+char *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8;
 int r;
 {
 	if (ok_regcheck4(r,s1,s2,s3,s4))

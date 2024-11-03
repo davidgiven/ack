@@ -13,10 +13,10 @@ static char *four_digits();
 
 char *
 asctime(tm)
-	register struct tm *tm;
+	struct tm *tm;
 {
 	static char buf[32];
-	register char *pb = buf, *ps;
+	char *pb = buf, *ps;
 	
 	strcpy(pb, DATE_STR);
 	ps = days[tm->tm_wday];
@@ -38,7 +38,7 @@ asctime(tm)
 
 static char *
 two_digits(pb, i, nospace)
-	register char *pb;
+	char *pb;
 {
 	*pb = (i / 10) % 10 + '0';
 	if (!nospace && *pb == '0') *pb = ' ';
@@ -49,7 +49,7 @@ two_digits(pb, i, nospace)
 
 static char *
 four_digits(pb, i)
-	register char *pb;
+	char *pb;
 {
 	i %= 10000;
 	*pb++ = (i / 1000) + '0';

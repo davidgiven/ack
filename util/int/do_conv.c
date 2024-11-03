@@ -19,8 +19,8 @@
 void DoCII(void)
 {
 	/* CII -: Convert integer to integer (*) */
-	register int newsize = swpop();
-	register long s;
+	int newsize = swpop();
+	long s;
 
 	LOG(("@C6 DoCII()"));
 	spoilFRA();
@@ -68,8 +68,8 @@ void DoCII(void)
 void DoCUI(void)
 {
 	/* CUI -: Convert unsigned to integer (*) */
-	register int newsize = swpop();
-	register unsigned long u;
+	int newsize = swpop();
+	unsigned long u;
 
 	LOG(("@C6 DoCUI()"));
 	spoilFRA();
@@ -126,7 +126,7 @@ void DoCFI(void)
 {
 	/* CFI -: Convert floating to integer (*) */
 #ifndef NOFLOAT
-	register int newsize = swpop();
+	int newsize = swpop();
 	double f;
 
 	LOG(("@C6 DoCFI()"));
@@ -189,7 +189,7 @@ void DoCIF(void)
 {
 	/* CIF -: Convert integer to floating (*) */
 #ifndef NOFLOAT
-	register int newsize = swpop();
+	int newsize = swpop();
 
 	LOG(("@C6 DoCIF()"));
 	spoilFRA();
@@ -227,8 +227,8 @@ void DoCUF(void)
 {
 	/* CUF -: Convert unsigned to floating (*) */
 #ifndef NOFLOAT
-	register int newsize = swpop();
-	register unsigned long u;
+	int newsize = swpop();
+	unsigned long u;
 
 	LOG(("@C6 DoCUF()"));
 	spoilFRA();
@@ -280,7 +280,7 @@ void DoCFF(void)
 {
 	/* CFF -: Convert floating to floating (*) */
 #ifndef NOFLOAT
-	register int newsize = swpop();
+	int newsize = swpop();
 
 	LOG(("@C6 DoCFF()"));
 	spoilFRA();
@@ -307,8 +307,8 @@ void DoCFF(void)
 void DoCIU(void)
 {
 	/* CIU -: Convert integer to unsigned */
-	register int newsize = swpop();
-	register long u;
+	int newsize = swpop();
+	long u;
 
 	LOG(("@C6 DoCIU()"));
 	spoilFRA();
@@ -345,7 +345,7 @@ void DoCIU(void)
 void DoCUU(void)
 {
 	/* CUU -: Convert unsigned to unsigned */
-	register int newsize = swpop();
+	int newsize = swpop();
 
 	LOG(("@C6 DoCUU()"));
 	spoilFRA();
@@ -382,7 +382,7 @@ void DoCFU(void)
 {
 	/* CFU -: Convert floating to unsigned */
 #ifndef NOFLOAT
-	register int newsize = swpop();
+	int newsize = swpop();
 	double f;
 
 	LOG(("@C6 DoCFU()"));

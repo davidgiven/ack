@@ -29,7 +29,7 @@ void DoIdent(FILE *, int);
 int StartId(int);
 int InId(int);
 int StartNum(int);
-void DoNum(register FILE *, int);
+void DoNum(FILE *, int);
 
 
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
 void DoFile(FILE *fp)
 {
-	register int c;
+	int c;
 
 	while ((c = getc(fp)) != EOF) {
 		switch (c) {
@@ -112,7 +112,7 @@ void DoFile(FILE *fp)
 
 void SkipString(FILE *fp, int stopc)
 {
-	register int c;
+	int c;
 
 	while ((c = getc(fp)) != EOF) {
 		if (GCcopy) putchar(c);
@@ -129,7 +129,7 @@ void SkipString(FILE *fp, int stopc)
 
 void SkipComment(FILE *fp)
 {
-	register int c;
+	int c;
 
 	while ((c = getc(fp)) != EOF) {
 		if (GCcopy) putchar(c);
@@ -146,8 +146,8 @@ void SkipComment(FILE *fp)
 void DoIdent(FILE *fp, int s)
 {
 	char id_buf[MAX_ID_LEN];
-	register int cnt = 1;
-	register int c;
+	int cnt = 1;
+	int c;
 
 	id_buf[0] = s;
 
@@ -232,7 +232,7 @@ int StartNum(int c)
 #define getoct(c, fp)	do { c = getc((fp)); if (GCcopy) putchar(c);} while (isoct(c))
 #define gethex(c, fp)	do { c = getc((fp)); if (GCcopy) putchar(c);} while (ishex(c))
 
-void DoNum(register FILE *fp, int c)
+void DoNum(FILE *fp, int c)
 {
 	if (c != '0') {
 		getdec(c, fp);

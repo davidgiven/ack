@@ -15,7 +15,7 @@ int	nerrors;
 
 main() {
 	jmp_buf envm;
-	register int i;
+	int i;
 
 	test1();
 	test2();
@@ -52,7 +52,7 @@ e(n) {
 }
 
 test1() {
-	register p;
+	p;
 
 	printf("TEST 1 : one integer register variable\n");
 	whichtest = 1;
@@ -62,7 +62,7 @@ test1() {
 }
 
 test2() {
-	register p,q;
+	p,q;
 
 	printf("TEST 2 : two integer register variables\n");
 	whichtest = 2;
@@ -73,7 +73,7 @@ test2() {
 }
 	
 test3() {
-	register p,q,r;
+	p,q,r;
 
 	printf("TEST 3 : three integer register variables\n");
 	whichtest = 3;
@@ -87,7 +87,7 @@ test3() {
 char	buf[512];
 
 test4() {
-	register char *p;
+	char *p;
 
 	printf("TEST 4 : one pointer register variable\n");
 	whichtest = 4;
@@ -97,7 +97,7 @@ test4() {
 }
 
 test5() {
-	register char *p,*q;
+	char *p,*q;
 
 	printf("TEST 5 : two pointer register variables\n");
 	whichtest = 5;
@@ -108,7 +108,7 @@ test5() {
 }
 
 test6() {
-	register char *p,*q,*r;
+	char *p,*q,*r;
 
 	printf("TEST 6 : three pointer register variables\n");
 	whichtest = 6;
@@ -133,7 +133,7 @@ addr() {
 
 garbage() {
 	register	i,j,k;
-	register char	*p,*q,*r;
+	char	*p,*q,*r;
 	char *a, *tmp;
 	int t;
 
@@ -195,8 +195,8 @@ garbage() {
 }
 
 level1() {
-	register char *p;
-	register i;
+	char *p;
+	i;
 
 	i = 1000;
 	p = &buf[10];
@@ -206,8 +206,8 @@ level1() {
 }
 
 level2() {
-	register char *p;
-	register i;
+	char *p;
+	i;
 
 	i = 0200;
 	p = &buf[2];
@@ -216,7 +216,7 @@ level2() {
 }
 
 dolev() {
-	register char *p;
+	char *p;
 	register	i;
 
 	i = 010;
@@ -232,7 +232,7 @@ catch() {
 }
 
 hard() {
-	register char *p;
+	char *p;
 
 	signal(SIGHUP,catch);
 	for(p = buf;p <= &buf[511]; p++) *p = 025;

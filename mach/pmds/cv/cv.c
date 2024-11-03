@@ -62,7 +62,7 @@ long align(a,b)
 
 int
 follows(pa, pb)
-        register struct outsect *pa, *pb;
+        struct outsect *pa, *pb;
 {
         /* return 1 if pa follows pb */
 
@@ -73,7 +73,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
+	int		nsect;
 	long			magic ;
 	long			textsize ;
 	long			datasize ;

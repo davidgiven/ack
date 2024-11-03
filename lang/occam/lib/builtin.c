@@ -15,8 +15,8 @@ extern int errno;
 static void nullterm(s) register char *s;
 /* Change Occam string to C string */
 {
-	register len= (*s & 0377);
-	register char *p;
+	len= (*s & 0377);
+	char *p;
 
 	while (--len>=0) {
 		p=s++;
@@ -28,8 +28,8 @@ static void nullterm(s) register char *s;
 static void lenterm(s) register char *s;
 /* Change C string to Occam string */
 {
-	register i=0;
-	register c0, c1;
+	i=0;
+	c0, c1;
 
 	c0=0;
 	do {
@@ -43,8 +43,8 @@ static void lenterm(s) register char *s;
 void b_open(mode, name, index) register char *mode, *name; long *index;
 /* PROC open(VAR index, VALUE name[], mode[])=	*/
 {
-	register FILE *fp;
-	register i;
+	FILE *fp;
+	i;
 
 	nullterm(name);
 	nullterm(mode);

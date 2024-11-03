@@ -34,13 +34,13 @@ int nhallsets = -1;
 int hallfreq[MAXHALL][2];
 
 int recurhall(int, short [][SETSIZE]);
-void unite(register short *, short *);
+void unite(short *, short *);
 
 
 void hallverbose(void)
 {
-	register int i;
-	register int max;
+	int i;
+	int max;
 
 	fprintf(stderr, "Table of hall frequencies\n   #   pre   post\n");
 	for (max = MAXHALL - 1; hallfreq[max][0] == 0 && hallfreq[max][1] == 0;
@@ -57,9 +57,9 @@ void inithall(void)
 	nhallsets = 0;
 }
 
-void nexthall(register short *sp)
+void nexthall(short *sp)
 {
-	register int i;
+	int i;
 
 	assert(nhallsets >= 0);
 	for (i = 0; i < SETSIZE; i++)
@@ -67,9 +67,9 @@ void nexthall(register short *sp)
 	nhallsets++;
 }
 
-int card(register short *sp)
+int card(short *sp)
 {
-	register int sum, i;
+	int sum, i;
 
 	sum = 0;
 	for (i = 0; i < 8 * sizeof(short) * SETSIZE; i++)
@@ -87,7 +87,7 @@ void checkhall(void)
 
 int hall(void)
 {
-	register int i, j, k;
+	int i, j, k;
 	int ok;
 
 	hallfreq[nhallsets][0]++;
@@ -126,7 +126,7 @@ int recurhall(int nhallsets, short hallsets[][SETSIZE])
 {
 	short copysets[MAXHALL][SETSIZE];
 	short setsum[SETSIZE];
-	register int i, j, k, ncopys;
+	int i, j, k, ncopys;
 
 	/*
 	 * First check cardinality of union of all
@@ -158,9 +158,9 @@ int recurhall(int nhallsets, short hallsets[][SETSIZE])
 	return (1);
 }
 
-void unite(register short *sp, short *into)
+void unite(short *sp, short *into)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < SETSIZE; i++)
 		into[i] |= sp[i];

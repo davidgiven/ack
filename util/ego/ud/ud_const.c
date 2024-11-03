@@ -128,7 +128,7 @@ static void search_backwards(line_p use, short v, bool* found, line_p* def)
 	 * implicit one, return 0 as def.
 	 */
 
-	register line_p l;
+	line_p l;
 
 	for (l = PREV(use); l != (line_p)0; l = PREV(l))
 	{

@@ -8,12 +8,12 @@
 #include "loc_time.h"
 
 struct tm*
-gmtime(register const time_t* timer)
+gmtime(const time_t* timer)
 {
 	static struct tm br_time;
-	register struct tm* timep = &br_time;
+	struct tm* timep = &br_time;
 	time_t tim = *timer;
-	register unsigned long dayclock, dayno;
+	unsigned long dayclock, dayno;
 	int year = EPOCH_YR;
 
 	dayclock = (unsigned long)tim % SECS_DAY;

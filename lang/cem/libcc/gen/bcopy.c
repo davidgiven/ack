@@ -1,7 +1,7 @@
 /* $Id$ */
 bcopy(old, new, n)
-register char *old, *new;
-register int n;
+char *old, *new;
+int n;
 {
 /* Copy a block of data. */
 

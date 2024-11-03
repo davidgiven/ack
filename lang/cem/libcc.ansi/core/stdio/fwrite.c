@@ -9,10 +9,10 @@
 
 size_t
 fwrite(const void* ptr, size_t size, size_t nmemb,
-    register FILE* stream)
+    FILE* stream)
 {
-	register const unsigned char* cp = ptr;
-	register size_t s;
+	const unsigned char* cp = ptr;
+	size_t s;
 	size_t ndone = 0;
 
 	if (size)

@@ -114,7 +114,7 @@ int strip(char *name)
 
 static int copy(char *fnam, char *tnam, long size, FILE *fr, FILE *fw)
 {
-	register int s;
+	int s;
 	char lbuf[512];
 
 	while(size != (long)0) {

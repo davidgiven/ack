@@ -127,7 +127,7 @@ extern char *tmpfil(void);
 
 
 /* Read next byte from "af" file, fatal error if there isn't one. */
-extern int xgetc(register FILE *af);
+extern int xgetc(FILE *af);
 /* Read a value of length "l" bytes from file "f",
  * fatal error if cannot be read.
  */
@@ -140,7 +140,7 @@ extern cons_t xgeta(FILE* f);
 
 
 /* Output one byte into file "af" and fatal error if it gives an error */
-extern void xputc(int c,register FILE *af);
+extern void xputc(int c, FILE *af);
 /* Output a 16-bit value into file "f" in little-endian, fatal error if it gives an error. */
 extern void xput16(int w,FILE *f);
 /* Output a value of "l" bytes into file "f" and fatal error if it gives an error. */
@@ -204,8 +204,8 @@ extern void extadr(cons_t a);
 extern	int 	oplength(int);
 extern	void 	genop(char *,cons_t,int );
 
-extern	void 	putblk(register FILE *stream,register char *from, register int amount);
-extern	int getblk(register FILE *stream, register char *from, register int amount);
+extern	void 	putblk(FILE *stream, char *from, int amount);
+extern	int getblk(FILE *stream, char *from, int amount);
 
 
 extern	void 	set_mode(int mode);

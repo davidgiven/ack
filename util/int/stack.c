@@ -69,7 +69,7 @@ void init_stack(void)
  */
 void newSP(ptr ap)
 {
-	register ptr p = ap;
+	ptr p = ap;
 
 	LOG(("@s6 newSP(%lu), ML = %lu, SP = %lu", p, ML, SP));
 	if (LB < p)
@@ -98,7 +98,7 @@ void newSP(ptr ap)
 		if (p < SL)
 		{
 			/* extend stack space */
-			register size stacksize = ML + 1 - p;
+			size stacksize = ML + 1 - p;
 
 			stacksize = allocfrac(stacksize);
 			SL = ML + 1 - stacksize;
@@ -122,7 +122,7 @@ void newSP(ptr ap)
  */
 void incSP(size n)
 {
-	register ptr p = SP - n;
+	ptr p = SP - n;
 
 	if (p < HP || maxstack || p < SL)
 		newSP(p);
@@ -149,7 +149,7 @@ void incSP(size n)
  */
 void decSP(size n)
 {
-	register ptr p = SP + n;
+	ptr p = SP + n;
 
 	if (LB < p)
 		newSP(p);
@@ -193,10 +193,10 @@ void newLB(ptr p)
 /** Store data pointer "ap" in stack at address "addr".
  * Full validation is done on "addr" before storing into it.
  */
-void st_stdp(register ptr addr, ptr ap)
+void st_stdp(ptr addr, ptr ap)
 {
-	register int i;
-	register long p = (long)ap;
+	int i;
+	long p = (long)ap;
 
 	LOG(("@s6 st_stdp(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
@@ -213,10 +213,10 @@ void st_stdp(register ptr addr, ptr ap)
 /** Store code pointer "ap" in stack address "addr".
  *  Full validation is done on "addr" before storing into it.
  */
-void st_stip(register ptr addr, ptr ap)
+void st_stip(ptr addr, ptr ap)
 {
-	register int i;
-	register long p = (long)ap;
+	int i;
+	long p = (long)ap;
 
 	LOG(("@s6 st_stip(%lu, %lu)", addr, p));
 	ch_in_stack(addr, psize);
@@ -233,10 +233,10 @@ void st_stip(register ptr addr, ptr ap)
 /** Store an integer value "al" of "n" bytes in size in stack at address "addr".
  *  Full validation is done on "addr" before storing into it.
  */
-void st_stn(register ptr addr, long al, size n)
+void st_stn(ptr addr, long al, size n)
 {
-	register int i;
-	register long l = al;
+	int i;
+	long l = al;
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && n == psize) ? (SH_INT | SH_DATAP) : SH_INT;
@@ -261,10 +261,10 @@ void st_stn(register ptr addr, long al, size n)
 /** Store an integer value "al" of word size bytes in stack at address "addr".
  *  Full validation is done on "addr" before storing into it.
  */
-void st_stw(register ptr addr, long al)
+void st_stw(ptr addr, long al)
 {
-	register int i;
-	register long l = al;
+	int i;
+	long l = al;
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && wsize == psize) ? (SH_INT | SH_DATAP) : SH_INT;
@@ -290,11 +290,11 @@ void st_stw(register ptr addr, long al)
 /** Store a real value "f" of "n" bytes in size in stack at address "addr".
  *  Full validation is done on "addr" before storing into it.
  */
-void st_stf(register ptr addr, double f, size n)
+void st_stf(ptr addr, double f, size n)
 {
-	register char* cp = (char*)&f;
+	char* cp = (char*)&f;
 	float fl;
-	register int i;
+	int i;
 
 	LOG(("@s6 st_stf(%lu, %g, %lu)", addr, f, n));
 	ch_in_stack(addr, n);
@@ -330,9 +330,9 @@ void st_stf(register ptr addr, double f, size n)
 /** Loads and returns a data pointer stored on the stack
  * at address "addr".
  */
-ptr st_lddp(register ptr addr)
+ptr st_lddp(ptr addr)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@s6 st_lddp(%lu)", addr));
 
@@ -354,9 +354,9 @@ ptr st_lddp(register ptr addr)
 /** Loads and returns a core pointer stored on the stack
  * at address "addr".
  */
-ptr st_ldip(register ptr addr)
+ptr st_ldip(ptr addr)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@s6 st_ldip(%lu)", addr));
 
@@ -379,10 +379,10 @@ ptr st_ldip(register ptr addr)
  * "n" bytes in size stored in the stack at address
  * "addr".
  */
-unsigned long st_ldu(register ptr addr, size n)
+unsigned long st_ldu(ptr addr, size n)
 {
-	register int i;
-	register unsigned long u = 0;
+	int i;
+	unsigned long u = 0;
 
 	LOG(("@s6 st_ldu(%lu, %lu)", addr, n));
 
@@ -409,10 +409,10 @@ unsigned long st_ldu(register ptr addr, size n)
  * word size bytes stored in the stack at address
  * "addr".
  */
-unsigned long st_lduw(register ptr addr)
+unsigned long st_lduw(ptr addr)
 {
-	register int i;
-	register unsigned long u = 0;
+	int i;
+	unsigned long u = 0;
 
 	LOG(("@s6 st_lduw(%lu)", addr));
 
@@ -439,10 +439,10 @@ unsigned long st_lduw(register ptr addr)
  * "n" bytes in size stored in the stack at address
  * "addr".
  */
-long st_lds(register ptr addr, size n)
+long st_lds(ptr addr, size n)
 {
-	register int i;
-	register long l;
+	int i;
+	long l;
 
 	LOG(("@s6 st_lds(%lu, %lu)", addr, n));
 
@@ -470,10 +470,10 @@ long st_lds(register ptr addr, size n)
  * word size bytes stored in the stack at address
  * "addr".
  */
-long st_ldsw(register ptr addr)
+long st_ldsw(ptr addr)
 {
-	register int i;
-	register long l;
+	int i;
+	long l;
 
 	LOG(("@s6 st_ldsw(%lu)", addr));
 
@@ -501,12 +501,12 @@ long st_ldsw(register ptr addr)
 /** Loads and returns a real value of "n" bytes
  * stored in the stack at address "addr".
  */
-double st_ldf(register ptr addr, size n)
+double st_ldf(ptr addr, size n)
 {
 	double f;
 	float fl;
-	register char* cp;
-	register int i;
+	char* cp;
+	int i;
 
 	LOG(("@s6 st_ldf(%lu, %lu)", addr, n));
 
@@ -560,10 +560,10 @@ double st_ldf(register ptr addr, size n)
 /** Moves "n" bytes from stack address "s1" to
  * stack address "s2".
  */
-void st_mvs(register ptr s2, register ptr s1, size n)
+void st_mvs(ptr s2, ptr s1, size n)
 /* s1 -> s2 */
 {
-	register int i;
+	int i;
 
 	ch_in_stack(s1, n);
 	ch_wordaligned(s1);
@@ -587,7 +587,7 @@ void st_mvs(register ptr s2, register ptr s1, size n)
 void st_mvd(ptr s, ptr d, size n)
 /* d -> s */
 {
-	register int i;
+	int i;
 
 	ch_in_data(d, n);
 	ch_wordaligned(d);
@@ -625,7 +625,7 @@ void st_mvd(ptr s, ptr d, size n)
 /** Pop and return as a data pointer from the stack. */
 ptr dppop(void)
 {
-	register ptr p;
+	ptr p;
 
 	p = st_lddp(SP);
 	decSP(psize);
@@ -636,7 +636,7 @@ ptr dppop(void)
 /** Pop and return as an unsigned integer "n" bytes from the stack. */
 unsigned long upop(size n)
 {
-	register unsigned long l;
+	unsigned long l;
 
 	l = st_ldu(SP, n);
 	decSP(max(n, wsize));
@@ -647,7 +647,7 @@ unsigned long upop(size n)
 /** Pop and return a word size unsigned integer from the stack. */
 unsigned long uwpop(void)
 {
-	register unsigned long l;
+	unsigned long l;
 
 	l = st_lduw(SP);
 	decSP(wsize);
@@ -658,7 +658,7 @@ unsigned long uwpop(void)
 /** Pop and return as an integer "n" bytes from the stack. */
 long spop(size n)
 {
-	register long l;
+	long l;
 
 	l = st_lds(SP, n);
 	decSP(max(n, wsize));
@@ -669,7 +669,7 @@ long spop(size n)
 /** Pop and return a word size signed integer from the stack. */
 long swpop(void)
 {
-	register long l;
+	long l;
 
 	l = st_ldsw(SP);
 	decSP(wsize);
@@ -736,7 +736,7 @@ double fpop(size n)
 /** Pop a word size value, independently of its type. */
 long wpop(void)
 {
-	register long l;
+	long l;
 
 	l = w_in_stack(SP);
 	decSP(wsize);
@@ -773,7 +773,7 @@ void wpush(long l)
 }
 
 /** Push "n" bytes from value "l" unto the stack. */
-void npush(register long l, register size n)
+void npush(long l, size n)
 {
 	if (n <= wsize)
 	{
@@ -854,8 +854,8 @@ void fpush(double f, size n)
 
 static void warn_stbits(ptr addr, size n)
 {
-	register int or_bits = 0;
-	register int and_bits = 0xff;
+	int or_bits = 0;
+	int and_bits = 0xff;
 
 	while (n--)
 	{
@@ -885,7 +885,7 @@ static void warn_stbits(ptr addr, size n)
 static void st_clear_area(ptr from, ptr to)
 {
 	/* includes both *from and *to (since ML+1 is unexpressible) */
-	register ptr a;
+	ptr a;
 
 	for (a = from; a >= to; a--)
 	{

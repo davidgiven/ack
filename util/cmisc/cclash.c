@@ -93,7 +93,7 @@ int EnHash(char*);
 void EndOfProgram(void);
 void DoOption(char*);
 void CheckId(char *, int);
-void saveline(register struct idf *);
+void saveline(struct idf *);
 void mapline(char *);
 
 
@@ -102,8 +102,8 @@ struct idf *maplist = 0;
 
 void DefineKeys(void)
 {
-	register char **pkey = &keywords[0];
-	register char *id;
+	char **pkey = &keywords[0];
+	char *id;
 
 	while ((id = *pkey++))
 		if (strlen(id) >= maxlen)
@@ -145,8 +145,8 @@ char *Malloc(), *Salloc();
 void InsertId(char *id, int key)
 {
 	int hash_val = EnHash(id);
-	register struct idf *idp = hash_tab[hash_val];
-	register struct idf *p = 0;
+	struct idf *idp = hash_tab[hash_val];
+	struct idf *p = 0;
 
 	while (idp && strncmp(idp->id_name, id, maxlen)) {
 		p = idp;
@@ -201,8 +201,8 @@ char *Salloc(char *str)
 
 int EnHash(char *id)
 {
-	register unsigned hash_val = 0;
-	register int n = maxlen;
+	unsigned hash_val = 0;
+	int n = maxlen;
 
 	while (n-- && *id)
 		hash_val = 31 * hash_val + *id++;
@@ -214,8 +214,8 @@ void BeginOfProgram(void) { DefineKeys(); }
 
 void EndOfProgram(void)
 {
-	register int i;
-	register struct idf *idp, *p;
+	int i;
+	struct idf *idp, *p;
 
 	for (i = 0; i < HASHSIZE; i++) {
 		for (idp = hash_tab[i]; idp; idp = idp->id_next) {
@@ -223,7 +223,7 @@ void EndOfProgram(void)
 				continue;
 
 			switch (action) {
-				register int n;
+				int n;
 
 			case ACT_LISTONLY:
 				n = 0;
@@ -246,7 +246,7 @@ void EndOfProgram(void)
 			case ACT_CID:
 			case ACT_MAPFILE:
 				for (p = idp->id_same; p;) {
-					register struct idf *q = p->id_same;
+					struct idf *q = p->id_same;
 
 					if (p->id_key == 0)
 						saveline(p);
@@ -267,9 +267,9 @@ void EndOfProgram(void)
 	}
 }
 
-void saveline(register struct idf *p)
+void saveline(struct idf *p)
 {
-	register struct idf *idp = maplist, *idp1 = 0;
+	struct idf *idp = maplist, *idp1 = 0;
 
 	while (idp && strcmp(idp->id_name, p->id_name) < 0) {
 		idp1 = idp;

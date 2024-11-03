@@ -170,8 +170,8 @@ skip_block(to_endif)
 			#ifndef or #elif until the corresponding #endif is
 			seen.
 	*/
-	register int ch;
-	register int skiplevel = nestlevel; /* current nesting level	*/
+	int ch;
+	int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
 
 #ifdef LINT
@@ -333,7 +333,7 @@ do_define()
 	char parbuf[PARBUFSIZE];		/* names of formals	*/
 	char *repl_text;	/* start of the replacement text	*/
 	int length;		/* length of the replacement text	*/
-	register ch;
+	int ch;
 
 	/* read the #defined macro's name	*/
 	if (!(id = GetIdentifier())) {
@@ -425,7 +425,7 @@ do_if()
 static
 do_ifdef(how)
 {
-	register struct idf *id;
+	struct idf *id;
 
 	/*	how == 1 : ifdef; how == 0 : ifndef
 	*/
@@ -445,7 +445,7 @@ do_ifdef(how)
 static
 do_undef()
 {
-	register struct idf *id;
+	struct idf *id;
 
 	/* Forget a macro definition.	*/
 	if (id = GetIdentifier()) {
@@ -474,10 +474,10 @@ getparams(buf, parbuf)
 		Note that the '(' has already been eaten.
 		The names of the formal parameters are stored into parbuf.
 	*/
-	register char **pbuf = &buf[0];
-	register int c;
-	register char *ptr = &parbuf[0];
-	register char **pbuf2;
+	char **pbuf = &buf[0];
+	int c;
+	char *ptr = &parbuf[0];
+	char **pbuf2;
 
 	LoadChar(c);
 	c = skipspaces(c,0);
@@ -530,10 +530,10 @@ getparams(buf, parbuf)
 
 EXPORT
 macro_def(id, text, nformals, length, flags)
-	register struct idf *id;
+	struct idf *id;
 	char *text;
 {
-	register struct macro *newdef = id->id_macro;
+	struct macro *newdef = id->id_macro;
 
 	/*	macro_def() puts the contents and information of a macro
 		definition into a structure and stores it into the symbol
@@ -562,7 +562,7 @@ find_name(nm, index)
 		"index" if it can be found there.  0 is returned if it is
 		not there.
 	*/
-	register char **ip = &index[0];
+	char **ip = &index[0];
 
 	while (*ip)
 		if (strcmp(nm, *ip++) == 0)
@@ -591,10 +591,10 @@ get_text(formals, length)
 		identifiers, because they might be replaced by some actual
 		parameter.  Other tokens will not be seen as such.
 	*/
-	register int c;
-	register int text_size;
+	int c;
+	int text_size;
 	char *text = Malloc(text_size = ITEXTSIZE);
-	register int pos = 0;
+	int pos = 0;
 
 	LoadChar(c);
 
@@ -631,8 +631,8 @@ get_text(formals, length)
 		else
 		if (formals && class(c) == STIDF) {
 			char id_buf[IDFSIZE + 1];
-			register id_size = 0;
-			register n;
+			id_size = 0;
+			int n;
 
 			/* read identifier: it may be a formal parameter */
 			id_buf[id_size++] = c;
@@ -650,7 +650,7 @@ get_text(formals, length)
 						text_size += RTEXTSIZE);
 			}
 			else {
-				register char *ptr = &id_buf[0];
+				char *ptr = &id_buf[0];
 
 				while (pos + id_size >= text_size)
 					text = Srealloc(text,
@@ -680,7 +680,7 @@ get_text(formals, length)
 */
 static int
 macroeq(s, t)
-	register char *s, *t;
+	char *s, *t;
 {
 
 	/* skip leading spaces	*/

@@ -247,7 +247,7 @@ void combine(dblock_p db, line_p l1, line_p l2, byte pseu)
 
 /* arglist */
 
-static void arg_string(offset length, register argb_p abp)
+static void arg_string(offset length, argb_p abp)
 {
 
 	while (length--)
@@ -261,7 +261,7 @@ static void arg_string(offset length, register argb_p abp)
 line_p arglist(int n)
 {
 	line_p lnp;
-	register arg_p ap, *app;
+	arg_p ap, *app;
 	bool moretocome;
 	offset length;
 

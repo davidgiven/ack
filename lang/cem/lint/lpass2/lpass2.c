@@ -83,8 +83,8 @@ static init(argc, argv)
 	init_class();
 
 	while (argc > 1 && argv[1][0] == '-') {
-		register char *arg = &argv[1][1];
-		register char ch;
+		char *arg = &argv[1][1];
+		char ch;
 
 		while (ch = *arg++) {
 			switch (ch) {
@@ -271,10 +271,10 @@ static one_ext_decl(kind, other_kind, other_class)
 static usage(stnr)
 	int stnr;
 {
-	register struct inpdef *def =
+	struct inpdef *def =
 		(stnr ? sta : proto ? proto : ext ? ext : lib ? lib : 0);
-	register int VU_count = 0;
-	register int VU_samefile = 0;
+	int VU_count = 0;
+	int VU_samefile = 0;
 
 	while (same_obj(stnr) && dot->id_class == FC) {
 		one_func_call(def);
@@ -289,7 +289,7 @@ static usage(stnr)
 	}
 
 	if (def && loptions['h']) {
-		register char *fn = def->id_file;
+		char *fn = def->id_file;
 
 		if (	stnr == 0
 		&&	VU_count == 1

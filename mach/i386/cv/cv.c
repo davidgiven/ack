@@ -264,8 +264,8 @@ char buf[0300];
 
 header()
 {
-	register char *p = buf;
-	register int i;
+	char *p = buf;
+	int i;
 
 	shortcvt(exec.x_magic, p);
 	shortcvt(exec.x_ext, p);
@@ -316,8 +316,8 @@ header()
  * Transfer the emitted byted from one file to another.
  */
 emits(section) struct outsect *section ; {
-	register long	n ;
-	register int	blk;
+	long	n ;
+	int	blk;
 	char		buffer[BUFSIZ];
 
 	n= section->os_flen ;
@@ -343,17 +343,17 @@ emits(section) struct outsect *section ; {
 long
 emit_symtab()
 {
-	register int i;
+	int i;
 	struct xnm {
 		unsigned short s_type, s_seg;
 		long	s_value;
 	} xnm;
 	char *chars, *xname;
 	struct outname *names;
-	register char *xptr;
+	char *xptr;
 	long off = OFF_CHAR(outhead);
-	register char *p;
-	register struct outname *np;
+	char *p;
+	struct outname *np;
 
 	chars = malloc((unsigned)(outhead.oh_nchar));
 	if (! chars) return 0;

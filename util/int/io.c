@@ -52,8 +52,8 @@ int fd_limit = 100; /* first non-available file descriptor */
  */
 FILE* fcreat_high(char* fn)
 {
-	register int fd;
-	register FILE* fp;
+	int fd;
+	FILE* fp;
 
 	if ((fd = creat(fn, 0644)) == -1)
 		return NULL;
@@ -72,7 +72,7 @@ FILE* fcreat_high(char* fn)
 static int highestfd(int fd)
 {
 
-	register int newfd, higherfd;
+	int newfd, higherfd;
 
 	/* try to get a better fd */
 	newfd = dup(fd);
@@ -186,7 +186,7 @@ void message(char* fmt, ...)
 char* position(void) /* transient */
 {
 	static char buff[300];
-	register char* fn = dt_fname(getFIL());
+	char* fn = dt_fname(getFIL());
 
 #ifdef LOGGING
 	sprintf(buff, "\"%s\", line %ld, INR = %ld", fn, getLIN(), inr);

@@ -23,7 +23,7 @@ void store(size_t siz, char* addr, int p)
 	    handled by the LOI instruction is handled as if it was
 	    loaded with the LOI instruction.
 	*/
-	register char* q = (char*)&p;
+	char* q = (char*)&p;
 	char t[4];
 
 	if (siz < EM_WSIZE && EM_WSIZE % siz == 0)

@@ -100,7 +100,7 @@ static string mycat(string s1, string s2) {
 }
 
 string mystrcpy(string s) {
-	register string r;
+	string r;
 
 	r=salloc(strlen(s));
 	strcpy(r,s);

@@ -1,6 +1,6 @@
 int ENTIER(statlink, a)
   int *statlink ;
-  register double a ;
+  double a ;
   {
     int n ;
     n = ( int ) a ;
@@ -8,6 +8,6 @@ int ENTIER(statlink, a)
   }
 int ROUN(statlink,a)
   int *statlink ;
-  register double a ;
+  double a ;
   { return(ENTIER(statlink, a+0.5)) ;
   }

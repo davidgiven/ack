@@ -12,12 +12,12 @@
  * that the check for overflow at the end could fail.
  */
 time_t
-mktime(register struct tm* timep)
+mktime(struct tm* timep)
 {
-	register long day, year;
-	register int tm_year;
+	long day, year;
+	int tm_year;
 	int yday, month;
-	register unsigned long seconds;
+	unsigned long seconds;
 	int overflow;
 	unsigned dst;
 

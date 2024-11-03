@@ -2,11 +2,11 @@
 #include <stdio.h>
 
 int getw(iop)
-	register FILE *iop;
+	FILE *iop;
 {
-	register int cnt = sizeof(int);
+	int cnt = sizeof(int);
 	int w;
-	register char *p = (char *) &w;
+	char *p = (char *) &w;
 
 	while (cnt--) {
 		*p++ = getc(iop);

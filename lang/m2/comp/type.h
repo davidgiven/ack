@@ -256,35 +256,35 @@ arith align(arith pos, int al);
    alignment "algn" and "size" bytes. */ 
 struct type  *standard_type(int fund, int algn, arith size);
 struct type  *enum_type(struct node *EnumList);
-struct type  *construct_type(int fund, register struct type  *tp);
+struct type  *construct_type(int fund, struct type  *tp);
 struct type  *qualified_type(struct node **pnd);
 /*	Check that the value "i" fits in the subrange or enumeration
 	type "tp".  Return 1 if so, 0 otherwise
 */
-int in_range(arith i, register struct type  *tp);
+int in_range(arith i, struct type  *tp);
 /*	Construct a subrange type from the constant expressions
 	indicated by "lb" and "ub", but first perform some
 	checks. "base" is either a user-specified base-type, or NULL.
 */
 struct type  *subr_type(struct node *lb, struct node *ub, struct type  *base);
 struct type  *proc_type(struct type  *result_type, struct paramlist *parameters, arith n_bytes_params);
-void genrck(register struct type  *tp);
+void genrck(struct type  *tp);
 /*	Get the bounds of a bounded type. */
-void getbounds(register struct type  *tp, arith *plo, arith *phi);
+void getbounds(struct type  *tp, arith *plo, arith *phi);
 /*	Construct a set type with base type "tp", but first 
  *  perform some checks */
-struct type  *set_type(register struct type  *tp);
-void ArrayElSize(register struct type  *tp);
-void ArraySizes(register struct type  *tp);
-void FreeType(register struct type  *tp);
-void DeclareType(struct node *nd, register struct def *df, register struct type  *tp);
-void SolveForwardTypeRefs(register struct def *df);
-void ForceForwardTypeDef(register struct def *df);
-struct type  *RemoveEqual(register struct type  *tpx);
+struct type  *set_type(struct type  *tp);
+void ArrayElSize(struct type  *tp);
+void ArraySizes(struct type  *tp);
+void FreeType(struct type  *tp);
+void DeclareType(struct node *nd, struct def *df, struct type  *tp);
+void SolveForwardTypeRefs(struct def *df);
+void ForceForwardTypeDef(struct def *df);
+struct type  *RemoveEqual(struct type  *tpx);
 int type_or_forward(struct type  *tp);
-struct type  *intorcard(register struct type  *left, register struct type  *right);
+struct type  *intorcard(struct type  *left, struct type  *right);
 #ifdef DEBUG
-void DumpType(register struct type  *tp);
+void DumpType(struct type  *tp);
 #endif
 int fit(arith sz, int nbytes);
 /* Greatest common divisotr. */

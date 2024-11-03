@@ -4,7 +4,7 @@
 fclose(fp)
 FILE *fp;
 {
-	register int i;
+	int i;
 
 	for (i=0; i<_NFILES; i++)
 		if (fp == _io_table[i]) {

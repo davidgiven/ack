@@ -116,10 +116,10 @@ extern short em_ptyp[];
 /* Own version of atol that continues computing on overflow.
    We don't know that about the ANSI C one.
 */
-static long our_atol(register char *s)
+static long our_atol(char *s)
 {
-  register long total = 0;
-  register unsigned digit;
+  long total = 0;
+  unsigned digit;
   int minus = 0;
 
   while (*s == ' ' || *s == '\t') s++;
@@ -157,7 +157,7 @@ void in_finish(void) {
 
 void fillemlines(void) {
 	int t,i;
-	register struct emline *lp;
+	struct emline *lp;
 
 	while ((emlines+nemlines)-emp<MAXEMLINES-5) {
 		assert(nemlines<MAXEMLINES);
@@ -235,9 +235,9 @@ void fillemlines(void) {
 }
 
 void dopseudo(void) {
-	register int b,t;
-	register full n;
-	register long save;
+	int b,t;
+	full n;
+	long save;
 	word romcont[MAXROM+1];
 	int nromwords;
 	int rombit,rommask;
@@ -416,7 +416,7 @@ void dopseudo(void) {
 /* ----- input ----- */
 
 static int getarg(int typset) {
-	register int t,argtyp;
+	int t,argtyp;
 
 	argtyp = t = table2();
 	if (t == EOF)
@@ -429,7 +429,7 @@ static int getarg(int typset) {
 }
 
 static int table1(void) {
-	register int i;
+	int i;
 
 	i = get8();
 	if (i < sp_fmnem+sp_nmnem && i >= sp_fmnem) {
@@ -448,7 +448,7 @@ static int table1(void) {
 }
 
 static int table2(void) {
-	register int i;
+	int i;
 
 	i = get8();
 	if (i < sp_fcst0+sp_ncst0 && i >= sp_fcst0) {
@@ -502,7 +502,7 @@ static int table3(int i) {
 }
 
 static int get16(void) {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = get8();
 	h_byte = get8();
@@ -511,8 +511,8 @@ static int get16(void) {
 }
 
 static long get32(void) {
-	register long l;
-	register int h_byte;
+	long l;
+	int h_byte;
 
 	l = get8();
 	l |= ((unsigned) get8())*256 ;
@@ -523,8 +523,8 @@ static long get32(void) {
 }
 
 static void getstring(void) {
-	register char *p;
-	register int n;
+	char *p;
+	int n;
 
 	getarg(cst_ptyp);
 	if (argval < 0 || argval > MAXSTR-1)
@@ -537,7 +537,7 @@ static void getstring(void) {
 }
 
 static char *strarg(int t) {
-	register char *p;
+	char *p;
 
 	switch (t) {
 	case sp_ilb1:
@@ -586,7 +586,7 @@ static char *strarg(int t) {
 
 static void bss(full n, int t, int b)
 {
-	register long s;
+	long s;
 
 	if (n % TEM_WSIZE)
 		fatal("bad BSS size");
@@ -609,7 +609,7 @@ static void bss(full n, int t, int b)
 }
 
 static long con(int t) {
-	register int i;
+	int i;
 
 	strarg(t);
 	switch (t) {
@@ -668,7 +668,7 @@ static void switchseg(int s) {
 
 static void savelab(void)
 {
-	register char *p,*q;
+	char *p,*q;
 	part_flush();
 	if (labstr[0]) {
 		dlbdlb(argstr,labstr);

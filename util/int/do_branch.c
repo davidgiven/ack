@@ -25,7 +25,7 @@
 		newPC(PC + (j));                                                                           \
 	}
 
-void DoBRA(register long jump)
+void DoBRA(long jump)
 {
 	/* BRA b: Branch unconditionally to label b */
 
@@ -33,10 +33,10 @@ void DoBRA(register long jump)
 	do_jump(arg_c(jump));
 }
 
-void DoBLT(register long jump)
+void DoBLT(long jump)
 {
 	/* BLT b: Branch less (pop 2 words, branch if top > second) */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBLT(%ld)", jump));
 	spoilFRA();
@@ -44,10 +44,10 @@ void DoBLT(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoBLE(register long jump)
+void DoBLE(long jump)
 {
 	/* BLE b: Branch less or equal */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBLE(%ld)", jump));
 	spoilFRA();
@@ -55,10 +55,10 @@ void DoBLE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoBEQ(register long jump)
+void DoBEQ(long jump)
 {
 	/* BEQ b: Branch equal */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBEQ(%ld)", jump));
 	spoilFRA();
@@ -66,10 +66,10 @@ void DoBEQ(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoBNE(register long jump)
+void DoBNE(long jump)
 {
 	/* BNE b: Branch not equal */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBNE(%ld)", jump));
 	spoilFRA();
@@ -77,10 +77,10 @@ void DoBNE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoBGE(register long jump)
+void DoBGE(long jump)
 {
 	/* BGE b: Branch greater or equal */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBGE(%ld)", jump));
 	spoilFRA();
@@ -88,10 +88,10 @@ void DoBGE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoBGT(register long jump)
+void DoBGT(long jump)
 {
 	/* BGT b: Branch greater */
-	register long t = wpop();
+	long t = wpop();
 
 	LOG(("@B6 DoBGT(%ld)", jump));
 	spoilFRA();
@@ -99,7 +99,7 @@ void DoBGT(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZLT(register long jump)
+void DoZLT(long jump)
 {
 	/* ZLT b: Branch less than zero (pop 1 word, branch negative) */
 
@@ -109,7 +109,7 @@ void DoZLT(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZLE(register long jump)
+void DoZLE(long jump)
 {
 	/* ZLE b: Branch less or equal to zero */
 
@@ -119,7 +119,7 @@ void DoZLE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZEQ(register long jump)
+void DoZEQ(long jump)
 {
 	/* ZEQ b: Branch equal zero */
 
@@ -129,7 +129,7 @@ void DoZEQ(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZNE(register long jump)
+void DoZNE(long jump)
 {
 	/* ZNE b: Branch not zero */
 
@@ -139,7 +139,7 @@ void DoZNE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZGE(register long jump)
+void DoZGE(long jump)
 {
 	/* ZGE b: Branch greater or equal zero */
 
@@ -149,7 +149,7 @@ void DoZGE(register long jump)
 		do_jump(arg_c(jump));
 }
 
-void DoZGT(register long jump)
+void DoZGT(long jump)
 {
 	/* ZGT b: Branch greater than zero */
 

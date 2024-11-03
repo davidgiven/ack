@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-div_t div(register int numer, register int denom)
+div_t div(int numer, int denom)
 {
 	div_t r;
 

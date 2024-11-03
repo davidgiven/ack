@@ -14,13 +14,13 @@ struct node;
 struct paramlist;
 
 
-struct def *Enter(char *name, long kind, register struct type *type, int pnam);
-void EnterProgList(register struct node *Idlist);
-void EnterEnumList(struct node *Idlist, register struct type *type);
-void EnterFieldList(struct node *Idlist, register struct type *type,
+struct def *Enter(char *name, long kind, struct type *type, int pnam);
+void EnterProgList(struct node *Idlist);
+void EnterEnumList(struct node *Idlist, struct type *type);
+void EnterFieldList(struct node *Idlist, struct type *type,
 		struct scope *scope, arith *addr, unsigned short packed);
 void EnterVarList(struct node *Idlist, struct type *type, int local);
-arith EnterParamList(register struct node *fpl, struct paramlist **parlist);
-arith EnterParTypes(register struct node *fpl, struct paramlist **parlist);
+arith EnterParamList(struct node *fpl, struct paramlist **parlist);
+arith EnterParTypes(struct node *fpl, struct paramlist **parlist);
 
 #endif /* ENTER_H_ */

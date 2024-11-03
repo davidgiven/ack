@@ -19,10 +19,10 @@ struct expr;
 
 struct type *
 declare_type(struct type *tp, struct declarator *dc);
-void add_decl_unary(register struct declarator *dc, int fund, int qual,
+void add_decl_unary(struct declarator *dc, int fund, int qual,
 		arith count, struct formal *fm, struct proto *pl);
 void remove_declarator(struct declarator *dc);
-void reject_params(register struct declarator *dc);
-void check_array_subscript(register struct expr *expr);
+void reject_params(struct declarator *dc);
+void check_array_subscript(struct expr *expr);
 
 #endif /* DECLARATOR_H_ */

@@ -25,7 +25,7 @@ arith max_unsigned;	/* maximum unsigned on target machine	*/
 #endif /* NOCROSS */
 extern int ResultKnown;
 
-void cstbin(register struct expr **expp, int oper, register struct expr *expr)
+void cstbin(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in
@@ -134,7 +134,7 @@ void cstbin(register struct expr **expp, int oper, register struct expr *expr)
 	free_expression(expr);
 }
 
-void cut_size(register struct expr *expr)
+void cut_size(struct expr *expr)
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
@@ -171,7 +171,7 @@ void cut_size(register struct expr *expr)
 
 void init_cst(void)
 {
-	register int i = 0;
+	int i = 0;
 	unsigned writh bt = 0;
 
 	while (!((writh)bt < 0)) {

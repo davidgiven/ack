@@ -69,7 +69,7 @@ void _zone(void)
 }
 void _in(char* buf)
 {
-	register int holder;
+	int holder;
 	char* c;
 	int pos;
 	if (_chann == -1)

@@ -156,10 +156,10 @@ Pnotboth(e)
 
  static int
 numread(pf, n)
- register FILE *pf;
+ FILE *pf;
  int *n;
 {
-	register int c, k;
+	int c, k;
 
 	if ((c = getc(pf)) < '0' || c > '9')
 		return c;
@@ -180,11 +180,11 @@ numread(pf, n)
 
  static int
 readref(pf, e, ftype)
- register FILE *pf;
+ FILE *pf;
  Extsym *e;
  int ftype;
 {
-	register int c, *t;
+	int c, *t;
 	int i, nargs, type;
 	Argtypes *at;
 	Atype *a, *ae;
@@ -252,10 +252,10 @@ readref(pf, e, ftype)
 
  static int
 comlen(pf)
- register FILE *pf;
+ FILE *pf;
 {
-	register int c;
-	register char *s, *se;
+	int c;
+	char *s, *se;
 	char buf[128], cbuf[128];
 	int refread;
 	long L;
@@ -339,8 +339,8 @@ Ptoken(pf, canend)
  FILE *pf;
  int canend;
 {
-	register int c;
-	register char *s, *se;
+	int c;
+	char *s, *se;
 
  top:
 	for(;;) {
@@ -611,8 +611,8 @@ Ptype(pf)
  static char *
 trimunder()
 {
-	register char *s;
-	register int n;
+	char *s;
+	int n;
 	static char buf[128];
 
 	s = Ptok + strlen(Ptok) - 1;
@@ -661,9 +661,9 @@ argverify(ftype, p)
  Extsym *p;
 {
 	Argtypes *at;
-	register Atype *aty;
+	Atype *aty;
 	int i, j, k;
-	register int *t, *te;
+	int *t, *te;
 	char buf1[32], buf2[32];
 	int type_fixup();
 
@@ -740,8 +740,8 @@ newarg(ftype, p)
  Extsym *p;
 {
 	Argtypes *at;
-	register Atype *aty;
-	register int *t, *te;
+	Atype *aty;
+	int *t, *te;
 	int i, k;
 
 	if (p->extstg == STGCOMMON) {
@@ -843,8 +843,8 @@ read_Pfiles(ffiles)
 {
 	char **f1files, **f1files0, *s;
 	int k;
-	register Extsym *e, *ee;
-	register Argtypes *at;
+	Extsym *e, *ee;
+	Argtypes *at;
 	extern int retcode;
 
 	f1files0 = f1files = ffiles;

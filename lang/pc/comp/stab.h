@@ -11,7 +11,7 @@
 struct def;
 struct type;
 
-void stb_string(register struct def *df, long kind);
+void stb_string(struct def *df, long kind);
 void stb_addtp(char *s, struct type *tp);
 
 #endif /* STAB_H_ */

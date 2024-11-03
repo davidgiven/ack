@@ -97,13 +97,13 @@ reduce_name_table()
 #define S_NEEDED S_MOD
 #define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
-	register int *diff_index =
+	int *diff_index =
 		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
-	register struct outrelo *rp = reloc_info;
-	register struct outname *np;
-	register int i;
+	struct outrelo *rp = reloc_info;
+	struct outname *np;
+	int i;
 	char *new_str;
-	register char *p, *q;
+	char *p, *q;
 
 	*diff_index++ = 0;
 	for (i = 0; i < nrelo; i++) {
@@ -176,8 +176,8 @@ convert_outname( header)
 struct outhead *header;
 {
 	int i;
-	register struct outname *np;
-	register long l = OFF_CHAR(*header);
+	struct outname *np;
+	long l = OFF_CHAR(*header);
 
 	for (i = 0, np = symbol_table; i < nname; i++, np++) {
 		np->on_foff += l;

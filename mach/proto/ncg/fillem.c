@@ -706,7 +706,7 @@ static void switchseg(int s) {
 }
 
 static void savelab(void) {
-	register char *p,*q;
+	char *p,*q;
 
 	part_flush();
 	if (labstr[0]) {

@@ -71,7 +71,7 @@ long getaddr();
 
 main(argc,argv) char **argv;
 {
-	register i ;
+	i ;
 	long line,fileaddr;
 	char tok ;
 
@@ -168,7 +168,7 @@ int read2() {
 
 long readaddr() {
 	long res ;
-	register int i ;
+	int i ;
 
 	res=0 ;
 	for (i=0 ; i<asize ; i++ ) res |= getb()<<(8*i) ;
@@ -177,7 +177,7 @@ long readaddr() {
 
 long readword() {
 	long res ;
-	register int i ;
+	int i ;
 
 	res=0 ;
 	for (i=0 ; i<wsize ; i++ ) res |= getb()<<(8*i) ;

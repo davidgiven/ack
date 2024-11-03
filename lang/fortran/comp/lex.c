@@ -316,8 +316,8 @@ char *name;
 LOCAL popinclude()
 {
 	struct Inclfile *t;
-	register char *p;
-	register int k;
+	char *p;
+	int k;
 
 	if(infile != stdin)
 		clf(&infile, infname, 1);	/* Close the input file */
@@ -358,7 +358,7 @@ putlineno()
 	static char *lastfile = "??", *lastfile0 = "?";
 	static char fbuf[P1_FILENAME_MAX];
 	extern int gflag;
-	register char *s0, *s1;
+	char *s0, *s1;
 
 	if (gflag) {
 		if (lastline) {
@@ -465,7 +465,7 @@ merged into one long card (hence the size of the buffer named   sbuf)   */
  LOCAL int
 getcds()
 {
-	register char *p, *q;
+	char *p, *q;
 
 	flush_comments ();
 top:
@@ -529,10 +529,10 @@ top:
  static void
 bang(a,b,c,d,e)		/* save ! comments */
  char *a, *b, *c;
- register char *d, *e;
+ char *d, *e;
 {
 	char buf[COMMENT_BUFFER_SIZE + 1];
-	register char *p, *pe;
+	char *p, *pe;
 
 	p = buf;
 	pe = buf + COMMENT_BUFFER_SIZE;
@@ -565,10 +565,10 @@ It assumes that   b   points to currently empty storage somewhere in  sbuf  */
 
  LOCAL int
 getcd(b, nocont)
- register char *b;
+ char *b;
 {
-	register int c;
-	register char *p, *bend;
+	int c;
+	char *p, *bend;
 	int speclin;		/* Special line - true when the line is allowed
 				   to have more than 66 characters (e.g. the
 				   "&" shorthand for continuation, use of a "\t"
@@ -827,7 +827,7 @@ initline:
  LOCAL void
 crunch()
 {
-	register char *i, *j, *j0, *j1, *prvstr;
+	char *i, *j, *j0, *j1, *prvstr;
 	int k, ten, nh, nh0, quote;
 
 	/* i is the next input character to be looked at
@@ -964,7 +964,7 @@ copychar:		/*not a string or space -- copy, shifting case if necessary */
  LOCAL void
 analyz()
 {
-	register char *i;
+	char *i;
 
 	if(parlev != 0)
 	{
@@ -1038,8 +1038,8 @@ analyz()
  LOCAL int
 getkwd()
 {
-	register char *i, *j;
-	register struct Keylist *pk, *pend;
+	char *i, *j;
+	struct Keylist *pk, *pend;
 	int k;
 
 	if(! isalpha_(* USC nextch) )
@@ -1066,9 +1066,9 @@ getkwd()
 
 initkey()
 {
-	register struct Keylist *p;
-	register int i,j;
-	register char *s;
+	struct Keylist *p;
+	int i,j;
+	char *s;
 
 	for(i = 0 ; i<26 ; ++i)
 		keystart[i] = NULL;
@@ -1092,8 +1092,8 @@ initkey()
 hexcheck(key)
  int key;
 {
-	register int radix;
-	register char *p;
+	int radix;
+	char *p;
 	char *kind;
 
 	switch(key) {
@@ -1139,7 +1139,7 @@ int havdot, havexp, havdbl;
 	int radix, val;
 	struct Punctlist *pp;
 	struct Dotlist *pd;
-	register int ch;
+	int ch;
 
 	char *i, *j, *n1, *p;
 
@@ -1411,8 +1411,8 @@ store_comment(str)
  static void
 flush_comments()
 {
-	register char *s, *s1;
-	register comment_buf *cb;
+	char *s, *s1;
+	comment_buf *cb;
 	if (cbnext == cbinit)
 		return;
 	cbcur->last = cbnext;
@@ -1434,7 +1434,7 @@ flush_comments()
  void
 unclassifiable()
 {
-	register char *s, *se;
+	char *s, *se;
 
 	s = sbuf;
 	se = lastch;

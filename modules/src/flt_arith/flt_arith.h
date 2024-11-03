@@ -95,7 +95,7 @@ void flt_arith2flt(arith n, flt_arith *e, int uns);
  *  returns this value. If the uns flag is set, the result is to be
  *  regarded as unsigned.
  */
-arith flt_flt2arith(register flt_arith *e, int uns);
+arith flt_flt2arith(flt_arith *e, int uns);
 /** Negates the number indicated by `e` and stores the result
  *  in `e`. */
 void flt_umin(flt_arith *e);

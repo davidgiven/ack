@@ -1,8 +1,8 @@
 /* $Id$ */
 char *strrchr(s, c)
-register char *s, c;
+char *s, c;
 {
-  register char *result;
+  char *result;
 
   result = 0;
   do

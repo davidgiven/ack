@@ -32,7 +32,7 @@ int nstab=0;
 
 static void chkstr(string str,char used[])
 {
-	register int low,middle,high;
+	int low,middle,high;
 
 	low=0; high=nstab-1;
 	while (high>low) {
@@ -57,7 +57,7 @@ static void chkstr(string str,char used[])
 
 string myalloc(int size)
 {
-	register string p;
+	string p;
 
 	p = (string) malloc(size);
 	if (p==0)
@@ -72,7 +72,7 @@ void myfree(void* p)
 
 void popstr(int nnstab)
 {
-	register int i;
+	int i;
 	for (i=nnstab;i<nstab;i++)
 		myfree(stab[i]);
 	nstab = nnstab;
@@ -80,7 +80,7 @@ void popstr(int nnstab)
 
 char *salloc(int size)
 {
-	register char *p;
+	char *p;
 	if (nstab==MAXSTAB)
 		fatal("String table overflow");
 	p = myalloc(size+1);    /* extra room for terminating zero */
@@ -100,12 +100,12 @@ int compar(const void* pp1, const void* pp2)
 }
 
 void garbage_collect(void) {
-	register int i;
+	int i;
 	struct emline *emlp;
 	token_p tp;
 	tkdef_p tdp;
 	struct reginfo *rp;
-	register char **fillp,**scanp;
+	char **fillp,**scanp;
 	char used[MAXSTAB];     /* could be bitarray */
 
 	if (nstab<THRESHOLD)

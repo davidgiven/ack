@@ -17,7 +17,7 @@ DOUBLE	s1;
 struct fef8_returns *r;
 {
 	EXTEND	buf;
-	register struct fef8_returns *p = r;	/* make copy, r might refer
+	struct fef8_returns *p = r;	/* make copy, r might refer
 						   to itself (see table)
 						*/
 

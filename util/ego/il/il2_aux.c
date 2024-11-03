@@ -198,7 +198,7 @@ static short param_score(call_p c)
 	 * happens to be "0". So the call gets extra points for this.
 	 */
 
-	register actual_p act;
+	actual_p act;
 	line_p l;
 	short score = 0;
 
@@ -369,7 +369,7 @@ static call_p find_origin(call_p c)
 	 * of the calling procedure.
 	 */
 
-	register call_p x;
+	call_p x;
 
 	for (x = c->cl_caller->P_CALS; x != (call_p)0; x = x->cl_cdr)
 	{
@@ -568,7 +568,7 @@ void select_calls(proc_p proclist, FILE* ccf, long space)
 
 static void nonnested_calls(FILE* cfile)
 {
-	register call_p c, a;
+	call_p c, a;
 
 	while ((c = getcall(cfile)) != (call_p)0)
 	{
@@ -674,7 +674,7 @@ void cleancals(proc_p proclist)
 	 * that were not selected for in line expansion.
 	 */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = proclist; p != (proc_p)0; p = p->p_next)
 	{

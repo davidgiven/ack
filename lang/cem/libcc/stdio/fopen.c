@@ -7,7 +7,7 @@
 FILE *fopen(name,mode)
 char *name , *mode;
 {
-	register int i;
+	int i;
 	FILE *fp;
 	char *malloc();
 	int fd,

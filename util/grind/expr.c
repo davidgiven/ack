@@ -74,7 +74,7 @@ extern char	*malloc(), *realloc();
 */
 static t_addr
 get_addr(sym, psize)
-  register p_symbol	sym;
+  p_symbol	sym;
   long			*psize;
 {
   p_type	tp = sym->sy_type;
@@ -183,7 +183,7 @@ get_v(a, pbuf, size)
 */
 static int
 get_value(sym, pbuf, psize)
-  register p_symbol	sym;
+  p_symbol	sym;
   char	**pbuf;
   long	*psize;
 {
@@ -263,7 +263,7 @@ get_int(buf, size, class)
   long	size;
   int	class;
 {
-  register long l;
+  long l;
 
   switch((int)size) {
   case sizeof(char):
@@ -337,8 +337,8 @@ int
 convert(pbuf, psize, ptp, tp, size)
   char	**pbuf;
   long	*psize;
-  register p_type *ptp;
-  register p_type tp;
+  p_type *ptp;
+  p_type tp;
   long size;
 {
   /* Convert the value in pbuf, of size psize and type ptp, to type
@@ -1181,9 +1181,9 @@ select_addr(p, paddr, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
-  register p_type	tp;
-  register struct fields *f;
-  register int		nf;
+  p_type	tp;
+  struct fields *f;
+  int		nf;
 
   if (eval_desig(p->t_args[0], paddr, psize, ptp)) {
 	tp = *ptp;
@@ -1293,7 +1293,7 @@ eval_expr(p, pbuf, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
-  register p_symbol	sym;
+  p_symbol	sym;
   int		retval = 0;
 
   *pbuf = 0;
@@ -1374,7 +1374,7 @@ eval_desig(p, paddr, psize, ptp)
   long		*psize;
   p_type	*ptp;
 {
-  register p_symbol	sym;
+  p_symbol	sym;
   int	retval = 0;
   t_addr a;
 

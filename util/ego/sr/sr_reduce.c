@@ -346,7 +346,7 @@ static bool same_expr(line_p lb1, line_p le1, line_p lb2, line_p le2)
 	 * expression as the code from lb2 to le2.
 	 */
 
-	register line_p l1, l2;
+	line_p l1, l2;
 
 	l1 = lb1;
 	l2 = lb2;

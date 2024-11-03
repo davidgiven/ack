@@ -220,7 +220,7 @@ static bool all_alloc(void)
 static bool direct_alloc(struct outhead* head)
 {
 	ind_t sectindex = IND_SECT(*head);
-	register struct outsect* sects;
+	struct outsect* sects;
 	unsigned short nsect = head->oh_nsect;
 	size_t size, rest;
 
@@ -256,7 +256,7 @@ static bool direct_alloc(struct outhead* head)
  */
 static bool indirect_alloc(struct outhead* head)
 {
-	register int allopiece;
+	int allopiece;
 	unsigned short nsect = head->oh_nsect;
 	unsigned short nrelo = head->oh_nrelo;
 	ind_t sectindex = IND_SECT(*head);
@@ -294,7 +294,7 @@ static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 	long flen;
 	ind_t emitindex;
 	static long zeros[MAXSECT];
-	register long zero = zeros[allopiece - ALLOEMIT];
+	long zero = zeros[allopiece - ALLOEMIT];
 
 	/*
 	 * Notice that "sectindex" is not a section number!
@@ -310,7 +310,7 @@ static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 			return FALSE;
 		if ((emitindex = alloc(allopiece, zero)) != BADOFF)
 		{
-			register char* p = address(allopiece, emitindex);
+			char* p = address(allopiece, emitindex);
 
 			debug("Zeros %ld\n", zero, 0, 0, 0);
 			while (zero--)
@@ -369,9 +369,9 @@ static bool putdbugindex(ind_t dbugoff, size_t ndbugbytes)
  */
 static void get_indirect(struct outhead* head, struct outsect* sect)
 {
-	register ind_t* emitindex;
-	register int nsect;
-	register int piece;
+	ind_t* emitindex;
+	int nsect;
+	int piece;
 	ind_t* reloindex;
 
 	emitindex = (ind_t*)modulptr(IND_EMIT(*head));
@@ -404,7 +404,7 @@ void seek(long pos)
  */
 void skip_modul(struct outhead* head)
 {
-	register ind_t skip = modulsize(head);
+	ind_t skip = modulsize(head);
 
 	if (incore)
 	{
@@ -425,7 +425,7 @@ void skip_modul(struct outhead* head)
 static void read_modul(void)
 {
 	struct outhead* head;
-	register struct outsect* sects;
+	struct outsect* sects;
 	struct outname* names;
 	char* chars;
 	ind_t sectindex, nameindex, charindex;

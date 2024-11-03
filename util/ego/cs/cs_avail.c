@@ -152,7 +152,7 @@ avail_p av_enter(avail_p avp, occur_p ocp, int kind)
 	 * if it is not already there.
 	 * Add ocp to the set of occurrences of this expression.
 	 */
-	register avail_p ravp;
+	avail_p ravp;
 	line_p last = ocp->oc_llast;
 
 	for (ravp = avails; ravp != (avail_p)0; ravp = ravp->av_before)
@@ -196,9 +196,9 @@ void clr_avails(void)
 {
 	/* Throw away the information about the available expressions. */
 
-	register avail_p ravp, next;
-	register Lindex i;
-	register lset s;
+	avail_p ravp, next;
+	Lindex i;
+	lset s;
 
 	for (ravp = avails; ravp != (avail_p)0; ravp = next)
 	{

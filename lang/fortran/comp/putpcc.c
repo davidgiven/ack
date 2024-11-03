@@ -65,10 +65,10 @@ int class;
 }
 
 putif(p, else_if_p)
- register expptr p;
+ expptr p;
  int else_if_p;
 {
-	register int k;
+	int k;
 	int n;
 	long where;
 
@@ -145,10 +145,10 @@ struct Labelblock *labs[];
 
  static expptr
 krput(p)
- register expptr p;
+ expptr p;
 {
-	register expptr e, e1;
-	register unsigned op;
+	expptr e, e1;
+	unsigned op;
 	int t = krparens == 2 ? TYDREAL : p->exprblock.vtype;
 
 	op = p->exprblock.opcode;
@@ -173,7 +173,7 @@ krput(p)
 	}
 
 expptr putx(p)
- register expptr p;
+ expptr p;
 {
 	int opc;
 	int k;
@@ -521,7 +521,7 @@ expptr p;
 LOCAL Addrp intdouble(p)
 Addrp p;
 {
-	register Addrp t;
+	Addrp t;
 
 	t = mktmp(TYDREAL, ENULL);
 	putout (putassign(cpexpr((expptr)t), (expptr)p));
@@ -535,9 +535,9 @@ Addrp p;
 /* Complex-type variable assignment */
 
 LOCAL Addrp putcxeq(p)
-register expptr p;
+expptr p;
 {
-	register Addrp lp, rp;
+	Addrp lp, rp;
 	expptr code;
 
 	if(p->tag != TEXPR)
@@ -572,11 +572,11 @@ expptr p;
 #define PAIR(x,y) mkexpr (OPCOMMA, (x), (y))
 
 LOCAL Addrp putcx1(p)
-register expptr p;
+expptr p;
 {
 	expptr q;
 	Addrp lp, rp;
-	register Addrp resp;
+	Addrp resp;
 	int opcode;
 	int ltype, rtype;
 	long ts;
@@ -770,10 +770,10 @@ register expptr p;
    are not defined */
 
 LOCAL expptr putcxcmp(p)
-register expptr p;
+expptr p;
 {
 	int opcode;
-	register Addrp lp, rp;
+	Addrp lp, rp;
 	expptr q;
 
 	if(p->tag != TEXPR)
@@ -796,7 +796,7 @@ register expptr p;
 /* putch1 -- Forces constants into the literal pool, among other things */
 
 LOCAL Addrp putch1(p)
-register expptr p;
+expptr p;
 {
 	Addrp t;
 	expptr e;
@@ -868,7 +868,7 @@ expptr p;
 
 
 LOCAL expptr putcheq(p)
-register expptr p;
+expptr p;
 {
 	expptr lp, rp;
 
@@ -900,7 +900,7 @@ register expptr p;
 
 
 LOCAL expptr putchcmp(p)
-register expptr p;
+expptr p;
 {
 	expptr lp, rp;
 
@@ -941,9 +941,9 @@ register expptr p;
 
 LOCAL expptr putcat(lhs0, rhs)
  expptr lhs0;
- register expptr rhs;
+ expptr rhs;
 {
-	register Addrp lhs = (Addrp)lhs0;
+	Addrp lhs = (Addrp)lhs0;
 	int n, tyi;
 	Addrp length_var, string_var;
 	expptr p;
@@ -984,8 +984,8 @@ LOCAL expptr putcat(lhs0, rhs)
 
 
 LOCAL putct1(q, length_var, string_var, ip)
-register expptr q;
-register Addrp length_var, string_var;
+expptr q;
+Addrp length_var, string_var;
 int *ip;
 {
 	int i;
@@ -1023,7 +1023,7 @@ int *ip;
 LOCAL expptr putaddr(p0)
  expptr p0;
 {
-	register Addrp p;
+	Addrp p;
 
 	if (!(p = (Addrp)p0))
 		return ENULL;
@@ -1048,13 +1048,13 @@ addrfix(e)		/* fudge character string length if it's a TADDR */
  LOCAL int
 typekludge(ccall, q, at, j)
  int ccall;
- register expptr q;
+ expptr q;
  Atype *at;
  int j;	/* alternate type */
 {
-	register int i, k;
+	int i, k;
 	extern int iocalladdr;
-	register Namep np;
+	Namep np;
 
 	/* Return value classes:
 	 *	< 100 ==> Fortran arg (pointer to type)
@@ -1176,7 +1176,7 @@ atype_squawk(at, msg)
  Argtypes *at;
  char *msg;
 {
-	register Atype *a, *ae;
+	Atype *a, *ae;
 	warn(msg);
 	for(a = at->atypes, ae = a + at->nargs; a < ae; a++)
 		frchain(&a->cp);
@@ -1207,7 +1207,7 @@ type_fixup(at,a,k)
  Atype *a;
  int k;
 {
-	register struct Entrypoint *ep;
+	struct Entrypoint *ep;
 	if (!infertypes)
 		return 0;
 	for(ep = entries; ep; ep = ep->entnextp)
@@ -1364,7 +1364,7 @@ save_argtypes(arglist, at0, at1, ccall, fname, stg, nchargs, type, zap)
 
  void
 saveargtypes(p)		/* for writing prototypes */
- register Exprp p;
+ Exprp p;
 {
 	Addrp a;
 	Argtypes **at0, **at1;
@@ -1419,14 +1419,14 @@ LOCAL expptr putcall(p0, temp)
  expptr p0;
  Addrp *temp;
 {
-    register Exprp p = (Exprp)p0;
+    Exprp p = (Exprp)p0;
     chainp arglist;		/* Pointer to actual arguments, if any */
     chainp charsp;		/* List of copies of the variables which
 				   hold the lengths of character
 				   parameters (other than procedure
 				   parameters) */
     chainp cp;			/* Iterator over argument lists */
-    register expptr q;		/* Pointer to the current argument */
+    expptr q;		/* Pointer to the current argument */
     Addrp fval;			/* Function return value */
     int type;			/* type of the call - presumably this was
 				   set elsewhere */
@@ -1621,7 +1621,7 @@ LOCAL expptr putcall(p0, temp)
    CONST */
 
 LOCAL expptr putmnmx(p)
-register expptr p;
+expptr p;
 {
 	int op, op2, type;
 	expptr arg, qp, temp;

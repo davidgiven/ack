@@ -60,8 +60,8 @@ static void check_requirements(char* name)
 
 int main(int argc, char* argv[])
 {
-	register int i;
-	register int nosetjmp = 1;
+	int i;
+	int nosetjmp = 1;
 	int must_disassemble = 0;
 	int must_tally = 0;
 

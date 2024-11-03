@@ -283,7 +283,7 @@ LOCAL io_setup io_stuff[] = {
 
 
 fmtstmt(lp)
-register struct Labelblock *lp;
+struct Labelblock *lp;
 {
 	if(lp == NULL)
 	{
@@ -309,8 +309,8 @@ struct Labelblock *lp;
 {
 	int n;
 	char *s0, *lexline();
-	register char *s, *se, *t;
-	register k;
+	char *s, *se, *t;
+	k;
 
 	s0 = s = lexline(&n);
 	se = t = s + n;
@@ -372,7 +372,7 @@ struct Labelblock *lp;
 
 startioctl()
 {
-	register int i;
+	int i;
 
 	inioctl = YES;
 	nioctl = 0;
@@ -511,7 +511,7 @@ endioctl()
 
 iocname()
 {
-	register int i;
+	int i;
 	int found, mask;
 
 	found = 0;
@@ -539,8 +539,8 @@ iocname()
 
 
 ioclause(n, p)
-register int n;
-register expptr p;
+int n;
+expptr p;
 {
 	struct Ioclist *iocp;
 
@@ -635,9 +635,9 @@ doiolist(p0)
  chainp p0;
 {
 	chainp p;
-	register tagptr q;
-	register expptr qe;
-	register Namep qn;
+	tagptr q;
+	expptr qe;
+	Namep qn;
 	Addrp tp, mkscalar();
 	int range;
 	extern char *ohalign;
@@ -722,12 +722,12 @@ doiolist(p0)
  LOCAL void
 putio(nelt, addr)
  expptr nelt;
- register expptr addr;
+ expptr addr;
 {
 	int type;
-	register expptr q;
+	expptr q;
 	extern Constp mkconst();
-	register Addrp c = 0;
+	Addrp c = 0;
 
 	type = addr->headblock.vtype;
 	if(ioformatted!=LISTDIRECTED && ISCOMPLEX(type) )
@@ -804,7 +804,7 @@ endio()
 
  LOCAL void
 putiocall(q)
- register expptr q;
+ expptr q;
 {
 	int tyintsave;
 
@@ -828,10 +828,10 @@ putiocall(q)
  void
 fmtname(np, q)
  Namep np;
- register Addrp q;
+ Addrp q;
 {
-	register int k;
-	register char *s, *t;
+	int k;
+	char *s, *t;
 	extern chainp assigned_fmts;
 
 	if (!np->vfmt_asg) {
@@ -853,7 +853,7 @@ fmtname(np, q)
 LOCAL Addrp asg_addr(p)
  union Expression *p;
 {
-	register Addrp q;
+	Addrp q;
 
 	if (p->tag != TPRIM)
 		badtag("asg_addr", p->tag);
@@ -870,10 +870,10 @@ LOCAL Addrp asg_addr(p)
 
 startrw()
 {
-	register expptr p;
-	register Namep np;
-	register Addrp unitp, fmtp, recp;
-	register expptr nump;
+	expptr p;
+	Namep np;
+	Addrp unitp, fmtp, recp;
+	expptr nump;
 	Addrp mkscalar();
 	expptr mkaddcon();
 	int iostmt1;
@@ -1119,7 +1119,7 @@ endfmt:
  LOCAL void
 dofopen()
 {
-	register expptr p;
+	expptr p;
 
 	if( (p = V(IOSUNIT)) && ISINT(p->headblock.vtype) )
 		ioset(TYIOINT, XUNIT, cpexpr(p) );
@@ -1153,7 +1153,7 @@ dofopen()
  LOCAL void
 dofclose()
 {
-	register expptr p;
+	expptr p;
 
 	if( (p = V(IOSUNIT)) && ISINT(p->headblock.vtype) )
 	{
@@ -1169,7 +1169,7 @@ dofclose()
  LOCAL void
 dofinquire()
 {
-	register expptr p;
+	expptr p;
 	if(p = V(IOSUNIT))
 	{
 		if( V(IOSFILE) )
@@ -1203,7 +1203,7 @@ dofinquire()
 dofmove(subname)
  char *subname;
 {
-	register expptr p;
+	expptr p;
 
 	if( (p = V(IOSUNIT)) && ISINT(p->headblock.vtype) )
 	{
@@ -1219,11 +1219,11 @@ static int ioset_assign = OPASSIGN;
  LOCAL void
 ioset(type, offset, p)
  int type, offset;
- register expptr p;
+ expptr p;
 {
 	offset /= SZLONG;
 	if(statstruct && ISCONST(p)) {
-		register char *s;
+		char *s;
 		switch(type) {
 			case TYADDR:	/* stmt label */
 				s = "fmt_";
@@ -1239,7 +1239,7 @@ ioset(type, offset, p)
 		frexpr(p);
 		}
 	else {
-		register Addrp q;
+		Addrp q;
 
 		q = ALLOC(Addrblock);
 		q->tag = TADDR;
@@ -1255,7 +1255,7 @@ ioset(type, offset, p)
 		if (type == TYADDR && p->tag == TCONST
 				   && p->constblock.vtype == TYADDR) {
 			/* kludge */
-			register Addrp p1;
+			Addrp p1;
 			p1 = ALLOC(Addrblock);
 			p1->tag = TADDR;
 			p1->vtype = type;
@@ -1281,7 +1281,7 @@ ioset(type, offset, p)
  LOCAL void
 iosetc(offset, p)
  int offset;
- register expptr p;
+ expptr p;
 {
 	extern Addrp putchop();
 
@@ -1300,7 +1300,7 @@ iosetc(offset, p)
  LOCAL void
 ioseta(offset, p)
  int offset;
- register Addrp p;
+ Addrp p;
 {
 	char *s, *s1;
 	static char who[] = "ioseta";
@@ -1388,7 +1388,7 @@ ioseta(offset, p)
 iosetip(i, offset)
  int i, offset;
 {
-	register expptr p;
+	expptr p;
 
 	if(p = V(i))
 		if(p->tag==TADDR &&
@@ -1409,7 +1409,7 @@ iosetip(i, offset)
 iosetlc(i, offp, offl)
  int i, offp, offl;
 {
-	register expptr p;
+	expptr p;
 	if( (p = V(i)) && p->headblock.vtype==TYCHAR)
 		ioset(TYIOINT, offl, cpexpr(p->headblock.vleng) );
 	iosetc(offp, p);

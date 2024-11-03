@@ -13,7 +13,7 @@ static char	rcsid[] = "$Id$";
 #define BMASK	0xFF	/* To extract least significant 8 bits from an int. */
 
 /* Forward declarations */
-static void show(register struct outhead *);
+static void show(struct outhead *);
 static void showflags(unsigned	int);
 static void showsect(void);
 static void showrelo(void);
@@ -26,7 +26,7 @@ static void error(char *, ...);
 int main(int argc, char **argv)
 #		define prog	argv[0]
 {
-	register char	**arg = argv;
+	char	**arg = argv;
 	struct outhead	header;
 
 	while (*++arg) {
@@ -51,12 +51,12 @@ int main(int argc, char **argv)
  * NB. The header has already been read and is in the struct outhead `headp'
  * points to.
  */
-static void show(register struct outhead *headp)
+static void show(struct outhead *headp)
 {
-	register int		i;
-	register struct outname	*np;
-	register struct outname	*name;	/* Dynamically allocated name-array. */
-	register char		*string;/* Base of string area. */
+	int		i;
+	struct outname	*np;
+	struct outname	*name;	/* Dynamically allocated name-array. */
+	char		*string;/* Base of string area. */
 
 	printf("Version %d\n", headp->oh_stamp);
 	showflags((unsigned) headp->oh_flags);
@@ -229,7 +229,7 @@ static void showname(struct outname *namep)
  */
 static char *myalloc(unsigned int u)
 {
-	register char	*rcp;
+	char	*rcp;
 
 	rcp = malloc(u);
 	if (rcp == (char *) NULL) {

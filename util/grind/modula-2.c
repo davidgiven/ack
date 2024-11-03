@@ -83,7 +83,7 @@ print_string(f, s, len)
   char	*s;
   int	len;
 {
-  register char	*str = s;
+  char	*str = s;
   int delim = '\'';
 
   while (*str) {
@@ -151,7 +151,7 @@ binop_prio(op)
 
 static int
 get_number(ch)
-  register int	ch;
+  int	ch;
 {
   /*	The problem arising with the "parsing" of a number
 	is that we don't know the base in advance so we
@@ -159,10 +159,10 @@ get_number(ch)
 	complex finite automaton.
   */
   enum statetp {Oct,Hex,Dec,OctEndOrHex,End,Real};
-  register enum statetp state;
+  enum statetp state;
   char buf[512+1];
-  register int base = 10;
-  register char *np = &buf[0];
+  int base = 10;
+  char *np = &buf[0];
 
   *np++ = ch;
   state = is_oct(ch) ? Oct : Dec;
@@ -300,11 +300,11 @@ get_number(ch)
 
 static int
 getname(c)
-  register int	c;
+  int	c;
 {
   char	buf[512+1];
-  register char	*p = &buf[0];
-  register struct idf *id;
+  char	*p = &buf[0];
+  struct idf *id;
 
   do {
 	if (p - buf < 512) *p++ = c;
@@ -359,7 +359,7 @@ getname(c)
 
 static int
 get_token(c)
-  register int	c;
+  int	c;
 {
   switch(c) {
   case '[':
@@ -441,9 +441,9 @@ static int
 getstring(c)
   int	c;
 {
-  register int ch;
+  int ch;
   char buf[512];
-  register int len = 0;
+  int len = 0;
 
   while (ch = getc(db_in), ch != c) {
 	if (ch == '\n') {

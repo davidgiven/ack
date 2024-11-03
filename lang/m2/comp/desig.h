@@ -75,14 +75,14 @@ struct node;
 
 void LOL(arith offset, arith size);
 void STL(arith offset, arith size);
-void CodeValue(register struct desig *ds, register struct type *tp);
-void ChkForFOR(register struct node *nd);
-void CodeStore(register struct desig *ds, register struct type *tp);
-void CodeCopy(register struct desig *lhs, register struct desig *rhs, arith sz, arith *psize);
-void CodeMove(register struct desig *rhs, register struct node *left, struct type *rtp);
-void CodeAddress(register struct desig *ds);
-void CodeFieldDesig(register struct def *df, register struct desig *ds);
-void CodeVarDesig(register struct def *df, register struct desig *ds);
-void CodeDesig(register struct node *nd, register struct desig *ds);
+void CodeValue(struct desig *ds, struct type *tp);
+void ChkForFOR(struct node *nd);
+void CodeStore(struct desig *ds, struct type *tp);
+void CodeCopy(struct desig *lhs, struct desig *rhs, arith sz, arith *psize);
+void CodeMove(struct desig *rhs, struct node *left, struct type *rtp);
+void CodeAddress(struct desig *ds);
+void CodeFieldDesig(struct def *df, struct desig *ds);
+void CodeVarDesig(struct def *df, struct desig *ds);
+void CodeDesig(struct node *nd, struct desig *ds);
 
 #endif /* DESIG_H_ */

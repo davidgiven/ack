@@ -57,7 +57,7 @@ label datlab_count = 1;
 
 int fp_used;
 
-extern void str_cst(register char *, register int, int);  /* ival.c */
+extern void str_cst(char *, int, int);  /* ival.c */
 
 
 
@@ -121,7 +121,7 @@ struct string_cst *str_list = 0;
 
 label code_string(char* val, int len)
 {
-	register struct string_cst *sc = new_string_cst();
+	struct string_cst *sc = new_string_cst();
 	label dlb = data_label();
 
 	C_ina_dlb(dlb);
@@ -133,7 +133,7 @@ label code_string(char* val, int len)
 	return dlb;
 }
 
-void def_strings(register struct string_cst *sc)
+void def_strings(struct string_cst *sc)
 {
 	while (sc) {
 		struct string_cst *sc1 = sc;
@@ -176,13 +176,13 @@ void prepend_scopes(void)
 		and generates those exa's, exp's, ina's and inp's
 		that superior hindsight has provided.
 	*/
-	register struct stack_entry *se = local_level->sl_entry;
+	struct stack_entry *se = local_level->sl_entry;
 
 #ifdef USE_TMP
 	C_beginpart(tmp_id);
 #endif /* USE_TMP */
 	while (se != 0)	{
-		register struct def *df = se->se_idf->id_def;
+		struct def *df = se->se_idf->id_def;
 		
 		if (df && (df->df_initialized || df->df_used || df->df_alloc)) {
 			code_scope(se->se_idf->id_text, df);
@@ -195,7 +195,7 @@ void prepend_scopes(void)
 }
 #endif	/* PREPEND_SCOPES */
 
-void code_scope(char* text, register struct def *def)
+void code_scope(char* text, struct def *def)
 {
 	/*	generates code for one name, text, of the storage class
 		as given by def, if meaningful.
@@ -236,8 +236,8 @@ void begin_proc(struct decspecs *ds, struct idf *idf)		/* to be called when ente
 			does not fit in the return area
 		-	a fil pseudo instruction
 	*/
-	register char *name = idf->id_text;
-	register struct def *def = idf->id_def;
+	char *name = idf->id_text;
+	struct def *def = idf->id_def;
 
 	/* idf->id_def does not indicate the right def structure
 	 * when the function being defined has a parameter of the
@@ -423,7 +423,7 @@ void do_return_expr(struct expr *expr)
 
 void
 code_declaration(
-	register struct idf *idf,	/* idf to be declared	*/
+	struct idf *idf,	/* idf to be declared	*/
 	struct expr *expr,	/* initialisation; NULL if absent	*/
 	int lvl,		/* declaration level	*/
 	int sc)		/* storage class, as in the declaration */
@@ -447,8 +447,8 @@ code_declaration(
 		The sc is the actual storage class, as given in the
 		declaration.
 	*/
-	register struct def *def = idf->id_def;
-	register arith size = def->df_type->tp_size;
+	struct def *def = idf->id_def;
+	arith size = def->df_type->tp_size;
 	int fund = def->df_type->tp_fund;
 	int def_sc = def->df_sc;
 	
@@ -540,9 +540,9 @@ void loc_init(struct expr *expr, struct idf *id)
 		expression expr to the local variable described by id.
 		It frees the expression afterwards.
 	*/
-	register struct expr *e = expr;
-	register struct def *df = id->id_def;
-	register struct type *tp = df->df_type;
+	struct expr *e = expr;
+	struct def *df = id->id_def;
+	struct type *tp = df->df_type;
 	static arith tmpoffset = 0;
 	static arith unknownsize = 0;
 	
@@ -610,11 +610,11 @@ void loc_init(struct expr *expr, struct idf *id)
 	}
 }
 
-void bss(register struct idf *idf)
+void bss(struct idf *idf)
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
-	register struct def *df = idf->id_def;
+	struct def *df = idf->id_def;
 	
 #ifndef	PREPEND_SCOPES
 	code_scope(idf->id_text, df);
@@ -640,13 +640,13 @@ void bss(register struct idf *idf)
 	}
 }
 
-void formal_cvt(int hasproto, register struct def *df)
+void formal_cvt(int hasproto, struct def *df)
 {
 	/*	formal_cvt() converts a formal parameter of type char or
 		short from int to that type. It also converts a formal
 		parameter of type float from a double to a float.
 	*/
-	register struct type *tp = df->df_type;
+	struct type *tp = df->df_type;
 
 	if (tp->tp_size != int_size &&
 		(tp->tp_fund == CHAR || tp->tp_fund == SHORT)
@@ -705,7 +705,7 @@ static struct stmt_block *stmt_stack;	/* top of statement stack */
 */
 void code_break(void)
 {
-	register struct stmt_block *stmt_block = stmt_stack;
+	struct stmt_block *stmt_block = stmt_stack;
 
 #ifdef DBSYMTAB
 	if (options['g']) db_line(dot.tk_file, dot.tk_line);
@@ -724,7 +724,7 @@ void code_break(void)
 void
 code_continue(void)
 {
-	register struct stmt_block *stmt_block = stmt_stack;
+	struct stmt_block *stmt_block = stmt_stack;
 
 	while (stmt_block)	{
 		if (stmt_block->st_continue)	{
@@ -741,7 +741,7 @@ code_continue(void)
 
 void stack_stmt(label break_label, label cont_label)
 {
-	register struct stmt_block *stmt_block = new_stmt_block();
+	struct stmt_block *stmt_block = new_stmt_block();
 
 	stmt_block->next = stmt_stack;
 	stmt_block->st_break = break_label;
@@ -754,7 +754,7 @@ void unstack_stmt(void)
 	/*	unstack_stmt() unstacks the data of a statement
 		which may contain break or continue
 	*/
-	register struct stmt_block *sbp = stmt_stack;
+	struct stmt_block *sbp = stmt_stack;
 	stmt_stack = sbp->next;
 	free_stmt_block(sbp);
 }

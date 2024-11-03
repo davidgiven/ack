@@ -130,7 +130,7 @@ Addrp a, b;
 
 
 Addrp mkfield(res, f, ty)
-register Addrp res;
+Addrp res;
 char *f;
 int ty;
 {
@@ -141,9 +141,9 @@ int ty;
 
 
 Addrp realpart(p)
-register Addrp p;
+Addrp p;
 {
-	register Addrp q;
+	Addrp q;
 	expptr mkrealcon();
 
 	if (p -> uname_tag == UNAM_CONST && ISCOMPLEX (p->vtype)) {
@@ -163,9 +163,9 @@ register Addrp p;
 
 
 expptr imagpart(p)
-register Addrp p;
+Addrp p;
 {
-	register Addrp q;
+	Addrp q;
 	expptr mkrealcon();
 
 	if( ISCOMPLEX(p->vtype) )
@@ -192,7 +192,7 @@ register Addrp p;
 /* ncat -- computes the number of adjacent concatenation operations */
 
 ncat(p)
-register expptr p;
+expptr p;
 {
 	if(p->tag==TEXPR && p->exprblock.opcode==OPCONCAT)
 		return( ncat(p->exprblock.leftp) + ncat(p->exprblock.rightp) );
@@ -206,7 +206,7 @@ register expptr p;
    substring must have a static (i.e. compile-time) fixed length */
 
 ftnint lencat(p)
-register expptr p;
+expptr p;
 {
 	if(p->tag==TEXPR && p->exprblock.opcode==OPCONCAT)
 		return( lencat(p->exprblock.leftp) + lencat(p->exprblock.rightp) );
@@ -231,9 +231,9 @@ register expptr p;
 */
 
 Addrp putconst(p)
-register Constp p;
+Constp p;
 {
-	register Addrp q;
+	Addrp q;
 	struct Literal *litp, *lastlit;
 	int k, len, type;
 	int litflavor;

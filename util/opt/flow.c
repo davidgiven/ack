@@ -17,7 +17,7 @@
 #include "ext.h"
 
 /* Forward declarations */
-static void reach(register line_p);
+static void reach(line_p);
 static void findreach(void);
 static void cleaninstrs(void);
 
@@ -29,7 +29,7 @@ void flow(void)
 
 static void findreach(void)
 {
-	register num_p *npp, np;
+	num_p *npp, np;
 
 	reach(instrs);
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
@@ -56,9 +56,9 @@ static void findreach(void)
 			}
 }
 
-static void reach(register line_p lnp)
+static void reach(line_p lnp)
 {
-	register num_p np;
+	num_p np;
 
 	for (; lnp != (line_p) 0; lnp = lnp->l_next)
 	{
@@ -102,7 +102,7 @@ static void reach(register line_p lnp)
 
 static void cleaninstrs(void)
 {
-	register line_p *lpp, lp, *lastbra;
+	line_p *lpp, lp, *lastbra;
 	bool reachable, superfluous;
 	int instr;
 

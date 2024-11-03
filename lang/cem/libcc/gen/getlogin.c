@@ -32,7 +32,7 @@ getlogin()
 	static char name[sizeof(ut.ut_name) + 1];
 	int	slotno = ttyslot();
 	int	fd;
-	register char *p, *q;
+	char *p, *q;
 
 	if (! slotno || !(fd = open(UTMPFILE, 0))) return 0;
 	lseek(fd, (long) slotno * sizeof(ut), 0);

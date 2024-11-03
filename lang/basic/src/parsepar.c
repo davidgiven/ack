@@ -28,7 +28,7 @@ void parseparams(int argc,char **argv)
 {
 	int files=0 ;
 	int i;
-	register char *p;
+	char *p;
 
 	if(argc< 4)
 	{

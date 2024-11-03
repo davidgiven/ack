@@ -47,7 +47,7 @@ static void newnorder(int index);
 static void newtorder(int index);
 static void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
 static void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
-static p_gram copyrule(register p_gram p,int length);
+static p_gram copyrule(p_gram p,int length);
 /* and of course LLparse() */
 
 static void newnorder(int index) {
@@ -470,7 +470,7 @@ static void mkterm(p_gram prod, int flags,int lc,register p_gram result)
 }
 }
 
-elem (register p_gram pres;)
+elem (p_gram pres;)
 	{	register int	t = 0;
 		p_gram		p1;
 		int		ln;
@@ -639,7 +639,7 @@ firsts	{	register string p; }
 	;
 {
 
-static p_gram copyrule(register p_gram p,int length)
+static p_gram copyrule(p_gram p,int length)
 {
 	/*
 	 * Returns a pointer to a grammar rule that was created in

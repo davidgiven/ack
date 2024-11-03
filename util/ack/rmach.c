@@ -92,10 +92,10 @@ void setlist(char *name) {
 }
 
 static int inoptlist(char *nm) {
-	register char *p=Optlist ;
+	char *p=Optlist ;
 
 	while ( p && *p ) {
-		register char *q=nm ;
+		char *q=nm ;
 
 		while ( *q!='\0' && *q++==*p ) p++ ;
 		if ( *q=='\0' && ( *p=='\0' || *p==',' ) ) return 1 ;
@@ -106,7 +106,7 @@ static int inoptlist(char *nm) {
 
 static void intrf(void) {
 	/* Read in trf (transformation) */
-	register trf *new ;
+	trf *new ;
 	int twice ;
 	int name_seen=0 ;
 
@@ -230,7 +230,7 @@ static void intrf(void) {
 	}
 #ifdef DEBUG
 	if ( debug>=3 ) {
-		register list_elem *elem ;
+		list_elem *elem ;
 		vprint("%s: from %s to %s '%s'\n",
 			new->t_name,new->t_in ? new->t_in : "(null)",new->t_out,new->t_prog) ;
 		vprint("\targs: %s",new->t_argd) ;
@@ -257,7 +257,7 @@ static  char            *inptr ;
 char			*em_dir = EM_DIR;
 
 static void open_in(char *name) {
-	register dmach *cmac ;
+	dmach *cmac ;
 
 	gr_init(&rline) ;
 	for ( cmac= massoc ; cmac->ma_index!= -1 ; cmac++ ) {
@@ -300,7 +300,7 @@ static char *readline(void) {
 	   The line is stored in a volatile buffer,
 	   a pointer to the line is returned.
 	*/
-	register int nchar ;
+	int nchar ;
 	enum { BOL, ESCAPE, SKIPPING, MOL } state = BOL ;
 
 	gr_throw(&rline) ;
@@ -347,7 +347,7 @@ static char *readline(void) {
 }
 
 static int getinchar(void) {
-	register int token ;
+	int token ;
 
 	if ( incore ) {
 		if ( *inptr==0 ) return EOF ;
@@ -361,7 +361,7 @@ static int getinchar(void) {
 }
 
 static int getln(void) {
-	register char *c_ptr ;
+	char *c_ptr ;
 
 	do {
 		if ( (c_ptr=readline())==(char *)0 ) return 0 ;

@@ -142,13 +142,13 @@ struct scope;
 struct idf;
 
 
-struct def *MkDef(register struct idf *id, register struct scope *scope, int kind);
-struct def *define(register struct idf *id, register struct scope *scope, int kind);
-void RemoveFromIdList(register struct def *df);
-struct def * DeclProc(int type, register struct idf *id);
-void EndProc(register struct def *df, struct idf *id);
+struct def *MkDef(struct idf *id, struct scope *scope, int kind);
+struct def *define(struct idf *id, struct scope *scope, int kind);
+void RemoveFromIdList(struct def *df);
+struct def * DeclProc(int type, struct idf *id);
+void EndProc(struct def *df, struct idf *id);
 struct def * DefineLocalModule(struct idf *id);
-void CheckWithDef(register struct def *df, struct type *tp);
-void end_definition_list(register struct def **pdf);
+void CheckWithDef(struct def *df, struct type *tp);
+void end_definition_list(struct def **pdf);
 
 #endif /* DEF_H_ */

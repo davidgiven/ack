@@ -546,7 +546,7 @@ new_quadrant(void)
 void
 course_control(void)
 {
-  register i;
+  int i;
   /* @@@ int c2, c3, q4, q5; */
   int q4, q5;
   string sTemp;
@@ -826,7 +826,7 @@ maneuver_energy(void)
 void
 short_range_scan(void)
 {
-  register i, j;
+  int i, j;
 
   strcpy(sC, "GREEN");
 
@@ -898,7 +898,7 @@ short_range_scan(void)
 void
 long_range_scan(void)
 {
-  register i, j;
+  int i, j;
 
   if (d[3] < 0.0)
     {
@@ -928,7 +928,7 @@ long_range_scan(void)
 void
 phaser_control(void)
 {
-  register i;
+  int i;
   int iEnergy;
   int h1, h;
   string sTemp;
@@ -1183,7 +1183,7 @@ damage_control(void)
 { 
   int a1;
   double d3 = 0.0;
-  register i;
+  int i;
 
   if (d[6] < 0.0)
     {

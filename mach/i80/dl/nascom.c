@@ -45,9 +45,9 @@ stop(code) {
 }
 
 main(argc,argv) char **argv; {
-	register unsigned nd;
+	unsigned nd;
 	long pc;
-	register char *s;
+	char *s;
 	int i;
 
 	progname = argv[0];
@@ -116,7 +116,7 @@ main(argc,argv) char **argv; {
 		while (sect[i].os_size) {
 			unsigned int sz = 8096, fl;
 			extern char *calloc();
-			register char *buf;
+			char *buf;
 			char *pbuf;
 
 			if (sz > sect[i].os_size) sz = sect[i].os_size;
@@ -148,10 +148,10 @@ main(argc,argv) char **argv; {
 }
 
 data(nd,pc,buf)
-	register char *buf;
+	char *buf;
 	int pc;
 {
-	register i;
+	i;
 
 	check = 0;
 	pc += disp;

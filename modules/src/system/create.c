@@ -10,8 +10,8 @@
 int
 sys_create(File** filep, char* path, int mode)
 {
-	register int fd;
-	register File *fp;
+	int fd;
+	File *fp;
 
 	if ((fp = _get_entry()) == (File *)0)
 		return 0;

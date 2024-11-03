@@ -118,7 +118,7 @@ long align(a,b)
 
 int
 follows(pa, pb)
-        register struct outsect *pa, *pb;
+        struct outsect *pa, *pb;
 {
         /* return 1 if pa follows pb */
 
@@ -135,7 +135,7 @@ main(argc, argv)
 	program= argv[0] ;
 	if ( argc>1 && argv[1][0]=='-' ) {
 		if (argv[1][1] == 'F') {
-			register char *p = &argv[1][2];
+			char *p = &argv[1][2];
 
 			stacksize = 0;
 			while (*p) {
@@ -282,8 +282,8 @@ char buf[0300];
 
 header()
 {
-	register char *p = buf;
-	register int i;
+	char *p = buf;
+	int i;
 
 	shortcvt(exec.x_magic, p);
 	shortcvt(exec.x_ext, p);
@@ -334,8 +334,8 @@ header()
  * Transfer the emitted byted from one file to another.
  */
 emits(section) struct outsect *section ; {
-	register long	n ;
-	register int	blk;
+	long	n ;
+	int	blk;
 	char		buffer[BUFSIZ];
 
 	n= section->os_flen ;
@@ -361,17 +361,17 @@ emits(section) struct outsect *section ; {
 long
 emit_symtab()
 {
-	register unsigned short i;
+	unsigned short i;
 	struct xnm {
 		unsigned short s_type, s_seg;
 		long	s_value;
 	} xnm;
 	char *chars, *xname;
 	struct outname *names;
-	register char *xptr;
+	char *xptr;
 	extern char *malloc();
 	long off = OFF_CHAR(outhead);
-	register char *p;
+	char *p;
 
 	chars = malloc((unsigned)(outhead.oh_nchar));
 	if (! chars) return 0;

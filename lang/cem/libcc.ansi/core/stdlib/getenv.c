@@ -29,12 +29,12 @@ char* getenv(const char* name)
  *
  *	This routine *should* be a static; don't use it.
  */
-char* _findenv(register const char* name, int* offset)
+char* _findenv(const char* name, int* offset)
 {
 	extern char** environ;
-	register int len;
-	register char** P;
-	register const char* C;
+	int len;
+	char** P;
+	const char* C;
 
 	if (!environ)
 		return NULL;

@@ -103,7 +103,7 @@ void DoMacro(char *str)
 void GetMacros(char *fn)
 {
 	FILE *fp;
-	register int c;
+	int c;
 	char buf[LINE_LEN];
 	char *bufp = &buf[0];
 
@@ -170,8 +170,8 @@ char *Salloc(char *str)
 
 struct idf *FindId(char *id)
 {
-	register int hash_val = EnHash(id);
-	register struct idf *idp = hash_tab[hash_val];
+	int hash_val = EnHash(id);
+	struct idf *idp = hash_tab[hash_val];
 
 	while (idp) {
 		if (strcmp(idp->id_name, id) == 0) {
@@ -184,7 +184,7 @@ struct idf *FindId(char *id)
 
 int EnHash(char *id)
 {
-	register unsigned hash_val = 0;
+	unsigned hash_val = 0;
 
 	while (*id) {
 		hash_val = 31 * hash_val + *id++;

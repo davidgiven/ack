@@ -39,7 +39,7 @@ void wr_fatal(void)
  */
 void begin_write(void)
 {
-	register struct outhead* hd = &outhead;
+	struct outhead* hd = &outhead;
 
 	assert(!incore);
 	wr_ohead(hd);
@@ -64,8 +64,8 @@ static struct outname* sectname(int sectindex)
  */
 void end_write(void)
 {
-	register struct outname* name;
-	register int sectindex;
+	struct outname* name;
+	int sectindex;
 	extern long NGChars;
 
 	assert(!incore);
@@ -87,26 +87,26 @@ void wrt_emit(char* emit, int sectindex, long cnt)
 	wr_emit(emit, cnt);
 }
 
-void wrt_nulls(int sectindex, register long cnt)
+void wrt_nulls(int sectindex, long cnt)
 {
 	static char nullbuf[BUFSIZ];
 
 	wr_outsect(sectindex);
 	while (cnt)
 	{
-		register int n = cnt >= BUFSIZ ? BUFSIZ : cnt;
+		int n = cnt >= BUFSIZ ? BUFSIZ : cnt;
 		wr_emit(nullbuf, (long)n);
 		cnt -= n;
 	}
 }
 
-void wrt_name(register struct outname* name, int writename)
+void wrt_name(struct outname* name, int writename)
 {
 	assert(!incore);
 	assert(!(flagword & SFLAG));
 	if (name->on_mptr != (char*)0)
 	{
-		register long len = strlen(name->on_mptr) + 1;
+		long len = strlen(name->on_mptr) + 1;
 
 		wr_string(name->on_mptr, len);
 		name->on_foff = off_char;

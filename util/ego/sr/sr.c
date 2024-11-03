@@ -114,8 +114,8 @@ static void loopblocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
-	register bblock_p b;
-	register Lindex i;
+	bblock_p b;
+	Lindex i;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -181,8 +181,8 @@ static void sr_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
+	loop_p lp;
+	Lindex pi;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -200,8 +200,8 @@ static void sr_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
+	loop_p lp;
+	Lindex pi;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{

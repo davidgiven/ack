@@ -30,9 +30,9 @@ static convert_name(), convert_reloc(), init_unixheader();
 
 output_back()
 {
-	register int i;
-	register struct nlist *u_name;
-	register struct outrelo *rp;
+	int i;
+	struct nlist *u_name;
+	struct outrelo *rp;
 
 	/*
 	 * Convert relocation data structures. This also requires
@@ -106,13 +106,13 @@ reduce_name_table()
 #define S_NEEDED	S_MOD
 #define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
-	register int *diff_index =
+	int *diff_index =
 		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
-	register int i;
-	register struct outname *np;
+	int i;
+	struct outname *np;
 	char *new_str;
-	register char *p, *q;
-	register struct relocation_info *rp;
+	char *p, *q;
+	struct relocation_info *rp;
 
 	*diff_index++ = 0;
 	rp = u_reloc;
@@ -199,8 +199,8 @@ init_unixheader()
 
 static
 convert_reloc( a_relo, u_relo)
-register struct outrelo *a_relo;
-register struct relocation_info *u_relo;
+struct outrelo *a_relo;
+struct relocation_info *u_relo;
 {
 	int retval = 1;
 
@@ -238,8 +238,8 @@ register struct relocation_info *u_relo;
 
 static
 convert_name( a_name, u_name)
-register struct outname *a_name;
-register struct nlist *u_name;
+struct outname *a_name;
+struct nlist *u_name;
 {
 	/* print( "naam is %s\n", a_name->on_foff + string_area);   */
 

@@ -118,9 +118,9 @@ int narg;
 	exit(0);
 }
 
-flags(s,ftype) register char *s;
+flags(s,ftype) char *s;
 {
-	register c;
+	int c;
 
 	s++;	/* skip - */
 	switch (c = *s++) {
@@ -165,9 +165,9 @@ flags(s,ftype) register char *s;
 }
 
 char *tail(s)
-register char *s;
+char *s;
 {
-	register char *t;
+	char *t;
 
 	t = s;
 	while (*s)
@@ -178,7 +178,7 @@ register char *s;
 
 scan(s) char *s;
 {
-	register lastc;
+	lastc;
 
 	linecount = 0; 
 	nflag = 0;
@@ -238,7 +238,7 @@ scan(s) char *s;
 }
 
 suffix(s)
-register char *s;
+char *s;
 {
 	while (*s) s++;
 	if (*(s-2) == '.')
@@ -269,8 +269,8 @@ struct link {
 
 buildhash()
 {
-	register struct link *p,*q; 
-	register char *s;
+	struct link *p,*q; 
+	char *s;
 	int i;
 
 	for (i=0; i<HSIZE; i++)
@@ -302,7 +302,7 @@ buildhash()
 h_add(s,l) char *s; 
 int l;
 {
-	register struct link *q,**p; 
+	struct link *q,**p; 
 	char temp[80];
 	char *s2;
 
@@ -322,7 +322,7 @@ int l;
 
 h_in(s) char *s;
 {
-	register struct link *p;
+	struct link *p;
 	char temp[80];
 	char *s2;
 
@@ -445,7 +445,7 @@ scannumber()
 }
 
 scansymbol(ok1,ok2) {
-	register char *p;
+	char *p;
 
 	p = id;
 	do {	
@@ -458,7 +458,7 @@ scansymbol(ok1,ok2) {
 }
 
 scanusymbol(ok1,ok2) {
-	register char *p;
+	char *p;
 
 	p = id;
 	do {	
@@ -493,8 +493,8 @@ acmnt1() {
 
 	/* handle a .COMMENT ..... .COMMENT */
 
-	register char *p;
-	register int cont;
+	char *p;
+	int cont;
 
 	p = id;
 	nextch();
@@ -530,7 +530,7 @@ acmnt1() {
 }
 
 acmnt2() {
-	register char *p;
+	char *p;
 	int cont;
 
 	/* handle a CO ..... CO comment */
@@ -674,7 +674,7 @@ s_scan()
 
 x_scan()
 {
-	register char *p;
+	char *p;
 	nextch();
 	for (;;) switch (chsy) {
 	case LETTER:
@@ -704,7 +704,7 @@ int N;
 
 post()
 {
-	register n,l,i; 
+	int n,l,i; 
 	int first,newid,newfl,withfile;
 
 	first = 1; 
@@ -762,7 +762,7 @@ post()
 }
 
 getfld(stopch) {
-	register char *p;
+	char *p;
 
 	p = buf;
 	while (ch!=EOF && ch!=stopch) {

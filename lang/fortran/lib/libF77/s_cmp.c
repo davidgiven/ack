@@ -1,10 +1,10 @@
 #include "f2c.h"
 
 integer s_cmp(a, b, la, lb)	/* compare two strings */
-register char *a, *b;
+char *a, *b;
 long int la, lb;
 {
-register char *aend, *bend;
+char *aend, *bend;
 aend = a + la;
 bend = b + lb;
 

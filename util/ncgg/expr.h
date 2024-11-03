@@ -28,7 +28,7 @@ expr_t all_expr(int all_no, int subreg);
 expr_t perc_ident_expr(char *name);
 expr_t tokm_expr(int tokarg, char *name);
 int membset(int setno, char *name, short *regset, char *appearance, int restyp, int *typp);
-void subregset(register short *sp, int subreg, register short *regset);
+void subregset(short *sp, int subreg, short *regset);
 expr_t subreg_expr(int tokarg, int subreg);
 expr_t ident_expr(char *name);
 expr_t make_expr(int type, int operator, int op1, int op2);

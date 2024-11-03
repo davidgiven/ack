@@ -30,12 +30,12 @@ static string rcsid6 = "$Id$";
 
 /* In this file the following routines are defined: */
 static void readgrammar(int, char *[]);
-static void doparse(register p_file);
+static void doparse(p_file);
 static void comfatal(void);
 
-int main(int argc, register string argv[])
+int main(int argc, string argv[])
 {
-	register string arg;
+	string arg;
 
 	f_dir = ".";
 	f_temp = maketempfile();
@@ -226,7 +226,7 @@ static void readgrammar(int argc, char *argv[])
 	/*
 	 * Do just what the name suggests : read the grammar
 	 */
-	register p_file p;
+	p_file p;
 
 	linecount = 0;
 	f_input = "no filename";
@@ -267,7 +267,7 @@ static void readgrammar(int argc, char *argv[])
 		comfatal();
 }
 
-static void doparse(register p_file p)
+static void doparse(p_file p)
 {
 	linecount = 0;
 	p->f_name = f_input;
@@ -339,8 +339,8 @@ void copyfile(string file)
 	/*
 	 * Copies a file indicated by the parameter to filedescriptor fpars.
 	 */
-	register int c;
-	register FILE *f;
+	int c;
+	FILE *f;
 
 	if ((f = fopen(file, "r")) == NULL)
 	{
@@ -389,8 +389,8 @@ void install(string target, string source)
 	 * if allowed (which means that the target must be generated
 	 * by LLgen from the source, or that the target is not present
 	 */
-	register int c1, c2;
-	register FILE *f1, *f2;
+	int c1, c2;
+	FILE *f1, *f2;
 	int cnt;
 	string realtarget = !isabspath(target) ? aprintf("%s/%s", f_dir, target) : target;
 

@@ -21,7 +21,7 @@ extern char *realloc();
 
 char *Realloc(char ptr[], unsigned int sz)
 {
-	register char *mptr;
+	char *mptr;
 
 	if (!ptr) mptr = malloc(sz);
 	else mptr = realloc(ptr, sz);

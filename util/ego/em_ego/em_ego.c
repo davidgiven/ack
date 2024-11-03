@@ -90,7 +90,7 @@ static void cleanup(void)
 
 	if (!keeptemps)
 	{
-		register int i;
+		int i;
 
 		for (i = NTEMPS * 2; i > 0; i--)
 		{
@@ -153,7 +153,7 @@ static void old_infiles(void)
 {
 	/*	Remove old input files unless we have to keep them around. */
 
-	register int i;
+	int i;
 
 	if (phargs[1] == pdump || keeptemps)
 		return;
@@ -166,7 +166,7 @@ static void get_infiles(void)
 {
 	/*	Make output temps from previous phase input temps of next phase. */
 
-	register int i;
+	int i;
 	char** dst = &phargs[1];
 	char** src = &phargs[NTEMPS + 1];
 
@@ -182,7 +182,7 @@ static void new_outfiles(void)
 	static int Bindex = 0;
 	static char dig1 = '1';
 	static char dig2 = '0';
-	register int i;
+	int i;
 	char** dst = &phargs[NTEMPS + 1];
 
 	if (!Bindex)
@@ -211,8 +211,8 @@ static void run_phase(int phase)
 	IC and CA.
   */
 	static int flags_added;
-	register int argc;
-	register int i;
+	int argc;
+	int i;
 	char buf[256];
 	int pid, status;
 
@@ -275,7 +275,7 @@ static void run_phase(int phase)
 
 	if (v_flag)
 	{
-		register int i = 0;
+		int i = 0;
 
 		while (phargs[i])
 		{

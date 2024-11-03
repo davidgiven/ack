@@ -55,7 +55,7 @@ static void tstinpro(void)
 
 short readshort(void)
 {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = readbyte();
 	h_byte = readbyte();
@@ -67,8 +67,8 @@ short readshort(void)
 #ifdef LONGOFF
 static offset readoffset(void)
 {
-	register long l;
-	register int h_byte;
+	long l;
+	int h_byte;
 
 	l = readbyte();
 	l |= ((unsigned) readbyte()) * 256;
@@ -137,9 +137,9 @@ static void make_string(int n)
 
 static void inident(void)
 {
-	register int n;
-	register char *p = string;
-	register int c;
+	int n;
+	char *p = string;
+	int c;
 
 	n = getint();
 	while (n--)
@@ -202,7 +202,7 @@ static int table3(int n)
 
 static int table1(void)
 {
-	register int n;
+	int n;
 
 	n = readbyte();
 	if (n == EOF)
@@ -227,7 +227,7 @@ static int table1(void)
 
 static int table2(void)
 {
-	register int n;
+	int n;
 
 	n = readbyte();
 	if ((n < sp_fcst0 + sp_ncst0) && (n >= sp_fcst0))
@@ -238,7 +238,7 @@ static int table2(void)
 	return (table3(n));
 }
 
-static void argstring(offset length, register argb_p abp)
+static void argstring(offset length, argb_p abp)
 {
 	while (length--)
 	{
@@ -251,7 +251,7 @@ static void argstring(offset length, register argb_p abp)
 static line_p arglist(int n)
 {
 	line_p lnp;
-	register arg_p ap, *app;
+	arg_p ap, *app;
 	bool moretocome;
 	offset length;
 
@@ -329,7 +329,7 @@ static line_p arglist(int n)
 	return (lnp);
 }
 
-offset aoff(register arg_p ap, int n)
+offset aoff(arg_p ap, int n)
 {
 
 	while (n > 0)
@@ -347,7 +347,7 @@ offset aoff(register arg_p ap, int n)
 
 static int inpseudo(short n)
 {
-	register line_p lnp, head, tail;
+	line_p lnp, head, tail;
 	short n1, n2;
 	proinf savearea;
 #ifdef PSEUBETWEEN
@@ -456,7 +456,7 @@ static int inpseudo(short n)
 			curpro.gtoproc = 0;
 			if (prodepth > 1)
 			{
-				register int i;
+				int i;
 
 				curpro.lastline = (line_p) 0;
 				curpro.freg = (reg_p) 0;
@@ -506,8 +506,8 @@ static int inpseudo(short n)
 
 void getlines(void)
 {
-	register line_p lnp;
-	register int instr;
+	line_p lnp;
+	int instr;
 
 	for (;;)
 	{

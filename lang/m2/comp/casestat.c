@@ -89,8 +89,8 @@ static int compact(int nr, arith low, arith up)
 
 static void AddOneCase(struct switch_hdr *sh, struct node *lnode,  struct node *rnode, label lbl)
 {
-	register struct case_entry *ce = new_case_entry();
-	register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
+	struct case_entry *ce = new_case_entry();
+	struct case_entry *c1 = sh->sh_entries, *c2 = 0;
 	int fund = sh->sh_type->tp_fund;
 	arith diff;
 
@@ -204,7 +204,7 @@ node_error(rnode, "multiple case entry for value %ld", (long)(ce->ce_up));
 }
 
 
-static void AddCases(struct switch_hdr *sh, register struct node *node, label lbl)
+static void AddCases(struct switch_hdr *sh, struct node *node, label lbl)
 {
 	/*	Add case labels to the case label list
 	*/
@@ -233,7 +233,7 @@ static void FreeSh(struct switch_hdr *sh)
 {
 	/*	 free the allocated switch structure	
 	*/
-	register struct case_entry *ce;
+	struct case_entry *ce;
 
 	ce = sh->sh_entries;
 	while (ce)	{
@@ -253,10 +253,10 @@ int CaseCode(struct node *nd, label exitlabel, int end_reached)
 		"exitlabel" is the exit-label of the closest enclosing
 		LOOP-statement, or 0.
 	*/
-	register struct switch_hdr *sh = new_switch_hdr();
-	register struct node *pnode = nd;
-	register struct case_entry *ce;
-	register arith val;
+	struct switch_hdr *sh = new_switch_hdr();
+	struct node *pnode = nd;
+	struct case_entry *ce;
+	arith val;
 	label CaseDescrLab;
 	int rval;
 

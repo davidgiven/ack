@@ -3,7 +3,7 @@
 
 ungetc(ch, iop)
 int ch;
-register FILE *iop;
+FILE *iop;
 {
 	unsigned char *p;
 

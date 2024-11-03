@@ -135,7 +135,7 @@ struct tokenname tkfunny[] =	{	/* internal keywords */
 };
 #endif	/* ____ */
 
-void reserve(register struct tokenname resv[])
+void reserve(struct tokenname resv[])
 {
 	/*	The names of the tokens described in resv are entered
 		as reserved words.

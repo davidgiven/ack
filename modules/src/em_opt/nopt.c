@@ -73,11 +73,11 @@ void O_close(void)
 	C_close();
 }
 
-void OO_dfa(register int last)
+void OO_dfa(int last)
 {
-	register struct dfa *b;
-	register struct dodefault *d;
-	register int (*f)();
+	struct dfa *b;
+	struct dodefault *d;
+	int (*f)();
 	for (;;)
 	{
 		printstate("OO_dfa");
@@ -131,8 +131,8 @@ static void allocmem(void)
 
 char * OO_freestr(char *str)
 {
-	register char *s = str;
-	register char *res;
+	char *s = str;
+	char *res;
 	while (*s++)
 		;
 	again: if ((s - str) > (laststr - nextstr))
@@ -160,8 +160,8 @@ void OO_flush(void)
 	 	 Output all instructions waiting in the output queue and free their
 	 	 storage including the saved strings.
 	 */
-	register p_instr p, q;
-	register int i, n;
+	p_instr p, q;
+	int i, n;
 	printstate("Flush");
 	for (p = OO_buffer; p < OO_patternqueue; p++)
 		C_out(p);
@@ -187,8 +187,8 @@ p_instr OO_halfflush(void)
 	 	 Note that OO_endbackup is always NIL (i.e. there are no
 	 	 instructions on the backup queue) when this is invoked.
 	 */
-	register int i, n;
-	register p_instr p, q;
+	int i, n;
+	p_instr p, q;
 	printstate("Half flush");
 	n = MAXBUFFER / 2;
 	for (p = OO_buffer, i = n; i--;)
@@ -201,7 +201,7 @@ p_instr OO_halfflush(void)
 	return (OO_nxtpatt++);
 }
 
-void OO_mkext(register p_instr p, int opcode, p_instr arg, arith off)
+void OO_mkext(p_instr p, int opcode, p_instr arg, arith off)
 {
 	switch (arg->em_argtype)
 	{
@@ -223,8 +223,8 @@ void OO_mkrepl(int lrepl, int diff, int numbkup)
 {
 	/* copy the replacement queue into the buffer queue */
 	/* then move the pattern queue back n places */
-	register p_instr p, q;
-	register int i;
+	p_instr p, q;
+	int i;
 	printstate("Before backup");
 	if (OO_endbackup)
 	{

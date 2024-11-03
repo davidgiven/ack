@@ -20,9 +20,9 @@ struct	olddirect {
  * get next entry in a directory.
  */
 struct direct *readdir(dirp)
-register DIR *dirp;
+DIR *dirp;
 {
-	register struct olddirect *dp;
+	struct olddirect *dp;
 	static struct direct dir;
 
 	for (;;) {

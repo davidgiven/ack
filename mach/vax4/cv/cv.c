@@ -106,7 +106,7 @@ long align(a,b)
 
 int
 follows(pa, pb)
-	register struct outsect *pa, *pb;
+	struct outsect *pa, *pb;
 {
 	/* return 1 if pa follows pb */
 
@@ -117,7 +117,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
+	int		nsect;
 
 	program= argv[0] ;
 	while ( argc>1 && argv[1][0]=='-' ) {
@@ -309,8 +309,8 @@ emit_relo()
 {
 	struct outrelo *ACKrelo;
 	struct machrelo *MACHtrelo,*MACHdrelo;
-	register struct outrelo *ap;
-	register struct machrelo *mtp, *mdp;
+	struct outrelo *ap;
+	struct machrelo *mtp, *mdp;
 	unsigned int cnt = outhead.oh_nrelo;
 
 	ACKrelo = (struct outrelo *) calloc(cnt, sizeof(struct outrelo));
@@ -324,7 +324,7 @@ emit_relo()
 	rd_relo(ACKrelo, cnt);
 	rd_name(ACKnames, outhead.oh_nname);
 	while (cnt-- != 0) {
-		register struct machrelo *mp;
+		struct machrelo *mp;
 
 		if (ap->or_sect - S_MIN <= ROMSG) mp = mtp++;
 		else mp = mdp++;
@@ -364,7 +364,7 @@ get(sz)
 {
 	char buf[10];
 	long l = 0;
-	register char *p = buf + sz;
+	char *p = buf + sz;
 
 	read(output,buf,sz);
 	while (sz--) {
@@ -377,7 +377,7 @@ put(l,sz)
 	long l;
 {
 	char buf[10];
-	register char *p = buf;
+	char *p = buf;
 
 	*p++ = l;
 	*p++ = l >> 8;
@@ -390,9 +390,9 @@ put(l,sz)
 }
 
 patch(ap, an, mp)
-	register struct outrelo *ap;
-	register struct outname *an;
-	register struct machrelo *mp;
+	struct outrelo *ap;
+	struct outname *an;
+	struct machrelo *mp;
 {
 	int whichsect = (an->on_type & S_TYP) - S_MIN;
 	long correction = 0;
@@ -468,8 +468,8 @@ cvshort(s)
 
 int
 is_rest_local(A, i)
-	register int i;
-	register struct outname *A;
+	int i;
+	struct outname *A;
 {
 	while (i--) {
 		if (A->on_type & S_EXT) return 0;
@@ -480,10 +480,10 @@ is_rest_local(A, i)
 
 emit_symtab()
 {
-	register unsigned short i = outhead.oh_nname;
-	register struct outname *A;
+	unsigned short i = outhead.oh_nname;
+	struct outname *A;
 	struct sym *MACHnames;
-	register struct sym *M;
+	struct sym *M;
 	char *chars;
 	long offX = OFF_CHAR(outhead) - 4;
 

@@ -36,7 +36,7 @@ void add_interval(short t1, short t2, interv_p* list)
 	 * putting adjacent intervals in one interval.
 	 */
 
-	register interv_p x1, x2, *q;
+	interv_p x1, x2, *q;
 	int adjacent = 0;
 	interv_p x;
 
@@ -90,8 +90,8 @@ interv_p loop_lifetime(loop_p lp)
 	 */
 
 	interv_p lt = 0;
-	register bblock_p b;
-	register Lindex bi;
+	bblock_p b;
+	Lindex bi;
 
 	for (bi = Lfirst(lp->LP_BLOCKS); bi != (Lindex)0; bi = Lnext(bi, lp->LP_BLOCKS))
 	{
@@ -105,7 +105,7 @@ interv_p proc_lifetime(proc_p p)
 {
 	/* Determine the lifetime of an entire procedure */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b->b_next != (bblock_p)0; b = b->b_next)
 		;
@@ -205,7 +205,7 @@ bool not_disjoint(interv_p list1, interv_p list2)
 
 bool contains(short t, interv_p timespan)
 {
-	register interv_p iv;
+	interv_p iv;
 
 	for (iv = timespan; iv != (interv_p)0; iv = iv->i_next)
 	{

@@ -74,8 +74,8 @@ char *path;			/* pointer to name of file to be executed */
 char *argv[];			/* pointer to argument array */
 char *envp[];			/* pointer to environment */
 {
-  register char **argtop;
-  register char **envtop;
+  char **argtop;
+  char **envtop;
 
 	/* Count the argument pointers and environment pointers. */
   for (argtop = argv; *argtop != (char *) NULL; ) argtop++;

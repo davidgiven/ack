@@ -59,14 +59,14 @@ out:
 }
 
 char *skipblank(char *str) {
-	register char *ptr ;
+	char *ptr ;
 
 	for ( ptr=str ; *ptr==SPACE || *ptr==TAB ; ptr++ ) ;
 	return ptr ;
 }
 
 char *firstblank(char *str) {
-	register char *ptr ;
+	char *ptr ;
 
 	for ( ptr=str ; *ptr && *ptr!=SPACE && *ptr!=TAB ; ptr++ ) ;
 	return ptr ;
@@ -144,7 +144,7 @@ void quit(int code) {
 ***********/
 
 char *keeps(const char *str) {
-	register char *result ;
+	char *result ;
 	result= getcore( (unsigned)(strlen(str)+1) ) ;
 	if ( !result ) fatal("Out of core") ;
 	return strcpy(result,str) ;

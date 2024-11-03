@@ -50,7 +50,7 @@ lint_expr(expr, used)
 	struct expr *expr;
 	int used;			/* USED or IGNORED */
 {
-	register struct expr_state *esp;
+	struct expr_state *esp;
 
 	esp = expr2state(expr, RVAL, used);
 	referred_esp(esp);
@@ -59,7 +59,7 @@ lint_expr(expr, used)
 
 static struct expr_state *
 expr2state(expr, val, used)
-	register struct expr *expr;
+	struct expr *expr;
 	int val;			/* RVAL or LVAL */
 	int used;			/* USED or IGNORED */
 {
@@ -99,7 +99,7 @@ value2state(expr, val)
 
 	case Name:
 	{
-		register struct idf *idf = expr->VL_IDF;
+		struct idf *idf = expr->VL_IDF;
 		struct expr_state *esp = 0;
 
 		if (!idf || !idf->id_def)
@@ -139,9 +139,9 @@ oper2state(expr, val, used)
 	int val;			/* RVAL or LVAL */
 	int used;			/* USED or IGNORED */
 {
-	register int oper = expr->OP_OPER;
-	register struct expr *left = expr->OP_LEFT;
-	register struct expr *right = expr->OP_RIGHT;
+	int oper = expr->OP_OPER;
+	struct expr *left = expr->OP_LEFT;
+	struct expr *right = expr->OP_RIGHT;
 	struct expr_state *esp_l = 0;
 	struct expr_state *esp_r = 0;
 
@@ -199,7 +199,7 @@ oper2state(expr, val, used)
 	case '(':
 		if (right != 0) {
 			/* function call with parameters */
-			register struct expr *ex = right;
+			struct expr *ex = right;
 
 			while (	ex->ex_class == Oper
 			&&	ex->OP_OPER == PARCOMMA
@@ -363,7 +363,7 @@ add_expr_state(value, to_state, espp)
 	struct value value;
 	struct expr_state **espp;
 {
-	register struct expr_state *esp = *espp;
+	struct expr_state *esp = *espp;
 
 	assert(value.vl_class == Name);
 
@@ -421,10 +421,10 @@ referred_esp(esp)
 
 static
 free_expr_states(esp)
-	register struct expr_state *esp;
+	struct expr_state *esp;
 {
 	while (esp) {
-		register struct expr_state *esp2 = esp;
+		struct expr_state *esp2 = esp;
 
 		esp = esp->next;
 		free_expr_state(esp2);

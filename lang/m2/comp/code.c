@@ -43,15 +43,15 @@ extern struct desig	null_desig;
 int		fp_used;
 
 /* Forward declarations */
-static void CodeParameters(struct paramlist *, register struct node *);
+static void CodeParameters(struct paramlist *, struct node *);
 static void CodeStd(struct node *);
 static void compare(int, label);
 static void truthvalue(int);
-static void CodeUoper(register struct node *);
-static void CodeSet(register struct node *, int);
-static void CodeEl(register struct node *, register struct type *, int);
+static void CodeUoper(struct node *);
+static void CodeSet(struct node *, int);
+static void CodeEl(struct node *, struct type *, int);
 static void CodeDAddress(struct node *, int);
-static void DoHIGH(register struct def *);
+static void DoHIGH(struct def *);
 
 void CodeConst(arith cst, int size)
 {
@@ -66,7 +66,7 @@ void CodeConst(arith cst, int size)
 	}
 }
 
-void CodeString(register struct node *nd)
+void CodeString(struct node *nd)
 {
 	if (nd->nd_type->tp_fund != T_STRING) {
 		/* Character constant */
@@ -80,7 +80,7 @@ void CodeString(register struct node *nd)
 
 void CodeExpr(struct node *nd, struct desig *ds, label true_label, label false_label)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	DoLineno(nd);
 	if (tp->tp_fund == T_REAL) fp_used = 1;
@@ -142,8 +142,8 @@ void CodeExpr(struct node *nd, struct desig *ds, label true_label, label false_l
 		break;
 
 	case Set: {
-		register unsigned i = (unsigned) (tp->tp_size) / (int) word_size;
-		register arith *st = nd->nd_set + i;
+		unsigned i = (unsigned) (tp->tp_size) / (int) word_size;
+		arith *st = nd->nd_set + i;
 		int null_set = 1;
 
 		ds->dsg_kind = DSG_LOADED;
@@ -297,7 +297,7 @@ void CodeCoercion(struct type *t1, struct type *t2)
 void CodeCall(struct node *nd)
 {
 
-	register struct node *left = nd->nd_LEFT;
+	struct node *left = nd->nd_LEFT;
 	struct type *result_tp;
 	int needs_fn;
 
@@ -321,7 +321,7 @@ void CodeCall(struct node *nd)
 
 	switch(left->nd_class) {
 	case Def: {
-		register struct def *df = left->nd_def;
+		struct def *df = left->nd_def;
 
 		if (df->df_kind == D_CONST) {
 			/* a procedure address */
@@ -359,10 +359,10 @@ void CodeCall(struct node *nd)
 }
 
 /* Generates code to setup the parameters of a procedure call. */
-static void CodeParameters(struct paramlist *param, register struct node *arg)
+static void CodeParameters(struct paramlist *param, struct node *arg)
 {
-	register struct type *tp;
-	register struct type *arg_type;
+	struct type *tp;
+	struct type *arg_type;
 
 	assert(param != 0 && arg != 0);
 
@@ -374,7 +374,7 @@ static void CodeParameters(struct paramlist *param, register struct node *arg)
 	arg = arg->nd_LEFT;
 	arg_type = arg->nd_type;
 	if (IsConformantArray(tp)) {
-		register struct type *elem = tp->arr_elem;
+		struct type *elem = tp->arr_elem;
 
 		C_loc(tp->arr_elsize);
 		if (IsConformantArray(arg_type)) {
@@ -443,7 +443,7 @@ static void CodeParameters(struct paramlist *param, register struct node *arg)
 void CodePString(struct node *nd, struct type *tp)
 {
 	arith szarg = WA(nd->nd_type->tp_size);
-	register arith zersz = WA(tp->tp_size) - szarg;
+	arith zersz = WA(tp->tp_size) - szarg;
 
 	if (zersz) {
 		/* null padding required */
@@ -472,7 +472,7 @@ static void addu(int sz)
 	C_adu((arith)sz);
 }
 
-static int complex_lhs(register struct node *nd)
+static int complex_lhs(struct node *nd)
 {
 	switch(nd->nd_class) {
 	case Value:
@@ -490,9 +490,9 @@ static int complex_lhs(register struct node *nd)
 /* Generate code for internal procedures */
 static void CodeStd(struct node *nd)
 {
-	register struct node *arg = nd->nd_RIGHT;
-	register struct node *left = 0;
-	register struct type *tp = 0;
+	struct node *arg = nd->nd_RIGHT;
+	struct node *left = 0;
+	struct type *tp = 0;
 	int std = nd->nd_LEFT->nd_def->df_value.df_stdname;
 
 	if (arg) {
@@ -557,7 +557,7 @@ static void CodeStd(struct node *nd)
 
 	case S_DEC:
 	case S_INC: {
-		register arith size;
+		arith size;
 		int compl = complex_lhs(left);
 		arith tmp = 0;
 
@@ -643,7 +643,7 @@ static void CodeStd(struct node *nd)
 	}
 }
 
-static int needs_rangecheck(register struct type *tpl, struct type *tpr)
+static int needs_rangecheck(struct type *tpl, struct type *tpr)
 {
 	arith rlo, rhi;
 
@@ -666,7 +666,7 @@ static int needs_rangecheck(register struct type *tpl, struct type *tpr)
 	return 0;
 }
 
-void RangeCheck(register struct type *tpl, struct type *tpr)
+void RangeCheck(struct type *tpl, struct type *tpr)
 {
 	arith rlo, rhi;
 
@@ -691,7 +691,7 @@ void RangeCheck(register struct type *tpl, struct type *tpr)
 	}
 }
 
-void Operands(register struct node *nd)
+void Operands(struct node *nd)
 {
 
 	CodePExpr(nd->nd_LEFT);
@@ -700,13 +700,13 @@ void Operands(register struct node *nd)
 }
 
 void CodeOper(
-	register struct node *expr,	/* the expression tree itself	*/
+	struct node *expr,	/* the expression tree itself	*/
 	label true_label,
 	label false_label	/* labels to jump to in logical expr's	*/
 )
 {
-	register struct node *leftop = expr->nd_LEFT;
-	register struct node *rightop = expr->nd_RIGHT;
+	struct node *leftop = expr->nd_LEFT;
+	struct node *rightop = expr->nd_RIGHT;
 	int fund = expr->nd_type->tp_fund;
 	arith size = expr->nd_type->tp_size;
 
@@ -1057,9 +1057,9 @@ static void truthvalue(int relop)
 
 
 /* Generates code for an unary expression */
-void CodeUoper(register struct node *nd)
+void CodeUoper(struct node *nd)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	CodePExpr(nd->nd_RIGHT);
 	switch(nd->nd_symb) {
@@ -1090,9 +1090,9 @@ void CodeUoper(register struct node *nd)
 	}
 }
 
-static void CodeSet(register struct node *nd, int null_set)
+static void CodeSet(struct node *nd, int null_set)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	nd = nd->nd_NEXT;
 	while (nd) {
@@ -1107,9 +1107,9 @@ static void CodeSet(register struct node *nd, int null_set)
 	if (null_set) C_zer(tp->tp_size);
 }
 
-static void CodeEl(register struct node *nd, register struct type *tp, int null_set)
+static void CodeEl(struct node *nd, struct type *tp, int null_set)
 {
-	register struct type *eltype = ElementType(tp);
+	struct type *eltype = ElementType(tp);
 
 	if (nd->nd_class == Link && nd->nd_symb == UPTO) {
 		if (null_set) C_zer(tp->tp_size);
@@ -1132,7 +1132,7 @@ static void CodeEl(register struct node *nd, register struct type *tp, int null_
 	}
 }
 
-void CodePExpr(register struct node *nd)
+void CodePExpr(struct node *nd)
 {
 
 	struct desig designator;
@@ -1168,7 +1168,7 @@ static void CodeDAddress(struct node *nd, int chk_controlvar)
 	}
 }
 
-void CodeDStore(register struct node *nd)
+void CodeDStore(struct node *nd)
 {
 
 
@@ -1180,13 +1180,13 @@ void CodeDStore(register struct node *nd)
 	CodeStore(&designator, nd->nd_type);
 }
 
-static void DoHIGH(register struct def *df)
+static void DoHIGH(struct def *df)
 {
 	/*	Get the high index of a conformant array, indicated by "nd".
 		The high index is the second field in the descriptor of
 		the array, so it is easily found.
 	*/
-	register arith highoff;
+	arith highoff;
 
 	assert(df->df_kind == D_VARIABLE);
 	assert(IsConformantArray(df->df_type));

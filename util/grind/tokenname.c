@@ -81,12 +81,12 @@ struct tokenname tkstandard[] =	{	/* standard identifiers */
 /* Some routines to handle tokennames */
 
 reserve(resv)
-	register struct tokenname *resv;
+	struct tokenname *resv;
 {
 	/*	The names of the tokens described in resv are entered
 		as reserved words.
 	*/
-	register struct idf *p;
+	struct idf *p;
 
 	while (resv->tn_symbol)	{
 		p = str2idf(resv->tn_name, 0);

@@ -144,7 +144,7 @@ rd_ohead(h)
 
 /*ARGSUSED1*/
 rd_name(names, count)
-  register struct outname	*names;
+  struct outname	*names;
   unsigned int		count;	/* ignored; complete namelist is read */
 {
   names->on_valu = 0; names->on_foff = seg_strings + OFF_CHAR(hh);
@@ -208,7 +208,7 @@ rd_name(names, count)
 extern char	*strcpy();
 
 rd_string(strings, count)
-  register char	*strings;
+  char	*strings;
   long	count;
 {
 #if defined(sun)
@@ -278,9 +278,9 @@ get_names(h, sz)
   struct outhead	*h;
   long sz;
 {
-  register char	*xnms = malloc((unsigned) sz);
-  register char *p;
-  register struct outname *onm = (struct outname *) malloc((((unsigned)sz+8)/9)*sizeof(struct outname));
+  char	*xnms = malloc((unsigned) sz);
+  char *p;
+  struct outname *onm = (struct outname *) malloc((((unsigned)sz+8)/9)*sizeof(struct outname));
   struct  xnm {
 	unsigned short s_type, s_seg;
 	long	s_value;
@@ -447,8 +447,8 @@ rd_ohead(h)
   Elf32_Shdr *shdr;
   Elf_Data *sectnames;
   Elf_Data *dt;
-  register struct nlist *dn;
-  register Elf32_Sym *n;
+  struct nlist *dn;
+  Elf32_Sym *n;
   long text_offset, data_offset, bss_offset, fun_offset;
   int fixnamoff = 0, newfixnamoff = 0;
 
@@ -608,8 +608,8 @@ rd_name(nm, count)
   struct outname	*nm;
   unsigned int		count;
 {
-  register struct nlist *dn = dbtab;
-  register struct outname *n = nm;
+  struct nlist *dn = dbtab;
+  struct outname *n = nm;
   while (dn < maxdn) {
 	if (dn->n_type & N_STAB) {
 		n->on_type = dn->n_type << 8;

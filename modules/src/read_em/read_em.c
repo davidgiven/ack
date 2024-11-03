@@ -177,7 +177,7 @@ EXPORT void EM_close(void)
  again, but also to deliver the arguments on next calls to EM_getinstr.
  This is indicated by the variable "argp".
  */
-static void startmes(register struct e_instr *p)
+static void startmes(struct e_instr *p)
 {
 
 	getarg(cst_ptyp, &(p->em_arg));
@@ -208,13 +208,13 @@ static void startmes(register struct e_instr *p)
 
 /* EM_getinstr: read an "EM_line"
  */
-EXPORT int EM_getinstr(register struct e_instr *p)
+EXPORT int EM_getinstr(struct e_instr *p)
 {
 
 	EM_error = 0;
 	if (ahead)
 	{
-		register int i;
+		int i;
 
 		ahead--;
 		*p = aheads[0];
@@ -242,7 +242,7 @@ EXPORT int EM_getinstr(register struct e_instr *p)
 			return EM_error == 0;
 		case EM_MNEM:
 		{
-			register int i, j;
+			int i, j;
 			extern char em_flag[];
 			extern short em_ptyp[];
 

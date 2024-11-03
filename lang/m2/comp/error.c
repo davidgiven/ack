@@ -63,7 +63,7 @@ int err_occurred;
 	FileName, node errors get their information from the
 	node, whereas other errors use the information in the token.
 */
-static void _error(int, struct node *, char *, register va_list, int);
+static void _error(int, struct node *, char *, va_list, int);
 
 #if __STDC__
 #ifdef DEBUG
@@ -322,13 +322,13 @@ void crash(va_alist)
 }
 #endif
 
-static void _error(int class, struct node *node, char *fmt, register va_list ap, int warn_class)
+static void _error(int class, struct node *node, char *fmt, va_list ap, int warn_class)
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
 	*/
 	unsigned int ln = 0;
-	register char *remark = 0;
+	char *remark = 0;
 	
 	/* check visibility of message */
 	if (class == ERROR || class == WARNING) {

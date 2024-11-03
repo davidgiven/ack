@@ -74,7 +74,7 @@ void skipcomment(int flag);
 # ifdef LINE_DIRECTIVE
 static void linedirective(void); 
 # endif
-static string cpy(int s,register string p,int inserted); 
+static string cpy(int s,string p,int inserted); 
 static string vallookup(int s);
 static void copyact(char ch1,char ch2,int flag,int level);
 
@@ -239,8 +239,8 @@ int scanner(void)
 	/*
 	 * Lexical analyser, what else
 	 */
-	register int	ch;		/* Current char */
-	register char *p = ltext;
+	int	ch;		/* Current char */
+	char *p = ltext;
 	int		reserved = 0;	/* reserved word? */
 	char		*max = &ltext[LTEXTSZ - 1];
 	static int	nextexpr;
@@ -305,7 +305,7 @@ int scanner(void)
 		  case ISSPA :
 			continue;
 		  case ISDIG : {
-			register int i = 0;
+			int i = 0;
 			do {
 				i = 10 * i + (ch - '0');
 				ch= input();
@@ -333,7 +333,7 @@ int scanner(void)
 			if (reserved) {	/*
 					 * Now search for the keyword
 					 */
-				register p_keyw w;
+				p_keyw w;
 
 				w = resword;
 				while (w->w_word) {
@@ -365,7 +365,7 @@ int input(void)
 	/*
 	 * Low level input routine, used by all other input routines
 	 */
-	register int c;
+	int c;
 
 	if ((c = backupc)) {
 			/* Last char was "unput()". Deliver it again
@@ -406,7 +406,7 @@ void skipcomment(int flag)
 	 * Skip comment. If flag != 0, the comment is inside a fragment
 	 * of C-code, so keep it.
 	 */
-	register int	ch;
+	int	ch;
 	int		saved;	/* line count on which comment starts */
 
 	saved = linecount;
@@ -430,11 +430,11 @@ static void linedirective(void)
 	/*
 	 * Read a line directive
 	 */
-	register int	ch;
-	register int	i;
+	int	ch;
+	int	i;
 	string		s_error = "Illegal line directive";
 	string		store();
-	register string	c;
+	string	c;
 
 	do {	/*
 		 * Skip to next digit
@@ -479,7 +479,7 @@ static string vallookup(int s)
 	/*
 	 * Look up the keyword that has token number s
 	 */
-	register p_keyw p = resword;
+	p_keyw p = resword;
 
 	while (p->w_value) {
 		if (p->w_value == s) return p->w_word;
@@ -488,14 +488,14 @@ static string vallookup(int s)
 	return 0;
 }
 
-static string cpy(int s,register string p,int inserted) 
+static string cpy(int s,string p,int inserted) 
 {
 	/*
 	 * Create a piece of error message for token s and put it at p.
 	 * inserted = 0 if the token s was deleted (in which case we have
 	 * attributes), else it was inserted
 	 */
-	register string t = 0;
+	string t = 0;
 
 	switch(s) {
 	  case C_IDENT :
@@ -567,7 +567,7 @@ void LLmessage(int d)
 	 * or non-zero, in which case it represents a token that is inserted
 	 * before the current token
 	 */
-	register string	s,t;
+	string	s,t;
 	char		buf[128];
 
 	nerrors++;

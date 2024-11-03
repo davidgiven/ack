@@ -14,8 +14,8 @@ extern char** environ;
 
 int putenv(char* name)
 {
-	register char** v = environ;
-	register char* r;
+	char** v = environ;
+	char* r;
 	static int size = 0;
 	/* When size != 0, it contains the number of entries in the
 	 * table (including the final NULL pointer). This means that the
@@ -26,7 +26,7 @@ int putenv(char* name)
 		return 0;
 	if (r = strchr(name, '='))
 	{
-		register const char *p, *q;
+		const char *p, *q;
 
 		*r = '\0';
 
@@ -58,8 +58,8 @@ int putenv(char* name)
 
 	if (!size)
 	{
-		register char** p;
-		register int i = 0;
+		char** p;
+		int i = 0;
 
 		if (v)
 			do

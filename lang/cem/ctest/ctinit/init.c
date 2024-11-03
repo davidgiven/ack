@@ -105,7 +105,7 @@ float fla3[4][3] = {
 } ;
 
 pflt() {
-	register i,j ;
+	i,j ;
 
 	printf("Floats:\n\n") ;
 
@@ -146,7 +146,7 @@ double dbla3[4][3] = {
 } ;
 
 pdbl() {
-	register i,j ;
+	i,j ;
 
 	printf("Doubles:\n\n") ;
 

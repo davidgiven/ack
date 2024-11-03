@@ -51,8 +51,8 @@ void build_lifetimes(item_p items[])
 	 * dead-message that is not a live -or dead message.
 	 */
 
-	register line_p l;
-	register short now;
+	line_p l;
+	short now;
 	item_p item;
 	short last_code;
 

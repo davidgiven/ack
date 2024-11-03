@@ -46,7 +46,7 @@ int tokenseen = 0;	/* Some comment-options must precede any program text */
  */
 void CommentOptions(void)
 {
-	register int ch, ci;
+	int ch, ci;
 	int	on_on_minus = 0;
 	/* Parse options inside comments */
 
@@ -91,7 +91,7 @@ void CommentOptions(void)
 
 		case 'i':
 		{
-			register int i=0;
+			int i=0;
 
 			LoadChar(ch);
 			while( ch >= '0' && ch <= '9' ) {
@@ -128,7 +128,7 @@ static void SkipComment(void)
 			comments may not be nested (ISO 6.1.8).
 			(* and { are interchangeable, so are *) and }.
 	*/
-	register int ch;
+	int ch;
 
 	LoadChar(ch);
 	if (ch == '$') CommentOptions();
@@ -153,15 +153,15 @@ static void SkipComment(void)
 	}
 }
 
-static struct string *GetString(register int delim)
+static struct string *GetString(int delim)
 {
 	/*	Read a Pascal string, delimited by the character ' or ".
 	*/
-	register int ch;
-	register struct string *str = (struct string *)
+	int ch;
+	struct string *str = (struct string *)
 				Malloc((unsigned) sizeof(struct string));
-	register char *p;
-	register int len = ISTRSIZE;
+	char *p;
+	int len = ISTRSIZE;
 
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
 	for( ; ; )	{
@@ -210,10 +210,10 @@ static char *s_error = "illegal line directive";
 
 void CheckForLineDirective(void)
 {
-	register int	ch;
-	register int	i = 0;
+	int	ch;
+	int	i = 0;
 	char		buf[IDFSIZE + 2];
-	register char	*c = buf;
+	char	*c = buf;
 
 	LoadChar(ch);
 
@@ -276,8 +276,8 @@ int LLlex(void)
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
 	*/
-	register struct token *tk = &dot;
-	register int ch, nch;
+	struct token *tk = &dot;
+	int ch, nch;
 
 	toktype = error_type;
 
@@ -386,8 +386,8 @@ again:
 
 	case STIDF:	{
 		char buf[IDFSIZE + 1];
-		register char *tag = &buf[0];
-		register struct idf *id;
+		char *tag = &buf[0];
+		struct idf *id;
 
 		do	{
 			if( !options['C'] )	/* -C : cases are different */
@@ -414,7 +414,7 @@ again:
 	}
 
 	case STSTR:	{
-		register struct string *str = GetString(ch);
+		struct string *str = GetString(ch);
 
 		if( str->s_length == 1 && ch == '\'')	{
 #ifdef DEBUG
@@ -447,8 +447,8 @@ again:
 #define REAL_MODE	1
 
 		char buf[NUMSIZE+2];
-		register char *np = &buf[1];
-		register int state = INT_MODE;
+		char *np = &buf[1];
+		int state = INT_MODE;
 
 		buf[0] = '-';
 		do	{

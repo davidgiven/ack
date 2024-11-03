@@ -1,8 +1,8 @@
 /* $Id$ */
 char *
 memcpy(s1, s2, n)
-register char *s1, *s2;
-register int n;
+char *s1, *s2;
+int n;
 {
 /* Copy a block of data. */
 

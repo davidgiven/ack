@@ -46,8 +46,8 @@ stop() {
 }
 
 main(argc,argv) char **argv; {
-	register *p;
-	register char *s;
+	int *p;
+	char *s;
 
 	prog = *argv++; --argc;
 	mktemp(name1);
@@ -109,7 +109,7 @@ main(argc,argv) char **argv; {
 }
 
 select() {
-	register FILE *f;
+	FILE *f;
 	int i;
 
 	if (sscanf(line, "TEST %d", &i) != 1)
@@ -212,7 +212,7 @@ copy(s) char *s; {
 }
 
 getline() {
-	register len;
+	len;
 
 	if (fgets(line, LINSIZ, stdin) == NULL)
 		return(0);
@@ -243,10 +243,10 @@ usage() {
 
 char *
 to3dig(i)
-	register int i;
+	int i;
 {
 	static char buf[4];
-	register char *s = buf;
+	char *s = buf;
 
 	*s++ = (i % 1000) / 100 + '0';
 	*s++ = (i % 100) / 10 + '0';

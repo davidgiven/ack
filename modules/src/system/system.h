@@ -77,7 +77,7 @@ time_t sys_modtime(char *);
  *
  * Supports both DOS and UNIX style paths.
  * */
-extern void sys_basename(const char *str, register char *dst);
+extern void sys_basename(const char *str, char *dst);
 
 /* Creates a temporary filename, makes it, and returns a malloc'd string
  * containing the filename. */

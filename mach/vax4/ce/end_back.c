@@ -16,8 +16,8 @@ end_back()
 static
 finish_tables()
 {
-        register struct outname *np = symbol_table;
-        register int i = nname;
+        struct outname *np = symbol_table;
+        int i = nname;
 
         for (; i; i--, np++) {
                 if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {

@@ -34,11 +34,11 @@ p_tree
 mknode(int op, ...)
 {
   va_list ap;
-  register p_tree p = new_tree();
+  p_tree p = new_tree();
 
   va_start(ap, op);
   {
-	register int i, na;
+	int i, na;
 
 	p->t_oper = op;
 #else
@@ -48,11 +48,11 @@ mknode(va_alist)
   va_dcl
 {
   va_list ap;
-  register p_tree p = new_tree();
+  p_tree p = new_tree();
 
   va_start(ap);
   {
-	register int i, na;
+	int i, na;
 
 	p->t_oper = va_arg(ap, int);
 #endif
@@ -89,9 +89,9 @@ mknode(va_alist)
 }
 
 freenode(p)
-  register p_tree	p;
+  p_tree	p;
 {
-  register int na, i;
+  int na, i;
 
   if (! p) return;
   na = nargs(p->t_oper);
@@ -107,7 +107,7 @@ get_addr_from_node(p)
   p_tree	p;
 {
   t_addr	a = ILL_ADDR;
-  register p_symbol sym;
+  p_symbol sym;
 
   if (! p) return NO_ADDR;
   if (p->t_address != 0) return p->t_address;
@@ -173,8 +173,8 @@ get_addr_from_node(p)
 static int	ommit_commas = 0;
 
 print_node(f, p, top_level)
-  register p_tree	p;
-  register FILE		*f;
+  p_tree	p;
+  FILE		*f;
 {
   if (!p) return;
   switch(p->t_oper) {
@@ -454,9 +454,9 @@ eval(p)
 }
 
 newfile(id)
-  register struct idf	*id;
+  struct idf	*id;
 {
-  register p_symbol sym = Lookup(id, PervasiveScope, FILESYM);
+  p_symbol sym = Lookup(id, PervasiveScope, FILESYM);
 
   if (listfile != sym) listline = 1;
   listfile = sym;
@@ -471,7 +471,7 @@ newfile(id)
 int	in_wheninvoked;
 
 perform(p, a)
-  register p_tree	p;
+  p_tree	p;
   t_addr		a;
 {
   switch(p->t_oper) {
@@ -490,7 +490,7 @@ perform(p, a)
 	break;
   case OP_TRACE:
 	if (p->t_args[0] && p->t_args[0]->t_oper == OP_IN) {
-		register p_scope sc = base_scope(CurrentScope);
+		p_scope sc = base_scope(CurrentScope);
 	
 		if (sc != get_scope_from_addr(p->t_args[0]->t_address)) {
 			break;

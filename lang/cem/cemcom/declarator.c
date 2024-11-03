@@ -26,7 +26,7 @@ declare_type(tp, dc)
 	/*	Applies the decl_unary list starting at dc->dc_decl_unary
 		to the type tp and returns the result.
 	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct decl_unary *du = dc->dc_decl_unary;
 
 	while (du)	{
 		tp = construct_type(du->du_fund, tp, du->du_count);
@@ -36,7 +36,7 @@ declare_type(tp, dc)
 }
 
 add_decl_unary(dc, fund, count, fm)
-	register struct declarator *dc;
+	struct declarator *dc;
 	arith count;
 	struct formal *fm;
 {
@@ -44,7 +44,7 @@ add_decl_unary(dc, fund, count, fm)
 		type fund and with size count is inserted in front of the
 		declarator dc.
 	*/
-	register struct decl_unary *new = new_decl_unary();
+	struct decl_unary *new = new_decl_unary();
 
 	new->next = dc->dc_decl_unary;
 	new->du_fund = fund;
@@ -68,7 +68,7 @@ remove_declarator(dc)
 	/*	The decl_unary list starting at dc->dc_decl_unary is
 		removed.
 	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct decl_unary *du = dc->dc_decl_unary;
 
 	while (du)	{
 		struct decl_unary *old_du = du;
@@ -79,7 +79,7 @@ remove_declarator(dc)
 }
 
 reject_params(dc)
-	register struct declarator *dc;
+	struct declarator *dc;
 {
 	/*	The declarator is checked to have no parameters, if it
 		is a function.
@@ -92,7 +92,7 @@ reject_params(dc)
 }
 
 check_array_subscript(expr)
-	register struct expr *expr;
+	struct expr *expr;
 {
 	arith size = expr->VL_VALUE;
 

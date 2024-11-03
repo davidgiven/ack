@@ -12,7 +12,7 @@
 
 void cap(unsigned int u)
 {
-	register unsigned* p = &u;
+	unsigned* p = &u;
 
 	if (*p >= 'a' && *p <= 'z')
 		*p += 'A' - 'a';

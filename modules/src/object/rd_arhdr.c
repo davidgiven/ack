@@ -14,12 +14,12 @@
 extern void rd_fatal(void);
 
 
-int rd_arhdr(FILE* fd, register struct ar_hdr *arhdr)
+int rd_arhdr(FILE* fd, struct ar_hdr *arhdr)
 {
     char buf[AR_TOTAL];
-    register char *c = buf;
-    register char *p = arhdr->ar_name;
-    register size_t i;
+    char *c = buf;
+    char *p = arhdr->ar_name;
+    size_t i;
 
     i = fread(c, 1, AR_TOTAL, fd);
     if (i == 0) return 0;

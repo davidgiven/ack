@@ -36,6 +36,6 @@
 
 void con_float(void);
 void con_mult(word sz);
-void con_part(register int sz, word w);
+void con_part(int sz, word w);
 void mes(word type);
 void prolog(full nlocals);

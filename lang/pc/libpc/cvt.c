@@ -42,8 +42,8 @@ static struct powers_of_10
 static char* cvt(double value, int ndigit, int* decpt, int* sign, int ecvtflag)
 {
 	static char buf[NDIGITS + 1];
-	register char* p = buf;
-	register char* pe;
+	char* p = buf;
+	char* pe;
 
 	if (ndigit < 0)
 		ndigit = 0;
@@ -66,7 +66,7 @@ static char* cvt(double value, int ndigit, int* decpt, int* sign, int ecvtflag)
 	}
 	if (value != 0.0)
 	{
-		register struct powers_of_10* pp = &p10[0];
+		struct powers_of_10* pp = &p10[0];
 
 		if (value >= 10.0)
 			do

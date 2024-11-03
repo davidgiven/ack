@@ -21,12 +21,12 @@
 
 extern int expect_label;
 
-void LLmessage(register int tk)
+void LLmessage(int tk)
 {
 	if( tk > 0 )	{
 		/* if( tk > 0 ), it represents the token to be inserted.
 		*/
-		register struct token *dotp = &dot;
+		struct token *dotp = &dot;
 
 		error("%s missing before %s", symbol2str(tk), symbol2str(dotp->tk_symb));
 

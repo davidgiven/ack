@@ -13,7 +13,7 @@
 struct def;
 
 void stb_addtp(char *s, struct type *tp);
-void stb_string(register struct def *df, int kind);
+void stb_string(struct def *df, int kind);
 
 
 #endif /* STAB_H_ */

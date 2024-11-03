@@ -44,7 +44,7 @@ changedtype(q)
 {
 	char buf[200];
 	int qtype, type1;
-	register Extsym *e;
+	Extsym *e;
 	Argtypes *at;
 
 	if (q->vtypewarned)
@@ -79,11 +79,11 @@ changedtype(q)
 
  void
 unamstring(q, s)
- register Addrp q;
- register char *s;
+ Addrp q;
+ char *s;
 {
-	register int k;
-	register char *t;
+	int k;
+	char *t;
 
 	k = strlen(s);
 	if (k < IDENT_LEN) {
@@ -261,8 +261,8 @@ newproc()
  static void
 zap_changes()
 {
-	register chainp cp;
-	register Argtypes *at;
+	chainp cp;
+	Argtypes *at;
 
 	/* arrange to get correct count of prototypes that would
 	   change by running f2c again */
@@ -329,7 +329,7 @@ endproc()
 
 enddcl()
 {
-	register struct Entrypoint *ep;
+	struct Entrypoint *ep;
 	struct Entrypoint *ep0;
 	extern void freetemps();
 	chainp cp;
@@ -379,7 +379,7 @@ startproc(progname, class)
 Extsym * progname;
 int class;
 {
-	register struct Entrypoint *p;
+	struct Entrypoint *p;
 
 	p = ALLOC(Entrypoint);
 	if(class == CLMAIN) {
@@ -406,10 +406,10 @@ int class;
 /* subroutine or function statement */
 
 Extsym *newentry(v, substmsg)
- register Namep v;
+ Namep v;
  int substmsg;
 {
-	register Extsym *p;
+	Extsym *p;
 	char buf[128], badname[64];
 	static int nbad = 0;
 	static char already[] = "external name already used";
@@ -447,8 +447,8 @@ ftnint length;
 Extsym *entry;
 chainp args;
 {
-	register Namep q;
-	register struct Entrypoint *p;
+	Namep q;
+	struct Entrypoint *p;
 	extern int types3[];
 
 	if(class != CLENTRY)
@@ -525,9 +525,9 @@ LOCAL epicode()
 /* generate code to return value of type  t */
 
 LOCAL retval(t)
-register int t;
+int t;
 {
-	register Addrp p;
+	Addrp p;
 
 	switch(t)
 	{
@@ -577,9 +577,9 @@ FILE *outfile;
 dim_finish(v)
  Namep v;
 {
-	register struct Dimblock *p;
-	register expptr q;
-	register int i, nd;
+	struct Dimblock *p;
+	expptr q;
+	int i, nd;
 	extern expptr make_int_expr();
 
 	p = v->vdim;
@@ -607,10 +607,10 @@ duparg(q)
 LOCAL doentry(ep)
 struct Entrypoint *ep;
 {
-	register int type;
-	register Namep np;
+	int type;
+	Namep np;
 	chainp p, p1;
-	register Namep q;
+	Namep q;
 	Addrp mkarg(), rs;
 	int it, k;
 	extern char dflttype[26];
@@ -780,7 +780,7 @@ int type;
 dim_check(q)
  Namep q;
 {
-	register struct Dimblock *vdim = q->vdim;
+	struct Dimblock *vdim = q->vdim;
 
 	if(!vdim->nelt || !ISICON(vdim->nelt))
 		dclerr("adjustable dimension on non-argument", q);
@@ -790,8 +790,8 @@ dim_check(q)
 
 LOCAL dobss()
 {
-	register struct Hashentry *p;
-	register Namep q;
+	struct Hashentry *p;
+	Namep q;
 	int qstg, qclass, qtype;
 	Extsym *e;
 
@@ -833,8 +833,8 @@ LOCAL dobss()
 
 donmlist()
 {
-	register struct Hashentry *p;
-	register Namep q;
+	struct Hashentry *p;
+	Namep q;
 
 	for(p=hashtab; p<lasthash; ++p)
 		if( (q = p->varp) && q->vclass==CLNAMELIST)
@@ -845,7 +845,7 @@ donmlist()
 /* iarrlen -- Returns the size of the array in bytes, or -1 */
 
 ftnint iarrlen(q)
-register Namep q;
+Namep q;
 {
 	ftnint leng;
 
@@ -866,8 +866,8 @@ register Namep q;
 namelist(np)
 Namep np;
 {
-	register chainp q;
-	register Namep v;
+	chainp q;
+	Namep v;
 	int y;
 
 	if (!np->visused)
@@ -894,11 +894,11 @@ Namep np;
 
 LOCAL docommon()
 {
-    register Extsym *extptr;
-    register chainp q, q1;
+    Extsym *extptr;
+    chainp q, q1;
     struct Dimblock *t;
     expptr neltp;
-    register Namep comvar;
+    Namep comvar;
     ftnint size;
     int i, k, pref, type;
     extern int type_pref[];
@@ -1007,7 +1007,7 @@ chainp list;
 
 LOCAL docomleng()
 {
-	register Extsym *p;
+	Extsym *p;
 
 	for(p = extsymtab ; p < nextext ; ++p)
 		if(p->extstg == STGCOMMON)
@@ -1035,9 +1035,9 @@ Addrp p;
  void
 freetemps()
 {
-	register chainp p, p1;
-	register Addrp q;
-	register int t;
+	chainp p, p1;
+	Addrp q;
+	int t;
 
 	p1 = holdtemps;
 	while(p = p1) {
@@ -1058,14 +1058,14 @@ freetemps()
 /* allocate an automatic variable slot for each of   nelt   variables */
 
 Addrp autovar(nelt0, t, lengp, name)
-register int nelt0, t;
+int nelt0, t;
 expptr lengp;
 char *name;
 {
 	ftnint leng;
-	register Addrp q;
+	Addrp q;
 	char *temp_name ();
-	register int nelt = nelt0 > 0 ? nelt0 : 1;
+	int nelt = nelt0 > 0 ? nelt0 : 1;
 	extern char *av_pfix[];
 
 	if(t == TYCHAR)
@@ -1108,12 +1108,12 @@ char *name;
 
 Addrp mktmpn(nelt, type, lengp)
 int nelt;
-register int type;
+int type;
 expptr lengp;
 {
 	ftnint leng;
 	chainp p, oldp;
-	register Addrp q;
+	Addrp q;
 
 	if(type==TYUNKNOWN || type==TYERROR)
 		badtype("mktmpn", type);
@@ -1188,11 +1188,11 @@ expptr lengp;
    s   will be NULL if the block is unnamed */
 
 Extsym *comblock(s)
- register char *s;
+ char *s;
 {
 	Extsym *p;
-	register char *t;
-	register int c, i;
+	char *t;
+	int c, i;
 	char cbuf[256], *s0;
 
 /* Give the unnamed common block a unique name */
@@ -1251,9 +1251,9 @@ Namep v;
    in will only attempt to fill out more information give the other params */
 
 settype(v, type, length)
-register Namep  v;
-register int type;
-register ftnint length;
+Namep  v;
+int type;
+ftnint length;
 {
 	int type1;
 
@@ -1318,10 +1318,10 @@ register ftnint length;
    type and length specifier */
 
 lengtype(type, len)
-register int type;
+int type;
 ftnint len;
 {
-	register int length = (int)len;
+	int length = (int)len;
 	switch(type)
 	{
 	case TYREAL:
@@ -1383,7 +1383,7 @@ ret:
 /* setintr -- Set Intrinsic function */
 
 setintr(v)
-register Namep  v;
+Namep  v;
 {
 	int k;
 
@@ -1417,7 +1417,7 @@ register Namep  v;
    procedures */
 
 setext(v)
-register Namep  v;
+Namep  v;
 {
 	if(v->vclass == CLUNKNOWN)
 		v->vclass = CLPROC;
@@ -1436,12 +1436,12 @@ register Namep  v;
 /* create dimensions block for array variable */
 
 setbound(v, nd, dims)
-register Namep  v;
+Namep  v;
 int nd;
 struct Dims dims[ ];
 {
-	register expptr q, t;
-	register struct Dimblock *p;
+	expptr q, t;
+	struct Dimblock *p;
 	int i;
 	extern chainp new_vars;
 	char buf[256];

@@ -125,7 +125,7 @@ static TABLE TimezoneTable[] = {
 static void
 ZoneFromTable(long timezone)
 {
-	register TABLE* tptr = TimezoneTable;
+	TABLE* tptr = TimezoneTable;
 
 	while (tptr->tz_name != NULL)
 	{
@@ -148,9 +148,9 @@ ZoneFromTable(long timezone)
 #endif /* USE_TABLE */
 
 static const char*
-parseZoneName(register char* buf, register const char* p)
+parseZoneName(char* buf, const char* p)
 {
-	register int n = 0;
+	int n = 0;
 
 	if (*p == ':')
 		return NULL;
@@ -168,10 +168,10 @@ parseZoneName(register char* buf, register const char* p)
 }
 
 static const char*
-parseTime(register long* tm, const char* p, register struct dsttype* dst)
+parseTime(long* tm, const char* p, struct dsttype* dst)
 {
-	register int n = 0;
-	register const char* q = p;
+	int n = 0;
+	const char* q = p;
 	char ds_type = (dst ? dst->ds_type : '\0');
 
 	if (dst)
@@ -224,10 +224,10 @@ parseTime(register long* tm, const char* p, register struct dsttype* dst)
 }
 
 static const char*
-parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
+parseDate(char* buf, const char* p, struct dsttype* dstinfo)
 {
-	register const char* q;
-	register int n = 0;
+	const char* q;
+	int n = 0;
 	int cnt = 0;
 	const int bnds[3][2] = { { 1, 12 },
 		{ 1, 5 },
@@ -283,10 +283,10 @@ parseDate(register char* buf, register const char* p, struct dsttype* dstinfo)
 }
 
 static const char*
-parseRule(register char* buf, register const char* p)
+parseRule(char* buf, const char* p)
 {
 	long tim;
-	register const char* q;
+	const char* q;
 
 	if (!(p = parseDate(buf, p, &dststart)))
 		return NULL;
@@ -410,7 +410,7 @@ void _tzset(void)
 }
 
 static int
-last_sunday(register int day, register struct tm* timep)
+last_sunday(int day, struct tm* timep)
 {
 	int first = FIRSTSUNDAY(timep);
 
@@ -422,11 +422,11 @@ last_sunday(register int day, register struct tm* timep)
 }
 
 static int
-date_of(register struct dsttype* dst, struct tm* timep)
+date_of(struct dsttype* dst, struct tm* timep)
 {
 	int leap = LEAPYEAR(YEAR0 + timep->tm_year);
 	int firstday, tmpday;
-	register int day, month;
+	int day, month;
 
 	if (dst->ds_type != 'M')
 	{
@@ -455,10 +455,10 @@ date_of(register struct dsttype* dst, struct tm* timep)
  * Britain). 
  */
 unsigned
-_dstget(register struct tm* timep)
+_dstget(struct tm* timep)
 {
 	int begindst, enddst;
-	register struct dsttype *dsts = &dststart, *dste = &dstend;
+	struct dsttype *dsts = &dststart, *dste = &dstend;
 	int do_dst = 0;
 
 	if (_daylight == -1)

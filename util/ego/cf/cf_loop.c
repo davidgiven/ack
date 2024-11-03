@@ -130,7 +130,7 @@ static loop_p org_loop(loop_p lp, lset loops)
 	 * back edge; if so return this loop; else return 0.
 	 */
 
-	register Lindex li;
+	Lindex li;
 
 	for (li = Lfirst(loops); li != (Lindex)0; li = Lnext(li, loops))
 	{
@@ -147,8 +147,8 @@ static loop_p org_loop(loop_p lp, lset loops)
 
 static void collapse_loops(lset* loops_p)
 {
-	register Lindex li1, li2;
-	register loop_p lp1, lp2;
+	Lindex li1, li2;
+	loop_p lp1, lp2;
 
 	for (li1 = Lfirst(*loops_p); li1 != (Lindex)0; li1 = Lnext(li1, *loops_p))
 	{
@@ -177,7 +177,7 @@ static void loop_per_block(loop_p lp)
 
 	/* Update the b_loops sets */
 
-	register Lindex bi;
+	Lindex bi;
 
 	for (bi = Lfirst(lp->LP_BLOCKS); bi != (Lindex)0; bi = Lnext(bi, lp->LP_BLOCKS))
 	{
@@ -190,8 +190,8 @@ static void loop_attrib(lset loops)
 {
 	/* Compute several attributes */
 
-	register Lindex li;
-	register loop_p lp;
+	Lindex li;
+	loop_p lp;
 	loop_id lastlpid = 0;
 
 	for (li = Lfirst(loops); li != (Lindex)0; li = Lnext(li, loops))
@@ -212,8 +212,8 @@ static void nest_levels(lset loops)
 	 * very small, there is no cause for alarm.
 	 */
 
-	register Lindex li1, li2;
-	register loop_p lp;
+	Lindex li1, li2;
+	loop_p lp;
 
 	for (li1 = Lfirst(loops); li1 != (Lindex)0; li1 = Lnext(li1, loops))
 	{
@@ -233,7 +233,7 @@ static void cleanup(lset loops)
 {
 	/* Throw away the LP_BLOCKS sets */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(loops); i != (Lindex)0; i = Lnext(i, loops))
 	{
@@ -283,7 +283,7 @@ static void mark_blocks(loop_p lp)
 	 * tail of the back edge).
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 
 	/* First mark all blocks that are the successor of a
 	 * block that may exit the loop (i.e. contains a
@@ -347,7 +347,7 @@ void loop_detection(proc_p p)
 
 	lset loops; /* the set of all loops */
 	loop_p lp, org;
-	register bblock_p b;
+	bblock_p b;
 	bblock_p s;
 	Lindex si;
 

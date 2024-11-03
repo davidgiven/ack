@@ -24,7 +24,7 @@ struct e_instr *C_alloc(void)
 	return &b;
 }
 
-int C_out(register struct e_instr *p)
+int C_out(struct e_instr *p)
 {
 	/*	Generate EM-code from the e_instr structure "p"
 	*/
@@ -79,7 +79,7 @@ int C_out(register struct e_instr *p)
 	return 1;
 }
 
-static void arg(register struct e_instr *p, int comma)
+static void arg(struct e_instr *p, int comma)
 {
 	/*	Output the argument of "p".
 	*/
@@ -140,7 +140,7 @@ static void arg(register struct e_instr *p, int comma)
 	}
 }
 
-static void pseudo(register struct e_instr *p)
+static void pseudo(struct e_instr *p)
 {
 
 	PS(p->em_opcode);

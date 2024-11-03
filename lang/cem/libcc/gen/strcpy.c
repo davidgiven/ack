@@ -1,6 +1,6 @@
 /* $Id$ */
 char *strcpy(s1, s2)
-register char *s1, *s2;
+char *s1, *s2;
 {
 /* Copy s2 to s1. */
   char *original = s1;

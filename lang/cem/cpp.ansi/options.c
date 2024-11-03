@@ -61,7 +61,7 @@ void do_option(char *text)
 		break;
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
-		register char *cp = text, *name, *mactext;
+		char *cp = text, *name, *mactext;
 		unsigned maclen;
 
 		if (class(*cp) != STIDF && class(*cp) != STELL)	{
@@ -89,8 +89,8 @@ void do_option(char *text)
 	}
 	case 'I' :	/* -Ipath : insert "path" into include list	*/
 		if (*text)	{
-			register int i;
-			register char *new = text;
+			int i;
+			char *new = text;
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
@@ -134,8 +134,8 @@ static int txt2int(char **tp)
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0;
-	register int ch;
+	int val = 0;
+	int ch;
 	
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';

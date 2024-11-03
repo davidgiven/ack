@@ -1774,17 +1774,17 @@ struct ep
 
 void disassemble(void)
 {
-	register ptr low = 0;
-	register ptr high = DB;
-	register int idf;
-	register int cnt;
+	ptr low = 0;
+	ptr high = DB;
+	int idf;
+	int cnt;
 	struct ep* ep; /* list of entry points */
 
 	/* collect the entry points */
 	ep = (struct ep*)Malloc((size)(NProc * sizeof(struct ep)), "entry points");
 	for (idf = 0; idf < NProc; idf++)
 	{
-		register struct proc* pr = &proctab[idf];
+		struct proc* pr = &proctab[idf];
 
 		ep[idf].ep_idf = idf;
 		ep[idf].ep_ep = pr->pr_ep;
@@ -1794,7 +1794,7 @@ void disassemble(void)
 	/* a very naive sorting algorithm */
 	for (idf = 0; idf < NProc; idf++)
 	{
-		register int jdf;
+		int jdf;
 
 		for (jdf = 0; jdf < NProc; jdf++)
 		{
@@ -1821,7 +1821,7 @@ void disassemble(void)
 
 		if (idf < NProc && TC >= ep[idf].ep_ep)
 		{
-			register struct ep* p = &ep[idf];
+			struct ep* p = &ep[idf];
 
 			printf(
 			    "P[%d]+%lu:	; %ld %s\n", p->ep_idf, TC - p->ep_ep, p->ep_nloc,

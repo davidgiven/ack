@@ -31,7 +31,7 @@ extern label datlab_count;
 
 struct idf;
 
-void enter_label(register struct idf *idf, int defining);
-void unstack_label(register struct idf *idf);
+void enter_label(struct idf *idf, int defining);
+void unstack_label(struct idf *idf);
 
 #endif /* LABEL_H_ */

@@ -1,6 +1,6 @@
 /* $Id$ */
 char *index(s, c)
-register char *s, c;
+char *s, c;
 {
   do {
 	if (*s == c)

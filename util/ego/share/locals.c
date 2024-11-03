@@ -131,8 +131,8 @@ void make_localtab(proc_p p)
 	local_p locallist = (local_p)0;
 	short cnt = 0;
 	offset x, ill_zone = 0;
-	register bblock_p b;
-	register line_p l;
+	bblock_p b;
+	line_p l;
 
 	/* first make a list of all locals used */
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

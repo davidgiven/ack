@@ -32,8 +32,8 @@ static int argnum;		/* Number of arguments */
 #define COMMENTSTARTER	';'
 
 /* Forward declarations */
-static void gettyp(int, register struct e_arg *);
-static int getexpr(register int, register struct e_arg *);
+static void gettyp(int, struct e_arg *);
+static int getexpr(int, struct e_arg *);
 
 /* External definitions */
 extern char em_mnem[][4];
@@ -41,9 +41,9 @@ extern char em_pseu[][4];
 
 /* inithash, pre_hash, hash: Simple hashtable mechanism
 */
-static int hash(register char *s)
+static int hash(char *s)
 {
-	register int h = 0;
+	int h = 0;
 
 	while (*s) {
 		h <<= 1;
@@ -54,7 +54,7 @@ static int hash(register char *s)
 
 static void pre_hash(int i, char *s)
 {
-	register int h;
+	int h;
 
 	assert(i != 0);
 	h = hash(s);
@@ -74,7 +74,7 @@ static void pre_hash(int i, char *s)
 
 static void inithash(void)
 {
-	register int i;
+	int i;
 
 	/* Enter instructions ... */
 	for (i = sp_fmnem; i <= sp_lmnem; i++) {
@@ -92,7 +92,7 @@ static void inithash(void)
 */
 static int nospace(void)
 {
-	register int c;
+	int c;
 
 	do	c = getbyte();
 	while (isspace(c) && c != '\n');
@@ -109,7 +109,7 @@ static int nospace(void)
 */
 static void syntax(char *s)
 {
-	register int c;
+	int c;
 
 	xerror(s);
 	state = 0;
@@ -132,7 +132,7 @@ static void checkeol(void)
 */
 static int getescape(void)
 {
-	register int c, j, r;
+	int c, j, r;
 
 	if ((c = getbyte()) >= '0' && c <= '7') { /* numeric escape */
 		r = c - '0';
@@ -164,9 +164,9 @@ static int getescape(void)
 */
 static struct string *getname(void)
 {
-	register char *p;
-	register struct string *s;
-	register int c;
+	char *p;
+	struct string *s;
+	int c;
 
 	s = &string;
 	p = s->str;
@@ -202,9 +202,9 @@ static struct string *getname(void)
 */
 static struct string *getstring(int isident)
 {
-	register char *p;
+	char *p;
 	struct string *s;
-	register int c;
+	int c;
 	static int termc;
 
 	s = &string;
@@ -254,7 +254,7 @@ static struct string *getstring(int isident)
 
 static int offsetted(int argtyp, arith *ap)
 {
-	register int c;
+	int c;
 
 	if ((c = nospace()) == '+' || c == '-') {
 		struct e_arg dummy;
@@ -270,10 +270,10 @@ static int offsetted(int argtyp, arith *ap)
 	return argtyp;
 }
 
-static int getnumber(register int c, register struct e_arg *ap)
+static int getnumber(int c, struct e_arg *ap)
 {
 	char str[256 + 1];
-	register char *p = str;
+	char *p = str;
 	int n;
 	int expsign;
 
@@ -358,7 +358,7 @@ static int getnumber(register int c, register struct e_arg *ap)
 }
 
 
-static int getfactor(register int c, register struct e_arg *ap)
+static int getfactor(int c, struct e_arg *ap)
 {
 	if (c == '(') {
 		if (getexpr(nospace(), ap) != sp_cst4) {
@@ -373,7 +373,7 @@ static int getfactor(register int c, register struct e_arg *ap)
 	return getnumber(c, ap);
 }
 
-static int getterm(register int c, register struct e_arg *ap)
+static int getterm(int c, struct e_arg *ap)
 {
 	arith left;
 
@@ -398,7 +398,7 @@ static int getterm(register int c, register struct e_arg *ap)
 	return sp_cst4;
 }
 
-static int getexpr(register int c, register struct e_arg *ap)
+static int getexpr(int c, struct e_arg *ap)
 {
 	arith left;
 
@@ -433,10 +433,10 @@ static int get15u(void)
 	return (int) (dummy.ema_cst);
 }
 
-static void gettyp(int typset, register struct e_arg *ap)
+static void gettyp(int typset, struct e_arg *ap)
 {
-	register int c, t;
-	register int argtyp;
+	int c, t;
+	int argtyp;
 
 	if ((c = nospace()) == '\n') {
 		ungetbyte(c);
@@ -474,7 +474,7 @@ static void gettyp(int typset, register struct e_arg *ap)
 		argtyp = sp_pnam;
 	}
 	else if (c == '"' || c == '\'') {
-		register struct string *s;
+		struct string *s;
 
 		out("string\n");
 		ungetbyte(c);
@@ -509,7 +509,7 @@ static void gettyp(int typset, register struct e_arg *ap)
 
 static void getarg(int typset, struct e_arg *ap)
 {
-	register int c;
+	int c;
 
 	if (argnum != 1) {
 		if ((c = nospace()) != ',') {
@@ -527,11 +527,11 @@ static void getarg(int typset, struct e_arg *ap)
 /* getmnem: We found the start of either an instruction or a pseudo.
 	get the rest of it
 */
-static void getmnem(int c, register struct e_instr *p)
+static void getmnem(int c, struct e_instr *p)
 {
-	register int h;
+	int h;
 	int i;
-	register struct string *s;
+	struct string *s;
 
 	ungetbyte(c);
 	s = getname();
@@ -579,7 +579,7 @@ static void line_line(void)
 	EM_filename = filebuf;
 }
 
-static void getlabel(int c, register struct e_instr *p)
+static void getlabel(int c, struct e_instr *p)
 {
 
 	ungetbyte(c);
@@ -600,9 +600,9 @@ static void getlabel(int c, register struct e_instr *p)
 	checkeol();
 }
 
-static void gethead(register struct e_instr *p)
+static void gethead(struct e_instr *p)
 {
-	register int c;
+	int c;
 
 	argnum = 1;
 	for (;;) {	

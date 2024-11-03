@@ -47,8 +47,8 @@ int main(int argc, char **argv)
 	 *        debugging information.
 	 */
 	char workspace[6000];
-	register char *cp;
-	register int argno;
+	char *cp;
+	int argno;
 
 	progname = argv[0];
 	for (cp = argv[0]; *cp;)
@@ -76,10 +76,10 @@ int main(int argc, char **argv)
 
 static void getcore(void)
 {
-	register siz_t *p;
+	siz_t *p;
 	siz_t bytes;
-	register unsigned n;
-	register char *base;
+	unsigned n;
+	char *base;
 
 	/*
 	 * xglobs[] should be located in front of mglobs[], see upd_reloc()
@@ -139,7 +139,7 @@ static siz_t* getsizes(char *str)
  */
 static void argument(char *arg)
 {
-	register int w;
+	int w;
 
 	if (oflag)
 	{
@@ -179,8 +179,8 @@ static void argument(char *arg)
  */
 static void flags(char *arg)
 {
-	register char *argp;
-	register int on;
+	char *argp;
+	int on;
 
 	argp = arg;
 	while (*++argp)
@@ -294,8 +294,8 @@ void do_proc(void)
 
 static void archive(void)
 {
-	register int i;
-	register char *p;
+	int i;
+	char *p;
 
 	/*
 	 * Read a library.
@@ -417,10 +417,10 @@ void initproc(void)
 void endproc(void)
 {
 	/* Throw the contents of the line and local label table away */
-	register line_t *lnp1;
-	register locl_t *lbhead, *lbp, *lbp_next;
-	register int kind;
-	register stat_t *prevstate;
+	line_t *lnp1;
+	locl_t *lbhead, *lbp, *lbp_next;
+	int kind;
+	stat_t *prevstate;
 
 	while ((lnp1 = pstate.s_fline) != NULL)
 	{
@@ -481,7 +481,7 @@ void end_module(void)
 
 static void enmd_pro(void)
 {
-	register proc_t *p, *limit;
+	proc_t *p, *limit;
 
 	/*
 	 * Check that all local procedures have been defined,
@@ -511,7 +511,7 @@ static void enmd_pro(void)
 
 static void enmd_glo(void)
 {
-	register glob_t *mg, *xg, *limit;
+	glob_t *mg, *xg, *limit;
 
 	/*
 	 * Tougher then enmd_pro().
@@ -586,7 +586,7 @@ static void c_print(void)
 
 static void c_dprint(char *str, char* cnt)
 {
-	register int first, curr;
+	int first, curr;
 	printf("unused %s opcodes\n", str);
 	for (first = -1, curr = 0; curr <= 256; curr++)
 	{
@@ -616,9 +616,9 @@ static void c_dprint(char *str, char* cnt)
 
 static void check_def(void)
 {
-	register proc_t *p;
-	register glob_t *g;
-	register int count;
+	proc_t *p;
+	glob_t *g;
+	int count;
 
 	/*
 	 * Check for unresolved references.

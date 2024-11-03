@@ -49,7 +49,7 @@ char *Malloc(u)
 struct namelist *
 new_namelist()
 {
-	register struct namelist *nlp = freelist;
+	struct namelist *nlp = freelist;
 
 	if (nlp)
 	{
@@ -76,7 +76,7 @@ void add_name(char *nm)
 
 	while (nlp)
 	{
-		register int i = strcmp(nm, nlp->name);
+		int i = strcmp(nm, nlp->name);
 		if (i < 0)
 			break;
 		if (i == 0) /* already present */
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	exit(err ? 1 : 0);
 }
 
-int contains_slash(register char *s)
+int contains_slash(char *s)
 {
 	while (*s)
 		if (*s++ == '/')

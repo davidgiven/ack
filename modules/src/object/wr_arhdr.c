@@ -13,12 +13,12 @@
 #include "obj.h"
 
 
-void wr_arhdr(FILE* fd, register struct ar_hdr	*arhdr)
+void wr_arhdr(FILE* fd, struct ar_hdr	*arhdr)
 {
 	char buf[AR_TOTAL];
-	register char *c = buf;
-	register char *p = arhdr->ar_name;
-	register int i = AR_NAME_MAX;
+	char *c = buf;
+	char *p = arhdr->ar_name;
+	int i = AR_NAME_MAX;
 
 	while (i--) {
 		*c++ = *p++;

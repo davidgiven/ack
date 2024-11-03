@@ -10,6 +10,6 @@
 
 #include "arith.h"
 
-void ch3mon(int oper, register arith *pval, int *puns);
+void ch3mon(int oper, arith *pval, int *puns);
 
 #endif /* CH3MON_H_ */

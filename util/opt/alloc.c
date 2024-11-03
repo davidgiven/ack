@@ -18,7 +18,7 @@
 
 #ifdef USEMALLOC
 
-short *myalloc(register unsigned int);
+short *myalloc(unsigned int);
 
 #define newcore(size) myalloc(size)
 #define oldcore(p,size) free(p)
@@ -92,8 +92,8 @@ int asizetab[] = {
 
 line_p newline(int optyp)
 {
-	register line_p lnp;
-	register int kind = optyp;
+	line_p lnp;
+	int kind = optyp;
 
 	if (kind > OPMINI)
 		kind = OPMINI;
@@ -102,9 +102,9 @@ line_p newline(int optyp)
 	return (lnp);
 }
 
-void oldline(register line_p lnp)
+void oldline(line_p lnp)
 {
-	register int kind = lnp->l_optyp & BMASK;
+	int kind = lnp->l_optyp & BMASK;
 
 	if (kind > OPMINI)
 		kind = OPMINI;
@@ -115,16 +115,16 @@ void oldline(register line_p lnp)
 
 arg_p newarg(int kind)
 {
-	register arg_p ap;
+	arg_p ap;
 
 	ap = (arg_p) newcore(asizetab[kind]);
 	ap->a_typ = kind;
 	return (ap);
 }
 
-void oldargs(register arg_p ap)
+void oldargs(arg_p ap)
 {
-	register arg_p next;
+	arg_p next;
 
 	while (ap != (arg_p) 0)
 	{
@@ -145,9 +145,9 @@ void oldargs(register arg_p ap)
 	}
 }
 
-void oldargb(register argb_p abp)
+void oldargb(argb_p abp)
 {
-	register argb_p next;
+	argb_p next;
 
 	while (abp != (argb_p) 0)
 	{
@@ -217,9 +217,9 @@ typedef struct coreblock
 #ifdef COREDEBUG
 coreverbose()
 {
-	register size;
-	register short *p;
-	register sum;
+	size;
+	short *p;
+	sum;
 
 	sum = 0;
 	for(size=1;size<MAXSHORT;size++)
@@ -233,7 +233,7 @@ coreverbose()
 
 compactcore()
 {
-	register core_p corelist=0,tp,cl;
+	core_p corelist=0,tp,cl;
 	int size;
 
 #ifdef COREDEBUG
@@ -291,8 +291,8 @@ compactcore()
 
 short *grabcore(size) int size;
 {
-	register short *p;
-	register trysize;
+	short *p;
+	trysize;
 
 	/*
 	 * Desperate situation, can't get more core from system.
@@ -346,7 +346,7 @@ short *grabcore(size) int size;
 
 short *newcore(size) int size;
 {
-	register short *p,*q;
+	short *p,*q;
 
 	size = (size + sizeof(int) - 1) & ~(sizeof(int) - 1);
 	if( size < 2*MAXSHORT )
@@ -398,7 +398,7 @@ free()
 oldcore(p,size) short *p; int size;
 {
 #ifdef CORECHECK
-	register short *cp;
+	short *cp;
 #endif
 
 	assert(size<2*MAXSHORT);
@@ -427,7 +427,7 @@ coreinit(p1,p2) short *p1,*p2;
 
 short *freshcore(size) int size;
 {
-	register short *temp;
+	short *temp;
 	static int cchunk=CCHUNK;
 
 	while(&ccur[size/sizeof(short)] >= cend && cchunk>0)
@@ -461,9 +461,9 @@ void coreinit(void)
 	 */
 }
 
-short *myalloc(register unsigned int size)
+short *myalloc(unsigned int size)
 {
-	register short *p, *q;
+	short *p, *q;
 
 	p = (short *) malloc(size);
 	if (p == 0)

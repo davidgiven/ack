@@ -10,6 +10,6 @@
 
 struct expr;
 
-void fltcstbin(register struct expr **expp, int oper, register struct expr *expr);
+void fltcstbin(struct expr **expp, int oper, struct expr *expr);
 
 #endif /* FLTCSTOPER_H_ */

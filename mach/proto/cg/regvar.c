@@ -49,7 +49,7 @@ struct regvar *linkreg(long of,int sz,int tp,int sc)
 void tryreg(struct regvar *rvlp, int typ)
 {
 	int score;
-	register int i;
+	int i;
 	struct regassigned *ra;
 	struct regvar *save;
 
@@ -94,8 +94,8 @@ void tryreg(struct regvar *rvlp, int typ)
 
 void fixregvars(int saveall)
 {
-	register struct regvar *rv;
-	register int rvtyp,i;
+	struct regvar *rv;
+	int rvtyp,i;
 	
 	swtxt();
 	i_regsave();	/* machine dependent initialization */
@@ -117,7 +117,7 @@ void fixregvars(int saveall)
 
 int isregvar(long off)
 {
-	register struct regvar *rvlp;
+	struct regvar *rvlp;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=rvlp->rv_next)
 		if(rvlp->rv_off == off)
@@ -126,8 +126,8 @@ int isregvar(long off)
 }
 
 void unlinkregs(void) {
-	register struct regvar *rvlp,*t;
-	register struct regassigned *ra;
+	struct regvar *rvlp,*t;
+	struct regassigned *ra;
 	int rvtyp,i;
 
 	for(rvlp=rvlist;rvlp!=0;rvlp=t) {

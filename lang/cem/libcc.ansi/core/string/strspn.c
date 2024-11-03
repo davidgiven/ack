@@ -9,7 +9,7 @@
 size_t
 strspn(const char* string, const char* in)
 {
-	register const char *s1, *s2;
+	const char *s1, *s2;
 
 	for (s1 = string; *s1; s1++)
 	{

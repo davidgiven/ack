@@ -9,7 +9,7 @@
 /* We do not use strtol here for backwards compatibility in behaviour on
    overflow.
 */
-int atoi(register const char* nptr)
+int atoi(const char* nptr)
 {
 	int total = 0;
 	int minus = 0;

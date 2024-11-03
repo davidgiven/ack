@@ -25,7 +25,7 @@ extern struct decspecs null_decspecs;
 
 struct type;
 
-void do_decspecs(register struct decspecs *ds);
-struct type *qualifier_type(register struct type *tp, int typequal);
+void do_decspecs(struct decspecs *ds);
+struct type *qualifier_type(struct type *tp, int typequal);
 
 #endif

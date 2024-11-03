@@ -44,7 +44,7 @@
 
 int do_ioctl(int fd, int req, ptr addr)
 {
-	register long e;
+	long e;
 #ifdef WANT_SGTTY
 	struct sgttyb sg_buf;
 #endif

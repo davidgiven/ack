@@ -37,7 +37,7 @@ static int stacktop = 0;
 
 /* Forward declarations */
 static void do_inst_label(line_p);
-static void assign_label(register num_p);
+static void assign_label(num_p);
 
 void init_state(void)
 {
@@ -47,7 +47,7 @@ void init_state(void)
 
 void tes_pseudos(void)
 {
-	register line_p lp;
+	line_p lp;
 
 	for (lp = pseudos; lp != (line_p) 0; lp = lp->l_next)
 	{
@@ -57,7 +57,7 @@ void tes_pseudos(void)
 			case ps_rom:
 				if (lp->l_optyp == OPLIST)
 				{
-					register arg_p ap = lp->l_a.la_arg;
+					arg_p ap = lp->l_a.la_arg;
 
 					while (ap != (arg_p) 0)
 					{
@@ -77,8 +77,8 @@ void tes_pseudos(void)
 void tes_instr(line_p lnp, line_p x, line_p y)
 {
 	char *s;
-	register int instr = INSTR(lnp);
-	register int arg, argdef;
+	int instr = INSTR(lnp);
+	int arg, argdef;
 	int neg = 0;
 
 	if (instr == op_lab)
@@ -195,7 +195,7 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 	}
 }
 
-static void assign_label(register num_p label)
+static void assign_label(num_p label)
 {
 	if (label->n_flags & NUMSET)
 	{

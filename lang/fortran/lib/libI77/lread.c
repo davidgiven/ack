@@ -166,8 +166,8 @@ l_R(poststar)
  int poststar;
 {
 	char s[FMAX+EXPMAXDIGS+4];
-	register int ch;
-	register char *sp, *spe, *sp1;
+	int ch;
+	char *sp, *spe, *sp1;
 	long e, exp;
 	double atof();
 	int havenum, se;
@@ -275,7 +275,7 @@ bad:
 
  static int
 rd_count(ch)
- register int ch;
+ int ch;
 {
 	if (ch < '0' || ch > '9')
 		return 1;

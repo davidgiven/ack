@@ -26,7 +26,7 @@ static int want_verbose = 0;
 
 char *myalloc(int n)
 {
-	register char *p;
+	char *p;
 
 	p = malloc((unsigned) n);
 	if (p == 0)
@@ -51,10 +51,10 @@ void tstbool(expr_t e)
 		yyerror("Must be boolean expression");
 }
 
-int structsize(register list2 s)
+int structsize(list2 s)
 {
-	register list1 l;
-	register int sum;
+	list1 l;
+	int sum;
 
 	sum = 0;
 	while (s != 0)
@@ -109,7 +109,7 @@ list2 lookstruct(list2 ll)
 
 int instno(inst_t inst)
 {
-	register int i, j;
+	int i, j;
 
 	for (i = 1; i < narinstance; i++)
 	{
@@ -128,7 +128,7 @@ int instno(inst_t inst)
 
 string scopy(string s)
 {
-	register string t;
+	string t;
 
 	t = (char *) myalloc(strlen(s) + 1);
 	strcpy(t, s);
@@ -137,7 +137,7 @@ string scopy(string s)
 
 int strlookup(string s)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < ncodestrings; i++)
 		if (strcmp(s, codestrings[i]) == 0)
@@ -147,10 +147,10 @@ int strlookup(string s)
 	return (ncodestrings++);
 }
 
-int stringno(register string s)
+int stringno(string s)
 {
 	char buf[256];
-	register char *p = buf;
+	char *p = buf;
 
 	while (*s != 0)
 		switch (*s)
@@ -213,7 +213,7 @@ int stringno(register string s)
 					else
 					{
 						char field[256];
-						register char *f = field;
+						char *f = field;
 						int type, offset;
 
 						while (*s != ']' && *s != 0)
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 
 int lookup(int comm, int operator, int lnode, int rnode)
 {
-	register node_p p;
+	node_p p;
 
 	for (p = nodes + 1; p < lastnode; p++)
 	{
@@ -352,7 +352,7 @@ int lookup(int comm, int operator, int lnode, int rnode)
 
 static void compueq(void)
 {
-	register int i, j;
+	int i, j;
 
 	for (i = 1; i < nmachregs; i++)
 	{
@@ -369,8 +369,8 @@ static void compueq(void)
 
 static int eqregclass(int r1, int r2)
 {
-	register reginfo rp1, rp2;
-	register int i;
+	reginfo rp1, rp2;
+	int i;
 	short regbits[(MAXREGS + 15) >> 4];
 	int member;
 
@@ -395,10 +395,10 @@ static int eqregclass(int r1, int r2)
 	return (1);
 }
 
-unsigned hash(register string name)
+unsigned hash(string name)
 {
-	register unsigned sum;
-	register int i;
+	unsigned sum;
+	int i;
 
 	for (sum = i = 0; *name; i += 3)
 		sum ^= (*name++) << (i & 07);
@@ -407,7 +407,7 @@ unsigned hash(register string name)
 
 ident_p ilookup(string name, int enterf)
 {
-	register ident_p p, *pp;
+	ident_p p, *pp;
 
 	pp = &identtab[hash(name) % ITABSIZE];
 	while (*pp != 0)
@@ -461,7 +461,7 @@ static void initio(void)
 
 int exprlookup(set_t sett)
 {
-	register int i, j, ok;
+	int i, j, ok;
 
 	for (i = 0; i < nmachsets; i++)
 	{
@@ -483,8 +483,8 @@ int exprlookup(set_t sett)
 
 static void inittables(void)
 {
-	register reginfo r;
-	register int i;
+	reginfo r;
+	int i;
 	inst_t inst;
 	set_t sett;
 
@@ -519,7 +519,7 @@ static void inittables(void)
 
 static void outregs(void)
 {
-	register int i, j, k;
+	int i, j, k;
 	static short rset[(MAXREGS + 15) >> 4];
 	int t, ready;
 
@@ -584,11 +584,11 @@ static void outregs(void)
 
 static void finishio(void)
 {
-	register int i;
-	register node_p np;
+	int i;
+	node_p np;
 	int j;
 	int setsize;
-	register move_p mp;
+	move_p mp;
 
 	fprintf(cfile, "};\n\n");
 	if (wsize > 0)
@@ -641,12 +641,12 @@ static void finishio(void)
 	fprintf(cfile, "};\n\nstring codestrings[] = {\n");
 	for (i = 0; i < ncodestrings; i++)
 	{
-		register char *p;
+		char *p;
 		p = codestrings[i];
 		fprintf(cfile, "\t\"");
 		while (*p)
 		{
-			register int c = (*p) & BMASK;
+			int c = (*p) & BMASK;
 			if (!isasc(c) || iscntrl(c))
 			{
 				/* The next line used to have (c>>6)&03,
@@ -747,7 +747,7 @@ static void finishio(void)
 
 static void outregvar(void)
 {
-	register int i, j;
+	int i, j;
 
 	fprintf(hfile, "#define REGVARS\n");
 	fprintf(cfile, "#include \"regvar.h\"\n");
@@ -796,9 +796,9 @@ static void verbose(void)
 
 void inbetween(void)
 {
-	register ident_p ip;
-	register int i, j;
-	register move_p mp;
+	ident_p ip;
+	int i, j;
+	move_p mp;
 
 	lookident = 1; /* for lexical analysis */
 
@@ -841,12 +841,12 @@ void inbetween(void)
 	}
 }
 
-int formconversion(register char *p, register token_p tp)
+int formconversion(char *p, token_p tp)
 {
 	char buf[256];
-	register char *q = buf;
+	char *q = buf;
 	char field[256];
-	register char *f;
+	char *f;
 	int i;
 
 	if (p == 0)
@@ -887,11 +887,11 @@ int formconversion(register char *p, register token_p tp)
 	return (strlookup(buf));
 }
 
-void setfields(register token_p tp, string format)
+void setfields(token_p tp, string format)
 {
-	register int i;
+	int i;
 	list2 ll;
-	register list1 l;
+	list1 l;
 	int type;
 
 	for (i = 0; i < TOKENSIZE - 1; i++)
@@ -921,7 +921,7 @@ void setfields(register token_p tp, string format)
 
 void chkregexp(int number)
 {
-	register int i;
+	int i;
 
 	for (i = nmachregs + 1; i < nmachregs + 1 + nmachtokens; i++)
 		if (machsets[number].set_val[i >> 4] & (01 << (i & 017)))
@@ -930,9 +930,9 @@ void chkregexp(int number)
 
 int findstructel(int number, string name, int *t)
 {
-	register int i;
-	register token_p tp;
-	register list2 structdecl;
+	int i;
+	token_p tp;
+	list2 structdecl;
 	int offset;
 
 	for (i = 1; i <= nmachregs; i++)
@@ -1009,7 +1009,7 @@ struct hashmnem
 
 void inithash(void)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i <= sp_lmnem - sp_fmnem; i++)
 		enter(em_mnem[i], i + sp_fmnem);
@@ -1017,7 +1017,7 @@ void inithash(void)
 
 void enter(char *name, int value)
 {
-	register unsigned h;
+	unsigned h;
 
 	h = hash(name) % HASHSIZE;
 	while (hashmnem[h].h_name[0] != 0)
@@ -1028,7 +1028,7 @@ void enter(char *name, int value)
 
 int mlookup(char *name)
 {
-	register unsigned int h;
+	unsigned int h;
 
 	h = hash(name) % HASHSIZE;
 	while (strncmp(hashmnem[h].h_name, name, 3) != 0
@@ -1040,8 +1040,8 @@ int mlookup(char *name)
 void hashpatterns(void)
 {
 	short index;
-	register byte *bp, *tp;
-	register short i;
+	byte *bp, *tp;
+	short i;
 	unsigned short hashvalue;
 	int patlen;
 
@@ -1080,18 +1080,18 @@ void hashpatterns(void)
 
 static void debug(void)
 {
-	register int i, j;
+	int i, j;
 
 	for (i = 0; i < ITABSIZE; i++)
 	{
-		register ident_p ip;
+		ident_p ip;
 		for (ip = identtab[i]; ip != 0; ip = ip->i_next)
 			printf("%-14s %1d %3d\n", ip->i_name, ip->i_type, ip->i_i.i_regno);
 	}
 
 	for (i = 2; i < nmachregs; i++)
 	{
-		register reginfo rp;
+		reginfo rp;
 
 		rp = machregs[i];
 		printf("%s = (\"%s\", %d", rp->rname, rp->rrepr, rp->rsize);

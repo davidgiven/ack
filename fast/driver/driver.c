@@ -301,8 +301,8 @@ static char *expand_string(char *s, struct system_information *);
 static void error(char *, char *, char *);
 static void warning(char *, char *, char *);
 static void panic(char *);
-static void append(register struct arglist *, char *);
-static void expand(register struct arglist *, struct system_information *);
+static void append(struct arglist *, char *);
+static void expand(struct arglist *, struct system_information *);
 static void concat(struct arglist *, struct arglist *);
 static int runvec(struct arglist *, char *);
 static int needsprep(char *);
@@ -549,7 +549,7 @@ int main(int argc, char *argv[])
 	int libs_count;
 	char *ext;
 	FILE* fd;
-	register struct arglist *call = &CALL_VEC;
+	struct arglist *call = &CALL_VEC;
 	char tmpbuffer[256];
 	char *file;
 	char *ldfile;
@@ -763,7 +763,7 @@ int main(int argc, char *argv[])
 	/* For argument file */
 	while (count-- > 0)
 	{
-		register char *f;
+		char *f;
 		sys_basename(file = *argvec++, BASE);
 
 		ext = extension(file);
@@ -977,8 +977,8 @@ static char * alloc(unsigned int u)
 static char * expand_string(char *s, struct system_information *sysinfo)
 {
 	char buf[1024];
-	register char *p = s;
-	register char *q = &buf[0];
+	char *p = s;
+	char *q = &buf[0];
 	int expanded = 0;
 
 	if (!p)
@@ -1024,7 +1024,7 @@ static char * expand_string(char *s, struct system_information *sysinfo)
 	return strcpy(p, buf);
 }
 
-static void append(register struct arglist *al, char *arg)
+static void append(struct arglist *al, char *arg)
 {
 	if (!arg || !*arg)
 		return;
@@ -1033,10 +1033,10 @@ static void append(register struct arglist *al, char *arg)
 	al->al_argv[(al->al_argc)++] = arg;
 }
 
-static void expand(register struct arglist *al, struct system_information *sysinfo)
+static void expand(struct arglist *al, struct system_information *sysinfo)
 {
-	register int i = al->al_argc;
-	register char **p = &(al->al_argv[0]);
+	int i = al->al_argc;
+	char **p = &(al->al_argv[0]);
 
 	while (i-- > 0)
 	{
@@ -1047,9 +1047,9 @@ static void expand(register struct arglist *al, struct system_information *sysin
 
 static void concat(struct arglist *al1, struct arglist *al2)
 {
-	register int i = al2->al_argc;
-	register char **p = &(al1->al_argv[al1->al_argc]);
-	register char **q = &(al2->al_argv[0]);
+	int i = al2->al_argc;
+	char **p = &(al1->al_argv[al1->al_argc]);
+	char **q = &(al2->al_argv[0]);
 
 	if ((al1->al_argc += i) >= MAXARGC)
 		panic("argument list overflow");
@@ -1065,8 +1065,8 @@ char *mkstr(char *dst, ...)
 
 	va_start(ap, dst);
 	{
-		register char *p;
-		register char *q;
+		char *p;
+		char *q;
 
 		q = dst;
 		p = va_arg(ap, char *);
@@ -1086,7 +1086,7 @@ char *mkstr(char *dst, ...)
 
 static char *extension(char *fn)
 {
-	register char *c = fn;
+	char *c = fn;
 
 	while (*c++)
 		;

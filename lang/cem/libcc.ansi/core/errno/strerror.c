@@ -10,7 +10,7 @@
  * I don't know why, but X3J11 says that strerror() should be in declared
  * in <string.h>.  That is why the function is defined here.
  */
-char* strerror(register int errnum)
+char* strerror(int errnum)
 {
 	extern const char* _sys_errlist[];
 	extern const int _sys_nerr;

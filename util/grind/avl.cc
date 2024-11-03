@@ -41,10 +41,10 @@ struct avl_tree {
 static int
 balance_add(ppsc, n, cmp)
   struct avl_node **ppsc;	/* address of root */
-  register char *n;		/* user-supplied information */
+  char *n;		/* user-supplied information */
   int (*cmp)();			/* user-supplied comparison routine */
 {
-  register struct avl_node *psc = *ppsc, *qsc, *ssc;
+  struct avl_node *psc = *ppsc, *qsc, *ssc;
 
   if (! psc) {
 	*ppsc = new_avl_node();
@@ -157,7 +157,7 @@ struct avl_tree *
 create_avl_tree(cmp)
   int	(*cmp)();		/* comparison routine */
 {
-  register struct avl_tree *p = new_avl_tree();
+  struct avl_tree *p = new_avl_tree();
 
   p->cmp = cmp;
   return p;
@@ -182,7 +182,7 @@ find_ngt(tree, n)
   struct avl_tree	*tree;	/* tree to be searched in */
   char			*n;	/* information to be compared with */
 {
-  register struct avl_node *nd = tree->root, *lastnd = 0;
+  struct avl_node *nd = tree->root, *lastnd = 0;
 
   for (;;) {
   	while (nd && (*tree->cmp)(nd->info, n) > 0) {
@@ -206,7 +206,7 @@ find_nlt(tree, n)
   struct avl_tree	*tree;	/* tree to be searched in */
   char			*n;	/* information to be compared with */
 {
-  register struct avl_node *nd = tree->root, *lastnd = 0;
+  struct avl_node *nd = tree->root, *lastnd = 0;
 
   for (;;) {
   	while (nd && (*tree->cmp)(nd->info, n) < 0) {
@@ -230,7 +230,7 @@ find_eq(tree, n)
   struct avl_tree	*tree;	/* tree to be searched in */
   char			*n;	/* information to be compared with */
 {
-  register struct avl_node *nd = tree->root;
+  struct avl_node *nd = tree->root;
 
   for (;;) {
   	while (nd && (*tree->cmp)(nd->info, n) < 0) {

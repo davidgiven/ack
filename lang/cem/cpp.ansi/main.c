@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 void compile(int argc, char *argv[])
 {
-	register char *source = 0;
+	char *source = 0;
 	char *dummy;
 
 	switch (argc) {
@@ -111,10 +111,10 @@ struct idf	*file_head;
 
 static void list_dependencies(char *source)
 {
-	register struct idf *p = file_head;
+	struct idf *p = file_head;
 
 	if (source) {
-		register char *s = strrchr(source, '.');
+		char *s = strrchr(source, '.');
 
 		if (s && *(s+1)) {
 			s++;
@@ -142,7 +142,7 @@ static void list_dependencies(char *source)
 
 void add_dependency(char *s)
 {
-	register struct idf *p = str2idf(s, 0);
+	struct idf *p = str2idf(s, 0);
 
 	if (! p->id_resmac) {
 		p->id_resmac = K_FILE;

@@ -57,10 +57,10 @@ char *m;
 
 
 process_operand( arg, op)
-register char *arg;
-register struct t_operand *op;
+char *arg;
+struct t_operand *op;
 {
-	register char *einde;
+	char *einde;
 
 	if ( n_index == 3) 
 		n_index = 0;
@@ -116,7 +116,7 @@ register struct t_operand *op;
 
 
 char *ind( buf, str)
-register char *buf, *str;
+char *buf, *str;
 
 /* Reads the index in front of '(register)'.
  */
@@ -129,7 +129,7 @@ register char *buf, *str;
 
 
 char *lab( buf, str)
-register char *buf, *str;
+char *buf, *str;
 
 /* Reads 'label' in front of '+offset'.
  */
@@ -146,8 +146,8 @@ register char *buf, *str;
 	
 
 int is_reg( str, num)
-register char *str;
-register int *num; 
+char *str;
+int *num; 
 
 /* Is "str" a 'registers' ?
  */
@@ -181,7 +181,7 @@ register int *num;
 
 
 char *end_arg( str)
-register char *str;
+char *str;
 
 /* Shift to the last character of "str".
  */
@@ -193,7 +193,7 @@ register char *str;
 
 
 char *match( str, sym)
-register char *str;
+char *str;
 char sym;
 {
 	while ( *str != sym)
@@ -207,7 +207,7 @@ char sym;
 char my_buf[256];
 
 gen_operand( op)
-register struct t_operand *op;
+struct t_operand *op;
 
 /* Generate object-code for a argument.
  */

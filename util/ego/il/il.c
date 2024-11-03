@@ -253,7 +253,7 @@ static void il_extptab(proc_p ptab)
 	 * Also, initialise some of the fields just allocated.
 	 */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = ptab; p != (proc_p)0; p = p->p_next)
 	{
@@ -267,7 +267,7 @@ static void il_cleanptab(proc_p ptab)
 {
 	/* De-allocate space for extensions */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = ptab; p != (proc_p)0; p = p->p_next)
 	{

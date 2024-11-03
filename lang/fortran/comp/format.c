@@ -1083,7 +1083,7 @@ char *finalnl;
 write_formats(outfile)
  FILE *outfile;
 {
-	register struct Labelblock *lp;
+	struct Labelblock *lp;
 	int first = 1;
 	char *fs;
 
@@ -1107,8 +1107,8 @@ write_formats(outfile)
 write_ioblocks(outfile)
  FILE *outfile;
 {
-	register iob_data *L;
-	register char *f, **s, *sep;
+	iob_data *L;
+	char *f, **s, *sep;
 
 	nice_printf(outfile, "/* Fortran I/O blocks */\n");
 	L = iob_list = (iob_data *)revchain((chainp)iob_list);
@@ -1137,7 +1137,7 @@ write_ioblocks(outfile)
 write_assigned_fmts(outfile)
  FILE *outfile;
 {
-	register chainp cp;
+	chainp cp;
 	Namep np;
 	int did_one = 0;
 
@@ -1156,11 +1156,11 @@ write_assigned_fmts(outfile)
 
  static char *
 to_upper(s)
- register char *s;
+ char *s;
 {
 	static char buf[64];
-	register char *t = buf;
-	register int c;
+	char *t = buf;
+	int c;
 	while(*t++ = (c = *s++) >= 'a' && c <= 'z' ? c + 'A' - 'a' : c);
 	return buf;
 	}
@@ -1206,8 +1206,8 @@ write_namelists(nmch, outfile)
 	struct Dimblock *dimp;
 	int i, nd, type;
 	char *comma, *name;
-	register chainp q;
-	register Namep v;
+	chainp q;
+	Namep v;
 
 	nice_printf(outfile, "/* Namelist stuff */\n\n");
 	for (entry = hashtab; entry < lasthash; ++entry) {
@@ -1927,7 +1927,7 @@ p1getf(infile, result)
 {
 
 	char buf[1324];
-	register int k;
+	int k;
 
 	k = fscanf (infile, "%s", buf);
 	if (k < 1)

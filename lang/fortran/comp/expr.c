@@ -38,9 +38,9 @@ extern char dflttype[26];
 /* little routines to create constant blocks */
 
 Constp mkconst(t)
-register int t;
+int t;
 {
-	register Constp p;
+	Constp p;
 
 	p = ALLOC(Constblock);
 	p->tag = TCONST;
@@ -52,9 +52,9 @@ register int t;
 /* mklogcon -- Make Logical Constant */
 
 expptr mklogcon(l)
-register int l;
+int l;
 {
-	register Constp  p;
+	Constp  p;
 
 	p = mkconst(TYLOGICAL);
 	p->Const.ci = l;
@@ -68,7 +68,7 @@ register int l;
 expptr mkintcon(l)
 ftnint l;
 {
-	register Constp p;
+	Constp p;
 
 	p = mkconst(tyint);
 	p->Const.ci = l;
@@ -81,9 +81,9 @@ ftnint l;
 /* mkaddcon -- Make Address Constant, given integer value */
 
 expptr mkaddcon(l)
-register long l;
+long l;
 {
-	register Constp p;
+	Constp p;
 
 	p = mkconst(TYADDR);
 	p->Const.ci = l;
@@ -96,10 +96,10 @@ register long l;
    to be TYREAL or TYDREAL */
 
 expptr mkrealcon(t, d)
- register int t;
+ int t;
  char *d;
 {
-	register Constp p;
+	Constp p;
 
 	p = mkconst(t);
 	p->Const.cds[0] = cds(d,CNULL);
@@ -119,8 +119,8 @@ int shift;
 int leng;
 char *s;
 {
-	register Constp p;
-	register long x;
+	Constp p;
+	long x;
 
 	p = mkconst(TYLONG);
 	x = 0;
@@ -144,10 +144,10 @@ char *s;
 
 expptr mkstrcon(l,v)
 int l;
-register char *v;
+char *v;
 {
-	register Constp p;
-	register char *s;
+	Constp p;
+	char *s;
 
 	p = mkconst(TYCHAR);
 	p->vleng = ICON(l);
@@ -165,10 +165,10 @@ register char *v;
    values, each of which may be integer, real or double. */
 
 expptr mkcxcon(realp,imagp)
-register expptr realp, imagp;
+expptr realp, imagp;
 {
 	int rtype, itype;
-	register Constp p;
+	Constp p;
 	expptr errnode();
 
 	rtype = realp->headblock.vtype;
@@ -232,11 +232,11 @@ expptr errnode()
    bytes. */
 
 expptr mkconv(t, p)
-register int t;
-register expptr p;
+int t;
+expptr p;
 {
-	register expptr q;
-	register int pt, charwarn = 1;
+	expptr q;
+	int pt, charwarn = 1;
 	expptr opconv();
 
 	if (t >= 100) {
@@ -286,7 +286,7 @@ expptr opconv(p, t)
 expptr p;
 int t;
 {
-	register expptr q;
+	expptr q;
 
 	if (t == TYSUBR)
 		err("illegal use of subroutine name");
@@ -310,11 +310,11 @@ expptr p;
 /* cpexpr - Returns a new copy of input expression   p   */
 
 tagptr cpexpr(p)
-register tagptr p;
+tagptr p;
 {
-	register tagptr e;
+	tagptr e;
 	int tag;
-	register chainp ep, pp;
+	chainp ep, pp;
 	tagptr cpblock();
 
 /* This table depends on the ordering of the T macros, e.g. TNAME */
@@ -397,9 +397,9 @@ register tagptr p;
 /* frexpr -- Free expression -- frees up memory used by expression   p   */
 
 frexpr(p)
-register tagptr p;
+tagptr p;
 {
-	register chainp q;
+	chainp q;
 
 	if(p == NULL)
 		return;
@@ -472,7 +472,7 @@ wronginf(np)
    names to address blocks */
 
 expptr fixtype(p)
-register tagptr p;
+tagptr p;
 {
 
 	if(p == 0)
@@ -547,11 +547,11 @@ cplenexpr(p)
    returned */
 
 expptr fixexpr(p)
-register Exprp p;
+Exprp p;
 {
 	expptr lp;
-	register expptr rp;
-	register expptr q;
+	expptr rp;
+	expptr q;
 	int opcode, ltype, rtype, ptype, mtype;
 
 	if( ISERROR(p) )
@@ -747,9 +747,9 @@ fixargs(doput, p0)
 int doput;	/* doput is true if constants need to be passed by reference */
 struct Listblock *p0;
 {
-	register chainp p;
-	register tagptr q, t;
-	register int qtag;
+	chainp p;
+	tagptr q, t;
+	int qtag;
 	int nargs;
 	Addrp mkscalar();
 
@@ -799,9 +799,9 @@ struct Listblock *p0;
    io.c */
 
 Addrp mkscalar(np)
-register Namep np;
+Namep np;
 {
-	register Addrp ap;
+	Addrp ap;
 
 	vardcl(np);
 	ap = mkaddr(np);
@@ -811,7 +811,7 @@ register Namep np;
 	 */
 	if( !checksubs && np->vstg==STGARG)
 	{
-		register struct Dimblock *dp;
+		struct Dimblock *dp;
 		dp = np->vdim;
 		frexpr(ap->memoffset);
 		ap->memoffset = mkexpr(OPSTAR,
@@ -828,10 +828,10 @@ register Namep np;
 adjust_arginfo(np)	/* adjust arginfo to omit the length arg for the
 			   arg that we now know to be a character-valued
 			   function */
- register Namep np;
+ Namep np;
 {
 	struct Entrypoint *ep;
-	register chainp args;
+	chainp args;
 	Argtypes *at;
 
 	for(ep = entries; ep; ep = ep->entnextp)
@@ -846,12 +846,12 @@ adjust_arginfo(np)	/* adjust arginfo to omit the length arg for the
 expptr mkfunct(p0)
  expptr p0;
 {
-	register struct Primblock *p = (struct Primblock *)p0;
+	struct Primblock *p = (struct Primblock *)p0;
 	struct Entrypoint *ep;
 	Addrp ap;
 	Extsym *extp;
-	register Namep np;
-	register expptr q;
+	Namep np;
+	expptr q;
 	expptr intrcall();
 	extern chainp new_procs;
 	int k, nargs;
@@ -983,13 +983,13 @@ LOCAL expptr stfcall(np, actlist)
 Namep np;
 struct Listblock *actlist;
 {
-	register chainp actuals;
+	chainp actuals;
 	int nargs;
 	chainp oactp, formals;
 	int type;
 	expptr Ln, Lq, q, q1, rhs, ap;
 	Namep tnp;
-	register struct Rplblock *rp;
+	struct Rplblock *rp;
 	struct Rplblock *tlist;
 	static int inv_count;
 
@@ -1098,10 +1098,10 @@ static int replaced;
    return an addrp with the appropriate stuff */
 
 Addrp mkplace(np)
-register Namep np;
+Namep np;
 {
-	register Addrp s;
-	register struct Rplblock *rp;
+	Addrp s;
+	struct Rplblock *rp;
 	int regn;
 
 	/* is name on the replace list? */
@@ -1150,10 +1150,10 @@ register Namep np;
    translator will need this only to worry about the subscript stuff */
 
 expptr mklhs(p)
-register struct Primblock *p;
+struct Primblock *p;
 {
 	expptr suboffset();
-	register Addrp s;
+	Addrp s;
 	Namep np;
 
 	if(p->tag != TPRIM)
@@ -1227,9 +1227,9 @@ Namep np;
    objects are passed through untouched */
 
 Addrp memversion(np)
-register Namep np;
+Namep np;
 {
-	register Addrp s;
+	Addrp s;
 
 	if(np->vdovar==NO || (inregister(np)<0) )
 		return(NULL);
@@ -1244,9 +1244,9 @@ register Namep np;
 /* inregister -- looks for the input name in the global list   regnamep */
 
 inregister(np)
-register Namep np;
+Namep np;
 {
-	register int i;
+	int i;
 
 	for(i = 0 ; i < nregvar ; ++i)
 		if(regnamep[i] == np)
@@ -1260,7 +1260,7 @@ register Namep np;
    subscripts as arguments */
 
 expptr suboffset(p)
-register struct Primblock *p;
+struct Primblock *p;
 {
 	int n;
 	expptr si, size;
@@ -1269,7 +1269,7 @@ register struct Primblock *p;
 	expptr subcheck();
 	struct Dimblock *dimp;
 	expptr sub[MAXDIM+1];
-	register Namep np;
+	Namep np;
 
 	np = p->namep;
 	offp = ICON(0);
@@ -1335,7 +1335,7 @@ register struct Primblock *p;
 
 expptr subcheck(np, p)
 Namep np;
-register expptr p;
+expptr p;
 {
 	struct Dimblock *dimp;
 	expptr t, checkvar, checkcond, badcall;
@@ -1401,10 +1401,10 @@ badsub:
 
 
 Addrp mkaddr(p)
-register Namep p;
+Namep p;
 {
 	Extsym *extp;
-	register Addrp t;
+	Addrp t;
 	Addrp intraddr();
 	int k;
 
@@ -1478,7 +1478,7 @@ register Namep p;
 Addrp mkarg(type, argno)
 int type, argno;
 {
-	register Addrp p;
+	Addrp p;
 
 	p = ALLOC(Addrblock);
 	p->tag = TADDR;
@@ -1511,8 +1511,8 @@ expptr mkprim(v0, args, substr)
 		struct Nameblock nameblock;
 		struct Headblock headblock;
 		} *Primu;
-	register Primu v = (Primu)v0;
-	register struct Primblock *p;
+	Primu v = (Primu)v0;
+	struct Primblock *p;
 
 	if(v->headblock.vclass == CLPARAM)
 	{
@@ -1560,7 +1560,7 @@ expptr mkprim(v0, args, substr)
    recursive references to the same function */
 
 vardcl(v)
-register Namep v;
+Namep v;
 {
 	struct Dimblock *t;
 	expptr neltp;
@@ -1629,9 +1629,9 @@ register Namep v;
    letter */
 
 impldcl(p)
-register Namep p;
+Namep p;
 {
-	register int k;
+	int k;
 	int type;
 	ftnint leng;
 
@@ -1683,9 +1683,9 @@ inferdcl(np,type)
 
 expptr mkexpr(opcode, lp, rp)
 int opcode;
-register expptr lp, rp;
+expptr lp, rp;
 {
-	register expptr e, e1;
+	expptr e, e1;
 	int etype;
 	int ltype, rtype;
 	int ltag, rtag;
@@ -1998,7 +1998,7 @@ error:
 /* cktype -- Check and return the type of the expression */
 
 cktype(op, lt, rt)
-register int op, lt, rt;
+int op, lt, rt;
 {
 	char *errs;
 
@@ -2151,10 +2151,10 @@ error1:
 
  LOCAL expptr
 fold(e)
- register expptr e;
+ expptr e;
 {
 	Constp p;
-	register expptr lp, rp;
+	expptr lp, rp;
 	int etype, mtype, ltype, rtype, opcode;
 	int i, bl, ll, lr;
 	char *q, *s;
@@ -2332,10 +2332,10 @@ fold(e)
 
 consconv(lt, lc, rc)
  int lt;
- register Constp lc, rc;
+ Constp lc, rc;
 {
 	int rt = rc->vtype;
-	register union Constant *lv = &lc->Const, *rv = &rc->Const;
+	union Constant *lv = &lc->Const, *rv = &rc->Const;
 
 	lc->vtype = lt;
 	if (ONEOF(lt, MSKREAL|MSKCOMPLEX) && ONEOF(rt, MSKREAL|MSKCOMPLEX)) {
@@ -2394,9 +2394,9 @@ consconv(lt, lc, rc)
 /* Negate constant value -- changes the input node's value */
 
 consnegop(p)
-register Constp p;
+Constp p;
 {
-	register char *s;
+	char *s;
 
 	if (p->vstg) {
 		if (ISCOMPLEX(p->vtype)) {
@@ -2438,8 +2438,8 @@ conspower(p, ap, n)
  Constp p, ap;
  ftnint n;
 {
-	register union Constant *powp = &p->Const;
-	register int type;
+	union Constant *powp = &p->Const;
+	int type;
 	struct Constblock x, x0;
 
 	if (n == 1) {
@@ -2524,7 +2524,7 @@ consbinop(opcode, type, cpp, app, bpp)
  int opcode, type;
  Constp cpp, app, bpp;
 {
-	register union Constant *ap = &app->Const,
+	union Constant *ap = &app->Const,
 				*bp = &bpp->Const,
 				*cp = &cpp->Const;
 	int k;
@@ -2714,9 +2714,9 @@ consbinop(opcode, type, cpp, app, bpp)
 /* conssgn - returns the sign of a Fortran constant */
 
 conssgn(p)
-register expptr p;
+expptr p;
 {
-	register char *s;
+	char *s;
 
 	if( ! ISCONST(p) )
 		Fatal( "sgn(nonconstant)" );
@@ -2763,9 +2763,9 @@ char *powint[ ] = {
 	"pow_ii", "pow_ri", "pow_di", "pow_ci", "pow_zi" };
 
 LOCAL expptr mkpower(p)
-register expptr p;
+expptr p;
 {
-	register expptr q, lp, rp;
+	expptr q, lp, rp;
 	int ltype, rtype, mtype, tyi;
 
 	lp = p->exprblock.leftp;
@@ -2853,7 +2853,7 @@ register expptr p;
 
  LOCAL void
 zdiv(c, a, b)
- register dcomplex *a, *b, *c;
+ dcomplex *a, *b, *c;
 {
 	double ratio, den;
 	double abr, abi;

@@ -12,7 +12,7 @@ ttyname(filedes)
 {
 	static char result[MAXNAMLEN + 1 + 5];
 	DIR *dirp;
-	register struct direct *dp;
+	struct direct *dp;
 	struct stat fdstat;
 	ino_t inode;
 	dev_t device;

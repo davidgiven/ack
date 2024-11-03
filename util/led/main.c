@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 #ifndef NOSTATISTICS
 static void do_statistics(void)
 {
-	register struct memory* m = mems;
+	struct memory* m = mems;
 
 	while (m <= &mems[NMEMS - 1])
 	{
@@ -126,9 +126,9 @@ int exitstatus = 0;
  * If the argument starts with a '-', it's a flag, else it is either
  * a plain file to be loaded, or an archive.
  */
-static void first_pass(register char** argv)
+static void first_pass(char** argv)
 {
-	register char* argp;
+	char* argp;
 	int sectno;
 	int h;
 
@@ -260,9 +260,9 @@ static void first_pass(register char** argv)
  */
 static uint32_t number(const char* s)
 {
-	register int digit;
-	register uint32_t value = 0;
-	register int radix = 10;
+	int digit;
+	uint32_t value = 0;
+	int radix = 10;
 
 	if (*s == '0')
 	{
@@ -412,9 +412,9 @@ long sect_comm[MAXSECT];
  */
 static void norm_commons(void)
 {
-	register struct outname* name;
-	register int cnt;
-	register int und = FALSE;
+	struct outname* name;
+	int cnt;
+	int und = FALSE;
 
 	name = (struct outname*)address(ALLOGLOB, (ind_t)0);
 	cnt = NGlobals;
@@ -453,8 +453,8 @@ static void norm_commons(void)
 	{
 		if (!ISABSOLUTE(name) && ISCOMMON(name))
 		{
-			register long size;
-			register int sectindex;
+			long size;
+			int sectindex;
 
 			size = name->on_valu; /* XXX rounding? */
 			sectindex = (name->on_type & S_TYP) - S_MIN;
@@ -474,10 +474,10 @@ struct orig relorig[MAXSECT];
  */
 static void complete_sections(void)
 {
-	register uint32_t base = 0;
-	register uint32_t foff;
-	register struct outsect* sc;
-	register int sectindex;
+	uint32_t base = 0;
+	uint32_t foff;
+	struct outsect* sc;
+	int sectindex;
 
 	foff = SZ_HEAD + outhead.oh_nsect * SZ_SECT;
 	for (sectindex = 0; sectindex < outhead.oh_nsect; sectindex++)
@@ -514,8 +514,8 @@ static void complete_sections(void)
  */
 static void change_names(void)
 {
-	register int cnt;
-	register struct outname* name;
+	int cnt;
+	struct outname* name;
 
 	name = (struct outname*)address(ALLOGLOB, (ind_t)0);
 	cnt = NGlobals;
@@ -546,8 +546,8 @@ static void change_names(void)
  */
 bool setbit(int indx, char string[])
 {
-	register int byte_index, bit_index;
-	register int byte;
+	int byte_index, bit_index;
+	int byte;
 
 	byte_index = indx / WIDTH; /* Index of byte with bit we need. */
 	bit_index = indx % WIDTH; /* Index of bit we need. */
@@ -567,8 +567,8 @@ bool setbit(int indx, char string[])
  */
 static bool tstbit(int indx, char string[])
 {
-	register int byte_index, bit_index;
-	register int byte;
+	int byte_index, bit_index;
+	int byte;
 
 	byte_index = indx / WIDTH; /* Index of byte with bit we need. */
 	bit_index = indx % WIDTH; /* Index of bit we need. */
@@ -583,8 +583,8 @@ static bool tstbit(int indx, char string[])
  */
 void addbase(struct outname* name)
 {
-	register int type = name->on_type & S_TYP;
-	register int sectindex = type - S_MIN;
+	int type = name->on_type & S_TYP;
+	int sectindex = type - S_MIN;
 
 	if (type == S_UND || type == S_ABS || type == S_CRS)
 		return;

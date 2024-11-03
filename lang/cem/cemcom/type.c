@@ -46,7 +46,7 @@ create_type(fund)
 	/*	A brand new struct type is created, and its tp_fund set
 		to fund.
 	*/
-	register struct type *ntp = new_type();
+	struct type *ntp = new_type();
 
 	ntp->tp_fund = fund;
 	ntp->tp_size = (arith)-1;
@@ -56,13 +56,13 @@ create_type(fund)
 
 struct type *
 construct_type(fund, tp, count)
-	register struct type *tp;
+	struct type *tp;
 	arith count; /* for fund == ARRAY only */
 {
 	/*	fund must be a type constructor: FIELD, FUNCTION, POINTER or
 		ARRAY. The pointer to the constructed type is returned.
 	*/
-	register struct type *dtp;
+	struct type *dtp;
 
 	switch (fund)	{
 #ifndef NOBITFIELD
@@ -106,9 +106,9 @@ construct_type(fund, tp, count)
 
 struct type *
 function_of(tp)
-	register struct type *tp;
+	struct type *tp;
 {
-	register struct type *dtp = tp->tp_function;
+	struct type *dtp = tp->tp_function;
 
 	if (!dtp)	{
 		tp->tp_function = dtp = create_type(FUNCTION);
@@ -121,9 +121,9 @@ function_of(tp)
 
 struct type *
 pointer_to(tp)
-	register struct type *tp;
+	struct type *tp;
 {
-	register struct type *dtp = tp->tp_pointer;
+	struct type *dtp = tp->tp_pointer;
 
 	if (!dtp)	{
 		tp->tp_pointer = dtp = create_type(POINTER);
@@ -137,10 +137,10 @@ pointer_to(tp)
 
 struct type *
 array_of(tp, count)
-	register struct type *tp;
+	struct type *tp;
 	arith count;
 {
-	register struct type *dtp = tp->tp_array;
+	struct type *dtp = tp->tp_array;
 
 	/* look for a type with the right size */
 	while (dtp && dtp->tp_size != count)
@@ -160,9 +160,9 @@ array_of(tp, count)
 #ifndef NOBITFIELD
 struct type *
 field_of(tp)
-	register struct type *tp;
+	struct type *tp;
 {
-	register struct type *dtp = create_type(FIELD);
+	struct type *dtp = create_type(FIELD);
 
 	dtp->tp_up = tp;
 	dtp->tp_align = tp->tp_align;
@@ -194,7 +194,7 @@ idf2type(idf, tpp)
 		prevent garbage at the initialisation of arrays with
 		unknown size.
 	*/
-	register struct type *tp = idf->id_def->df_type;
+	struct type *tp = idf->id_def->df_type;
 
 	if (	tp->tp_size < (arith)0 && tp->tp_fund == ARRAY)	{
 		*tpp = new_type();
@@ -218,7 +218,7 @@ struct type *
 standard_type(fund, sgn, algn, sz)
 	int algn; arith sz;
 {
-	register struct type *tp = create_type(fund);
+	struct type *tp = create_type(fund);
 
 	tp->tp_unsigned = sgn;
 	tp->tp_align = algn;

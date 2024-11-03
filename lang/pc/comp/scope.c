@@ -25,8 +25,8 @@ static int sccount;
 
 void InitScope(void)
 {
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	struct scope *sc = new_scope();
+	struct scopelist *ls = new_scopelist();
 
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
@@ -37,8 +37,8 @@ void InitScope(void)
 
 void open_scope(void)
 {
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	struct scope *sc = new_scope();
+	struct scopelist *ls = new_scopelist();
 
 	sc->sc_level = proclevel;
 	ls->sc_scope = sc;
@@ -52,7 +52,7 @@ void close_scope(int doclean)
 	/* When this procedure is called, the next visible scope is equal to
 	   the statically enclosing scope
 	*/
-	register struct def *df;
+	struct def *df;
 
 	assert(CurrentScope != 0);
 	df = CurrentScope->sc_def;
@@ -64,13 +64,13 @@ void close_scope(int doclean)
 	CurrVis = CurrVis->next;
 }
 
-void Forward(register struct node *nd, register struct type *tp)
+void Forward(struct node *nd, struct type *tp)
 {
 	/* Enter a forward reference into the current scope. This is
 	 * used in pointertypes.
 	 */
-	register struct def *df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
-	register struct forwtype *fw_type = new_forwtype();
+	struct def *df = define(nd->nd_IDF, CurrentScope, D_FORWTYPE);
+	struct forwtype *fw_type = new_forwtype();
 
 	fw_type->f_next = df->df_fortype;
 	df->df_fortype = fw_type;
@@ -82,7 +82,7 @@ void Forward(register struct node *nd, register struct type *tp)
 void chk_prog_params(void)
 {
 	/* the program parameters must be global variables of some file type */
-	register struct def *df = CurrentScope->sc_def;
+	struct def *df = CurrentScope->sc_def;
 
 	while( df )	{
 	    if( df->df_kind & D_PARAMETER )	{
@@ -105,7 +105,7 @@ void chk_prog_params(void)
 void chk_directives(void)
 {
 	/* check if all forward declarations are defined */
-	register struct def *df = CurrentScope->sc_def;
+	struct def *df = CurrentScope->sc_def;
 
 	while( df )	{
 		if( df->df_kind == D_FWPROCEDURE )

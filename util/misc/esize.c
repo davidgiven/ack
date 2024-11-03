@@ -122,7 +122,7 @@ static int rd_byte(void)
 static long rd_int(long n)
 {
 	long l;
-	register int i;
+	int i;
 
 	l = btol(rd_byte());
 	for (i = 1; i < n; i++)

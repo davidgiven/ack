@@ -13,9 +13,9 @@
 
 /* gnum() is used to get the width and precision fields of a format. */
 static const char*
-gnum(register const char* f, int* ip, va_list* app)
+gnum(const char* f, int* ip, va_list* app)
 {
-	register int i, c;
+	int i, c;
 
 	if (*f == '*')
 	{
@@ -155,10 +155,10 @@ o_print(va_list* ap, int flags, char* s, char c, int precision, int is_signed)
 	return s;
 }
 
-int _doprnt(register const char* fmt, va_list ap)
+int _doprnt(const char* fmt, va_list ap)
 {
-	register char* s;
-	register int j;
+	char* s;
+	int j;
 	int i, c, width, precision, zfill, flags, between_fill;
 	int nrchars = 0;
 	const char* oldfmt;

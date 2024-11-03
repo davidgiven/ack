@@ -12,7 +12,7 @@ int SkipToNewLine(void);
 /*	Skips skips any white space and returns the first
 	non-space character.
  */
-int skipspaces(register int ch, int skipnl);
+int skipspaces(int ch, int skipnl);
 
 
 #endif /* SKIP_H_ */

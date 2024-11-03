@@ -47,7 +47,7 @@ p_mem ralloc(p_mem p,size_t size)
 	return p;
 }
 
-p_mem new_mem(register p_info p)
+p_mem new_mem(p_info p)
 {
 	/*
 	   This routine implements arrays that can grow.

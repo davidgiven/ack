@@ -52,7 +52,7 @@ void init_data(ptr hb)
 /** Grows the heap space with the new heap pointer. */
 void newHP(ptr ap)
 {
-	register ptr p = ap;
+	ptr p = ap;
 
 	if (in_gda(p))
 	{
@@ -106,10 +106,10 @@ void newHP(ptr ap)
  ************************************************************************/
 
 /** Store data pointer "ap" at address "addr". */
-void dt_stdp(register ptr addr, ptr ap)
+void dt_stdp(ptr addr, ptr ap)
 {
-	register int i;
-	register long p = (long)ap;
+	int i;
+	long p = (long)ap;
 
 	LOG(("@g6 dt_stdp(%lu, %lu)", addr, p));
 	ch_in_data(addr, psize);
@@ -123,10 +123,10 @@ void dt_stdp(register ptr addr, ptr ap)
 	}
 }
 
-void dt_stip(register ptr addr, ptr ap)
+void dt_stip(ptr addr, ptr ap)
 {
-	register int i;
-	register long p = (long)ap;
+	int i;
+	long p = (long)ap;
 
 	LOG(("@g6 dt_stip(%lu, %lu)", addr, p));
 	ch_in_data(addr, psize);
@@ -141,10 +141,10 @@ void dt_stip(register ptr addr, ptr ap)
 }
 
 /** Store "n" byte integer "al" at address "addr". */
-void dt_stn(register ptr addr, long al, size n)
+void dt_stn(ptr addr, long al, size n)
 {
-	register int i;
-	register long l = al;
+	int i;
+	long l = al;
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && n == psize) ? (SH_INT | SH_DATAP) : SH_INT;
@@ -165,10 +165,10 @@ void dt_stn(register ptr addr, long al, size n)
 }
 
 /** Store word sized integer "al" at address. */
-void dt_stw(register ptr addr, long al)
+void dt_stw(ptr addr, long al)
 {
-	register int i;
-	register long l = al;
+	int i;
+	long l = al;
 #ifdef LOGGING
 	/* a psize zero is ambiguous */
 	int sh_flags = (l == 0 && wsize == psize) ? (SH_INT | SH_DATAP) : SH_INT;
@@ -190,10 +190,10 @@ void dt_stw(register ptr addr, long al)
 
 #ifndef NOFLOAT
 /** Store a real value "f" or size "n" bytes at address "addr". */
-void dt_stf(register ptr addr, double f, register size n)
+void dt_stf(ptr addr, double f, size n)
 {
-	register char* cp = (char*)&f;
-	register int i;
+	char* cp = (char*)&f;
+	int i;
 	float fl;
 
 	LOG(("@g6 dt_stf(%lu, %g, %lu)", addr, f, n));
@@ -227,9 +227,9 @@ void dt_stf(register ptr addr, double f, register size n)
  ************************************************************************/
 
 /** Load a data segment pointer located at address "addr". */
-ptr dt_lddp(register ptr addr)
+ptr dt_lddp(ptr addr)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@g6 dt_lddp(%lu)", addr));
 
@@ -248,9 +248,9 @@ ptr dt_lddp(register ptr addr)
 	return (p);
 }
 
-ptr dt_ldip(register ptr addr)
+ptr dt_ldip(ptr addr)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@g6 dt_ldip(%lu)", addr));
 
@@ -270,10 +270,10 @@ ptr dt_ldip(register ptr addr)
 }
 
 /** Load an unsigned integer of "n" bytes from address "addr". */
-unsigned long dt_ldu(register ptr addr, size n)
+unsigned long dt_ldu(ptr addr, size n)
 {
-	register int i;
-	register unsigned long u = 0;
+	int i;
+	unsigned long u = 0;
 
 	LOG(("@g6 dt_ldu(%lu, %lu)", addr, n));
 
@@ -297,10 +297,10 @@ unsigned long dt_ldu(register ptr addr, size n)
 }
 
 /** Load an unsigned integer of word size from address "addr". */
-unsigned long dt_lduw(register ptr addr)
+unsigned long dt_lduw(ptr addr)
 {
-	register int i;
-	register unsigned long u = 0;
+	int i;
+	unsigned long u = 0;
 
 	LOG(("@g6 dt_lduw(%lu)", addr));
 
@@ -324,10 +324,10 @@ unsigned long dt_lduw(register ptr addr)
 }
 
 /** Load an integer of size "n" bytes from address "addr". */
-long dt_lds(register ptr addr, size n)
+long dt_lds(ptr addr, size n)
 {
-	register int i;
-	register long l;
+	int i;
+	long l;
 
 	LOG(("@g6 dt_lds(%lu, %lu)", addr, n));
 
@@ -352,10 +352,10 @@ long dt_lds(register ptr addr, size n)
 }
 
 /** Load a word size integer from address "addr". */
-long dt_ldsw(register ptr addr)
+long dt_ldsw(ptr addr)
 {
-	register int i;
-	register long l;
+	int i;
+	long l;
 
 	LOG(("@g6 dt_ldsw(%lu)", addr));
 
@@ -393,7 +393,7 @@ long dt_ldsw(register ptr addr)
 /** Move "n" bytes from "d1" to "d2". */
 void dt_mvd(ptr d2, ptr d1, size n)
 {
-	register int i;
+	int i;
 
 	ch_in_data(d1, n);
 	ch_wordaligned(d1);
@@ -413,7 +413,7 @@ void dt_mvd(ptr d2, ptr d1, size n)
 /** Move "n" bytes from stack address "s" to data address "d". */
 void dt_mvs(ptr d, ptr s, size n) /* s -> d */
 {
-	register int i;
+	int i;
 
 	ch_in_stack(s, n);
 	ch_wordaligned(s);
@@ -435,8 +435,8 @@ void dt_mvs(ptr d, ptr s, size n) /* s -> d */
 
 static void warn_dtbits(ptr addr, size n)
 {
-	register int or_bits = 0;
-	register int and_bits = 0xff;
+	int or_bits = 0;
+	int and_bits = 0xff;
 
 	while (n--)
 	{
@@ -466,7 +466,7 @@ static void warn_dtbits(ptr addr, size n)
 void dt_clear_area(ptr from, ptr to)
 {
 	/* includes *from but excludes *to */
-	register ptr a;
+	ptr a;
 
 	for (a = from; a < to; a++)
 	{

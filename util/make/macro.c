@@ -16,7 +16,7 @@ struct macro *      macrohead;
 
 static struct macro *getmp(char *name)
 {
-    register struct macro * rp;
+    struct macro * rp;
 
     for (rp = macrohead; rp; rp = rp->m_next)
         if (strcmp(name, rp->m_name) == 0)
@@ -38,8 +38,8 @@ char * getmacro(char* name)
 
 struct macro * setmacro(char* name, char* val, int prio)
 {
-    register struct macro * rp;
-    register char *     cp;
+    struct macro * rp;
+    char *     cp;
 
 
             /*  Replace macro definition if it exists  */
@@ -84,10 +84,10 @@ struct macro * setmacro(char* name, char* val, int prio)
  */
 static void doexp(char **to, char* from, int* len, char* buf)
 {
-    register char *     rp;
-    register char *     p;
-    register char *     q;
-    register struct macro * mp;
+    char *     rp;
+    char *     p;
+    char *     q;
+    struct macro * mp;
 
 
     rp = from;

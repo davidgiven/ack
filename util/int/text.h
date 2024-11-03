@@ -107,4 +107,4 @@ void init_text(void);
 /* Sets the new value of the PC register to the specified
  * value "p".
  */
-void newPC(register ptr p);
+void newPC(ptr p);

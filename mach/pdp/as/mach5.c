@@ -44,8 +44,8 @@ void op2(int mode)
 
 void branch(int opc,expr_t exp)
 {
-	register int eval;
-	register int sm;
+	int eval;
+	int sm;
 
 	eval = adjust(exp) >> 1;
 	sm = fitb(eval);
@@ -58,7 +58,7 @@ void branch(int opc,expr_t exp)
 
 void ejump(int opc, expr_t exp)
 {
-	register int sm,eval;
+	int sm,eval;
 	int gain;
 
 # ifdef THREE_PASS
@@ -98,11 +98,11 @@ void sob(int reg, expr_t exp)
 
 int jump(int opc,int opr)
 {
-  register int val;
+  int val;
 
 # ifdef THREE_PASS
 	if (opr==067) {
-		register int sm = 0;
+		int sm = 0;
 
 		val = adjust(exp_1) >> 1;
 		if ( fitb(val) && (exp_1.typ & ~S_DOT) == DOTTYP) {

@@ -32,12 +32,12 @@
 #include	"error.h"
 #include	"lookup.h"
 
-static int ChkValue(register struct node *);
-static int ChkUnOper(register struct node *);
-static int ChkStandard(register struct node *, register struct node *);
+static int ChkValue(struct node *);
+static int ChkUnOper(struct node *);
+static int ChkStandard(struct node *, struct node *);
 
 
-static void Xerror(register struct node *nd, char *mess)
+static void Xerror(struct node *nd, char *mess)
 {
 	if (nd->nd_class == Def && nd->nd_def)
 	{
@@ -50,7 +50,7 @@ static void Xerror(register struct node *nd, char *mess)
 
 struct node *ZeroParam(void)
 {
-	register struct node *nd;
+	struct node *nd;
 
 	nd = MkLeaf(Value, &dot);
 	nd->nd_type = int_type;
@@ -62,7 +62,7 @@ struct node *ZeroParam(void)
 	return nd;
 }
 
-void MarkUsed(register struct node *nd)
+void MarkUsed(struct node *nd)
 {
 	while (nd && nd->nd_class != Def)
 	{
@@ -76,7 +76,7 @@ void MarkUsed(register struct node *nd)
 
 	if (nd && nd->nd_class == Def)
 	{
-		register struct def *df = nd->nd_def;
+		struct def *df = nd->nd_def;
 
 		if (df->df_kind != D_FIELD)
 		{
@@ -91,9 +91,9 @@ void MarkUsed(register struct node *nd)
 	}
 }
 
-int ChkConstant(register struct node *expp)
+int ChkConstant(struct node *expp)
 {
-	register struct node *nd;
+	struct node *nd;
 
 	if (!(nd = expp->nd_right))
 		nd = expp;
@@ -117,7 +117,7 @@ int ChkConstant(register struct node *expp)
 	return 1;
 }
 
-int ChkVariable(register struct node *expp)
+int ChkVariable(struct node *expp)
 {
 	/* Check that "expp" indicates an item that can be accessed */
 
@@ -132,7 +132,7 @@ int ChkVariable(register struct node *expp)
 	return 1;
 }
 
-int ChkLhs(register struct node *expp)
+int ChkLhs(struct node *expp)
 {
 	int class;
 
@@ -171,7 +171,7 @@ int ChkLhs(register struct node *expp)
 }
 
 #ifdef DEBUG
-static int ChkValue(register struct node *expp)
+static int ChkValue(struct node *expp)
 {
 	switch( expp->nd_symb )
 	{
@@ -188,9 +188,9 @@ static int ChkValue(register struct node *expp)
 }
 #endif
 
-int ChkLinkOrName(register struct node *expp)
+int ChkLinkOrName(struct node *expp)
 {
-	register struct def *df;
+	struct def *df;
 
 	expp->nd_type = error_type;
 
@@ -203,7 +203,7 @@ int ChkLinkOrName(register struct node *expp)
 	else if (expp->nd_class == Link)
 	{
 		/* a selection from a record */
-		register struct node *left = expp->nd_left;
+		struct node *left = expp->nd_left;
 
 		assert(expp->nd_symb == '.');
 
@@ -256,7 +256,7 @@ int ChkLinkOrName(register struct node *expp)
 	return df->df_kind != D_ERROR;
 }
 
-static int ChkExLinkOrName(register struct node *expp)
+static int ChkExLinkOrName(struct node *expp)
 {
 	if (!ChkLinkOrName(expp))
 		return 0;
@@ -271,12 +271,12 @@ static int ChkExLinkOrName(register struct node *expp)
 	return 1;
 }
 
-static int ChkUnOper(register struct node *expp)
+static int ChkUnOper(struct node *expp)
 {
 	/*	Check an unary operation.
 	 */
-	register struct node *right = expp->nd_right;
-	register struct type *tpr;
+	struct node *right = expp->nd_right;
+	struct type *tpr;
 
 	if (!ChkExpression(right)) return 0;
 
@@ -412,11 +412,11 @@ static int Boolean(int operator)
 	return operator == OR || operator == AND;
 }
 
-static int ChkBinOper(register struct node *expp)
+static int ChkBinOper(struct node *expp)
 {
 	/*	Check a binary operation.
 	 */
-	register struct node *left, *right;
+	struct node *left, *right;
 	struct type *tpl, *tpr;
 	int retval, allowed;
 
@@ -551,15 +551,15 @@ static int ChkBinOper(register struct node *expp)
 	return 1;
 }
 
-static int ChkElement(register struct node *expp, register struct type **tp,
+static int ChkElement(struct node *expp, struct type **tp,
 		arith **set, unsigned *cnt)
 {
 	/*	Check elements of a set. This routine may call itself
 	 recursively. Also try to compute the set!
 	 */
-	register struct node *left = expp->nd_left;
-	register struct node *right = expp->nd_right;
-	register int i;
+	struct node *left = expp->nd_left;
+	struct node *right = expp->nd_right;
+	int i;
 
 	if (expp->nd_class == Link && expp->nd_symb == UPTO)
 	{
@@ -646,12 +646,12 @@ static int ChkElement(register struct node *expp, register struct type **tp,
 	return 1;
 }
 
-static int ChkSet(register struct node *expp)
+static int ChkSet(struct node *expp)
 {
 	/*	Check the legality of a SET aggregate, and try to evaluate it
 	 compile time. Unfortunately this is all rather complicated.
 	 */
-	register struct node *nd = expp->nd_right;
+	struct node *nd = expp->nd_right;
 	arith *set = (arith *) 0;
 	unsigned cnt = 0;
 
@@ -707,7 +707,7 @@ static int ChkSet(register struct node *expp)
 	return 1;
 }
 
-char *ChkAllowedVar(register struct node *nd, int reading)
+char *ChkAllowedVar(struct node *nd, int reading)
 /* reading indicates read or readln */
 
 {
@@ -753,7 +753,7 @@ char *ChkAllowedVar(register struct node *nd, int reading)
 	return message;
 }
 
-static int ChkVarPar(register struct node *nd, register struct node *name)
+static int ChkVarPar(struct node *nd, struct node *name)
 {
 	/* 	ISO 6.6.3.3 :
 	 An actual variable parameter shall not denote a field
@@ -789,8 +789,8 @@ getarg(struct node **argp, int bases, int varaccess, struct node *name,
 	 that the address from this argument is taken, so that it
 	 must be a varaccess and may not be a register variable.
 	 */
-	register struct node *arg = (*argp)->nd_right;
-	register struct node *left;
+	struct node *arg = (*argp)->nd_right;
+	struct node *left;
 
 	if (!arg)
 	{
@@ -856,9 +856,9 @@ static int ChkProcCall(struct node *expp)
 {
 	/*	Check a procedure call
 	 */
-	register struct node *left;
+	struct node *left;
 	struct node *name;
-	register struct paramlist *param;
+	struct paramlist *param;
 	char ebuf[80];
 	int retval = 1;
 	int cnt = 0;
@@ -935,7 +935,7 @@ static int ChkProcCall(struct node *expp)
 	return retval;
 }
 
-int ChkCall(register struct node *expp)
+int ChkCall(struct node *expp)
 {
 	/*	Check something that looks like a procedure or function call.
 	 Of course this does not have to be a call at all,
@@ -944,7 +944,7 @@ int ChkCall(register struct node *expp)
 
 	/* First, get the name of the function or procedure
 	 */
-	register struct node *left = expp->nd_left;
+	struct node *left = expp->nd_left;
 
 	expp->nd_type = error_type;
 
@@ -975,7 +975,7 @@ int ChkCall(register struct node *expp)
 	return ChkProcCall(expp);
 }
 
-static int ChkExCall(register struct node *expp)
+static int ChkExCall(struct node *expp)
 {
 	if (!ChkCall(expp))
 		return 0;
@@ -988,7 +988,7 @@ static int ChkExCall(register struct node *expp)
 	return 1;
 }
 
-static int ChkNameOrCall(register struct node *expp)
+static int ChkNameOrCall(struct node *expp)
 {
 	/* From the context it appears that the occurrence of the function-
 	 identifier is a call to that function
@@ -999,7 +999,7 @@ static int ChkNameOrCall(register struct node *expp)
 	return ChkExCall(expp);
 }
 
-static int ChkStandard(register struct node *expp, register struct node *left)
+static int ChkStandard(struct node *expp, struct node *left)
 {
 	/*	Check a call of a standard procedure or function
 	 */
@@ -1201,8 +1201,8 @@ static int ChkStandard(register struct node *expp, register struct node *left)
 		if (arg->nd_right)
 		{
 			/* varargs new/dispose(p,c1,.....) */
-			register struct selector *sel;
-			register arith i;
+			struct selector *sel;
+			arith i;
 
 			if (PointedtoType(left->nd_type) ->tp_fund != T_RECORD)
 				break;
@@ -1262,14 +1262,14 @@ static int ChkStandard(register struct node *expp, register struct node *left)
 	return 1;
 }
 
-static int ChkArrow(register struct node *expp)
+static int ChkArrow(struct node *expp)
 {
 	/*	Check an application of the '^' operator.
 	 The operand must be a variable of a pointer-type or a
 	 variable of a file-type.
 	 */
 
-	register struct type *tp;
+	struct type *tp;
 
 	assert(expp->nd_class == Arrow);
 	assert(expp->nd_symb == '^');
@@ -1293,7 +1293,7 @@ static int ChkArrow(register struct node *expp)
 	return 1;
 }
 
-static int ChkArr(register struct node *expp)
+static int ChkArr(struct node *expp)
 {
 	/*	Check an array selection.
 	 The left hand side must be a variable of an array type,
@@ -1301,7 +1301,7 @@ static int ChkArr(register struct node *expp)
 	 assignment compatible with the array-index.
 	 */
 
-	register struct type *tpl, *tpr;
+	struct type *tpl, *tpr;
 	int retval;
 
 	assert(expp->nd_class == Arrsel);

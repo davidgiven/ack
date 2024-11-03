@@ -30,9 +30,9 @@ void init_text(void)
  *									*
  ************************************************************************/
 
-void newPC(register ptr p)
+void newPC(ptr p)
 {
-	register struct proc* pr = &proctab[PI];
+	struct proc* pr = &proctab[PI];
 
 	if (p >= DB)
 	{

@@ -29,7 +29,7 @@ long NGChars = 0; /* Idem for global names. */
 
 void savemagic(void)
 {
-	register char* p;
+	char* p;
 
 	if (!incore)
 		return;
@@ -43,7 +43,7 @@ void savemagic(void)
 
 void savehdr(struct ar_hdr* hdr)
 {
-	register char* p;
+	char* p;
 
 	if (!incore)
 		return;
@@ -60,10 +60,10 @@ void savehdr(struct ar_hdr* hdr)
  * Return its offset in this area. We don't use the first char of the string
  * area, so that empty strings can be distinguished from the first string.
  */
-ind_t savechar(register int piece, register ind_t off)
+ind_t savechar(int piece, ind_t off)
 {
-	register size_t len;
-	register ind_t newoff;
+	size_t len;
+	ind_t newoff;
 
 	if (off == (ind_t)0)
 		return 0;

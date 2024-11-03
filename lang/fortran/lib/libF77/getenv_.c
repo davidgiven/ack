@@ -17,8 +17,8 @@ char *value, *fname;
 long int vlen, flen;
 {
 extern char **environ;
-register char *ep, *fp, *flast;
-register char **env = environ;
+char *ep, *fp, *flast;
+char **env = environ;
 
 flast = fname + flen;
 for(fp = fname ; fp < flast ; ++fp)

@@ -43,7 +43,7 @@ convert ()
 		while (sect[i].os_size) {
 			unsigned int sz = 8096, fl;
 			extern char *calloc();
-			register char *buf;
+			char *buf;
 			char *pbuf;
 
 			if (sz > sect[i].os_size) sz = sect[i].os_size;
@@ -95,7 +95,7 @@ S1record (buf)
 	}
 
 record (buf)
-	register char *buf;
+	char *buf;
 	{
 	while (bytcnt != 0) 
 		{

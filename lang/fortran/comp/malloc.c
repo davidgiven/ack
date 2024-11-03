@@ -42,9 +42,9 @@ struct {
 
 char *
 malloc(size)
-register unsigned size;
+unsigned size;
 {
-	register struct mem *p, *q, *r, *s;
+	struct mem *p, *q, *r, *s;
 	unsigned register k, m;
 	extern char *sbrk();
 	char *top, *top1;

@@ -26,22 +26,22 @@ struct emhashmnem
 
 /* Forward declarations */
 static void enter(char *, int);
-static unsigned emhash(register char *);
+static unsigned emhash(char *);
 
 
 void initemhash(void)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i <= sp_lmnem - sp_fmnem; i++)
 		enter(em_mnem[i], i + sp_fmnem);
 	enter("lab", op_lab);
 }
 
-static unsigned emhash(register char *name)
+static unsigned emhash(char *name)
 {
-	register unsigned int sum;
-	register int i;
+	unsigned int sum;
+	int i;
 
 	for (sum = i = 0; *name; i += 3)
 		sum ^= (*name++) << (i & 07);
@@ -50,7 +50,7 @@ static unsigned emhash(register char *name)
 
 static void enter(char *name, int value)
 {
-	register unsigned h;
+	unsigned h;
 
 	h = emhash(name) % HASHSIZE;
 	while (emhashmnem[h].h_name[0] != 0)
@@ -61,7 +61,7 @@ static void enter(char *name, int value)
 
 int mlookup(char *name)
 {
-	register unsigned h;
+	unsigned h;
 
 	h = emhash(name) % HASHSIZE;
 	while (strncmp(emhashmnem[h].h_name, name, 3) != 0

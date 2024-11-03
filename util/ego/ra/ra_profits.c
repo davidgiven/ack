@@ -178,7 +178,7 @@ void compute_profits(alloc_p alloclist, bool time_opt)
 	 * of register, we choose only the most advanteagous one.
 	 */
 
-	register alloc_p alloc;
+	alloc_p alloc;
 	short s, t, rtyp, maxsc;
 	item_p item;
 	short time, space, sc;

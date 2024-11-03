@@ -28,7 +28,7 @@ struct idf *gen_anon_idf(void)
 	return str2idf(s, 0);
 }
 
-void not_declared(char *what, register struct node *id, char *where)
+void not_declared(char *what, struct node *id, char *where)
 {
 	/*	The identifier "id" is not declared. If it is not generated,
 		give an error message
@@ -39,7 +39,7 @@ void not_declared(char *what, register struct node *id, char *where)
 	}
 }
 
-char *gen_proc_name(register struct idf *id, int inp)
+char *gen_proc_name(struct idf *id, int inp)
 {
 	/* generate pseudo and internal name for procedure or function */
 

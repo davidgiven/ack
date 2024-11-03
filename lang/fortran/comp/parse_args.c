@@ -262,7 +262,7 @@ int entries;
    in   length   ONLY IF a match was found.   */
 
 int match_table (norm_input, table, entries, use_prefix, length)
-register char *norm_input;
+char *norm_input;
 arg_info table[];
 int entries;
 boolean use_prefix;
@@ -271,7 +271,7 @@ int *length;
     extern int match (/* char *, char *, arg_info *, boolean */);
 
     char low_input[MAX_INPUT_SIZE];
-    register int i;
+    int i;
     int best_index = -1, best_length = 0;
 
 /* FUNCTION BODY */
@@ -330,7 +330,7 @@ boolean use_prefix;
 
 /* Pointers for the required strings (lowered or nonlowered) */
 
-    register char *input, *prefix, *string;
+    char *input, *prefix, *string;
 
 /* FUNCTION BODY */
 
@@ -371,7 +371,7 @@ char *lower_string (dest, src)
 char *dest, *src;
 {
     char *result = dest;
-    register int c;
+    int c;
 
     if (dest == NULL || src == NULL)
 	result = NULL;

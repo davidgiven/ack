@@ -15,10 +15,10 @@ extern char** environ;
  *	Set the value of the environmental variable "name" to be
  *	"value".  If rewrite is set, replace any current value.
  */
-int setenv(register const char* name, register const char* value, int rewrite)
+int setenv(const char* name, const char* value, int rewrite)
 {
 	static int alloced = 0; /* if allocated space before */
-	register char* C;
+	char* C;
 	int l_value,
 	    offset;
 
@@ -38,8 +38,8 @@ int setenv(register const char* name, register const char* value, int rewrite)
 	}
 	else
 	{ /* create new slot */
-		register int cnt = 0;
-		register char** P;
+		int cnt = 0;
+		char** P;
 
 		if (environ)
 			for (P = environ; *P; ++P, ++cnt)
@@ -82,7 +82,7 @@ int setenv(register const char* name, register const char* value, int rewrite)
  */
 int unsetenv(const char* name)
 {
-	register char** P;
+	char** P;
 	int offset;
 
 	while (_findenv(name, &offset)) /* if set multiple times */

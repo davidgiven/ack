@@ -1,6 +1,6 @@
 /* $Id$ */
 char *strchr(s, c)
-register char *s, c;
+char *s, c;
 {
   do {
 	if (*s == c)

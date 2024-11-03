@@ -21,7 +21,7 @@ static
 print_unsigned(tp, v, format)
   p_type	tp;
   long		v;
-  register char	*format;
+  char	*format;
 {
   while (format && *format) {
 	if (strchr("cdohx", *format)) break;
@@ -60,8 +60,8 @@ print_literal(tp, v, compressed, format)
   int		compressed;
   char		*format;
 {
-  register struct literal *lit = tp->ty_literals;
-  register int i;
+  struct literal *lit = tp->ty_literals;
+  int i;
 
   if (format) {
 	print_unsigned(tp, v, format);
@@ -84,7 +84,7 @@ static
 print_integer(tp, v, format)
   p_type	tp;
   long		v;
-  register char	*format;
+  char	*format;
 {
   while (format && *format) {
 	if (strchr("cdohx", *format)) break;
@@ -121,9 +121,9 @@ print_params(tp, AB, static_link)
   t_addr	AB;
 {
   char *param_bytes;
-  register char *p;
-  register int i;
-  register struct param *par;
+  char *p;
+  int i;
+  struct param *par;
   long size;
 
   if (! tp) return;
@@ -185,9 +185,9 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
   char		*addr;		/* address to get value from */
   int		compressed;	/* for parameter lists */
   int		indent;		/* indentation */
-  register char	*format;	/* format given or 0 */
+  char	*format;	/* format given or 0 */
 {
-  register int i;
+  int i;
   long elsize;
 
   if (indent == 0) indent = 4;
@@ -237,7 +237,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	indent -= 4;
 	break;
   case T_STRUCT: {
-	register struct fields *fld = tp->ty_fields;
+	struct fields *fld = tp->ty_fields;
 
 	if (compressed) {
 		fprintf(db_out, currlang->open_struct_display);
@@ -279,7 +279,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	print_literal(tp, get_int(addr, tp_sz, T_ENUM), compressed, format);
 	break;
   case T_PROCEDURE: {
-	register p_scope sc = get_scope_from_addr((t_addr) get_int(addr, pointer_size, T_UNSIGNED));
+	p_scope sc = get_scope_from_addr((t_addr) get_int(addr, pointer_size, T_UNSIGNED));
 
 	if (sc && sc->sc_definedby) {
 		fprintf(db_out, sc->sc_definedby->sy_idf->id_text);

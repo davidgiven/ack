@@ -33,8 +33,8 @@ static
 Xcvt(buf, statbuf)
 	char *buf, *statbuf;
 {
-	register char *s, *t;
-	register int i;
+	char *s, *t;
+	int i;
 
 	s = buf; t = statbuf;
 	for (i = 14; i; i--) *t++ = *s++;

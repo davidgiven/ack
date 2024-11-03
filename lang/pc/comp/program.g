@@ -53,7 +53,7 @@ Program
 	  Module(df, &dummy)
 ;
 
-ProgramHeading(register struct def **df;):
+ProgramHeading(struct def **df;):
 	PROGRAM IDENT
 			{ program = *df = new_def();
 			  (*df)->df_idf = dot.TOK_IDF;

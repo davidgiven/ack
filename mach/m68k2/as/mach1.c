@@ -93,7 +93,7 @@ int from_dreg(int opc, int sz, int bits);
 void cmp(int sz);
 void move(int sz);
 void move_special(int sz);
-int reverse(register int regs, int max);
+int reverse(int regs, int max);
 void movem(int dr, int sz, int regs);
 void movep(int sz);
 void branch(int opc, expr_t exp);

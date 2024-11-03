@@ -18,9 +18,9 @@ static int is_oct(char c)
 	The ascii length of the resulting string is returned, including the
 	terminating null-character.
 */
-char *str2bts(register char *str, char *bts, int *pn)
+char *str2bts(char *str, char *bts, int *pn)
 {
-	register char *t = bts;
+	char *t = bts;
 
 	while (*str) {
 		if (*str == '\\') {
@@ -47,7 +47,7 @@ char *str2bts(register char *str, char *bts, int *pn)
 				break;
 			default:
 				if (is_oct(*str)) {
-					register int cnt = 0, oct = 0;
+					int cnt = 0, oct = 0;
 
 					do
 						oct = oct * 8 + *str - '0';

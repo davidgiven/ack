@@ -8,5 +8,5 @@
  * Motorola 6800 C declarations
  */
 
-void branch(register int opc, expr_t exp);
+void branch(int opc, expr_t exp);
 

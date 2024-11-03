@@ -88,8 +88,8 @@ void make_defs(proc_p p)
 	 * explicit definition.
 	 */
 
-	register bblock_p b;
-	register line_p l;
+	bblock_p b;
+	line_p l;
 	short v, i, cnt = 0;
 	bool found;
 
@@ -288,8 +288,8 @@ void gen_sets(proc_p p)
 	 * well as implicit) that reach the end of b.
 	 */
 
-	register bblock_p b;
-	register line_p l;
+	bblock_p b;
+	line_p l;
 	short defnr = 1;
 
 	init_gen(nrdefs); /* compute all_globl_defs and all_indir_defs */
@@ -358,7 +358,7 @@ void kill_sets(proc_p p)
 	 * definitions.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	Cindex i;
 	short v;
 

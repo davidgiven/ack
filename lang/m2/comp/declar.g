@@ -186,7 +186,7 @@ TypeDeclaration
 			}
 ;
 
-type(register struct type **ptp;):
+type(struct type **ptp;):
 	%default SimpleType(ptp)
 |
 	ArrayType(ptp)
@@ -200,7 +200,7 @@ type(register struct type **ptp;):
 	ProcedureType(ptp)
 ;
 
-SimpleType(register struct type **ptp;) :
+SimpleType(struct type **ptp;) :
 	qualtype(ptp)
 	[
 		/* nothing */
@@ -455,7 +455,7 @@ SetType(struct type **ptp;)
 	have to be declared yet, so be careful about identifying
 	type-identifiers.
 */
-PointerType(register struct type **ptp;)
+PointerType(struct type **ptp;)
 {	register struct type *tp;
 } :
 			{ tp = construct_type(T_POINTER, NULLTYPE); }

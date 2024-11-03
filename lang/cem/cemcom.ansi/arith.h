@@ -35,26 +35,26 @@ struct type;
 
 extern writh full_mask[];		/* cstoper.c */
 
-void arithbalance(register struct expr **e1p, int oper, register struct expr **e2p);
-void relbalance(register struct expr **e1p, int oper, register struct expr **e2p);
-void ch3pointer(struct expr **expp, int oper, register struct type *tp);
-int any2arith(register struct expr **expp, register int oper);
+void arithbalance(struct expr **e1p, int oper, struct expr **e2p);
+void relbalance(struct expr **e1p, int oper, struct expr **e2p);
+void ch3pointer(struct expr **expp, int oper, struct type *tp);
+int any2arith(struct expr **expp, int oper);
 void erroneous2int(struct expr **expp);
-struct expr *arith2arith(struct type *tp, int oper, register struct expr *expr);
-int int2int(struct expr **expp, register struct type *tp);
-void int2float(register struct expr **expp, struct type *tp);
+struct expr *arith2arith(struct type *tp, int oper, struct expr *expr);
+int int2int(struct expr **expp, struct type *tp);
+void int2float(struct expr **expp, struct type *tp);
 void float2int(struct expr **expp, struct type *tp);
-void float2float(register struct expr **expp, struct type *tp);
-void array2pointer(register struct expr *exp);
-void function2pointer(register struct expr *exp);
-void string2pointer(register struct expr *ex);
-void opnd2integral(register struct expr **expp, int oper);
-void opnd2logical(register struct expr **expp, int oper);
-void opnd2test(register struct expr **expp, int oper);
-void any2opnd(register struct expr **expp, int oper);
-void any2parameter(register struct expr **expp);
-void field2arith(register struct expr **expp);
-void switch_sign_fp(register struct expr *expr);
+void float2float(struct expr **expp, struct type *tp);
+void array2pointer(struct expr *exp);
+void function2pointer(struct expr *exp);
+void string2pointer(struct expr *ex);
+void opnd2integral(struct expr **expp, int oper);
+void opnd2logical(struct expr **expp, int oper);
+void opnd2test(struct expr **expp, int oper);
+void any2opnd(struct expr **expp, int oper);
+void any2parameter(struct expr **expp);
+void field2arith(struct expr **expp);
+void switch_sign_fp(struct expr *expr);
 char *writh2str(writh val, int uns);
 label code_string(char * val, int len);
 

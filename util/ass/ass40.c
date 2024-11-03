@@ -15,8 +15,8 @@
 */
 void pass_4(void)
 {
-	register line_t *lnp;
-	register locl_t *lbp;
+	line_t *lnp;
+	locl_t *lbp;
 	int     min_l, max_l;
 	int     instr;
 

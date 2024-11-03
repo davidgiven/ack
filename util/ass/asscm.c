@@ -44,8 +44,8 @@ static struct freeblock freexx[2] =
 
 area_t getarea(unsigned int size)
 {
-	register struct freeblock *c_ptr, *l_ptr;
-	register char *ptr;
+	struct freeblock *c_ptr, *l_ptr;
+	char *ptr;
 	unsigned rqsize;
 
 	size = ((size + (sizeof(int) - 1)) / sizeof(int)) * sizeof(int);
@@ -90,9 +90,9 @@ area_t getarea(unsigned int size)
 	UNREACHABLE_CODE;
 }
 
-void freearea(register area_t ptr, unsigned int size)
+void freearea(area_t ptr, unsigned int size)
 {
-	register struct freeblock *c_ptr, *l_ptr;
+	struct freeblock *c_ptr, *l_ptr;
 
 	size = ((size + (sizeof(int) - 1)) / sizeof(int)) * sizeof(int);
 #ifdef MEMUSE

@@ -292,7 +292,7 @@ free_dump(p)
   free(d->stack);
   if (d == last_dump) last_dump = d->next;
   else {
-	register struct dump *d1 = last_dump;
+	struct dump *d1 = last_dump;
 
 	while (d1->next != d) d1 = d1->next;
 	d1->next = d->next;
@@ -308,7 +308,7 @@ do_find(p)
   p_tree	p;
 {
   /* Print all identifications of p->t_args[0]. */
-  register p_symbol s;
+  p_symbol s;
   p_tree	arg;
 
   p = p->t_args[0];
@@ -425,7 +425,7 @@ do_file(p)
 
   if (p->t_args[0]) {
 	if (! strcmp(p->t_args[0]->t_str, "?")) {
-		register p_symbol	sym = PervasiveScope->sc_symbs;
+		p_symbol	sym = PervasiveScope->sc_symbs;
 
 		while (sym) {
 			if (sym->sy_class == FILESYM) {
@@ -918,7 +918,7 @@ extern int	in_wheninvoked;
 enterlog(p)
   p_tree	p;
 {
-  register p_tree	p1;
+  p_tree	p1;
 
   if (logfd && ! in_wheninvoked) {
 	switch(p->t_oper) {
@@ -934,7 +934,7 @@ enterlog(p)
 		*/
 		p1 = p->t_args[0];
 		while (p1 && p1->t_oper == OP_LINK) {
-			register p_tree	p2 = p1->t_args[0];
+			p_tree	p2 = p1->t_args[0];
 			if (p2->t_ival > 0 && p2->t_ival <= item_count) {
 				p2->t_ival = p2->t_ival - item_count - 1;
 			}

@@ -19,7 +19,7 @@ line_p last_line(line_p lines)
 {
 	/* Determine the last line of a list */
 
-	register line_p l;
+	line_p l;
 
 	assert(lines != (line_p)0);
 	for (l = lines; l->l_next != (line_p)0; l = l->l_next)

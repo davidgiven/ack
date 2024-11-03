@@ -390,7 +390,7 @@ static void put_lis_valu(char* addr, uint32_t value, uint16_t type)
 	uint16_t hi, lo;
 	bool ha16;
 
-	/* ha16 flag in high bit, register in next 5 bits */
+	/* ha16 flag in high bit, in next 5 bits */
 	opcode = read4(addr, type);
 	ha16 = opcode >> 31;
 	reg = (opcode >> 26) & 0x1f;
@@ -501,13 +501,13 @@ static unsigned addrelo(
     struct outname* names,
     long* valu_out)
 {
-	register struct outname* local = &names[relo->or_nami];
-	register unsigned short index = NLocals;
-	register long valu = *valu_out;
+	struct outname* local = &names[relo->or_nami];
+	unsigned short index = NLocals;
+	long valu = *valu_out;
 
 	if ((local->on_type & S_SCT))
 	{
-		register int sectindex = (local->on_type & S_TYP) - S_MIN;
+		int sectindex = (local->on_type & S_TYP) - S_MIN;
 
 		valu += relorig[sectindex].org_size;
 		valu += outsect[sectindex].os_base;
@@ -515,7 +515,7 @@ static unsigned addrelo(
 	}
 	else
 	{
-		register struct outname* name;
+		struct outname* name;
 		extern struct outhead outhead;
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));

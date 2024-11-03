@@ -74,7 +74,7 @@ int do_sigtrp(
     int sn /* UNIX signal number */
 )
 {
-	register int old_tn;
+	int old_tn;
 
 	if (sn <= 0 || sn > NSIG)
 	{
@@ -121,7 +121,7 @@ int do_sigtrp(
  */
 void trap_signal(void)
 {
-	register int old_sig = signalled;
+	int old_sig = signalled;
 
 	signalled = 0;
 	trap(sig_map[old_sig]);

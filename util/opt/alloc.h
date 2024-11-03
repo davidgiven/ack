@@ -15,10 +15,10 @@ extern arg_p	newarg(int kind);
 extern argb_p	newargb(void);
 extern reg_p	newreg(void);
 
-extern void oldline(register line_p lnp);
+extern void oldline(line_p lnp);
 extern void oldreg(reg_p rp);
-extern void oldargs(register arg_p ap);
-extern void oldargb(register argb_p abp);
+extern void oldargs(arg_p ap);
+extern void oldargb(argb_p abp);
 extern void oldnum(num_p lp);
 extern void coreinit(void);
 

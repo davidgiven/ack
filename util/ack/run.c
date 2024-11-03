@@ -36,7 +36,7 @@ static unsigned argmax; /* The maximum number of arguments so far */
 
 int runphase(trf* phase)
 {
-	register list_elem* elem;
+	list_elem* elem;
 	char* prog;
 	int result;
 

@@ -25,7 +25,7 @@ extern void error(char *s, char* s1);
 
 
 int LLlex(void) {
-	register int c;
+	int c;
 
 	if (aside.t_tokno) {	/* A token was pushed aside, return it now */
 		dot = aside;

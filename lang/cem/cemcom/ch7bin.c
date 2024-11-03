@@ -30,7 +30,7 @@ extern char options[];
 #define non_commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 0)
 
 ch7bin(expp, oper, expr)
-	register struct expr **expp;
+	struct expr **expp;
 	struct expr *expr;
 {
 	/*	apply binary operator oper between *expp and expr.
@@ -210,7 +210,7 @@ ch7bin(expp, oper, expr)
 		opnd2test(expp, oper);
 		opnd2test(&expr, oper);
 		if (is_cp_cst(*expp))	{
-			register struct expr *ex = *expp;
+			struct expr *ex = *expp;
 
 			/* the following condition is a short-hand for
 				((oper == AND) && o1) || ((oper == OR) && !o1)
@@ -299,7 +299,7 @@ ch7bin(expp, oper, expr)
 }
 
 pntminuspnt(expp, oper, expr)
-	register struct expr **expp, *expr;
+	struct expr **expp, *expr;
 {
 	/*	Subtracting two pointers is so complicated it merits a
 		routine of its own.
@@ -324,13 +324,13 @@ pntminuspnt(expp, oper, expr)
 
 mk_binop(expp, oper, expr, commutative)
 	struct expr **expp;
-	register struct expr *expr;
+	struct expr *expr;
 {
 	/*	Constructs in *expp the operation indicated by the operands.
 		"commutative" indicates whether "oper" is a commutative
 		operator.
 	*/
-	register struct expr *ex = *expp;
+	struct expr *ex = *expp;
 
 	if (is_cp_cst(expr) && is_cp_cst(ex))
 		cstbin(expp, oper, expr);
@@ -345,7 +345,7 @@ mk_binop(expp, oper, expr, commutative)
 }
 
 pointer_arithmetic(expp1, oper, expp2)
-	register struct expr **expp1, **expp2;
+	struct expr **expp1, **expp2;
 {
 	/*	prepares the integral expression expp2 in order to
 		apply it to the pointer expression expp1
@@ -364,7 +364,7 @@ pointer_arithmetic(expp1, oper, expp2)
 }
 
 pointer_binary(expp, oper, expr)
-	register struct expr **expp, *expr;
+	struct expr **expp, *expr;
 {
 	/*	constructs the pointer arithmetic expression out of
 		a pointer expression, a binary operator and an integral

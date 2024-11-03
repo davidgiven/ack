@@ -14,8 +14,8 @@ gmtime(clock)
 	long cl = *clock;
 	long dayclock, dayno;
 	static struct tm tm_buf;
-	register struct tm *pbuf = &tm_buf;
-	register int *months = monthsize;
+	struct tm *pbuf = &tm_buf;
+	int *months = monthsize;
 	int year = 1970;
 
 	dayclock = cl % SECS_DAY;

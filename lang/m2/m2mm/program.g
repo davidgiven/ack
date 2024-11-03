@@ -76,7 +76,7 @@ export :
 	IdentList ';'
 ;
 
-import(register struct lnk **p;)
+import(struct lnk **p;)
 {
 	register struct idf *fromid = 0;
 	struct idf *id;

@@ -54,7 +54,7 @@ chk_args(id, def)
 
 	if (is_formatargs) {
 		/* there was a format */
-		register int i;
+		int i;
 
 		/* skip over the actuals already covered */
 		for (i = 0; i < nrargs; i++) {
@@ -75,8 +75,8 @@ static chk_argtps(id, def, nrargs, act_tp, form_tp)
 	char *form_tp;			/* formal type definitions */
 {
 	while (*act_tp && *form_tp && *form_tp != '.') {
-		register char *act_start = act_tp;
-		register char *form_start = form_tp;
+		char *act_start = act_tp;
+		char *form_start = form_tp;
 
 		/* isolate actual argument type */
 		act_tp = next_argtype(act_tp);
@@ -174,11 +174,11 @@ static conv_format(id, act, form)
 	/*	convert the actual format into a def-list, using the
 		formal format (form) as a map to convert from %X to type
 	*/
-	register char *fmt = &formatargs[0];
+	char *fmt = &formatargs[0];
 
 	is_formatargs = 1;
 	while (*act) {
-		register char *map;
+		char *map;
 
 		/* find next conversion specification */
 		while (*act && *act != '%') {
@@ -218,7 +218,7 @@ static conv_format(id, act, form)
 
 		map = form;
 		while (*map) {
-			register char *cs = act;
+			char *cs = act;
 
 			/* find next conversion mapping */
 			while (*map && *map != '%') {
@@ -232,7 +232,7 @@ static conv_format(id, act, form)
 			}
 
 			while (*map && *map != '=') {
-				register int match = 0;
+				int match = 0;
 
 				if (*map == '[') {
 					while (*map && *map != ']') {

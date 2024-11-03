@@ -71,11 +71,11 @@ static int oldlineno;
 #define EXIT_FLAG 2
 
 /* Forward declarations. */
-static void WalkDef(register struct def*);
-static void MkCalls(register struct def*);
-static void UseWarnings(register struct def*);
-static void RegisterMessage(register struct def*);
-static void WalkDefList(register struct def*, void (*proc)(struct def*));
+static void WalkDef(struct def*);
+static void MkCalls(struct def*);
+static void UseWarnings(struct def*);
+static void RegisterMessage(struct def*);
+static void WalkDefList(struct def*, void (*proc)(struct def*));
 #ifdef DBSYMTAB
 static void stabdef(struct def*);
 #endif
@@ -127,7 +127,7 @@ void def_ilb(label l)
 	oldlineno = 0;
 }
 
-void DoLineno(register struct node* nd)
+void DoLineno(struct node* nd)
 {
 	if ((!options['L']
 #ifdef DBSYMTAB
@@ -173,9 +173,9 @@ void DoFilename(int needed)
 	}
 }
 
-void WalkModule(register struct def* module)
+void WalkModule(struct def* module)
 {
-	register struct scope* sc;
+	struct scope* sc;
 	struct scopelist* savevis = CurrVis;
 
 	CurrVis = module->mod_vis;
@@ -216,7 +216,7 @@ void WalkModule(register struct def* module)
 		   Call initialization routines of imported modules.
 		   Also prevent recursive calls of this one.
 		*/
-		register struct node* nd = Modules;
+		struct node* nd = Modules;
 
 		if (state == IMPLEMENTATION)
 		{
@@ -273,13 +273,13 @@ void WalkModule(register struct def* module)
 	WalkDefList(sc->sc_def, UseWarnings);
 }
 
-void WalkProcedure(register struct def* procedure)
+void WalkProcedure(struct def* procedure)
 {
 
 	struct scopelist* savevis = CurrVis;
-	register struct type* tp;
-	register struct paramlist* param;
-	register struct scope* procscope = procedure->prc_vis->sc_scope;
+	struct type* tp;
+	struct paramlist* param;
+	struct scope* procscope = procedure->prc_vis->sc_scope;
 	label too_big = 0; /* returnsize larger than returnarea */
 	arith StackAdjustment = 0; /* space for conformant arrays */
 	arith retsav = 0; /* temporary space for return value */
@@ -562,7 +562,7 @@ void WalkProcedure(register struct def* procedure)
 }
 
 /* Walk through a list of definitions */
-static void WalkDef(register struct def* df)
+static void WalkDef(struct def* df)
 {
 
 
@@ -590,7 +590,7 @@ static void WalkDef(register struct def* df)
 }
 
 /* Generate calls to initialization routines of modules */
-static void MkCalls(register struct def* df)
+static void MkCalls(struct def* df)
 {
 
 
@@ -601,7 +601,7 @@ static void MkCalls(register struct def* df)
 	}
 }
 
-int WalkLink(register struct node* nd, label exit_label, int end_reached)
+int WalkLink(struct node* nd, label exit_label, int end_reached)
 {
 
 	while (nd && nd->nd_class == Link)
@@ -613,19 +613,19 @@ int WalkLink(register struct node* nd, label exit_label, int end_reached)
 	return WalkNode(nd, exit_label, end_reached);
 }
 
-static void ForLoopVarExpr(register struct node* nd)
+static void ForLoopVarExpr(struct node* nd)
 {
-	register struct type* tp = nd->nd_type;
+	struct type* tp = nd->nd_type;
 
 	CodePExpr(nd);
 	CodeCoercion(tp, BaseType(tp));
 }
 
-int WalkStat(register struct node* nd, label exit_label, int end_reached)
+int WalkStat(struct node* nd, label exit_label, int end_reached)
 {
 
-	register struct node* left = nd->nd_LEFT;
-	register struct node* right = nd->nd_RIGHT;
+	struct node* left = nd->nd_LEFT;
+	struct node* right = nd->nd_RIGHT;
 
 	assert(nd->nd_class == Stat);
 
@@ -936,7 +936,7 @@ int (*WalkTable[])(struct node*, label, int) = {
 
 extern struct desig null_desig;
 
-void ExpectBool(register struct node** pnd, label true_label, label false_label)
+void ExpectBool(struct node** pnd, label true_label, label false_label)
 {
 
 	struct desig ds;
@@ -966,8 +966,8 @@ int WalkDesignator(struct node** pnd, struct desig* ds, int flags)
 
 int DoForInit(struct node* nd)
 {
-	register struct node* right = nd->nd_RIGHT;
-	register struct def* df;
+	struct node* right = nd->nd_RIGHT;
+	struct def* df;
 	struct type* base_tp;
 	struct type *tpl, *tpr;
 	int r;
@@ -994,7 +994,7 @@ int DoForInit(struct node* nd)
 
 	if (df->df_scope != CurrentScope)
 	{
-		register struct scopelist* sc = CurrVis;
+		struct scopelist* sc = CurrVis;
 
 		for (;;)
 		{
@@ -1042,7 +1042,7 @@ int DoForInit(struct node* nd)
 }
 
 
-void DoAssign(register struct node* nd)
+void DoAssign(struct node* nd)
 {
 	/* May we do it in this order (expression first) ???
 	   The reference manual sais nothing about it, but the book does:
@@ -1050,7 +1050,7 @@ void DoAssign(register struct node* nd)
 	   DAMN THE BOOK!
 	*/
 	struct desig dsr;
-	register struct type* tp;
+	struct type* tp;
 
 	if (!(ChkExpression(&(nd->nd_RIGHT)) & ChkVariable(&(nd->nd_LEFT), D_DEFINED)))
 		return;
@@ -1078,9 +1078,9 @@ void DoAssign(register struct node* nd)
 	CodeMove(&dsr, nd->nd_LEFT, tp);
 }
 
-static void RegisterMessage(register struct def* df)
+static void RegisterMessage(struct def* df)
 {
-	register struct type* tp;
+	struct type* tp;
 
 	if (df->df_kind == D_VARIABLE)
 	{
@@ -1123,7 +1123,7 @@ static void df_warning(struct node* nd, struct def* df, char* warning)
 	}
 }
 
-static void UseWarnings(register struct def* df)
+static void UseWarnings(struct def* df)
 {
 	struct node* nd = df->df_scope->sc_end;
 
@@ -1134,7 +1134,7 @@ static void UseWarnings(register struct def* df)
 
 	if (df->df_kind & D_IMPORTED)
 	{
-		register struct def* df1 = df->imp_def;
+		struct def* df1 = df->imp_def;
 
 		df1->df_flags |= df->df_flags & (D_USED | D_DEFINED);
 		if (df->df_kind == D_INUSE)
@@ -1170,7 +1170,7 @@ static void UseWarnings(register struct def* df)
 	}
 }
 
-static void WalkDefList(register struct def* df, void (*proc)(struct def*))
+static void WalkDefList(struct def* df, void (*proc)(struct def*))
 {
 	for (; df; df = df->df_nextinscope)
 	{

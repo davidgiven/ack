@@ -31,7 +31,7 @@ int setfiles(trf *phase) {
 	/* Set the out structure according to the in structure,
 	   the transformation and some global data */
 	growstring pathname ;
-	register list_elem *elem ;
+	list_elem *elem ;
 	static int out_used= 0 ;
 
 	if ( !phase->t_next && !phase->t_isprep && outfile ) {
@@ -109,8 +109,8 @@ void disc_files(trf *phase) {
 void disc_inputs(trf *phase) {
 	/* Remove all the input files of this phase */
 	/* Only for combiners */
-	register path *l_in ;
-	register list_elem *elem ;
+	path *l_in ;
+	list_elem *elem ;
 	scanlist( l_first(phase->t_inputs), elem) {
 		l_in= p_cont(*elem) ;
 		file_final(l_in) ;
@@ -133,7 +133,7 @@ void rmfile(path *file) {
 void rmtemps(void) {
 	/* Called in case of disaster, always remove the current output file!
 	*/
-	register list_elem *elem ;
+	list_elem *elem ;
 
 	if ( t_flag>1 ) return ;
 	rmfile(&out) ;
@@ -146,7 +146,7 @@ void rmtemps(void) {
 }
 
 void add_input(path *file, trf *phase) {
-	register path *store ;
+	path *store ;
 #ifdef DEBUG
 	if ( debug ) {
 		vprint("Adding %s to inputs of %s\n",

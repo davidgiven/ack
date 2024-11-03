@@ -76,7 +76,7 @@ char opdesc[] = {
 
 string mycat(string s1,string s2)
 {
-	register string s;
+	string s;
 
 	s=salloc(strlen(s1)+strlen(s2));
 	strcpy(s,s1);
@@ -86,7 +86,7 @@ string mycat(string s1,string s2)
 
 string mystrcpy(string s)
 {
-	register string r;
+	string r;
 
 	r=salloc(strlen(s));
 	strcpy(r,s);
@@ -110,7 +110,7 @@ string tostring(word n)
 
 result_t undefres= {EV_UNDEF};
 
-result_t compute(register node_p node)
+result_t compute(node_p node)
 {
 	result_t leaf1,leaf2,result;
 	token_p tp;

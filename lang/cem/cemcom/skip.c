@@ -15,12 +15,12 @@
 #ifndef NOPP
 int
 skipspaces(ch, skipnl)
-	register int ch;
+	int ch;
 {
 	/*	skipspaces() skips any white space and returns the first
 		non-space character.
 	*/
-	register int nlseen = 0;
+	int nlseen = 0;
 
 	for (;;) {
 		while (class(ch) == STSKIP) {
@@ -64,12 +64,12 @@ skipline()
 		is seen, not escaped by a '\\'.
 		Any comment is skipped.
 	*/
-	register int c;
+	int c;
 
 	LoadChar(c);
 	while (class(c) != STNL && c != EOI) {
 		if (class(c) == STSTR || class(c) == STCHAR) {
-			register int stopc = c;
+			int stopc = c;
 			int escaped;
 			do {
 				escaped = 0;

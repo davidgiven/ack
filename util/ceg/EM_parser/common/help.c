@@ -23,7 +23,7 @@ char *str;
 /* Print : "if ( <str> ) {"
  */
 {
-	register char c;
+	char c;
 	int arg_nr;
 
 	out( "if ( ");
@@ -49,7 +49,7 @@ char *str;
  * that are generated, look for text?() and reloc?() calls.
  */
 {
-	register char c;
+	char c;
 	int arg_nr;
 	extern int no_conversions;
 

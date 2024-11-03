@@ -88,7 +88,7 @@ void dominators(bblock_p r, short n)
 	 * block in the control flow graph rooted by r.
 	 */
 
-	register short i;
+	short i;
 	Lindex ind, next;
 	bblock_p v, w, u;
 

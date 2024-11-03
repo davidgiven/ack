@@ -460,7 +460,7 @@ void LLread(void) {
 
 void LLerror(int t)
 {
-	register int i;
+	int i;
 
 	if (t == EOFILE && LLsymb <= 0) return;
 #ifdef LL_NEWMESS
@@ -564,7 +564,7 @@ void LLsafeerror(int t)
 
 #ifndef LLNOFIRSTS
 int LLfirst(int x, int d) {
-	register int i;
+	int i;
 
 	return (i = LLindex[x]) >= 0 &&
 		(LLsets[d + (i >> 3)] & (1 << (i & 07)));
@@ -609,18 +609,18 @@ static int LLuserhook(int e, int *list)
 	return LLsymb != old;
 }
 
-static void LLmklist(register int *list)
+static void LLmklist(int *list)
 {
 	char Xset[LL_SSIZE];
-	register char *p;
-	register int i;
+	char *p;
+	int i;
 
 	for (p = &Xset[0]; p < &Xset[LL_SSIZE]; ) *p++ = 0;
 	for (i = 0; i < LL_NTERMINALS; i++) {
 		if (LLtcnt[i] != 0) Xset[i >> 3] |= (1 << (i & 07));
 	}
 	for (i = LL_NSETS - 1; i >= 0; i--) if (LLscnt[i] != 0) {
-		register char *q = &LLsets[LL_SSIZE * i];
+		char *q = &LLsets[LL_SSIZE * i];
 
 		p = &Xset[0];
 		while (p < &Xset[LL_SSIZE]) *p++ |= *q++;
@@ -638,7 +638,7 @@ static int LLdoskip(int e)
 	int LLx;
 	int list[LL_NTERMINALS+1];
 #endif /* LL_USERHOOK */
-	register int i;
+	int i;
 	int retval;
 	int LLi, LLb;
 
@@ -693,7 +693,7 @@ static int LLdoskip(int e)
 }
 
 void LLnewlevel(unsigned int *LLsinfo) {
-	register int i;
+	int i;
 
 	if (LLlevel++) {
 		LLsinfo[LL_NSETS+LL_NTERMINALS] = (unsigned) LLsymb;
@@ -711,7 +711,7 @@ void LLnewlevel(unsigned int *LLsinfo) {
 }
 
 void LLoldlevel(unsigned int *LLsinfo) {
-	register int i;
+	int i;
 
 	LLtdecr(0);
 #ifdef LL_DEBUG

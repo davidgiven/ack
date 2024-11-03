@@ -147,10 +147,10 @@ extern char *strrchr();
 list_dependencies(source)
 char *source;
 {
-    register struct idf *p = file_head;
+    struct idf *p = file_head;
 
     if (source) {
-	register char *s = strrchr(source, '.');
+	char *s = strrchr(source, '.');
 
 	if (s && *(s+1)) {
 	    s++;
@@ -179,7 +179,7 @@ char *source;
 add_dependency(s)
 char *s;
 {
-    register struct idf *p = str2idf(s);
+    struct idf *p = str2idf(s);
     
     if (! p->id_resmac) {
 	p->id_resmac = K_FILE;
@@ -211,7 +211,7 @@ compile(argc, argv)
 {
 	char *result;
 #ifndef	LINT
-	register char *destination = 0;
+	char *destination = 0;
 #endif	/* LINT */
 
 #ifdef DEBUG
@@ -382,7 +382,7 @@ init()
 }
 
 init_specials(si)
-	register struct sp_id *si;
+	struct sp_id *si;
 {
 	while (si->si_identifier)	{
 		struct idf *idf = str2idf(si->si_identifier);

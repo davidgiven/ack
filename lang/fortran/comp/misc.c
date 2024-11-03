@@ -71,7 +71,7 @@ Alloc(n)	/* error-checking version of malloc */
  int n;
 {
 	char errbuf[32];
-	register char *rv;
+	char *rv;
 
 	rv = malloc(n);
 	if (!rv) {
@@ -83,8 +83,8 @@ Alloc(n)	/* error-checking version of malloc */
 
 
 cpn(n, a, b)
-register int n;
-register char *a, *b;
+int n;
+char *a, *b;
 {
 	while(--n >= 0)
 		*b++ = *a++;
@@ -93,8 +93,8 @@ register char *a, *b;
 
 
 eqn(n, a, b)
-register int n;
-register char *a, *b;
+int n;
+char *a, *b;
 {
 	while(--n >= 0)
 		if(*a++ != *b++)
@@ -109,10 +109,10 @@ register char *a, *b;
 
 
 cmpstr(a, b, la, lb)	/* compare two strings */
-register char *a, *b;
+char *a, *b;
 ftnint la, lb;
 {
-	register char *aend, *bend;
+	char *aend, *bend;
 	aend = a + la;
 	bend = b + lb;
 
@@ -158,9 +158,9 @@ ftnint la, lb;
 /* hookup -- Same as LISP NCONC, that is a destructive append of two lists */
 
 chainp hookup(x,y)
-register chainp x, y;
+chainp x, y;
 {
-	register chainp p;
+	chainp p;
 
 	if(x == NULL)
 		return(y);
@@ -176,7 +176,7 @@ register chainp x, y;
 struct Listblock *mklist(p)
 chainp p;
 {
-	register struct Listblock *q;
+	struct Listblock *q;
 
 	q = ALLOC(Listblock);
 	q->tag = TLIST;
@@ -186,10 +186,10 @@ chainp p;
 
 
 chainp mkchain(p,q)
-register char * p;
-register chainp q;
+char * p;
+chainp q;
 {
-	register chainp r;
+	chainp r;
 
 	if(chains)
 	{
@@ -206,9 +206,9 @@ register chainp q;
 
  chainp
 revchain(next)
- register chainp next;
+ chainp next;
 {
-	register chainp p, prev = 0;
+	chainp p, prev = 0;
 
 	while(p = next) {
 		next = p->nextp;
@@ -225,9 +225,9 @@ revchain(next)
 
  char *
 addunder(s)
- register char *s;
+ char *s;
 {
-	register int c, i;
+	int c, i;
 	char *s0 = s;
 
 	i = 0;
@@ -247,10 +247,10 @@ addunder(s)
 /* copyn -- return a new copy of the input Fortran-string */
 
 char *copyn(n, s)
-register int n;
-register char *s;
+int n;
+char *s;
 {
-	register char *p, *q;
+	char *p, *q;
 
 	p = q = (char *) Alloc(n);
 	while(--n >= 0)
@@ -274,8 +274,8 @@ char *s;
    legal number, with no trailing blanks */
 
 ftnint convci(n, s)
-register int n;
-register char *s;
+int n;
+char *s;
 {
 	ftnint sum;
 	sum = 0;
@@ -290,7 +290,7 @@ char *convic(n)
 ftnint n;
 {
 	static char s[20];
-	register char *t;
+	char *t;
 
 	s[19] = '\0';
 	t = s+19;
@@ -309,12 +309,12 @@ ftnint n;
    hash table. */
 
 Namep mkname(s)
-register char *s;
+char *s;
 {
 	struct Hashentry *hp;
-	register Namep q;
-	register int c, hash, i;
-	register char *t;
+	Namep q;
+	int c, hash, i;
+	char *t;
 	char *s0;
 	char errbuf[64];
 
@@ -369,7 +369,7 @@ register char *s;
 struct Labelblock *mklabel(l)
 ftnint l;
 {
-	register struct Labelblock *lp;
+	struct Labelblock *lp;
 
 	if(l <= 0)
 		return(NULL);
@@ -405,7 +405,7 @@ newlabel()
 struct Labelblock *execlab(stateno)
 ftnint stateno;
 {
-	register struct Labelblock *lp;
+	struct Labelblock *lp;
 
 	if(lp = mklabel(stateno))
 	{
@@ -459,8 +459,8 @@ Addrp builtin(t, s, dbi)
 int t, dbi;
 char *s;
 {
-	register Extsym *p;
-	register Addrp q;
+	Extsym *p;
+	Addrp q;
 	extern chainp used_builtins;
 
 	p = mkext(s,s);
@@ -525,9 +525,9 @@ chainp *list_store;
 
 
 frchain(p)
-register chainp *p;
+chainp *p;
 {
-	register chainp q;
+	chainp q;
 
 	if(p==0 || *p==0)
 		return;
@@ -541,9 +541,9 @@ register chainp *p;
 
  void
 frexchain(p)
- register chainp *p;
+ chainp *p;
 {
-	register chainp q, r;
+	chainp q, r;
 
 	if (q = *p) {
 		for(;;q = r) {
@@ -559,10 +559,10 @@ frexchain(p)
 
 
 tagptr cpblock(n,p)
-register int n;
-register char * p;
+int n;
+char * p;
 {
-	register ptr q;
+	ptr q;
 
 	memcpy((char *)(q = ckalloc(n)), (char *)p, n);
 	return( (tagptr) q);
@@ -639,7 +639,7 @@ int type;
 char *name;
 chainp args;
 {
-	register expptr p;
+	expptr p;
 
 	p = mkexpr(OPCALL,
 		(expptr)builtin(callk_kludge ? callk_kludge : type, name, 0),
@@ -717,7 +717,7 @@ char *name;
 struct Impldoblock *mkiodo(dospec, list)
 chainp dospec, list;
 {
-	register struct Impldoblock *q;
+	struct Impldoblock *q;
 
 	q = ALLOC(Impldoblock);
 	q->tag = TIMPLDO;
@@ -733,9 +733,9 @@ chainp dospec, list;
    memory error */
 
 ptr ckalloc(n)
-register int n;
+int n;
 {
-	register ptr p;
+	ptr p;
 	if( p = (ptr)calloc(1, (unsigned) n) )
 		return(p);
 	fprintf(stderr, "failing to get %d bytes\n",n);
@@ -746,7 +746,7 @@ register int n;
 
 
 isaddr(p)
-register expptr p;
+expptr p;
 {
 	if(p->tag == TADDR)
 		return(YES);
@@ -776,7 +776,7 @@ register expptr p;
 
 
 isstatic(p)
-register expptr p;
+expptr p;
 {
 	extern int useauto;
 	if(p->headblock.vleng && !ISCONST(p->headblock.vleng))
@@ -803,7 +803,7 @@ register expptr p;
    referenced by constant values */
 
 addressable(p)
-register expptr p;
+expptr p;
 {
 	switch(p->tag)
 	{
@@ -905,7 +905,7 @@ ffilecopy (infp, outfp)
 FILE *infp, *outfp;
 {
     while (!feof (infp)) {
-	register c = getc (infp);
+	c = getc (infp);
 	if (!feof (infp))
 	putc (c, outfp);
     } /* while */
@@ -924,9 +924,9 @@ char *str;
 {
 	extern int n_keywords;
 	extern char *c_keywords[];
-	register int n = n_keywords;
-	register char **K = c_keywords;
-	register int n1, t;
+	int n = n_keywords;
+	char **K = c_keywords;
+	int n1, t;
 
 	do {
 		n1 = n >> 1;
@@ -1006,8 +1006,8 @@ chainp s1, s2;
     if (s1 == CHNULL && s2 == CHNULL)
 	return YES;
     for(; s1 && s2; s1 = s1->nextp, s2 = s2->nextp) {
-	register Namep v1 = (Namep) s1 -> datap;
-	register Namep v2 = (Namep) s2 -> datap;
+	Namep v1 = (Namep) s1 -> datap;
+	Namep v2 = (Namep) s2 -> datap;
 
 	if (v1 == (Namep) NULL || v1 -> tag != TNAME ||
 		v2 == (Namep) NULL || v2 -> tag != TNAME)

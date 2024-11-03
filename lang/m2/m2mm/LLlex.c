@@ -31,8 +31,8 @@ SkipComment()
 	/*	Skip Modula-2 comments (* ... *).
 		Note that comments may be nested (par. 3.5).
 	*/
-	register int ch;
-	register int CommentLevel = 0;
+	int ch;
+	int CommentLevel = 0;
 
 	LoadChar(ch);
 	if (ch == '$') {
@@ -81,7 +81,7 @@ GetString(upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
-	register int ch;
+	int ch;
 	
 	while (LoadChar(ch), ch != upto)	{
 		if (class(ch) == STNL)	{
@@ -101,7 +101,7 @@ static char *s_error = "illegal line directive";
 static int
 getch()
 {
-	register int ch;
+	int ch;
 
 	for (;;) {
 		LoadChar(ch);
@@ -116,10 +116,10 @@ getch()
 
 CheckForLineDirective()
 {
-	register int ch = getch();
-	register int	i = 0;
+	int ch = getch();
+	int	i = 0;
 	char		buf[IDFSIZE + 2];
-	register char	*c = buf;
+	char	*c = buf;
 
 
 	if (ch != '#') {
@@ -180,8 +180,8 @@ LLlex()
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
 	*/
-	register struct token *tk = &dot;
-	register int ch, nch;
+	struct token *tk = &dot;
+	int ch, nch;
 
 	if (ASIDE)	{	/* a token is put aside		*/
 		*tk = aside;
@@ -262,8 +262,8 @@ again:
 
 	case STIDF:
 	{
-		register char *tag = &idfbuf[0];
-		register struct idf *id;
+		char *tag = &idfbuf[0];
+		struct idf *id;
 
 		do	{
 			if (tag - idfbuf < idfsize) *tag++ = ch;
@@ -289,7 +289,7 @@ again:
 			complex finite automaton.
 		*/
 		enum statetp {Oct,OptHex,Hex,Dec,OctEndOrHex,End,OptReal,Real};
-		register enum statetp state;
+		enum statetp state;
 		state = is_oct(ch) ? Oct : Dec;
 		LoadChar(ch);
 		for (;;) {

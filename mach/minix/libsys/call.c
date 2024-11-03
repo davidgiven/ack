@@ -33,8 +33,8 @@ _CONST char *name;		/* string */
  * one integer parameter along with a string.  If the string fits in the
  * message, it is copied there.  If not, a pointer to it is passed.
  */
-  register int k;
-  register char *rp;
+  int k;
+  char *rp;
   k = _len(name);
   _M.m3_i1 = k;
   _M.m3_i2 = int1;
@@ -70,7 +70,7 @@ PUBLIC int _len(s)
 _CONST register char *s;	/* character string whose length is needed */
 {
 /* Return the length of a character string, including the 0 at the end. */
-  register int k;
+  int k;
 
   k = 0;
   while (*s++ != 0) k++;

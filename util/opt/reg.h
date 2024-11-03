@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-void regvar(register arg_p ap);
+void regvar(arg_p ap);
 void outregs(void);
 int inreg(offset off);
 void outtes(void);

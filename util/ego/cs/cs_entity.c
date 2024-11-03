@@ -22,7 +22,7 @@ entity_p find_entity(valnum vn)
 {
 	/* Try to find the entity with valuenumber vn. */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
@@ -117,8 +117,8 @@ entity_p en_enter(entity_p enp)
 	/* Put the entity in enp in the entity set, if it is not already there.
 	 * Return pointer to stored entity.
 	 */
-	register Lindex i;
-	register entity_p new;
+	Lindex i;
+	entity_p new;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
@@ -138,7 +138,7 @@ void clr_entities(void)
 {
 	/* Throw away all pseudo-symboltable information. */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{

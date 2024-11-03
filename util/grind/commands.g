@@ -545,7 +545,7 @@ name(p_tree *p;)
 int
 LLlex()
 {
-  register int c;
+  int c;
 
   if (ASIDE) {
 	tok = aside;
@@ -597,11 +597,11 @@ LLlex()
 
 int
 get_name(c)
-  register int	c;
+  int	c;
 {
   char	buf[512+1];
-  register char	*p = &buf[0];
-  register struct idf *id;
+  char	*p = &buf[0];
+  struct idf *id;
 
   do {
 	if (p - buf < 512) *p++ = c;
@@ -670,12 +670,12 @@ ctch()
 static int
 shellescape()
 {
-  register char *p;			/* walks through command */
+  char *p;			/* walks through command */
   static char previous[SHBUFSIZ];	/* previous command */
   char comm[SHBUFSIZ];			/* space for command */
-  register int cnt;			/* prevent array bound errors */
-  register int c;			/* current char */
-  register int lastc = 0;		/* will contain the previous char */
+  int cnt;			/* prevent array bound errors */
+  int c;			/* current char */
+  int lastc = 0;		/* will contain the previous char */
 
   p = comm;
   cnt = SHBUFSIZ-2;

@@ -38,12 +38,12 @@ extern char options[];
 #define commutative_binop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 #define non_commutative_relop(expp, oper, expr)	mk_binop(expp, oper, expr, 1)
 
-void ch3bin(register struct expr **expp, int oper, struct expr *expr)
+void ch3bin(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	apply binary operator oper between *expp and expr.
 		NB: don't swap operands if op is one of the op= operators!!!
 	*/
-	register struct type *expp_tp;
+	struct type *expp_tp;
 
 	any2opnd(expp, oper);
 	expp_tp = (*expp)->ex_type;
@@ -197,7 +197,7 @@ void ch3bin(register struct expr **expp, int oper, struct expr *expr)
 		opnd2test(expp, oper);
 		opnd2test(&expr, oper);
 		if (is_cp_cst(*expp))	{
-			register struct expr *ex = *expp;
+			struct expr *ex = *expp;
 
 			/* the following condition is a short-hand for
 				((oper == AND) && o1) || ((oper == OR) && !o1)
@@ -296,7 +296,7 @@ void ch3bin(register struct expr **expp, int oper, struct expr *expr)
 	}
 }
 
-void pntminuspnt(register struct expr **expp, int oper, register struct expr *expr)
+void pntminuspnt(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	Subtracting two pointers is so complicated it merits a
 		routine of its own.
@@ -338,13 +338,13 @@ int arg_switched(int oper)
 	}
 }
 
-void mk_binop(struct expr **expp, int oper, register struct expr *expr, int commutative)
+void mk_binop(struct expr **expp, int oper, struct expr *expr, int commutative)
 {
 	/*	Constructs in *expp the operation indicated by the operands.
 		"commutative" indicates whether "oper" is a commutative
 		operator.
 	*/
-	register struct expr *ex = *expp;
+	struct expr *ex = *expp;
 
 	if (is_cp_cst(expr) && is_cp_cst(ex))
 		cstbin(expp, oper, expr);
@@ -362,7 +362,7 @@ void mk_binop(struct expr **expp, int oper, register struct expr *expr, int comm
 	}
 }
 
-void pointer_arithmetic(register struct expr **expp1, int oper, register struct expr **expp2)
+void pointer_arithmetic(struct expr **expp1, int oper, struct expr **expp2)
 {
 	int typ;
 	/*	prepares the integral expression expp2 in order to
@@ -382,7 +382,7 @@ void pointer_arithmetic(register struct expr **expp1, int oper, register struct 
 	);
 }
 
-void pointer_binary(register struct expr **expp, int oper, register struct expr *expr)
+void pointer_binary(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	constructs the pointer arithmetic expression out of
 		a pointer expression, a binary operator and an integral

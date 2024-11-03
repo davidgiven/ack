@@ -8,9 +8,9 @@
  * Motorola 6809 special routines
  */
 
-void branch(register int opc, expr_t exp)
+void branch(int opc, expr_t exp)
 {
-	register int	sm, dist;
+	int	sm, dist;
 	int		saving;
 
 	dist = exp.val - (DOTVAL + 2);
@@ -45,7 +45,7 @@ void branch(register int opc, expr_t exp)
 		emit1(lowb(dist));
 }
 
-int regno(register int r)
+int regno(int r)
 {
 	switch (r) {
 	case X:	return 0;
@@ -63,7 +63,7 @@ void emit1or2(int n)
 	emit1(n);
 }
 
-void offset(register int reg, expr_t exp, register int ind)
+void offset(int reg, expr_t exp, int ind)
 {
 	if (reg == PC) {
 		int	sm, dist;

@@ -68,7 +68,7 @@ char *gr_final(growstring *id) {
 	   length and return a pointer to a string to be get rid of with
 	   throws
 	*/
-	register char *retval ;
+	char *retval ;
 	retval= keeps(gr_start(*id)) ;
 	gr_throw(id) ;
 	return retval ;

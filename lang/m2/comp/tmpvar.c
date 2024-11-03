@@ -58,7 +58,7 @@ void TmpOpen(struct scope *sc)
 
 arith TmpSpace(arith sz, int al)
 {
-	register struct scope *sc = ProcScope;
+	struct scope *sc = ProcScope;
 
 	sc->sc_off = - WA(align(sz - sc->sc_off, al));
 	return sc->sc_off;
@@ -66,8 +66,8 @@ arith TmpSpace(arith sz, int al)
 
 static arith NewTmp(struct tmpvar **plist, arith sz, int al, int regtype)
 {
-	register arith offset;
-	register struct tmpvar *tmp;
+	arith offset;
+	struct tmpvar *tmp;
 
 	if (!*plist) {
 		offset = TmpSpace(sz, al);
@@ -95,7 +95,7 @@ arith NewPtr(void)
 
 static void FreeTmp(struct tmpvar **plist, arith off)
 {
-	register struct tmpvar *tmp = new_tmpvar();
+	struct tmpvar *tmp = new_tmpvar();
 
 	tmp->t_next = *plist;
 	tmp->t_offset = off;
@@ -114,7 +114,7 @@ void FreePtr(arith off)
 
 void TmpClose(void)
 {
-	register struct tmpvar *tmp, *tmp1;
+	struct tmpvar *tmp, *tmp1;
 
 	tmp = TmpInts;
 	while (tmp) {

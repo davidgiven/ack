@@ -21,11 +21,11 @@ static void patchcase(void);
 
 void pass_5(void)
 {
-	register line_t *lnp;
+	line_t *lnp;
 	cons_t off1;
 	char defined ;
 	int afterlength, partype ;
-	register int inslength, ope;
+	int inslength, ope;
 	char *op_curr ;
 
 	pass = 5;
@@ -87,7 +87,7 @@ void pass_5(void)
 void genop(char *startc,cons_t value,int i_flag)
 {
 	char *currc ;
-	register int flag ;
+	int flag ;
 	char opc ;
 
 	currc= startc ;
@@ -166,8 +166,8 @@ void genop(char *startc,cons_t value,int i_flag)
 
 static void patchcase(void)
 {
-	register relc_t *r;
-	register locl_t *k;
+	relc_t *r;
+	locl_t *k;
 
 	if ( (r= pstate.s_fdata) ) {
 		r= r->r_next ;

@@ -34,9 +34,9 @@ ch7sel(expp, oper, idf)
 	/*	The selector idf is applied to *expp; oper may be '.' or
 		ARROW.
 	*/
-	register struct expr *exp;
-	register struct type *tp;
-	register struct sdef *sd;
+	struct expr *exp;
+	struct type *tp;
+	struct sdef *sd;
 
 	any2opnd(expp, oper);
 	exp = *expp;
@@ -146,15 +146,15 @@ ch7incr(expp, oper)
 }
 
 ch7cast(expp, oper, tp)
-	register struct expr **expp;
-	register struct type *tp;
+	struct expr **expp;
+	struct type *tp;
 {
 	/*	The expression *expp is cast to type tp; the cast is
 		caused by the operator oper.  If the cast has
 		to be passed on to run time, its left operand will be an
 		expression of class Type.
 	*/
-	register struct type *oldtp;
+	struct type *oldtp;
 
 	if ((*expp)->ex_type->tp_fund == FUNCTION)
 		function2pointer(*expp);
@@ -344,7 +344,7 @@ ch7asgn(expp, oper, expr)
 			      f     (typeof (f op e))e
 		EVAL should however take care of evaluating (typeof (f op e))f
 	*/
-	register struct expr *exp = *expp;
+	struct expr *exp = *expp;
 	int fund = exp->ex_type->tp_fund;
 	struct type *tp;
 
@@ -399,7 +399,7 @@ ch7asgn(expp, oper, expr)
 */
 int
 is_integral_type(tp)
-	register struct type *tp;
+	struct type *tp;
 {
 	switch (tp->tp_fund)	{
 	case CHAR:
@@ -419,7 +419,7 @@ is_integral_type(tp)
 
 int
 is_arith_type(tp)
-	register struct type *tp;
+	struct type *tp;
 {
 	switch (tp->tp_fund)	{
 	case CHAR:

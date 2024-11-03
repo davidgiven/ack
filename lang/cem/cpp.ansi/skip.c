@@ -14,9 +14,9 @@
 
 extern int InputLevel;
 
-int skipspaces(register int ch, int skipnl)
+int skipspaces(int ch, int skipnl)
 {
-	register int nlseen = 0;
+	int nlseen = 0;
 
 	for (;;)
 	{
@@ -70,9 +70,9 @@ int skipspaces(register int ch, int skipnl)
 
 int SkipToNewLine(void)
 {
-	register int ch;
-	register int garbage = 0;
-	register int delim = 0;
+	int ch;
+	int garbage = 0;
+	int delim = 0;
 
 	while ((ch = GetChar()) != '\n')
 	{

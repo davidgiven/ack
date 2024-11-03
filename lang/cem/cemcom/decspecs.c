@@ -22,12 +22,12 @@ extern int level;
 struct decspecs null_decspecs;
 
 do_decspecs(ds)
-	register struct decspecs *ds;
+	struct decspecs *ds;
 {
 	/*	The provisional decspecs ds as obtained from the program
 		is turned into a legal consistent decspecs.
 	*/
-	register struct type *tp = ds->ds_type;
+	struct type *tp = ds->ds_type;
 	
 	ASSERT(level != L_FORMAL1);
 	

@@ -427,8 +427,8 @@ static char *pbittab[PBITTABSZ];
 
 int oursmall(int fitsmall, int gain)
 {
-	register int bit;
-	register char *p;
+	int bit;
+	char *p;
 
 	if (DOTSCT == NULL)
 		nosect();

@@ -21,7 +21,7 @@
 static int level = 0 ;
 static wrs() ;
 procentry(name) char *name ; {
-	register int count ;
+	int count ;
 
 	count=level++ ;
 	while ( count-- ) {
@@ -30,7 +30,7 @@ procentry(name) char *name ; {
 	wrs("Entering ");wrs(name);wrs("\n") ;
 }
 procexit(name) char *name ; {
-	register int count ;
+	int count ;
 
 	count= --level ;
 	while ( count-- ) {
@@ -38,6 +38,6 @@ procexit(name) char *name ; {
 	}
 	wrs("Leaving  ");wrs(name);wrs("\n") ;
 }
-static wrs(s) register char *s ; {
+static wrs(s) char *s ; {
 	write(2,s,strlen(s)) ;
 }

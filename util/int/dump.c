@@ -45,7 +45,7 @@ static void FRA_dump(void), FRA_item(int);
 
 void std_all(long sz, int rawfl)
 {
-	register ptr addr;
+	ptr addr;
 
 	if (!check_log(" d1 "))
 		return;
@@ -90,7 +90,7 @@ static ptr std_raw(ptr addr, int rawfl)
 	    at  addr, up to the Return Status Block (identified
 	    by protection bits)
 	*/
-	register int nundef = 0;
+	int nundef = 0;
 
 	LOG((" d2       ADDRESS     BYTE     ITEM VALUE   SHADOW"));
 
@@ -229,7 +229,7 @@ static void std_left_undefs(int nundef, ptr addr)
 
 static void FRA_dump(void)
 {
-	register int addr;
+	int addr;
 
 	LOG((" d2        FRA: size = %d, %s", FRASize, FRA_def ? "defined" : "undefined"));
 
@@ -271,8 +271,8 @@ static void FRA_item(int addr)
 
 void gdad_all(ptr low, ptr high)
 {
-	register ptr addr;
-	register int nundef = 0;
+	ptr addr;
+	int nundef = 0;
 
 	if (!check_log(" +1 "))
 		return;
@@ -359,8 +359,8 @@ static void gdad_left_undefs(int nundef, ptr addr)
 
 void hpd_all(void)
 {
-	register ptr addr;
-	register int nundef = 0;
+	ptr addr;
+	int nundef = 0;
 
 	if (!check_log(" *1 "))
 		return;
@@ -502,9 +502,9 @@ static char* displ_undefs(int nundef, ptr addr)
 	    This takes some arithmetic.
 	*/
 	static char buf[30];
-	register int left = wsize - 1 - p2i(addr - 1) % wsize;
-	register int wrds = (nundef - left) / wsize;
-	register int right = nundef - left - wrds * wsize;
+	int left = wsize - 1 - p2i(addr - 1) % wsize;
+	int wrds = (nundef - left) / wsize;
+	int right = nundef - left - wrds * wsize;
 
 	if (wrds == 0)
 	{
@@ -566,7 +566,7 @@ static char* displ_sh(char shadow, int byte)
 	  shadow byte.
   */
 	static char buf[32];
-	register char* bufp;
+	char* bufp;
 	int check = 0;
 
 	bufp = buf;

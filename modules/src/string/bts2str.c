@@ -15,9 +15,9 @@
 
 
 
-char *bts2str(char *b, register int n, char *s)
+char *bts2str(char *b, int n, char *s)
 {
-	register char *f = b, *t = s;
+	char *f = b, *t = s;
 
 	while (n-- > 0) {
 		if (is_print(*f)) {

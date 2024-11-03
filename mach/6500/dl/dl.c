@@ -32,7 +32,7 @@ struct outsect sect[MAXSECT];
 
 main(argc,argv) char **argv; {
 	int i,nd,pc,first;
-	register char *s;
+	char *s;
 
 
 	progname = argv[0];
@@ -58,7 +58,7 @@ main(argc,argv) char **argv; {
 		pc = sect[i].os_base;
 		while (sect[i].os_size) {
 			unsigned int sz = 8096, fl;
-			register char *buf;
+			char *buf;
 			char *pbuf;
 
 			if (sz > sect[i].os_size) sz = sect[i].os_size;
@@ -92,7 +92,7 @@ main(argc,argv) char **argv; {
 }
 
 data(nd,pc, buf)
-	register char *buf;
+	char *buf;
 {
 
 	newline(nd,pc,DATTYPE);
@@ -155,7 +155,7 @@ put(c)
 }
 
 reply() {
-	register i;
+	i;
 	char c;
 
 	if (echo == 0)

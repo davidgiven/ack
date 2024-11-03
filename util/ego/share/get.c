@@ -50,7 +50,7 @@ lab_id freshlabel(void)
 
 short getshort(void)
 {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = getbyte();
 	h_byte = getbyte();
@@ -61,8 +61,8 @@ short getshort(void)
 
 offset getoff(void)
 {
-	register long l;
-	register int h_byte;
+	long l;
+	int h_byte;
 
 	l = getbyte();
 	l |= ((unsigned)getbyte()) * 256;
@@ -154,7 +154,7 @@ static cset getcset(void)
 	 */
 
 	cset s;
-	register short i;
+	short i;
 
 	s = Cempty_set(getshort());
 	for (i = 0; i <= DIVWL(s->v_size - 1); i++)

@@ -179,7 +179,7 @@ static bool is_archive(char* name)
 	 * long (i.e. the name ".ma" is not accepted as an archive name!).
 	 */
 
-	register char* p;
+	char* p;
 
 	for (p = name; *p; p++)
 		;
@@ -193,9 +193,9 @@ static bool read_hdr(void)
 	/* Read the header of an archive module */
 
 	char buf[AR_TOTAL];
-	register char* c = buf;
-	register char* p = hdr.ar_name;
-	register int i;
+	char* c = buf;
+	char* p = hdr.ar_name;
+	int i;
 
 	fread(c, AR_TOTAL, 1, curfile);
 	if (feof(curfile))

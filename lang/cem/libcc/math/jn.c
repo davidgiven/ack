@@ -26,7 +26,7 @@ yn(n, x)
 	int negative = 0;
 	extern double y0(), y1();
 	double yn1, yn2;
-	register int i;
+	int i;
 
 	if (x <= 0) {
 		errno = EDOM;
@@ -83,7 +83,7 @@ jn(n, x)
 		   increasing n, so we use that.
 		*/
 		double jn2 = j0(x), jn1 = j1(x);
-		register int i;
+		int i;
 
 		for (i = 1; i < n; i++) {
 			double tmp = jn1;
@@ -94,7 +94,7 @@ jn(n, x)
 	}
 	{
 		/* we first compute j(n,x)/j(n-1,x) */
-		register int i;
+		int i;
 		double quotient = 0.0;
 		double xsqr = x*x;
 		double jn1, jn2;

@@ -56,12 +56,12 @@ arr(int type, /* operation TYPE */
     size elm_size /* ELeMent SIZE */
 )
 {
-	register ptr desc = dppop(); /* array DESCriptor */
-	register size obj_size; /* OBJect SIZE */
+	ptr desc = dppop(); /* array DESCriptor */
+	size obj_size; /* OBJect SIZE */
 	long index = spop(elm_size);
 	long diff = /* between index and lower bound */
 	    index - mem_lds(desc, elm_size);
-	register ptr arr_addr = dppop(); /* ARRay ADDRess */
+	ptr arr_addr = dppop(); /* ARRay ADDRess */
 
 	if (must_test && !(IgnMask & BIT(EARRAY)))
 	{

@@ -91,7 +91,7 @@ static line_p last_mnem(bblock_p b)
 {
 	/* Determine the last line of a list */
 
-	register line_p l;
+	line_p l;
 
 	for (l = b->b_start; l->l_next != (line_p)0; l = l->l_next)
 		;
@@ -292,8 +292,8 @@ static bool try_pred(bblock_p b)
 	 * which we can perform cross jumping.
 	 */
 
-	register bblock_p b1, b2;
-	register Lindex i, j;
+	bblock_p b1, b2;
+	Lindex i, j;
 	lset s = b->b_pred;
 
 	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))

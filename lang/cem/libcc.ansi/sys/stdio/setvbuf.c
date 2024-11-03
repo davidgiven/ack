@@ -8,7 +8,7 @@
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
-int setvbuf(register FILE* stream, char* buf, int mode, size_t size)
+int setvbuf(FILE* stream, char* buf, int mode, size_t size)
 {
 	int retval = 0;
 

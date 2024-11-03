@@ -61,7 +61,7 @@ bool is_item(line_p l)
 
 item_p item_of(offset off, item_p items[])
 {
-	register item_p x;
+	item_p x;
 
 	for (x = items[LOCALVAR]; x != (item_p)0; x = x->it_next)
 	{
@@ -238,7 +238,7 @@ static void add_item(item_p item, time_p t, item_p items[])
 	 * case record the fact that item is used at 't'.
 	 */
 
-	register item_p x, *q;
+	item_p x, *q;
 
 	q = &items[item->it_type]; /* each type has its own list */
 	for (x = *q; x != (item_p)0; x = *q)
@@ -299,9 +299,9 @@ void build_itemlist(proc_p p, item_p items[], int* nrinstr_out)
 	 * As a side effect, determine the number of instructions of p.
 	 */
 
-	register line_p l;
-	register bblock_p b;
-	register int cnt = 0;
+	line_p l;
+	bblock_p b;
+	int cnt = 0;
 
 	clean_tab(items);
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

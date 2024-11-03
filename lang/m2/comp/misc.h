@@ -16,6 +16,6 @@
 struct idf;
 struct node;
 
-void match_id(register struct idf *id1, struct idf *id2);
+void match_id(struct idf *id1, struct idf *id2);
 struct idf *gen_anon_idf(void);
 void not_declared(char *what, struct node *id, char *where);

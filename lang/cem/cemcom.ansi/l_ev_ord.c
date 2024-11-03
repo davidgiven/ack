@@ -40,7 +40,7 @@ check_and_merge(expr, espp, esp)
  * united.
  * *espp will be pointing to this new list. esp is used for this list.
  */
-	register struct expr_state **pp, *p1, *p2;
+	struct expr_state **pp, *p1, *p2;
 	int oper = expr->OP_OPER;
 	int is_sequencer =
 		(oper == '?' || oper == OR || oper == AND || oper ==',');

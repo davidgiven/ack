@@ -10,8 +10,8 @@ struct node;
 
 void DeclLabel(struct node *nd);
 void chk_labels(int Slevel);
-void TstLabel(register struct node *nd, int Slevel);
-void DefLabel(register struct node *nd, int Slevel);
+void TstLabel(struct node *nd, int Slevel);
+void DefLabel(struct node *nd, int Slevel);
 
 
 #endif /* LABEL_H_ */

@@ -82,7 +82,7 @@ static alloc_p find_fitting_alloc(alloc_p alloc, alloc_p packed)
 	 * We prefer allocations that have the same item as alloc.
 	 */
 
-	register alloc_p x;
+	alloc_p x;
 	alloc_p cand = (alloc_p)0;
 	bool cont_item;
 
@@ -109,7 +109,7 @@ static alloc_p best_alloc(alloc_p unpacked, alloc_p packed, bool time_opt) /* no
 {
 	/* Find the next best candidate */
 
-	register alloc_p x, best;
+	alloc_p x, best;
 
 	best = unpacked; /* dummy */
 
@@ -155,7 +155,7 @@ static void update_lists(alloc_p alloc, alloc_p unpacked, alloc_p packed, alloc_
 	 *  2. a timespan that overlaps the timespan of alloc.
 	 */
 
-	register alloc_p x, q, next;
+	alloc_p x, q, next;
 
 	q = unpacked; /* dummy element at head of list */
 	for (x = unpacked->al_next; x != (alloc_p)0; x = next)
@@ -210,7 +210,7 @@ static void best_cumprofits(alloc_p list, alloc_p* x_out, alloc_p* prev_out)
 {
 	/* Find the allocation with the best cummulative profits */
 
-	register alloc_p x, prev, best_prev;
+	alloc_p x, prev, best_prev;
 	short best = 0, cum;
 
 	prev = list;
@@ -291,7 +291,7 @@ static bool in_single_reg(item_p item, alloc_p packed)
 	 * several different registers during several parts of its lifetime.
 	 */
 
-	register alloc_p x, m;
+	alloc_p x, m;
 	bool seen = FALSE;
 
 	for (x = packed->al_next; x != (alloc_p)0; x = x->al_next)
@@ -312,7 +312,7 @@ static bool in_single_reg(item_p item, alloc_p packed)
 
 static alloc_p find_prev(alloc_p alloc, alloc_p list)
 {
-	register alloc_p x;
+	alloc_p x;
 
 	assert(alloc != (alloc_p)0);
 	for (x = list; x->al_next != alloc; x = x->al_next)
@@ -358,7 +358,7 @@ static void repl_allocs(alloc_p new, alloc_p old, alloc_p packed)
 
 static void assemble_allocs(alloc_p packed)
 {
-	register alloc_p x, m, next;
+	alloc_p x, m, next;
 	alloc_p e;
 	bool voidb;
 
@@ -389,7 +389,7 @@ void pack(alloc_p alloclist, bool time_opt, alloc_p* packed_out, alloc_p* not_pa
 	 * the same registers (i.e. these allocations fit together).
 	 */
 
-	register alloc_p x;
+	alloc_p x;
 	alloc_p packed, unpacked, fit;
 
 	initregcount();

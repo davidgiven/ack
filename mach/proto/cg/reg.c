@@ -20,8 +20,8 @@ static void awayreg(int);
 
 void chrefcount(int regno, int amount, int tflag)
 {
-	register struct reginfo *rp;
-	register int i;
+	struct reginfo *rp;
+	int i;
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0
@@ -41,8 +41,8 @@ void chrefcount(int regno, int amount, int tflag)
 
 int getrefcount(int regno, int tflag)
 {
-	register struct reginfo *rp;
-	register int i,maxcount;
+	struct reginfo *rp;
+	int i,maxcount;
 
 	rp= &machregs[regno];
 #if MAXMEMBERS!=0
@@ -62,8 +62,8 @@ int getrefcount(int regno, int tflag)
 
 void erasereg(int regno)
 {
-	register struct reginfo *rp;
-	register int i;
+	struct reginfo *rp;
+	int i;
 
 	rp = &machregs[regno];
 	rp->r_contents.t_token = 0;
@@ -88,9 +88,9 @@ void erasereg(int regno)
 
 static void awayreg(int regno)
 {
-	register struct reginfo *rp;
-	register tkdef_p tdp;
-	register int i;
+	struct reginfo *rp;
+	tkdef_p tdp;
+	int i;
 
 	/* Now erase recursively all registers containing
 	 * something using this one
@@ -113,8 +113,8 @@ static void awayreg(int regno)
 
 void cleanregs(void)
 {
-	register struct reginfo *rp;
-	register int i;
+	struct reginfo *rp;
+	int i;
 
 	for (rp=machregs;rp<machregs+NREGS;rp++) {
 		rp->r_contents.t_token = 0;
@@ -126,8 +126,8 @@ void cleanregs(void)
 #ifndef NDEBUG
 void inctcount(int regno)
 {
-	register struct reginfo *rp;
-	register int i;
+	struct reginfo *rp;
+	int i;
 
 	rp = &machregs[regno];
 #if MAXMEMBERS!=0
@@ -145,9 +145,9 @@ void inctcount(int regno)
 
 void chkregs(void)
 {
-	register struct reginfo *rp;
-	register token_p tp;
-	register tkdef_p tdp;
+	struct reginfo *rp;
+	token_p tp;
+	tkdef_p tdp;
 	int i;
 
 	for (rp=machregs;rp<machregs+NREGS;rp++) {

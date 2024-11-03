@@ -10,9 +10,9 @@
 struct node;
 
 struct node *ChkStdInOut(char *name, int st_out);
-void ChkRead(register struct node *arg);
-void ChkReadln(register struct node *arg);
-void ChkWrite(register struct node *arg);
-void ChkWriteln(register struct node *arg);
+void ChkRead(struct node *arg);
+void ChkReadln(struct node *arg);
+void ChkWrite(struct node *arg);
+void ChkWriteln(struct node *arg);
 
 #endif /* READWRITE_H_ */

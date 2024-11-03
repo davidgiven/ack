@@ -144,7 +144,7 @@ short putlines(line_p l, FILE* lf)
 	 * Return the number of instruction written.
 	 */
 
-	register line_p lnp;
+	line_p lnp;
 	line_p next;
 	short instr;
 	short count = 0;
@@ -214,10 +214,10 @@ void putdtable(dblock_p head, FILE* df)
 {
 	/* Write the datablock table to the data block file df. */
 
-	register dblock_p dbl;
-	register obj_p obj;
+	dblock_p dbl;
+	obj_p obj;
 	dblock_p next;
-	register short n = 0;
+	short n = 0;
 
 	curoutp = df; /* set f to the data block output file */
 	/* Count the number of objects */
@@ -257,7 +257,7 @@ static void outcset(cset s)
 	 * (its bitvector) preceded by its length.
 	 */
 
-	register short i;
+	short i;
 
 	outshort(s->v_size);
 	for (i = 0; i <= DIVWL(s->v_size - 1); i++)
@@ -268,9 +268,9 @@ static void outcset(cset s)
 
 void putptable(proc_p head, FILE* pf, bool all)
 {
-	register proc_p p;
+	proc_p p;
 	proc_p next;
-	register short n = 0;
+	short n = 0;
 	/* Write the proc table */
 
 	curoutp = pf;
@@ -349,7 +349,7 @@ static void outlset(lset s, void (*p)(void*))
 	 * prints an id (proc_id, obj_id etc.).
 	 */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
 	{
@@ -360,8 +360,8 @@ static void outlset(lset s, void (*p)(void*))
 
 void putunit(short kind, proc_p p, line_p l, FILE* gf, FILE* lf)
 {
-	register bblock_p b;
-	register short n = 0;
+	bblock_p b;
+	short n = 0;
 	Lindex pi;
 	bblock_p nextb;
 	loop_p lp;

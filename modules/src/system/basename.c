@@ -6,12 +6,12 @@
 #include <string.h>
 
 
-void sys_basename(char *str, register char *dst)
+void sys_basename(char *str, char *dst)
 {
-	register char *p1 = str;
-	register char *p2 = p1;
-	register char *end;
-	register char *start;
+	char *p1 = str;
+	char *p2 = p1;
+	char *end;
+	char *start;
 	int len;
 
 	if ((str == NULL) || (*str == '\0'))

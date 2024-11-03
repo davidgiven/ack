@@ -14,7 +14,7 @@ static void installofile(void);
 static void UNLINK(char *);
 static void RENAME(char *, char *);
 static void increase_next(unsigned int);
-static void store_row(int, register int *);
+static void store_row(int, int *);
 static void outdfa(void);
 static void outmnems(struct mnems);
 static int sametest(int, int, struct exp_node *, struct exp_node *);
@@ -62,8 +62,8 @@ static void installofile(void)
 	 * from that of ofilename then copy over old file else
 	 * delete newly generated file
 	 */
-	register FILE *f1, *f2;
-	register int c1, c2;
+	FILE *f1, *f2;
+	int c1, c2;
 	fclose(ofile);
 	if ((f1 = fopen(ofiletemp, "rb")) == NULL)
 	{
@@ -120,7 +120,7 @@ static void increase_next(unsigned int size)
 	 * of size 'size'
 	 */
 	unsigned newsize = currsize;
-	register unsigned int i;
+	unsigned int i;
 	do
 	{
 		newsize *= 2;
@@ -135,11 +135,11 @@ static void increase_next(unsigned int size)
 	currsize = newsize;
 }
 
-static void store_row(int state, register int *row)
+static void store_row(int state, int *row)
 {
 	/* find a place to store row in arrays */
-	register int b, i, o;
-	register int *n = next;
+	int b, i, o;
+	int *n = next;
 	b = 0;
 	for (;;)
 	{
@@ -171,8 +171,8 @@ static void store_row(int state, register int *row)
 
 static void outdfa(void)
 {
-	register int s, i;
-	register struct state *p;
+	int s, i;
+	struct state *p;
 	int nout, ncpy, ngto;
 	int row[MAXOPCODE];
 	int numinrow;
@@ -327,8 +327,8 @@ static int sametest(int s1, int s2, struct exp_node *e1, struct exp_node *e2)
 static int samerepl(int s1, int s2, struct mnems r1, struct mnems r2)
 {
 	/* return 1 if replacements are identical */
-	register int i;
-	register struct mnem_elem *m1, *m2;
+	int i;
+	struct mnem_elem *m1, *m2;
 	if (r1.m_len != r2.m_len)
 		return 0; /* different length */
 	for (i = 0; i < r1.m_len; i++)
@@ -346,7 +346,7 @@ static int samerepl(int s1, int s2, struct mnems r1, struct mnems r2)
 static int samecode(int s1, int s2)
 {
 	/* return 1 if replacement code of state s1 and s2 are identical */
-	register struct action *a1, *a2;
+	struct action *a1, *a2;
 	if (patterns[s1].m_len != patterns[s2].m_len)
 		return 0;
 	a1 = actions[s1];
@@ -369,7 +369,7 @@ static int samecode(int s1, int s2)
 
 static void outdotrans(void)
 {
-	register int s, t;
+	int s, t;
 	struct action *a;
 	int seennontested;
 	int *farray;

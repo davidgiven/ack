@@ -76,9 +76,9 @@ FILE *do_open(const char *file) {
 
 void
 readm(void) {
-	register int i ;
-	register int token ;
-	register FILE *in ;
+	int i ;
+	int token ;
+	FILE *in ;
 
 	in=do_open(fname) ;
 	if ( in==NULL ) {

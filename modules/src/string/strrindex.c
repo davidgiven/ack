@@ -6,9 +6,9 @@
 
 #include "ack_string.h"
 
-char *strrindex(register char *str, int chr)
+char *strrindex(char *str, int chr)
 {
-	register char *retptr = 0;
+	char *retptr = 0;
 
 	while (*str)
 		if (*str++ == chr)

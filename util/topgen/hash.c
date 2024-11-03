@@ -28,8 +28,8 @@ static struct hlist *hashtable[129]; /* an array of ptr's to these lists,
 
 static unsigned hash(char* string)
 {
-	register char *p;
-	register unsigned i, sum;
+	char *p;
+	unsigned i, sum;
 
 	if (strcmp(string, "ANY") == 0)
 		return 128;
@@ -45,7 +45,7 @@ void addtohashtable(char* s, int n)
 	 * s is the key, n the pattern number
 	 */
 	unsigned hval;
-	register struct hlist *p;
+	struct hlist *p;
 
 	hval = hash(s);
 	p = (struct hlist *) malloc(sizeof *p);
@@ -78,7 +78,7 @@ void printhashtable(void)
 	 * Print the linear lists, and also output an array of
 	 * pointers to them
 	 */
-	register int i;
+	int i;
 
 	for (i = 1; i <= 128; i++)
 	{

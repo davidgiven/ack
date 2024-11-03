@@ -12,11 +12,11 @@
 #include "object.h"
 #include "obj.h"
 
-void rd_ranlib(FILE* fd, register struct ranlib *ran, register long cnt)
+void rd_ranlib(FILE* fd, struct ranlib *ran, long cnt)
 {
 	rd_bytes(fd, (char *) ran, cnt * SZ_RAN);
 	{
-		register char *c = (char *) ran + cnt * SZ_RAN;
+		char *c = (char *) ran + cnt * SZ_RAN;
 
 		ran += cnt;
 		while (cnt--) {

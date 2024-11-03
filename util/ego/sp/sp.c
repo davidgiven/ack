@@ -82,7 +82,7 @@ static void stack_pollution(bblock_p b)
 	 * block b, try to combine the two into one ASP.
 	 */
 
-	register line_p l;
+	line_p l;
 	line_p asp, next = b->b_start;
 	bool asp_seen = FALSE;
 	int stack_diff, pop, push;
@@ -146,7 +146,7 @@ static void stack_pollution(bblock_p b)
 static bool block_save(bblock_p b)
 {
 
-	register line_p l;
+	line_p l;
 	int stack_diff, pop, push;
 	bool ok;
 
@@ -190,7 +190,7 @@ static void mark_pred(bblock_p b)
 
 static void mark_unsave_blocks(proc_p p)
 {
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -205,7 +205,7 @@ static void mark_unsave_blocks(proc_p p)
 static void sp_optimize(void* vp)
 {
 	proc_p p = vp;
-	register bblock_p b;
+	bblock_p b;
 
 	if (IS_ENTERED_WITH_GTO(p))
 		return;
@@ -228,8 +228,8 @@ int main(int argc, char* argv[])
 debug_stack_pollution(p)
     proc_p p;
 {
-    register bblock_p b;
-    register line_p l;
+    bblock_p b;
+    line_p l;
     int lcnt,aspcnt,instr;
 
     for (b = p->p_start; b != 0; b = b->b_next) {

@@ -4,14 +4,14 @@
 
 void _readln(void)
 {
-	register int c;
+	int c;
 	while ((c = fgetc(_chanrd)) != EOF && c != '\n')
 		;
 }
 
 void readskip(void)
 {
-	register int c;
+	int c;
 #ifdef DEBUG
 	printf("readskip\n");
 #endif
@@ -82,7 +82,7 @@ void _readflt(double* addr)
 void _readstr(String** s)
 {
 	char buffer[1024];
-	register int kar;
+	int kar;
 	char* c;
 
 #ifdef DEBUG

@@ -22,8 +22,8 @@ set_t emptyset;
 
 int setlookup(set_t s)
 {
-	register set_p p;
-	register int i;
+	set_p p;
+	int i;
 	int setno;
 
 	for (p = l_sets; p < &l_sets[nsets]; p++)
@@ -44,7 +44,7 @@ int setlookup(set_t s)
 void make_std_sets(void)
 {
 	set_t s;
-	register int i;
+	int i;
 
 	for (i = 0; i < SETSIZE; i++)
 		s.set_val[i] = 0;
@@ -57,9 +57,9 @@ void make_std_sets(void)
 
 set_t ident_to_set(char *name)
 {
-	register symbol *sy_p;
-	register int i;
-	register struct propinfo *pp;
+	symbol *sy_p;
+	int i;
+	struct propinfo *pp;
 	int bitno;
 	set_t result;
 
@@ -91,17 +91,17 @@ set_t ident_to_set(char *name)
 	return (result);
 }
 
-static void checksize(register set_p s)
+static void checksize(set_p s)
 {
-	register int i;
-	register int size = -1;
+	int i;
+	int size = -1;
 
 	s->set_size = 0;
 	for (i = 1; i <= nregs; i++)
 	{
 		if (BIT(s->set_val, i))
 		{
-			register int sz = l_regs[i].ri_size;
+			int sz = l_regs[i].ri_size;
 
 			if (size == -1)
 				size = sz;
@@ -113,7 +113,7 @@ static void checksize(register set_p s)
 	{
 		if (BIT(s->set_val, i + nregs))
 		{
-			register int sz = l_tokens[i]->tk_size;
+			int sz = l_tokens[i]->tk_size;
 			if (size == -1)
 				size = sz;
 			else if (size != sz)
@@ -127,7 +127,7 @@ static void checksize(register set_p s)
 set_t setproduct(set_t s1, set_t s2)
 {
 	set_t result;
-	register int i;
+	int i;
 
 	for (i = 0; i < SETSIZE; i++)
 		result.set_val[i] = s1.set_val[i] & s2.set_val[i];
@@ -138,7 +138,7 @@ set_t setproduct(set_t s1, set_t s2)
 set_t setsum(set_t s1, set_t s2)
 {
 	set_t result;
-	register int i;
+	int i;
 
 	if (s1.set_size == s2.set_size)
 		result.set_size = s1.set_size;
@@ -152,7 +152,7 @@ set_t setsum(set_t s1, set_t s2)
 set_t setdiff(set_t s1, set_t s2)
 {
 	set_t result;
-	register int i;
+	int i;
 
 	for (i = 0; i < SETSIZE; i++)
 		result.set_val[i] = s1.set_val[i] & ~s2.set_val[i];

@@ -14,21 +14,21 @@ struct node;
 struct type;
 struct desig;
 
-void routine_label(register struct def * df);
-void RomString(register struct node *nd);
-void RomReal(register struct node *nd);
+void routine_label(struct def * df);
+void RomString(struct node *nd);
+void RomReal(struct node *nd);
 void BssVar(void);
-arith CodeBeginBlock(register struct def *df);
-void CodeEndBlock(register struct def *df, arith StackAdjustment);
-void CodeExpr(register struct node *nd, register struct desig *ds,
+arith CodeBeginBlock(struct def *df);
+void CodeEndBlock(struct def *df, arith StackAdjustment);
+void CodeExpr(struct node *nd, struct desig *ds,
 		label true_label);
-void CodeCall(register struct node *nd);
-void RangeCheck(register struct type *tpl, register struct type *tpr);
+void CodeCall(struct node *nd);
+void RangeCheck(struct type *tpl, struct type *tpr);
 
 /*	Generate code to push the value of the expression "nd"
     on the stack.
 */
-void CodePExpr(register struct node *nd);
+void CodePExpr(struct node *nd);
 
 /*	Generate code to push the address of the designator "nd"
     on the stack.
@@ -38,7 +38,7 @@ void CodeDAddress(struct node *nd);
 /*	Generate code to store the expression on the stack
     into the designator "nd".
  */
-void CodeDStore(register struct node *nd);
+void CodeDStore(struct node *nd);
 
 /* Generate code to convert long to int */
 void Long2Int(void);

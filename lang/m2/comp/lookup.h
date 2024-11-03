@@ -15,7 +15,7 @@ struct node;
 struct scopelist;
 struct def;
 
-struct def *lookup(register struct idf *id, struct scope *scope, int import, int flags);
-struct def *lookfor(register struct node *id, register struct scopelist *vis, int message, int flags);
+struct def *lookup(struct idf *id, struct scope *scope, int import, int flags);
+struct def *lookfor(struct node *id, struct scopelist *vis, int message, int flags);
 
 #endif /* LOOKUP_H_ */

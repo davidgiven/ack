@@ -208,7 +208,7 @@ WithStatement
 			}
 ;
 
-RecordVariableList(register struct node **pnd;)
+RecordVariableList(struct node **pnd;)
 {
 	struct node *nd;
 } :
@@ -224,7 +224,7 @@ RecordVariableList(register struct node **pnd;)
 	]*
 ;
 
-RecordVariable(register struct node **pnd;):
+RecordVariable(struct node **pnd;):
 	VariableAccess(pnd)
 				{ WithStat(*pnd); }
 ;
@@ -286,7 +286,7 @@ CaseStatement
 					{ CaseEnd(casend, exit_label); }
 ;
 
-CaseListElementTail(register struct node **pnd; label exit_label;):
+CaseListElementTail(struct node **pnd; label exit_label;):
 	/* This is a new rule, all because of a silly semicolon
 	 */
 	/* empty */
@@ -301,7 +301,7 @@ CaseListElementTail(register struct node **pnd; label exit_label;):
 	]
 ;
 
-CaseListElement(register struct node **pnd; label exit_label;):
+CaseListElement(struct node **pnd; label exit_label;):
 	CaseConstantList(pnd)
 	':'
 				{ *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
@@ -400,7 +400,7 @@ ForStatement
 
 /* SPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIAL */
 /* ISO section 6.9, p. 132-136 */
-ReadParameterList(register struct node **pnd;)
+ReadParameterList(struct node **pnd;)
 {
 	register struct node *nd;
 } :
@@ -422,7 +422,7 @@ ReadParameterList(register struct node **pnd;)
 	')'
 ;
 
-WriteParameterList(register struct node **pnd;)
+WriteParameterList(struct node **pnd;)
 {
 	register struct node *nd;
 } :
@@ -446,7 +446,7 @@ WriteParameterList(register struct node **pnd;)
 	')'
 ;
 
-WriteParameter(register struct node **pnd;)
+WriteParameter(struct node **pnd;)
 {
 	register struct node *nd;
 } :

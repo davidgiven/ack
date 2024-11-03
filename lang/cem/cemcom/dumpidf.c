@@ -44,7 +44,7 @@ static int dumplevel;
 
 static
 newline()	{
-	register int dl = dumplevel;
+	int dl = dumplevel;
 	
 	print("\n");
 	while (dl >= 2)	{
@@ -69,7 +69,7 @@ dumpidftab(msg, opt)
 	print(">>> DUMPIDF, %s (start)", msg);
 	dumpstack();
 	for (i = 0; i < HASHSIZE; i++)	{
-		register struct idf *notch = idf_hashtable[i];
+		struct idf *notch = idf_hashtable[i];
 
 		while (notch)	{
 			dumpidf(notch, opt);
@@ -84,10 +84,10 @@ dumpstack()
 {
 	/*	Dumps the identifier stack, starting at the top.
 	*/
-	register struct stack_level *stl = local_level;
+	struct stack_level *stl = local_level;
 	
 	while (stl)	{
-		register struct stack_entry *se = stl->sl_entry;
+		struct stack_entry *se = stl->sl_entry;
 		
 		newline();
 		print("%3d: ", stl->sl_level);
@@ -101,7 +101,7 @@ dumpstack()
 }
 
 dumpidf(idf, opt)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	All information about the identifier idf is divulged in a
 		hopefully readable format.
@@ -157,7 +157,7 @@ dumpidf(idf, opt)
 }
 
 dumpdefs(def, opt)
-	register struct def *def;
+	struct def *def;
 {
 	dumplevel++;
 	while (def && ((opt&4) || def->df_level))	{
@@ -179,12 +179,12 @@ dumpdefs(def, opt)
 }
 
 dumptags(tag)
-	register struct tag *tag;
+	struct tag *tag;
 {
 	dumplevel++;
 	while (tag)	{
-		register struct type *tp = tag->tg_type;
-		register int fund = tp->tp_fund;
+		struct type *tp = tag->tg_type;
+		int fund = tp->tp_fund;
 
 		newline();
 		print("L%d: %s %s",
@@ -207,7 +207,7 @@ dumptags(tag)
 }
 
 dumpsdefs(sdef, sdk)
-	register struct sdef *sdef;
+	struct sdef *sdef;
 	enum sdef_kind sdk;
 {
 	/*	Since sdef's are members of two chains, there are actually
@@ -240,7 +240,7 @@ dumpsdefs(sdef, sdk)
 
 char *
 type2str(tp)
-	register struct type *tp;
+	struct type *tp;
 {
 	/*	Yields a pointer to a one-line description of the type tp.
 	*/
@@ -317,7 +317,7 @@ print_expr(msg, expr)
 }
 
 p1_expr(lvl, expr)
-	register struct expr *expr;
+	struct expr *expr;
 {
 	p1_indent(lvl);
 	if (!expr)	{
@@ -394,7 +394,7 @@ p1_expr(lvl, expr)
 }
 
 p1_indent(lvl)
-	register int lvl;
+	int lvl;
 {
 	while (lvl--)
 		print("  ");

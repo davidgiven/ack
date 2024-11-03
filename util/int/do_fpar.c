@@ -37,7 +37,7 @@ static void fef(double, size), fif(double, double, size);
 
 #endif /* NOFLOAT */
 
-void DoADF(register size l)
+void DoADF(size l)
 {
 	/* ADF w: Floating add (*) */
 #ifndef NOFLOAT
@@ -51,7 +51,7 @@ void DoADF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoSBF(register size l)
+void DoSBF(size l)
 {
 	/* SBF w: Floating subtract (*) */
 #ifndef NOFLOAT
@@ -65,7 +65,7 @@ void DoSBF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoMLF(register size l)
+void DoMLF(size l)
 {
 	/* MLF w: Floating multiply (*) */
 #ifndef NOFLOAT
@@ -79,7 +79,7 @@ void DoMLF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoDVF(register size l)
+void DoDVF(size l)
 {
 	/* DVF w: Floating divide (*) */
 #ifndef NOFLOAT
@@ -93,7 +93,7 @@ void DoDVF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoNGF(register size l)
+void DoNGF(size l)
 {
 	/** NGF w: Floating negate (*) */
 #ifndef NOFLOAT
@@ -107,7 +107,7 @@ void DoNGF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoFIF(register size l)
+void DoFIF(size l)
 {
 	/* FIF w: Floating multiply and split integer and fraction part (*) */
 #ifndef NOFLOAT
@@ -121,7 +121,7 @@ void DoFIF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoFEF(register size l)
+void DoFEF(size l)
 {
 	/* FEF w: Split floating number in exponent and fraction part (*) */
 #ifndef NOFLOAT
@@ -278,7 +278,7 @@ static void fif(double f1, double f2, size n)
 
 static void fef(double f, size n)
 {
-	register long exponent, sign = (long)(f < 0.0);
+	long exponent, sign = (long)(f < 0.0);
 
 	if (f == 0.0)
 	{
@@ -307,7 +307,7 @@ static double fabs(double f)
 static double floor(double f)
 {
 	double res, d;
-	register int sign = 1;
+	int sign = 1;
 
 	/* eliminate the sign */
 	if (f < 0)
@@ -364,10 +364,10 @@ static double ttttp(double f, int n)
 */
 double str2double(char* str)
 {
-	register char b;
-	register int sign = 1; /* either +1 or -1 */
-	register int frac = 0; /* how far in fraction part ? */
-	register int ex; /* to store exponent */
+	char b;
+	int sign = 1; /* either +1 or -1 */
+	int frac = 0; /* how far in fraction part ? */
+	int ex; /* to store exponent */
 	double mantissa = 0.0; /* to store mantissa */
 	double d; /* double to be returned */
 

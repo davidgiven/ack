@@ -42,10 +42,10 @@
  static Vardesc *
 hash(ht, s)
  hashtab *ht;
- register char *s;
+ char *s;
 {
-	register int c, x;
-	register hashentry *h;
+	int c, x;
+	hashentry *h;
 	char *s0 = s;
 
 	for(x = 0; c = *s++; x = x & 0x4000 ? ((x << 1) & 0x7fff) + 1 : x << 1)
@@ -113,8 +113,8 @@ static char Alpha[256], Alphanum[256];
 
  static void
 nl_init() {
-	register char *s;
-	register int c;
+	char *s;
+	int c;
 
 	if(!init)
 		f_init();
@@ -133,11 +133,11 @@ nl_init() {
 
  static int
 getname(s, slen)
- register char *s;
+ char *s;
  int slen;
 {
-	register char *se = s + slen - 1;
-	register int ch;
+	char *se = s + slen - 1;
+	int ch;
 
 	GETC(ch);
 	if (!(*s++ = Alpha[ch & 0xff])) {
@@ -160,8 +160,8 @@ getnum(chp, val)
  int *chp;
  ftnlen *val;
 {
-	register int ch, sign;
-	register ftnlen x;
+	int ch, sign;
+	ftnlen x;
 
 	while(GETC(ch) <= ' ' && ch >= 0);
 	if (ch == '-') {
@@ -193,7 +193,7 @@ getdimen(chp, d, delta, extent, x1)
  dimen *d;
  ftnlen delta, extent, *x1;
 {
-	register int k;
+	int k;
 	ftnlen x2, x3;
 
 	if (k = getnum(chp, x1))

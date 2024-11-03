@@ -120,7 +120,7 @@ print_string(f, s, len)
   char	*s;
   int	len;
 {
-  register char	*str = s;
+  char	*str = s;
 
   putc('"', f);
   while (*str && len-- > 0) printchar(f, *str++, '"');
@@ -200,7 +200,7 @@ binop_prio(op)
 
 static int
 val_in_base(c, base)
-  register int c;
+  int c;
 {
   return is_dig(c) 
 	? c - '0'
@@ -213,13 +213,13 @@ val_in_base(c, base)
 
 static int
 get_number(c)
-  register int	c;
+  int	c;
 {
   char buf[512+1];
-  register int base = 10;
-  register char *p = &buf[0];
-  register long val = 0;
-  register int val_c;
+  int base = 10;
+  char *p = &buf[0];
+  long val = 0;
+  int val_c;
 
   if (c == '0') {
 	/* check if next char is an 'x' or an 'X' */
@@ -274,7 +274,7 @@ get_number(c)
 
 static int
 get_token(c)
-  register int	c;
+  int	c;
 {
   switch(c) {
   case '[':
@@ -418,7 +418,7 @@ quoted(ch)
 	}
   }
   else {				/* a quoted octal */
-	register int oct = 0, cnt = 0;
+	int oct = 0, cnt = 0;
 
 	do {
 		oct = oct*8 + (ch-'0');
@@ -435,9 +435,9 @@ static int
 getstring(c)
   int	c;
 {
-  register int ch;
+  int ch;
   char buf[512];
-  register int len = 0;
+  int len = 0;
 
   while (ch = getc(db_in), ch != c) {
 	if (ch == '\n') {

@@ -85,7 +85,7 @@ declaration
 	an erroneous type-identifier.
 */
 
-decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
+decl_specifiers	/* non-empty */ (struct decspecs *ds;)
 	/*	Reads a non-empty decl_specifiers and fills the struct
 		decspecs *ds.
 	*/
@@ -101,7 +101,7 @@ decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 	{do_decspecs(ds);}
 ;
 
-single_decl_specifier /* non_empty */ (register struct decspecs *ds;)
+single_decl_specifier /* non_empty */ (struct decspecs *ds;)
 :
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
@@ -192,7 +192,7 @@ init_declarator_list(struct decspecs *ds;):
 	[ ',' init_declarator(ds) ]*
 ;
 
-init_declarator(register struct decspecs *ds;)
+init_declarator(struct decspecs *ds;)
 	{
 		struct declarator Dc;
 	}
@@ -298,7 +298,7 @@ initializer(struct idf *idf; int sc;)
 	description list dc.
 */
 /* 3.5.4 */
-declarator(register struct declarator *dc;)
+declarator(struct declarator *dc;)
 	{	struct formal *fm = NO_PARAMS;
 		struct proto *pl = NO_PROTO;
 		arith count;
@@ -328,7 +328,7 @@ declarator(register struct declarator *dc;)
 	{add_decl_unary(dc, POINTER, qual, (arith)0, NO_PARAMS, NO_PROTO);}
 ;
 
-primary_declarator(register struct declarator *dc;) :
+primary_declarator(struct declarator *dc;) :
 	identifier(&dc->dc_idf)
 |
 	'(' declarator(dc) ')'
@@ -360,7 +360,7 @@ formal(struct formal **fmp;)
 :
 	identifier(&idf)
 	{
-		register struct formal *new = new_formal();
+		struct formal *new = new_formal();
 		
 		new->fm_idf = idf;
 		new->next = *fmp;
@@ -372,7 +372,7 @@ formal(struct formal **fmp;)
 ;
 
 /* Change 2 */
-enum_specifier(register struct type **tpp;)
+enum_specifier(struct type **tpp;)
 	{
 		struct idf *idf;
 		arith l = (arith)0;
@@ -402,7 +402,7 @@ enum_specifier(register struct type **tpp;)
 	]
 ;
 
-enumerator_pack(register struct type *tp; arith *lp;) :
+enumerator_pack(struct type *tp; arith *lp;) :
 	'{'
 	enumerator(tp, lp)
 	[%while (AHEAD != '}')
@@ -438,11 +438,11 @@ enumerator(struct type *tp; arith *lp;)
 ;
 
 /* 8.5 */
-struct_or_union_specifier(register struct type **tpp;)
+struct_or_union_specifier(struct type **tpp;)
 	{
 		int fund;
 		struct idf *idfX;
-		register struct idf *idf;
+		struct idf *idf;
 	}
 :
 	{if (*tpp) error("multiple types in declaration");}
@@ -487,7 +487,7 @@ struct_or_union_specifier(register struct type **tpp;)
 	]
 ;
 
-struct_declaration_pack(register struct type *stp;)
+struct_declaration_pack(struct type *stp;)
 	{
 		struct sdef **sdefp = &stp->tp_sdef;
 		arith size = (arith)0;
@@ -572,7 +572,7 @@ cast(struct type **tpp;)
 /*	This code is an abject copy of that of 'declarator', for lack of
 	a two-level grammar.
 */
-abstract_declarator(register struct declarator *dc;)
+abstract_declarator(struct declarator *dc;)
 	{	struct proto *pl = NO_PROTO;
 		arith count;
 		int qual;
@@ -621,7 +621,7 @@ parameter_type_list(struct proto **plp;)
 	parameter_decl_list(plp)
 	[
 		',' ELLIPSIS
-		{	register struct proto *new = new_proto();
+		{	struct proto *new = new_proto();
 
 			new->next = *plp;
 			new->pl_flag = PL_ELLIPSIS;
@@ -646,7 +646,7 @@ parameter_decl_list(struct proto **plp;)
 ;
 
 parameter_decl(struct proto **plp;)
-	{	register struct proto *new = new_proto();
+	{	struct proto *new = new_proto();
 		struct declarator Dc;
 		struct decspecs Ds;
 	}
@@ -685,7 +685,7 @@ parameter_decl(struct proto **plp;)
 	since this is the only place where they don't give
 	conflicts. However, this makes the grammar messy.
 */
-parameter_declarator(register struct declarator *dc;)
+parameter_declarator(struct declarator *dc;)
 	{	struct formal *fm = NO_PARAMS;
 		struct proto *pl = NO_PROTO;
 		arith count;
@@ -715,7 +715,7 @@ parameter_declarator(register struct declarator *dc;)
 	{add_decl_unary(dc, POINTER, qual, (arith)0, NO_PARAMS, NO_PROTO);}
 ;
 
-primary_parameter_declarator(register struct declarator *dc;)
+primary_parameter_declarator(struct declarator *dc;)
 :
 [%if (AHEAD == ')' || first_of_parameter_type_list(AHEAD)
 				    && (AHEAD != IDENTIFIER))

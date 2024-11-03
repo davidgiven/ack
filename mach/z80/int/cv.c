@@ -11,7 +11,7 @@ unsigned memaddr = 0x100;
 
 main() {
 	char buf[256];
-	register i,len;
+	i,len;
 
 	while((len=read(0,buf,sizeof(buf))) > 0) {
 		putw(memaddr,stdout);

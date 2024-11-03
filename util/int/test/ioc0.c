@@ -8,7 +8,7 @@ struct sgttyb old, ttyb;
 
 main()
 {
-   register i = 0;
+   i = 0;
    char c;
 
    if( ioctl( 1, TIOCGETP, &old ) != 0 ) {

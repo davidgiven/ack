@@ -119,7 +119,7 @@ lint_end_comment()
 	}
 	else
 	if (strncmp(bufpos, "FORMAT", 6) == 0 && isdigit(bufpos[6])) {
-		register int argn;
+		int argn;
 
 		bufpos += 6;
 		argn = *bufpos++ - '0';
@@ -147,8 +147,8 @@ make_format(argn, oldf)
 	int argn;
 	char *oldf;
 {
-	register char *newf;
-	register int last_stat;
+	char *newf;
+	int last_stat;
 
 	while (*oldf && *oldf != '$') {
 		oldf++;
@@ -176,7 +176,7 @@ make_format(argn, oldf)
 
 	last_stat = NONE;
 	while (*oldf && *oldf != '$') {
-		register char ch = *oldf++;
+		char ch = *oldf++;
 
 		if (isspace(ch)) {
 			if (last_stat == LETGIT)

@@ -169,10 +169,10 @@ write_comment()
  static int *
 count_args()
 {
-	register int *ac;
-	register chainp cp;
-	register struct Entrypoint *ep;
-	register Namep q;
+	int *ac;
+	chainp cp;
+	struct Entrypoint *ep;
+	Namep q;
 
 	ac = (int *)ckalloc(nallargs*sizeof(int));
 
@@ -185,12 +185,12 @@ count_args()
 
 prolog(outfile, p)
  FILE *outfile;
- register chainp p;
+ chainp p;
 {
 	int addif, addif0, i, nd, size;
 	int *ac;
-	register Namep q;
-	register struct Dimblock *dp;
+	Namep q;
+	struct Dimblock *dp;
 
 	if(procclass == CLBLOCK)
 		return;

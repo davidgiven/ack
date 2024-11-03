@@ -37,8 +37,8 @@ EXTEND	*e1,*e2;
 	short	count;
 #else
 	unsigned short u[9], v[5];
-	register int j;
-	register unsigned short *u_p = u;
+	int j;
+	unsigned short *u_p = u;
 	int maxv = 4;
 #endif
 

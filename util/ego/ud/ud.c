@@ -153,7 +153,7 @@ static void solve_equations(proc_p p)
 	 * solve the equations.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	bool change;
 	cset newin;
 
@@ -493,7 +493,7 @@ static void ud_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -505,7 +505,7 @@ static void ud_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{

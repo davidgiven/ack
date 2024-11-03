@@ -192,7 +192,7 @@ void codeint(int x)
 
 void outpatterns(void)
 {
-	register int i;
+	int i;
 
 	if (!inproc)
 	{
@@ -250,8 +250,8 @@ static void patbyte(int n)
 void hashpatterns(void)
 {
 	short index;
-	register char *bp, *tp;
-	register short i;
+	char *bp, *tp;
+	short i;
 	unsigned short hashvalue;
 	int patlen;
 
@@ -300,7 +300,7 @@ void outincludes(void)
 
 void outregs(void)
 {
-	register int i, j, k;
+	int i, j, k;
 	short rset[SZOFSET(MAXREGS)];
 	short clashlist[MAXREGS * MAXREGS];
 	int iclashlist = 0;
@@ -387,7 +387,7 @@ void outregs(void)
 
 void outregvars(void)
 {
-	register int i, j;
+	int i, j;
 
 	fprintf(htable, "#define REGVARS\n");
 	if (reglap != 0)
@@ -447,9 +447,9 @@ static int is_ascii(int c)
 	return 0;
 }
 
-void outfmt(register char *p)
+void outfmt(char *p)
 {
-	register int c;
+	int c;
 	fprintf(ctable, "\"");
 	while ((c = (*p++ & 0377)) != 0)
 	{
@@ -466,8 +466,8 @@ void outfmt(register char *p)
 
 void outtokens(void)
 {
-	register int tokno, i;
-	register token_p tp;
+	int tokno, i;
+	token_p tp;
 
 	fprintf(ctable, "tkdef_t tokens[] = {{0},\n");
 	for (tokno = 1; tokno < ntokens; tokno++)
@@ -489,7 +489,7 @@ void outtokens(void)
 
 void outenodes(void)
 {
-	register node_p np;
+	node_p np;
 
 	fprintf(ctable, "node_t enodes[] = {\n");
 	for (np = nodes; np < &nodes[nnodes]; np++)
@@ -500,10 +500,10 @@ void outenodes(void)
 
 void outstrings(void)
 {
-	register int i;
+	int i;
 #if 0
-	register char *p;
-	register int c;
+	char *p;
+	int c;
 #endif
 
 	if (tabledebug)
@@ -535,8 +535,8 @@ extern set_t unstackset;
 
 void outsets(void)
 {
-	register int i;
-	register set_p sp;
+	int i;
+	set_p sp;
 
 	fprintf(ctable, "set_t machsets[] = {\n");
 	for (sp = l_sets; sp < &l_sets[nsets]; sp++)
@@ -557,8 +557,8 @@ void outsets(void)
 
 void outinstances(void)
 {
-	register inst_p ip;
-	register int i;
+	inst_p ip;
+	int i;
 
 	fprintf(ctable, "inst_t tokeninstances[] = {\n");
 	for (ip = l_instances; ip < &l_instances[ninstances]; ip++)
@@ -573,7 +573,7 @@ void outinstances(void)
 
 void outmoves(void)
 {
-	register move_p mp;
+	move_p mp;
 
 	fprintf(ctable, "move_t moves[] = {\n");
 	for (mp = l_moves; mp < &l_moves[nmoves]; mp++)
@@ -584,7 +584,7 @@ void outmoves(void)
 
 void outtests(void)
 {
-	register test_p tp;
+	test_p tp;
 
 	fprintf(ctable, "test_t tests[] = {\n");
 	for (tp = l_tests; tp < &l_tests[ntests]; tp++)
@@ -594,7 +594,7 @@ void outtests(void)
 
 void outstacks(void)
 {
-	register c1_p cp;
+	c1_p cp;
 
 	fprintf(ctable, "c1_t c1coercs[] = {\n");
 	for (cp = l_stacks; cp < &l_stacks[nstacks]; cp++)
@@ -605,8 +605,8 @@ void outstacks(void)
 
 void outsplits(void)
 {
-	register c2_p cp;
-	register int i;
+	c2_p cp;
+	int i;
 
 	fprintf(ctable, "c2_t c2coercs[] = {\n");
 	for (cp = l_split; cp < &l_split[nsplit]; cp++)
@@ -622,7 +622,7 @@ void outsplits(void)
 
 void outcoercs(void)
 {
-	register c3_p cp;
+	c3_p cp;
 
 	fprintf(ctable, "c3_t c3coercs[] = {\n");
 	for (cp = l_coercs; cp < &l_coercs[ncoercs]; cp++)
@@ -633,8 +633,8 @@ void outcoercs(void)
 
 void outproplists(void)
 {
-	register int propno;
-	register int regno;
+	int propno;
+	int regno;
 
 	for (propno = 0; propno < nprops; propno++)
 	{
@@ -675,7 +675,7 @@ void passon(char *s)
 
 void outdefs(void)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 	extern int maxempatlen, maxrule;
 	char *wrdfmt;
 
@@ -711,7 +711,7 @@ void outdefs(void)
 
 void outars(void)
 {
-	register int i;
+	int i;
 
 	if (code_in_c)
 		fprintf(htable, "#define CODEINC 1\n");
@@ -775,10 +775,10 @@ void codecoco(int cocono)
 void dopattern(int stackcoerc, varinfo *kills, varinfo *allocates,
 			varinfo *generates, varinfo *yields, varinfo *leaving)
 {
-	register int i;
+	int i;
 	int n, nops;
-	register struct varinfo *vp, *vivp;
-	register instr_p instp;
+	struct varinfo *vp, *vivp;
+	instr_p instp;
 	int al, deal;
 	int vil;
 	int cocono = -1;

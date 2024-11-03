@@ -59,10 +59,10 @@ static void docmds1(struct name *np, struct line *lp)
     bool            ssilent;
     bool            signore;
     int         estat;
-    register char *     q;
-    register char *     p;
+    char *     q;
+    char *     p;
     char *          shell;
-    register struct cmd *   cp;
+    struct cmd *   cp;
 
 
     if (*(shell = getmacro("SHELL")) == '\0')
@@ -136,7 +136,7 @@ static void docmds1(struct name *np, struct line *lp)
 
 void docmds(struct name *np)
 {
-    register struct line *  lp;
+    struct line *  lp;
 
 
     for (lp = np->n_line; lp; lp = lp->l_next)
@@ -188,8 +188,8 @@ void touch(struct name *np)
 
 static void make1(struct name *np, struct line *lp, struct depend *qdp)
 {
-    register struct depend *    dp;
-    register char *p;
+    struct depend *    dp;
+    char *p;
 
     if (dotouch)
         touch(np);
@@ -223,9 +223,9 @@ static void make1(struct name *np, struct line *lp, struct depend *qdp)
  */
 int make(struct name *np, int level)
 {
-    register struct depend *    dp;
-    register struct line *      lp;
-    register struct depend *    qdp;
+    struct depend *    dp;
+    struct line *      lp;
+    struct depend *    qdp;
     time_t              dtime = 1;
     bool                didsomething = 0;
     int             dynamic = 0;

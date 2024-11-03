@@ -14,13 +14,13 @@ struct def;
 struct type;
 
 int TstProcEquiv(struct type *tp1, struct type *tp2);
-int TstCompat(register struct type *tp1, register struct type *tp2);
-int TstAssCompat(register struct type *tp1, register struct type *tp2);
-int TstParCompat(int parno, register struct type *formaltype, int VARflag, struct node **nd, struct def *edf);
+int TstCompat(struct type *tp1, struct type *tp2);
+int TstAssCompat(struct type *tp1, struct type *tp2);
+int TstParCompat(int parno, struct type *formaltype, int VARflag, struct node **nd, struct def *edf);
 
 int ChkCompat(struct node **nd, struct type *tp, char *message);
 int ChkAssCompat(struct node **nd, struct type *tp, char *message);
 
-char *incompat(register struct type *tp1, register struct type *tp2);
+char *incompat(struct type *tp1, struct type *tp2);
 
 #endif /* TYPEQUIV_H_ */

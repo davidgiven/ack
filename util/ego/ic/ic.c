@@ -235,7 +235,7 @@ static void process_lines(FILE* fout)
 
 static int readline(short* instr_out, line_p* lnp_out)
 {
-	register line_p lnp;
+	line_p lnp;
 	short n;
 
 	/* Read one line. If it is a normal EM instruction without
@@ -313,7 +313,7 @@ static line_p readoperand(short instr)
 	 * Create a line struct and return a pointer to it.
 	 */
 
-	register line_p lnp;
+	line_p lnp;
 	short flag;
 
 	VI(instr);

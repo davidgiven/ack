@@ -22,9 +22,9 @@ char str2[LZ];
 struct name *newname(char *name)
 {
 
-	register struct name * rp;
-	register struct name * rrp;
-	register char * cp;
+	struct name * rp;
+	struct name * rrp;
+	char * cp;
 
 	for (rp = namehead.n_next, rrp = &namehead; rp;
 			rp = rp->n_next, rrp = rrp->n_next)
@@ -52,8 +52,8 @@ struct name *newname(char *name)
  */
 struct depend *newdep(struct name *np, struct depend *dp)
 {
-	register struct depend * rp;
-	register struct depend * rrp;
+	struct depend * rp;
+	struct depend * rrp;
 
 	if ((rp = (struct depend *) malloc(sizeof(struct depend)))
 			== (struct depend *) 0)
@@ -78,9 +78,9 @@ struct depend *newdep(struct name *np, struct depend *dp)
  */
 struct cmd *newcmd(char *str, struct cmd *cp)
 {
-	register struct cmd * rp;
-	register struct cmd * rrp;
-	register char * rcp;
+	struct cmd * rp;
+	struct cmd * rrp;
+	char * rcp;
 
 	if ((rcp = strrchr(str, '\n')))
 		*rcp = '\0'; /*  Loose newline  */
@@ -127,8 +127,8 @@ struct cmd *newcmd(char *str, struct cmd *cp)
 void newline(struct name *np, struct depend *dp, struct cmd *cp, int flag)
 {
 	bool hascmds = FALSE; /*  Target has commands  */
-	register struct line * rp;
-	register struct line * rrp;
+	struct line * rp;
+	struct line * rrp;
 
 	/* Handle the .SUFFIXES case */
 	if (!strcmp(np->n_name, ".SUFFIXES") && !dp && !cp)
@@ -207,7 +207,7 @@ void input(FILE *fd)
 		while (((q = strchr(p, '=')) != (char *) 0) && (p != q)
 				&& (q[-1] == '\\')) /*  Find value */
 		{
-			register char * a;
+			char * a;
 
 			a = q - 1; /*  Del \ chr; move rest back  */
 			p = q;
@@ -217,7 +217,7 @@ void input(FILE *fd)
 
 		if (q != (char *) 0)
 		{
-			register char * a;
+			char * a;
 
 			*q++ = '\0'; /*  Separate name and val  */
 			while (isspace(*q))
@@ -242,7 +242,7 @@ void input(FILE *fd)
 		while (((q = strchr(p, ':')) != (char *) 0) && (p != q)
 				&& (q[-1] == '\\')) /*  Find dependents  */
 		{
-			register char * a;
+			char * a;
 
 			a = q - 1; /*  Del \ chr; move rest back  */
 			p = q;

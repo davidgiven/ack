@@ -7,9 +7,9 @@
 #include <stdlib.h>
 
 size_t
-mbstowcs(register wchar_t* pwcs, register const char* s, size_t n)
+mbstowcs(wchar_t* pwcs, const char* s, size_t n)
 {
-	register int i = n;
+	int i = n;
 
 	while (--i >= 0)
 	{

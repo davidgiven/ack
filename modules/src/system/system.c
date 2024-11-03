@@ -14,7 +14,7 @@ File _sys_ftab[SYS_NOPEN] = {
 
 File * _get_entry(void)
 {
-	register File *fp;
+	File *fp;
 
 	for (fp = &_sys_ftab[0]; fp < &_sys_ftab[SYS_NOPEN]; fp++)
 		if (fp->o_flags == 0)

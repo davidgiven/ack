@@ -59,18 +59,18 @@ struct node		*EmptyStatement = &_emptystat;
 /* Forward declarations. */
 struct stdproc;
 int Compile(char *, char *);
-static void AddProcs(register struct stdproc *);
+static void AddProcs(struct stdproc *);
 static void AddStandards(void);
 /* External function declarations */
 extern void CompUnit(void);
 extern void DefModule(void); /* Lpars */
-extern void reserve(register struct tokenname *); /* tokenname */
-char* getwdir(register char *); /* defmodule */
+extern void reserve(struct tokenname *); /* tokenname */
+char* getwdir(char *); /* defmodule */
 
 int main(int argc, char **argv)
 {
-	register int Nargc = 1;
-	register char **Nargv = &argv[0];
+	int Nargc = 1;
+	char **Nargv = &argv[0];
 
 	ProgName = *argv++;
 	DEFPATH = (char **) Malloc((unsigned)mDEF * sizeof(char *));
@@ -145,7 +145,7 @@ int Compile(char *src, char *dst)
 #ifdef DEBUG
 void LexScan(void)
 {
-	register t_token *tkp = &dot;
+	t_token *tkp = &dot;
 	
 
 	while (LLlex() > 0) {
@@ -213,7 +213,7 @@ static struct stdproc sysprocs[] = {
 	{ 0,		0 }
 };
 
-static void AddProcs(register struct stdproc *p)
+static void AddProcs(struct stdproc *p)
 {
 	for (; p->st_nam != 0; p++) {
 		if (! Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con)) {
@@ -224,7 +224,7 @@ static void AddProcs(register struct stdproc *p)
 
 static void AddStandards(void)
 {
-	register struct def *df;
+	struct def *df;
 	static t_token nilconst = { INTEGER, 0};
 
 	AddProcs(stdprocs);

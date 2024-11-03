@@ -19,7 +19,7 @@ extern char *malloc();
 
 char *Malloc(unsigned int sz)
 {
-	register char *res = malloc(sz);
+	char *res = malloc(sz);
 	
 	if (sz && res == 0) No_Mem();
 	return res;

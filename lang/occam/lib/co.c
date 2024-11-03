@@ -13,7 +13,7 @@ void resume(id) identification id;
  */
 {
 	if (group!=nil) {
-		register wordsize size;
+		wordsize size;
 
 		size=top_size(group->s_brk);
 		(*group->active)->stack=alloc((unsigned) size);
@@ -34,7 +34,7 @@ static void search(id) identification id;
  * traversed to find the running process.
  */
 {
-	register struct process **aproc, *proc;
+	struct process **aproc, *proc;
 
 	for(;;) {
 		aproc= &group->first;
@@ -65,7 +65,7 @@ static void delete_group(group) struct procgroup *group;
  * process.
  */
 {
-	register struct process *proc, *next;
+	struct process *proc, *next;
 
 	proc=group->first;
 
@@ -84,8 +84,8 @@ static void delete_group(group) struct procgroup *group;
 
 void coend()
 {
-	register struct process *proc, *next;
-	register struct procgroup *junk;
+	struct process *proc, *next;
+	struct procgroup *junk;
 
 	proc=group->first;
 

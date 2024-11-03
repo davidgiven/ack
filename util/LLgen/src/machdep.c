@@ -36,8 +36,8 @@ static string rcsid5 = "$Id$";
 string libpath(string s)
 {
 	/* Must deliver a full pathname to the library file "s" */
-	register string p;
-	register size_t length;
+	string p;
+	size_t length;
 
 	char* libdir = getenv("LLGEN_LIB_DIR");
 	if (!libdir)

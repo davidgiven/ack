@@ -36,12 +36,12 @@ struct EXTEND	*e1,*e2,*e3;
 	/*	Multiply the extended numbers e1 and e2, and put the
 		result in e3.
 	*/
-	register int	i,j;		/* loop control	*/
+	int	i,j;		/* loop control	*/
 	unsigned short	mp[4];
 	unsigned short	mc[4];
 	unsigned short	result[8];	/* result */
 
-	register unsigned short *pres;
+	unsigned short *pres;
 
 	/* first save the sign (XOR)			*/
 	e3->sign = e1->sign ^ e2->sign;
@@ -249,7 +249,7 @@ b64_add(e1,e2)
 		 */
 	struct mantissa	*e1,*e2;
 {
-	register int	overflow;
+	int	overflow;
 	int		carry;
 
 			/* add higher pair of 32 bits */
@@ -473,7 +473,7 @@ _str_ext_cvt(s, ss, e)
 	struct EXTEND	*e;
 {
 	/*	Like strtod, but for extended precision */
-	register int	c;
+	int	c;
 	int		dotseen = 0;
 	int		digitseen = 0;
 	int		exp = 0;
@@ -552,8 +552,8 @@ _ext_str_cvt(e, ndigit, decpt, sign, ecvtflag)
 	/*	Like cvt(), but for extended precision */
 
 	static char buf[NDIGITS+1];
-	register char *p = buf;
-	register char *pe;
+	char *p = buf;
+	char *pe;
 	int findex = 0;
 
 	if (ndigit < 0) ndigit = 0;
@@ -569,7 +569,7 @@ _ext_str_cvt(e, ndigit, decpt, sign, ecvtflag)
 
 	*decpt = 0;
 	if (e->m1 != 0) {
-		register struct EXTEND *pp = &big_ten_powers[1];
+		struct EXTEND *pp = &big_ten_powers[1];
 
 		while(cmp_ext(e,pp) >= 0) pp++;
 		pp--;
@@ -674,7 +674,7 @@ _dbl_ext_cvt(value, e)
 	/*	Convert double to extended
 	*/
 	int exponent;
-	register int i;
+	int i;
 
 	value = frexp(value, &exponent);
 	e->sign = value < 0.0;

@@ -65,7 +65,7 @@ static line_p last_code(line_p lines, bool skip_pseu)
 {
 	/* Determine the last line of a list */
 
-	register line_p l;
+	line_p l;
 
 	for (l = lines; l->l_next != (line_p)0; l = l->l_next)
 		;
@@ -82,7 +82,7 @@ static short cc_tab[12] = { op_blt, op_zlt, op_ble, op_zle, op_beq, op_zeq,
 
 static short rev_cond(short cond)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < 12; i++)
 	{
@@ -264,8 +264,8 @@ static void bo_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
+	loop_p lp;
+	Lindex pi;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -278,8 +278,8 @@ static void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
-	register bblock_p b;
-	register Lindex i;
+	bblock_p b;
+	Lindex i;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -294,9 +294,9 @@ static void bo_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
-	register bblock_p b;
+	loop_p lp;
+	Lindex pi;
+	bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{

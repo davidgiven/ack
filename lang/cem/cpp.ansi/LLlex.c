@@ -42,8 +42,8 @@ extern int InputLevel; /* # of current macro expansions	*/
 
 static arith char_constant(char*);
 static char* string_token(char*, int);
-static int quoted(register int);
-static int val_in_base(register int, int);
+static int quoted(int);
+static int val_in_base(int, int);
 static int trigraph(void);
 
 int LLlex(void)
@@ -51,7 +51,7 @@ int LLlex(void)
 	return (DOT != EOF) ? GetToken(&dot) : EOF;
 }
 
-int GetToken(register struct token* ptok)
+int GetToken(struct token* ptok)
 {
 	/*	GetToken() is the actual token recognizer. It calls the
 	    control line interpreter if it encounters a "\n{w}*#"
@@ -59,7 +59,7 @@ int GetToken(register struct token* ptok)
 	    needed.
 	*/
 	char buf[BUFFERSIZE];
-	register int ch, nch;
+	int ch, nch;
 
 again: /* rescan the input after an error or replacement	*/
 	ch = GetChar();
@@ -218,8 +218,8 @@ again: /* rescan the input after an error or replacement	*/
 		case STIDF:
 		{
 			extern int idfsize; /* ??? */
-			register char* tg = &buf[0];
-			register char* maxpos = &buf[idfsize];
+			char* tg = &buf[0];
+			char* maxpos = &buf[idfsize];
 			int NoExpandNext = 0;
 
 #define tstmac(bx)                                                                                 \
@@ -278,7 +278,7 @@ again: /* rescan the input after an error or replacement	*/
 			*tg++ = '\0'; /* mark the end of the identifier	*/
 			if (ReplaceMacros)
 			{
-				register struct idf* idef = findidf(buf);
+				struct idf* idef = findidf(buf);
 
 				if (idef && idef->id_macro && !NoExpandNext)
 				{
@@ -310,8 +310,8 @@ again: /* rescan the input after an error or replacement	*/
 		}
 		case STNUM: /* a numeric constant	*/
 		{ /* it may only be an integer constant */
-			register int base = 10, vch;
-			register arith val = 0;
+			int base = 10, vch;
+			arith val = 0;
 			int ovfl = 0;
 			arith ubound = max_arith / (base / 2);
 
@@ -405,7 +405,7 @@ void skipcomment(void)
 	    EOI is returned by LoadChar only on encountering EOF of the
 	    top-level file...
 	*/
-	register int c;
+	int c;
 
 	NoUnstack++;
 	c = GetChar();
@@ -448,8 +448,8 @@ void skiplinecomment(void)
 
 static arith char_constant(char* nm)
 {
-	register arith val = 0;
-	register int ch;
+	arith val = 0;
+	int ch;
 	int size = 0;
 
 	ch = GetChar();
@@ -482,10 +482,10 @@ static arith char_constant(char* nm)
 
 static char* string_token(char* nm, int stop_char)
 {
-	register int ch;
-	register int str_size;
-	register char* str = Malloc((unsigned)(str_size = ISTRSIZE));
-	register int pos = 0;
+	int ch;
+	int str_size;
+	char* str = Malloc((unsigned)(str_size = ISTRSIZE));
+	int pos = 0;
 
 	ch = GetChar();
 	while (ch != stop_char)
@@ -513,7 +513,7 @@ static char* string_token(char* nm, int stop_char)
 	return str;
 }
 
-static int quoted(register int ch)
+static int quoted(int ch)
 {
 	/*	quoted() replaces an escaped character sequence by the
 	    character meant.
@@ -546,8 +546,8 @@ static int quoted(register int ch)
 				break;
 			case 'x': /* quoted hex */
 			{
-				register int hex = 0;
-				register int vch;
+				int hex = 0;
+				int vch;
 
 				for (;;)
 				{
@@ -563,7 +563,7 @@ static int quoted(register int ch)
 	}
 	else
 	{ /* a quoted octal */
-		register int oct = 0, cnt = 0;
+		int oct = 0, cnt = 0;
 
 		do
 		{
@@ -576,7 +576,7 @@ static int quoted(register int ch)
 	return ch & 0377;
 }
 
-static int val_in_base(register int ch, int base)
+static int val_in_base(int ch, int base)
 {
 	switch (base)
 	{
@@ -597,7 +597,7 @@ int GetChar(void)
 	/*	The routines GetChar and trigraph parses the trigraph
 	    sequences and removes occurences of \\\n.
 	*/
-	register int ch;
+	int ch;
 	static bool atnewline = true;
 
 again:
@@ -646,7 +646,7 @@ again:
 
 static int trigraph(void)
 {
-	register int ch;
+	int ch;
 
 	LoadChar(ch);
 	if (ch == '?')

@@ -418,7 +418,7 @@ void modify(line_p text, call_p c, line_p lab, offset ab_off, offset lb_off, int
 	 * Note that the first line of the text is a dummy instruction.
 	 */
 
-	register line_p l;
+	line_p l;
 	line_p next;
 
 	for (l = text->l_next; l != (line_p)0; l = next)

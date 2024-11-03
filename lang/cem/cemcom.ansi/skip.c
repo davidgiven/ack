@@ -15,8 +15,8 @@
 
 int SkipToNewLine(void)
 {
-	register int ch;
-	register int garbage = 0;
+	int ch;
+	int garbage = 0;
 
 	while ((ch = GetChar()) != '\n')
 	{

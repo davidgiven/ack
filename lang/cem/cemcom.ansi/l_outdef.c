@@ -56,8 +56,8 @@ lint_declare_idf(idf, sc)
 	struct idf *idf;
 	int sc;
 {
-	register struct def *def = idf->id_def;
-	register int is_function = def->df_type->tp_fund == FUNCTION;
+	struct def *def = idf->id_def;
+	int is_function = def->df_type->tp_fund == FUNCTION;
 
 	if (level == L_GLOBAL) {
 		lint_ext_def(idf, sc);
@@ -76,8 +76,8 @@ lint_non_function_decl(ds, dc)
 	struct decspecs *ds;
 	struct declarator *dc;
 {
-	register struct def *def = dc->dc_idf->id_def;
-	register int is_function = def->df_type->tp_fund == FUNCTION;
+	struct def *def = dc->dc_idf->id_def;
+	int is_function = def->df_type->tp_fund == FUNCTION;
 
 	if (is_function)
 		def2decl(ds->ds_sc);
@@ -97,8 +97,8 @@ lint_ext_def(idf, sc)
  * The od_valreturned field is known at the end of the function definition.
  * sc indicates the storage class defined by the declaration specifier.
  */
-	register struct def *def = idf->id_def;
-	register struct type *type = def->df_type;
+	struct def *def = idf->id_def;
+	struct type *type = def->df_type;
 
 	OutDef.od_name = idf->id_text;
 	OutDef.od_statnr = (sc == STATIC ? stat_number : 0);
@@ -163,13 +163,13 @@ lint_formals()
 /* Make a list of 'struct argument's containing the types of the formal
  * parameters of the function definition just parsed.
  */
-	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
-	register struct argument **hook = &OutDef.od_arg;
-	register int nrargs = 0;
+	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
+	struct argument **hook = &OutDef.od_arg;
+	int nrargs = 0;
 
 	while (se) {
-		register struct type *type = se->se_idf->id_def->df_type;
-		register struct argument *arg = new_argument();
+		struct type *type = se->se_idf->id_def->df_type;
+		struct argument *arg = new_argument();
 
 		if (f_FORMAT && nrargs == f_FORMATn) {
 			if (	!f_FORMATvar
@@ -209,7 +209,7 @@ lint_formals()
 		}
 
 		while (nrargs < f_FORMATn) {
-			register struct argument *arg = new_argument();
+			struct argument *arg = new_argument();
 			
 			arg->ar_type = error_type;
 			arg->ar_class = ArgFormal;
@@ -218,7 +218,7 @@ lint_formals()
 			nrargs++;
 		}
 		if (nrargs == f_FORMATn) {
-			register struct argument *arg = new_argument();
+			struct argument *arg = new_argument();
 			
 			arg->ar_type = string_type;
 			arg->ar_class = ArgString;
@@ -246,8 +246,8 @@ output_proto(idf, def)
 	struct def *def;
 {
 	/* fund == FUNCTION && sc != STATIC */
-	register struct proto *pl = def->df_type->tp_proto;
-	register int nrargs = 0;
+	struct proto *pl = def->df_type->tp_proto;
+	int nrargs = 0;
 
 	if (!pl) return;
 
@@ -260,8 +260,8 @@ output_proto(idf, def)
 	OutDef.od_valreturned = NORETURN;/*???*/
 
 	while (pl) {
-		register struct type *type = pl->pl_type;
-		register struct argument *arg = new_argument();
+		struct type *type = pl->pl_type;
+		struct argument *arg = new_argument();
 
 		if (type) {
 			arg->ar_type = type;
@@ -326,7 +326,7 @@ output_def(od)
 		case SFDF:
 			/* free the 'struct argument's */
 			while (od->od_arg) {
-				register struct argument *tmp = od->od_arg;
+				struct argument *tmp = od->od_arg;
 				od->od_arg = od->od_arg->next;
 				free_argument(tmp);
 			}
@@ -381,7 +381,7 @@ outargs(arg, n)
 {
 /* Output the n arguments in the argument list and remove them */
 
-	register struct argument *tmp;
+	struct argument *tmp;
 
 	while (n--) {
 		assert(arg);
@@ -446,7 +446,7 @@ outargstring(arg)
 	struct argument *arg;
 {
 	char buff[1000];
-	register char *p;
+	char *p;
 
 	bts2str(arg->CAS_VALUE, arg->CAS_LEN, buff);
 	for (p = &buff[0]; *p; p++) {
@@ -542,8 +542,8 @@ fill_outcall(ex, used)
 	struct expr *ex;
 	int used;
 {
-	register struct idf *idf = ex->OP_LEFT->VL_IDF;
-	register struct def *def = idf->id_def;
+	struct idf *idf = ex->OP_LEFT->VL_IDF;
+	struct def *def = idf->id_def;
 
 #ifdef	IMPLICIT
 	if (def->df_sc == IMPLICIT && !idf->id_def->df_used) {
@@ -577,7 +577,7 @@ static
 add_expr_arg(e)
 	struct expr *e;
 {
-	register struct argument *arg;
+	struct argument *arg;
 
 	arg = new_argument();
 	arg->ar_type = e->ex_type;
@@ -590,7 +590,7 @@ add_expr_arg(e)
 		&&	e->VL_CLASS == Label
 		) {
 		/* it may be a string; let's look it up */
-		register struct string_cst *sc = str_list;
+		struct string_cst *sc = str_list;
 
 		while (sc) {
 			if (sc->sc_dlb == e->VL_LBL)

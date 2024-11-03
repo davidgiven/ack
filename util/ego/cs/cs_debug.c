@@ -55,7 +55,7 @@ void SHOWOCCUR(occur_p ocp)
 {
 	/* Shows all instructions in an occurrence. */
 
-	register line_p lnp, next;
+	line_p lnp, next;
 
 	if (verbose_flag)
 	{
@@ -82,7 +82,7 @@ void SHOWAVAIL(avail_p avp)
 
 void OUTAVAILS(void)
 {
-	register avail_p ravp;
+	avail_p ravp;
 
 	fprintf(stderr, "AVAILABLE EXPRESSIONS\n");
 
@@ -112,12 +112,12 @@ static char* enkinds[] = { "constant",
 
 void OUTENTITIES(void)
 {
-	register Lindex i;
+	Lindex i;
 
 	fprintf(stderr, "ENTITIES\n");
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
-		register entity_p rep = en_elem(i);
+		entity_p rep = en_elem(i);
 
 		fprintf(stderr, "%s,", enkinds[rep->en_kind]);
 		fprintf(stderr, "size %ld,", rep->en_size);

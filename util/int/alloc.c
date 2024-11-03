@@ -15,7 +15,7 @@
  */
 char* Malloc(size sz, char* descr)
 {
-	register char* new = malloc((unsigned int)(sz));
+	char* new = malloc((unsigned int)(sz));
 
 	if (new == (char*)0 && descr != (char*)0)
 		fatal("Cannot allocate %s", descr);
@@ -23,9 +23,9 @@ char* Malloc(size sz, char* descr)
 #ifdef DB_MALLOC /* from debug.h */
 	/* fill area with recognizable garbage */
 	{
-		register char* p = new;
-		register size i = sz;
-		register char ch = 0252;
+		char* p = new;
+		size i = sz;
+		char ch = 0252;
 
 		if (p)
 		{
@@ -48,7 +48,7 @@ char* Malloc(size sz, char* descr)
  */
 char* Realloc(char* old, size sz, char* descr)
 {
-	register char* new = realloc(old, (unsigned int)(sz));
+	char* new = realloc(old, (unsigned int)(sz));
 
 	if (new == (char*)0)
 		fatal("Cannot reallocate %s", descr);

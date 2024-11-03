@@ -80,8 +80,8 @@ char *ident() {
 	*/
 
 	static char array[200] ;
-	register int c ;
-	register char *cc ;
+	int c ;
+	char *cc ;
 
 	do {
 		c=readchar() ;

@@ -246,7 +246,7 @@ static void allocs_of_item(
     short* dloopcnt, /* dynamic arrays */
     alloc_p* alloc_list_p)
 {
-	register Lindex li;
+	Lindex li;
 	loop_p lp;
 	bblock_p header, ini;
 	short susecount, dusecount;
@@ -308,7 +308,7 @@ static void allocs_of_item(
 alloc_p build_alloc_list(proc_p p, short nrloops, item_p itemlist)
 {
 	short *sloopcnt, *dloopcnt; /* dynamic arrays */
-	register item_p item;
+	item_p item;
 	alloc_p alloc_list = (alloc_p)0;
 
 	sloopcnt = (short*)newtable(nrloops);
@@ -335,7 +335,7 @@ void build_rivals_graph(alloc_p alloclist)
 	 * allocation.
 	 */
 
-	register alloc_p alloc, x;
+	alloc_p alloc, x;
 
 	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
 	{

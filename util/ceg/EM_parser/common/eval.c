@@ -9,7 +9,7 @@ char *str;
  * parameter-names, converted where necessary.
  */
 {
-	register char c;
+	char c;
 	int i;
 
 	for ( c = *str++; c != '\0'; c= *str++)

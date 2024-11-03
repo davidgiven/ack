@@ -10,6 +10,6 @@
 
 struct type;
 
-void conversion(register struct type *from_type, register struct type *to_type);
+void conversion(struct type *from_type, struct type *to_type);
 
 #endif /* CONVERSION_H_ */

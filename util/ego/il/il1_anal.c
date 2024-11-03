@@ -46,7 +46,7 @@ void apriori(proc_p proctab)
 	 * of the call list.
 	 */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = proctab; p != (proc_p)0; p = p->p_next)
 	{
@@ -100,7 +100,7 @@ static void anal_instr(proc_p p, bblock_p b, FILE* cf)
 	 * the CAL instructions.
 	 */
 
-	register line_p l;
+	line_p l;
 
 	for (l = b->b_start; l != (line_p)0; l = l->l_next)
 	{
@@ -155,7 +155,7 @@ void anal_proc(proc_p p, FILE* cf, FILE* ccf)
 	 * its instructions.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	bool fallthrough = TRUE;
 
 	cchead = (calcnt_p)0;

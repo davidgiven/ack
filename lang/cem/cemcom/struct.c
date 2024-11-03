@@ -54,9 +54,9 @@ int lcm();
 */
 
 add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
-	register struct type *stp;	/* type of the structure */
+	struct type *stp;	/* type of the structure */
 	struct type *tp;		/* type of the selector */
-	register struct idf *idf;	/* idf of the selector */
+	struct idf *idf;	/* idf of the selector */
 	struct sdef ***sdefpp;	/* address of hook to selector definition */
 	arith *szp;		/* pointer to struct size upto here */
 	struct field *fd;
@@ -74,7 +74,7 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 
 	struct tag *tg = stp->tp_idf->id_struct;	/* or union */
 	struct sdef *sdef = idf->id_sdef;
-	register struct sdef *newsdef;
+	struct sdef *newsdef;
 	int lvl = tg->tg_level;
 	
 #ifndef NOROPTION
@@ -167,13 +167,13 @@ add_sel(stp, tp, idf, sdefpp, szp, fd)	/* this is horrible */
 }
 
 check_selector(idf, stp)
-	register struct idf *idf;
+	struct idf *idf;
 	struct type *stp;	/* the type of the struct */
 {
 	/*	checks if idf occurs already as a selector in
 		struct or union *stp.
 	*/
-	register struct sdef *sdef = stp->tp_sdef;
+	struct sdef *sdef = stp->tp_sdef;
 	
 	while (sdef)	{
 		if (sdef->sd_idf == idf)
@@ -185,7 +185,7 @@ check_selector(idf, stp)
 char *symbol2str();
 
 declare_struct(fund, idf, tpp)
-	register struct idf *idf;
+	struct idf *idf;
 	struct type **tpp;
 {
 	/*	A struct, union or enum (depending on fund) with tag (!)
@@ -194,8 +194,8 @@ declare_struct(fund, idf, tpp)
 		The idf may be missing (i.e. idf == 0), in which case an
 		anonymous struct etc. is defined.
 	*/
-	register struct tag **tgp;
-	register struct tag *tg;
+	struct tag **tgp;
+	struct tag *tg;
 
 	if (!idf)
 		idf = gen_idf();
@@ -265,7 +265,7 @@ declare_struct(fund, idf, tpp)
 }
 
 apply_struct(fund, idf, tpp)
-	register struct idf *idf;
+	struct idf *idf;
 	struct type **tpp;
 {
 	/*	The occurrence of a struct, union or enum (depending on
@@ -273,7 +273,7 @@ apply_struct(fund, idf, tpp)
 		declared before. Its type (complete or incomplete) is
 		returned in *tpp.
 	*/
-	register struct tag **tgp;
+	struct tag **tgp;
 
 	tgp = (is_struct_or_union(fund) ? &idf->id_struct : &idf->id_enum);
 
@@ -285,7 +285,7 @@ apply_struct(fund, idf, tpp)
 
 struct sdef *
 idf2sdef(idf, tp)
-	register struct idf *idf;
+	struct idf *idf;
 	struct type *tp;
 {
 	/*	The identifier idf is identified as a selector, preferably
@@ -294,7 +294,7 @@ idf2sdef(idf, tp)
 		If the attempt fails, a selector of type error_type is
 		created.
 	*/
-	register struct sdef **sdefp = &idf->id_sdef, *sdef;
+	struct sdef **sdefp = &idf->id_sdef, *sdef;
 	
 	/* Follow chain from idf, to meet tp. */
 	while ((sdef = *sdefp))	{
@@ -329,7 +329,7 @@ idf2sdef(idf, tp)
 
 int
 uniq_selector(idf_sdef)
-	register struct sdef *idf_sdef;
+	struct sdef *idf_sdef;
 {
 	/*	Returns true if idf_sdef (which is guaranteed to exist)
 		is unique for this level, i.e there is no other selector
@@ -339,7 +339,7 @@ uniq_selector(idf_sdef)
 		case!
 	*/
 	
-	register struct sdef *sdef = idf_sdef->next;
+	struct sdef *sdef = idf_sdef->next;
 	
 	while (sdef && sdef->sd_level == idf_sdef->sd_level)	{
 		if (	sdef->sd_type != idf_sdef->sd_type
@@ -356,10 +356,10 @@ uniq_selector(idf_sdef)
 arith
 add_field(szp, fd, fdtpp, idf, stp)
 	arith *szp;			/* size of struct upto here	*/
-	register struct field *fd;	/* bitfield, containing width	*/
-	register struct type **fdtpp;	/* type of selector		*/
+	struct field *fd;	/* bitfield, containing width	*/
+	struct type **fdtpp;	/* type of selector		*/
 	struct idf *idf;		/* name of selector		*/
-	register struct type *stp;	/* current struct descriptor	*/
+	struct type *stp;	/* current struct descriptor	*/
 {
 	/*	The address where this selector is put is returned. If the
 		selector with specified width does not fit in the word, or
@@ -468,7 +468,7 @@ add_field(szp, fd, fdtpp, idf, stp)
 /* some utilities */
 int
 is_struct_or_union(fund)
-	register int fund;
+	int fund;
 {
 	return fund == STRUCT || fund == UNION;
 }
@@ -477,9 +477,9 @@ is_struct_or_union(fund)
  */
 int
 gcd(m, n)
-	register int m, n;
+	int m, n;
 {
-	register int r;
+	int r;
 
 	while (n)	{
 		r = m % n;
@@ -493,7 +493,7 @@ gcd(m, n)
  */
 int
 lcm(m, n)
-	register int m, n;
+	int m, n;
 {
 	return m * (n / gcd(m, n));
 }

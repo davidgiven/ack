@@ -7,10 +7,10 @@
 
 #if ACKCONF_WANT_STDIO
 
-char* fgets(char* s, register int n, register FILE* stream)
+char* fgets(char* s, int n, FILE* stream)
 {
-	register int ch;
-	register char* ptr;
+	int ch;
+	char* ptr;
 
 	ptr = s;
 	while (--n > 0 && (ch = getc(stream)) != EOF)

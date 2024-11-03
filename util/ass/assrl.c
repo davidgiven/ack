@@ -36,7 +36,7 @@ relc_t * text_reloc(glob_t *glosym, FOFFSET off, int typ)
 	 *       into the one in xglobs[] later.
 	 */
 
-	register relc_t *nxtextreloc;
+	relc_t *nxtextreloc;
 
 	nxtextreloc = rlp_cast getarea(sizeof *nxtextreloc);
 	if (!f_text)
@@ -62,7 +62,7 @@ relc_t * data_reloc(char *arg ,FOFFSET off, int typ)
 	 * Same as above.
 	 */
 
-	register relc_t *nxdatareloc;
+	relc_t *nxdatareloc;
 
 	nxdatareloc = rlp_cast getarea(sizeof *nxdatareloc);
 	if (!f_data)
@@ -83,7 +83,7 @@ relc_t * data_reloc(char *arg ,FOFFSET off, int typ)
 
 void copyout(void)
 {
-	register int i;
+	int i;
 	int remtext;
 
 	/*
@@ -168,7 +168,7 @@ static void dataprocess(FILE *f1, FILE *outf)
 {
 	relc_t datareloc;
 	FOFFSET i;
-	register int ieof;
+	int ieof;
 
 	rewind(rdfile);
 	ieof = getblk(rdfile, (char *) (&datareloc.r_off),
@@ -217,9 +217,9 @@ static void textprocess(FILE *f1, FILE *outf)
 	FOFFSET i;
 	FILE *otfile;
 	int insl;
-	register int ieof;
+	int ieof;
 	char *op_curr;
-	register FOFFSET keep;
+	FOFFSET keep;
 
 	rewind(rtfile);
 	keep = textoff;
@@ -275,8 +275,8 @@ static void textprocess(FILE *f1, FILE *outf)
 
 void upd_reloc(void)
 {
-	register relc_t *p;
-	register glob_t *gbp;
+	relc_t *p;
+	glob_t *gbp;
 
 	/*
 	 * Change reloc-tables such that for every pointer into mglobs

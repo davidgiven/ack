@@ -66,12 +66,12 @@ void pushrsb(int rsbcode)
 int poprsb(int rtt) /* set to 1 if working for RTT */
 {
 	/* pops the RSB and returns the rsbcode, for further testing */
-	register int rsbcode;
+	int rsbcode;
 
 #ifdef LOGGING
 	{
 		/* check SP */
-		register ptr properSP = LB - proctab[PI].pr_nloc;
+		ptr properSP = LB - proctab[PI].pr_nloc;
 
 		if (SP < properSP)
 			warning(rtt ? WRTTSTL : WRETSTL);

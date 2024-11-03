@@ -59,7 +59,7 @@ struct vars {
 static struct vars *v_first ;
 
 static struct vars *newvar(char *name) {
-	register struct vars *new ;
+	struct vars *new ;
 
 	for ( new=v_first ; new ; new= new->v_next ) {
 		if ( strcmp(name,new->v_name)==0 ) {
@@ -78,7 +78,7 @@ static struct vars *newvar(char *name) {
 }
 
 void setsvar(char *name, char *str) {
-	register struct vars *new ;
+	struct vars *new ;
 
 	new= newvar(name);
 #ifdef DEBUG
@@ -89,7 +89,7 @@ void setsvar(char *name, char *str) {
 }
 
 void setpvar(char *name, char *(*rout)(void)) {
-	register struct vars *new ;
+	struct vars *new ;
 
 	new= newvar(name);
 #ifdef DEBUG
@@ -100,7 +100,7 @@ void setpvar(char *name, char *(*rout)(void)) {
 }
 
 char *getvar(const char *name) {
-	register struct vars *scan ;
+	struct vars *scan ;
 
 	for ( scan=v_first ; scan ; scan= scan->v_next ) {
 		if ( strcmp(name,scan->v_name)==0 ) {

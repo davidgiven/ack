@@ -81,9 +81,9 @@ static int	max_rules;
 /* Here are defined : */
 static void newnorder(int index);
 static void newtorder(int index);
-static void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
-static void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
-static p_gram copyrule(register p_gram p,int length);
+static void mkalt(p_gram prod, int condition,int lc, p_gram res); 
+static void mkterm(p_gram prod, int flags,int lc, p_gram result); 
+static p_gram copyrule(p_gram p,int length);
 /* and of course LLparse() */
 
 static void newnorder(int index) {
@@ -127,10 +127,10 @@ static void LL5_productions(
 p_gram *p) ;
 static void LL6_simpleproduction(
 # line 330 "LLgen.g"
-p_gram *p ,register int *conflres) ;
+p_gram *p , int *conflres) ;
 static void LL7_elem(
 # line 478 "LLgen.g"
-register p_gram pres) ;
+p_gram pres) ;
 static void LL8_repeats(
 # line 600 "LLgen.g"
 int *kind ,int *cnt) ;
@@ -186,7 +186,7 @@ LL1_def(
 void
 ) {
 # line 106 "LLgen.g"
-	register string p; 
+	string p; 
 switch(LLcsymb) {
 case /*  C_IDENT  */ 2 : ;
 LL2_rule();
@@ -237,8 +237,8 @@ LL_NOSCANDONE(C_IDENT);
 				 * Put the declaration in the list
 				 * of start symbols
 				 */
-				register p_gram temp;
-				register p_start ff;
+				p_gram temp;
+				p_start ff;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_start) alloc(sizeof(t_start));
@@ -335,9 +335,9 @@ LL2_rule(
 void
 ) {
 # line 198 "LLgen.g"
-	register p_nont p;
+	p_nont p;
 				p_gram rr;
-				register p_gram temp;
+				p_gram temp;
 			
 LLtincr(6);
 LLtincr(7);
@@ -540,12 +540,12 @@ goto L_3;
 # line 304 "LLgen.g"
 
 
-static void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
+static void mkalt(p_gram prod, int condition,int lc, p_gram res) 
 {
 	/*
 	 * Create an alternation and initialise it.
 	 */
-	register p_link		l;
+	p_link		l;
 	static p_link list;
 	static int cnt;
 
@@ -566,7 +566,7 @@ static
 void
 LL6_simpleproduction(
 # line 330 "LLgen.g"
-p_gram *p ,register int *conflres)  
+p_gram *p , int *conflres)  
 {
 # line 331 "LLgen.g"
 	t_gram		elem;
@@ -766,7 +766,7 @@ L_10: ;
 LLsdecr(4);
 # line 382 "LLgen.g"
 { if (g_gettype(&elem) == TERM) {
-				register p_term q = g_getterm(&elem);
+				p_term q = g_getterm(&elem);
 
 				if (! (q->t_flags & RESOLVER) &&
 				    g_gettype(q->t_rule) != ALTERNATION &&
@@ -798,7 +798,7 @@ goto L_10;
 }
 # line 409 "LLgen.g"
 {	if (!termdeleted && g_gettype(&elem) == TERM) {
-					register p_term q;
+					p_term q;
 
 					q = g_getterm(&elem);
 					r_setkind(q,kind);
@@ -850,13 +850,13 @@ break;
 # line 452 "LLgen.g"
 
 
-static void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
+static void mkterm(p_gram prod, int flags,int lc, p_gram result) 
 {
 	/*
 	 * Create a term, initialise it and return
 	 * a grammar element containing it
 	 */
-	register p_term		q;
+	p_term		q;
 
 	if (! t_cnt) {
 		t_cnt = 50;
@@ -876,10 +876,10 @@ static
 void
 LL7_elem(
 # line 478 "LLgen.g"
-register p_gram pres)  
+p_gram pres)  
 {
 # line 479 "LLgen.g"
-	register int	t = 0;
+	int	t = 0;
 		p_gram		p1;
 		int		ln;
 		p_gram		pe;
@@ -1101,8 +1101,8 @@ LL_NOSCANDONE(C_IDENT);
 # line 553 "LLgen.g"
 {
 #ifdef NON_CORRECTING
-				register p_gram temp;
-				register p_start subp;
+				p_gram temp;
+				p_start subp;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				subp = (p_start) alloc (sizeof(t_start));
@@ -1130,8 +1130,8 @@ LL_NOSCANDONE(C_IDENT);
 # line 569 "LLgen.g"
 {
 #ifdef NON_CORRECTING
-				register p_gram temp;
-				register p_start ff;
+				p_gram temp;
+				p_start ff;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 
@@ -1266,7 +1266,7 @@ LL4_firsts(
 void
 ) {
 # line 626 "LLgen.g"
-	register string p; 
+	string p; 
 LLtincr(23);
 LLtincr(2);
 LLtincr(24);
@@ -1286,7 +1286,7 @@ LL_NOSCANDONE(';');
 				 * to this input file
 				 */
 				p_gram temp;
-				register p_first ff;
+				p_first ff;
 
 				temp = search(NONTERM,lextoken.t_string,BOTH);
 				ff = (p_first) alloc(sizeof(t_first));
@@ -1300,13 +1300,13 @@ LL_NOSCANDONE(';');
 # line 645 "LLgen.g"
 
 
-static p_gram copyrule(register p_gram p,int length)
+static p_gram copyrule(p_gram p,int length)
 {
 	/*
 	 * Returns a pointer to a grammar rule that was created in
 	 * p. The space pointed to by p can now be reused
 	 */
-	register p_gram t;
+	p_gram t;
 	p_gram rule;
 
 	t = (p_gram) alloc(length * sizeof(t_gram));

@@ -31,14 +31,14 @@ extern int	pass_1;
 extern char	options[];
 #endif
 
-struct def *lookup(register struct idf *id, struct scope *scope, int import, int flags)
+struct def *lookup(struct idf *id, struct scope *scope, int import, int flags)
 {
 	/*	Look up a definition of an identifier in scope "scope".
 		Make the "def" list self-organizing.
 		Return a pointer to its "def" structure if it exists,
 		otherwise return 0.
 	*/
-	register struct def *df, *df1;
+	struct def *df, *df1;
 
 	/* Look in the chain of definitions of this "id" for one with scope
 	   "scope".
@@ -73,13 +73,13 @@ struct def *lookup(register struct idf *id, struct scope *scope, int import, int
 	return df;
 }
 
-struct def *lookfor(register struct node *id, register struct scopelist *vis, int message, int flags)
+struct def *lookfor(struct node *id, struct scopelist *vis, int message, int flags)
 {
 	/*	Look for an identifier in the visibility range started by "vis".
 		If it is not defined create a dummy definition and,
 		if message is set, give an error message
 	*/
-	register struct scopelist *sc;
+	struct scopelist *sc;
 	struct scopelist *sc1 = 0;
 	struct def *df;
 

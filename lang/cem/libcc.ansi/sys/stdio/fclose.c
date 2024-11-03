@@ -11,7 +11,7 @@
 
 int fclose(FILE* fp)
 {
-	register int i, retval = 0;
+	int i, retval = 0;
 
 	for (i = 0; i < FOPEN_MAX; i++)
 		if (fp == __iotab[i])

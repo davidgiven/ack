@@ -46,7 +46,7 @@ line_p scan_to_cal(line_p lines, short n)
 {
 	/* Find the n-th CAL instruction */
 
-	register line_p l;
+	line_p l;
 
 	for (l = lines; l != (line_p)0; l = l->l_next)
 	{

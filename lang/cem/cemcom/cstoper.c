@@ -22,14 +22,14 @@ arith max_int;		/* maximum integer on target machine	*/
 arith max_unsigned;	/* maximum unsigned on target machine	*/
 
 cstbin(expp, oper, expr)
-	register struct expr **expp, *expr;
+	struct expr **expp, *expr;
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in
 		*expp.
 	*/
-	register arith o1 = (*expp)->VL_VALUE;
-	register arith o2 = expr->VL_VALUE;
+	arith o1 = (*expp)->VL_VALUE;
+	arith o2 = expr->VL_VALUE;
 	int uns = (*expp)->ex_type->tp_unsigned;
 
 	ASSERT(is_ld_cst(*expp) && is_cp_cst(expr));
@@ -183,12 +183,12 @@ cstbin(expp, oper, expr)
 }
 
 cut_size(expr)
-	register struct expr *expr;
+	struct expr *expr;
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	register arith o1 = expr->VL_VALUE;
+	arith o1 = expr->VL_VALUE;
 	int uns = expr->ex_type->tp_unsigned;
 	int size = (int) expr->ex_type->tp_size;
 
@@ -219,8 +219,8 @@ cut_size(expr)
 
 init_cst()
 {
-	register int i = 0;
-	register arith bt = (arith)0;
+	int i = 0;
+	arith bt = (arith)0;
 
 	while (!(bt < 0))	{
 		bt = (bt << 8) + 0377, i++;

@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strcpy(char* ret, register const char* s2)
+char* strcpy(char* ret, const char* s2)
 {
-	register char* s1 = ret;
+	char* s1 = ret;
 
 	while (*s1++ = *s2++)
 		/* EMPTY */;

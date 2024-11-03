@@ -15,7 +15,7 @@
 #include	"type.h"
 #include	"lookup.h"
 
-void remove_def(register struct def *df)
+void remove_def(struct def *df)
 {
 	struct idf *id= df->df_idf;
 	struct def *df1 = id->id_def;
@@ -28,10 +28,10 @@ void remove_def(register struct def *df)
 	free_def(df);
 }
 
-struct def *lookup(register struct idf *id, struct scope *scope, long inuse)
+struct def *lookup(struct idf *id, struct scope *scope, long inuse)
 {
 
-	register struct def *df, *df1;
+	struct def *df, *df1;
 
 	/* Look in the chain of definitions of this "id" for one with scope
 	   "scope".
@@ -60,11 +60,11 @@ struct def *lookup(register struct idf *id, struct scope *scope, long inuse)
 }
 
 
-struct def *lookfor(register struct node *id, struct scopelist *vis, int give_error)
+struct def *lookfor(struct node *id, struct scopelist *vis, int give_error)
 {
 
-	register struct def *df, *tmp_df;
-	register struct scopelist *sc = vis;
+	struct def *df, *tmp_df;
+	struct scopelist *sc = vis;
 
 	while( sc )	{
 		df = lookup(id->nd_IDF, sc->sc_scope, D_INUSE);

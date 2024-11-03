@@ -118,11 +118,11 @@ static line_p doread_line(proc_p* p_out)
 {
 	/* read a line, and check pseudos for procedure addresses */
 
-	register line_p lnp = read_line(p_out);
+	line_p lnp = read_line(p_out);
 
 	if (lnp && TYPE(lnp) == OPLIST && INSTR(lnp) != ps_mes)
 	{
-		register arg_p arg = ARG(lnp);
+		arg_p arg = ARG(lnp);
 
 		while (arg)
 		{
@@ -359,8 +359,8 @@ static void cf_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures of p */
 
-	register bblock_p b;
-	register Lindex pi;
+	bblock_p b;
+	Lindex pi;
 	loop_p lp;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
@@ -472,7 +472,7 @@ static void trans_clos(proc_p head)
 	 * variable information.
 	 */
 
-	register proc_p p, q;
+	proc_p p, q;
 	Cindex i;
 	bool changes = TRUE;
 

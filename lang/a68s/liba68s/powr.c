@@ -4,7 +4,7 @@ double POWR(statlink, pow, num)
   double num ;
   {
     int p ;
-    register double n, r;
+    double n, r;
     if (pow < 0) {
       p = -pow;
       n = 1.0/num;

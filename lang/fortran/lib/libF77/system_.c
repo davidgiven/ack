@@ -4,11 +4,11 @@
 
  integer
 system_(s, n)
-register char *s;
+char *s;
 long int n;
 {
 char buff[1000];
-register char *bp, *blast;
+char *bp, *blast;
 
 blast = buff + (n < 1000 ? n : 1000);
 

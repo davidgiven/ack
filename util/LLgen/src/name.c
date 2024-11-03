@@ -57,7 +57,7 @@ void name_init(void)
 
 static p_entry newentry(string str, p_entry next)
 {
-	register p_entry p;
+	p_entry p;
 
 	if ((p = entries) == maxentries)
 	{
@@ -79,7 +79,7 @@ static p_entry newentry(string str, p_entry next)
  */
 string store(string s)
 {
-	register string s1, t, u;
+	string s1, t, u;
 
 	u = name;
 	t = s;
@@ -104,8 +104,8 @@ string store(string s)
  */
 static int hash(string str)
 {
-	register int i;
-	register string l;
+	int i;
+	string l;
 
 	l = str;
 	i = 0;
@@ -120,11 +120,11 @@ static int hash(string str)
  * It has type UNKNOWN, LITERAL, TERMINAL or NONTERM.
  * option can be ENTERING or BOTH (also looking).
  */
-p_gram search(int type, register string str, int option)
+p_gram search(int type, string str, int option)
 {
-	register int val = 0;
-	register p_entry p;
-	register int i;
+	int val = 0;
+	p_entry p;
+	int i;
 	int type1;
 
 	i = hash(str);
@@ -165,7 +165,7 @@ p_gram search(int type, register string str, int option)
 	h_root[i] = p;
 	if (type == TERMINAL || type == LITERAL)
 	{
-		register p_token pt;
+		p_token pt;
 
 		pt = (p_token) new_mem(&token_info);
 		tokens = (p_token) token_info.i_ptr;
@@ -248,7 +248,7 @@ p_gram search(int type, register string str, int option)
 	 * UNKNOWN and not yet declared means : NONTERM
 	 */
 	{
-		register p_nont q;
+		p_nont q;
 
 		q = (p_nont) new_mem(&nont_info);
 		nonterms = (p_nont) nont_info.i_ptr;

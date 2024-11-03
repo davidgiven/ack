@@ -28,9 +28,9 @@ void DoINC(void)
 }
 
 /** INL l: Increment local or parameter (*) */
-void DoINL(register long l)
+void DoINL(long l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@Z6 DoINL(%ld)", l));
 	spoilFRA();
@@ -39,10 +39,10 @@ void DoINL(register long l)
 }
 
 /** INE g: Increment external (*) */
-void DoINE(register long arg)
+void DoINE(long arg)
 {
 
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@Z6 DoINE(%lu)", p));
 	spoilFRA();
@@ -60,10 +60,10 @@ void DoDEC(void)
 }
 
 /** DEL l: Decrement local or parameter (*) */
-void DoDEL(register long l)
+void DoDEL(long l)
 {
 
-	register ptr p;
+	ptr p;
 
 	LOG(("@Z6 DoDEL(%ld)", l));
 	spoilFRA();
@@ -73,10 +73,10 @@ void DoDEL(register long l)
 }
 
 /** DEE g: Decrement external (*) */
-void DoDEE(register long arg)
+void DoDEE(long arg)
 {
 
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@Z6 DoDEE(%lu)", p));
 	spoilFRA();
@@ -85,7 +85,7 @@ void DoDEE(register long arg)
 }
 
 /** ZRL l: Zero local or parameter */
-void DoZRL(register long l)
+void DoZRL(long l)
 {
 
 	LOG(("@Z6 DoZRL(%ld)", l));
@@ -95,10 +95,10 @@ void DoZRL(register long l)
 }
 
 /** ZRE g: Zero external */
-void DoZRE(register long arg)
+void DoZRE(long arg)
 {
 
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@Z6 DoZRE(%lu)", p));
 	spoilFRA();
@@ -106,7 +106,7 @@ void DoZRE(register long arg)
 }
 
 /** ZRF w: Load a floating zero of size w */
-void DoZRF(register size l)
+void DoZRF(size l)
 {
 
 #ifndef NOFLOAT
@@ -119,7 +119,7 @@ void DoZRF(register size l)
 #endif /* NOFLOAT */
 }
 /** ZER w: Load w zero bytes */
-void DoZER(register size l)
+void DoZER(size l)
 {
 	LOG(("@Z6 DoZER(%ld)", l));
 	spoilFRA();

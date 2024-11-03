@@ -27,9 +27,9 @@
 extern unsigned cc1,cc2,cc3,cc4;
 
 
-int match(register token_p tp, register set_p tep, int optexp)
+int match(token_p tp, set_p tep, int optexp)
 {
-	register int bitno;
+	int bitno;
 	token_p ct;
 	result_t result;
 
@@ -54,9 +54,9 @@ int match(register token_p tp, register set_p tep, int optexp)
 	return(result.e_v.e_con);
 }
 
-void instance(int instno,register token_p token)
+void instance(int instno, token_p token)
 {
-	register inst_p inp;
+	inst_p inp;
 	int i;
 	token_p tp;
 	struct reginfo *rp;
@@ -134,10 +134,10 @@ void instance(int instno,register token_p token)
 	}
 }
 
-void cinstance(int instno,register token_p token,
-		 register token_p tp,int regno)
+void cinstance(int instno, token_p token,
+		 token_p tp,int regno)
 {
-	register inst_p inp;
+	inst_p inp;
 	int i;
 	struct reginfo *rp;
 	result_t result;
@@ -205,8 +205,8 @@ void cinstance(int instno,register token_p token,
 
 int eqtoken(token_p tp1,token_p tp2)
 {
-	register int i;
-	register tkdef_p tdp;
+	int i;
+	tkdef_p tdp;
 
 	if (tp1->t_token!=tp2->t_token)
 		return(0);
@@ -239,9 +239,9 @@ int eqtoken(token_p tp1,token_p tp2)
 }
 
 int distance(int cindex) {
-	register byte *bp;
-	register int i;
-	register token_p tp;
+	byte *bp;
+	int i;
+	token_p tp;
 	int tokexp,tpl;
 	int expsize,toksize,exact;
 	int xsekt=0;
@@ -305,7 +305,7 @@ int ssize(int tokexpno) {
 	return(machsets[tokexpno].set_size);
 }
 
-int tsize(register token_p tp)
+int tsize(token_p tp)
 {
 	if (tp->t_token==-1)
 		return(machregs[tp->t_att[0].ar].r_size);
@@ -344,9 +344,9 @@ int instsize(int tinstno,token_p tp) {
 }
 #endif /* MAXSPLIT */
 
-void tref(register token_p tp,int amount)  {
-	register int i;
-	register tkdef_p tdp;
+void tref(token_p tp,int amount)  {
+	int i;
+	tkdef_p tdp;
 
 	if (tp->t_token==-1)
 		chrefcount(tp->t_att[0].ar,amount,FALSE);
@@ -366,7 +366,7 @@ int split(token_p tp,int *ip,int ply,int toplevel)
 	c2_p cp;
 	token_t savestack[MAXSAVE];
 	int ok;
-	register int i;
+	int i;
 	int diff;
 	token_p stp;
 	int tpl;
@@ -435,7 +435,7 @@ unsigned stackupto(token_p limit,int ply,int toplevel)
 	int nareg;	/* saved nareg */
 	int areg[MAXALLREG];
 	c1_p cp;
-	register token_p tp;
+	token_p tp;
 	unsigned totalcost=0;
 	struct reginfo *rp,**rpp;
 
@@ -487,10 +487,10 @@ unsigned stackupto(token_p limit,int ply,int toplevel)
 
 c3_p findcoerc(token_p tp,set_p tep)
 {
-	register c3_p cp;
+	c3_p cp;
 	token_t rtoken;
-	register int i;
-	register struct reginfo **rpp;
+	int i;
+	struct reginfo **rpp;
 
 	for (cp=c3coercs;cp< &c3coercs[NC3]; cp++) {
 		if (tp!=(token_p) 0) {

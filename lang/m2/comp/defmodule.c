@@ -43,9 +43,9 @@ extern void DefModule(void); /* Lpars */
 
 struct idf* DefId;
 
-char* getwdir(register char *fn)
+char* getwdir(char *fn)
 {
-	register char* p;
+	char* p;
 
 	while ((p = strrchr(fn, '/')) && *(p + 1) == '\0')
 	{
@@ -90,14 +90,14 @@ static int GetFile(char *name)
 	return 1;
 }
 
-struct def* GetDefinitionModule(register struct idf* id, int incr)
+struct def* GetDefinitionModule(struct idf* id, int incr)
 {
 	/*	Return a pointer to the "def" structure of the definition
 		module indicated by "id".
 		We may have to read the definition module itself.
 		Also increment level by "incr".
 	*/
-	register struct def* df;
+	struct def* df;
 	static int level;
 	struct scopelist* vis;
 	char* fn = FileName;
@@ -140,7 +140,7 @@ struct def* GetDefinitionModule(register struct idf* id, int incr)
 					   to call its initialization routine
 					*/
 					static struct node* nd_end;
-					register struct node* n;
+					struct node* n;
 					extern struct node* Modules;
 
 					n = dot2leaf(Def);

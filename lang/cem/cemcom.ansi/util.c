@@ -50,7 +50,7 @@ void LocalInit(void)
 
 arith LocalSpace(arith sz, int al)
 {
-	register struct stack_level *stl = local_level;
+	struct stack_level *stl = local_level;
 
 	stl->sl_max_block = - align(sz - stl->sl_max_block, al);
 	return stl->sl_max_block;
@@ -61,7 +61,7 @@ static struct localvar *regs[TABSIZ];
 
 arith NewLocal(arith sz, int al, int regtype, int sc)
 {
-	register struct localvar *tmp = FreeTmps;
+	struct localvar *tmp = FreeTmps;
 	struct localvar *prev = 0;
 	int index;
 
@@ -97,7 +97,7 @@ arith NewLocal(arith sz, int al, int regtype, int sc)
 void FreeLocal(arith off)
 {
 	int index = (int) (off >> 2) & (TABSIZ - 1);
-	register struct localvar *tmp = regs[index];
+	struct localvar *tmp = regs[index];
 	struct localvar *prev = 0;
 
 	while (tmp && tmp->t_offset != off) {
@@ -114,8 +114,8 @@ void FreeLocal(arith off)
 
 void LocalFinish(void)
 {
-	register struct localvar *tmp, *tmp1;
-	register int i;
+	struct localvar *tmp, *tmp1;
+	int i;
 
 #ifdef USE_TMP
 	C_beginpart(loc_id);
@@ -160,7 +160,7 @@ void LocalFinish(void)
 
 void RegisterAccount(arith offset, arith size, int regtype, int sc)
 {
-	register struct localvar *p;
+	struct localvar *p;
 	int index;
 
 	if (regtype < 0) return;
@@ -178,7 +178,7 @@ void RegisterAccount(arith offset, arith size, int regtype, int sc)
 
 static struct localvar *find_reg(arith off)
 {
-	register struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
+	struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
 
 	while (p && p->t_offset != off) p = p->next;
 	return p;
@@ -186,7 +186,7 @@ static struct localvar *find_reg(arith off)
 
 void LoadLocal(arith off, arith sz)
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
@@ -205,7 +205,7 @@ void LoadLocal(arith off, arith sz)
 
 void StoreLocal(arith off, arith sz)
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
@@ -225,7 +225,7 @@ void StoreLocal(arith off, arith sz)
 #ifndef	LINT
 void AddrLocal(arith off)
 {
-	register struct localvar *p = find_reg(off);
+	struct localvar *p = find_reg(off);
 
 	if (p) p->t_regtype = -1;
 	C_lal(off);

@@ -23,9 +23,9 @@ static int globstep;
  */
 static int glohash(char *aname ,int size)
 {
-	register char *p;
-	register int i;
-	register int sum;
+	char *p;
+	int i;
+	int sum;
 
 	/*
 	 * Computes a hash-value from a string.
@@ -87,8 +87,8 @@ static void findext(glob_t *g)
  */
 glob_t *glolookup(char *name,int status,glob_t *table, int size)
 {
-	register glob_t *g;
-	register int rem,j;
+	glob_t *g;
+	int rem,j;
 	int new;
 
 
@@ -159,8 +159,8 @@ glob_t *glolookup(char *name,int status,glob_t *table, int size)
  */
 locl_t *loclookup(unsigned int an,int status)
 {
-	register locl_t *lbp,*l_lbp;
-	register unsigned int num;
+	locl_t *lbp,*l_lbp;
+	unsigned int num;
 	char hinum;
 
 	if ( !pstate.s_locl ) fatal("label outside procedure");
@@ -214,8 +214,8 @@ locl_t *loclookup(unsigned int an,int status)
  */
 proc_t *prolookup(char *name,int status)
 {
-	register proc_t *p= NULL;
-	register int pstat = 0;
+	proc_t *p= NULL;
+	int pstat = 0;
 
 
 	switch(status) {
@@ -296,8 +296,8 @@ proc_t *prolookup(char *name,int status)
  */
 proc_t *searchproc(char *name,proc_t *table,int size)
 {
-	register proc_t *p;
-	register int rem,j;
+	proc_t *p;
+	int rem,j;
 
 
 	rem = glohash(name,size);
@@ -327,7 +327,7 @@ proc_t *searchproc(char *name,proc_t *table,int size)
  */
 proc_t *enterproc(char *name,int status,proc_t *place)
 {
-	register proc_t *p;
+	proc_t *p;
 
 	p=place;
 	p->p_name = (char *) getarea((unsigned) (strlen(name) + 1));

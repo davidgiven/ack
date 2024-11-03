@@ -18,10 +18,10 @@ qsort(base, nel, width, compar)
 static
 qsort1(a1, a2, width)
 	char *a1, *a2;
-	register int width;
+	int width;
 {
-	register char *left, *right;
-	register char *lefteq, *righteq;
+	char *left, *right;
+	char *lefteq, *righteq;
 	int cmp;
 
 	for (;;) {
@@ -114,10 +114,10 @@ again:
 
 static
 qexchange(p, q, n)
-	register char *p, *q;
-	register int n;
+	char *p, *q;
+	int n;
 {
-	register int c;
+	int c;
 
 	while (n-- > 0) {
 		c = *p;
@@ -128,10 +128,10 @@ qexchange(p, q, n)
 
 static
 q3exchange(p, q, r, n)
-	register char *p, *q, *r;
-	register int n;
+	char *p, *q, *r;
+	int n;
 {
-	register int c;
+	int c;
 
 	while (n-- > 0) {
 		c = *p;

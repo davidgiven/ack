@@ -13,7 +13,7 @@
 void out_init(char *filename);
 void out_finish(void);
 void tstoutput(void);
-void gencode(register char *code);
+void gencode(char *code);
 void genexpr(int nodeno);
 void gennl(void);
 void prtoken(token_p tp);

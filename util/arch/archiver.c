@@ -268,7 +268,7 @@ void catch (int param)
 
 int main(int argc, char* argv[])
 {
-	register char* ptr;
+	char* ptr;
 	int needs_arg = 0;
 
 	progname = argv[0];
@@ -389,7 +389,7 @@ again:
 
 void get(int argc, char* argv[])
 {
-	register MEMBER* member;
+	MEMBER* member;
 	FILE* ar_f;
 	int i = 0;
 	char buffer[FILENAME_MAX];
@@ -454,7 +454,7 @@ void get(int argc, char* argv[])
 			else if (show_fl)
 			{
 				char buf[sizeof(member->ar_name) + 2];
-				register char *p = buf, *q = member->ar_name;
+				char *p = buf, *q = member->ar_name;
 
 				while (q <= &member->ar_name[sizeof(member->ar_name) - 1] && *q)
 				{
@@ -699,7 +699,7 @@ void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting)
 char* get_mode(int mode)
 {
 	static char mode_buf[11];
-	register int tmp = mode;
+	int tmp = mode;
 	int i;
 
 	mode_buf[9] = ' ';
@@ -737,7 +737,7 @@ void show(char* s, char* name)
 {
 	MEMBER x;
 	char buf[sizeof(x.ar_name) + 1];
-	register char *p = buf, *q = name;
+	char *p = buf, *q = name;
 
 	while (q <= &name[sizeof(x.ar_name) - 1] && *q)
 		*p++ = *q++;
@@ -754,9 +754,9 @@ void show(char* s, char* name)
  */
 void write_symdef(FILE* ar)
 {
-	register struct ranlib* ran;
-	register int i;
-	register long delta;
+	struct ranlib* ran;
+	int i;
+	long delta;
 	time_t time_value;
 	MEMBER arbuf;
 
@@ -838,8 +838,8 @@ void do_object(FILE* f, long size)
  */
 void do_names(struct outhead* headp)
 {
-	register char* strings = NULL;
-	register int nnames = headp->oh_nname;
+	char* strings = NULL;
+	int nnames = headp->oh_nname;
 #define NNAMES 100
 	struct outname namebuf[NNAMES];
 	long xxx = OFF_CHAR(*headp);
@@ -853,7 +853,7 @@ void do_names(struct outhead* headp)
 	while (nnames)
 	{
 		int i = nnames >= NNAMES ? NNAMES : nnames;
-		register struct outname* p = namebuf;
+		struct outname* p = namebuf;
 
 		nnames -= i;
 		rd_name(namebuf, i);
@@ -884,7 +884,7 @@ void do_names(struct outhead* headp)
 
 void enter_name(struct outname* namep)
 {
-	register char* cp;
+	char* cp;
 
 	if (tnum >= tabsz)
 	{

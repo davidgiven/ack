@@ -76,8 +76,8 @@ struct idf *hash_tab[HASHSIZE];
 void InsertId(char *id)
 {
 	int hash_val = EnHash(id);
-	register struct idf *idp = hash_tab[hash_val];
-	register struct idf *p = 0;
+	struct idf *idp = hash_tab[hash_val];
+	struct idf *p = 0;
 
 	while (idp && strcmp(idp->id_name, id)) {
 		p = idp;
@@ -115,8 +115,8 @@ char *Salloc(char *str)
 
 int EnHash(char *id)
 {
-	register unsigned hash_val = 0;
-	register int n = maxlen;
+	unsigned hash_val = 0;
+	int n = maxlen;
 
 	while (n-- && *id)
 		hash_val = 31 * hash_val + *id++;
@@ -126,8 +126,8 @@ int EnHash(char *id)
 
 void EndOfProgram(void)
 {
-	register struct idf *idp;
-	register int i;
+	struct idf *idp;
+	int i;
 
 	for (i = 0; i < HASHSIZE; i++) {
 		for (idp = hash_tab[i]; idp; idp = idp->id_next) {

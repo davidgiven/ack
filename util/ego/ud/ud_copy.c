@@ -105,7 +105,7 @@ static bool is_changed(line_p varl, line_p start, line_p stop)
 	 * is changed anywhere between 'start' and 'stop'
 	 */
 
-	register line_p l;
+	line_p l;
 	short v;
 	bool found;
 
@@ -130,8 +130,8 @@ static void gen_kill_copies(proc_p p)
 	 * of p.
 	 */
 
-	register line_p l;
-	register bblock_p b, n;
+	line_p l;
+	bblock_p b, n;
 	short v;
 	bool found;
 	short copycnt = 1, defcnt = 1;
@@ -236,7 +236,7 @@ static void solve_cin(proc_p p)
 	 * solve the equations.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	bool change;
 	cset newin, full_set;
 	short n;

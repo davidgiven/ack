@@ -17,5 +17,5 @@ extern	int LexSave;	/* last character read by GetChar		*/
  * If there is just a filename and no path, it returns DOT e.g the current
  * directory.
  */
-char *getwdir(register char *fn);
+char *getwdir(char *fn);
 

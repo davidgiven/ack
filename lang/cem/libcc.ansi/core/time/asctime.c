@@ -10,7 +10,7 @@
 #define DATE_STR "??? ??? ?? ??:??:?? ????\n"
 
 static char*
-two_digits(register char* pb, int i, int nospace)
+two_digits(char* pb, int i, int nospace)
 {
 	*pb = (i / 10) % 10 + '0';
 	if (!nospace && *pb == '0')
@@ -21,7 +21,7 @@ two_digits(register char* pb, int i, int nospace)
 }
 
 static char*
-four_digits(register char* pb, int i)
+four_digits(char* pb, int i)
 {
 	i %= 10000;
 	*pb++ = (i / 1000) + '0';
@@ -36,9 +36,9 @@ four_digits(register char* pb, int i)
 char* asctime(const struct tm* timeptr)
 {
 	static char buf[26];
-	register char* pb = buf;
-	register const char* ps;
-	register int n;
+	char* pb = buf;
+	const char* ps;
+	int n;
 
 	strcpy(pb, DATE_STR);
 	ps = _days[timeptr->tm_wday];

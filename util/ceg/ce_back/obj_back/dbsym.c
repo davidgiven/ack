@@ -8,7 +8,7 @@ char *s, *val;
 arith added;
 {
 	int i = find_sym(val, STORE_STRING);
-	register struct outname *p;
+	struct outname *p;
 
 	if (! s) s = "";
 	p = &symbol_table[find_sym(s, FORCE_DEF)];
@@ -21,7 +21,7 @@ B_symbcst(s, len, type, add, val)
 char *s;
 arith val;
 {
-	register struct outname *p;
+	struct outname *p;
 
 	if (! s) s = "";
 	p = &symbol_table[find_sym(s, FORCE_DEF)];
@@ -33,7 +33,7 @@ arith val;
 B_symd(s, len, type, add)
 char *s;
 {
-	register struct outname *p;
+	struct outname *p;
 
 	if (! s) s = "";
 	p = &symbol_table[find_sym(s, FORCE_DEF)];

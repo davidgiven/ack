@@ -190,7 +190,7 @@ _error(class, fmt, argv)
 		for a given line to MAXERR_LINE.
 	*/
 	unsigned int ln = 0;
-	register char *remark = 0;
+	char *remark = 0;
 	
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant

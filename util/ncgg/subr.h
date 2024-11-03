@@ -31,12 +31,12 @@ void n_sconst(char *ident, char *val);
 void regline(struct varinfo *rl, struct varinfo *pl, int rv);
 void check_reglap(void);
 void setallreg(struct varinfo *vi);
-void freevi(register struct varinfo *vip);
-int myatoi(register char *s);
+void freevi(struct varinfo *vip);
+int myatoi(char *s);
 char *mystrcpy(char *s);
-char *myalloc(register int n);
+char *myalloc(int n);
 int chkincl(int value, int lwb, int upb);
 int subset(short *sp1, short *sp2, int setsize);
-int vilength(register struct varinfo *vip);
+int vilength(struct varinfo *vip);
 
 #endif /* SUBR_H_ */

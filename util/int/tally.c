@@ -120,7 +120,7 @@ void out_tally(void)
 	while (*hook)
 	{
 		struct file_tally* ft = *hook;
-		register long i;
+		long i;
 
 		fprintf(tally_fp, "%s:\n", dt_fname(ft->ft_fil));
 		for (i = 0; i < ft->ft_limit; i++)

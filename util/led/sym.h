@@ -10,7 +10,7 @@ void entername(struct outname* name, int hashval);
 /** Initialize the symbol table. All indices should be noticeably invalid. */
 void init_symboltable(void);
 /** Return the hash value of the string represented in p. */
-int hash(register char* p);
+int hash(char* p);
 /** Return the index of `name' in the symbol table. */
 unsigned int indexof(struct outname* name);
 /*

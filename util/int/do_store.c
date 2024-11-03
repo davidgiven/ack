@@ -15,7 +15,7 @@
 #include "switch.h"
 
 /** STL l: Store local or parameter */
-void DoSTL(register long l)
+void DoSTL(long l)
 {
 	LOG(("@S6 DoSTL(%ld)", l));
 	spoilFRA();
@@ -24,9 +24,9 @@ void DoSTL(register long l)
 }
 
 /** STE g: Store external */
-void DoSTE(register unsigned long arg)
+void DoSTE(unsigned long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@S6 DoSTE(%lu)", p));
 	spoilFRA();
@@ -34,7 +34,7 @@ void DoSTE(register unsigned long arg)
 }
 
 /** SIL l: Store into word pointed to by l-th local or parameter */
-void DoSIL(register long l)
+void DoSIL(long l)
 {
 	LOG(("@S6 DoSIL(%ld)", l));
 	spoilFRA();
@@ -43,9 +43,9 @@ void DoSIL(register long l)
 }
 
 /** STF f: Store offsetted */
-void DoSTF(register long l)
+void DoSTF(long l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@S6 DoSTF(%ld)", l));
 	spoilFRA();
@@ -53,9 +53,9 @@ void DoSTF(register long l)
 }
 
 /** STI o: Store indirect o bytes (pop address, then data) */
-void DoSTI(register size l)
+void DoSTI(size l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@S6 DoSTI(%ld)", l));
 	spoilFRA();
@@ -63,9 +63,9 @@ void DoSTI(register size l)
 }
 
 /** STS w: Store indirect, w-byte integer on top of stack gives object size */
-void DoSTS(register size l)
+void DoSTS(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@S6 DoSTS(%ld)", l));
 	spoilFRA();
@@ -75,7 +75,7 @@ void DoSTS(register size l)
 }
 
 /** SDL l: Store double local or parameter */
-void DoSDL(register long l)
+void DoSDL(long l)
 {
 
 	LOG(("@S6 DoSDL(%ld)", l));
@@ -85,9 +85,9 @@ void DoSDL(register long l)
 }
 
 /** SDE g: Store double external */
-void DoSDE(register unsigned long arg)
+void DoSDE(unsigned long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@S6 DoSDE(%lu)", p));
 	spoilFRA();
@@ -95,9 +95,9 @@ void DoSDE(register unsigned long arg)
 }
 
 /** SDF f: Store double offsetted */
-void DoSDF(register long l)
+void DoSDF(long l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@S6 DoSDF(%ld)", l));
 	spoilFRA();

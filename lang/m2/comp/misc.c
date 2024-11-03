@@ -25,7 +25,7 @@
 #include	"node.h"
 #include	"error.h"
 
-void match_id(register struct idf *id1, struct idf *id2)
+void match_id(struct idf *id1, struct idf *id2)
 {
 	/*	Check that identifiers id1 and id2 are equal. If they
 		are not, check that we did'nt generate them in the

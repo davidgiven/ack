@@ -6,12 +6,12 @@
 
 #include <stdlib.h>
 
-void* bsearch(register const void* key, register const void* base,
-    register size_t nmemb, register size_t size,
+void* bsearch(const void* key, const void* base,
+    size_t nmemb, size_t size,
     int (*compar)(const void*, const void*))
 {
-	register const void* mid_point;
-	register int cmp;
+	const void* mid_point;
+	int cmp;
 
 	while (nmemb > 0)
 	{

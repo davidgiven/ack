@@ -8,4 +8,4 @@ struct tokenname	{	/*	Used for defining the name of a
 };
 
 
-void reserve(register struct tokenname *resv);
+void reserve(struct tokenname *resv);

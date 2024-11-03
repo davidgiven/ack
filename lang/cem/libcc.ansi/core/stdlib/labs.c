@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-long labs(register long l)
+long labs(long l)
 {
 	return l >= 0 ? l : -l;
 }

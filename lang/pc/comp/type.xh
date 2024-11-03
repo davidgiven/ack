@@ -200,26 +200,26 @@ struct type *construct_type(int fund, register struct type *tp);
 struct type *proc_type(struct paramlist *parameters, arith n_bytes_params);
 /* Constructs a new function type with the specified parameters and result type. */
 struct type *func_type(struct paramlist * parameters, arith n_bytes_params, struct type *resulttype);
-void chk_type_id(register struct type **ptp, register struct node *nd);
+void chk_type_id(struct type **ptp, register struct node *nd);
 /* Construct a new subrange type from a lower bound "lb" to an upper bound "ub" */
-struct type *subr_type(register struct node *lb, register struct node *ub);
+struct type *subr_type(struct node *lb, register struct node *ub);
 /* Return the bounds of the specified type "tp", assert if this is not a bounded type. */
-void getbounds(register struct type *tp, arith *plo, arith *phi);
+void getbounds(struct type *tp, arith *plo, arith *phi);
 /* Construct a new set type. */
-struct type *set_type(register struct type *tp, unsigned short packed);
+struct type *set_type(struct type *tp, unsigned short packed);
 /* Assign sizes to an array type, and check index type and generate array descriptor */
-void ArraySizes(register struct type *tp);
+void ArraySizes(struct type *tp);
 /* Check all forward declaration */
 void chk_forw_types(void);
 /* Insert selector of nested variant (sel1) in tagvalue-table of
    current selector (sel).
 */
-void TstCaseConstants(register struct node *nd, register struct selector *sel,
+void TstCaseConstants(struct node *nd, register struct selector *sel,
 		register struct selector *sel1);
 /* Return the "pos" aligned to "al". */
 arith align(arith pos, int al);
 /* Print type information for "tp". */
-void DumpType(register struct type *tp);
+void DumpType(struct type *tp);
 /* Least Common Multiple */
 int lcm(int m, int n);
 

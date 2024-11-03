@@ -44,12 +44,12 @@ static entity_p find_base(valnum vn)
 	 * accessed entity. Return the entity that holds this address
 	 * recursively.
 	 */
-	register Lindex i;
-	register avail_p ravp;
+	Lindex i;
+	avail_p ravp;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
-		register entity_p renp = en_elem(i);
+		entity_p renp = en_elem(i);
 
 		if (renp->en_vn == vn)
 		{
@@ -129,7 +129,7 @@ static void kill_external(obj_p obp, int indir)
 	 * proven taht they are not in the same data block, are killed in
 	 * both cases.
 	 */
-	register Lindex i;
+	Lindex i;
 
 	OUTTRACE("kill external", 0);
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
@@ -192,7 +192,7 @@ static void kill_local(entity_p enp, bool indir)
 {
 	/* This time a store is done into an ENLOCAL. */
 
-	register Lindex i;
+	Lindex i;
 
 	OUTTRACE("kill local", 0);
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
@@ -249,12 +249,12 @@ static void kill_sim(void)
 {
 	/* A store is done into the ENIGNMASK. */
 
-	register Lindex i;
+	Lindex i;
 
 	OUTTRACE("kill sim", 0);
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
-		register entity_p rep = en_elem(i);
+		entity_p rep = en_elem(i);
 
 		if (rep->en_kind == ENIGNMASK)
 		{
@@ -327,12 +327,12 @@ extern void kill_much(void)
 	/* Kills all killable entities,
 	 * except the locals for which a registermessage was generated.
 	 */
-	register Lindex i;
+	Lindex i;
 
 	OUTTRACE("kill much", 0);
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
-		register entity_p rep = en_elem(i);
+		entity_p rep = en_elem(i);
 
 		if (rep->en_static)
 			continue;
@@ -358,7 +358,7 @@ static void kill_globset(cset s)
 	/* S is a set of global variables that might be changed.
 	 * We act as if a direct store is done into each of them.
 	 */
-	register Cindex i;
+	Cindex i;
 
 	OUTTRACE("kill globset", 0);
 	for (i = Cfirst(s); i != (Cindex)0; i = Cnext(i, s))
@@ -393,7 +393,7 @@ void kill_all(void)
 {
 	/* Kills all entities. */
 
-	register Lindex i;
+	Lindex i;
 
 	OUTTRACE("kill all entities", 0);
 	for (i = Lfirst(entities); i != (Lindex)i; i = Lnext(i, entities))

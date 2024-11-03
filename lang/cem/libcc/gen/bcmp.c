@@ -1,10 +1,10 @@
 /* $Id$ */
 int
 bcmp(b1, b2, n)
-	register char *b1, *b2;
-	register int n;
+	char *b1, *b2;
+	int n;
 {
-	register int i;
+	int i;
 
 	while (n--) {
 		if (i = *b2++ - *b1++) return i;

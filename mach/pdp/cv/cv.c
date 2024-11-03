@@ -74,7 +74,7 @@ char flag ;
 
 int main(int argc, char* argv[])
 {
-	register struct exec *e = &exec;
+	struct exec *e = &exec;
 
 	output = stdout;
 	program= argv[0] ;
@@ -209,8 +209,8 @@ cv_long(l)
  * Transfer the emitted byted from one file to another.
  */
 void emits(struct outsect* section) {
-	register long	n ;
-	register int	blk;
+	long	n ;
+	int	blk;
 	char		buffer[BUFSIZ];
 
 	n= section->os_flen ;
@@ -237,7 +237,7 @@ void emit_symtab(void)
 {
 	struct outname ACK_name;  /* symbol table entry in ACK format */
 	struct nlist PDP_name;	  /* symbol table entry in PDP V7 format */
-	register unsigned short i;
+	unsigned short i;
 
 	char *chars;
 	long l;

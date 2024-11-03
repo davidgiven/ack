@@ -20,9 +20,9 @@ static long mli(long, long, size), rmi(long, long), ngi(long, size);
 static long sli(long, long, size), sri(long, long, size);
 
 /** ADI w: Addition (*) */
-void DoADI(register size l)
+void DoADI(size l)
 {
-	register long t = spop(arg_wi(l));
+	long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoADI(%ld)", l));
 	spoilFRA();
@@ -30,9 +30,9 @@ void DoADI(register size l)
 }
 
 /** SBI w: Subtraction (*) */
-void DoSBI(register size l)
+void DoSBI(size l)
 {
-	register long t = spop(arg_wi(l));
+	long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoSBI(%ld)", l));
 	spoilFRA();
@@ -40,9 +40,9 @@ void DoSBI(register size l)
 }
 
 /** MLI w: Multiplication (*) */
-void DoMLI(register size l)
+void DoMLI(size l)
 {
-	register long t = spop(arg_wi(l));
+	long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoMLI(%ld)", l));
 	spoilFRA();
@@ -50,9 +50,9 @@ void DoMLI(register size l)
 }
 
 /** DVI w: Division (*) */
-void DoDVI(register size l)
+void DoDVI(size l)
 {
-	register long t = spop(arg_wi(l));
+	long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoDVI(%ld)", l));
 	spoilFRA();
@@ -60,9 +60,9 @@ void DoDVI(register size l)
 }
 
 /** RMI w: Remainder (*) */
-void DoRMI(register size l)
+void DoRMI(size l)
 {
-	register long t = spop(arg_wi(l));
+	long t = spop(arg_wi(l));
 
 	LOG(("@I6 DoRMI(%ld)", l));
 	spoilFRA();
@@ -70,7 +70,7 @@ void DoRMI(register size l)
 }
 
 /** NGI w: Negate (two's complement) (*) */
-void DoNGI(register size l)
+void DoNGI(size l)
 {
 	LOG(("@I6 DoNGI(%ld)", l));
 	spoilFRA();
@@ -79,9 +79,9 @@ void DoNGI(register size l)
 }
 
 /** SLI w: Shift left (*) */
-void DoSLI(register size l)
+void DoSLI(size l)
 {
-	register long t = swpop();
+	long t = swpop();
 
 	LOG(("@I6 DoSLI(%ld)", l));
 	spoilFRA();
@@ -90,9 +90,9 @@ void DoSLI(register size l)
 }
 
 /** SRI w: Shift right (*) */
-void DoSRI(register size l)
+void DoSRI(size l)
 {
-	register long t = swpop();
+	long t = swpop();
 
 	LOG(("@I6 DoSRI(%ld)", l));
 	spoilFRA();

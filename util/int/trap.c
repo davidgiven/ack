@@ -60,7 +60,7 @@ void do_trap(int nr, int L, char* F)
 	static int rec_nr; /* Recursive trap number */
 	static int rec_trap = 0; /* To detect traps inside do_trap() */
 
-	register long tpi; /* Trap Procedure Identifier */
+	long tpi; /* Trap Procedure Identifier */
 
 	LOG(("@t1 trap(%d) [%s: %d]", nr, F, L));
 	warning(WMSG + nr);

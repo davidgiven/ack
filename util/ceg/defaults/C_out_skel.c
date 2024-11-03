@@ -30,7 +30,7 @@ static C_dopseudo();
 
 EXPORT int
 C_out(p)
-	register struct e_instr *p;
+	struct e_instr *p;
 {
 	C_error = 0;
 	switch(p->em_type) {
@@ -111,7 +111,7 @@ C_out(p)
 
 static
 C_dopseudo(p)
-	register struct e_instr *p;
+	struct e_instr *p;
 {
 
 	switch(p->em_opcode) {

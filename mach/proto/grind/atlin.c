@@ -22,10 +22,10 @@ static struct message_hdr ok_message;
 
 static char *
 BUFTOA(p)
-  register char	*p;
+  char	*p;
 {
-  register long	l = 0;
-  register int i;
+  long	l = 0;
+  int i;
 
   for (i = PS; i>0; i--) {
 	l = (l << 8) | (*p++ & 0377);
@@ -35,10 +35,10 @@ BUFTOA(p)
 
 static long
 BUFTOL(p)
-  register char	*p;
+  char	*p;
 {
-  register long	l = 0;
-  register int i;
+  long	l = 0;
+  int i;
 
   for (i = LS; i>0; i--) {
 	l = (l << 8) | (*p++ & 0377);
@@ -48,11 +48,11 @@ BUFTOL(p)
 
 static
 ATOBUF(p, cp)
-  register char	*p;
+  char	*p;
   char *cp;
 {
-  register int i;
-  register long l = (long) cp;
+  int i;
+  long l = (long) cp;
 
   p += PS;
   for (i = PS; i > 0; i--) {
@@ -63,10 +63,10 @@ ATOBUF(p, cp)
 
 static
 LTOBUF(p, l)
-  register char	*p;
-  register long	l;
+  char	*p;
+  long	l;
 {
-  register int i;
+  int i;
 
   p += LS;
   for (i = LS; i > 0; i--) {
@@ -200,8 +200,8 @@ do_request()
 {
   /* obtain a request from the debugger and perform it */
   int fail = 0;
-  register int i;
-  register char *c;
+  int i;
+  char *c;
   char *c1;
   long sz;
   struct message_hdr message;
@@ -413,7 +413,7 @@ sigcatch()
 static int
 check_bp()
 {
-  register int i;
+  int i;
 
   for (i = 0; i < nbp; i++) {
     	if (bp[i] == retaddr) {
@@ -426,7 +426,7 @@ check_bp()
 static int
 check_trace()
 {
-  register int i;
+  int i;
 
   for (i = 0; i < ntrace; i++) {
 	if (trace_buf[i].begin_trace <= retaddr &&
@@ -440,7 +440,7 @@ check_trace()
 static
 send_ok(type)
 {
-  register int i;
+  int i;
 
   ok_message.m_type = type;
   LTOBUF(ok_message.m_buf+1, (long) retaddr);

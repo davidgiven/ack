@@ -408,8 +408,8 @@ char *callbyvalue[ ] =
  void
 r8fix()	/* adjust tables for -r8 */
 {
-	register struct Intrblock *I;
-	register struct Specblock *S;
+	struct Intrblock *I;
+	struct Specblock *S;
 
 	for(I = intrtab; I->intrfname[0]; I++)
 		if (I->intrval.intrgroup != INTRGEN)
@@ -483,8 +483,8 @@ int nargs;
 {
 	int i, rettype;
 	Addrp ap;
-	register struct Specblock *sp;
-	register struct Chain *cp;
+	struct Specblock *sp;
+	struct Chain *cp;
 	expptr Inline(), mkcxcon(), mkrealcon();
 	expptr q, ep;
 	int mtype;
@@ -717,7 +717,7 @@ bad:
 intrfunct(s)
 char *s;
 {
-	register struct Intrblock *p;
+	struct Intrblock *p;
 
 	for(p = intrtab; p->intrval.intrgroup!=INTREND ; ++p)
 	{
@@ -742,7 +742,7 @@ Addrp intraddr(np)
 Namep np;
 {
 	Addrp q;
-	register struct Specblock *sp;
+	struct Specblock *sp;
 	int f3field;
 
 	if(np->vclass!=CLPROC || np->vprocclass!=PINTRINSIC)
@@ -805,7 +805,7 @@ int fno;
 int type;
 struct Chain *args;
 {
-	register expptr q, t, t1;
+	expptr q, t, t1;
 
 	switch(fno)
 	{

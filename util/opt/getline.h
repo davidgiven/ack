@@ -11,7 +11,7 @@
 #include "types.h"
 
 void getlines(void);
-offset aoff(register arg_p ap, int n);
+offset aoff(arg_p ap, int n);
 short readshort(void);
 
 #endif /* GETLINE_H_ */

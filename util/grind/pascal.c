@@ -87,7 +87,7 @@ print_string(f, s, len)
   char	*s;
   int	len;
 {
-  register char	*str = s;
+  char	*str = s;
 
   putc('\'', f);
   while (*str && len > 0) {
@@ -157,10 +157,10 @@ binop_prio(op)
 
 static int
 get_number(ch)
-  register int	ch;
+  int	ch;
 {
   char buf[512+1];
-  register char *np = &buf[0];
+  char *np = &buf[0];
   int real_mode = 0;
 
   while (is_dig(ch))	{
@@ -226,11 +226,11 @@ get_number(ch)
 
 static int
 getname(c)
-  register int	c;
+  int	c;
 {
   char	buf[512+1];
-  register char	*p = &buf[0];
-  register struct idf *id;
+  char	*p = &buf[0];
+  struct idf *id;
 
   do {
 	if (isupper(c)) c = tolower(c);
@@ -286,7 +286,7 @@ getname(c)
 
 static int
 get_token(c)
-  register int	c;
+  int	c;
 {
   switch(c) {
   case '[':
@@ -356,9 +356,9 @@ static int
 getstring(c)
   int	c;
 {
-  register int ch;
+  int ch;
   char buf[512];
-  register int len = 0;
+  int len = 0;
 
   for (;;) {
 	ch = getc(db_in);

@@ -56,7 +56,7 @@ void pop_frames(void)
 
 int ptr2seg(ptr p)
 {
-	register int s;
+	int s;
 
 	if (in_gda(p))
 	{

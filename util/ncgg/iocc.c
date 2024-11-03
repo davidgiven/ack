@@ -34,7 +34,7 @@ iocc_t subr_iocc(int tokarg, int subreg)
 {
 	inst_t insta;
 	iocc_t result;
-	register int i;
+	int i;
 
 	insta.in_which = IN_COPY;
 	insta.in_info[0] = tokarg;
@@ -58,7 +58,7 @@ iocc_t tokm_iocc(int tokarg, char *ident)
 {
 	iocc_t result;
 	inst_t insta;
-	register int i;
+	int i;
 	char app[100];
 	int dummy;
 
@@ -80,7 +80,7 @@ iocc_t percident_iocc(char *ident)
 {
 	iocc_t result;
 	inst_t insta;
-	register int i;
+	int i;
 	char app[100];
 	int dummy;
 
@@ -99,8 +99,8 @@ iocc_t ident_iocc(char *ident)
 {
 	iocc_t result;
 	inst_t insta;
-	register int i;
-	register symbol *sy_p;
+	int i;
+	symbol *sy_p;
 
 	for (i = 0; i < SETSIZE; i++)
 		result.in_set[i] = 0;
@@ -116,9 +116,9 @@ iocc_t all_iocc(int all_no, int subreg)
 {
 	iocc_t result;
 	inst_t insta;
-	register int i;
+	int i;
 	set_t localset;
-	register short *sp;
+	short *sp;
 
 	sp = l_props[allreg[all_no]].pr_regset;
 	for (i = 0; i < SETSIZE; i++)
@@ -137,9 +137,9 @@ iocc_t descr_iocc(char *ident)
 {
 	iocc_t result;
 	inst_t insta;
-	register symbol *sy_p;
-	register token_p tp;
-	register int i;
+	symbol *sy_p;
+	token_p tp;
+	int i;
 	int typerr;
 
 	for (i = 0; i < SETSIZE; i++)
@@ -211,7 +211,7 @@ inst_t l_instances[MAXINSTANCES];
 
 static int instalookup(inst_t insta, int filled)
 {
-	register int i, j;
+	int i, j;
 
 	for (j = filled; j <= MAXATT; j++)
 		insta.in_info[j] = 0;

@@ -9,9 +9,9 @@
 #include <limits.h>
 
 size_t
-wcstombs(register char* s, register const wchar_t* pwcs, size_t n)
+wcstombs(char* s, const wchar_t* pwcs, size_t n)
 {
-	register int i = n;
+	int i = n;
 
 	while (--i >= 0)
 	{

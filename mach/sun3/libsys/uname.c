@@ -10,9 +10,9 @@ static char ver[] = "vm";
 static char mach[] = "sun";
 
 uname(nm)
-	register struct utsname *nm;
+	struct utsname *nm;
 {
-	register char *p = nm->nodename;
+	char *p = nm->nodename;
 
 	while (p <= nm->release) *p++ = 0;
 	if (gethostname(nm->nodename,9) == -1) {

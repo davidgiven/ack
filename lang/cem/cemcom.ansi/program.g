@@ -162,7 +162,7 @@ external_definition
 	{remove_declarator(&Dc); flush_strings(); }
 ;
 
-non_function(register struct decspecs *ds; register struct declarator *dc;)
+non_function(struct decspecs *ds; struct declarator *dc;)
 :
 	{	reject_params(dc);
 	}
@@ -187,7 +187,7 @@ non_function(register struct decspecs *ds; register struct declarator *dc;)
 function(struct decspecs *ds; struct declarator *dc;)
 	{
 		arith fbytes;
-		register struct idf *idf = dc->dc_idf;
+		struct idf *idf = dc->dc_idf;
 	}
 :
 	{

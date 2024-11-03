@@ -29,7 +29,7 @@ extern int endofprog;
 
 unsigned ggd(unsigned int a,unsigned int b)
 {
-	register unsigned c;
+	unsigned c;
 
 	do {
 		c = a%b; a=b; b=c;
@@ -40,7 +40,7 @@ unsigned ggd(unsigned int a,unsigned int b)
 
 int main(int argc, char **argv)
 {
-	register unsigned n;
+	unsigned n;
 	extern unsigned cc1,cc2,cc3,cc4;
 
 

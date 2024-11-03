@@ -1,9 +1,9 @@
 /* $Id$ */
 long atol(s)
-register char *s;
+char *s;
 {
-  register long total = 0;
-  register unsigned digit;
+  long total = 0;
+  unsigned digit;
   int minus = 0;
 
   while (*s == ' ' || *s == '\t') s++;

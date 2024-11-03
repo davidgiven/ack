@@ -50,18 +50,18 @@ static int dumplevel;
 static void dumpstack(void);
 static char *next_transient(void);
 static char *qual2str(int);
-static char *type2str(register struct type *);
-static void p1_indent(register int);
-static void dumpdefs(register struct def *, int);
-void dumpidf(register struct idf *, int);
-void dumptags(register struct tag *);
-void dumptype(register struct type *);
-void dumpsdefs(register struct sdef *, enum sdef_kind);
-static void p1_expr(int, register struct expr *);
+static char *type2str(struct type *);
+static void p1_indent(int);
+static void dumpdefs(struct def *, int);
+void dumpidf(struct idf *, int);
+void dumptags(struct tag *);
+void dumptype(struct type *);
+void dumpsdefs(struct sdef *, enum sdef_kind);
+static void p1_expr(int, struct expr *);
 
 void newline(void)
 {
-	register int dl = dumplevel;
+	int dl = dumplevel;
 	
 	print("\n");
 	while (dl >= 2)	{
@@ -94,10 +94,10 @@ static void dumpstack(void)
 {
 	/*	Dumps the identifier stack, starting at the top.
 	*/
-	register struct stack_level *stl = local_level;
+	struct stack_level *stl = local_level;
 	
 	while (stl)	{
-		register struct stack_entry *se = stl->sl_entry;
+		struct stack_entry *se = stl->sl_entry;
 		
 		newline();
 		print("%3d: ", stl->sl_level);
@@ -110,7 +110,7 @@ static void dumpstack(void)
 	print("\n");
 }
 
-void dumpidf(register struct idf *idf, int opt)
+void dumpidf(struct idf *idf, int opt)
 {
 	/*	All information about the identifier idf is divulged in a
 		hopefully readable format.
@@ -149,7 +149,7 @@ void dumpidf(register struct idf *idf, int opt)
 	}
 }
 
-void dumpdefs(register struct def *def, int opt)
+void dumpdefs(struct def *def, int opt)
 {
 	dumplevel++;
 	while (def && ((opt&4) || def->df_level))	{
@@ -170,12 +170,12 @@ void dumpdefs(register struct def *def, int opt)
 	dumplevel--;
 }
 
-void dumptags(register struct tag *tag)
+void dumptags(struct tag *tag)
 {
 	dumplevel++;
 	while (tag)	{
-		register struct type *tp = tag->tg_type;
-		register int fund = tp->tp_fund;
+		struct type *tp = tag->tg_type;
+		int fund = tp->tp_fund;
 
 		newline();
 		print("L%d: %s %s",
@@ -197,7 +197,7 @@ void dumptags(register struct tag *tag)
 	dumplevel--;
 }
 
-void dumpsdefs(register struct sdef *sdef, enum sdef_kind sdk)
+void dumpsdefs(struct sdef *sdef, enum sdef_kind sdk)
 {
 	/*	Since sdef's are members of two chains, there are actually
 		two dumpsdefs's, one following the chain of all selectors
@@ -227,10 +227,10 @@ void dumpsdefs(register struct sdef *sdef, enum sdef_kind sdk)
 	dumplevel--;
 }
 
-void dumpproto(register struct proto *pl)
+void dumpproto(struct proto *pl)
 {
-	register struct type *type;
-	register int argcnt = 0;
+	struct type *type;
+	int argcnt = 0;
 
 	newline();
 	print("dump proto type list (start)");
@@ -258,7 +258,7 @@ void dumpproto(register struct proto *pl)
 	print("dump proto type list (end)\n");
 }
 
-void dumptype(register struct type *tp)
+void dumptype(struct type *tp)
 {
 	int ops = 1;
 
@@ -315,7 +315,7 @@ void dumptype(register struct type *tp)
 	dumplevel--;
 }
 
-static char *type2str(register struct type *tp)
+static char *type2str(struct type *tp)
 {
 	/*	Yields a pointer to a one-line description of the type tp.
 	*/
@@ -406,7 +406,7 @@ void print_expr(char msg[], struct expr *expr)
 	}
 }
 
-static void p1_expr(int lvl, register struct expr *expr)
+static void p1_expr(int lvl, struct expr *expr)
 {
 	p1_indent(lvl);
 	if (!expr)	{
@@ -481,7 +481,7 @@ static void p1_expr(int lvl, register struct expr *expr)
 	}
 }
 
-static void p1_indent(register int lvl)
+static void p1_indent(int lvl)
 {
 	while (lvl--)
 		print("  ");
