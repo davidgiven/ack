@@ -2,15 +2,6 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#if defined Value
-#undef Value
-#endif
-
-struct node {
-	struct node *nd_left;
-#define nd_next nd_left
-	struct node *nd_right;
-	int nd_class;		/* kind of node */
 #define Value		0	/* constant */
 #define Name		1	/* an identifier */
 #define Uoper		2	/* unary operator */
@@ -28,6 +19,12 @@ struct node {
 #define IntCoerc	14	/* coercion of integers to longs */
 #define IntReduc	15	/* reduction of longs to integers */
 				/* do NOT change the order or the numbers!!! */
+				
+struct node {
+	struct node *nd_left;
+#define nd_next nd_left
+	struct node *nd_right;
+	int nd_class;		/* kind of node */
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;
 #define nd_def		nd_token.tk_data.tk_def
