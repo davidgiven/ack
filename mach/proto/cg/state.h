@@ -26,10 +26,10 @@ typedef struct state {
 } state_t,*state_p;
 
 #ifndef STONSTACK
-state_p state_p savestatus(void);
+void savestatus(void);
 #endif
 
 void restorestatus(register state_p sp);
-state_p savestatus(register state_p sp);
+void savestatus(register state_p sp);
 
 #endif /* STATE_H_ */

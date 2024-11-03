@@ -21,9 +21,9 @@
 #include "salloc.h"
 #include "gencode.h"
 #include "regvar.h"
+#include "codegen.h"
 
 
-unsigned codegen();
 extern unsigned cc1,cc2,cc3,cc4;
 
 

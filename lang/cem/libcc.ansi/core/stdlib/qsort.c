@@ -119,7 +119,6 @@ qsort1(char* a1, char* a2, register size_t width)
 		*/
 		a1 = righteq + width;
 	}
-	/*NOTREACHED*/
 }
 
 static void

@@ -26,7 +26,7 @@
 #include	"level.h"
 #include	"l_state.h"
 
-extern char *symbol2str();
+
 extern struct type *func_type;
 
 PRIVATE lint_enum_arith();

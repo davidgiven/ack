@@ -20,7 +20,7 @@
 #include	"assert.h"
 
 extern char options[];
-extern char *symbol2str();
+
 
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer
@@ -248,7 +248,7 @@ ch7cast(expp, oper, tp)
 #else /* NOFLOAT */
 		else {
 			crash("(ch7cast) floats not implemented\n");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 #endif /* NOFLOAT */
 	}

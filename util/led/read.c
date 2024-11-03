@@ -12,7 +12,7 @@ static char rcsid[] = "$Id$";
 #include <stdbool.h>
 #include "error.h"
 
-int	infile;	/* The current input file. */
+int infile; /* The current input file. */
 
 void rd_fatal(void)
 {

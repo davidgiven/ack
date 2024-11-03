@@ -26,7 +26,6 @@
 #include "ra_xform.h"
 #include "ra_items.h"
 
-
 /* The replacement table is used to transform instructions that reference
  * items other than local variables (i.e. the address of a local or global
  * variable or a single/double constant; the transformation of an instruction
@@ -35,47 +34,47 @@
  * machine.
  */
 
-
-struct repl {
-	short	r_instr;	/* instruction		*/
-	short	r_op;		/* operand		*/
+struct repl
+{
+	short r_instr; /* instruction		*/
+	short r_op; /* operand		*/
 };
 
 /* REGNR,NO and STOP should not equal the wordsize or pointer size
  * of any machine.
  */
-#define	REGNR	-3
-#define	NO	-2
-#define	STOP	-1
-#define	PS	0
-#define	PS2	1
-#define	WS	2
-#define	WS2	3
+#define REGNR -3
+#define NO -2
+#define STOP -1
+#define PS 0
+#define PS2 1
+#define WS 2
+#define WS2 3
 
-#define LOAD_POINTER	op_nop
-#define	BLANK		{0, STOP}
+#define LOAD_POINTER op_nop
+#define BLANK                                                                                      \
+	{                                                                                              \
+		0, STOP                                                                                    \
+	}
 
-#define NRREPLACEMENTS	13
-#define	REPL_LENGTH	3
+#define NRREPLACEMENTS 13
+#define REPL_LENGTH 3
 
 struct repl repl_tab[NRREPLACEMENTS][REPL_LENGTH] = {
-	/* 0 */	{{op_lil, REGNR},	BLANK,		BLANK},
-	/* 1 */	{{LOAD_POINTER,REGNR},	{op_loi,PS},	{op_loi,WS}},
-	/* 2 */	{{LOAD_POINTER,REGNR},	BLANK,		BLANK},
-	/* 3 */ {{LOAD_POINTER,REGNR},	{op_loi,WS2},	BLANK},
-	/* 4 */	{{op_sil,REGNR},	BLANK,		BLANK},
-	/* 5 */	{{LOAD_POINTER,REGNR},	{op_loi,PS},	{op_sti,WS}},
-	/* 6 */	{{LOAD_POINTER,REGNR},	{op_sti,WS2},	BLANK},
-	/* 7 */	{{op_lil,REGNR},	{op_inc,NO},	{op_sil,REGNR}},
-	/* 8 */	{{op_lil,REGNR},	{op_dec,NO},	{op_sil,REGNR}},
-	/* 9 */	{{op_zer,WS},		{op_sil,REGNR},	BLANK},
-	/*10 */	{{op_lol,REGNR},	BLANK,		BLANK},
-	/*11 */	{{op_ldl,REGNR},	BLANK,		BLANK},
-	/*12 */	{{LOAD_POINTER,REGNR},	{op_cai,NO},	BLANK},
+	/* 0 */ { { op_lil, REGNR }, BLANK, BLANK },
+	/* 1 */ { { LOAD_POINTER, REGNR }, { op_loi, PS }, { op_loi, WS } },
+	/* 2 */ { { LOAD_POINTER, REGNR }, BLANK, BLANK },
+	/* 3 */ { { LOAD_POINTER, REGNR }, { op_loi, WS2 }, BLANK },
+	/* 4 */ { { op_sil, REGNR }, BLANK, BLANK },
+	/* 5 */ { { LOAD_POINTER, REGNR }, { op_loi, PS }, { op_sti, WS } },
+	/* 6 */ { { LOAD_POINTER, REGNR }, { op_sti, WS2 }, BLANK },
+	/* 7 */ { { op_lil, REGNR }, { op_inc, NO }, { op_sil, REGNR } },
+	/* 8 */ { { op_lil, REGNR }, { op_dec, NO }, { op_sil, REGNR } },
+	/* 9 */ { { op_zer, WS }, { op_sil, REGNR }, BLANK },
+	/*10 */ { { op_lol, REGNR }, BLANK, BLANK },
+	/*11 */ { { op_ldl, REGNR }, BLANK, BLANK },
+	/*12 */ { { LOAD_POINTER, REGNR }, { op_cai, NO }, BLANK },
 };
-
-
-
 
 void init_replacements(short psize, short wsize)
 {
@@ -87,139 +86,138 @@ void init_replacements(short psize, short wsize)
 	 * as a 'Load pointer' instruction.
 	 */
 
-	register int i,j;
+	register int i, j;
 	short load_pointer;
-	struct repl *r;
+	struct repl* r;
 
-	assert (psize == wsize || psize == 2*wsize);
+	assert(psize == wsize || psize == 2 * wsize);
 	load_pointer = (psize == wsize ? op_lol : op_ldl);
-	for (i = 0; i < NRREPLACEMENTS; i++) {
-		for (j = 0; j < REPL_LENGTH; j++) {
+	for (i = 0; i < NRREPLACEMENTS; i++)
+	{
+		for (j = 0; j < REPL_LENGTH; j++)
+		{
 			r = &repl_tab[i][j];
-			if (r->r_op == STOP) break;
-			if (r->r_instr == LOAD_POINTER) {
+			if (r->r_op == STOP)
+				break;
+			if (r->r_instr == LOAD_POINTER)
+			{
 				r->r_instr = load_pointer;
 			}
-			switch (r->r_op) {
+			switch (r->r_op)
+			{
 				/* initially r_op describes how to compute
 				 * the real operand of the instruction. */
 				case PS2:
-					r->r_op = 2*psize;
+					r->r_op = 2 * psize;
 					break;
 				case PS:
 					r->r_op = psize;
 					break;
 				case WS2:
-					r->r_op = 2*wsize;
+					r->r_op = 2 * wsize;
 					break;
 				case WS:
 					r->r_op = wsize;
 					break;
 				case NO:
-				case REGNR:	/* use offset of dummy local,
-						 * will be filled in later.
-						 */
+				case REGNR: /* use offset of dummy local,
+				             * will be filled in later.
+				             */
 					break;
-				default: assert(FALSE);
+				default:
+					assert(FALSE);
 			}
 		}
 	}
 }
 
-
-
-STATIC int repl_index(l)
-	line_p l;
+STATIC int repl_index(line_p l)
 {
 	return itemtab[INSTR(l) - sp_fmnem].id_replindex;
 }
-
-
 
 STATIC bool is_current(alloc_p alloc, short t)
 {
 	/* Is time t part of alloc's timespan? */
 
-	return contains(t,alloc->al_timespan);
+	return contains(t, alloc->al_timespan);
 }
 
-
-STATIC bool match_item(item,l)
-	item_p item;
-	line_p l;
+STATIC bool match_item(item_p item, line_p l)
 {
 	/* See if the item used by l is the same one as 'item' */
 	struct item thisitem;
 
-	fill_item(&thisitem,l);
-	if (item->it_type == LOCAL_ADDR && thisitem.it_type == LOCALVAR) {
+	fill_item(&thisitem, l);
+	if (item->it_type == LOCAL_ADDR && thisitem.it_type == LOCALVAR)
+	{
 		/* The usage of a local variable is also considered to
 		 * be the usage of the address of that variable.
 		 */
 		thisitem.it_type = LOCAL_ADDR;
 	}
-	return item->it_type == thisitem.it_type && same_item(item,&thisitem);
+	return item->it_type == thisitem.it_type && same_item(item, &thisitem);
 }
 
-
-
-STATIC alloc_p find_alloc(alloclist,l,t)
-	alloc_p alloclist;
-	line_p l;
-	short t;
+STATIC alloc_p find_alloc(alloc_p alloclist, line_p l, short t)
 {
 	/* See if any of the allocations of the list applies to instruction
 	 * l at time t.
 	 */
 
-	register alloc_p alloc,m;
+	register alloc_p alloc, m;
 
-	for (alloc = alloclist; alloc != (alloc_p) 0; alloc = alloc->al_next) {
-		for (m = alloc; m != (alloc_p) 0; m = m->al_mates) {
-			if (is_current(m,t) && match_item(m->al_item,l)) {
+	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
+	{
+		for (m = alloc; m != (alloc_p)0; m = m->al_mates)
+		{
+			if (is_current(m, t) && match_item(m->al_item, l))
+			{
 				return m;
 			}
 		}
 	}
-	return (alloc_p) 0;
+	return (alloc_p)0;
 }
 
-
-STATIC void replace_line(l,b,list)
-	line_p l,list;
-	bblock_p b;
+STATIC void replace_line(line_p l, bblock_p b, line_p list)
 {
-	if (b->b_start == l) {
+	if (b->b_start == l)
+	{
 		b->b_start = list;
-	} else {
+	}
+	else
+	{
 		PREV(l)->l_next = list;
 	}
 	PREV(list) = PREV(l);
-	while (list->l_next != (line_p) 0) {
+	while (list->l_next != (line_p)0)
+	{
 		list = list->l_next;
 	}
 	list->l_next = l->l_next;
-	if (l->l_next != (line_p) 0) {
+	if (l->l_next != (line_p)0)
+	{
 		PREV(l->l_next) = list;
 	}
 	oldline(l);
 }
 
-
-STATIC line_p repl_code(lnp,regnr)
-	line_p lnp;
-	offset  regnr;
+STATIC line_p repl_code(line_p lnp, offset regnr)
 {
-	line_p head,*q,l,prev = (line_p) 0;
-	int i,index;
-	struct repl *r;
+	line_p head, *q, l, prev = (line_p)0;
+	int i, index;
+	struct repl* r;
 
 	q = &head;
 	index = repl_index(lnp);
-	for (i = 0; i < REPL_LENGTH; i++) {
+	for (i = 0; i < REPL_LENGTH; i++)
+	{
 		r = &repl_tab[index][i];
-		if (r->r_op == STOP) break;  /* replacement < REPL_LENGTH */
-		switch(r->r_op) {
+		if (r->r_op == STOP)
+			break; /* replacement < REPL_LENGTH */
+		switch (r->r_op)
+		{
 			case REGNR:
 				l = int_line(regnr);
 				break;
@@ -240,12 +238,7 @@ STATIC line_p repl_code(lnp,regnr)
 	return head;
 }
 
-
-
-STATIC void apply_alloc(b,l,alloc)
-	bblock_p b;
-	line_p l;
-	alloc_p alloc;
+STATIC void apply_alloc(bblock_p b, line_p l, alloc_p alloc)
 {
 	/* 'l' is an EM instruction using an item that will be put in
 	 * a register. Generate new code that uses the register instead
@@ -264,42 +257,43 @@ STATIC void apply_alloc(b,l,alloc)
 
 	line_p newcode;
 
-	if (alloc->al_item->it_type == LOCALVAR) {
-		if ((short) (alloc->al_dummy) == alloc->al_dummy) {
+	if (alloc->al_item->it_type == LOCALVAR)
+	{
+		if ((short)(alloc->al_dummy) == alloc->al_dummy)
+		{
 			TYPE(l) = OPSHORT;
 			SHORT(l) = alloc->al_dummy;
 		}
-		else {
+		else
+		{
 			TYPE(l) = OPOFFSET;
 			OFFSET(l) = alloc->al_dummy;
 		}
-	} else {
-		newcode = repl_code(l,alloc->al_dummy);
-		replace_line(l,b,newcode);
+	}
+	else
+	{
+		newcode = repl_code(l, alloc->al_dummy);
+		replace_line(l, b, newcode);
 	}
 }
 
-
-
-STATIC int loaditem_tab[NRITEMTYPES][2] =
-{	/* 		WS		2 * WS */
-	/*LOCALVAR*/	op_lol,		op_ldl,
-	/*LOCAL_ADDR*/	op_lal,		op_lal,
-	/*GLOBL_ADDR*/	op_lae,		op_lae,
-	/*PROC_ADDR*/	op_lpi,		op_lpi,
-	/*CONST*/	op_loc,		op_nop,
-	/*DCONST*/	op_nop,		op_ldc
+STATIC int loaditem_tab[NRITEMTYPES][2] = { /* 		WS		2 * WS */
+	                                        /*LOCALVAR*/ op_lol,   op_ldl,
+	                                        /*LOCAL_ADDR*/ op_lal, op_lal,
+	                                        /*GLOBL_ADDR*/ op_lae, op_lae,
+	                                        /*PROC_ADDR*/ op_lpi,  op_lpi,
+	                                        /*CONST*/ op_loc,      op_nop,
+	                                        /*DCONST*/ op_nop,     op_ldc
 };
 
-
-STATIC line_p load_item(item)
-	item_p item;
+STATIC line_p load_item(item_p item)
 {
 	/* Generate an EM instruction that loads the item on the stack */
 
 	line_p l;
 
-	switch (item->it_type) {
+	switch (item->it_type)
+	{
 		case GLOBL_ADDR:
 			l = newline(OPOBJECT);
 			OBJ(l) = item->i_t.it_obj;
@@ -316,10 +310,7 @@ STATIC line_p load_item(item)
 	return l;
 }
 
-
-STATIC line_p store_local(size,off)
-	short size;
-	offset off;
+STATIC line_p store_local(short size, offset off)
 {
 	line_p l = int_line(off);
 
@@ -327,17 +318,16 @@ STATIC line_p store_local(size,off)
 	return l;
 }
 
-
-
-STATIC line_p init_place(b)
-	bblock_p b;
+STATIC line_p init_place(bblock_p b)
 {
 
-	register line_p l,prev;
+	register line_p l, prev;
 
-	prev = (line_p) 0;
-	for (l = b->b_start; l != (line_p) 0; l = l->l_next) {
-		switch(INSTR(l)) {
+	prev = (line_p)0;
+	for (l = b->b_start; l != (line_p)0; l = l->l_next)
+	{
+		switch (INSTR(l))
+		{
 			case ps_mes:
 			case ps_pro:
 			case op_lab:
@@ -345,169 +335,155 @@ STATIC line_p init_place(b)
 			default:
 				return prev;
 		}
-		prev =l;
+		prev = l;
 	}
 	return prev;
 }
 
-
-
-STATIC void append_code(l1,l2,b)
-	line_p l1,l2;
-	bblock_p b;
+STATIC void append_code(line_p l1, line_p l2, bblock_p b)
 {
 	/* Append instruction l1 and l2 at begin of block b */
 
 	line_p l;
 
-	DLINK(l1,l2);
+	DLINK(l1, l2);
 	l = init_place(b);
-	if (l == (line_p) 0) {
+	if (l == (line_p)0)
+	{
 		l2->l_next = b->b_start;
 		b->b_start = l1;
-		PREV(l1) = (line_p) 0;
-	} else {
-		l2->l_next = l->l_next;
-		DLINK(l,l1);
+		PREV(l1) = (line_p)0;
 	}
-	if (l2->l_next != (line_p) 0) {
+	else
+	{
+		l2->l_next = l->l_next;
+		DLINK(l, l1);
+	}
+	if (l2->l_next != (line_p)0)
+	{
 		PREV(l2->l_next) = l2;
 	}
 }
 
-
-
-STATIC void emit_init_code(list)
-	alloc_p list;
+STATIC void emit_init_code(alloc_p list)
 {
 	/* Emit initialization code for all packed allocations.
 	 * This code looks like "dummy_local := item", e.g.
 	 * "LOC 25 ; STL -10" in EM terminology.
 	 */
 
-	register alloc_p alloc,m;
+	register alloc_p alloc, m;
 	Lindex bi;
 	bblock_p b;
 
-	for (alloc = list; alloc != (alloc_p) 0; alloc = alloc->al_next) {
-		for (m = alloc; m != (alloc_p) 0; m = m->al_mates) {
-			for (bi = Lfirst(m->al_inits); bi != (Lindex) 0;
-						  bi = Lnext(bi,m->al_inits)) {
+	for (alloc = list; alloc != (alloc_p)0; alloc = alloc->al_next)
+	{
+		for (m = alloc; m != (alloc_p)0; m = m->al_mates)
+		{
+			for (bi = Lfirst(m->al_inits); bi != (Lindex)0; bi = Lnext(bi, m->al_inits))
+			{
 				/* "inits" contains all initialization points */
-				b = (bblock_p) Lelem(bi);
-				append_code(load_item(m->al_item),
-					    store_local(m->al_item->it_size,
-							m->al_dummy),
-					    b);
+				b = (bblock_p)Lelem(bi);
+				append_code(
+				    load_item(m->al_item), store_local(m->al_item->it_size, m->al_dummy), b);
 			}
 		}
 	}
 }
 
-
-
-STATIC void emit_mesregs(p,alloclist)
-	proc_p  p;
-	alloc_p alloclist;
+STATIC void emit_mesregs(proc_p p, alloc_p alloclist)
 {
-	line_p l,m,x;
+	line_p l, m, x;
 	alloc_p alloc;
-
 
 	l = p->p_start->b_start;
 	x = l->l_next;
-	for (alloc = alloclist; alloc != (alloc_p) 0; alloc = alloc->al_next) {
-		m = reg_mes(alloc->al_dummy,alloc->al_item->it_size,
-			alloc->al_regtype,INFINITE);
-		DLINK(l,m);
+	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
+	{
+		m = reg_mes(alloc->al_dummy, alloc->al_item->it_size, alloc->al_regtype, INFINITE);
+		DLINK(l, m);
 		l = m;
 	}
-	if (x != (line_p) 0) DLINK(l,x); 
+	if (x != (line_p)0)
+		DLINK(l, x);
 }
 
-#define is_mesreg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_reg)
+#define is_mesreg(l) (INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_reg)
 
-
-
-STATIC void rem_mes(p)
-	proc_p p;
+STATIC void rem_mes(proc_p p)
 {
 	register bblock_p b;
-	register line_p l,next;
+	register line_p l, next;
 	offset m;
 
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		for (l = b->b_start; l != (line_p) 0; l = next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		for (l = b->b_start; l != (line_p)0; l = next)
+		{
 			next = l->l_next;
-			if (INSTR(l) == ps_mes
-			    && aoff(ARG(l),0) == ms_ego
-			    && ((m = aoff(ARG(l),1)) == ego_live
-				|| m == ego_dead)) {
+			if (INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_ego
+			    && ((m = aoff(ARG(l), 1)) == ego_live || m == ego_dead))
+			{
 				/* remove live/dead messages */
-				rm_line(l,b);
+				rm_line(l, b);
 			}
 		}
 	}
 }
 
-
-
-void
-xform_proc(proc_p p, alloc_p alloclist, short nrinstrs, line_p instrmap[])
+void xform_proc(proc_p p, alloc_p alloclist, short nrinstrs, line_p instrmap[])
 {
 	/* Transform every instruction of procedure p that uses an item
 	 * at a point where the item is kept in a register.
 	 */
 
 	register short now = 0;
-	register line_p l,next;
+	register line_p l, next;
 	register bblock_p b;
 	alloc_p alloc;
 
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		for (l = b->b_start; l != (line_p) 0; l = next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		for (l = b->b_start; l != (line_p)0; l = next)
+		{
 			next = l->l_next;
-			if (is_mesreg(l) && ARG(l)->a_next != (arg_p) 0 && 
-				aoff(ARG(l),4) != INFINITE) {
+			if (is_mesreg(l) && ARG(l)->a_next != (arg_p)0 && aoff(ARG(l), 4) != INFINITE)
+			{
 				/* All register messages for local variables
-			         * that were not assigned a register get
+				 * that were not assigned a register get
 				 * their 'count' fields* set to 0.
 				 */
-				ARG(l)->a_next->a_next->a_next
-					->a_next->a_a.a_offset = 0;
+				ARG(l)->a_next->a_next->a_next->a_next->a_a.a_offset = 0;
 			}
-			if (is_item(l) && 
-			    (alloc = find_alloc(alloclist,l,now))
-					     != (alloc_p) 0 ) {
-				apply_alloc(b,l,alloc);
+			if (is_item(l) && (alloc = find_alloc(alloclist, l, now)) != (alloc_p)0)
+			{
+				apply_alloc(b, l, alloc);
 			}
 			now++;
 		}
 	}
 	emit_init_code(alloclist);
-	emit_mesregs(p,alloclist);
+	emit_mesregs(p, alloclist);
 	rem_mes(p);
 }
 
-
-
-
-bool always_in_reg(offset off, alloc_p allocs, short *size_out)
+bool always_in_reg(offset off, alloc_p allocs, short* size_out)
 {
 	/* See if the local variable with the given offset is stored
 	 * in a register during its entire lifetime. As a side effect,
 	 * return the size of the local.
 	 */
 
-	alloc_p alloc,m;
+	alloc_p alloc, m;
 	item_p item;
 
-	for (alloc = allocs; alloc != (alloc_p) 0; alloc = alloc->al_next) {
-		for (m = alloc; m != (alloc_p) 0; m = m->al_mates) {
+	for (alloc = allocs; alloc != (alloc_p)0; alloc = alloc->al_next)
+	{
+		for (m = alloc; m != (alloc_p)0; m = m->al_mates)
+		{
 			item = m->al_item;
-			if (m->al_iswholeproc &&
-			    item->it_type == LOCALVAR &&
-			    item->i_t.it_off == off) {
+			if (m->al_iswholeproc && item->it_type == LOCALVAR && item->i_t.it_off == off)
+			{
 				*size_out = item->it_size;
 				return TRUE;
 			}
@@ -516,10 +492,7 @@ bool always_in_reg(offset off, alloc_p allocs, short *size_out)
 	return FALSE;
 }
 
-
-void rem_locals(p,allocs)
-	proc_p p;
-	alloc_p allocs;
+void rem_locals(proc_p p, alloc_p allocs)
 {
 	/* Try to decrease the number of locals of procedure p, by
 	 * looking at which locals are always stored in a register.
@@ -528,25 +501,25 @@ void rem_locals(p,allocs)
 	offset nrlocals = p->p_localbytes;
 	short size;
 
-	while (nrlocals > 0) {
+	while (nrlocals > 0)
+	{
 		/* A local can only be removed if all locals with
 		 * higher offsets are removed too.
 		 */
-		if (always_in_reg(-nrlocals,allocs,&size)) {
-			OUTVERBOSE("local %d removed from proc %d\n",
-				nrlocals,p->p_id);
+		if (always_in_reg(-nrlocals, allocs, &size))
+		{
+			OUTVERBOSE("local %d removed from proc %d\n", nrlocals, p->p_id);
 			nrlocals -= size;
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
 	p->p_localbytes = nrlocals;
 }
 
-void
-rem_formals(p,allocs)
-	proc_p p;
-	alloc_p allocs;
+void rem_formals(proc_p p, alloc_p allocs)
 {
 	/* Try to decrease the number of formals of procedure p, by
 	 * looking at which formals are always stored in a register.
@@ -556,18 +529,23 @@ rem_formals(p,allocs)
 	offset off = 0;
 	short size;
 
-	if (nrformals == UNKNOWN_SIZE) return;
-	while (off < nrformals) {
-		if (always_in_reg(off,allocs,&size)) {
-			OUTVERBOSE("formal %d removed from proc %d\n",
-				off,p->p_id);
+	if (nrformals == UNKNOWN_SIZE)
+		return;
+	while (off < nrformals)
+	{
+		if (always_in_reg(off, allocs, &size))
+		{
+			OUTVERBOSE("formal %d removed from proc %d\n", off, p->p_id);
 			off += size;
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
-	if (nrformals == off) {
-		OUTVERBOSE("all formals of procedure %d removed\n",p->p_id,0);
+	if (nrformals == off)
+	{
+		OUTVERBOSE("all formals of procedure %d removed\n", p->p_id, 0);
 		p->p_nrformals = 0;
 	}
 }

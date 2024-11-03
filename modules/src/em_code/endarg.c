@@ -2,7 +2,7 @@
 
 /* $Id$ */
 
-void CC_endnarg()
+void CC_endnarg(void)
 {
 	/*	END pseudo of procedure with unknown # of locals
 	*/

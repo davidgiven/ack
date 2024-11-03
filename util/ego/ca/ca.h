@@ -8,13 +8,12 @@
  *
  */
 
-
 #define PF_SYMOUT 01
 #define DF_SYMOUT 01
 
-extern dblock_p *dmap;
+extern dblock_p* dmap;
 
-extern char **dnames;
-extern char **pnames;
+extern char** dnames;
+extern char** pnames;
 
 extern byte em_flag[];

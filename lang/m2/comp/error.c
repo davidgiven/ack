@@ -51,7 +51,7 @@
 
 int err_occurred;
 
-extern char *symbol2str();
+
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -153,7 +153,7 @@ void lexwarning(int class, char *fmt, ...)
 }
 
 /*VARARGS*/
-void fatal(char *fmt, ...)
+NORETURN void fatal(char *fmt, ...)
 {
 	va_list ap;
 
@@ -166,7 +166,7 @@ void fatal(char *fmt, ...)
 }
 
 /*VARARGS*/
-void crash(char *fmt, ...)
+NORETURN void crash(char *fmt, ...)
 {
 	va_list ap;
 

@@ -6,7 +6,6 @@
 
 /* C O M M O N   S U B E X P R E S S I O N   E L I M I N A T I O N */
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include "../share/types.h"
@@ -25,7 +24,7 @@
 
 int Scs; /* Number of optimizations found. */
 
-STATIC void cs_clear()
+STATIC void cs_clear(void)
 {
 	clr_avails();
 	clr_entities();
@@ -34,21 +33,23 @@ STATIC void cs_clear()
 	start_valnum();
 }
 
-STATIC void cs_optimize(void *vp)
+STATIC void cs_optimize(void* vp)
 {
 	/* Optimize all basic blocks of one procedure. */
 
 	proc_p p = vp;
 	register bblock_p rbp, bdone;
 
-	if (IS_ENTERED_WITH_GTO(p)) return;
-	avails = (avail_p) 0;
+	if (IS_ENTERED_WITH_GTO(p))
+		return;
+	avails = (avail_p)0;
 	entities = Lempty_set();
 	cs_clear();
 
 	rbp = p->p_start;
 
-	while (rbp != (bblock_p) 0) {
+	while (rbp != (bblock_p)0)
+	{
 		/* First we build a list of common expressions with the
 		 * value numbering algorithm. We take blocks in textual order
 		 * as long as the next block can only be reached through the
@@ -56,14 +57,16 @@ STATIC void cs_optimize(void *vp)
 		 * by itself, the number of predecessors is greater than 1,
 		 * but the previous block can still be its immediate dominator.
 		 */
-		do {	vnm(rbp); bdone = rbp;
+		do
+		{
+			vnm(rbp);
+			bdone = rbp;
 			OUTTRACE("basic block %d processed", bdone->b_id);
 			rbp = rbp->b_next;
-		} while (rbp != (bblock_p) 0 && rbp->b_idom == bdone &&
-			Lnrelems(rbp->b_pred) == 1
-		);
+		} while (rbp != (bblock_p)0 && rbp->b_idom == bdone && Lnrelems(rbp->b_pred) == 1);
 		OUTTRACE("value numbering completed", 0);
-		OUTAVAILS(); OUTENTITIES();
+		OUTAVAILS();
+		OUTENTITIES();
 
 		/* Now we put out the instructions without common
 		 * subexpressions but with the use of temporaries,
@@ -74,7 +77,7 @@ STATIC void cs_optimize(void *vp)
 	}
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	Scs = 0;
 	go(argc, argv, no_action, cs_optimize, cs_machinit, no_action);

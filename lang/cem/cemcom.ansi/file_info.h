@@ -5,6 +5,9 @@
 /* $Id$ */
 /* F I L E   I N F O R M A T I O N   S T R U C T U R E */
 
+#ifndef FILE_INFO_H
+#define FILE_INFO_H
+
 struct file_info {
 	unsigned int	fil_lino;
 	int		fil_nestlow;
@@ -18,3 +21,5 @@ struct file_info {
 #define WorkingDir	finfo.fil_wdir
 
 extern struct file_info finfo;	/* input.c */
+
+#endif

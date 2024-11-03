@@ -97,7 +97,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 		{
 			default:
 				assert(FALSE);
-/* NOTREACHED */
+				UNREACHABLE_CODE;
 #ifdef TABLEDEBUG
 			case DO_DLINE:
 			{
@@ -311,12 +311,12 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				token_p regtp[MAXCREG];
 				c3_p regcp[MAXCREG];
 				rl_p regls[MAXCREG];
-				c3_p cp, findcoerc();
+				c3_p cp;
 #ifdef MAXSPLIT
 				int sret;
 #endif
 				int stackpad = 0;
-				struct perm *tup, *ntup, *besttup, *tuples();
+				struct perm *tup, *ntup, *besttup;
 
 				DEBUG("MATCH");
 				tokpatlen = (codep[-1] >> 5) & 07;

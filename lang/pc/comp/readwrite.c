@@ -19,6 +19,7 @@
 #include	"typequiv.h"
 #include	"error.h"
 #include	"readwrite.h"
+#include	"lookup.h"
 
 
 /* DEBUG */
@@ -353,7 +354,7 @@ static void CodeRead(register struct node *file, register struct node *arg)
 
 			default:
 				crash("(CodeRead)");
-				/*NOTREACHED*/
+				UNREACHABLE_CODE;
 		}
 		C_asp(pointer_size);
 		C_lfr(tp->tp_size);
@@ -455,7 +456,7 @@ static void CodeWrite(register struct node *file, register struct node *arg)
 
 			default:
 				crash("(CodeWrite)");
-				/*NOTREACHED*/
+				UNREACHABLE_CODE;
 		}
 		C_asp(nbpars);
 	}

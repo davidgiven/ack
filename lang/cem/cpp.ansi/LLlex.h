@@ -49,11 +49,12 @@ extern int err_occurred;	/* "error.c"	*/
 
 /* Public function declarations */
 
-int LLlex(void);
-int GetToken(register struct token* ptok);
-void skipcomment(void);
-void skiplinecomment(void);
+extern int LLlex(void);
+extern int GetToken(register struct token* ptok);
+extern void skipcomment(void);
+extern void skiplinecomment(void);
 /* Get next character input, with trigraph parsing and newline	*/
-int GetChar(void);
+extern int GetChar(void);
+extern char* symbol2str(int tok);
 
 #endif /* LLLLEX_H_ */

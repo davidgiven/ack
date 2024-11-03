@@ -11,55 +11,55 @@
 
 #include <stdio.h> /* FILE */
 
-int tsize(int type);		/*
-				 * Determine the size of a variable of
-				 * the given type.
-				 */
-line_p duplicate(line_p lnp);	/*
-				 * Make a duplicate of the given EM
-				 * instruction. Pseudos may not be
-				 * passed as argumnets.
-				 */
-line_p copy_expr(line_p l1);	/*
-				 * copy the expression l1.
-				 * Pseudos may not be contained in
-				 * the list of instructions.
-				 */
-void rem_call(call_p c);	/*
-				 * Remove a call from main memory.
-				 */
+int tsize(int type); /*
+                      * Determine the size of a variable of
+                      * the given type.
+                      */
+line_p duplicate(line_p lnp); /*
+                               * Make a duplicate of the given EM
+                               * instruction. Pseudos may not be
+                               * passed as argumnets.
+                               */
+line_p copy_expr(line_p l1); /*
+                              * copy the expression l1.
+                              * Pseudos may not be contained in
+                              * the list of instructions.
+                              */
+void rem_call(call_p c); /*
+                          * Remove a call from main memory.
+                          */
 void remunit(short kind, proc_p p, line_p l);
-				/*
-				 * Remove the CFG and EM text of
-				 * a procedure from core.
-				 */
-void remcc(calcnt_p head);	/*
-				 * Remove call-count info from core.
-				 */
-call_p getcall(FILE *cf);	/*
-				 * Read a call from the call-file
-				 */
-line_p get_text(FILE *lf, proc_p *p_out);
-				/*
-				 * Read the EM text of one procedure.
-				 * The procedure read is returned via
-				 * p_out.
-				 */
-calcnt_p getcc(FILE *ccf, proc_p p);
-				/*
-				 * Read the call-count information
-				 * of procedure p.
-				 */
-void putcall(call_p call, FILE *cfile, short level);
-				/*
-				 * Write the call 
-				 * with the given id to the given file.
-				 * The level is the nesting level, used by
-				 * putcall when it calls itself recurively.
-				 * It should be 0 on outer levels.
-				 */
-long putcc(calcnt_p head, FILE *ccf);
-				/*
-				 * Write call-count information to
-				 * file ccf.
-				 */
+/*
+ * Remove the CFG and EM text of
+ * a procedure from core.
+ */
+void remcc(calcnt_p head); /*
+                            * Remove call-count info from core.
+                            */
+call_p getcall(FILE* cf); /*
+                           * Read a call from the call-file
+                           */
+line_p get_text(FILE* lf, proc_p* p_out);
+/*
+ * Read the EM text of one procedure.
+ * The procedure read is returned via
+ * p_out.
+ */
+calcnt_p getcc(FILE* ccf, proc_p p);
+/*
+ * Read the call-count information
+ * of procedure p.
+ */
+void putcall(call_p call, FILE* cfile, short level);
+/*
+ * Write the call
+ * with the given id to the given file.
+ * The level is the nesting level, used by
+ * putcall when it calls itself recurively.
+ * It should be 0 on outer levels.
+ */
+long putcc(calcnt_p head, FILE* ccf);
+/*
+ * Write call-count information to
+ * file ccf.
+ */

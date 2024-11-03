@@ -74,7 +74,7 @@ struct def *define(register struct idf *id, register struct scope *scope,
 
 		case D_LABEL:
 			/* generate error message somewhere else */
-			return NULLDEF;
+			return NULL;
 
 		case D_PARAMETER:
 			if (kind == D_VARIABLE)
@@ -93,26 +93,26 @@ struct def *define(register struct idf *id, register struct scope *scope,
 			}
 			else
 				error("identifier \"%s\" must be a type", id->id_text);
-			return NULLDEF;
+			return NULL;
 
 		case D_FWPROCEDURE:
 			if (kind == D_PROCEDURE)
 				return df;
 			error("procedure identification \"%s\" expected", id->id_text);
-			return NULLDEF;
+			return NULL;
 
 		case D_FWFUNCTION:
 			if (kind == D_FUNCTION)
 				return df;
 			error("function identification \"%s\" expected", id->id_text);
-			return NULLDEF;
+			return NULL;
 
 		}
 		if (kind != D_ERROR)
 			/* avoid spurious error messages */
 			error("identifier \"%s\" already declared", id->id_text);
 
-		return NULLDEF;
+		return NULL;
 	}
 
 	return MkDef(id, scope, kind);

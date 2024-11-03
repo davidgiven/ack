@@ -62,7 +62,7 @@ full lbytes;
 #endif
 
 void
-prolog(nlocals) full nlocals; {
+prolog(full nlocals) {
 
 	fputs("push ebp\nmov ebp,esp\n", codefile);
 #ifdef REGVARS
@@ -105,7 +105,7 @@ regscore(long off, int size, int typ, int score, int totyp)
 }
 
 void
-i_regsave()
+i_regsave(void)
 {
 	si_off = -1;
 	di_off = -1;
@@ -113,7 +113,7 @@ i_regsave()
 }
 
 void
-f_regsave()
+f_regsave(void)
 {
 	if (si_off != di_off) {
 		if (si_off == -lbytes) lbytes -= 4;
@@ -149,7 +149,7 @@ regsave(const char* regstr, long off, int size)
 }
 
 void
-regreturn()
+regreturn(void)
 {
 	if (firstreg == 1) {
 		if (si_off != -1) fputs("pop esi\n", codefile);
@@ -168,8 +168,7 @@ static int gdb_flag = 0;
 static char *fp_hook_nam;
 
 void
-mach_option(s)
-	char *s;
+mach_option(char* s)
 {
 	if (! strcmp(s, "-gdb")) {
 		gdb_flag = 1;
@@ -184,7 +183,7 @@ mach_option(s)
 #endif /* MACH_OPTIONS */
 
 void
-mes(type) word type ; {
+mes(word type) {
 	int argt, a1, a2 ;
 
 	switch ( (int)type ) {

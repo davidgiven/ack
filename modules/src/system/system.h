@@ -54,7 +54,7 @@ int sys_system(const char* prog, const char* const* argv);
 int sys_lock(char *);
 int sys_unlock(char *);
 #endif
-void sys_stop(int);
+NORETURN void sys_stop(int);
 time_t sys_modtime(char *);
 
 /* standard file decsriptors */
@@ -95,5 +95,9 @@ extern void sys_setbinarymode(FILE* fp);
 /* As system sprintf(), except uses malloc() to allocate a new buffer of the
  * right size for the result. */
 extern char* aprintf(const char* format, ...);
+
+/* Implementation definitions. */
+
+extern File *_get_entry(void);
 
 #endif /* __SYSTEM_INCLUDED__ */

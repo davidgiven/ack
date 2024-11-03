@@ -29,6 +29,7 @@
 #include	"stab.h"
 #include	"options.h"
 #include	"error.h"
+#include	"enter.h"
 
 char		options[128];
 char		*ProgName;
@@ -174,7 +175,6 @@ void LexScan(void)
 void AddRequired(void)
 {
 	register struct def *df;
-	extern struct def *Enter();
 	static struct node maxintnode = { 0, 0, Value, 0, { INTEGER, 0 } };
 
 	/* PROCEDURES */
@@ -190,7 +190,7 @@ void AddRequired(void)
 	df->enm_next = Enter("true", D_ENUM, bool_type, 0);
 	df->enm_next->enm_val = 1;
 	df->df_flags |= D_SET;
-	df->enm_next->enm_next = NULLDEF;
+	df->enm_next->enm_next = NULL;
 
 	(void) Enter("rewrite", D_PROCEDURE, std_type, R_REWRITE);
 	(void) Enter("put", D_PROCEDURE, std_type, R_PUT);

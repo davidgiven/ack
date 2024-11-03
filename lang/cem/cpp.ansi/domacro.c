@@ -566,7 +566,6 @@ void do_undef(char* argstr)
 static void do_error(void)
 {
 	int len;
-	char* get_text();
 	char* bp = get_text((char**)0, &len);
 
 	error("user error: %s", bp);
@@ -644,7 +643,7 @@ static int getparams(char* buf[], char parbuf[])
 		c = GetChar();
 		c = skipspaces(c, 0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 void macro_def(register struct idf* id, char* text, int nformals, int length, int flags)

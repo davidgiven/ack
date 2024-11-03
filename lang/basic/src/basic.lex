@@ -191,10 +191,7 @@ char fgets_buf[GETSBUFSIZE];
 
 
 
-char *our_fgets(buffer,n_char,stream)
-char *buffer;
-int n_char;
-File *stream;
+char *our_fgets(char* buffer, int n_char, File* stream)
 {
     /* Read one line or n_char */
     static int characters_left = 0;

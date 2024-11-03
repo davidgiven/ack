@@ -14,48 +14,48 @@
 #include "lset.h"
 #include "utils.h"
 
-struct class {
-	byte	src_class;
-	byte	res_class;
+struct class
+{
+	byte src_class;
+	byte res_class;
 };
 
-typedef struct class *class_p;
+typedef struct class* class_p;
 
-
-#define NOCLASS	0
-#define CLASS1	1
-#define CLASS2	2
-#define CLASS3	3
-#define CLASS4	4
-#define CLASS5	5
-#define CLASS6	6
-#define CLASS7	7
-#define CLASS8	8
-#define CLASS9	9
+#define NOCLASS 0
+#define CLASS1 1
+#define CLASS2 2
+#define CLASS3 3
+#define CLASS4 4
+#define CLASS5 5
+#define CLASS6 6
+#define CLASS7 7
+#define CLASS8 8
+#define CLASS9 9
 #define CLASS10 10
-#define CLASS11	11
-#define CLASS12	12
+#define CLASS11 11
+#define CLASS12 12
 
 #include "classdefs.h"
 /* The file classdefs.h contains the table classtab. It is
  * generated automatically from the file classdefs.src.
  */
 
-STATIC bool classes(int instr, int *src_out, int *res_out)
+STATIC bool classes(int instr, int* src_out, int* res_out)
 {
 	/* Determine the classes of the given instruction */
 
 	class_p c;
 
-	if (instr < sp_fmnem || instr > sp_lmnem) return FALSE;
+	if (instr < sp_fmnem || instr > sp_lmnem)
+		return FALSE;
 	c = &classtab[instr];
-	if (c->src_class == NOCLASS) return FALSE;
+	if (c->src_class == NOCLASS)
+		return FALSE;
 	*src_out = c->src_class;
 	*res_out = c->res_class;
 	return TRUE;
 }
-
-
 
 STATIC bool uses_arg(int class)
 {
@@ -63,7 +63,8 @@ STATIC bool uses_arg(int class)
 	 * an argument.
 	 */
 
-	switch(class) {
+	switch (class)
+	{
 		case CLASS1:
 		case CLASS2:
 		case CLASS3:
@@ -74,10 +75,8 @@ STATIC bool uses_arg(int class)
 		default:
 			return FALSE;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
-
-
 
 STATIC bool uses_2args(int class)
 {
@@ -88,10 +87,10 @@ STATIC bool uses_2args(int class)
 	return class == CLASS10;
 }
 
-
-STATIC bool parse_locs(line_p l, offset *c1_out, offset *c2_out)
+STATIC bool parse_locs(line_p l, offset* c1_out, offset* c2_out)
 {
-	if (INSTR(l) == op_loc && INSTR(PREV(l)) == op_loc) {
+	if (INSTR(l) == op_loc && INSTR(PREV(l)) == op_loc)
+	{
 		*c1_out = off_set(l);
 		*c2_out = off_set(PREV(l));
 		return TRUE;
@@ -99,10 +98,7 @@ STATIC bool parse_locs(line_p l, offset *c1_out, offset *c2_out)
 	return FALSE;
 }
 
-
-
-STATIC bool check_args(line_p l, int src_class, int res_class,
-		       offset *arg1_out, offset *arg2_out)
+STATIC bool check_args(line_p l, int src_class, int res_class, offset* arg1_out, offset* arg2_out)
 {
 	/* Several EM instructions have an argument
 	 * giving the size of the operand(s) of
@@ -116,17 +112,25 @@ STATIC bool check_args(line_p l, int src_class, int res_class,
 	 * else we give up.
 	 */
 
-	if (uses_2args(src_class) || uses_2args(res_class)) {
-		return parse_locs(PREV(l),arg1_out,arg2_out);
+	if (uses_2args(src_class) || uses_2args(res_class))
+	{
+		return parse_locs(PREV(l), arg1_out, arg2_out);
 	}
-	if (uses_arg(src_class) || uses_arg(res_class)) {
-		if (TYPE(l) == OPSHORT) {
-			*arg1_out = (offset) SHORT(l);
+	if (uses_arg(src_class) || uses_arg(res_class))
+	{
+		if (TYPE(l) == OPSHORT)
+		{
+			*arg1_out = (offset)SHORT(l);
 			return TRUE;
-		} else {
-			if (TYPE(l) == OPOFFSET) {
+		}
+		else
+		{
+			if (TYPE(l) == OPOFFSET)
+			{
 				*arg1_out = OFFSET(l);
-			} else {
+			}
+			else
+			{
 				return FALSE;
 			}
 		}
@@ -134,15 +138,14 @@ STATIC bool check_args(line_p l, int src_class, int res_class,
 	return TRUE; /* no argument needed */
 }
 
-
-
 STATIC offset nrbytes(int class, offset arg1, offset arg2)
 {
 	/* Determine the number of bytes of the given
 	 * arguments and class.
 	 */
 
-	switch(class) {
+	switch (class)
+	{
 		case CLASS1:
 			return arg1;
 		case CLASS2:
@@ -162,9 +165,9 @@ STATIC offset nrbytes(int class, offset arg1, offset arg2)
 		case CLASS9:
 			return 0;
 		case CLASS10:
-			return arg2 + 2*ws;
+			return arg2 + 2 * ws;
 		case CLASS11:
-			return arg1 + 2*ps;
+			return arg1 + 2 * ps;
 		case CLASS12:
 			return (arg1 < ws ? ws : arg1);
 		default:
@@ -173,10 +176,7 @@ STATIC offset nrbytes(int class, offset arg1, offset arg2)
 	return 0;
 }
 
-
-
-STATIC void attrib(line_p l, offset *expect_out, offset *srcb_out,
-		   offset *resb_out)
+STATIC void attrib(line_p l, offset* expect_out, offset* srcb_out, offset* resb_out)
 {
 	/* Determine a number of attributes of an EM
 	 * instruction appearing in an expression.
@@ -189,23 +189,24 @@ STATIC void attrib(line_p l, offset *expect_out, offset *srcb_out,
 	 * result.
 	 */
 
-	int src_class,res_class;
+	int src_class, res_class;
 	offset arg1, arg2;
 
-	if (l == (line_p) 0 || !classes(INSTR(l),&src_class,&res_class) ||
-	    !check_args(l,src_class,res_class,&arg1,&arg2)) {
+	if (l == (line_p)0 || !classes(INSTR(l), &src_class, &res_class)
+	    || !check_args(l, src_class, res_class, &arg1, &arg2))
+	{
 		*expect_out = FALSE;
-	} else {
+	}
+	else
+	{
 		*expect_out = TRUE;
-		*srcb_out = nrbytes(src_class,arg1,arg2);
-		*resb_out = nrbytes(res_class,arg1,arg2);
+		*srcb_out = nrbytes(src_class, arg1, arg2);
+		*resb_out = nrbytes(res_class, arg1, arg2);
 	}
 }
 
-
-
-bool parse(line_p l, offset nbytes, line_p *l_out, int level,
-	   void (*action0)(line_p, line_p, offset))
+bool parse(
+    line_p l, offset nbytes, line_p* l_out, int level, void (*action0)(line_p, line_p, offset))
 {
 	/* This is a recursive descent parser for
 	 * EM expressions.
@@ -224,30 +225,37 @@ bool parse(line_p l, offset nbytes, line_p *l_out, int level,
 	 * bytes recognized.
 	 */
 
-	offset more, expected, sourcebytes,resultbytes;
+	offset more, expected, sourcebytes, resultbytes;
 	line_p lnp = 0;
 
 	more = nbytes; /* #bytes to be recognized */
-	while (more > 0) {
-		attrib(l,&expected,&sourcebytes,&resultbytes);
+	while (more > 0)
+	{
+		attrib(l, &expected, &sourcebytes, &resultbytes);
 		/* Get the attributes of EM instruction 'l'.
 		 * 'expected' denotes if it is something we can use;
 		 * 'sourcebytes' and 'resultbytes' are the number of
 		 * bytes popped resp. pushed by the instruction
 		 * (e.g. 'adi 2' pops 4 bytes and pushes 2 bytes).
 		 */
-		if (!expected || (more -= resultbytes) < 0) return FALSE;
-		if (sourcebytes == 0) {
+		if (!expected || (more -= resultbytes) < 0)
+			return FALSE;
+		if (sourcebytes == 0)
+		{
 			/* a leaf of the expression tree */
 			lnp = l;
-		} else {
-			if (!parse(PREV(l),sourcebytes,&lnp,level+1,action0)) {
+		}
+		else
+		{
+			if (!parse(PREV(l), sourcebytes, &lnp, level + 1, action0))
+			{
 				return FALSE;
 			}
 		}
-		if (level == 0) {
+		if (level == 0)
+		{
 			/* at toplevel */
-			(*action0) (lnp,l,resultbytes);
+			(*action0)(lnp, l, resultbytes);
 		}
 		l = PREV(lnp);
 	}

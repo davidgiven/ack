@@ -1,4 +1,3 @@
 /* $Id$ */
 
-#undef	NOFLOAT				/* No floating point when defined */
-
+#undef NOFLOAT /* No floating point when defined */

@@ -8,7 +8,7 @@
 #ifndef WHATEVER_H_
 #define WHATEVER_H_
 
-#include "global.h"	/* ptr, size */
+#include "global.h" /* ptr, size */
 
 /*
  * This header is for _whatever_ isn't in another header.
@@ -25,7 +25,7 @@ void putFIL(ptr);
 void call(long, int);
 
 /* init.c */
-void init(int , char **);
+void init(int, char**);
 
 /* m_ioctl.c */
 int do_ioctl(int, int, ptr);

@@ -15,6 +15,7 @@
 #include	<em_label.h>
 #include	<alloc.h>
 #include	<stdlib.h>
+#include	<string.h>
 
 #include	"type.h"
 #include	"main.h"
@@ -182,8 +183,6 @@ void DoOption(register char *text)
 		char *t;
 
 		while ( (c = *text++) != 0)	{
-			char *strchr();
-
 			t = text;
 			size = txt2int(&t);
 			algn = 0;

@@ -1,8 +1,7 @@
 /*
-	Various debug flags
+    Various debug flags
 */
 
 /* $Id$ */
 
-#undef	DB_MALLOC			/* sally malloc area */
-
+#undef DB_MALLOC /* sally malloc area */

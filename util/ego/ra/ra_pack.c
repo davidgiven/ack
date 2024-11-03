@@ -24,22 +24,22 @@
 #include "ra_pack.h"
 #include "ra_profits.h"
 
+short regs_occupied[NRREGTYPES]; /* #occupied registers for reg_pointer,
+                                  * reg_any etc.
+                                  */
+#define reg_available(t) (regs_available[t] > regs_occupied[t])
 
-short regs_occupied[NRREGTYPES];	/* #occupied registers for reg_pointer,
-					 * reg_any etc.
-					 */
-#define reg_available(t)	(regs_available[t] > regs_occupied[t])
-
-STATIC void initregcount()
+STATIC void initregcount(void)
 {
 	int t;
 
-	for (t = 0; t < NRREGTYPES; t++) {
+	for (t = 0; t < NRREGTYPES; t++)
+	{
 		regs_occupied[t] = 0;
 	}
 }
 
-STATIC alloc_p make_dummy()
+STATIC alloc_p make_dummy(void)
 {
 	alloc_p x;
 
@@ -48,8 +48,7 @@ STATIC alloc_p make_dummy()
 	return x;
 }
 
-
-STATIC bool fits_in(alloc_p a, alloc_p b, bool *cont_item)
+STATIC bool fits_in(alloc_p a, alloc_p b, bool* cont_item)
 {
 	/* See if allocation a can be assigned the same register as b.
 	 * Both allocations should be of the same register-type.
@@ -60,21 +59,23 @@ STATIC bool fits_in(alloc_p a, alloc_p b, bool *cont_item)
 	 */
 
 	*cont_item = FALSE;
-	if (a->al_regtype == b->al_regtype) {
-		while (b != (alloc_p) 0) {
-			if (Cis_elem(a->al_id,b->al_rivals)) break;
+	if (a->al_regtype == b->al_regtype)
+	{
+		while (b != (alloc_p)0)
+		{
+			if (Cis_elem(a->al_id, b->al_rivals))
+				break;
 			b = b->al_mates;
-			if (b != (alloc_p) 0 && a->al_item == b->al_item) {
+			if (b != (alloc_p)0 && a->al_item == b->al_item)
+			{
 				*cont_item = TRUE;
 			}
 		}
 	}
-	return b == (alloc_p) 0;
+	return b == (alloc_p)0;
 }
 
-
-STATIC alloc_p find_fitting_alloc(alloc,packed)
-	alloc_p alloc,packed;
+STATIC alloc_p find_fitting_alloc(alloc_p alloc, alloc_p packed)
 {
 	/* Try to find and already packed allocation that is assigned
 	 * a register that may also be used for alloc.
@@ -82,78 +83,70 @@ STATIC alloc_p find_fitting_alloc(alloc,packed)
 	 */
 
 	register alloc_p x;
-	alloc_p cand = (alloc_p) 0;
+	alloc_p cand = (alloc_p)0;
 	bool cont_item;
 
-	for (x = packed->al_next; x != (alloc_p) 0; x = x->al_next) {
-		if (fits_in(alloc,x,&cont_item)) {
+	for (x = packed->al_next; x != (alloc_p)0; x = x->al_next)
+	{
+		if (fits_in(alloc, x, &cont_item))
+		{
 			cand = x;
-			if (cont_item) break;
+			if (cont_item)
+				break;
 		}
 	}
 	return cand;
 }
 
-
-STATIC bool room_for(alloc,packed)
-	alloc_p alloc,packed;
+STATIC bool room_for(alloc_p alloc, alloc_p packed)
 {
 	/* See if there is any register available for alloc */
 
-	return reg_available(alloc->al_regtype) ||
-		(find_fitting_alloc(alloc,packed) != (alloc_p) 0);
+	return reg_available(alloc->al_regtype) || (find_fitting_alloc(alloc, packed) != (alloc_p)0);
 }
 
-
-
-STATIC alloc_p best_alloc(unpacked,packed,time_opt)
-	alloc_p unpacked,packed;
-	bool time_opt;	/* now unused */
+STATIC alloc_p best_alloc(alloc_p unpacked, alloc_p packed, bool time_opt) /* now unused */
 {
 	/* Find the next best candidate */
 
-	register alloc_p x,best;
+	register alloc_p x, best;
 
 	best = unpacked; /* dummy */
 
-	for (x = unpacked->al_next; x != (alloc_p) 0; x = x->al_next) {
-		if (x->al_profits > best->al_profits &&
-		    room_for(x,packed)) {
+	for (x = unpacked->al_next; x != (alloc_p)0; x = x->al_next)
+	{
+		if (x->al_profits > best->al_profits && room_for(x, packed))
+		{
 			best = x;
 		}
 	}
-	return (best == unpacked ? (alloc_p) 0 : best);
+	return (best == unpacked ? (alloc_p)0 : best);
 }
 
-
-
-
-STATIC alloc_p choose_location(alloc,packed,p)
-	alloc_p alloc,packed;
-	proc_p p;
+STATIC alloc_p choose_location(alloc_p alloc, alloc_p packed, proc_p p)
 {
 	/* Decide in which register to put alloc */
 
 	alloc_p fit;
 	offset dum;
 
-	fit = find_fitting_alloc(alloc,packed);
-	if (fit == (alloc_p) 0) {
+	fit = find_fitting_alloc(alloc, packed);
+	if (fit == (alloc_p)0)
+	{
 		/* Take a brand new register; allocate a dummy local for it */
 		alloc->al_regnr = regs_occupied[alloc->al_regtype]++;
-		dum = tmplocal(p,(offset) alloc->al_item->it_size);
+		dum = tmplocal(p, (offset)alloc->al_item->it_size);
 		alloc->al_dummy = dum;
-	} else {
+	}
+	else
+	{
 		alloc->al_regnr = fit->al_regnr;
 		alloc->al_dummy = fit->al_dummy;
 	}
 	return fit;
 }
 
-
-
-STATIC void update_lists(alloc,unpacked,packed,fit)
-	alloc_p alloc,unpacked,packed,fit;
+STATIC void update_lists(alloc_p alloc, alloc_p unpacked, alloc_p packed, alloc_p fit)
 {
 	/* 'alloc' has been granted a register; move it from the 'unpacked'
 	 * list to the 'packed' list. Also remove any allocation from 'unpacked'
@@ -162,83 +155,87 @@ STATIC void update_lists(alloc,unpacked,packed,fit)
 	 *  2. a timespan that overlaps the timespan of alloc.
 	 */
 
-	register alloc_p x,q,next;
+	register alloc_p x, q, next;
 
 	q = unpacked; /* dummy element at head of list */
-	for (x = unpacked->al_next; x != (alloc_p) 0; x = next) {
+	for (x = unpacked->al_next; x != (alloc_p)0; x = next)
+	{
 		next = x->al_next;
-		if (x->al_item == alloc->al_item &&
-		    not_disjoint(x->al_timespan, alloc->al_timespan)) {
+		if (x->al_item == alloc->al_item && not_disjoint(x->al_timespan, alloc->al_timespan))
+		{
 			/* this code kills two birds with one stone;
 			 * x is either an overlapping allocation or
 			 * alloc itself!
 			 */
 			q->al_next = x->al_next;
-			if (x == alloc) {
-				if (fit == (alloc_p) 0) {
+			if (x == alloc)
+			{
+				if (fit == (alloc_p)0)
+				{
 					x->al_next = packed->al_next;
 					packed->al_next = x;
-				} else {
+				}
+				else
+				{
 					x->al_mates = fit->al_mates;
 					fit->al_mates = x;
-					x->al_next = (alloc_p) 0;
+					x->al_next = (alloc_p)0;
 				}
 			}
-		} else {
+		}
+		else
+		{
 			q = x;
 		}
 	}
 }
 
-
-
-STATIC short cum_profits(alloc)
-	alloc_p alloc;
+STATIC short cum_profits(alloc_p alloc)
 {
 	/* Add the profits of all allocations packed in the same
 	 * register as alloc (i.e. alloc and all its 'mates').
 	 */
-	
+
 	alloc_p m;
 	short sum = 0;
 
-	for (m = alloc; m != (alloc_p) 0; m = m->al_mates) {
+	for (m = alloc; m != (alloc_p)0; m = m->al_mates)
+	{
 		sum += m->al_profits;
 	}
 	return sum;
 }
 
-
-
-STATIC alloc_p best_cumprofits(list,x_out,prev_out)
-	alloc_p list, *x_out, *prev_out;
+STATIC void best_cumprofits(alloc_p list, alloc_p* x_out, alloc_p* prev_out)
 {
 	/* Find the allocation with the best cummulative profits */
 
-	register alloc_p x,prev,best_prev;
+	register alloc_p x, prev, best_prev;
 	short best = 0, cum;
 
 	prev = list;
-	for (x = list->al_next; x != (alloc_p) 0; x = x->al_next) {
+	for (x = list->al_next; x != (alloc_p)0; x = x->al_next)
+	{
 		cum = cum_profits(x);
-		if (cum > best) {
+		if (cum > best)
+		{
 			best = cum;
 			best_prev = prev;
 		}
 		prev = x;
 	}
-	if (best == 0) {
-		*x_out = (alloc_p) 0;
-	} else {
+	if (best == 0)
+	{
+		*x_out = (alloc_p)0;
+	}
+	else
+	{
 		*x_out = best_prev->al_next;
 		*prev_out = best_prev;
 	}
 }
 
-
-
-STATIC void account_regsave(packed,unpacked)
-	alloc_p packed,unpacked;
+STATIC void account_regsave(alloc_p packed, alloc_p unpacked)
 {
 	/* After all packing has been done, we check for every allocated
 	 * register whether it is really advantageous to use this
@@ -246,29 +243,34 @@ STATIC void account_regsave(packed,unpacked)
 	 * and restoring the register are higher than the profits of all
 	 * allocations packed in the register. If so, we simply remove
 	 * all these allocations.
-	 * The cost of saving/restoring one extra register may depend on 
+	 * The cost of saving/restoring one extra register may depend on
 	 * the number of registers already saved.
 	 */
 
-	alloc_p x,prev,checked;
-	short time,space;
-	short tot_cost = 0,diff;
+	alloc_p x, prev, checked;
+	short time, space;
+	short tot_cost = 0, diff;
 
 	initregcount();
 	checked = make_dummy();
-	while (TRUE) {
-		best_cumprofits(packed,&x,&prev);
-		if (x == (alloc_p) 0) break;
+	while (TRUE)
+	{
+		best_cumprofits(packed, &x, &prev);
+		if (x == (alloc_p)0)
+			break;
 		regs_occupied[x->al_regtype]++;
-		regsave_cost(regs_occupied,&time,&space);
-		diff = add_timespace(time,space) - tot_cost;
-		if (diff < cum_profits(x)) {
+		regsave_cost(regs_occupied, &time, &space);
+		diff = add_timespace(time, space) - tot_cost;
+		if (diff < cum_profits(x))
+		{
 			/* x is o.k. */
 			prev->al_next = x->al_next;
 			x->al_next = checked->al_next;
 			checked->al_next = x;
 			tot_cost += diff;
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
@@ -276,29 +278,30 @@ STATIC void account_regsave(packed,unpacked)
 	 * it is moved to unpacked, indicating it will not be assigned
 	 * a register.
 	 */
-	for (x = unpacked; x->al_next != (alloc_p) 0; x = x->al_next);
+	for (x = unpacked; x->al_next != (alloc_p)0; x = x->al_next)
+		;
 	x->al_next = packed->al_next;
 	packed->al_next = checked->al_next;
 	oldalloc(checked);
 }
 
-
-
-STATIC bool in_single_reg(item,packed)
-	item_p item;
-	alloc_p packed;
+STATIC bool in_single_reg(item_p item, alloc_p packed)
 {
 	/* See if item is allocated in only one register (i.e. not in
 	 * several different registers during several parts of its lifetime.
 	 */
 
-	register alloc_p x,m;
+	register alloc_p x, m;
 	bool seen = FALSE;
 
-	for (x = packed->al_next; x != (alloc_p) 0; x = x->al_next) {
-		for ( m = x; m != (alloc_p) 0; m = m->al_mates) {
-			if (m->al_item == item) {
-				if (seen) return FALSE;
+	for (x = packed->al_next; x != (alloc_p)0; x = x->al_next)
+	{
+		for (m = x; m != (alloc_p)0; m = m->al_mates)
+		{
+			if (m->al_item == item)
+			{
+				if (seen)
+					return FALSE;
 				seen = TRUE;
 				break;
 			}
@@ -307,19 +310,15 @@ STATIC bool in_single_reg(item,packed)
 	return TRUE;
 }
 
-
-
-STATIC alloc_p find_prev(alloc,list)
-	alloc_p alloc,list;
+STATIC alloc_p find_prev(alloc_p alloc, alloc_p list)
 {
 	register alloc_p x;
 
-	assert ( alloc != (alloc_p) 0);
-	for (x = list; x->al_next != alloc ; x = x->al_next)
-		assert(x != (alloc_p) 0);
+	assert(alloc != (alloc_p)0);
+	for (x = list; x->al_next != alloc; x = x->al_next)
+		assert(x != (alloc_p)0);
 	return x;
 }
-
 
 /* If an item is always put in the same register during different loops,
  * we try to put it in that register during the whole procedure.
@@ -327,58 +326,58 @@ STATIC alloc_p find_prev(alloc,list)
  * account_regsave from rejecting it.
  */
 
-STATIC void repl_allocs(new,old,packed)
-	alloc_p new,old,packed;
+STATIC void repl_allocs(alloc_p new, alloc_p old, alloc_p packed)
 {
-	alloc_p x,next,prev,*p;
+	alloc_p x, next, prev, *p;
 	short prof = 0;
 
 	new->al_regnr = old->al_regnr;
 	new->al_dummy = old->al_dummy;
-	prev = find_prev(old,packed);
+	prev = find_prev(old, packed);
 	new->al_next = old->al_next;
-	old->al_next = (alloc_p) 0;
+	old->al_next = (alloc_p)0;
 	prev->al_next = new;
 	new->al_mates = old;
 	p = &new->al_mates;
-	for (x = old; x != (alloc_p) 0; x = next) {
+	for (x = old; x != (alloc_p)0; x = next)
+	{
 		next = x->al_mates;
-		if (x->al_item == new->al_item) {
+		if (x->al_item == new->al_item)
+		{
 			prof += x->al_profits;
 			*p = next;
 			oldalloc(x);
-		} else {
+		}
+		else
+		{
 			p = &x->al_mates;
 		}
 	}
 	new->al_profits = prof;
 }
 
-
-
-STATIC void assemble_allocs(packed)
-	alloc_p packed;
+STATIC void assemble_allocs(alloc_p packed)
 {
-	register alloc_p x,m,next;
+	register alloc_p x, m, next;
 	alloc_p e;
 	bool voidb;
 
-	for (x = packed->al_next; x != (alloc_p) 0; x = next) {
+	for (x = packed->al_next; x != (alloc_p)0; x = next)
+	{
 		next = x->al_next;
-		for ( m = x; m != (alloc_p) 0; m = m->al_mates) {
-			if (in_single_reg(m->al_item,packed) &&
-			    (e = m->al_wholeproc) != (alloc_p) 0 &&
-			    e->al_profits > 0 &&
-			    fits_in(e,x,&voidb)) {
-				repl_allocs(e,x,packed);
+		for (m = x; m != (alloc_p)0; m = m->al_mates)
+		{
+			if (in_single_reg(m->al_item, packed) && (e = m->al_wholeproc) != (alloc_p)0
+			    && e->al_profits > 0 && fits_in(e, x, &voidb))
+			{
+				repl_allocs(e, x, packed);
 				break;
 			}
 		}
 	}
 }
 
-void pack(alloc_p alloclist, bool time_opt, alloc_p *packed_out,
-	  alloc_p *not_packed_out, proc_p p)
+void pack(alloc_p alloclist, bool time_opt, alloc_p* packed_out, alloc_p* not_packed_out, proc_p p)
 {
 	/* This is the packing system. It decides which allations
 	 * to grant a register.
@@ -391,18 +390,19 @@ void pack(alloc_p alloclist, bool time_opt, alloc_p *packed_out,
 	 */
 
 	register alloc_p x;
-	alloc_p packed,unpacked,fit;
+	alloc_p packed, unpacked, fit;
 
 	initregcount();
 	packed = make_dummy();
 	unpacked = make_dummy();
 	unpacked->al_next = alloclist;
-	while ((x = best_alloc(unpacked,packed,time_opt)) != (alloc_p) 0) {
-		fit = choose_location(x,packed,p);
-		update_lists(x,unpacked,packed,fit);
+	while ((x = best_alloc(unpacked, packed, time_opt)) != (alloc_p)0)
+	{
+		fit = choose_location(x, packed, p);
+		update_lists(x, unpacked, packed, fit);
 	}
 	assemble_allocs(packed);
-	account_regsave(packed,unpacked); 
+	account_regsave(packed, unpacked);
 	/* remove allocations that don't pay off against register
 	 * save/restore costs.
 	 */

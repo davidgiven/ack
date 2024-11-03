@@ -50,7 +50,7 @@ int OO_extsame(register p_instr a1, register p_instr a2)
 			return (a1->em_dlb == a2->em_dlb);
 		default:
 			fatal("illegal type (%d) to sameext!", a1->em_argtype);
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 	}
 }
 
@@ -68,7 +68,7 @@ int OO_namsame(register p_instr a1, register p_instr a2)
 			return (a1->em_dlb == a2->em_dlb);
 		default:
 			fatal("illegal type (%d) to samenam!", a1->em_argtype);
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 	}
 }
 
@@ -84,6 +84,6 @@ arith OO_offset(register p_instr a)
 			return a->em_off;
 		default:
 			fatal("illegal type (%d) to offset!", a->em_argtype);
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 	}
 }

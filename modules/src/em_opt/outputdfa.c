@@ -318,7 +318,7 @@ PRIVATE int sametest(int s1, int s2, struct exp_node *e1, struct exp_node *e2)
 				return 1;
 
 		}
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	else
 		return (e2 == 0);

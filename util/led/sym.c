@@ -28,24 +28,25 @@ static char rcsid[] = "$Id$";
  * names. `Sy_next' contains the offset of the next symbol of which the
  * corresponding name has the same hash value.
  */
-struct symbol {
-	ind_t	sy_name;
-	ind_t	sy_next;
+struct symbol
+{
+	ind_t sy_name;
+	ind_t sy_next;
 };
 
-#define NHASH	307		/* Size of hash table. Must be odd. */
+#define NHASH 307 /* Size of hash table. Must be odd. */
 
-static ind_t	hashtable[NHASH];
+static ind_t hashtable[NHASH];
 
-unsigned short	NLocals = 0;	/* Number of local names to be saved. */
-unsigned short	NGlobals = 0;	/* Number of global names. */
+unsigned short NLocals = 0; /* Number of local names to be saved. */
+unsigned short NGlobals = 0; /* Number of global names. */
 
 /*
  * Initialize the symbol table. All indices should be noticeably invalid.
  */
 void init_symboltable(void)
 {
-	register ind_t	*rap;
+	register ind_t* rap;
 
 	for (rap = hashtable; rap < &hashtable[NHASH]; rap++)
 		*rap = BADOFF;
@@ -58,35 +59,36 @@ void init_symboltable(void)
  * in this element of the list is returned. When a match cannot be found,
  * NIL is returned.
  */
-struct outname *searchname(char *string, int hashval)
+struct outname* searchname(char* string, int hashval)
 {
-	register char		*rcp;
-	register char		*namestring;
-	register ind_t		symindex;
-	register struct outname	*name;
-	register struct symbol	*sym;
+	register char* rcp;
+	register char* namestring;
+	register ind_t symindex;
+	register struct outname* name;
+	register struct symbol* sym;
 
 	symindex = hashtable[hashval];
-	debug("looking for %s %d %z:", string, hashval,
-	      (size_t)hashtable[hashval], 0);
-	while (symindex != BADOFF) {
-		sym = (struct symbol *)address(ALLOSYMB, symindex);
-		name = (struct outname *)address(ALLOGLOB, sym->sy_name);
+	debug("looking for %s %d %z:", string, hashval, (size_t)hashtable[hashval], 0);
+	while (symindex != BADOFF)
+	{
+		sym = (struct symbol*)address(ALLOSYMB, symindex);
+		name = (struct outname*)address(ALLOGLOB, sym->sy_name);
 		namestring = address(ALLOGCHR, (ind_t)name->on_foff);
 		rcp = string;
 		debug("comp %s;", namestring, 0, 0, 0);
 		while (*rcp == *namestring++)
-			if (*rcp++ == '\0') {
-				debug("found %x, %x, %lx\n",
-				      name->on_type, name->on_desc,
-				      (unsigned long)name->on_valu, 0);
+			if (*rcp++ == '\0')
+			{
+				debug(
+				    "found %x, %x, %lx\n", name->on_type, name->on_desc,
+				    (unsigned long)name->on_valu, 0);
 				return name;
 			}
 		symindex = sym->sy_next;
 	}
 	/* Not found. */
 	debug("not found\n", 0, 0, 0, 0);
-	return (struct outname *)0;
+	return (struct outname*)0;
 }
 
 /*
@@ -97,22 +99,24 @@ struct outname *searchname(char *string, int hashval)
  */
 void entername(struct outname* name, int hashval)
 {
-	ind_t		savindex;
-	ind_t		symindex;
-	ind_t		namindex;
-	register struct symbol	*sym;
-	struct outname	*newname;
+	ind_t savindex;
+	ind_t symindex;
+	ind_t namindex;
+	register struct symbol* sym;
+	struct outname* newname;
 
-	debug("entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type, name->on_desc);
+	debug(
+	    "entername %s %d %x %x", modulptr((ind_t)name->on_foff), hashval, name->on_type,
+	    name->on_desc);
 	savindex = savechar(ALLOGCHR, (ind_t)name->on_foff);
 	symindex = hard_alloc(ALLOSYMB, (long)sizeof(struct symbol));
 	debug("; %z\n", (size_t)symindex, 0, 0, 0);
 	namindex = hard_alloc(ALLOGLOB, (long)sizeof(struct outname));
 	if (savindex == BADOFF || symindex == BADOFF || namindex == BADOFF)
 		fatal("symbol table overflow");
-	sym = (struct symbol *)address(ALLOSYMB, symindex);
+	sym = (struct symbol*)address(ALLOSYMB, symindex);
 	sym->sy_name = namindex;
-	newname = (struct outname *)address(ALLOGLOB, namindex);
+	newname = (struct outname*)address(ALLOGLOB, namindex);
 	*newname = *name;
 	newname->on_foff = savindex;
 	sym->sy_next = hashtable[hashval];
@@ -124,9 +128,9 @@ void entername(struct outname* name, int hashval)
  * Return the index of `name' in the symbol table in the order in which
  * it was entered. We need a REAL index, not a byte offset.
  */
-unsigned int indexof(struct outname *name)
+unsigned int indexof(struct outname* name)
 {
-	return name - (struct outname *)address(ALLOGLOB, (ind_t)0);
+	return name - (struct outname*)address(ALLOGLOB, (ind_t)0);
 }
 
 /*
@@ -136,10 +140,11 @@ unsigned int indexof(struct outname *name)
  */
 int hash(register char* p)
 {
-	register unsigned short	h = 0;
-	register int		c;
+	register unsigned short h = 0;
+	register int c;
 
-	while ((c = *p++) != '\0') {
+	while ((c = *p++) != '\0')
+	{
 		h <<= 2;
 		h += c;
 	}

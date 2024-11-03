@@ -525,7 +525,7 @@ getparams(buf, parbuf)
 		LoadChar(c);
 		c = skipspaces(c,0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 EXPORT

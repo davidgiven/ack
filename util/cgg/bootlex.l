@@ -23,7 +23,6 @@
 
 int lineno = 1;
 extern char *iname;
-extern char *scopy();
 %}
 
 %p 2000

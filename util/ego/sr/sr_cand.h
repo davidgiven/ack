@@ -8,13 +8,12 @@
  *  S R _ C A N D . H
  */
 
-
-void candidates(loop_p lp, lset *iv_cand, lset *vars);
-				/*
-				 * Find candidate induction variables,
-				 * i.e. local variables that are assigned
-				 * a value precisely once within the loop,
-				 * within a strong block. Also find the
-				 * local variables that are changed within
-				 * the loop, but that are not a candidate.
-				 */
+void candidates(loop_p lp, lset* iv_cand, lset* vars);
+/*
+ * Find candidate induction variables,
+ * i.e. local variables that are assigned
+ * a value precisely once within the loop,
+ * within a strong block. Also find the
+ * local variables that are changed within
+ * the loop, but that are not a candidate.
+ */

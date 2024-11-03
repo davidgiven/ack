@@ -30,6 +30,7 @@ word_t eval_hl(expr_t* expr, int token)
 	case OP_LO:  /* lo16[expr] */
 		return lo;
 	}
+	UNREACHABLE_CODE;
 }
 
 void emit_hl(word_t in)

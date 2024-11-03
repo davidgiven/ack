@@ -12,8 +12,7 @@ File _sys_ftab[SYS_NOPEN] = {
 	{ 2, OP_APPEND}
 };
 
-File *
-_get_entry()
+File * _get_entry(void)
 {
 	register File *fp;
 

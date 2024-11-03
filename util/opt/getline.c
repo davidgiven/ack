@@ -516,7 +516,7 @@ void getlines(void)
 		{
 			default:
 				error("unknown instruction byte");
-				/* NOTREACHED */
+				UNREACHABLE_CODE;
 
 			case ATEOF:
 				if (prodepth != 0)

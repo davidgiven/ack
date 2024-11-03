@@ -32,8 +32,14 @@ BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 
 # What build flags do you want to use for native code?
 
-CFLAGS ?= -g -Wno-return-type
-LDFLAGS ?= 
+CFLAGS ?= -g \
+	-Werror=return-type \
+	-Werror=implicit-function-declaration \
+	-Werror=strict-prototypes \
+	-fsanitize=unreachable
+
+LDFLAGS ?= -g \
+	-fsanitize=unreachable
 
 # Various commands.
 
@@ -69,6 +75,12 @@ INSDIR = $(abspath $(BUILDDIR)/staging)
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
+
+MANDATORYCFLAGS = \
+	-DUNREACHABLE_CODE='__builtin_unreachable()' \
+	-DNORETURN=_Noreturn
+
+MANDATORYLDFLAGS =
 
 .NOTPARALLEL:
 
@@ -130,8 +142,8 @@ $(build-file): first/ackbuilder.lua Makefile $(lua-files)
 		PREFIX="$(PREFIX)" \
 		AR=$(AR) \
 		CC=$(CC) \
-		CFLAGS="$(CFLAGS)" \
-		LDFLAGS="$(LDFLAGS)" \
+		CFLAGS="$(MANDATORYCFLAGS) $(CFLAGS)" \
+		LDFLAGS="$(MANDATORYLDFLAGS) $(LDFLAGS)" \
 		> $(build-file)
 
 ack-setup.exe: etc/windows-installer.nsi

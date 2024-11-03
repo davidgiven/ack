@@ -12,6 +12,7 @@
 #include	<em_label.h>
 #include	<pc_file.h>
 
+#include	"print.h"
 #include	"LLlex.h"
 #include	"chk_expr.h"
 #include	"def.h"
@@ -25,6 +26,7 @@
 #include	"error.h"
 #include	"label.h"
 #include	"enter.h"
+#include	"lookup.h"
 #ifdef DBSYMTAB
 #include	"stab.h"
 #endif
@@ -158,7 +160,6 @@ ProcedureAndFunctionDeclarationPart:
 Label(struct node **pnd;)
 {
 	char lab[5];
-	extern char *sprint();
 } :	{ expect_label = 1; }
 	INTEGER		/* not really an integer, in [0..9999] */
 	{ if( dot.TOK_INT < 0 || dot.TOK_INT > 9999 )	{
@@ -652,7 +653,6 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 	arith tcnt, max;
 	register arith ncst = 0;/* the number of values of the tagtype */
 	register struct selector **sp;
-	extern char *Malloc();
 } :
 	/* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
@@ -810,7 +810,7 @@ SetType(register struct type **ptp; unsigned short packed;):
 
 /* ISO section 6.4.3.5, p. 101 */
 FileType(register struct type **ptp;):
-	FILE OF
+	FILET OF
 			{ *ptp = construct_type(T_FILE, NULLTYPE);
 			  (*ptp)->tp_flags |= T_HASFILE;
 			}

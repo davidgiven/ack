@@ -28,4 +28,4 @@ extern int
 #define union_align	((int)AL_UNION)
 #endif /* NOCROSS */
 
-extern arith align();
+extern arith align(arith pos, int al);

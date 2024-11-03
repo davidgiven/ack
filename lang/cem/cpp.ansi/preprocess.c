@@ -35,7 +35,7 @@ void Xflush(void)
 	sys_write(STDOUT, _obuf, OBUFSIZE);
 }
 
-static char* SkipComment();
+static char* SkipComment(char *op, int *lineno);
 extern char options[];
 
 /* #pragma directives are saved here and passed to the compiler later on.
@@ -536,7 +536,7 @@ void preprocess(char *fn)
 			break;
 		}
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static char* SkipComment(char *op, int *lineno)

@@ -12,7 +12,7 @@
 #include	"LLlex.h"
 #include	"Lpars.h"
 
-extern char *symbol2str();
+
 
 LLmessage(tk)	{
 	err_occurred = 1;

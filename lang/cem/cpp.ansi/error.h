@@ -16,9 +16,9 @@ void warning(char *fmt, ...);
 /*VARARGS*/
 void strict(char *fmt, ...);
 /*VARARGS*/
-void crash(char *fmt, ...);
+NORETURN void crash(char *fmt, ...);
 /*VARARGS*/
-void fatal(char *fmt, ...);
+NORETURN void fatal(char *fmt, ...);
 #else
 /*VARARGS*/
 void error(va_alist);

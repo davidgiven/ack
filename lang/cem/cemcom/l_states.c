@@ -39,7 +39,7 @@
 #define	dbg_lint_stack(m)
 #endif	/* DEBUG */
 
-extern char *symbol2str();
+
 extern char *func_name;
 extern struct type *func_type;
 extern int func_notypegiven;
@@ -971,7 +971,7 @@ lint_case_stmt(dflt)
 
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -1017,7 +1017,7 @@ lint_break_stmt()
 
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	top_ls->ls_current->st_notreached = 1;
 	top_ls->ls_current->st_warned = 0;

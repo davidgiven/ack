@@ -14,6 +14,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include	"sizes.h"
 #include    "ch3bin.h"
 #include    "ch3mon.h"
@@ -23,9 +24,6 @@
 #include    "fltcstoper.h"
 
 extern char options[];
-extern char *symbol2str();
-
-void pntminuspnt();
 
 /*	This chapter asks for the repeated application of code to handle
 	an operation that may be executed at compile time or at run time,

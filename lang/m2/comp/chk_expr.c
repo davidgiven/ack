@@ -42,7 +42,7 @@
 #include	"warning.h"
 #include	"main.h"
 
-extern char *symbol2str();
+
 
 /* Forward file declarations */
 static int ChkStandard(struct node **);
@@ -96,7 +96,7 @@ void MkCoercion(struct node **pnd, register struct type *tp)
 				break;
 			default:
 				crash("MkCoercion");
-				/*NOTREACHED*/
+				UNREACHABLE_CODE;
 			}
 			if (flt_status == FLT_OVFL) {
 				wmess = "conversion";
@@ -816,7 +816,7 @@ static int AllowedTypes(int operator)
 	default:
 		crash("(AllowedTypes)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static int ChkAddressOper(
@@ -950,7 +950,6 @@ static int ChkBinOper(struct node **expp, int flags)
 		/* Operands must be compatible (distilled from Def 8.2)
 		*/
 		if (!TstCompat(tpr, tpl)) {
-			extern char *incompat();
 			node_error(exp, "\"%s\": %s in operands", symb, incompat(tpl, tpr));
 			return 0;
 		}

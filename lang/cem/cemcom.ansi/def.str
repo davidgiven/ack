@@ -8,6 +8,7 @@
 /* $Id$ */
 /* IDENTIFIER DEFINITION DESCRIPTOR */
 
+#include	"alloc.h"
 #include	"parameters.h"
 
 struct def	{		/* for ordinary tags */

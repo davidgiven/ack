@@ -460,7 +460,7 @@ STATIC void prset(p_set p)
 			}
 		}
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC void macro(string s, p_nont n)
@@ -504,7 +504,6 @@ STATIC void getparams(void)
 	 */
 	long off;
 	register int l;
-	long ftell();
 	char first;
 	char add_semi = ' ';
 
@@ -800,7 +799,6 @@ STATIC void alternation(p_gram pp, int safety, int mustscan, int mustpop,
 	int haddefault = 0;
 	int nsafe;
 	p_set set;
-	p_set setalloc();
 	int *tokenlist = mk_tokenlist();
 	int casecnt = 0;
 	int compacted;
@@ -1213,7 +1211,6 @@ STATIC void genswhead(register p_term q, int rep_kind, int rep_count,
 	 */
 	register FILE *f = fpars;
 	p_set p1;
-	p_set setalloc();
 	int hulp1 = 0, hulp2;
 	int safeterm;
 	int termissafe = 0;

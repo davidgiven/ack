@@ -27,15 +27,13 @@
 #include "ra_items.h"
 #include "ra_lifet.h"
 
+#define MSG_OFF(l) aoff(ARG(l), 2)
+#define is_livemsg(l)                                                                              \
+	(INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_ego && aoff(ARG(l), 1) == ego_live)
+#define is_deadmsg(l)                                                                              \
+	(INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_ego && aoff(ARG(l), 1) == ego_dead)
 
-#define MSG_OFF(l)	aoff(ARG(l),2)
-#define is_livemsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ego && \
-			 aoff(ARG(l),1) == ego_live)
-#define is_deadmsg(l)	(INSTR(l) == ps_mes && aoff(ARG(l),0) == ms_ego && \
-			 aoff(ARG(l),1) == ego_dead)
-
-void build_lifetimes(items)
-	item_p items[];
+void build_lifetimes(item_p items[])
 {
 	/* compute the it_lives attribute of every item; this is
 	 * a list of intervals during which the item is live,
@@ -59,24 +57,32 @@ void build_lifetimes(items)
 	short last_code;
 
 	last_code = 0;
-	for (now = 0; now < nrinstrs; now++) {
+	for (now = 0; now < nrinstrs; now++)
+	{
 		l = instrmap[now];
-		if (is_livemsg(l)) {
-			item = item_of(MSG_OFF(l),items);
+		if (is_livemsg(l))
+		{
+			item = item_of(MSG_OFF(l), items);
 			/* A local variable that is never used is NOT an
 			 * item; yet, there may be a register message for it...
 			 */
-			if(item != (item_p) 0) {
+			if (item != (item_p)0)
+			{
 				item->it_lastlive = last_code + 1;
 			}
-		} else {
-			if (is_deadmsg(l)) {
-				item = item_of(MSG_OFF(l),items);
-				if (item != (item_p) 0) {
-					add_interval(item->it_lastlive,
-					       last_code, &item->it_lives);
+		}
+		else
+		{
+			if (is_deadmsg(l))
+			{
+				item = item_of(MSG_OFF(l), items);
+				if (item != (item_p)0)
+				{
+					add_interval(item->it_lastlive, last_code, &item->it_lives);
 				}
-			} else {
+			}
+			else
+			{
 				last_code = now;
 			}
 		}

@@ -1,35 +1,35 @@
 /** @file
-	For dumping the stack, GDA, heap and text segment.
+    For dumping the stack, GDA, heap and text segment.
 */
 
 /* $Id$ */
 
-#include	<ctype.h>
+#include <ctype.h>
 
-#include	"em_abs.h"
-#include	"dump.h"
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"memdirect.h"
-#include	"mem.h"
-#include	"fra.h"
-#include	"text.h"
-#include	"proctab.h"
-#include	"shadow.h"
-#include	"linfil.h"
-#include	"rsb.h"
+#include "em_abs.h"
+#include "dump.h"
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "memdirect.h"
+#include "mem.h"
+#include "fra.h"
+#include "text.h"
+#include "proctab.h"
+#include "shadow.h"
+#include "linfil.h"
+#include "rsb.h"
 
-extern long inr;			/* from log.c */
+extern long inr; /* from log.c */
 
 /****************************************************************
  *	Dumping routines for debugging, in human-readable form.	*
  ****************************************************************/
 
-#ifdef	LOGGING
+#ifdef LOGGING
 
 /*	The file is repetitive and should probably be partly generated,
-	although it is not directly evident how.
+    although it is not directly evident how.
 */
 
 /* Forward declarations */
@@ -46,35 +46,40 @@ PRIVATE void FRA_dump(void), FRA_item(int);
 void std_all(long sz, int rawfl)
 {
 	register ptr addr;
-	
+
 	if (!check_log(" d1 "))
 		return;
-	
+
 	LOG((" d2 "));
-	LOG((" d2 . . STACK_DUMP[%ld/%ld%s] . . INR = %lu . . STACK_DUMP . .",
-				wsize, psize, rawfl ? ", raw" : "", inr));
+	LOG(
+	    (" d2 . . STACK_DUMP[%ld/%ld%s] . . INR = %lu . . STACK_DUMP . .", wsize, psize,
+	     rawfl ? ", raw" : "", inr));
 	LOG((" d2 ----------------------------------------------------------------"));
 
 	/* find a good start address */
 	addr = (sz && sz < ML - SP ? SP + sz : ML);
 	/* find RSB backwards */
-	while (in_stack(addr) && !is_st_prot(addr)) {
+	while (in_stack(addr) && !is_st_prot(addr))
+	{
 		addr++;
 	}
 	/* find end of RSB backwards */
-	while (in_stack(addr) && is_st_prot(addr)) {
+	while (in_stack(addr) && is_st_prot(addr))
+	{
 		addr++;
 	}
 	addr--;
 
 	/* dump the stack */
-	while (in_stack(addr)) {
+	while (in_stack(addr))
+	{
 		addr = std_raw(addr, rawfl);
 		addr = std_rsb(addr);
 	}
 	FRA_dump();
-	LOG((" d1 >> AB = %lu, LB = %lu, SP = %lu, HP = %lu, LIN = %lu, FIL = %s",
-		AB, LB, SP, HP, getLIN(), displ_fil(getFIL())));
+	LOG(
+	    (" d1 >> AB = %lu, LB = %lu, SP = %lu, HP = %lu, LIN = %lu, FIL = %s", AB, LB, SP, HP,
+	     getLIN(), displ_fil(getFIL())));
 	LOG((" d2 ----------------------------------------------------------------"));
 	LOG((" d2 "));
 }
@@ -82,22 +87,24 @@ void std_all(long sz, int rawfl)
 PRIVATE ptr std_raw(ptr addr, int rawfl)
 {
 	/*	Produces a formatted dump of the stack segment starting
-		at  addr, up to the Return Status Block (identified
-		by protection bits)
+	    at  addr, up to the Return Status Block (identified
+	    by protection bits)
 	*/
 	register int nundef = 0;
-	
+
 	LOG((" d2       ADDRESS     BYTE     ITEM VALUE   SHADOW"));
-	
-	while (	in_stack(addr)
-	&&	(!is_st_prot(addr) || rawfl)
-	) {
-		if (st_sh(addr) == UNDEFINED) {
+
+	while (in_stack(addr) && (!is_st_prot(addr) || rawfl))
+	{
+		if (st_sh(addr) == UNDEFINED)
+		{
 			if (nundef++ == 0)
 				LOG((" d2    %10lu    undef", addr));
 		}
-		else {
-			if (nundef) {
+		else
+		{
+			if (nundef)
+			{
 				std_left_undefs(nundef, addr + 1);
 				nundef = 0;
 			}
@@ -112,35 +119,27 @@ PRIVATE ptr std_raw(ptr addr, int rawfl)
 
 PRIVATE void std_item(ptr addr)
 {
-	if (	is_wordaligned(addr)
-	&&	is_in_stack(addr, psize)
-	&&	std_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
-	) {
+	if (is_wordaligned(addr) && is_in_stack(addr, psize)
+	    && std_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
+	{
 		/* print a pointer value */
-		LOG((" d2    %10lu      %3lu    [%10lu]  (%-s)",
-			addr,
-			btol(stack_loc(addr)),
-			p_in_stack(addr),
-			displ_sh(st_sh(addr), stack_loc(addr))));
+		LOG(
+		    (" d2    %10lu      %3lu    [%10lu]  (%-s)", addr, btol(stack_loc(addr)),
+		     p_in_stack(addr), displ_sh(st_sh(addr), stack_loc(addr))));
+	}
+	else if (is_wordaligned(addr) && w_is_in_stack(addr) && std_bytes(addr, addr + wsize, SH_INT))
+	{
+		/* print a word value */
+		LOG(
+		    (" d2    %10lu      %3lu    [%10ld]  (%-s)", addr, btol(stack_loc(addr)),
+		     w_in_stack(addr), displ_sh(st_sh(addr), stack_loc(addr))));
 	}
 	else
-	if (	is_wordaligned(addr)
-	&&	w_is_in_stack(addr)
-	&&	std_bytes(addr, addr + wsize, SH_INT)
-	) {
-		/* print a word value */
-		LOG((" d2    %10lu      %3lu    [%10ld]  (%-s)",
-			addr,
-			btol(stack_loc(addr)),
-			w_in_stack(addr),
-			displ_sh(st_sh(addr), stack_loc(addr))));
-	}
-	else {
+	{
 		/* just print the byte */
-		LOG((" d2    %10lu      %3lu                  (%-s)",
-			addr,
-			btol(stack_loc(addr)),
-			displ_sh(st_sh(addr), stack_loc(addr))));
+		LOG(
+		    (" d2    %10lu      %3lu                  (%-s)", addr, btol(stack_loc(addr)),
+		     displ_sh(st_sh(addr), stack_loc(addr))));
 	}
 }
 
@@ -155,12 +154,13 @@ PRIVATE ptr std_rsb(ptr addr)
 	long lin;
 	ptr fil;
 	char pr_descr[300];
-	
+
 	if (!in_stack(addr))
 		return addr;
 
-	dmp_lb = addr - (rsbsize-1);	/* pseudo local base */
-	if (!in_stack(dmp_lb)) {
+	dmp_lb = addr - (rsbsize - 1); /* pseudo local base */
+	if (!in_stack(dmp_lb))
+	{
 		LOG((" d1 >>RSB: >>>> INCOMPLETE <<<<"));
 		return dmp_lb;
 	}
@@ -172,50 +172,58 @@ PRIVATE ptr std_rsb(ptr addr)
 	lin = LIN_in_stack(dmp_lb + rsb_LIN);
 	fil = p_in_stack(dmp_lb + rsb_FIL);
 
-	if (pi == -1) {
+	if (pi == -1)
+	{
 		sprintf(pr_descr, "uninit");
 	}
-	else
-	if (pi < NProc) {
-		sprintf(pr_descr, "(%ld,%ld)",
-				pi, (long)proctab[pi].pr_nloc);
+	else if (pi < NProc)
+	{
+		sprintf(pr_descr, "(%ld,%ld)", pi, (long)proctab[pi].pr_nloc);
 	}
-	else {
+	else
+	{
 		sprintf(pr_descr, "%ld >>>> ILLEGAL <<<<", pi);
 	}
-	LOG((" d1 >> RSB: code = %s, PI = %s, PC = %lu, LB = %lu, LIN = %lu, FIL = %s",
-		displ_code(code), pr_descr, pc, lb, lin, displ_fil(fil)));
-	
+	LOG(
+	    (" d1 >> RSB: code = %s, PI = %s, PC = %lu, LB = %lu, LIN = %lu, FIL = %s",
+	     displ_code(code), pr_descr, pc, lb, lin, displ_fil(fil)));
+
 	LOG((" d2 "));
 	return addr - rsbsize;
 }
 
-PRIVATE char *displ_code(int rsbcode)
+PRIVATE char* displ_code(int rsbcode)
 {
-	switch (rsbcode) {
-	case RSB_STP:	return "STP";
-	case RSB_CAL:	return "CAL";
-	case RSB_RTT:	return "RTT";
-	case RSB_NRT:	return "NRT";
-	default:	return ">>Bad RSB code<<";
+	switch (rsbcode)
+	{
+		case RSB_STP:
+			return "STP";
+		case RSB_CAL:
+			return "CAL";
+		case RSB_RTT:
+			return "RTT";
+		case RSB_NRT:
+			return "NRT";
+		default:
+			return ">>Bad RSB code<<";
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 PRIVATE void std_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
-	switch (nundef) {
-	case 1:
-		break;
-	case 2:
-		LOG((" d2    %10lu    undef", addr));
-		break;
-	default:
-		LOG((" d2         | | |    | | |"));
-		LOG((" d2    %10lu    undef (%s)",
-				addr, displ_undefs(nundef, addr)));
-		break;
+	switch (nundef)
+	{
+		case 1:
+			break;
+		case 2:
+			LOG((" d2    %10lu    undef", addr));
+			break;
+		default:
+			LOG((" d2         | | |    | | |"));
+			LOG((" d2    %10lu    undef (%s)", addr, displ_undefs(nundef, addr)));
+			break;
 	}
 }
 
@@ -223,48 +231,41 @@ PRIVATE void FRA_dump(void)
 {
 	register int addr;
 
-	LOG((" d2        FRA: size = %d, %s",
-			FRASize, FRA_def ? "defined" : "undefined"));
+	LOG((" d2        FRA: size = %d, %s", FRASize, FRA_def ? "defined" : "undefined"));
 
-	for (addr = 0; addr < FRASize; addr++) {
+	for (addr = 0; addr < FRASize; addr++)
+	{
 		FRA_item(addr);
 	}
 }
 
 PRIVATE void FRA_item(int addr)
 {
-	if (	is_wordaligned(addr)
-	&&	is_in_FRA(addr, psize)
-	&&	FRAd_bytes(addr, (int)(addr + psize), SH_DATAP|SH_INSP)
-	) {
+	if (is_wordaligned(addr) && is_in_FRA(addr, psize)
+	    && FRAd_bytes(addr, (int)(addr + psize), SH_DATAP | SH_INSP))
+	{
 		/* print a pointer value */
-		LOG((" d2        FRA[%1d]      %3lu    [%10lu]  (%-s)",
-			addr,
-			btol(FRA[addr]),
-			p_in_FRA(addr),
-			displ_sh(FRA_sh[addr], FRA[addr])));
+		LOG(
+		    (" d2        FRA[%1d]      %3lu    [%10lu]  (%-s)", addr, btol(FRA[addr]),
+		     p_in_FRA(addr), displ_sh(FRA_sh[addr], FRA[addr])));
+	}
+	else if (
+	    is_wordaligned(addr) && is_in_FRA(addr, wsize)
+	    && FRAd_bytes(addr, (int)(addr + wsize), SH_INT))
+	{
+		/* print a word value */
+		LOG(
+		    (" d2        FRA[%1d]      %3lu    [%10ld]  (%-s)", addr, btol(FRA[addr]),
+		     w_in_FRA(addr), displ_sh(FRA_sh[addr], FRA[addr])));
 	}
 	else
-	if (	is_wordaligned(addr)
-	&&	is_in_FRA(addr, wsize)
-	&&	FRAd_bytes(addr, (int)(addr + wsize), SH_INT)
-	) {
-		/* print a word value */
-		LOG((" d2        FRA[%1d]      %3lu    [%10ld]  (%-s)",
-			addr,
-			btol(FRA[addr]),
-			w_in_FRA(addr),
-			displ_sh(FRA_sh[addr], FRA[addr])));
-	}
-	else {
+	{
 		/* just print the byte */
-		LOG((" d2        FRA[%1d]      %3lu                  (%-s)",
-			addr,
-			btol(FRA[addr]),
-			displ_sh(FRA_sh[addr], FRA[addr])));
+		LOG(
+		    (" d2        FRA[%1d]      %3lu                  (%-s)", addr, btol(FRA[addr]),
+		     displ_sh(FRA_sh[addr], FRA[addr])));
 	}
 }
-
 
 /******** Global Data Area Dump ********/
 
@@ -272,29 +273,32 @@ void gdad_all(ptr low, ptr high)
 {
 	register ptr addr;
 	register int nundef = 0;
-	
+
 	if (!check_log(" +1 "))
 		return;
-	
+
 	if (low == 0 && high == 0)
 		high = HB;
-	
+
 	LOG((" +1 "));
-	LOG((" +1 . . GDA_DUMP[%ld/%ld] . . INR = %lu . . GDA_DUMP . .",
-				wsize, psize, inr));
+	LOG((" +1 . . GDA_DUMP[%ld/%ld] . . INR = %lu . . GDA_DUMP . .", wsize, psize, inr));
 	LOG((" +1 ----------------------------------------------------------------"));
 	LOG((" +1       ADDRESS     BYTE     WORD VALUE   SHADOW"));
-	
+
 	/* dump global data area contents */
 	addr = low;
-	while (addr < min(HB, high)) {
-		if (dt_sh(addr) == UNDEFINED) {
+	while (addr < min(HB, high))
+	{
+		if (dt_sh(addr) == UNDEFINED)
+		{
 			if (nundef++ == 0)
 				LOG((" +1    %10lu    undef", addr));
 		}
-		else {
-			if (nundef) {
-				gdad_left_undefs(nundef, addr-1);
+		else
+		{
+			if (nundef)
+			{
+				gdad_left_undefs(nundef, addr - 1);
 				nundef = 0;
 			}
 			gdad_item(addr);
@@ -302,59 +306,52 @@ void gdad_all(ptr low, ptr high)
 		addr++;
 	}
 	if (nundef)
-		    gdad_left_undefs(nundef, addr-1);
+		gdad_left_undefs(nundef, addr - 1);
 	LOG((" +1 ----------------------------------------------------------------"));
 	LOG((" +1 "));
 }
 
 PRIVATE void gdad_item(ptr addr)
 {
-	if (	is_wordaligned(addr)
-	&&	is_in_data(addr, psize)
-	&&	dtd_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
-	) {
+	if (is_wordaligned(addr) && is_in_data(addr, psize)
+	    && dtd_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
+	{
 		/* print a pointer value */
-		LOG((" +1    %10lu      %3lu    [%10lu]  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			p_in_data(addr),
-			displ_sh(dt_sh(addr), data_loc(addr))));
+		LOG(
+		    (" +1    %10lu      %3lu    [%10lu]  (%-s)", addr, btol(data_loc(addr)),
+		     p_in_data(addr), displ_sh(dt_sh(addr), data_loc(addr))));
+	}
+	else if (
+	    is_wordaligned(addr) && is_in_data(addr, wsize) && dtd_bytes(addr, addr + wsize, SH_INT))
+	{
+		/* print a word value */
+		LOG(
+		    (" +1    %10lu      %3lu    [%10ld]  (%-s)", addr, btol(data_loc(addr)),
+		     w_in_data(addr), displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 	else
-	if (	is_wordaligned(addr)
-	&&	is_in_data(addr, wsize)
-	&&	dtd_bytes(addr, addr + wsize, SH_INT)
-	) {
-		/* print a word value */
-		LOG((" +1    %10lu      %3lu    [%10ld]  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			w_in_data(addr),
-			displ_sh(dt_sh(addr), data_loc(addr))));
-	}
-	else {
+	{
 		/* just print the byte */
-		LOG((" +1    %10lu      %3lu                  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			displ_sh(dt_sh(addr), data_loc(addr))));
+		LOG(
+		    (" +1    %10lu      %3lu                  (%-s)", addr, btol(data_loc(addr)),
+		     displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 }
 
 PRIVATE void gdad_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
-	switch (nundef) {
-	case 1:
-		break;
-	case 2:
-		LOG((" +1    %10lu    undef", addr));
-		break;
-	default:
-		LOG((" +1         | | |    | | |"));
-		LOG((" +1    %10lu    undef (%s)",
-				addr, displ_undefs(nundef, addr)));
-		break;
+	switch (nundef)
+	{
+		case 1:
+			break;
+		case 2:
+			LOG((" +1    %10lu    undef", addr));
+			break;
+		default:
+			LOG((" +1         | | |    | | |"));
+			LOG((" +1    %10lu    undef (%s)", addr, displ_undefs(nundef, addr)));
+			break;
 	}
 }
 
@@ -364,98 +361,94 @@ void hpd_all(void)
 {
 	register ptr addr;
 	register int nundef = 0;
-	
+
 	if (!check_log(" *1 "))
 		return;
 
 	LOG((" *1 "));
-	LOG((" *1 . . HEAP_DUMP[%ld/%ld] . . INR = %lu . . HEAP_DUMP . .",
-				wsize, psize, inr));
+	LOG((" *1 . . HEAP_DUMP[%ld/%ld] . . INR = %lu . . HEAP_DUMP . .", wsize, psize, inr));
 	LOG((" *1 ----------------------------------------------------------------"));
 	LOG((" *1       ADDRESS     BYTE     WORD VALUE   SHADOW"));
-	
+
 	/* dump heap contents */
-	for (addr = HB; addr < HP; addr++) {
-		if (dt_sh(addr) == UNDEFINED) {
+	for (addr = HB; addr < HP; addr++)
+	{
+		if (dt_sh(addr) == UNDEFINED)
+		{
 			if (nundef++ == 0)
 				LOG((" *1    %10lu    undef", addr));
 		}
-		else {
-			if (nundef) {
-				hpd_left_undefs(nundef, addr-1);
+		else
+		{
+			if (nundef)
+			{
+				hpd_left_undefs(nundef, addr - 1);
 				nundef = 0;
 			}
 			hpd_item(addr);
 		}
 	}
 	if (nundef)
-		hpd_left_undefs(nundef, addr-1);
+		hpd_left_undefs(nundef, addr - 1);
 	LOG((" *1 ----------------------------------------------------------------"));
 	LOG((" *1 "));
 }
 
 PRIVATE void hpd_item(ptr addr)
 {
-	if (	is_wordaligned(addr)
-	&&	is_in_data(addr, psize)
-	&&	dtd_bytes(addr, addr + psize, SH_DATAP|SH_INSP)
-	) {
+	if (is_wordaligned(addr) && is_in_data(addr, psize)
+	    && dtd_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
+	{
 		/* print a pointer value */
-		LOG((" *1    %10lu      %3lu    [%10lu]  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			p_in_data(addr),
-			displ_sh(dt_sh(addr), data_loc(addr))));
+		LOG(
+		    (" *1    %10lu      %3lu    [%10lu]  (%-s)", addr, btol(data_loc(addr)),
+		     p_in_data(addr), displ_sh(dt_sh(addr), data_loc(addr))));
+	}
+	else if (
+	    is_wordaligned(addr) && is_in_data(addr, wsize) && dtd_bytes(addr, addr + wsize, SH_INT))
+	{
+		/* print a word value */
+		LOG(
+		    (" *1    %10lu      %3lu    [%10ld]  (%-s)", addr, btol(data_loc(addr)),
+		     w_in_data(addr), displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 	else
-	if (	is_wordaligned(addr)
-	&&	is_in_data(addr, wsize)
-	&&	dtd_bytes(addr, addr + wsize, SH_INT)
-	) {
-		/* print a word value */
-		LOG((" *1    %10lu      %3lu    [%10ld]  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			w_in_data(addr),
-			displ_sh(dt_sh(addr), data_loc(addr))));
-	}
-	else {
+	{
 		/* just print the byte */
-		LOG((" *1    %10lu      %3lu                  (%-s)",
-			addr,
-			btol(data_loc(addr)),
-			displ_sh(dt_sh(addr), data_loc(addr))));
+		LOG(
+		    (" *1    %10lu      %3lu                  (%-s)", addr, btol(data_loc(addr)),
+		     displ_sh(dt_sh(addr), data_loc(addr))));
 	}
 }
 
 PRIVATE void hpd_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
-	switch (nundef) {
-	case 1:
-		break;
-	case 2:
-		LOG((" *1    %10lu    undef", addr));
-		break;
-	default:
-		LOG((" *1         | | |    | | |"));
-		LOG((" *1    %10lu    undef (%s)",
-				addr, displ_undefs(nundef, addr)));
-		break;
+	switch (nundef)
+	{
+		case 1:
+			break;
+		case 2:
+			LOG((" *1    %10lu    undef", addr));
+			break;
+		default:
+			LOG((" *1         | | |    | | |"));
+			LOG((" *1    %10lu    undef (%s)", addr, displ_undefs(nundef, addr)));
+			break;
 	}
 }
-
 
 /* Service routines */
 
 PRIVATE int std_bytes(ptr low, ptr high, int bits)
 {
 	/*	True if all stack bytes from low to high-1 have one of the
-		bits in bits on.
+	    bits in bits on.
 	*/
 	int byte = bits;
 
-	while (low < high) {
+	while (low < high)
+	{
 		byte &= st_sh(low);
 		low++;
 	}
@@ -466,11 +459,12 @@ PRIVATE int std_bytes(ptr low, ptr high, int bits)
 PRIVATE int dtd_bytes(ptr low, ptr high, int bits)
 {
 	/*	True if all data bytes from low to high-1 have one of the
-		bits in bits on.
+	    bits in bits on.
 	*/
 	int byte = bits;
 
-	while (low < high) {
+	while (low < high)
+	{
 		byte &= dt_sh(low);
 		low++;
 	}
@@ -481,11 +475,12 @@ PRIVATE int dtd_bytes(ptr low, ptr high, int bits)
 PRIVATE int FRAd_bytes(int low, int high, int bits)
 {
 	/*	True if all data bytes from low to high-1 have one of the
-		bits in bits on.
+	    bits in bits on.
 	*/
 	int byte = bits;
 
-	while (low < high) {
+	while (low < high)
+	{
 		byte &= FRA_sh[low];
 		low++;
 	}
@@ -493,105 +488,112 @@ PRIVATE int FRAd_bytes(int low, int high, int bits)
 	return byte & bits;
 }
 
-PRIVATE char *displ_undefs(int nundef, ptr addr)
+PRIVATE char* displ_undefs(int nundef, ptr addr)
 {
 	/*	Given the number of undefineds, we want to report the number
-		of words with the left-over numbers of bytes on both sides:
-			|             nundef               |
-			|left|          wrds            |right
-			.....|........|........|........|...
-			a
-			d
-			d
-			r
-		This takes some arithmetic.
+	    of words with the left-over numbers of bytes on both sides:
+	        |             nundef               |
+	        |left|          wrds            |right
+	        .....|........|........|........|...
+	        a
+	        d
+	        d
+	        r
+	    This takes some arithmetic.
 	*/
 	static char buf[30];
-	register int left = wsize - 1 - p2i(addr-1) % wsize;
-	register int wrds = (nundef-left) / wsize;
-	register int right = nundef - left - wrds*wsize;
+	register int left = wsize - 1 - p2i(addr - 1) % wsize;
+	register int wrds = (nundef - left) / wsize;
+	register int right = nundef - left - wrds * wsize;
 
-	if (wrds == 0) {
-		sprintf(buf, "%d byte%s",
-			nundef, nundef == 1 ? "" : "s");
+	if (wrds == 0)
+	{
+		sprintf(buf, "%d byte%s", nundef, nundef == 1 ? "" : "s");
 	}
-	else if (left == 0 && right == 0) {
-		sprintf(buf, "%d word%s",
-			wrds, wrds == 1 ? "" : "s");
+	else if (left == 0 && right == 0)
+	{
+		sprintf(buf, "%d word%s", wrds, wrds == 1 ? "" : "s");
 	}
-	else if (left == 0) {
-		sprintf(buf, "%d word%s + %d byte%s",
-			wrds, wrds == 1 ? "" : "s",
-			right, right == 1 ? "" : "s");
+	else if (left == 0)
+	{
+		sprintf(
+		    buf, "%d word%s + %d byte%s", wrds, wrds == 1 ? "" : "s", right, right == 1 ? "" : "s");
 	}
-	else if (right == 0) {
-		sprintf(buf, "%d byte%s + %d word%s",
-			left, left == 1 ? "" : "s",
-			wrds, wrds == 1 ? "" : "s");
+	else if (right == 0)
+	{
+		sprintf(
+		    buf, "%d byte%s + %d word%s", left, left == 1 ? "" : "s", wrds, wrds == 1 ? "" : "s");
 	}
-	else {
-		sprintf(buf, "%d byte%s + %d word%s + %d byte%s",
-			left, left == 1 ? "" : "s",
-			wrds, wrds == 1 ? "" : "s",
-			right, right == 1 ? "" : "s");
+	else
+	{
+		sprintf(
+		    buf, "%d byte%s + %d word%s + %d byte%s", left, left == 1 ? "" : "s", wrds,
+		    wrds == 1 ? "" : "s", right, right == 1 ? "" : "s");
 	}
 	return buf;
 }
 
-PRIVATE char *displ_fil(ptr fil)
-{	/*	Returns a buffer containing a representation of the
-		filename derived from FIL-value fil.
-	*/
+PRIVATE char* displ_fil(ptr fil)
+{ /*	Returns a buffer containing a representation of the
+	  filename derived from FIL-value fil.
+  */
 	static char buf[40];
-	char *bp = &buf[0];
+	char* bp = &buf[0];
 	int ch;
-	
+
 	if (!fil)
 		return "NULL";
 	if (fil >= HB)
 		return "***NOT IN GDA***";
-	
+
 	*bp++ = '"';
-	while (in_gda(fil) && (ch = data_loc(fil))) {
-		if (bp < &buf[sizeof buf-1]) {
+	while (in_gda(fil) && (ch = data_loc(fil)))
+	{
+		if (bp < &buf[sizeof buf - 1])
+		{
 			*bp++ = (ch < 040 || ch > 126 ? '?' : ch);
 		}
 		fil++;
 	}
-	if (bp < &buf[sizeof buf-1])
+	if (bp < &buf[sizeof buf - 1])
 		*bp++ = '"';
 	*bp++ = '\0';
 	return &buf[0];
 }
 
-PRIVATE char *displ_sh(char shadow, int byte)
-{	/*	Returns a buffer containing a description of the
-		shadow byte.
-	*/
+PRIVATE char* displ_sh(char shadow, int byte)
+{ /*	Returns a buffer containing a description of the
+	  shadow byte.
+  */
 	static char buf[32];
-	register char *bufp;
+	register char* bufp;
 	int check = 0;
 
 	bufp = buf;
-	if (shadow & SH_INT) {
+	if (shadow & SH_INT)
+	{
 		*bufp++ = 'I';
 		*bufp++ = 'n';
 		check++;
 	}
-	if (shadow & SH_FLOAT) {
+	if (shadow & SH_FLOAT)
+	{
 		*bufp++ = 'F';
 		*bufp++ = 'l';
 	}
-	if (shadow & SH_DATAP) {
+	if (shadow & SH_DATAP)
+	{
 		*bufp++ = 'D';
 		*bufp++ = 'p';
 	}
-	if (shadow & SH_INSP) {
+	if (shadow & SH_INSP)
+	{
 		*bufp++ = 'I';
 		*bufp++ = 'p';
 	}
 
-	if (shadow & SH_PROT) {
+	if (shadow & SH_PROT)
+	{
 		*bufp++ = ',';
 		*bufp++ = ' ';
 		*bufp++ = 'P';
@@ -600,7 +602,8 @@ PRIVATE char *displ_sh(char shadow, int byte)
 		*bufp++ = 't';
 	}
 
-	if (check && isascii(byte) && isprint(byte)) {
+	if (check && isascii(byte) && isprint(byte))
+	{
 		*bufp++ = ',';
 		*bufp++ = ' ';
 		*bufp++ = byte;
@@ -610,5 +613,4 @@ PRIVATE char *displ_sh(char shadow, int byte)
 	return (buf);
 }
 
-#endif	/* LOGGING */
-
+#endif /* LOGGING */

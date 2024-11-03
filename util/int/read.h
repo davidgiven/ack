@@ -1,5 +1,5 @@
 /*
-	Load-time variables, for reading the EM object file
+    Load-time variables, for reading the EM object file
 */
 
 /* $Id$ */
@@ -10,16 +10,16 @@ extern int FLAGS;
 
 /* EM header Part 2 variables */
 
-extern size NTEXT;		/* number of programtext bytes */
-extern size NDATA;		/* number of load-file descriptor bytes */
-extern long NPROC;		/* number of procedure descriptors */
-extern long ENTRY;		/* procedure identifier of start procedure */
-extern long NLINE;		/* the maximum source line number */
-extern size SZDATA;		/* number of gda bytes after initialization */
+extern size NTEXT; /* number of programtext bytes */
+extern size NDATA; /* number of load-file descriptor bytes */
+extern long NPROC; /* number of procedure descriptors */
+extern long ENTRY; /* procedure identifier of start procedure */
+extern long NLINE; /* the maximum source line number */
+extern size SZDATA; /* number of gda bytes after initialization */
 
 /* Open e.out file with "fname". Raise a fatal error if
    it cannot be opened. */
-void rd_open(char *fname);
+void rd_open(char* fname);
 
 /* Read the header of the load file and populates
  * the "FLAGS", "NTEXT", "NDATA", "NPROC", "ENTRY", "NLINE"

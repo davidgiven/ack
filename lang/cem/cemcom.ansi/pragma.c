@@ -8,6 +8,7 @@
 #include	"parameters.h"
 #include    "pragma.h"
 #include    "skip.h"
+#include	"domacro.h"
 
 #define P_UNKNOWN	0
 #define NR_PRAGMAS	0
@@ -19,8 +20,6 @@ struct pkey
 } pragmas[NR_PRAGMAS + 1] =
 {
 { 0, P_UNKNOWN } };
-
-extern struct idf *GetIdentifier();
 
 void do_pragma(void)
 {

@@ -4,28 +4,28 @@
 
 /* $Id$ */
 
-#include	<em_abs.h>
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"trap.h"
-#include	"warn.h"
-#include	"mem.h"
-#include	"memdirect.h"
-#include	"segment.h"
-#include	"shadow.h"
-#include	"data.h"
-#include	"text.h"
-#include	"stack.h"
-#include	"read.h"
-#include	"fra.h"
-#include	"rsb.h"
-#include	"io.h"
-#include	"linfil.h"
-#include	"switch.h"
-#include	"whatever.h"
+#include <em_abs.h>
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "trap.h"
+#include "warn.h"
+#include "mem.h"
+#include "memdirect.h"
+#include "segment.h"
+#include "shadow.h"
+#include "data.h"
+#include "text.h"
+#include "stack.h"
+#include "read.h"
+#include "fra.h"
+#include "rsb.h"
+#include "io.h"
+#include "linfil.h"
+#include "switch.h"
+#include "whatever.h"
 
-extern int running;			/* from main.c */
+extern int running; /* from main.c */
 
 /** Current line number */
 long LIN;
@@ -35,7 +35,7 @@ ptr FIL;
 PRIVATE void index_jump(size), range_check(size), search_jump(size);
 PRIVATE void gto(ptr);
 
-#define asp(l)		newSP(SP + arg_f(l))
+#define asp(l) newSP(SP + arg_f(l))
 
 /** ASP f: Adjust the stack pointer by f */
 void DoASP(register long l)
@@ -53,17 +53,26 @@ void DoASS(register size l)
 	asp(l);
 }
 
-#define	block_move(a1,a2,n)	\
-		if (in_stack(a1)) { \
-			if (in_stack(a2)) st_mvs(a1, a2, n); \
-			else st_mvd(a1, a2, n); } \
-		else {	if (in_stack(a2)) dt_mvs(a1, a2, n); \
-			else dt_mvd(a1, a2, n); }
+#define block_move(a1, a2, n)                                                                      \
+	if (in_stack(a1))                                                                              \
+	{                                                                                              \
+		if (in_stack(a2))                                                                          \
+			st_mvs(a1, a2, n);                                                                     \
+		else                                                                                       \
+			st_mvd(a1, a2, n);                                                                     \
+	}                                                                                              \
+	else                                                                                           \
+	{                                                                                              \
+		if (in_stack(a2))                                                                          \
+			dt_mvs(a1, a2, n);                                                                     \
+		else                                                                                       \
+			dt_mvd(a1, a2, n);                                                                     \
+	}
 
 /** BLM z: Block move z bytes; first pop destination addr, then source addr */
 void DoBLM(register size l)
 {
-	register ptr dp1, dp2;		/* Destination Pointers */
+	register ptr dp1, dp2; /* Destination Pointers */
 
 	LOG(("@M6 DoBLM(%ld)", l));
 	spoilFRA();
@@ -109,7 +118,8 @@ void DoDCH(void)
 	LOG(("@M6 DoDCH()"));
 	spoilFRA();
 	lb = dppop();
-	if (!is_LB(lb)) {
+	if (!is_LB(lb))
+	{
 		wtrap(WDCHBADLB, ESTACK);
 	}
 	dppush(st_lddp(lb + rsb_LB));
@@ -160,7 +170,8 @@ void DoFIL(register unsigned long arg)
 
 	LOG(("@M6 DoFIL(%lu)", p));
 	spoilFRA();
-	if (p > HB) {
+	if (p > HB)
+	{
 		wtrap(WILLFIL, EILLINS);
 	}
 	putFIL(arg_g(p));
@@ -188,7 +199,7 @@ void DoLIN(register unsigned long l)
 {
 	LOG(("@M6 DoLIN(%lu)", l));
 	spoilFRA();
-	putLIN((long) arg_lin(l));
+	putLIN((long)arg_lin(l));
 }
 
 /** LNI -: Line number increment */
@@ -204,16 +215,17 @@ void DoLOR(register long l)
 {
 	LOG(("@M6 DoLOR(%ld)", l));
 	spoilFRA();
-	switch ((int) arg_r(l)) {
-	case 0:
-		dppush(LB);
-		break;
-	case 1:
-		dppush(SP);
-		break;
-	case 2:
-		dppush(HP);
-		break;
+	switch ((int)arg_r(l))
+	{
+		case 0:
+			dppush(LB);
+			break;
+		case 1:
+			dppush(SP);
+			break;
+		case 2:
+			dppush(HP);
+			break;
 	}
 }
 
@@ -225,7 +237,8 @@ void DoLPB(void)
 	LOG(("@M6 DoLPB()"));
 	spoilFRA();
 	lb = dppop();
-	if (!is_LB(lb)) {
+	if (!is_LB(lb))
+	{
 		wtrap(WLPBBADLB, ESTACK);
 	}
 	dppush(lb + rsbsize);
@@ -260,29 +273,30 @@ void DoRTT(void)
 {
 	LOG(("@M6 DoRTT()"));
 
-	switch (poprsb(1)) {
-	case RSB_STP:
-		warning(WRTTEMPTY);
-		running = 0;		/* stop the machine */
-		return;
-	case RSB_CAL:
-		warning(WRTTCALL);
-		return;
-	case RSB_RTT:
-		/* OK */
-		break;
-	case RSB_NRT:
-		warning(WRTTNRTT);
-		running = 0;		/* stop the machine */
-		return;
-	default:
-		warning(WRTTBAD);
-		return;
+	switch (poprsb(1))
+	{
+		case RSB_STP:
+			warning(WRTTEMPTY);
+			running = 0; /* stop the machine */
+			return;
+		case RSB_CAL:
+			warning(WRTTCALL);
+			return;
+		case RSB_RTT:
+			/* OK */
+			break;
+		case RSB_NRT:
+			warning(WRTTNRTT);
+			running = 0; /* stop the machine */
+			return;
+		default:
+			warning(WRTTBAD);
+			return;
 	}
 
 	/* pop the trap number */
 	uwpop();
-	
+
 	/* restore the Function Return Area */
 	FRA_def = uwpop();
 	FRASize = uwpop();
@@ -292,20 +306,24 @@ void DoRTT(void)
 /** SIG -: Trap errors to proc identifier on top of stack, \-2 resets default */
 void DoSIG(void)
 {
- 	register long tpi = spop(psize);
+	register long tpi = spop(psize);
 
 	LOG(("@M6 DoSIG()"));
 	spoilFRA();
-	if (OnTrap == TR_HALT) {
+	if (OnTrap == TR_HALT)
+	{
 		npush(-2L, psize);
 	}
-	else	npush(TrapPI, psize);
-	if (tpi == -2) {
+	else
+		npush(TrapPI, psize);
+	if (tpi == -2)
+	{
 		OnTrap = TR_HALT;
 		TrapPI = 0;
 	}
-	else {
-		tpi = arg_p(tpi);	/* do not test earlier! */
+	else
+	{
+		tpi = arg_p(tpi); /* do not test earlier! */
 		OnTrap = TR_TRAP;
 		TrapPI = tpi;
 	}
@@ -324,17 +342,18 @@ void DoSTR(register long l)
 {
 	LOG(("@M6 DoSTR(%ld)", l));
 	spoilFRA();
-	switch ((int) arg_r(l)) {
-	case 0:
-		newLB(dppop());
-		pop_frames();
-		break;
-	case 1:
-		newSP(dppop());
-		break;
-	case 2:
-		newHP(dppop());
-		break;
+	switch ((int)arg_r(l))
+	{
+		case 0:
+			newLB(dppop());
+			pop_frames();
+			break;
+		case 1:
+			newSP(dppop());
+			break;
+		case 2:
+			newHP(dppop());
+			break;
 	}
 }
 
@@ -345,11 +364,11 @@ void DoTRP(void)
 
 	LOG(("@M6 DoTRP()"));
 	spoilFRA();
-	if (tr > 15 || !(IgnMask&BIT(tr))) {
+	if (tr > 15 || !(IgnMask & BIT(tr)))
+	{
 		wtrap(WTRP, (int)tr);
 	}
 }
-
 
 /* Service routines */
 
@@ -360,11 +379,13 @@ PRIVATE void gto(ptr p)
 	register ptr new_SP = dt_lddp(p + psize);
 	register ptr new_LB = dt_lddp(p + (2 * psize));
 
-	while (old_LB < new_LB) {
+	while (old_LB < new_LB)
+	{
 		PI = st_lds(old_LB + rsb_PI, psize);
 		old_LB = st_lddp(old_LB + rsb_LB);
 	}
-	if (old_LB != new_LB) {
+	if (old_LB != new_LB)
+	{
 		wtrap(WGTORSB, EBADGTO);
 	}
 
@@ -375,9 +396,9 @@ PRIVATE void gto(ptr p)
 }
 
 /*
-	The LIN and FIL routines.
-	The values of LIN and FIL are kept in EM machine registers
-	(variables LIN and FIL) and in the data space.
+    The LIN and FIL routines.
+    The values of LIN and FIL are kept in EM machine registers
+    (variables LIN and FIL) and in the data space.
 */
 
 void putLIN(long lin)
@@ -409,15 +430,17 @@ void putFIL(ptr fil)
 
 PRIVATE void index_jump(size nbytes)
 {
-	register ptr cdp = dppop();	/* Case Descriptor Pointer */
-	register long t_index =		/* Table INDEX */
-			spop(nbytes) - mem_lds(cdp + psize, nbytes);
-	register ptr nPC = 0;		/* New Program Counter */
+	register ptr cdp = dppop(); /* Case Descriptor Pointer */
+	register long t_index = /* Table INDEX */
+	    spop(nbytes) - mem_lds(cdp + psize, nbytes);
+	register ptr nPC = 0; /* New Program Counter */
 
-	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes)) {
+	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes))
+	{
 		nPC = mem_ldip(cdp + (2 * nbytes) + ((t_index + 1) * psize));
 	}
-	if (nPC == 0 && (nPC = mem_ldip(cdp)) == 0) {
+	if (nPC == 0 && (nPC = mem_ldip(cdp)) == 0)
+	{
 		trap(ECASE);
 	}
 	newPC(nPC);
@@ -436,15 +459,17 @@ PRIVATE void index_jump(size nbytes)
 
 PRIVATE void search_jump(size nbytes)
 {
-	register ptr cdp = dppop();	/* Case Descriptor Pointer */
-	register long sv = spop(nbytes);/* Search Value */
-	register long nt =		/* Number of Table-entries */
-			mem_lds(cdp + psize, nbytes);
-	register ptr nPC;		/* New Program Counter */
+	register ptr cdp = dppop(); /* Case Descriptor Pointer */
+	register long sv = spop(nbytes); /* Search Value */
+	register long nt = /* Number of Table-entries */
+	    mem_lds(cdp + psize, nbytes);
+	register ptr nPC; /* New Program Counter */
 
-	while (--nt >= 0) {
-		if (sv == mem_lds(cdp + (nt+1) * (nbytes+psize), nbytes)) {
-			nPC = mem_ldip(cdp + nbytes + (nt+1)*(nbytes+psize));
+	while (--nt >= 0)
+	{
+		if (sv == mem_lds(cdp + (nt + 1) * (nbytes + psize), nbytes))
+		{
+			nPC = mem_ldip(cdp + nbytes + (nt + 1) * (nbytes + psize));
 			if (nPC == 0)
 				trap(ECASE);
 			newPC(nPC);
@@ -467,14 +492,14 @@ PRIVATE void search_jump(size nbytes)
  ********************************************************/
 PRIVATE void range_check(size nbytes)
 {
-	register ptr rdp = dppop();	/* Range check Descriptor Pointer */
-	register long cv =		/* Check Value */
-			st_lds(SP, nbytes);
+	register ptr rdp = dppop(); /* Range check Descriptor Pointer */
+	register long cv = /* Check Value */
+	    st_lds(SP, nbytes);
 
-	if (must_test && !(IgnMask&BIT(ERANGE))) {
-		if (	cv < mem_lds(rdp, nbytes)
-		||	cv > mem_lds(rdp + nbytes, nbytes)
-		) {
+	if (must_test && !(IgnMask & BIT(ERANGE)))
+	{
+		if (cv < mem_lds(rdp, nbytes) || cv > mem_lds(rdp + nbytes, nbytes))
+		{
 			trap(ERANGE);
 		}
 	}

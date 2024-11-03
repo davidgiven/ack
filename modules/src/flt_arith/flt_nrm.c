@@ -9,8 +9,7 @@
 #include "flt_misc.h"
 
 void
-flt_nrm(e)
-	register flt_arith *e;
+flt_nrm(flt_arith* e)
 {
 	if ((e->m1 | e->m2) == 0L) {
 		e->flt_exp = 0;

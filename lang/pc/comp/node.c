@@ -55,7 +55,7 @@ int NodeCrash(struct node *expp)
 
 #ifdef DEBUG
 
-extern char *symbol2str();
+
 
 void indnt(int lvl)
 {

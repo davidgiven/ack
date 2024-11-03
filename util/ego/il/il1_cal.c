@@ -24,8 +24,16 @@
 
 STATIC actual_p acts, *app;
 
-#define INIT_ACTS()	{acts = (actual_p) 0; app = &acts;}
-#define APPEND_ACTUAL(a) {*app = a; app = &a->ac_next;}
+#define INIT_ACTS()                                                                                \
+	{                                                                                              \
+		acts = (actual_p)0;                                                                        \
+		app = &acts;                                                                               \
+	}
+#define APPEND_ACTUAL(a)                                                                           \
+	{                                                                                              \
+		*app = a;                                                                                  \
+		app = &a->ac_next;                                                                         \
+	}
 
 STATIC void make_actual(line_p l1, line_p l2, offset size)
 {
@@ -37,30 +45,25 @@ STATIC void make_actual(line_p l1, line_p l2, offset size)
 	actual_p a;
 
 	a = newactual();
-	a->ac_exp = copy_code(l1,l2);
+	a->ac_exp = copy_code(l1, l2);
 	a->ac_size = size;
 	APPEND_ACTUAL(a); /* append it to actual-list */
 }
 
-
-
-STATIC bool chck_asp(p,l)
-	proc_p p;
-	line_p l;
+STATIC bool chck_asp(proc_p p, line_p l)
 {
 	/* We require a call to a procedure p that has n formal
 	 * parameters to be followed by an 'asp n' instruction
 	 * (i.e. the caller should remove the actual parameters).
 	 */
 
-	return (p->p_nrformals == 0 || (l != (line_p) 0 &&INSTR(l) == op_asp &&
-		   TYPE(l) == OPSHORT && SHORT(l) == p->p_nrformals));
+	return (
+	    p->p_nrformals == 0
+	    || (l != (line_p)0 && INSTR(l) == op_asp && TYPE(l) == OPSHORT
+	        && SHORT(l) == p->p_nrformals));
 }
 
-
-
-STATIC void inc_count(caller,callee)
-	proc_p caller, callee;
+STATIC void inc_count(proc_p caller, proc_p callee)
 {
 	/* Update the call-count information.
 	 * Record the fact that there is one more call
@@ -69,12 +72,15 @@ STATIC void inc_count(caller,callee)
 
 	calcnt_p cc;
 
-	if (!SUITABLE(caller)) return;
+	if (!SUITABLE(caller))
+		return;
 	/* if the calling routine is never expanded in line
 	 * we do not need call-count information.
 	 */
-	for (cc = cchead; cc != (calcnt_p) 0; cc = cc->cc_next) {
-		if (cc->cc_proc == callee) {
+	for (cc = cchead; cc != (calcnt_p)0; cc = cc->cc_next)
+	{
+		if (cc->cc_proc == callee)
+		{
 			cc->cc_count++;
 			/* #calls to callee from caller */
 			return;
@@ -90,13 +96,7 @@ STATIC void inc_count(caller,callee)
 	cchead = cc;
 }
 
-
-
-void anal_cal(p,call,b,cf)
-	proc_p p;
-	line_p call;
-	bblock_p b;
-	FILE   *cf;
+void anal_cal(proc_p p, line_p call, bblock_p b, FILE* cf)
 {
 	/* Analyze a call instruction. If the called
 	 * routine may be expanded in line, try to
@@ -113,26 +113,31 @@ void anal_cal(p,call,b,cf)
 #endif
 	calnr++;
 	callee = PROC(call);
-	if (SUITABLE(callee)) {
+	if (SUITABLE(callee))
+	{
 		/* The called procedure may be expanded */
-		callee->P_NRCALLED++;   /* #calls to callee from anywhere */
+		callee->P_NRCALLED++; /* #calls to callee from anywhere */
 		INIT_ACTS();
-		if (parse(PREV(call),callee->p_nrformals,&lnp,0,make_actual) &&
-		      chck_asp(callee,call->l_next)) {
+		if (parse(PREV(call), callee->p_nrformals, &lnp, 0, make_actual)
+		    && chck_asp(callee, call->l_next))
+		{
 			/* succeeded in recognizing the actuals */
 			c = newcall();
 			c->cl_caller = p;
 			c->cl_id = calnr;
 			c->cl_proc = callee;
-			c->cl_looplevel = (byte) looplevel(b);
-			if (c->cl_looplevel > 0 && IS_FIRM(b)) {
+			c->cl_looplevel = (byte)looplevel(b);
+			if (c->cl_looplevel > 0 && IS_FIRM(b))
+			{
 				c->cl_flags |= CLF_FIRM;
 			}
 			c->cl_actuals = acts;
-			inc_count(p,callee);
+			inc_count(p, callee);
 			/* update call-count info */
-			putcall(c,cf,(short) 0);  /* write the call to the calfile */
-		} else {
+			putcall(c, cf, (short)0); /* write the call to the calfile */
+		}
+		else
+		{
 #ifdef VERBOSE
 			Sparsefails++;
 #endif

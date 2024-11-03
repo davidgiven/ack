@@ -35,8 +35,7 @@
 #include	"f_info.h"
 #include	"warning.h"
 #include	"misc.h"
-
-extern struct def	*GetDefinitionModule();
+#include	"defmodule.h"
 
 }
 /*

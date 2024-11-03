@@ -16,7 +16,7 @@ static int inpflag = 0;			/* input mentioned in heading ? */
 static int outpflag = 0;		/* output mentioned in heading ? */
 static label extfl_label;		/* label of array of file pointers */
 
-static void make_extfl_args();
+static void make_extfl_args(register struct def *df);
 
 void set_inp(void)
 {

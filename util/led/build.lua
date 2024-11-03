@@ -1,5 +1,6 @@
-cprogram {
-    name = "led",
+cprogram
+{
+	name = "led",
     srcs = {
 		"./archive.c",
 		"./error.c",
@@ -26,12 +27,11 @@ cprogram {
     }
 }
 
-installable {
-    name = "pkg",
-    map = {
-        ["$(INSDIR)/share/man/man5/ack.out.5"] = "./ack.out.5",
-        ["$(INSDIR)/share/man/man6/led.6"] = "./led.6",
-        ["$(PLATDEP)/em_led"] = "+led",
-    }
+installable
+{
+	name = "pkg", map = {
+		["$(INSDIR)/share/man/man5/ack.out.5"] = "./ack.out.5",
+		["$(INSDIR)/share/man/man6/led.6"] = "./led.6",
+		["$(PLATDEP)/em_led"] = "+led",
+	}
 }
-

@@ -62,11 +62,11 @@ int Sbig_caller, Sdispensable, Schangedcallee, Sbigcallee, Sspace, Szeroratio;
  * The call descriptors are put in a file (calfile).
  */
 
-STATIC void pass1(const char *lnam, const char *bnam, const char *cnam)
+STATIC void pass1(const char* lnam, const char* bnam, const char* cnam)
 {
-	FILE* f, *gf, *cf, *ccf; /* The EM input, the basic block graph,
-				  * the call-list file and the calcnt file.
-				  */
+	FILE *f, *gf, *cf, *ccf; /* The EM input, the basic block graph,
+	                          * the call-list file and the calcnt file.
+	                          */
 	long laddr;
 	bblock_p g;
 	short kind;
@@ -128,9 +128,9 @@ STATIC void pass1(const char *lnam, const char *bnam, const char *cnam)
  * be expanded in line. It does not use the EM text.
  */
 
-STATIC void pass2(const char *cnam, long space)
+STATIC void pass2(const char* cnam, long space)
 {
-	FILE* cf, *cf2, *ccf;
+	FILE *cf, *cf2, *ccf;
 	call_p c, a;
 
 	cf = openfile(cnam, "rb");
@@ -179,10 +179,10 @@ STATIC void pass2(const char *cnam, long space)
  * EM textfile.
  */
 
-void pass3(const char *lnam, const char *lnam2)
+void pass3(const char* lnam, const char* lnam2)
 {
 	bool verbose = TRUE;
-	FILE* lfile, *lfilerand, *lfile2, *sfile;
+	FILE *lfile, *lfilerand, *lfile2, *sfile;
 	call_p c, next;
 	line_p l, startscan, cal;
 	short lastcid; /* last call-id seen */
@@ -247,8 +247,7 @@ void pass3(const char *lnam, const char *lnam2)
 	}
 }
 
-STATIC void il_extptab(ptab)
-    proc_p ptab;
+STATIC void il_extptab(proc_p ptab)
 {
 	/* Allocate space for extension of proctable entries.
 	 * Also, initialise some of the fields just allocated.
@@ -264,8 +263,7 @@ STATIC void il_extptab(ptab)
 	}
 }
 
-STATIC void il_cleanptab(ptab)
-    proc_p ptab;
+STATIC void il_cleanptab(proc_p ptab)
 {
 	/* De-allocate space for extensions */
 
@@ -278,7 +276,7 @@ STATIC void il_cleanptab(ptab)
 }
 
 #ifdef VERBOSE
-STATIC void Sdiagnostics()
+STATIC void Sdiagnostics(void)
 {
 	/* print statictical information */
 
@@ -302,9 +300,9 @@ STATIC void Sdiagnostics()
 }
 #endif
 
-void il_flags(void *vp)
+void il_flags(void* vp)
 {
-	char *p = vp;
+	char* p = vp;
 
 	switch (*p++)
 	{
@@ -327,8 +325,7 @@ void il_flags(void *vp)
 	}
 }
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc, char* argv[])
 {
 	struct files* files = findfiles(argc, argv);
 	FILE* f;

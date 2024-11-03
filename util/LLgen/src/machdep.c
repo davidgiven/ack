@@ -45,7 +45,7 @@ string libpath(string s)
 	return aprintf("%s/%s", libdir, s);
 }
 
-string maketempfile()
+string maketempfile(void)
 {
 	string tmp = getenv("TMP");
 	if (!tmp)

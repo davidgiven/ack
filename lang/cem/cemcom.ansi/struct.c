@@ -29,7 +29,6 @@
 static int field_busy = 0;
 
 extern char options[];
-char *symbol2str();
 
 static void check_selector(register struct idf *, struct type *);
 /*	Greatest Common Divisor */

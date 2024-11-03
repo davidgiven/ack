@@ -256,7 +256,7 @@ int TstParCompat(int parno, register struct type *formaltype, int VARflag, struc
 	return 0;
 }
 
-int CompatCheck(register struct node **nd, struct type *tp, char *message, int (*fc)())
+int CompatCheck(register struct node **nd, struct type *tp, char *message, int (*fc)(struct type*, struct type*))
 {
 	if (! (*fc)(tp, (*nd)->nd_type)) {
 		if (message) {

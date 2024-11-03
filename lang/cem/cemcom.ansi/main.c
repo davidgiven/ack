@@ -32,7 +32,7 @@
 #include    "tokenname.h"
 
 extern struct tokenname tkidf[];
-extern char *symbol2str();
+
 extern char options[128];
 
 struct sp_id special_ids[] =	{
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 #endif	/* DEBUG */
 
 	sys_stop(err_occurred ? S_EXIT : S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 char *source = 0;

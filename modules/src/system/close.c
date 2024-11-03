@@ -8,8 +8,7 @@
 #include "system.h"
 
 void
-sys_close(fp)
-	register File *fp;
+sys_close(File* fp)
 {
 	if (fp) {
 		fp->o_flags = 0;

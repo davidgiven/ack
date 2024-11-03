@@ -8,14 +8,14 @@
  *  I L 3 _ A U X . H
  */
 
-line_p last_line(line_p list);	/*
-				 * Find the last line of a list.
-				 */
+line_p last_line(line_p list); /*
+                                * Find the last line of a list.
+                                */
 void app_list(line_p list, line_p l);
-				/*
-				 * Put list after l
-				 */
-void rem_line(line_p l);	/*
-				 * Remove a line from a (doubly linked)
-				 * list.
-				 */
+/*
+ * Put list after l
+ */
+void rem_line(line_p l); /*
+                          * Remove a line from a (doubly linked)
+                          * list.
+                          */

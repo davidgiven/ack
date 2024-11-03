@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "diagnostics.h"
+#include "warnings.h"
 
 const char* program_name = NULL;
 

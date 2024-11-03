@@ -22,22 +22,24 @@
  * and 'optimize' is called with the current procedure
  * as parameter.
  */
-void go(int argc, char * const *argv,
-	void (*initialize)(void *null),
-	void (*optimize)(void *),	/* (proc_p *p) */
-	void (*phase_machinit)(void *),	/* (FILE *f) */
-	void (*proc_flag)(void *));	/* (char *flag) */
+void go(
+    int argc,
+    char* const* argv,
+    void (*initialize)(void* null),
+    void (*optimize)(void*), /* (proc_p *p) */
+    void (*phase_machinit)(void*), /* (FILE *f) */
+    void (*proc_flag)(void*)); /* (char *flag) */
 
 /*
  * Parameter to be supplied for e.g. 'initialize' if
  * no action is required.
  */
-void no_action(void *);
+void no_action(void*);
 
 /* Report core usage, if core_flag is set. */
 void core_usage(void);
 
-/* Report number of optimizations found, if 
+/* Report number of optimizations found, if
  * report_flag is set
  */
 void report(char* s, int n);

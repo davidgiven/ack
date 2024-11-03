@@ -8,6 +8,8 @@
 #ifndef CODEGEN_H_
 #define CODEGEN_H_
 
-unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit, int forced);
+extern unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit, int forced);
+extern string tostring(word n);
+extern string mystrcpy(string s);
 
 #endif /* CODEGEN_H_ */

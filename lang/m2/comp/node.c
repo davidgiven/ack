@@ -111,7 +111,7 @@ int PNodeCrash(struct node **expp, int flags)
 
 #ifdef DEBUG
 
-extern char *symbol2str();
+
 
 void indnt(int lvl)
 {

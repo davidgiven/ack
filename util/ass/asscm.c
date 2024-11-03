@@ -87,7 +87,7 @@ area_t getarea(unsigned int size)
 		m_used += rqsize;
 #endif
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 void freearea(register area_t ptr, unsigned int size)

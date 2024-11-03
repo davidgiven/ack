@@ -21,10 +21,7 @@
 #include "ra.h"
 #include "ra_aux.h"
 
-
-time_p cons_time(l,b)
-	line_p l;
-	bblock_p b;
+time_p cons_time(line_p l, bblock_p b)
 {
 	/* Construct a time */
 
@@ -34,9 +31,6 @@ time_p cons_time(l,b)
 	t->t_bblock = b;
 	return t;
 }
-
-
-
 
 short loop_scale(short lev)
 {

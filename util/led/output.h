@@ -23,5 +23,4 @@ void beginoutput(void);
  */
 void endoutput(void);
 
-
 #endif /* __OUTPUT_H_INCLUDED__ */

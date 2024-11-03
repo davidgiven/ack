@@ -4,23 +4,26 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"warn.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "text.h"
+#include "fra.h"
+#include "warn.h"
+#include "switch.h"
 
 /*	Note that in the EM assembly language brach instructions have
-	lables as their arguments, where in the EM machine language they
-	have (relative) offsets as parameters.  This is not described in the
-	EM manual but follows from the Pascal interpreter.
+    lables as their arguments, where in the EM machine language they
+    have (relative) offsets as parameters.  This is not described in the
+    EM manual but follows from the Pascal interpreter.
 */
 
-#define	do_jump(j)	{ newPC(PC + (j)); }
+#define do_jump(j)                                                                                 \
+	{                                                                                              \
+		newPC(PC + (j));                                                                           \
+	}
 
 void DoBRA(register long jump)
 {

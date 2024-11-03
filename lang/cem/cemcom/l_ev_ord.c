@@ -29,7 +29,7 @@
 #include	"l_lint.h"
 #include	"l_state.h"
 
-extern char *symbol2str();
+
 
 PRIVATE check_ev_order();
 

@@ -61,7 +61,7 @@ static int	pro_id;
 #endif /* USE_TMP */
 
 extern char options[];
-extern char *symbol2str();
+
 
 #ifndef	LINT
 init_code(dst_file)
@@ -493,7 +493,7 @@ code_declaration(idf, expr, lvl, sc)
 			break;
 		default:
 			crash("bad local storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 	}
 }

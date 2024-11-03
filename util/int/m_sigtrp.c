@@ -4,15 +4,15 @@
 
 /* $Id$ */
 
-#include	<signal.h>
+#include <signal.h>
 
-#include	"global.h"
-#include	"log.h"
-#include	"warn.h"
-#include	"trap.h"
-#include	"m_sigtrp.h"
-#include	"io.h"
-#include	"whatever.h"
+#include "global.h"
+#include "log.h"
+#include "warn.h"
+#include "trap.h"
+#include "m_sigtrp.h"
+#include "io.h"
+#include "whatever.h"
 
 /*************************** SIGTRP *************************************
  *  The monitor call "sigtrp()" is handled by "do_sigtrp()".  The first	*
@@ -24,7 +24,7 @@
  *  indicates an error.							*
  ************************************************************************/
 
-#define	UNIX_trap(sn)	(SIGILL <= sn && sn <= SIGSYS)
+#define UNIX_trap(sn) (SIGILL <= sn && sn <= SIGSYS)
 
 #ifndef NSIG
 #define NSIG _NSIG
@@ -70,9 +70,9 @@ void init_signals(void)
 }
 
 int do_sigtrp(
-		int tn, /* EM trap number */
-		int sn  /* UNIX signal number */
-		)
+    int tn, /* EM trap number */
+    int sn /* UNIX signal number */
+)
 {
 	register int old_tn;
 
@@ -99,7 +99,7 @@ int do_sigtrp(
 		signal(sn, SIG_IGN);
 	}
 	else if (tn >= 0 && tn <= 252)
-	{/* legal tn */
+	{ /* legal tn */
 		if (signal(sn, HndlEmSig) == SIG_ERR)
 		{
 			sig_map[sn] = old_tn;
@@ -132,9 +132,7 @@ PRIVATE void HndlIntSig(int sn)
 	/* The interpreter got the signal */
 	signal(sn, SIG_IGN); /* peace and quiet for close_down() */
 	LOG(("@t1 signal %d caught by interpreter", sn));
-	message(
-			"interpreter received signal %d, which was not caught by the interpreted program",
-			sn);
+	message("interpreter received signal %d, which was not caught by the interpreted program", sn);
 	close_down(1);
 }
 
@@ -144,4 +142,3 @@ PRIVATE void HndlEmSig(int sn)
 	signal(sn, HndlIntSig); /* Revert to old situation */
 	signalled = sn;
 }
-

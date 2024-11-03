@@ -24,29 +24,31 @@ STATIC void showinstr(line_p lnp)
 	 * can occur in expressions that are going to be eliminated are
 	 * properly handled.
 	 */
-	if (INSTR(lnp) < sp_fmnem || INSTR(lnp) > sp_lmnem) {
-		fprintf(stderr,"*** ?\n");
+	if (INSTR(lnp) < sp_fmnem || INSTR(lnp) > sp_lmnem)
+	{
+		fprintf(stderr, "*** ?\n");
 		return;
 	}
 
-	fprintf(stderr,"%s", &em_mnem[4 * (INSTR(lnp)-sp_fmnem)]);
-	switch (TYPE(lnp)) {
+	fprintf(stderr, "%s", &em_mnem[4 * (INSTR(lnp) - sp_fmnem)]);
+	switch (TYPE(lnp))
+	{
 		case OPNO:
 			break;
 		case OPSHORT:
-			fprintf(stderr," %d", SHORT(lnp));
+			fprintf(stderr, " %d", SHORT(lnp));
 			break;
 		case OPOBJECT:
-			fprintf(stderr," %d", OBJ(lnp)->o_id);
+			fprintf(stderr, " %d", OBJ(lnp)->o_id);
 			break;
 		case OPOFFSET:
-			fprintf(stderr," %ld", OFFSET(lnp));
+			fprintf(stderr, " %ld", OFFSET(lnp));
 			break;
 		default:
-			fprintf(stderr," ?");
+			fprintf(stderr, " ?");
 			break;
 	}
-	fprintf(stderr,"\n");
+	fprintf(stderr, "\n");
 }
 
 void SHOWOCCUR(occur_p ocp)
@@ -55,9 +57,11 @@ void SHOWOCCUR(occur_p ocp)
 
 	register line_p lnp, next;
 
-	if (verbose_flag) {
-		for (lnp = ocp->oc_lfirst; lnp != (line_p) 0; lnp = next) {
-			next = lnp == ocp->oc_llast ? (line_p) 0 : lnp->l_next;
+	if (verbose_flag)
+	{
+		for (lnp = ocp->oc_lfirst; lnp != (line_p)0; lnp = next)
+		{
+			next = lnp == ocp->oc_llast ? (line_p)0 : lnp->l_next;
 
 			showinstr(lnp);
 		}
@@ -72,78 +76,78 @@ void SHOWAVAIL(avail_p avp)
 {
 	/* Shows an available expression. */
 	showinstr(avp->av_found);
-	fprintf(stderr,"result %d,", avp->av_result);
-	fprintf(stderr,"occurred %d times\n", Lnrelems(avp->av_occurs) + 1);
-
+	fprintf(stderr, "result %d,", avp->av_result);
+	fprintf(stderr, "occurred %d times\n", Lnrelems(avp->av_occurs) + 1);
 }
 
 void OUTAVAILS(void)
 {
 	register avail_p ravp;
 
-	fprintf(stderr,"AVAILABLE EXPRESSIONS\n");
+	fprintf(stderr, "AVAILABLE EXPRESSIONS\n");
 
-	for (ravp = avails; ravp != (avail_p) 0; ravp = ravp->av_before) {
+	for (ravp = avails; ravp != (avail_p)0; ravp = ravp->av_before)
+	{
 		SHOWAVAIL(ravp);
-		fprintf(stderr,"\n");
+		fprintf(stderr, "\n");
 	}
 }
 
-STATIC char *enkinds[] = {
-	"constant",
-	"local",
-	"external",
-	"indirect",
-	"offsetted",
-	"address of local",
-	"address of external",
-	"address of offsetted",
-	"address of local base",
-	"address of argument base",
-	"procedure",
-	"floating zero",
-	"array element",
-	"local base",
-	"heap pointer",
-	"ignore mask"
-};
+STATIC char* enkinds[] = { "constant",
+	                       "local",
+	                       "external",
+	                       "indirect",
+	                       "offsetted",
+	                       "address of local",
+	                       "address of external",
+	                       "address of offsetted",
+	                       "address of local base",
+	                       "address of argument base",
+	                       "procedure",
+	                       "floating zero",
+	                       "array element",
+	                       "local base",
+	                       "heap pointer",
+	                       "ignore mask" };
 
 void OUTENTITIES(void)
 {
 	register Lindex i;
 
-	fprintf(stderr,"ENTITIES\n");
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	fprintf(stderr, "ENTITIES\n");
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		register entity_p rep = en_elem(i);
 
-		fprintf(stderr,"%s,", enkinds[rep->en_kind]);
-		fprintf(stderr,"size %ld,", rep->en_size);
-		fprintf(stderr,"valno %d,", rep->en_vn);
-		switch (rep->en_kind) {
+		fprintf(stderr, "%s,", enkinds[rep->en_kind]);
+		fprintf(stderr, "size %ld,", rep->en_size);
+		fprintf(stderr, "valno %d,", rep->en_vn);
+		switch (rep->en_kind)
+		{
 			case ENCONST:
-				fprintf(stderr,"$%ld\n", rep->en_val);
+				fprintf(stderr, "$%ld\n", rep->en_val);
 				break;
 			case ENLOCAL:
 			case ENALOCAL:
-				fprintf(stderr,"%ld(LB)\n", rep->en_loc);
+				fprintf(stderr, "%ld(LB)\n", rep->en_loc);
 				break;
 			case ENINDIR:
-				fprintf(stderr,"*%d\n", rep->en_ind);
+				fprintf(stderr, "*%d\n", rep->en_ind);
 				break;
 			case ENOFFSETTED:
 			case ENAOFFSETTED:
-				fprintf(stderr,"%ld(%d)\n", rep->en_off, rep->en_base);
+				fprintf(stderr, "%ld(%d)\n", rep->en_off, rep->en_base);
 				break;
 			case ENALOCBASE:
 			case ENAARGBASE:
-				fprintf(stderr,"%ld levels\n", rep->en_levels);
+				fprintf(stderr, "%ld levels\n", rep->en_levels);
 				break;
 			case ENARRELEM:
-				fprintf(stderr,"%d[%d], ",rep->en_arbase,rep->en_index);
-				fprintf(stderr,"rom at %d\n", rep->en_adesc);
+				fprintf(stderr, "%d[%d], ", rep->en_arbase, rep->en_index);
+				fprintf(stderr, "rom at %d\n", rep->en_adesc);
 				break;
 		}
-		fprintf(stderr,"\n");
+		fprintf(stderr, "\n");
 	}
 }
 

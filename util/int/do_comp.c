@@ -4,20 +4,19 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"logging.h"
-#include	"nofloat.h"
-#include	"global.h"
-#include	"log.h"
-#include	"warn.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"trap.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"stack.h"
-#include	"switch.h"
-
+#include "em_abs.h"
+#include "logging.h"
+#include "nofloat.h"
+#include "global.h"
+#include "log.h"
+#include "warn.h"
+#include "mem.h"
+#include "shadow.h"
+#include "trap.h"
+#include "text.h"
+#include "fra.h"
+#include "stack.h"
+#include "switch.h"
 
 PRIVATE void compare_obj(size);
 
@@ -35,16 +34,16 @@ void DoCMI(register size l)
 void DoCMF(register size l)
 {
 	/* CMF w: Compare w byte reals */
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 	double t = fpop(arg_wf(l));
 	double s = fpop(l);
 
 	LOG(("@T6 DoCMF(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
-#else	/* NOFLOAT */
+#else /* NOFLOAT */
 	nofloat();
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 }
 
 void DoCMU(register size l)
@@ -138,27 +137,27 @@ void DoTGT(void)
  ********************************************************/
 PRIVATE void compare_obj(size obj_size)
 {
-	register ptr addr1;		/* ADDRess in object highest on st. */
-	register ptr addr2;		/* ADDRess in object deeper in st. */
-	register int comp_res = 0;	/* COMPare RESult */
+	register ptr addr1; /* ADDRess in object highest on st. */
+	register ptr addr2; /* ADDRess in object deeper in st. */
+	register int comp_res = 0; /* COMPare RESult */
 
-	for (	addr1 = SP, addr2 = SP + obj_size;
-		addr1 < SP + obj_size;
-		addr1++, addr2++
-	) {
-#ifdef	LOGGING
-		if (!st_sh(addr1) || !st_sh(addr2)) {
+	for (addr1 = SP, addr2 = SP + obj_size; addr1 < SP + obj_size; addr1++, addr2++)
+	{
+#ifdef LOGGING
+		if (!st_sh(addr1) || !st_sh(addr2))
+		{
 			warning(WUNCMP);
 			/* Let's say undefined's are not equal: */
 			comp_res = 1;
 			break;
 		}
-#endif	/* LOGGING */
-		if (stack_loc(addr1) != stack_loc(addr2)) {
+#endif /* LOGGING */
+		if (stack_loc(addr1) != stack_loc(addr2))
+		{
 			comp_res = 1;
 			break;
 		}
 	}
 	st_dec(2 * obj_size);
-	wpush((long) comp_res);
+	wpush((long)comp_res);
 }

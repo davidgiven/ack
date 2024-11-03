@@ -23,6 +23,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include	"field.h"
 #include	"mes.h"
 #include    "cstoper.h"
@@ -31,10 +32,8 @@
 #include    "error.h"
 
 
-extern char *symbol2str();
+
 extern char options[];
-extern arith flt_flt2arith();
-extern label code_string();
 
 /* 3.1.2.5 */
 void arithbalance(register struct expr **e1p, int oper, register struct expr **e2p)

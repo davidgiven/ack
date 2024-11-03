@@ -40,7 +40,7 @@ extern char options[];
 
 
 extern struct idf *idf_hashtable[];
-extern char *symbol2str();
+
 
 enum sdef_kind {selector, field};		/* parameter for dumpsdefs */
 

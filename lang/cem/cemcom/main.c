@@ -32,7 +32,7 @@
 #include	"macro.h"
 
 extern struct tokenname tkidf[], tkother[];
-extern char *symbol2str();
+
 extern char options[128];
 
 
@@ -136,7 +136,7 @@ main(argc, argv)
 	}
 #endif
 	sys_stop(err_occurred ? S_EXIT : S_END);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 #ifndef NOPP

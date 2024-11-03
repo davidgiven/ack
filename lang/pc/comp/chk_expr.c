@@ -30,6 +30,7 @@
 #include	"body.h"
 #include	"cstoper.h"
 #include	"error.h"
+#include	"lookup.h"
 
 static int ChkValue(register struct node *);
 static int ChkUnOper(register struct node *);
@@ -183,7 +184,7 @@ static int ChkValue(register struct node *expp)
 		default:
 		crash("(ChkValue)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 #endif
 
@@ -403,7 +404,7 @@ static int AllowedTypes(int operator)
 	default:
 		crash("(AllowedTypes)");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 static int Boolean(int operator)
@@ -471,7 +472,6 @@ static int ChkBinOper(register struct node *expp)
 	if (!(tpr->tp_fund & allowed) || !(tpl->tp_fund & allowed))
 	{
 		arith ub;
-		extern arith IsString();
 
 		if (allowed & T_STRINGCONST && (ub = IsString(tpl)))
 		{
@@ -560,7 +560,6 @@ static int ChkElement(register struct node *expp, register struct type **tp,
 	register struct node *left = expp->nd_left;
 	register struct node *right = expp->nd_right;
 	register int i;
-	extern char *Malloc();
 
 	if (expp->nd_class == Link && expp->nd_symb == UPTO)
 	{
@@ -748,7 +747,7 @@ char *ChkAllowedVar(register struct node *nd, int reading)
 
 	default:
 		crash("(ChkAllowedVar)");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	MarkDef(nd, D_SET, 1);
 	return message;

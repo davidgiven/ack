@@ -8,7 +8,7 @@
 #ifndef SWITCH_H_
 #define SWITCH_H_
 
-#include "global.h"	/* size */
+#include "global.h" /* size */
 
 /* switch.c */
 void do_instr(unsigned int);

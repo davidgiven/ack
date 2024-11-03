@@ -32,7 +32,6 @@ static string rcsid1 = "$Id$";
 static string c_first = "> firstset   ";
 static string c_contains = "> containset ";
 static string c_follow = "> followset  ";
-p_set setalloc();
 static int level;
 
 /* In this file are defined : */

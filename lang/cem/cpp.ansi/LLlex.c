@@ -193,7 +193,7 @@ again: /* rescan the input after an error or replacement	*/
 					return ptok->tk_symb = ch;
 				default:
 					crash("bad class for char 0%o", ch);
-					/* NOTREACHED */
+					UNREACHABLE_CODE;
 			}
 		case STCHAR: /* character constant	*/
 			ptok->tk_val = char_constant("character");
@@ -588,7 +588,7 @@ static int val_in_base(register int ch, int base)
 			return is_dig(ch) ? ch - '0' : is_hex(ch) ? (ch - 'a' + 10) & 017 : -1;
 		default:
 			fatal("(val_in_base) illegal base value %d", base);
-			/* NOTREACHED */
+			UNREACHABLE_CODE;
 	}
 }
 

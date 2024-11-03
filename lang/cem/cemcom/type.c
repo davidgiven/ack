@@ -99,7 +99,7 @@ construct_type(fund, tp, count)
 		break;
 	default:
 		crash("bad constructor in construct_type");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	return dtp;
 }

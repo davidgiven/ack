@@ -434,7 +434,7 @@ firstline:
 	default:				/* this cannot happen	*/
 		crash("bad class for char 0%o", ch);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 skipcomment()

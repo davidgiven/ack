@@ -7,15 +7,14 @@
  *	L O N G   S E T S
  */
 
-
-lset	Lempty_set(void);
-bool	Lis_elem(Lelem_t, lset);
-void	Ladd(Lelem_t, lset *);
-void	Lremove(Lelem_t, lset *);
-Lindex	Lfirst(lset);
-Lindex	Lnext(Lindex, lset);
-Lelem_t	Lelem(Lindex);
-void	Ljoin(lset, lset *);
-void	Ldeleteset(lset);
-bool	Lis_subset(lset, lset);
-short	Lnrelems(lset);
+lset Lempty_set(void);
+bool Lis_elem(Lelem_t, lset);
+void Ladd(Lelem_t, lset*);
+void Lremove(Lelem_t, lset*);
+Lindex Lfirst(lset);
+Lindex Lnext(Lindex, lset);
+Lelem_t Lelem(Lindex);
+void Ljoin(lset, lset*);
+void Ldeleteset(lset);
+bool Lis_subset(lset, lset);
+short Lnrelems(lset);

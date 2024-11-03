@@ -20,7 +20,8 @@
 
 STATIC bool test_cond(short cond, offset val)
 {
-	switch(cond) {
+	switch (cond)
+	{
 		case DEFAULT:
 			return TRUE;
 		case FITBYTE:
@@ -30,64 +31,73 @@ STATIC bool test_cond(short cond, offset val)
 		case IN_0_8:
 			return val >= 0 && val <= 8;
 	}
+	UNREACHABLE_CODE;
 }
 
 STATIC short map_value(struct cond_tab tab[], offset val, bool time)
 {
 	cond_p p;
 
-	for (p = &tab[0]; ; p++) {
-		if (test_cond(p->mc_cond,val)) {
+	for (p = &tab[0];; p++)
+	{
+		if (test_cond(p->mc_cond, val))
+		{
 			return (time ? p->mc_tval : p->mc_sval);
 		}
 	}
 }
 
-
 STATIC short index_value(struct cond_tab tab[], short n, bool time)
 {
 	cond_p p;
 
-	p = &tab[n]; 
+	p = &tab[n];
 	return (time ? p->mc_tval : p->mc_sval);
 }
 
-
-STATIC void
-allocscore(short itemtyp, short localtyp, short size, offset off,
-	   short totyp, short *time_out, short *space_out) 
+STATIC void allocscore(
+    short itemtyp,
+    short localtyp,
+    short size,
+    offset off,
+    short totyp,
+    short* time_out,
+    short* space_out)
 {
-	cond_p m = (cond_p) 0;
+	cond_p m = (cond_p)0;
 
-	if (localtyp == reg_loop) localtyp = reg_any;
-	if (size == ws || (size == ps && totyp == reg_pointer) ||
-	    (size == 2 * ws && totyp == reg_float)) {
-		switch(itemtyp) {
-		   case LOCALVAR:
-			m = alocaltab[localtyp][totyp];
-			break;
-		   case LOCAL_ADDR:
-			if (use_any_as_pointer || totyp == reg_pointer)
-				m = alocaddrtab[localtyp][totyp];
-			break;
-		   case CONST:
-			m = aconsttab;
-			break;
-		   case DCONST:
-			m = aconsttab;
-			break;
-		   case GLOBL_ADDR:
-			if (use_any_as_pointer || totyp == reg_pointer)
-				m = aglobaltab;
-			break;
-		   case PROC_ADDR:
-			if (use_any_as_pointer || totyp == reg_pointer)
-				m = aproctab;
-			break;
+	if (localtyp == reg_loop)
+		localtyp = reg_any;
+	if (size == ws || (size == ps && totyp == reg_pointer)
+	    || (size == 2 * ws && totyp == reg_float))
+	{
+		switch (itemtyp)
+		{
+			case LOCALVAR:
+				m = alocaltab[localtyp][totyp];
+				break;
+			case LOCAL_ADDR:
+				if (use_any_as_pointer || totyp == reg_pointer)
+					m = alocaddrtab[localtyp][totyp];
+				break;
+			case CONST:
+				m = aconsttab;
+				break;
+			case DCONST:
+				m = aconsttab;
+				break;
+			case GLOBL_ADDR:
+				if (use_any_as_pointer || totyp == reg_pointer)
+					m = aglobaltab;
+				break;
+			case PROC_ADDR:
+				if (use_any_as_pointer || totyp == reg_pointer)
+					m = aproctab;
+				break;
 		}
 	}
-	*time_out = (m == (cond_p) 0 ? -1 : map_value(m,off,TRUE));
-	*space_out = (m == (cond_p) 0 ? -1 : map_value(m,off,FALSE));
+	*time_out = (m == (cond_p)0 ? -1 : map_value(m, off, TRUE));
+	*space_out = (m == (cond_p)0 ? -1 : map_value(m, off, FALSE));
 	/*
 	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	fprintf(stderr,"ALLOCSCORE = (%d,%d)\n",*time_out,*space_out);
@@ -95,77 +105,71 @@ allocscore(short itemtyp, short localtyp, short size, offset off,
 }
 
 STATIC void
-opening_cost(short itemtyp, short localtyp, offset off,
-	     short *time_out, short *space_out) 
+opening_cost(short itemtyp, short localtyp, offset off, short* time_out, short* space_out)
 {
 	cond_p m;
 
-	if (localtyp == reg_loop) localtyp = reg_any;
-	switch(itemtyp) {
-	   case LOCALVAR:
-		m = olocaltab[localtyp];
-		break;
-	   case LOCAL_ADDR:
-		m = olocaddrtab[localtyp];
-		break;
-	   case CONST:
-		m = oconsttab;
-		break;
-	   case DCONST:
-		m = oconsttab;
-		break;
-	   case GLOBL_ADDR:
-		m = oglobaltab;
-		break;
-	   case PROC_ADDR:
-		m = oproctab;
-		break;
+	if (localtyp == reg_loop)
+		localtyp = reg_any;
+	switch (itemtyp)
+	{
+		case LOCALVAR:
+			m = olocaltab[localtyp];
+			break;
+		case LOCAL_ADDR:
+			m = olocaddrtab[localtyp];
+			break;
+		case CONST:
+			m = oconsttab;
+			break;
+		case DCONST:
+			m = oconsttab;
+			break;
+		case GLOBL_ADDR:
+			m = oglobaltab;
+			break;
+		case PROC_ADDR:
+			m = oproctab;
+			break;
 	}
-	*time_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,TRUE));
-	*space_out = (m == (cond_p) 0 ? 1000 : map_value(m,off,FALSE));
+	*time_out = (m == (cond_p)0 ? 1000 : map_value(m, off, TRUE));
+	*space_out = (m == (cond_p)0 ? 1000 : map_value(m, off, FALSE));
 	/*
 	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	fprintf(stderr,"OPEN_COST = (%d,%d)\n",*time_out,*space_out);
 	*/
 }
 
-
-
-
-void regsave_cost(short regs[], short *time_out, short *space_out)
+void regsave_cost(short regs[], short* time_out, short* space_out)
 {
 	/* Estimate the costs of saving and restoring the registers
 	 * The array regs contains the number of registers of every
 	 * possible type.
 	 */
 
-	short n = regs[reg_any] + regs[reg_pointer] + regs[reg_float]; 
+	short n = regs[reg_any] + regs[reg_pointer] + regs[reg_float];
 	/* #registers */
 
-	*time_out = index_value(regsav_cost,n,TRUE);
-	*space_out = index_value(regsav_cost,n,FALSE);
+	*time_out = index_value(regsav_cost, n, TRUE);
+	*space_out = index_value(regsav_cost, n, FALSE);
 	/*
 	fprintf(stderr,"REGSAVE COST, n=%d, (%d,%d)\n",n,*time_out,*space_out);
 	*/
 }
 
-
-
-STATIC short dyn_inits(inits)
-	lset inits;
+STATIC short dyn_inits(lset inits)
 {
 	Lindex i;
 	short sum = 0;
 	bblock_p b;
 
-	for (i = Lfirst(inits); i != (Lindex) 0; i = Lnext(i,inits)) {
-		b = (bblock_p) Lelem(i);
+	for (i = Lfirst(inits); i != (Lindex)0; i = Lnext(i, inits))
+	{
+		b = (bblock_p)Lelem(i);
 		sum += loop_scale(Lnrelems(b->b_loops));
 	}
 	return sum;
 }
-
-
 
 void compute_profits(alloc_p alloclist, bool time_opt)
 {
@@ -175,17 +179,19 @@ void compute_profits(alloc_p alloclist, bool time_opt)
 	 */
 
 	register alloc_p alloc;
-	short s,t,rtyp,maxsc;
+	short s, t, rtyp, maxsc;
 	item_p item;
-	short time,space,sc;
-	short otime,ospace;
+	short time, space, sc;
+	short otime, ospace;
 	offset off;
-	short cnt,nr_inits;
+	short cnt, nr_inits;
 
-	for (alloc = alloclist; alloc != (alloc_p) 0; alloc = alloc->al_next) {
+	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
+	{
 		maxsc = 0;
 		item = alloc->al_item;
-		switch(item->it_type) {
+		switch (item->it_type)
+		{
 			case LOCALVAR:
 			case LOCAL_ADDR:
 			case CONST:
@@ -195,27 +201,19 @@ void compute_profits(alloc_p alloclist, bool time_opt)
 			default:
 				off = 0;
 		}
-		for (rtyp = item->it_regtype; ; rtyp = reg_any) {
-			allocscore( 	item->it_type,
-					item->it_regtype,
-					item->it_size,
-					off,
-					rtyp,
-					&time,
-					&space);
-			opening_cost( 	item->it_type,
-					item->it_regtype,
-					off,
-					&otime,
-					&ospace);
+		for (rtyp = item->it_regtype;; rtyp = reg_any)
+		{
+			allocscore(item->it_type, item->it_regtype, item->it_size, off, rtyp, &time, &space);
+			opening_cost(item->it_type, item->it_regtype, off, &otime, &ospace);
 			nr_inits = Lnrelems(alloc->al_inits);
-			s = alloc->al_susecount * space - 
-				nr_inits*ospace;
+			s = alloc->al_susecount * space - nr_inits * ospace;
 #ifdef __STRANGE__
-			if (!alloc->al_isloop && nr_inits > 0) {
+			if (!alloc->al_isloop && nr_inits > 0)
+			{
 				/* might lead to increase of execution time */
 				cnt = 0;
-			} else
+			}
+			else
 #endif
 			{
 				cnt = alloc->al_dusecount;
@@ -223,14 +221,17 @@ void compute_profits(alloc_p alloclist, bool time_opt)
 			t = cnt * time - dyn_inits(alloc->al_inits) * otime;
 			sc = (time_opt ? t : s);
 			/*
-			fprintf(stderr, "cnt: %d time: %d otime: %d t: %d s: %d score: %d\n", cnt, time, otime, t, s, sc);
+			fprintf(stderr, "cnt: %d time: %d otime: %d t: %d s: %d score: %d\n", cnt, time, otime,
+			t, s, sc);
 			*/
-			if (sc > maxsc) {
+			if (sc > maxsc)
+			{
 				maxsc = sc;
 				alloc->al_regtype = rtyp;
 				alloc->al_profits = sc;
 			}
-			if (rtyp == reg_any) break;
+			if (rtyp == reg_any)
+				break;
 		}
 	}
 }

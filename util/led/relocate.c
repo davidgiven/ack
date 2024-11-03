@@ -233,7 +233,7 @@ static uint32_t getvalu(char* addr, uint16_t type)
 		default:
 			fatal("can't read relocation type %x", type & RELSZ);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 static void write2(uint16_t valu, char* addr, int type)
@@ -416,8 +416,7 @@ static void put_mips_valu(char* addr, uint32_t value)
 
 	/* The two bottom zero bits are implicit. */
 	if (value & 3)
-		fatal("invalid MIPS relocation value 0x%lx",
-		      (unsigned long)value);
+		fatal("invalid MIPS relocation value 0x%lx", (unsigned long)value);
 	value >>= 2;
 
 	switch (opcode >> 26)
@@ -497,9 +496,10 @@ extern struct orig relorig[];
  * Second case: we must update the value by the change
  * in position of the section of local.
  */
-static unsigned addrelo(relo, names, valu_out) struct outrelo* relo;
-struct outname* names;
-long* valu_out; /* Out variable. */
+static unsigned addrelo(
+    struct outrelo* relo, /* Out variable. */
+    struct outname* names,
+    long* valu_out)
 {
 	register struct outname* local = &names[relo->or_nami];
 	register unsigned short index = NLocals;
@@ -516,9 +516,6 @@ long* valu_out; /* Out variable. */
 	else
 	{
 		register struct outname* name;
-		extern int hash();
-		extern struct outname* searchname();
-		extern unsigned indexof();
 		extern struct outhead outhead;
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));
@@ -549,20 +546,21 @@ long* valu_out; /* Out variable. */
  * which the header is pointed to by `head'. Relocation is relative to the
  * names in `names'; `relo' tells how to relocate.
  */
-void relocate(struct outhead *head, char* emit, struct outname names[], struct outrelo *relo, long off)
+void relocate(
+    struct outhead* head, char* emit, struct outname names[], struct outrelo* relo, long off)
 {
 	long valu;
 	int sectindex = relo->or_sect - S_MIN;
 	extern struct outhead outhead;
-	uint32_t realaddress = outsect[sectindex].os_base + relo->or_addr
-		+ relorig[sectindex].org_size;
+	uint32_t realaddress = outsect[sectindex].os_base + relo->or_addr + relorig[sectindex].org_size;
 
 	/*
 	 * Pick up previous value at location to be relocated.
 	 */
 	valu = getvalu(emit + (relo->or_addr - off), relo->or_type);
-	debug("read relocation from 0x%08lx type 0x%x value 0x%08lx symbol %u\n",
-	      (unsigned long)realaddress, relo->or_type, valu, relo->or_nami);
+	debug(
+	    "read relocation from 0x%08lx type 0x%x value 0x%08lx symbol %u\n",
+	    (unsigned long)realaddress, relo->or_type, valu, relo->or_nami);
 
 	/*
 	 * Or_nami is an index in the name table of the considered module.
@@ -597,8 +595,9 @@ void relocate(struct outhead *head, char* emit, struct outname names[], struct o
 	/*
 	 * Now put the value back.
 	 */
-	debug("written fixed up relocation to 0x%08lx type 0x%x value 0x%08lx\n",
-	      (unsigned long)realaddress, relo->or_type, valu, 0);
+	debug(
+	    "written fixed up relocation to 0x%08lx type 0x%x value 0x%08lx\n",
+	    (unsigned long)realaddress, relo->or_type, valu, 0);
 	putvalu(valu, emit + (relo->or_addr - off), relo->or_type);
 
 	/*

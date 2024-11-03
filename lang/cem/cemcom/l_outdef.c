@@ -36,7 +36,7 @@
 #include	"l_class.h"
 
 extern char *bts2str();
-extern char *symbol2str();
+
 extern char *strchr();
 
 int stat_number = 9999;			/* static scope number */
@@ -344,7 +344,7 @@ output_def(od)
 		break;
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	printf(":");
 	outargtype(od->od_type);
@@ -409,7 +409,7 @@ outarg(arg)
 
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -479,7 +479,7 @@ outargtype(tp)
 		break;
 	default:
 		NOTREACHED();
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

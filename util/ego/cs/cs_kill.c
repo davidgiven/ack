@@ -23,7 +23,8 @@ STATIC valnum base_valno(entity_p enp)
 	/* Return the value number of the (base) address of an indirectly
 	 * accessed entity.
 	 */
-	switch (enp->en_kind) {
+	switch (enp->en_kind)
+	{
 		default:
 			assert(FALSE);
 			break;
@@ -34,7 +35,7 @@ STATIC valnum base_valno(entity_p enp)
 		case ENARRELEM:
 			return enp->en_arbase;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC entity_p find_base(valnum vn)
@@ -46,11 +47,14 @@ STATIC entity_p find_base(valnum vn)
 	register Lindex i;
 	register avail_p ravp;
 
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		register entity_p renp = en_elem(i);
 
-		if (renp->en_vn == vn) {
-			switch (renp->en_kind) {
+		if (renp->en_vn == vn)
+		{
+			switch (renp->en_kind)
+			{
 				case ENAEXTERNAL:
 				case ENALOCAL:
 				case ENALOCBASE:
@@ -65,17 +69,19 @@ STATIC entity_p find_base(valnum vn)
 	/* We couldn't find it among the entities.
 	 * Let's try the available expressions.
 	 */
-	for (ravp = avails; ravp != (avail_p) 0; ravp = ravp->av_before) {
-		if (ravp->av_result == vn) {
-			if (ravp->av_instr == (byte) op_aar)
+	for (ravp = avails; ravp != (avail_p)0; ravp = ravp->av_before)
+	{
+		if (ravp->av_result == vn)
+		{
+			if (ravp->av_instr == (byte)op_aar)
 				return find_base(ravp->av_ofirst);
-			if (ravp->av_instr == (byte) op_ads)
+			if (ravp->av_instr == (byte)op_ads)
 				return find_base(ravp->av_oleft);
 		}
 	}
 
 	/* Bad luck. */
-	return (entity_p) 0;
+	return (entity_p)0;
 }
 
 STATIC bool obj_overlap(obj_p op1, obj_p op2)
@@ -85,31 +91,33 @@ STATIC bool obj_overlap(obj_p op1, obj_p op2)
 	 */
 	obj_p tmp;
 
-	if (op1->o_off > op2->o_off) {
+	if (op1->o_off > op2->o_off)
+	{
 		/* Exchange them. */
-		tmp = op1; op1 = op2; op2 = tmp;
+		tmp = op1;
+		op1 = op2;
+		op2 = tmp;
 	}
-	return	op1->o_size == UNKNOWN_SIZE ||
-		op1->o_off + op1->o_size > op2->o_off;
+	return op1->o_size == UNKNOWN_SIZE || op1->o_off + op1->o_size > op2->o_off;
 }
 
-#define same_datablock(o1, o2)	((o1)->o_dblock == (o2)->o_dblock)
+#define same_datablock(o1, o2) ((o1)->o_dblock == (o2)->o_dblock)
 
 STATIC bool addr_local(entity_p enp)
 {
 	/* Is enp the address of a stack item. */
 
-	if (enp == (entity_p) 0) return FALSE;
+	if (enp == (entity_p)0)
+		return FALSE;
 
-	return	enp->en_kind == ENALOCAL || enp->en_kind == ENALOCBASE ||
-		enp->en_kind == ENAARGBASE;
+	return enp->en_kind == ENALOCAL || enp->en_kind == ENALOCBASE || enp->en_kind == ENAARGBASE;
 }
 
 STATIC bool addr_external(entity_p enp)
 {
 	/* Is enp the address of an external. */
 
-	return enp != (entity_p) 0 && enp->en_kind == ENAEXTERNAL;
+	return enp != (entity_p)0 && enp->en_kind == ENAEXTERNAL;
 }
 
 STATIC void kill_external(obj_p obp, int indir)
@@ -124,11 +132,13 @@ STATIC void kill_external(obj_p obp, int indir)
 	register Lindex i;
 
 	OUTTRACE("kill external", 0);
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		entity_p enp = en_elem(i);
 		entity_p base;
 
-		switch (enp->en_kind) {
+		switch (enp->en_kind)
+		{
 			case ENEXTERNAL:
 				if (!same_datablock(enp->en_ext, obp))
 					break;
@@ -147,9 +157,7 @@ STATIC void kill_external(obj_p obp, int indir)
 				base = find_base(base_valno(enp));
 				if (addr_local(base))
 					break;
-				if (addr_external(base) &&
-				    !same_datablock(base->en_ext, obp)
-				   )
+				if (addr_external(base) && !same_datablock(base->en_ext, obp))
 					break;
 				OUTTRACE("kill %d", enp->en_vn);
 				enp->en_vn = newvalnum();
@@ -167,14 +175,17 @@ STATIC bool loc_overlap(entity_p enp1, entity_p enp2)
 
 	assert(enp1->en_kind == ENLOCAL && enp2->en_kind == ENLOCAL);
 
-	if (enp1->en_loc > enp2->en_loc) {
+	if (enp1->en_loc > enp2->en_loc)
+	{
 		/* Exchange them. */
-		tmp = enp1; enp1 = enp2; enp2 = tmp;
+		tmp = enp1;
+		enp1 = enp2;
+		enp2 = tmp;
 	}
 	if (enp1->en_loc < 0 && enp2->en_loc >= 0)
-		return	FALSE; /* Locals and parameters do not overlap. */
-	else	return	enp1->en_size == UNKNOWN_SIZE ||
-			enp1->en_loc + enp1->en_size > enp2->en_loc;
+		return FALSE; /* Locals and parameters do not overlap. */
+	else
+		return enp1->en_size == UNKNOWN_SIZE || enp1->en_loc + enp1->en_size > enp2->en_loc;
 }
 
 STATIC void kill_local(entity_p enp, bool indir)
@@ -184,21 +195,27 @@ STATIC void kill_local(entity_p enp, bool indir)
 	register Lindex i;
 
 	OUTTRACE("kill local", 0);
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		entity_p rep = en_elem(i);
 		entity_p base;
 
-		switch (rep->en_kind) {
+		switch (rep->en_kind)
+		{
 			case ENLOCAL:
-				if (indir) {
+				if (indir)
+				{
 					/* Kill locals that might be stored into
 					 * via a pointer. Note: enp not used.
 					 */
-					if (!is_regvar(rep->en_loc)) {
+					if (!is_regvar(rep->en_loc))
+					{
 						OUTTRACE("kill %d", rep->en_vn);
 						rep->en_vn = newvalnum();
 					}
-				} else if (loc_overlap(rep, enp)) {
+				}
+				else if (loc_overlap(rep, enp))
+				{
 					/* Only kill overlapping locals. */
 					OUTTRACE("kill %d", rep->en_vn);
 					rep->en_vn = newvalnum();
@@ -207,9 +224,11 @@ STATIC void kill_local(entity_p enp, bool indir)
 			case ENINDIR:
 			case ENOFFSETTED:
 			case ENARRELEM:
-				if (!is_regvar(enp->en_loc)) {
+				if (!is_regvar(enp->en_loc))
+				{
 					base = find_base(base_valno(rep));
-					if (!addr_external(base)) {
+					if (!addr_external(base))
+					{
 						OUTTRACE("kill %d", rep->en_vn);
 						rep->en_vn = newvalnum();
 					}
@@ -217,7 +236,8 @@ STATIC void kill_local(entity_p enp, bool indir)
 				break;
 			case ENALOCBASE:
 			case ENAARGBASE:
-				if (enp->en_loc == 0 && rep->en_levels >= 1) {
+				if (enp->en_loc == 0 && rep->en_levels >= 1)
+				{
 					rep->en_vn = newvalnum();
 				}
 				break;
@@ -232,10 +252,12 @@ STATIC void kill_sim(void)
 	register Lindex i;
 
 	OUTTRACE("kill sim", 0);
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		register entity_p rep = en_elem(i);
 
-		if (rep->en_kind == ENIGNMASK) {
+		if (rep->en_kind == ENIGNMASK)
+		{
 			OUTTRACE("kill %d", rep->en_vn);
 			rep->en_vn = newvalnum();
 			return; /* There is only one ignoremask. */
@@ -248,7 +270,8 @@ void kill_direct(entity_p enp)
 	/* A store will be done into enp. We must forget the values of all the
 	 * entities this one may overlap with.
 	 */
-	switch (enp->en_kind) {
+	switch (enp->en_kind)
+	{
 		default:
 			assert(FALSE);
 			break;
@@ -277,10 +300,14 @@ void kill_indir(entity_p enp)
 	 * the front-end. When a MES 3 is generated for a local, this local
 	 * will not be referenced indirectly.
 	 */
-	if ((p = find_base(base_valno(enp))) == (entity_p) 0) {
+	if ((p = find_base(base_valno(enp))) == (entity_p)0)
+	{
 		kill_much(); /* Kill all entities without registermessage. */
-	} else {
-		switch (p->en_kind) {
+	}
+	else
+	{
+		switch (p->en_kind)
+		{
 			case ENAEXTERNAL:
 				/* An indirect store into global data. */
 				kill_external(p->en_ext, TRUE);
@@ -303,11 +330,14 @@ extern void kill_much(void)
 	register Lindex i;
 
 	OUTTRACE("kill much", 0);
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		register entity_p rep = en_elem(i);
 
-		if (rep->en_static) continue;
-		if (rep->en_kind == ENLOCAL && is_regvar(rep->en_loc)) continue;
+		if (rep->en_static)
+			continue;
+		if (rep->en_kind == ENLOCAL && is_regvar(rep->en_loc))
+			continue;
 		OUTTRACE("kill %d", rep->en_vn);
 		rep->en_vn = newvalnum();
 	}
@@ -331,7 +361,8 @@ STATIC void kill_globset(cset s)
 	register Cindex i;
 
 	OUTTRACE("kill globset", 0);
-	for (i = Cfirst(s); i != (Cindex) 0; i = Cnext(i,s)) {
+	for (i = Cfirst(s); i != (Cindex)0; i = Cnext(i, s))
+	{
 		kill_external(omap[Celem(i)], FALSE);
 	}
 }
@@ -341,13 +372,18 @@ void kill_call(proc_p pp)
 	/* Kill everything that might be destroyed by calling
 	 * the procedure in pp.
 	 */
-	if (bad_procflags(pp)) {
+	if (bad_procflags(pp))
+	{
 		/* We don't know enough about this procedure. */
 		kill_much();
-	} else if (pp->p_change->c_flags & CF_INDIR) {
+	}
+	else if (pp->p_change->c_flags & CF_INDIR)
+	{
 		/* The procedure does an indirect store. */
 		kill_much();
-	} else {
+	}
+	else
+	{
 		/* Procedure might affect global data. */
 		kill_globset(pp->p_change->c_ext);
 	}
@@ -360,7 +396,8 @@ void kill_all(void)
 	register Lindex i;
 
 	OUTTRACE("kill all entities", 0);
-	for (i = Lfirst(entities); i != (Lindex) i; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)i; i = Lnext(i, entities))
+	{
 		entity_p enp = en_elem(i);
 
 		OUTTRACE("kill %d", enp->en_vn);

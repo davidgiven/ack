@@ -9,16 +9,14 @@
  *
  */
 
-
-
 line_p move_pointer(offset tmp, int dir);
-	/* Generate EM code to load/store a pointer variable
-	 * onto/from the stack, depending on dir(ection).
-	 * We accept all kinds of pointer sizes.
-	 */
+/* Generate EM code to load/store a pointer variable
+ * onto/from the stack, depending on dir(ection).
+ * We accept all kinds of pointer sizes.
+ */
 void make_header(loop_p lp);
-	/* Make sure that the loop has a header block, i.e. a block
-	 * has the loop entry block as its only successor and
-	 * that dominates the loop entry block.
-	 * If there is no header yet, create one.
-	 */
+/* Make sure that the loop has a header block, i.e. a block
+ * has the loop entry block as its only successor and
+ * that dominates the loop entry block.
+ * If there is no header yet, create one.
+ */

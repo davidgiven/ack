@@ -4,12 +4,12 @@
 
 /* $Id$ */
 
-#include	<stdio.h>
+#include <stdio.h>
 
-#include	"global.h"
-#include	"linfil.h"
-#include	"alloc.h"
-#include	"whatever.h"
+#include "global.h"
+#include "linfil.h"
+#include "alloc.h"
+#include "whatever.h"
 
 struct line_tally
 { /* one for each line */
@@ -19,22 +19,22 @@ struct line_tally
 
 struct file_tally
 { /* one for each file */
-	struct file_tally *next;
+	struct file_tally* next;
 	ptr ft_fil; /* file name */
 	long ft_limit; /* size of line array */
-	struct line_tally *ft_line; /* pointer to line array */
+	struct line_tally* ft_line; /* pointer to line array */
 };
 
-PRIVATE struct file_tally *first_tally; /* start of chain */
-PRIVATE struct file_tally *file; /* present file */
+PRIVATE struct file_tally* first_tally; /* start of chain */
+PRIVATE struct file_tally* file; /* present file */
 
 PRIVATE long lastLIN;
 
-PRIVATE FILE *tally_fp;
+PRIVATE FILE* tally_fp;
 
 /* Forward declarations. */
 PRIVATE void tally_newFIL(ptr);
-PRIVATE void enlarge(struct file_tally *, long);
+PRIVATE void enlarge(struct file_tally*, long);
 
 void tally(void)
 {
@@ -61,7 +61,7 @@ void tally(void)
 
 PRIVATE void tally_newFIL(ptr f)
 {
-	struct file_tally **hook = &first_tally;
+	struct file_tally** hook = &first_tally;
 
 	while (*hook)
 	{
@@ -73,14 +73,14 @@ PRIVATE void tally_newFIL(ptr f)
 	{
 		/* first time we see this file */
 		/* construct a new entry */
-		struct file_tally *nt = (struct file_tally *) Malloc(
-				(size) sizeof(struct file_tally), "file_tally");
+		struct file_tally* nt
+		    = (struct file_tally*)Malloc((size)sizeof(struct file_tally), "file_tally");
 
-		nt->next = (struct file_tally *) 0;
+		nt->next = (struct file_tally*)0;
 		nt->ft_fil = f;
 		nt->ft_limit = 1; /* provisional length */
-		nt->ft_line = (struct line_tally *) Malloc(
-				(size) sizeof(struct line_tally), "struct line_tally");
+		nt->ft_line
+		    = (struct line_tally*)Malloc((size)sizeof(struct line_tally), "struct line_tally");
 		nt->ft_line[0].lt_cnt = 0;
 		nt->ft_line[0].lt_instr = 0;
 
@@ -90,14 +90,14 @@ PRIVATE void tally_newFIL(ptr f)
 	file = *hook;
 }
 
-PRIVATE void enlarge(struct file_tally *ft, long l)
+PRIVATE void enlarge(struct file_tally* ft, long l)
 {
 	long limit = allocfrac(l < 100 ? 100 : l);
 
 	if (limit <= ft->ft_limit)
 		return;
-	ft->ft_line = (struct line_tally *) Realloc((char *) ft->ft_line,
-			(size) (limit * sizeof(struct line_tally)), "array line_tally");
+	ft->ft_line = (struct line_tally*)Realloc(
+	    (char*)ft->ft_line, (size)(limit * sizeof(struct line_tally)), "array line_tally");
 	while (ft->ft_limit < limit)
 	{
 		ft->ft_line[ft->ft_limit].lt_cnt = 0;
@@ -106,11 +106,9 @@ PRIVATE void enlarge(struct file_tally *ft, long l)
 	}
 }
 
-
-
 void out_tally(void)
 {
-	struct file_tally **hook = &first_tally;
+	struct file_tally** hook = &first_tally;
 
 	if (!*hook)
 		return;
@@ -121,19 +119,18 @@ void out_tally(void)
 
 	while (*hook)
 	{
-		struct file_tally *ft = *hook;
+		struct file_tally* ft = *hook;
 		register long i;
 
 		fprintf(tally_fp, "%s:\n", dt_fname(ft->ft_fil));
 		for (i = 0; i < ft->ft_limit; i++)
 		{
-			struct line_tally *lt = &ft->ft_line[i];
+			struct line_tally* lt = &ft->ft_line[i];
 
 			if (lt->lt_cnt)
 			{
 				/* we visited this line */
-				fprintf(tally_fp, "\t%ld\t%ld\t%ld\n", i, lt->lt_cnt,
-						lt->lt_instr);
+				fprintf(tally_fp, "\t%ld\t%ld\t%ld\n", i, lt->lt_cnt, lt->lt_instr);
 			}
 		}
 		fprintf(tally_fp, "\n");
@@ -143,4 +140,3 @@ void out_tally(void)
 	fclose(tally_fp);
 	tally_fp = 0;
 }
-

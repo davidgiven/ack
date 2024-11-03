@@ -91,6 +91,7 @@ local function build_variant(code, cflags)
 			"modules/src/em_data+lib",
 			"modules/src/print+lib",
 			"modules/src/system+lib",
+			"modules/src/string+lib",
 		},
 		vars = {
 			["+cflags"] = cflags

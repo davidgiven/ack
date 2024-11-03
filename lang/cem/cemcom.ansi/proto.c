@@ -13,6 +13,7 @@
 #include	"level.h"
 #include	<flt_arith.h>
 #include	"arith.h"
+#include	"LLlex.h"
 #include	"align.h"
 #include	"stack.h"
 #include	"def.h"
@@ -21,6 +22,7 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"declar.h"
+#include    "declarator.h"
 #include	"decspecs.h"
 #include	"proto.h"
 #include    "error.h"
@@ -72,7 +74,7 @@ void add_proto(struct proto *pl, struct decspecs *ds, struct declarator *dc,
 	type = declare_type(ds->ds_type, dc);
 	if (type->tp_size < (arith) 0 && actual_declaration(sc, type))
 	{
-		extern char *symbol2str();
+		
 		if (type->tp_fund != VOID)
 			error("unknown %s-type", symbol2str(type->tp_fund));
 		else

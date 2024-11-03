@@ -2,38 +2,41 @@
  *  Memory allocation routines that will cause
  *  fatal error if allocation fails.
  */
-#include	<stdlib.h>
-#include	"debug.h"
-#include	"global.h"
-#include	"alloc.h"
-#include	"io.h"
+#include <stdlib.h>
+#include "debug.h"
+#include "global.h"
+#include "alloc.h"
+#include "io.h"
 
 /** Allocate "sz" bytes on the heap with description
  * "descr", raise a fatal error if it cannot be
  * allocated. Returns a pointer to the newly allocated
  * block.
  */
-char *Malloc(size sz, char *descr)
+char* Malloc(size sz, char* descr)
 {
-	register char *new = malloc((unsigned int) (sz));
-	
-	if (new == (char *) 0 && descr != (char *) 0)
+	register char* new = malloc((unsigned int)(sz));
+
+	if (new == (char*)0 && descr != (char*)0)
 		fatal("Cannot allocate %s", descr);
 
-#ifdef	DB_MALLOC			/* from debug.h */
+#ifdef DB_MALLOC /* from debug.h */
 	/* fill area with recognizable garbage */
-	{	register char *p = new;
+	{
+		register char* p = new;
 		register size i = sz;
 		register char ch = 0252;
 
-		if (p) {
-			while (i--) {
+		if (p)
+		{
+			while (i--)
+			{
 				*p++ = ch;
 				ch = ~ch;
 			}
 		}
 	}
-#endif	/* DB_MALLOC */
+#endif /* DB_MALLOC */
 
 	return new;
 }
@@ -43,12 +46,11 @@ char *Malloc(size sz, char *descr)
  * cannot be reallocated.
  *
  */
-char *Realloc(char *old, size sz, char *descr)
+char* Realloc(char* old, size sz, char* descr)
 {
-	register char *new = realloc(old, (unsigned int) (sz));
-	
-	if (new == (char *) 0)
+	register char* new = realloc(old, (unsigned int)(sz));
+
+	if (new == (char*)0)
 		fatal("Cannot reallocate %s", descr);
 	return new;
 }
-

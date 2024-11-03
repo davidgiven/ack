@@ -27,8 +27,6 @@ extern set_t l_sets[];
 int narexpr;
 expr_t arexp[MAXATT];
 
-expr_t iextoaddr();
-
 /* Forward declarations */
 static int instalookup(inst_t, int);
 

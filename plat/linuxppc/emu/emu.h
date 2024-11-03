@@ -1,7 +1,7 @@
 #ifndef EMU_H
 #define EMU_H
 
-extern void fatal(char* fmt, ...);
+extern NORETURN void fatal(char* fmt, ...);
 
 typedef struct
 {

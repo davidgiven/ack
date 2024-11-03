@@ -23,6 +23,7 @@
 #include	"proto.h"
 #include	"struct.h"
 #include	"declar.h"
+#include	"declarator.h"
 #include	"decspecs.h"
 #include	"sizes.h"
 #include    "print.h"
@@ -34,8 +35,7 @@
 #include	"Lpars.h"
 
 extern char options[];
-extern arith NewLocal();
-extern char *symbol2str();
+
 
 #ifdef DEBUG
 #define IDF_DEBUG
@@ -344,7 +344,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case GLOBAL:
@@ -359,7 +359,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case STATIC:
@@ -373,7 +373,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 			break;
 		default:
 			crash("bad storage class");
-			/*NOTREACHED*/
+			UNREACHABLE_CODE;
 		}
 		break;
 	case ENUM:
@@ -382,7 +382,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 		break;
 	default:
 		crash("bad storage class");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "mcg.h"
 
-static void init_idf();
+static void init_idf(void);
 static struct idf* str2idf(char* tg, int cp);
 
 #define IDF_TYPE struct symbol

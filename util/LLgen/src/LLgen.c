@@ -64,10 +64,6 @@ extern void LLnc_recover(void);
 # ifndef NORCSID
 static string	rcsid = "$Id$";
 # endif
-p_mem		alloc(), ralloc();
-string		store();
-p_gram		search();
-long		ftell();
 
 static int	acount;			/* count #of global actions */
 static p_term t_list;

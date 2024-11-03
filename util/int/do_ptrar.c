@@ -4,30 +4,34 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"segcheck.h"
-#include	"global.h"
-#include	"segment.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"warn.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "segcheck.h"
+#include "global.h"
+#include "segment.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "warn.h"
+#include "text.h"
+#include "fra.h"
+#include "switch.h"
 
-#define	adp(p,w)	((p) + (w))
-#define	sbs(t,s)	((s) - (t))
+#define adp(p, w) ((p) + (w))
+#define sbs(t, s) ((s) - (t))
 
-#ifdef	SEGCHECK
+#ifdef SEGCHECK
 
-#define	check_seg(s1,s2,w)	if (s1 != s2) { warning(w); }
+#define check_seg(s1, s2, w)                                                                       \
+	if (s1 != s2)                                                                                  \
+	{                                                                                              \
+		warning(w);                                                                                \
+	}
 
 #else
 
-#define	check_seg(s1,s2,w)
+#define check_seg(s1, s2, w)
 
-#endif	/* SEGCHECK */
+#endif /* SEGCHECK */
 
 /** ADP f: Add f to pointer on top of stack */
 void DoADP(register long l)
@@ -37,7 +41,8 @@ void DoADP(register long l)
 
 	LOG(("@R6 DoADP(%ld)", l));
 	spoilFRA();
-	if (t == 0) {
+	if (t == 0)
+	{
 		warning(WNULLPA);
 	}
 	l = arg_f(l);
@@ -55,7 +60,8 @@ void DoADS(register size l)
 	LOG(("@R6 DoADS(%ld)", l));
 	spoilFRA();
 	t = arg_f(t);
-	if (s == 0) {
+	if (s == 0)
+	{
 		warning(WNULLPA);
 	}
 	p = adp(s, t);
@@ -75,7 +81,8 @@ void DoSBS(register size l)
 	l = arg_wi(l);
 	check_seg(ptr2seg(t), ptr2seg(s), WSEGSBS);
 	w = sbs(t, s);
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
 		if (l == 2 && (w < I_MINS2 || w > I_MAXS2))
 			trap(EIOVFL);
 	}

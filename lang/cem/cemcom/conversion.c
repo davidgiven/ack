@@ -105,7 +105,7 @@ conversion(from_type, to_type)
 #endif /* NOFLOAT */
 	default:
 		crash("(conversion) illegal type conversion");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	if ((int)(to_type->tp_size) < (int)word_size
 #ifndef NOFLOAT

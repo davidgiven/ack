@@ -59,5 +59,5 @@ int nr;
 	  case STRING: return( "%s");
 	  case INT   : return( "%d");
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

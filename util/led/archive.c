@@ -24,11 +24,11 @@ static char rcsid[] = "$Id$";
 #include "scan.h"
 #include "error.h"
 #include "save.h"
+#include "sym.h"
 
-#define ENDLIB		((long)0)
+#define ENDLIB ((long)0)
 
-static struct ar_hdr	arhdr;
-
+static struct ar_hdr arhdr;
 
 void notelib(long pos);
 
@@ -41,31 +41,30 @@ void notelib(long pos);
  */
 static long getsymdeftable(void)
 {
-	register ind_t		off;
-	register struct ranlib	*ran;
-	register long		count;
-	register long		nran, nchar;
-	extern long		rd_int4();
-	extern FILE*		infile;
+	register ind_t off;
+	register struct ranlib* ran;
+	register long count;
+	register long nran, nchar;
+	extern FILE* infile;
 
 	count = nran = rd_int4(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
 	if (nran > SIZE_MAX / sizeof(struct ranlib))
-		off = BADOFF;	/* nran * size would overflow. */
+		off = BADOFF; /* nran * size would overflow. */
 	else
 		off = hard_alloc(ALLORANL, nran * sizeof(struct ranlib));
 	if (off == BADOFF)
 		fatal("no space for ranlib structs");
-	ran = (struct ranlib *)address(ALLORANL, off);
+	ran = (struct ranlib*)address(ALLORANL, off);
 	rd_ranlib(infile, ran, count);
 	nchar = rd_int4(infile);
 	debug("%ld ranlib chars\n", nchar, 0, 0, 0);
-	if (nchar != (size_t)nchar ||
-	    (off = hard_alloc(ALLORANL, nchar)) == BADOFF)
+	if (nchar != (size_t)nchar || (off = hard_alloc(ALLORANL, nchar)) == BADOFF)
 		fatal("no space for ranlib strings");
 	rd_bytes(infile, address(ALLORANL, off), nchar);
-	ran = (struct ranlib *)address(ALLORANL, (ind_t)0);
-	while (count--) {
+	ran = (struct ranlib*)address(ALLORANL, (ind_t)0);
+	while (count--)
+	{
 		/*
 		 * Adjust because names are now in core, not on file.
 		 * Note that `ran_off' is measured from the beginning of the
@@ -79,7 +78,7 @@ static long getsymdeftable(void)
 	return nran;
 }
 
-extern char	*modulname;
+extern char* modulname;
 
 /*
  * Process archive with table of contents. The table of contents tells
@@ -92,32 +91,33 @@ extern char	*modulname;
  */
 void arch(void)
 {
-	long	nran;
-	bool	resolved;
+	long nran;
+	bool resolved;
 
 	nran = getsymdeftable();
 
 	savemagic();
-	do {
-		register ind_t	ranindex;
-		register long	count;
+	do
+	{
+		register ind_t ranindex;
+		register long count;
 
 		debug("(re)scan ranlib table\n", 0, 0, 0, 0);
 		ranindex = (ind_t)0;
 		count = nran;
 		resolved = FALSE;
-		while (count > 0) {
-			register struct ranlib	*ran;
-			register char		*string;
-			register struct outname	*name;
-			register long		pos;
-			extern int		hash();
-			extern struct outname	*searchname();
+		while (count > 0)
+		{
+			register struct ranlib* ran;
+			register char* string;
+			register struct outname* name;
+			register long pos;
 
-			ran = (struct ranlib *)address(ALLORANL, ranindex);
+			ran = (struct ranlib*)address(ALLORANL, ranindex);
 			string = address(ALLORANL, (ind_t)ran->ran_off);
 			name = searchname(string, hash(string));
-			if (name == (struct outname *)0 || !ISUNDEFINED(name)) {
+			if (name == (struct outname*)0 || !ISUNDEFINED(name))
+			{
 				ranindex += sizeof(struct ranlib);
 				count--;
 				continue;
@@ -134,8 +134,10 @@ void arch(void)
 			 * one archive member is contiguous.
 			 */
 			pos = ran->ran_pos;
-			do {
-				count--; ran++;
+			do
+			{
+				count--;
+				ran++;
 				ranindex += sizeof(struct ranlib);
 			} while (count > 0 && ran->ran_pos == pos);
 			notelib(pos);
@@ -154,17 +156,17 @@ void arch(void)
  */
 void notelib(long pos)
 {
-	register ind_t	off;
+	register ind_t off;
 
 	if ((off = hard_alloc(ALLOARCH, sizeof(long))) == BADOFF)
 		fatal("no space for archive position");
-	*(long *)address(ALLOARCH, off) = pos;
+	*(long*)address(ALLOARCH, off) = pos;
 }
 
 /*
  * Index of position of first archive member of next archive.
  */
-static ind_t		posindex = (ind_t)0;
+static ind_t posindex = (ind_t)0;
 
 /*
  * Process the archive in pass 2.
@@ -175,20 +177,18 @@ static ind_t		posindex = (ind_t)0;
  */
 void arch2(void)
 {
-	register long	*pos;
-	register ind_t	localpos;
+	register long* pos;
+	register ind_t localpos;
 
 	localpos = posindex;
-	for (	pos = (long *)address(ALLOARCH, localpos);
-		*pos != ENDLIB;
-		pos++, localpos += sizeof(long)
-	) {
+	for (pos = (long*)address(ALLOARCH, localpos); *pos != ENDLIB; pos++, localpos += sizeof(long))
+	{
 		seek(*pos);
 		get_archive_header(&arhdr);
 		modulname = arhdr.ar_name;
 		debug("%s: archive member\n", modulname, 0, 0, 0);
 		finish();
 	}
-	localpos += sizeof(long);	/* Skip ENDLIB. */
-	posindex = localpos;		/* Remember for next call. */
+	localpos += sizeof(long); /* Skip ENDLIB. */
+	posindex = localpos; /* Remember for next call. */
 }

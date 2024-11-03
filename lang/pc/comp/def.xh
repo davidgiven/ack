@@ -145,31 +145,18 @@ struct def	{		/* list of definitions for a name */
 
 /* ALLOCDEF "def" 50 */
 
-extern struct def
-	*define(),
-	*MkDef(),
-	*DeclProc(),
-	*DeclFunc();
-
-extern struct def
-	*lookup(),
-	*lookfor();
-
-#define NULLDEF ((struct def *) 0)
-
-
-struct def *MkDef(register struct idf *id, register struct scope *scope,
+extern struct def *MkDef(register struct idf *id, register struct scope *scope,
 		long kind);
-struct def *define(register struct idf *id, register struct scope *scope,
+extern struct def *define(register struct idf *id, register struct scope *scope,
 		long kind);
-void DoDirective(struct idf *directive, struct node *nd, struct type *tp,
+extern void DoDirective(struct idf *directive, struct node *nd, struct type *tp,
 		struct scopelist *scl, int function);
-struct def *DeclProc(register struct node *nd, struct type *tp,
+extern struct def *DeclProc(register struct node *nd, struct type *tp,
 		register struct scopelist *scl);
-struct def *
+extern struct def *
 DeclFunc(register struct node *nd, struct type *tp,
 		register struct scopelist *scl);
-void EndFunc(register struct def *df);
-void EndBlock(register struct def *block_df);
+extern void EndFunc(register struct def *df);
+extern void EndBlock(register struct def *block_df);
 
 #endif

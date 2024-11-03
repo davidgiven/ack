@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <setjmp.h>
 #include <ctype.h>
-#include "diagnostics.h"
+#include "warnings.h"
 
 static bool timed_out = false;
 static bool child_exited = false;

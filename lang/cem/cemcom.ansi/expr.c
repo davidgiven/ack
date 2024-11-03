@@ -26,7 +26,7 @@
 #include    "cstoper.h"
 #include    "error.h"
 
-extern char *symbol2str();
+
 extern char options[];
 extern int InSizeof;
 
@@ -97,7 +97,7 @@ int rank_of(int oper)
 	case ',':
 		return 15;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 void dot2expr(struct expr **expp)
@@ -123,7 +123,7 @@ void dot2expr(struct expr **expp)
 		break;
 	default:
 		crash("bad conversion to expression");
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -306,7 +306,7 @@ writh ivalue, int fund)
 		break;
 	default:
 		crash("(fill_int_expr) bad fund %s\n", symbol2str(fund));
-		/*NOTREACHED*/
+		UNREACHABLE_CODE;
 	}
 	ex->ex_class = Value;
 	ex->VL_CLASS = Const;
@@ -488,7 +488,7 @@ int is_zero_cst(register struct expr *expr)
 		flt_arith2flt((arith) 0, &var, 0);
 		return flt_cmp(&var, &(expr->FL_ARITH)) == 0;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 void free_expression(register struct expr *expr)

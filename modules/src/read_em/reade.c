@@ -67,7 +67,7 @@ PRIVATE void pre_hash(int i, char *s)
 			return;
 		}
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 
 
@@ -570,7 +570,6 @@ PRIVATE void getmnem(int c, register struct e_instr *p)
 PRIVATE void line_line(void)
 {
 	static char filebuf[256 + 1];
-	char *btscpy();
 	struct e_arg dummy;
 
 	gettyp(ptyp(sp_cst2), &dummy);
@@ -634,5 +633,5 @@ PRIVATE void gethead(register struct e_instr *p)
 		checkeol();
 		if (p->em_type == EM_ERROR || p->em_type == EM_FATAL) return;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

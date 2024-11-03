@@ -51,7 +51,7 @@ struct vars {
 
 	union {
 		char    *v_string;
-		char    *(*v_routine)();
+		char    *(*v_routine)(void);
 	}                               v_value ;
 	struct vars                     *v_next ;
 };

@@ -44,7 +44,7 @@ struct tokenname tkidf[] =	{	/* names of the identifier tokens */
 	{DOWNTO, "downto"},
 	{ELSE, "else"},
 	{END, "end"},
-	{FILE, "file"},
+	{FILET, "file"},
 	{FOR, "for"},
 	{FUNCTION, "function"},
 	{GOTO, "goto"},

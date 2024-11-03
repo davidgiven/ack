@@ -4,7 +4,7 @@
 extern const char* program_name;
 
 extern void warning(const char* fmt, ...);
-extern void fatal(const char* fmt, ...);
+extern NORETURN void fatal(const char* fmt, ...);
 
 #endif
 

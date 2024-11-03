@@ -26,6 +26,7 @@
 #include	"sizes.h"
 #include    "field.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include	"level.h"
 #include    "conversion.h"
 #include	"stack.h"
@@ -42,8 +43,6 @@
 
 #define	CRASH()		crash("EVAL: CRASH at line %u", __LINE__)
 
-char *symbol2str();
-arith NewLocal();	/* util.c */
 #define LocalPtrVar()	NewLocal(pointer_size, pointer_align, reg_pointer, REGISTER)
 extern int	err_occurred; /* error.c */
 

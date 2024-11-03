@@ -10,6 +10,6 @@
  *
  */
 
-void init_globals(void *null);	 /* Assign a 'global variable number (o_globnr)
-				  * to every global variable.
-				  */
+void init_globals(void* null); /* Assign a 'global variable number (o_globnr)
+                                * to every global variable.
+                                */

@@ -22,7 +22,6 @@
 #include    "proto.h"
 #include	"sizes.h"
 
-extern struct expr *intexpr();
 int InSizeof = 0;	/* inside a sizeof- expression */
 int ResultKnown = 0;	/* result of the expression is already known */
 

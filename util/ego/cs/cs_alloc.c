@@ -14,8 +14,10 @@ occur_p newoccur(line_p l1, line_p l2, bblock_p b)
 
 	occur_p rop;
 
-	rop = (occur_p) newcore(sizeof(struct occur));
-	rop->oc_lfirst = l1; rop->oc_llast = l2; rop->oc_belongs = b;
+	rop = (occur_p)newcore(sizeof(struct occur));
+	rop->oc_lfirst = l1;
+	rop->oc_llast = l2;
+	rop->oc_belongs = b;
 	return rop;
 }
 
@@ -26,7 +28,7 @@ void oldoccur(occur_p ocp)
 
 avail_p newavail(void)
 {
-	return (avail_p) newcore(sizeof(struct avail));
+	return (avail_p)newcore(sizeof(struct avail));
 }
 
 void oldavail(avail_p avp)
@@ -36,7 +38,7 @@ void oldavail(avail_p avp)
 
 entity_p newentity(void)
 {
-	return (entity_p) newcore(sizeof(struct entity));
+	return (entity_p)newcore(sizeof(struct entity));
 }
 
 void oldentity(entity_p enp)

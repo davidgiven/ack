@@ -53,7 +53,7 @@ EXTERN char *iname;			/* stdin */
 typedef char byte;
 typedef char * string;
 
-EXTERN char *myalloc();
+EXTERN char *myalloc(int n);
 
 #include <cg_pattern.h>
 

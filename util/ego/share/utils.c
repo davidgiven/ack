@@ -21,45 +21,40 @@
 
 offset off_set(line_p lnp)
 {
-	switch(lnp->l_optype) {
+	switch (lnp->l_optype)
+	{
 		case OPSHORT:
-			return (offset) SHORT(lnp);
+			return (offset)SHORT(lnp);
 		case OPOFFSET:
 			return OFFSET(lnp);
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
-
-
-
 
 offset aoff(arg_p ap, int n)
 {
-	while (n>0) {
-		if (ap != (arg_p) 0)
+	while (n > 0)
+	{
+		if (ap != (arg_p)0)
 			ap = ap->a_next;
 		n--;
 	}
-	if (ap == (arg_p) 0)
+	if (ap == (arg_p)0)
 		error("too few parameters");
 	if (ap->a_type != ARGOFF)
 		error("offset expected");
-	return(ap->a_a.a_offset);
+	return (ap->a_a.a_offset);
 }
-
 
 offset tmplocal(proc_p p, offset size)
 {
 	/* Allocate a new local variable in the stack frame of p */
 
-	p->p_localbytes +=  size;
+	p->p_localbytes += size;
 	return -(p->p_localbytes);
 }
-
-
-
 
 line_p int_line(offset off)
 {
@@ -69,18 +64,19 @@ line_p int_line(offset off)
 
 	line_p lnp;
 
-	if ((short) off == off) {
+	if ((short)off == off)
+	{
 		/* fits in a short */
 		lnp = newline(OPSHORT);
-		SHORT(lnp) = (short) off;
-	} else {
+		SHORT(lnp) = (short)off;
+	}
+	else
+	{
 		lnp = newline(OPOFFSET);
 		OFFSET(lnp) = off;
 	}
 	return lnp;
 }
-
-
 
 line_p reg_mes(offset tmp, short size, int typ, int score)
 {
@@ -89,19 +85,20 @@ line_p reg_mes(offset tmp, short size, int typ, int score)
 	line_p l;
 	arg_p a;
 
-#define NEXTARG(a,val) a->a_next = newarg(ARGOFF); a = a->a_next; \
-			a->a_a.a_offset = val
+#define NEXTARG(a, val)                                                                            \
+	a->a_next = newarg(ARGOFF);                                                                    \
+	a = a->a_next;                                                                                 \
+	a->a_a.a_offset = val
 	l = newline(OPLIST);
 	l->l_instr = ps_mes;
 	a = ARG(l) = newarg(ARGOFF);
 	a->a_a.a_offset = ms_reg;
-	NEXTARG(a,tmp);
-	NEXTARG(a,size);
-	NEXTARG(a,typ);
-	NEXTARG(a,score);
+	NEXTARG(a, tmp);
+	NEXTARG(a, size);
+	NEXTARG(a, typ);
+	NEXTARG(a, score);
 	return l;
 }
-
 
 bool dom(bblock_p b1, bblock_p b2)
 {
@@ -111,15 +108,16 @@ bool dom(bblock_p b1, bblock_p b2)
 
 	register bblock_p b;
 
-	for (b = b2; b != (bblock_p) 0; b = b->b_idom) {
+	for (b = b2; b != (bblock_p)0; b = b->b_idom)
+	{
 		/* See if b1 is a (not necessarily proper) ancestor
 		 * of b2 in the immediate dominator tree.
 		 */
-		if (b == b1) return TRUE;
+		if (b == b1)
+			return TRUE;
 	}
 	return FALSE;
 }
-
 
 bblock_p common_dom(bblock_p a, bblock_p b)
 {
@@ -127,20 +125,26 @@ bblock_p common_dom(bblock_p a, bblock_p b)
 	 * note that a basic block also dominates itself.
 	 */
 
-	assert (a != (bblock_p) 0);
-	assert (b != (bblock_p) 0);
-	if (dom(a,b)) {
+	assert(a != (bblock_p)0);
+	assert(b != (bblock_p)0);
+	if (dom(a, b))
+	{
 		return a;
-	} else {
-		if (dom(b,a)) {
+	}
+	else
+	{
+		if (dom(b, a))
+		{
 			return b;
-		} else {
-			return common_dom(a->b_idom,b->b_idom);
+		}
+		else
+		{
+			return common_dom(a->b_idom, b->b_idom);
 		}
 	}
 }
 
-#define R	time_space_ratio
+#define R time_space_ratio
 
 short add_timespace(short time, short space)
 {
@@ -152,23 +156,22 @@ short add_timespace(short time, short space)
 	return (R * time + (100 - R) * space) / 100;
 }
 
-
-
 void rm_line(line_p l, bblock_p b)
 {
-	if (b->b_start == l) {
+	if (b->b_start == l)
+	{
 		b->b_start = l->l_next;
-	} else {
+	}
+	else
+	{
 		PREV(l)->l_next = l->l_next;
 	}
-	if (l->l_next != (line_p) 0) {
+	if (l->l_next != (line_p)0)
+	{
 		PREV(l->l_next) = PREV(l);
 	}
 	oldline(l);
 }
-
-
-
 
 void appnd_line(line_p l1, line_p l2)
 {
@@ -177,12 +180,11 @@ void appnd_line(line_p l1, line_p l2)
 	PREV(l1) = l2;
 	l1->l_next = l2->l_next;
 	l2->l_next = l1;
-	if (l1->l_next != (line_p) 0) {
+	if (l1->l_next != (line_p)0)
+	{
 		PREV(l1->l_next) = l1;
 	}
 }
-
-
 
 line_p last_instr(bblock_p b)
 {
@@ -190,13 +192,12 @@ line_p last_instr(bblock_p b)
 
 	register line_p l = b->b_start;
 
-	if (l == (line_p) 0) return (line_p) 0;
-	while (l->l_next != (line_p) 0) l = l->l_next;
+	if (l == (line_p)0)
+		return (line_p)0;
+	while (l->l_next != (line_p)0)
+		l = l->l_next;
 	return l;
 }
-
-
-
 
 line_p find_mesreg(offset off)
 {
@@ -205,20 +206,19 @@ line_p find_mesreg(offset off)
 	Lindex li;
 	line_p l;
 
-	for (li = Lfirst(mesregs); li != (Lindex) 0; li = Lnext(li,mesregs)) {
-		l = (line_p) Lelem(li);
-		if (aoff(ARG(l),1) == off) return l;
+	for (li = Lfirst(mesregs); li != (Lindex)0; li = Lnext(li, mesregs))
+	{
+		l = (line_p)Lelem(li);
+		if (aoff(ARG(l), 1) == off)
+			return l;
 	}
-	return (line_p) 0;
+	return (line_p)0;
 }
-
 
 bool is_regvar(offset off)
 {
-	return find_mesreg(off) != (line_p) 0;
+	return find_mesreg(off) != (line_p)0;
 }
-
-
 
 offset regv_arg(offset off, int n)
 {
@@ -227,6 +227,6 @@ offset regv_arg(offset off, int n)
 	 */
 
 	line_p x = find_mesreg(off);
-	assert (x != (line_p) 0);
-	return aoff(ARG(x),n);
+	assert(x != (line_p)0);
+	return aoff(ARG(x), n);
 }

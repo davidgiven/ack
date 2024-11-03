@@ -19,7 +19,7 @@ void warning(char *fmt, ...);
 void node_warning(struct node *node, char *fmt, ...);
 void lexerror(char *fmt, ...);
 void lexwarning(char *fmt, ...);
-void fatal(char *fmt, ...);
-void crash(char *fmt, ...);
+NORETURN void fatal(char *fmt, ...);
+NORETURN void crash(char *fmt, ...);
 
 #endif /* ERROR_H_ */

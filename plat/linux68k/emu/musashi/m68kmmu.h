@@ -177,7 +177,7 @@ uint pmmu_translate_addr(uint addr_in)
 
 */
 
-void m68881_mmu_ops()
+void m68881_mmu_ops(void)
 {
 	uint16 modes;
 	uint32 ea = m68ki_cpu.ir & 0x3f;

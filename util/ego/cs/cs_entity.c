@@ -22,48 +22,51 @@ entity_p find_entity(valnum vn)
 {
 	/* Try to find the entity with valuenumber vn. */
 
-	register Lindex i; 
+	register Lindex i;
 
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		if (en_elem(i)->en_vn == vn)
 			return en_elem(i);
 	}
 
-	return (entity_p) 0;
+	return (entity_p)0;
 }
 
 STATIC bool same_entity(entity_p enp1, entity_p enp2)
 {
-	if (enp1->en_kind != enp2->en_kind) return FALSE;
-	if (enp1->en_size != enp2->en_size) return FALSE;
-	if (enp1->en_size == UNKNOWN_SIZE) return FALSE;
+	if (enp1->en_kind != enp2->en_kind)
+		return FALSE;
+	if (enp1->en_size != enp2->en_size)
+		return FALSE;
+	if (enp1->en_size == UNKNOWN_SIZE)
+		return FALSE;
 
-	switch (enp1->en_kind) {
+	switch (enp1->en_kind)
+	{
 		case ENCONST:
-			return	enp1->en_val == enp2->en_val;
+			return enp1->en_val == enp2->en_val;
 		case ENLOCAL:
 		case ENALOCAL:
-			return	enp1->en_loc == enp2->en_loc;
+			return enp1->en_loc == enp2->en_loc;
 		case ENEXTERNAL:
 		case ENAEXTERNAL:
-			return	enp1->en_ext == enp2->en_ext;
+			return enp1->en_ext == enp2->en_ext;
 		case ENINDIR:
-			return	enp1->en_ind == enp2->en_ind;
+			return enp1->en_ind == enp2->en_ind;
 		case ENOFFSETTED:
 		case ENAOFFSETTED:
-			return	enp1->en_base == enp2->en_base &&
-				enp1->en_off == enp2->en_off;
+			return enp1->en_base == enp2->en_base && enp1->en_off == enp2->en_off;
 		case ENALOCBASE:
 		case ENAARGBASE:
-			return	enp1->en_levels == enp2->en_levels;
+			return enp1->en_levels == enp2->en_levels;
 		case ENPROC:
-			return	enp1->en_pro == enp2->en_pro;
+			return enp1->en_pro == enp2->en_pro;
 		case ENARRELEM:
-			return	enp1->en_arbase == enp2->en_arbase &&
-				enp1->en_index == enp2->en_index &&
-				enp1->en_adesc == enp2->en_adesc;
+			return enp1->en_arbase == enp2->en_arbase && enp1->en_index == enp2->en_index
+			    && enp1->en_adesc == enp2->en_adesc;
 		default:
-			return	TRUE;
+			return TRUE;
 	}
 }
 
@@ -73,7 +76,8 @@ STATIC void copy_entity(entity_p src, entity_p dst)
 	dst->en_kind = src->en_kind;
 	dst->en_size = src->en_size;
 
-	switch (src->en_kind) {
+	switch (src->en_kind)
+	{
 		case ENCONST:
 			dst->en_val = src->en_val;
 			break;
@@ -116,7 +120,8 @@ entity_p en_enter(entity_p enp)
 	register Lindex i;
 	register entity_p new;
 
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		if (same_entity(en_elem(i), enp))
 			return en_elem(i);
 	}
@@ -135,7 +140,8 @@ void clr_entities(void)
 
 	register Lindex i;
 
-	for (i = Lfirst(entities); i != (Lindex) 0; i = Lnext(i, entities)) {
+	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
+	{
 		oldentity(en_elem(i));
 	}
 	Ldeleteset(entities);

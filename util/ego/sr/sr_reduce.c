@@ -9,7 +9,6 @@
  *
  */
 
-
 #include <stdlib.h>
 #include <em_pseu.h>
 #include <em_reg.h>
@@ -29,8 +28,6 @@
 #include "sr_reduce.h"
 #include "sr_expr.h"
 
-
-
 STATIC lset avail;
 /* If an expression such as "iv * const" or "A[iv]" is
  * used more than once in a loop, we only use one temporary
@@ -39,10 +36,10 @@ STATIC lset avail;
  * be available.
  */
 
-STATIC int regtyp(code)
-	code_p code;
+STATIC int regtyp(code_p code)
 {
-	switch(code->co_instr) {
+	switch (code->co_instr)
+	{
 		case op_mli:
 		case op_mlu:
 		case op_sli:
@@ -51,23 +48,18 @@ STATIC int regtyp(code)
 		default:
 			return reg_pointer;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
-
-STATIC void gen_regmes(tmp,score,code,p)
-	offset tmp;
-	int score;
-	code_p code;
-	proc_p p;
+STATIC void gen_regmes(offset tmp, int score, code_p code, proc_p p)
 {
 	/* generate a register message for the temporary variable and
 	 * insert it at the start of the procedure.
 	 */
 
-	line_p l,pro;
+	line_p l, pro;
 
-	l = reg_mes(tmp,code->co_tmpsize,regtyp(code),score);
+	l = reg_mes(tmp, code->co_tmpsize, regtyp(code), score);
 	pro = p->p_start->b_start; /* every proc. begins with a PRO pseudo */
 	l->l_next = pro->l_next;
 	PREV(l->l_next) = l;
@@ -75,10 +67,7 @@ STATIC void gen_regmes(tmp,score,code,p)
 	PREV(l) = pro;
 }
 
-
-STATIC line_p newcode(code,tmp)
-	code_p code;
-	offset tmp;
+STATIC line_p newcode(code_p code, offset tmp)
 {
 	/* Construct the EM code that will replace the reducible code,
 	 * e.g.   iv * c   ->   tmp
@@ -87,7 +76,8 @@ STATIC line_p newcode(code,tmp)
 
 	line_p l;
 
-	switch(code->co_instr) {
+	switch (code->co_instr)
+	{
 		case op_mli:
 		case op_mlu:
 		case op_sli:
@@ -101,7 +91,7 @@ STATIC line_p newcode(code,tmp)
 			 * pointer variable, so the actual EM code
 			 * depends on the pointer size.
 			 */
-			l = move_pointer(tmp,LOAD);
+			l = move_pointer(tmp, LOAD);
 			break;
 		case op_lar:
 			/* New code is a load-indirect */
@@ -119,11 +109,7 @@ STATIC line_p newcode(code,tmp)
 	return l;
 }
 
-
-
-STATIC void replcode(code,text)
-	code_p code;
-	line_p text;
+STATIC void replcode(code_p code, line_p text)
 {
 	/* Replace old code (extending from code->co_lfirst to
 	 * code->co_llast) by new code (headed by 'text').
@@ -131,45 +117,51 @@ STATIC void replcode(code,text)
 
 	line_p l, l1, l2;
 
-	for (l = text; l->l_next != (line_p) 0; l = l->l_next);
+	for (l = text; l->l_next != (line_p)0; l = l->l_next)
+		;
 	/* 'l' now points to last instruction of text */
 	l1 = PREV(code->co_lfirst); /* instruction just before old code */
 	l2 = code->co_llast->l_next; /* instruction just behind old code */
-	if (l1 == (line_p) 0) {
+	if (l1 == (line_p)0)
+	{
 		code->co_block->b_start = text;
-		PREV(text) = (line_p) 0;
-	} else {
+		PREV(text) = (line_p)0;
+	}
+	else
+	{
 		l1->l_next = text;
 		PREV(text) = l1;
 	}
-	if (l2 != (line_p) 0) {
+	if (l2 != (line_p)0)
+	{
 		PREV(l2) = l;
 	}
 	l->l_next = l2;
-	code->co_llast->l_next = (line_p) 0;
+	code->co_llast->l_next = (line_p)0;
 	/* Note that the old code is still accessible via code->co_lfirst */
 }
 
-STATIC line_p add_code(pl, l)
-	line_p pl, l;
+STATIC line_p add_code(line_p pl, line_p l)
 {
-	if (! pl) {
+	if (!pl)
+	{
 		PREV(l) = 0;
 	}
-	else {
+	else
+	{
 		line_p n = pl->l_next;
 
 		DLINK(pl, l);
-		if (n) {
-			while (l->l_next) l = l->l_next;
+		if (n)
+		{
+			while (l->l_next)
+				l = l->l_next;
 			DLINK(l, n);
 		}
 		l = pl;
 	}
 	return l;
 }
-
-
 
 STATIC void init_code(code_p code, offset tmp)
 {
@@ -185,7 +177,8 @@ STATIC void init_code(code_p code, offset tmp)
 	line_p l, *p;
 
 	l = code->co_llast; /* the mli, lar etc. instruction */
-	switch(INSTR(l)) {
+	switch (INSTR(l))
+	{
 		case op_mli:
 		case op_mlu:
 			/* reduced code is: iv_expr * lc  (or lc * iv_expr)
@@ -211,11 +204,11 @@ STATIC void init_code(code_p code, offset tmp)
 			 * init_code is: tmp = &A[iv_expr].
 			 * So just change the lar or sar into a aar ...
 			 */
-			l->l_instr = (byte) op_aar;
+			l->l_instr = (byte)op_aar;
 			/* ... and fall through !! */
 		case op_aar:
 			/* append code to store a pointer in temp. local */
-			l->l_next = move_pointer(tmp,STORE);
+			l->l_next = move_pointer(tmp, STORE);
 			break;
 		default:
 			assert(FALSE); /* non-reducible instruction */
@@ -224,10 +217,13 @@ STATIC void init_code(code_p code, offset tmp)
 
 	/* Now insert the code at the end of the header block */
 	p = &code->co_loop->LP_INSTR;
-	if (INSTR((*p)) == op_bra) {
+	if (INSTR((*p)) == op_bra)
+	{
 		/* Add code before branching to the loop. */
 		add_code(PREV((*p)), code->co_lfirst);
-	} else {
+	}
+	else
+	{
 		/* Add code before falling into the loop. */
 		add_code(*p, code->co_lfirst);
 		while (l->l_next)
@@ -236,9 +232,7 @@ STATIC void init_code(code_p code, offset tmp)
 	}
 }
 
-STATIC void incr_code(code,tmp)
-	code_p  code;
-	offset  tmp;
+STATIC void incr_code(code_p code, offset tmp)
 {
 	/* Generate code to increment the temporary local variable.
 	 * The variable is incremented by
@@ -250,7 +244,7 @@ STATIC void incr_code(code,tmp)
 	 * (such as in: "5-(6-(-iv))" ), this value is negated.
 	 * The generated code looks like:
 	 *  LOL tmp ; LOC incr ; ADI ws ; STL tmp
-	 * For pointer-increments we generate a "ADP c", rather than 
+	 * For pointer-increments we generate a "ADP c", rather than
 	 * a "LOC c; ADS ws".
 	 * This code is put just after the code that increments
 	 * the induction variable.
@@ -259,14 +253,12 @@ STATIC void incr_code(code,tmp)
 	line_p load_tmp, loc, add, store_tmp, l;
 
 	add = newline(OPSHORT);
-	SHORT(add) = ws;  /* the add instruction, can be ADI,ADU or ADS */
-	switch(code->co_instr) {
+	SHORT(add) = ws; /* the add instruction, can be ADI,ADU or ADS */
+	switch (code->co_instr)
+	{
 		case op_mli:
 		case op_mlu:
-			loc = int_line(
-				  code->co_sign *
-				  off_set(code->c_o.co_loadlc) *
-				  code->co_iv->iv_step);
+			loc = int_line(code->co_sign * off_set(code->c_o.co_loadlc) * code->co_iv->iv_step);
 			loc->l_instr = op_loc;
 			add->l_instr = op_adi;
 			load_tmp = int_line(tmp);
@@ -277,9 +269,7 @@ STATIC void incr_code(code,tmp)
 		case op_sli:
 		case op_slu:
 			loc = int_line(
-				  code->co_sign *
-				  code->co_iv->iv_step *
-				  (1 << off_set(code->c_o.co_loadlc)));
+			    code->co_sign * code->co_iv->iv_step * (1 << off_set(code->c_o.co_loadlc)));
 			loc->l_instr = op_loc;
 			add->l_instr = op_adi;
 			load_tmp = int_line(tmp);
@@ -290,14 +280,11 @@ STATIC void incr_code(code,tmp)
 		case op_lar:
 		case op_sar:
 		case op_aar:
-			loc = (line_p) 0;
-			add = int_line(
-			        code->co_sign *
-				code->co_iv->iv_step *
-				elemsize(code->c_o.co_desc));
+			loc = (line_p)0;
+			add = int_line(code->co_sign * code->co_iv->iv_step * elemsize(code->c_o.co_desc));
 			add->l_instr = op_adp;
-			load_tmp = move_pointer(tmp,LOAD);
-			store_tmp = move_pointer(tmp,STORE);
+			load_tmp = move_pointer(tmp, LOAD);
+			store_tmp = move_pointer(tmp, STORE);
 			break;
 		default:
 			assert(FALSE);
@@ -307,131 +294,120 @@ STATIC void incr_code(code,tmp)
 	 * the local. This code will be put just after the code that
 	 * increments the induction variable.
 	 */
-	if (loc != (line_p) 0) concatenate(load_tmp,loc);
-	concatenate(load_tmp,add);
-	concatenate(load_tmp,store_tmp);
+	if (loc != (line_p)0)
+		concatenate(load_tmp, loc);
+	concatenate(load_tmp, add);
+	concatenate(load_tmp, store_tmp);
 	/* Now load_tmp points to a list of EM instructions */
 	l = code->co_iv->iv_incr;
-	if (l->l_next != (line_p) 0) {
-		DLINK(store_tmp,l->l_next);
+	if (l->l_next != (line_p)0)
+	{
+		DLINK(store_tmp, l->l_next);
 	}
-	DLINK(l,load_tmp); /* doubly link them */
+	DLINK(l, load_tmp); /* doubly link them */
 }
 
-
-STATIC void remcode(c)
-	code_p c;
+STATIC void remcode(code_p c)
 {
 	line_p l, next;
 
-	for (l = c->co_lfirst; l != (line_p) 0; l = next) {
+	for (l = c->co_lfirst; l != (line_p)0; l = next)
+	{
 		next = l->l_next;
 		oldline(l);
 	}
 	oldcinfo(c);
 }
 
-
-STATIC bool same_address(l1,l2,vars)
-	line_p l1,l2;
-	lset   vars;
+STATIC bool same_address(line_p l1, line_p l2, lset vars)
 {
 	/* See if l1 and l2 load the same address */
 
-	if (INSTR(l1) != INSTR(l2)) return FALSE;
-	switch(INSTR(l1)) {
+	if (INSTR(l1) != INSTR(l2))
+		return FALSE;
+	switch (INSTR(l1))
+	{
 		case op_lae:
 			return OBJ(l1) == OBJ(l2);
 		case op_lal:
 			return off_set(l1) == off_set(l2);
 		case op_lol:
-			return ps == ws &&
-			  off_set(l1) == off_set(l2) &&
-			  is_loopconst(l1,vars);
+			return ps == ws && off_set(l1) == off_set(l2) && is_loopconst(l1, vars);
 		case op_ldl:
-			return ps == 2*ws &&
-			  off_set(l1) == off_set(l2) &&
-			  is_loopconst(l1,vars);
+			return ps == 2 * ws && off_set(l1) == off_set(l2) && is_loopconst(l1, vars);
 		default:
 			return FALSE;
 	}
 }
 
-
-STATIC bool same_expr(lb1,le1,lb2,le2)
-	line_p lb1,le1,lb2,le2;
+STATIC bool same_expr(line_p lb1, line_p le1, line_p lb2, line_p le2)
 {
 	/* See if the code from lb1 to le1 is the same
 	 * expression as the code from lb2 to le2.
 	 */
 
-
-	register line_p l1,l2;
+	register line_p l1, l2;
 
 	l1 = lb1;
 	l2 = lb2;
-	for (;;) {
-		if (INSTR(l1) != INSTR(l2)) return FALSE;
-		switch(TYPE(l1)) {
+	for (;;)
+	{
+		if (INSTR(l1) != INSTR(l2))
+			return FALSE;
+		switch (TYPE(l1))
+		{
 			case OPSHORT:
-				if (TYPE(l2) != OPSHORT ||
-				    SHORT(l1) != SHORT(l2)) return FALSE;
+				if (TYPE(l2) != OPSHORT || SHORT(l1) != SHORT(l2))
+					return FALSE;
 				break;
 			case OPOFFSET:
-				if (TYPE(l2) != OPOFFSET ||
-				    OFFSET(l1) != OFFSET(l2)) return FALSE;
+				if (TYPE(l2) != OPOFFSET || OFFSET(l1) != OFFSET(l2))
+					return FALSE;
 				break;
 			case OPNO:
 				break;
 			default:
 				return FALSE;
 		}
-		if (l1 == le1 ) return l2 == le2;
-		if (l2 == le2) return FALSE;
+		if (l1 == le1)
+			return l2 == le2;
+		if (l2 == le2)
+			return FALSE;
 		l1 = l1->l_next;
 		l2 = l2->l_next;
 	}
 }
 
-STATIC bool same_code(c1,c2,vars)
-	code_p c1,c2;
-	lset   vars;
+STATIC bool same_code(code_p c1, code_p c2, lset vars)
 {
 	/* See if c1 and c2 compute the same expression. Two array
 	 * references can be the same even if one is e.g a fetch
 	 * and the other a store.
 	 */
 
-	switch(c1->co_instr) {
+	switch (c1->co_instr)
+	{
 		case op_mli:
 		case op_mlu:
 		case op_sli:
 		case op_slu:
-			return c1->co_instr == c2->co_instr &&
-			off_set(c1->c_o.co_loadlc) ==
-			off_set(c2->c_o.co_loadlc) &&
-			same_expr(c1->co_ivexpr,c1->co_endexpr,
-				  c2->co_ivexpr,c2->co_endexpr);
+			return c1->co_instr == c2->co_instr
+			    && off_set(c1->c_o.co_loadlc) == off_set(c2->c_o.co_loadlc)
+			    && same_expr(c1->co_ivexpr, c1->co_endexpr, c2->co_ivexpr, c2->co_endexpr);
 		case op_aar:
 		case op_lar:
 		case op_sar:
-			return ( c2->co_instr == op_aar ||
-				 c2->co_instr == op_lar ||
-				 c2->co_instr == op_sar) &&
-			same_expr(c1->co_ivexpr,c1->co_endexpr,
-				  c2->co_ivexpr,c2->co_endexpr) &&
-			same_address(c1->c_o.co_desc,c2->c_o.co_desc,vars) &&
-			same_address(c1->co_lfirst,c2->co_lfirst,vars);
+			return (c2->co_instr == op_aar || c2->co_instr == op_lar || c2->co_instr == op_sar)
+			    && same_expr(c1->co_ivexpr, c1->co_endexpr, c2->co_ivexpr, c2->co_endexpr)
+			    && same_address(c1->c_o.co_desc, c2->c_o.co_desc, vars)
+			    && same_address(c1->co_lfirst, c2->co_lfirst, vars);
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
-
-STATIC code_p available(c,vars)
-	code_p c;
-	lset   vars;
+STATIC code_p available(code_p c, lset vars)
 {
 	/* See if the code is already available.
 	 * If so, return a pointer to the first occurrence
@@ -441,13 +417,15 @@ STATIC code_p available(c,vars)
 	Lindex i;
 	code_p cp;
 
-	for (i = Lfirst(avail); i != (Lindex) 0; i = Lnext(i,avail)) {
-		cp = (code_p) Lelem(i);
-		if (same_code(c,cp,vars)) {
+	for (i = Lfirst(avail); i != (Lindex)0; i = Lnext(i, avail))
+	{
+		cp = (code_p)Lelem(i);
+		if (same_code(c, cp, vars))
+		{
 			return cp;
 		}
 	}
-	return (code_p) 0;
+	return (code_p)0;
 }
 
 STATIC void reduce(code_p code, lset vars)
@@ -468,47 +446,44 @@ STATIC void reduce(code_p code, lset vars)
 	offset tmp;
 	code_p ac;
 
-	OUTTRACE("succeeded!!",0);
-	if ((ac = available(code,vars)) != (code_p) 0) {
+	OUTTRACE("succeeded!!", 0);
+	if ((ac = available(code, vars)) != (code_p)0)
+	{
 		/* The expression is already available, so we
 		 * don't have to generate a new temporary local for it.
 		 */
-		OUTTRACE("expression was already available",0);
-		replcode(code,newcode(code,ac->co_temp));
+		OUTTRACE("expression was already available", 0);
+		replcode(code, newcode(code, ac->co_temp));
 		remcode(code);
-	} else {
+	}
+	else
+	{
 		make_header(code->co_loop);
 		/* make sure there's a header block */
-		tmp = tmplocal(curproc,(offset) code->co_tmpsize);
+		tmp = tmplocal(curproc, (offset)code->co_tmpsize);
 		code->co_temp = tmp;
 		/* create a new local variable in the stack frame
 		 * of current proc.
 		 */
-		gen_regmes(tmp,3,code,curproc); /* generate register message */
+		gen_regmes(tmp, 3, code, curproc); /* generate register message */
 		/* score is set to 3, as TMP is used at least 3 times */
-		replcode(code,newcode(code,tmp));
-		OUTTRACE("replaced old code by new code",0);
+		replcode(code, newcode(code, tmp));
+		OUTTRACE("replaced old code by new code", 0);
 		/* Construct the EM-code that will replace the reducible code
-	 	 * and replace the old code by the new code.
-	 	 */
-		init_code(code,tmp);
-		OUTTRACE("emitted initializing code",0);
+		 * and replace the old code by the new code.
+		 */
+		init_code(code, tmp);
+		OUTTRACE("emitted initializing code", 0);
 		/* Emit code to initialize the temporary local. This code is
-	 	 * put in the loop header block.
-	 	 */
-		incr_code(code,tmp); /* emit code to increment temp. local */
-		OUTTRACE("emitted increment code",0);
-		Ladd(code,&avail);
+		 * put in the loop header block.
+		 */
+		incr_code(code, tmp); /* emit code to increment temp. local */
+		OUTTRACE("emitted increment code", 0);
+		Ladd(code, &avail);
 	}
 }
 
-
-
-STATIC void try_multiply(lp,ivs,vars,b,mul)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   mul;
+STATIC void try_multiply(loop_p lp, lset ivs, lset vars, bblock_p b, line_p mul)
 {
 	/* See if we can reduce the strength of the multiply
 	 * instruction. If so, then set up the global common
@@ -516,36 +491,41 @@ STATIC void try_multiply(lp,ivs,vars,b,mul)
 	 * code to be reduced) and call 'reduce'.
 	 */
 
-	line_p l2,lbegin;
-	iv_p   iv;
+	line_p l2, lbegin;
+	iv_p iv;
 	code_p c;
-	int    sign;
+	int sign;
 
 	VL(mul);
-	OUTTRACE("trying multiply instruction on line %d",linecount);
-	if (ovfl_harmful && !IS_STRONG(b)) return;
+	OUTTRACE("trying multiply instruction on line %d", linecount);
+	if (ovfl_harmful && !IS_STRONG(b))
+		return;
 	/* If b is not a strong block, optimization may
 	 * introduce an overflow error in the initializing code.
 	 */
 
 	l2 = PREV(mul); /* Instruction before the multiply */
-	if ( (is_ivexpr(l2,ivs,vars,&lbegin,&iv,&sign)) &&
-		is_const(PREV(lbegin)) ) {
-			/* recognized expression "const * iv_expr" */
+	if ((is_ivexpr(l2, ivs, vars, &lbegin, &iv, &sign)) && is_const(PREV(lbegin)))
+	{
+		/* recognized expression "const * iv_expr" */
+		c = newcinfo();
+		c->c_o.co_loadlc = PREV(l2);
+		c->co_endexpr = l2;
+		c->co_lfirst = PREV(lbegin);
+	}
+	else
+	{
+		if (is_const(l2) && (is_ivexpr(PREV(l2), ivs, vars, &lbegin, &iv, &sign)))
+		{
+			/* recognized "iv * const " */
 			c = newcinfo();
-			c->c_o.co_loadlc = PREV(l2);
-			c->co_endexpr = l2;
-			c->co_lfirst = PREV(lbegin);
-	} else {
-		if (is_const(l2) &&
-			(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign))) {
-				/* recognized "iv * const " */
-				c = newcinfo();
-				c->c_o.co_loadlc = l2;
-				c->co_endexpr = PREV(l2);
-				c->co_lfirst = lbegin;
-		} else {
-			OUTTRACE("failed",0);
+			c->c_o.co_loadlc = l2;
+			c->co_endexpr = PREV(l2);
+			c->co_lfirst = lbegin;
+		}
+		else
+		{
+			OUTTRACE("failed", 0);
 			return;
 		}
 	}
@@ -558,19 +538,12 @@ STATIC void try_multiply(lp,ivs,vars,b,mul)
 	c->co_sign = sign;
 	c->co_tmpsize = ws; /* temp. local is a word */
 	c->co_instr = INSTR(mul);
-	OUTVERBOSE("sr: multiply in proc %d loop %d",
-		curproc->p_id, lp->lp_id);
+	OUTVERBOSE("sr: multiply in proc %d loop %d", curproc->p_id, lp->lp_id);
 	Ssr++;
-	reduce(c,vars);
+	reduce(c, vars);
 }
 
-
-
-STATIC void try_leftshift(lp,ivs,vars,b,shft)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   shft;
+STATIC void try_leftshift(loop_p lp, lset ivs, lset vars, bblock_p b, line_p shft)
 {
 	/* See if we can reduce the strength of the leftshift
 	 * instruction. If so, then set up the global common
@@ -578,28 +551,32 @@ STATIC void try_leftshift(lp,ivs,vars,b,shft)
 	 * code to be reduced) and call 'reduce'.
 	 */
 
-	line_p l2,lbegin;
-	iv_p   iv;
+	line_p l2, lbegin;
+	iv_p iv;
 	code_p c;
-	int    sign;
+	int sign;
 
 	VL(shft);
-	OUTTRACE("trying leftshift instruction on line %d",linecount);
-	if (ovfl_harmful && !IS_STRONG(b)) return;
+	OUTTRACE("trying leftshift instruction on line %d", linecount);
+	if (ovfl_harmful && !IS_STRONG(b))
+		return;
 	/* If b is not a strong block, optimization may
 	 * introduce an overflow error in the initializing code.
 	 */
 
 	l2 = PREV(shft); /* Instruction before the shift */
-	if (is_const(l2) && off_set(l2) > sli_threshold &&
-		(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign))) {
-			/* recognized "iv << const " */
-			c = newcinfo();
-			c->c_o.co_loadlc = l2;
-			c->co_endexpr = PREV(l2);
-			c->co_lfirst = lbegin;
-	} else {
-		OUTTRACE("failed",0);
+	if (is_const(l2) && off_set(l2) > sli_threshold
+	    && (is_ivexpr(PREV(l2), ivs, vars, &lbegin, &iv, &sign)))
+	{
+		/* recognized "iv << const " */
+		c = newcinfo();
+		c->c_o.co_loadlc = l2;
+		c->co_endexpr = PREV(l2);
+		c->co_lfirst = lbegin;
+	}
+	else
+	{
+		OUTTRACE("failed", 0);
 		return;
 	}
 	c->co_iv = iv;
@@ -610,27 +587,21 @@ STATIC void try_leftshift(lp,ivs,vars,b,shft)
 	c->co_sign = sign;
 	c->co_tmpsize = ws; /* temp. local is a word */
 	c->co_instr = INSTR(shft);
-	OUTVERBOSE("sr: leftshift in proc %d loop %d",
-		curproc->p_id, lp->lp_id);
+	OUTVERBOSE("sr: leftshift in proc %d loop %d", curproc->p_id, lp->lp_id);
 	Ssr++;
-	reduce(c,vars);
+	reduce(c, vars);
 }
 
-
-STATIC void try_array(lp,ivs,vars,b,arr)
-	loop_p   lp;
-	lset	 ivs,vars;
-	bblock_p b;
-	line_p   arr;
+STATIC void try_array(loop_p lp, lset ivs, lset vars, bblock_p b, line_p arr)
 {
 	/* See if we can reduce the strength of the array reference
 	 * instruction 'arr'.
 	 */
 
-	line_p l2,l3,lbegin;
-	iv_p   iv;
+	line_p l2, l3, lbegin;
+	iv_p iv;
 	code_p c;
-	int    sign;
+	int sign;
 
 	/* Try to recognize the pattern:
 	 *	LOAD ADDRES OF A
@@ -638,17 +609,19 @@ STATIC void try_array(lp,ivs,vars,b,arr)
 	 *      LOAD ADDRESS OF DESCRIPTOR
 	 */
 	VL(arr);
-	OUTTRACE("trying array instruction on line %d",linecount);
-	if (arrbound_harmful && !IS_STRONG(b)) return;
+	OUTTRACE("trying array instruction on line %d", linecount);
+	if (arrbound_harmful && !IS_STRONG(b))
+		return;
 	/* If b is not a strong block, optimization may
 	 * introduce an array bound error in the initializing code.
 	 */
 	l2 = PREV(arr);
-	if (is_caddress(l2,vars) &&
-		(INSTR(arr) == op_aar || elemsize(l2) == ws) &&
-		(is_ivexpr(PREV(l2),ivs,vars,&lbegin,&iv,&sign)) ) {
+	if (is_caddress(l2, vars) && (INSTR(arr) == op_aar || elemsize(l2) == ws)
+	    && (is_ivexpr(PREV(l2), ivs, vars, &lbegin, &iv, &sign)))
+	{
 		l3 = PREV(lbegin);
-		if (is_caddress(l3,vars)) {
+		if (is_caddress(l3, vars))
+		{
 			c = newcinfo();
 			c->co_iv = iv;
 			c->co_loop = lp;
@@ -661,32 +634,26 @@ STATIC void try_array(lp,ivs,vars,b,arr)
 			c->co_tmpsize = ps; /* temp. local is pointer */
 			c->co_instr = INSTR(arr);
 			c->c_o.co_desc = l2;
-			OUTVERBOSE("sr: array in proc %d loop %d",
-				curproc->p_id,lp->lp_id);
+			OUTVERBOSE("sr: array in proc %d loop %d", curproc->p_id, lp->lp_id);
 			Ssr++;
-			reduce(c,vars);
+			reduce(c, vars);
 		}
 	}
 }
 
-
-
-STATIC void clean_avail()
+STATIC void clean_avail(void)
 {
 	Lindex i;
 
-	for (i = Lfirst(avail); i != (Lindex) 0; i = Lnext(i,avail)) {
+	for (i = Lfirst(avail); i != (Lindex)0; i = Lnext(i, avail))
+	{
 		oldcinfo(Lelem(i));
 	}
 	Ldeleteset(avail);
 }
 
-
-
-void strength_reduction(lp,ivs,vars)
-	loop_p lp;	/* description of the loop */
-	lset    ivs;	/* set of induction variables of the loop */
-	lset	vars;	/* set of local variables changed in loop */
+void strength_reduction(loop_p lp, lset ivs, lset vars) /* description of the loop */
+/* set of induction variables of the loop */ /* set of local variables changed in loop */
 {
 	/* Find all expensive instructions (leftshift, multiply, array) and see
 	 * if they can be reduced. We branch to several instruction-specific
@@ -697,29 +664,32 @@ void strength_reduction(lp,ivs,vars)
 	 */
 
 	bblock_p b;
-	line_p   l, next;
-	Lindex   i;
+	line_p l, next;
+	Lindex i;
 
 	avail = Lempty_set();
-	for (i = Lfirst(lp->LP_BLOCKS); i != (Lindex) 0;
-			i = Lnext(i,lp->LP_BLOCKS)) {
-		b = (bblock_p) Lelem(i);
-		for (l = b->b_start; l != (line_p) 0; l = next) {
+	for (i = Lfirst(lp->LP_BLOCKS); i != (Lindex)0; i = Lnext(i, lp->LP_BLOCKS))
+	{
+		b = (bblock_p)Lelem(i);
+		for (l = b->b_start; l != (line_p)0; l = next)
+		{
 			next = l->l_next;
-			if (TYPE(l) == OPSHORT && SHORT(l) == ws) {
-				switch(INSTR(l)) {
+			if (TYPE(l) == OPSHORT && SHORT(l) == ws)
+			{
+				switch (INSTR(l))
+				{
 					case op_sli:
 					case op_slu:
-						try_leftshift(lp,ivs,vars,b,l);
+						try_leftshift(lp, ivs, vars, b, l);
 						break;
 					case op_mlu:
 					case op_mli:
-						try_multiply(lp,ivs,vars,b,l);
+						try_multiply(lp, ivs, vars, b, l);
 						break;
 					case op_lar:
 					case op_sar:
 					case op_aar:
-						try_array(lp,ivs,vars,b,l);
+						try_array(lp, ivs, vars, b, l);
 						break;
 				}
 			}

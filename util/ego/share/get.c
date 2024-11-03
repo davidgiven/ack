@@ -24,10 +24,9 @@
 #include "map.h"
 #include "utils.h"
 
-FILE *curinp;
-block_id lastbid;	/* block identifying number */
-lab_id	 lastlabid;	/* last label identifier */
-
+FILE* curinp;
+block_id lastbid; /* block identifying number */
+lab_id lastlabid; /* last label identifier */
 
 /* creating new identifying numbers, i.e. numbers that did not
  * appear in the input.
@@ -41,36 +40,37 @@ bblock_p freshblock(void)
 	return b;
 }
 
-
 lab_id freshlabel(void)
 {
 	curproc->p_nrlabels++;
 	return ++lastlabid;
 }
 
+#define getmark() getbyte()
 
-#define getmark()	getbyte()
-
-short getshort(void) {
+short getshort(void)
+{
 	register int l_byte, h_byte;
 
 	l_byte = getbyte();
 	h_byte = getbyte();
-	if ( h_byte>=128 ) h_byte -= 256 ;
-	return l_byte | (h_byte*256) ;
+	if (h_byte >= 128)
+		h_byte -= 256;
+	return l_byte | (h_byte * 256);
 }
 
-
-offset getoff(void) {
+offset getoff(void)
+{
 	register long l;
 	register int h_byte;
 
 	l = getbyte();
-	l |= ((unsigned) getbyte())*256 ;
-	l |= getbyte()*256L*256L ;
-	h_byte = getbyte() ;
-	if ( h_byte>=128 ) h_byte -= 256 ;
-	return l | (h_byte*256L*256*256L) ;
+	l |= ((unsigned)getbyte()) * 256;
+	l |= getbyte() * 256L * 256L;
+	h_byte = getbyte();
+	if (h_byte >= 128)
+		h_byte -= 256;
+	return l | (h_byte * 256L * 256 * 256L);
 }
 
 STATIC int getint(void)
@@ -80,9 +80,12 @@ STATIC int getint(void)
 	 * integer to be either a short or a long.
 	 */
 
-	if (sizeof(int) == sizeof(short)) {
+	if (sizeof(int) == sizeof(short))
+	{
 		return getshort();
-	} else {
+	}
+	else
+	{
 		/* Fails with 4-byte int, 8-byte long:
 		 * assert (sizeof(int) == sizeof(offset)); */
 		return getoff();
@@ -91,41 +94,41 @@ STATIC int getint(void)
 
 /* getptable */
 
-STATIC void *getloop(loop_id id)
+STATIC void* getloop(loop_id id)
 {
 	/* Map a loop identifier onto a loop struct.
 	 * If no struct was alocated yet for this identifier then
 	 * allocate one now and update the loop-map table.
 	 */
 
-
-	assert (id > 0 && id <=lplength);
-	if (lpmap[id] == (loop_p) 0) {
+	assert(id > 0 && id <= lplength);
+	if (lpmap[id] == (loop_p)0)
+	{
 		lpmap[id] = newloop();
 		lpmap[id]->lp_id = id;
 	}
 	return (lpmap[id]);
 }
 
-STATIC void *getblock(block_id id)
+STATIC void* getblock(block_id id)
 {
 	/* Map a basic block identifier onto a block struct
 	 * If no struct was alocated yet for this identifier then
 	 * allocate one now and update the block-map table.
 	 */
 
-
-	assert (id >= 0 && id <=blength);
-	if (id == 0) return (bblock_p) 0;
-	if (bmap[id] == (bblock_p) 0) {
+	assert(id >= 0 && id <= blength);
+	if (id == 0)
+		return (bblock_p)0;
+	if (bmap[id] == (bblock_p)0)
+	{
 		bmap[id] = newbblock();
 		bmap[id]->b_id = id;
 	}
 	return (bmap[id]);
 }
 
-
-STATIC lset getlset(void *(*p)(short))
+STATIC lset getlset(void* (*p)(short))
 {
 	/* Read a 'long' set. Such a set is represented externally
 	 * as a sequence of identifying numbers terminated by a 0.
@@ -137,14 +140,14 @@ STATIC lset getlset(void *(*p)(short))
 	int id;
 
 	s = Lempty_set();
-	while ((id = getshort()) != 0) {
-		Ladd( (*p) (id), &s);
+	while ((id = getshort()) != 0)
+	{
+		Ladd((*p)(id), &s);
 	}
 	return s;
 }
 
-
-STATIC cset getcset()
+STATIC cset getcset(void)
 {
 	/* Read a 'compact' set. Such a set is represented externally
 	 * a row of bytes (its bitvector) preceded by its length.
@@ -154,33 +157,36 @@ STATIC cset getcset()
 	register short i;
 
 	s = Cempty_set(getshort());
-	for (i = 0; i <= DIVWL(s->v_size-1);i++) {
+	for (i = 0; i <= DIVWL(s->v_size - 1); i++)
+	{
 		s->v_bits[i] = getint();
 	}
 	return s;
 }
 
-
-proc_p getptable(const char *pname)
+proc_p getptable(const char* pname)
 {
 	short i;
 	proc_p head, p, *pp;
 	short all;
 
-	if ((curinp = fopen(pname,"rb")) == NULL) {
-		error("cannot open %s",pname);
+	if ((curinp = fopen(pname, "rb")) == NULL)
+	{
+		error("cannot open %s", pname);
 	}
 
-	plength = getshort();  /* table is preceded by its length */
+	plength = getshort(); /* table is preceded by its length */
 	assert(plength >= 0);
-	assert(plength < 1000);  /* See if its a reasonable number */
-	pmap = (proc_p *) newmap(plength);   /* allocate the pmap table */
+	assert(plength < 1000); /* See if its a reasonable number */
+	pmap = (proc_p*)newmap(plength); /* allocate the pmap table */
 
 	all = getshort();
-	head = (proc_p) 0;
+	head = (proc_p)0;
 	pp = &head;
-	for (i = 0; i < plength; i++) {
-		if (feof(curinp)) {
+	for (i = 0; i < plength; i++)
+	{
+		if (feof(curinp))
+		{
 			error("unexpected eof %s", pname);
 		}
 		p = newproc();
@@ -188,11 +194,13 @@ proc_p getptable(const char *pname)
 		assert(p->p_id > 0 && p->p_id <= plength);
 		pmap[p->p_id] = p;
 		p->p_flags1 = getbyte();
-		if (p->p_flags1 & PF_BODYSEEN) {
+		if (p->p_flags1 & PF_BODYSEEN)
+		{
 			p->p_nrlabels = getshort();
 			p->p_localbytes = getoff();
 			p->p_nrformals = getoff();
-			if (all) {
+			if (all)
+			{
 				p->p_change = newchange();
 				p->p_change->c_ext = getcset();
 				p->p_change->c_flags = getshort();
@@ -205,15 +213,13 @@ proc_p getptable(const char *pname)
 		pp = &(p->p_next);
 	}
 	fclose(curinp);
-	OUTTRACE("have read proc table of length %d",plength);
-	return head;	/* pointer to first structure of list */
+	OUTTRACE("have read proc table of length %d", plength);
+	return head; /* pointer to first structure of list */
 }
-
-
 
 /* getdtable */
 
-dblock_p getdtable(const char *dname)
+dblock_p getdtable(const char* dname)
 {
 	/* Read the data block table. Every data block may
 	 * have a list of objects and a list of values (arguments),
@@ -226,27 +232,31 @@ dblock_p getdtable(const char *dname)
 	 */
 
 	dblock_p head, d = 0, *dp = &head;
-	obj_p    obj, *op = 0;
-	arg_p    arg, *ap = 0;
+	obj_p obj, *op = 0;
+	arg_p arg, *ap = 0;
 	/* dp, op an ap tell how the next dblock/obj/arg
 	 * has to be linked.
 	 */
 	int n;
 
-	head = (dblock_p) 0;
-	if ((curinp = fopen(dname,"rb")) == NULL) {
+	head = (dblock_p)0;
+	if ((curinp = fopen(dname, "rb")) == NULL)
+	{
 		error("cannot open %s", dname);
 	}
 	olength = getshort();
 	assert(olength >= 0);
-	assert(olength < 5000);  /* See if its a reasonable number */
+	assert(olength < 5000); /* See if its a reasonable number */
 	/* total number of objects */
-	omap = (obj_p *) newmap(olength);  /* allocate omap table */
+	omap = (obj_p*)newmap(olength); /* allocate omap table */
 
-	while (TRUE) {
+	while (TRUE)
+	{
 		n = getmark();
-		if (feof(curinp)) break;
-		switch(n) {
+		if (feof(curinp))
+			break;
+		switch (n)
+		{
 			case MARK_DBLOCK:
 				d = *dp = newdblock();
 				op = &d->d_objlist;
@@ -263,7 +273,7 @@ dblock_p getdtable(const char *dname)
 				op = &obj->o_next;
 				obj->o_dblock = d;
 				obj->o_id = getshort();
-				assert(obj->o_id >0);
+				assert(obj->o_id > 0);
 				assert(obj->o_id <= olength);
 				omap[obj->o_id] = obj;
 				obj->o_size = getoff();
@@ -278,25 +288,22 @@ dblock_p getdtable(const char *dname)
 				assert(FALSE);
 		}
 	}
-	OUTTRACE("have read data table, %d objects",olength);
+	OUTTRACE("have read data table, %d objects", olength);
 	return head;
 }
-
-
 
 /* getbblocks */
 
 STATIC void argstring(short length, argb_p abp)
 {
 
-	while (length--) {
+	while (length--)
+	{
 		if (abp->ab_index == NARGBYTES)
 			abp = abp->ab_next = newargb();
 		abp->ab_contents[abp->ab_index++] = getbyte();
 	}
 }
-
-
 
 STATIC arg_p readargs(void)
 {
@@ -305,21 +312,24 @@ STATIC arg_p readargs(void)
 	 */
 
 	arg_p head, arg, *ap;
-	byte  t;
+	byte t;
 	short length;
 
 	ap = &head;
-	for (;;) {
+	for (;;)
+	{
 		/* every argument list is terminated by an
 		 * ARGCEND byte in Intermediate Code.
 		 */
 		t = getbyte();
-		if (t == (byte) ARGCEND) {
+		if (t == (byte)ARGCEND)
+		{
 			return head;
 		}
 		arg = *ap = newarg(t);
 		ap = &arg->a_next;
-		switch((short) t) {
+		switch ((short)t)
+		{
 			case ARGOFF:
 				arg->a_a.a_offset = getoff();
 				break;
@@ -347,8 +357,7 @@ STATIC arg_p readargs(void)
 				length = getshort();
 				arg->a_a.a_con.ac_length = length;
 				/* size of the constant */
-				argstring(getshort(),
-					  &arg->a_a.a_con.ac_con);
+				argstring(getshort(), &arg->a_a.a_con.ac_con);
 				break;
 			default:
 				assert(FALSE);
@@ -356,8 +365,7 @@ STATIC arg_p readargs(void)
 	}
 }
 
-
-line_p read_line(proc_p *p_out)
+line_p read_line(proc_p* p_out)
 {
 	/* Read a line of EM code (i.e. one instruction)
 	 * and its arguments (if any).
@@ -367,14 +375,16 @@ line_p read_line(proc_p *p_out)
 	 */
 
 	line_p lnp;
-	byte   instr;
+	byte instr;
 
 	instr = getbyte();
-	if (feof(curinp)) return (line_p) 0;
+	if (feof(curinp))
+		return (line_p)0;
 	lnp = newline(getbyte());
 	linecount++;
 	lnp->l_instr = instr;
-	switch(TYPE(lnp)) {
+	switch (TYPE(lnp))
+	{
 		/* read the operand(s) */
 		case OPSHORT:
 			SHORT(lnp) = getshort();
@@ -384,7 +394,8 @@ line_p read_line(proc_p *p_out)
 			break;
 		case OPINSTRLAB:
 			INSTRLAB(lnp) = getshort();
-			if ((instr & BMASK) == op_lab) {
+			if ((instr & BMASK) == op_lab)
+			{
 				/* defining occurrence of an
 				 * instruction label.
 				 */
@@ -396,15 +407,16 @@ line_p read_line(proc_p *p_out)
 			break;
 		case OPPROC:
 			PROC(lnp) = pmap[getshort()];
-			if ((instr & BMASK) == ps_pro) {
+			if ((instr & BMASK) == ps_pro)
+			{
 				/* enter new procedure: allocate a
 				 * label map and a label-block map table.
 				 */
 				*p_out = PROC(lnp);
 				llength = (*p_out)->p_nrlabels;
-				lmap = (line_p *) newmap(llength);
+				lmap = (line_p*)newmap(llength);
 				/* maps lab_id to line structure */
-				lbmap = (bblock_p *) newmap(llength);
+				lbmap = (bblock_p*)newmap(llength);
 				/* maps lab_id to bblock structure */
 				lastlabid = llength;
 			}
@@ -418,7 +430,6 @@ line_p read_line(proc_p *p_out)
 	return lnp;
 }
 
-
 void message(line_p lnp)
 {
 	/* See if  lnp is some useful message.
@@ -428,11 +439,13 @@ void message(line_p lnp)
 	 */
 
 	assert(ARG(lnp)->a_type == ARGOFF);
-	switch((int) aoff(ARG(lnp),0)) {
+	switch ((int)aoff(ARG(lnp), 0))
+	{
 		case ms_reg:
-			if (ARG(lnp)->a_next != (arg_p) 0) {
+			if (ARG(lnp)->a_next != (arg_p)0)
+			{
 				/* take only "mes 3" with further arguments */
-				Ladd((Lelem_t) lnp,&mesregs);
+				Ladd((Lelem_t)lnp, &mesregs);
 			}
 			break;
 		case ms_err:
@@ -440,15 +453,13 @@ void message(line_p lnp)
 		case ms_opt:
 			error("ms_opt encountered");
 		case ms_emx:
-			ws = aoff(ARG(lnp),1);
-			ps = aoff(ARG(lnp),2);
+			ws = aoff(ARG(lnp), 1);
+			ps = aoff(ARG(lnp), 2);
 			break;
 	}
 }
 
-
-
-line_p getlines(FILE *lf, int n, proc_p *p_out, bool collect_mes)
+line_p getlines(FILE* lf, int n, proc_p* p_out, bool collect_mes)
 {
 	/* Read n lines of EM text and doubly link them.
 	 * Also process messages.
@@ -458,24 +469,30 @@ line_p getlines(FILE *lf, int n, proc_p *p_out, bool collect_mes)
 
 	curinp = lf; /* EM input file */
 	pp = &head;
-	lprev = (line_p) 0;
-	while (n--) {
+	lprev = (line_p)0;
+	while (n--)
+	{
 		l = *pp = read_line(p_out);
 		PREV(l) = lprev;
 		pp = &l->l_next;
 		lprev = l;
-		if (collect_mes && INSTR(l) == ps_mes) {
+		if (collect_mes && INSTR(l) == ps_mes)
+		{
 			message(l);
 		}
 	}
-	*pp = (line_p) 0;
+	*pp = (line_p)0;
 	return head;
 }
 
-
-
-bool getunit(FILE *gf, FILE *lf, short *kind_out, bblock_p *g_out,
-	     line_p *l_out, proc_p *p_out, bool collect_mes)
+bool getunit(
+    FILE* gf,
+    FILE* lf,
+    short* kind_out,
+    bblock_p* g_out,
+    line_p* l_out,
+    proc_p* p_out,
+    bool collect_mes)
 {
 	/* Read control flow graph (gf) and EM text (lf) of the next procedure.
 	 * A pointer to the proctable entry of the read procedure is
@@ -485,36 +502,39 @@ bool getunit(FILE *gf, FILE *lf, short *kind_out, bblock_p *g_out,
 	 * at their first reference rather than at when we read them.
 	 */
 
-	int n,i;
+	int n, i;
 	bblock_p head, *pp, b;
 	loop_p lp;
 
 	curinp = gf;
 	blength = getshort(); /* # basic blocks in this procedure */
-	if (feof(curinp)) return FALSE;
-	if (blength == 0) {
+	if (feof(curinp))
+		return FALSE;
+	if (blength == 0)
+	{
 		/* data unit */
 		*kind_out = LDATA;
 		n = getshort();
-		*l_out = getlines(lf,n,p_out,collect_mes);
+		*l_out = getlines(lf, n, p_out, collect_mes);
 		return TRUE;
 	}
 	*kind_out = LTEXT;
-	bmap = (bblock_p *) newmap(blength); /* maps block_id on bblock_p */
+	bmap = (bblock_p*)newmap(blength); /* maps block_id on bblock_p */
 	lplength = getshort(); /* # loops in this procedure */
-	lpmap = (loop_p *) newmap(lplength); /* maps loop_id on loop_p */
+	lpmap = (loop_p*)newmap(lplength); /* maps loop_id on loop_p */
 
 	/* Read the basic blocks and the EM text */
 	pp = &head; /* we use a pointer-to-a-pointer to link the structs */
-	for (i = 0; i < blength; i++) {
+	for (i = 0; i < blength; i++)
+	{
 		b = getblock(getshort());
-		n = getshort();  /* #instructions in the block */
+		n = getshort(); /* #instructions in the block */
 		b->b_succ = getlset(getblock);
 		b->b_pred = getlset(getblock);
 		b->b_idom = getblock(getshort());
 		b->b_loops = getlset(getloop);
 		b->b_flags = getshort();
-		b->b_start = getlines(lf,n,p_out,collect_mes);  /* read EM text */
+		b->b_start = getlines(lf, n, p_out, collect_mes); /* read EM text */
 		*pp = b;
 		pp = &b->b_next;
 		curinp = gf;
@@ -523,12 +543,13 @@ bool getunit(FILE *gf, FILE *lf, short *kind_out, bblock_p *g_out,
 
 	/* read the information about loops */
 	curproc->p_loops = Lempty_set();
-	for (i = 0; i < lplength; i++) {
+	for (i = 0; i < lplength; i++)
+	{
 		lp = getloop(getshort());
 		lp->lp_level = getshort(); /* nesting level */
 		lp->lp_entry = getblock(getshort()); /* entry block of the loop */
 		lp->lp_end = getblock(getshort()); /* tail of back edge of loop */
-		Ladd((Lelem_t)lp,&curproc->p_loops);
+		Ladd((Lelem_t)lp, &curproc->p_loops);
 	}
 	*g_out = head;
 	return TRUE;

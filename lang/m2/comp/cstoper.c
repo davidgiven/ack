@@ -29,8 +29,6 @@
 #include	"warning.h"
 #include	"error.h"
 
-extern char	*symbol2str();
-
 #define arith_sign	((arith) 1 << (sizeof(arith) * 8 - 1))
 
 #ifndef NOCROSS
@@ -422,7 +420,6 @@ void cstubin(struct node **expp)
 
 void cstset(struct node **expp)
 {
-	extern arith *MkSet();
 	register struct node *exp = *expp;
 	register arith *set1, *set2, *set3;
 	register unsigned int setsize;

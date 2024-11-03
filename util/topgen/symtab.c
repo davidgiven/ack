@@ -58,5 +58,5 @@ struct symtab * findident(char *s, int mode, struct symtab **table)
 			return findident(s, mode, &(p->s_left));
 		return findident(s, mode, &(p->s_right));
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }

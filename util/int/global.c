@@ -1,12 +1,11 @@
 /*
-	Definitions of the externs in global.h.
-	Could be generated.
+    Definitions of the externs in global.h.
+    Could be generated.
 */
 
 /* $Id$ */
 
-#include	"global.h"
-
+#include "global.h"
 
 /******** EM Machine capacity parameters ********/
 
@@ -21,7 +20,6 @@ long max_off = 0;
 ptr max_addr = 0;
 size wsizem1 = 0;
 
-
 /******** EM program parameters ********/
 
 ptr ML = 0;
@@ -30,9 +28,7 @@ ptr DB = 0;
 long NProc = 0;
 long PreIgnMask = 0;
 
-
 /******** EM machine registers ********/
-
 
 long PI = 0;
 ptr PC = 0;
@@ -49,25 +45,18 @@ int OnTrap = 0;
 long IgnMask = 0;
 long TrapPI = 0;
 
-char *FRA = NULL;
+char* FRA = NULL;
 size FRALimit = 0;
 size FRASize = 0;
 int FRA_def = 0;
 
-
 /******** The EM Machine Memory ********/
 
-char *text = NULL;
+char* text = NULL;
 
-char *data = NULL;
+char* data = NULL;
 ptr HL = 0;
 
-char *stack = NULL;
-char *stackML = NULL;
+char* stack = NULL;
+char* stackML = NULL;
 ptr SL = 0;
-
-
-
-
-
-

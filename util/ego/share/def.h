@@ -8,12 +8,11 @@
  *  F O R   A L L   O P T I M I Z E R   P A S S E S
  */
 
-#define MARK_DBLOCK	0
-#define MARK_OBJ	1
-#define MARK_ARG	2
+#define MARK_DBLOCK 0
+#define MARK_OBJ 1
+#define MARK_ARG 2
 
-
-#define op_lab	(sp_lmnem+1)
-#define op_last	op_lab
-#define ps_sym	(sp_lpseu+1)
+#define op_lab (sp_lmnem + 1)
+#define op_last op_lab
+#define ps_sym (sp_lpseu + 1)
 #define ps_last ps_sym

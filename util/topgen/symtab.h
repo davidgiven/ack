@@ -16,7 +16,7 @@ struct symtab {
 
 extern struct symtab *idtable,		/* table for variables */
 		     *deftable;		/* table for tunable defines */
-struct symtab *findident();
+extern struct symtab * findident(char *s, int mode, struct symtab **table);
 
 /* Options to "findident" */
 #define LOOKING		1

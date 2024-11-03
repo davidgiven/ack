@@ -78,6 +78,6 @@ ttyslot()
 		}
 		retval++;
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 #endif
 }

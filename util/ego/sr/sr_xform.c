@@ -9,8 +9,6 @@
  *
  */
 
-
-
 #include <stdio.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
@@ -29,9 +27,7 @@
 
 /* Transformations on EM texts */
 
-line_p move_pointer(tmp,dir)
-	offset tmp;
-	int    dir;
+line_p move_pointer(offset tmp, int dir)
 {
 	/* Generate EM code to load/store a pointer variable
 	 * onto/from the stack, depending on dir(ection).
@@ -41,51 +37,51 @@ line_p move_pointer(tmp,dir)
 	line_p l;
 
 	l = int_line(tmp);
-	if (ps == ws) {
+	if (ps == ws)
+	{
 		/* pointer fits in a word */
 		l->l_instr = (dir == LOAD ? op_lol : op_stl);
-	} else {
-		if (ps == 2 * ws) {
+	}
+	else
+	{
+		if (ps == 2 * ws)
+		{
 			/* pointer fits in a double word */
 			l->l_instr = (dir == LOAD ? op_ldl : op_sdl);
-		} else {
+		}
+		else
+		{
 			/* very large pointer size, generate code:
 			 * LAL tmp ; LOI/STI ps */
 			l->l_instr = op_lal;
 			l->l_next = newline(OPSHORT);
 			SHORT(l->l_next) = ps;
-			l->l_next->l_instr =
-			   (dir == LOAD ? op_loi : op_sti);
+			l->l_next->l_instr = (dir == LOAD ? op_loi : op_sti);
 			PREV(l->l_next) = l;
 		}
 	}
 	return l;
 }
 
-
-
 /* make_header */
 
-STATIC void copy_loops(b1,b2,except)
-	bblock_p b1,b2;
-	loop_p except;
+STATIC void copy_loops(bblock_p b1, bblock_p b2, loop_p except)
 {
 	/* Copy the loopset of b2 to b1, except for 'except' */
 
 	Lindex i;
 	loop_p lp;
-	for (i = Lfirst(b2->b_loops); i != (Lindex) 0;
-	     i = Lnext(i,b2->b_loops)) {
-		lp = (loop_p) Lelem(i);
-		if (lp != except) {
-			Ladd(lp,&b1->b_loops);
+	for (i = Lfirst(b2->b_loops); i != (Lindex)0; i = Lnext(i, b2->b_loops))
+	{
+		lp = (loop_p)Lelem(i);
+		if (lp != except)
+		{
+			Ladd(lp, &b1->b_loops);
 		}
 	}
 }
 
-
-STATIC lab_id label(b)
-	bblock_p b;
+STATIC lab_id label(bblock_p b)
 {
 	/* Find the label at the head of block b. If there is
 	 * no such label yet, create one.
@@ -93,23 +89,23 @@ STATIC lab_id label(b)
 
 	line_p l;
 
-	if (b->b_start && INSTR(b->b_start) == op_lab) {
+	if (b->b_start && INSTR(b->b_start) == op_lab)
+	{
 		return INSTRLAB(b->b_start);
 	}
 	/* The block has no label yet. */
 	l = newline(OPINSTRLAB);
 	l->l_instr = op_lab;
 	INSTRLAB(l) = freshlabel();
-	if (b->b_start) {
-		DLINK(l,b->b_start); /* doubly link them */
+	if (b->b_start)
+	{
+		DLINK(l, b->b_start); /* doubly link them */
 	}
 	b->b_start = l;
 	return INSTRLAB(l);
 }
 
-
-STATIC void adjust_jump(newtarg,oldtarg,c)
-	bblock_p newtarg,oldtarg,c;
+STATIC void adjust_jump(bblock_p newtarg, bblock_p oldtarg, bblock_p c)
 {
 	/* If the last instruction of c is a jump to the
 	 * old target, then change it into a jump to the
@@ -118,17 +114,19 @@ STATIC void adjust_jump(newtarg,oldtarg,c)
 
 	line_p l = last_instr(c);
 
-	assert(l != (line_p) 0);
+	assert(l != (line_p)0);
 
-	if (INSTR(oldtarg->b_start) == op_lab) {
+	if (INSTR(oldtarg->b_start) == op_lab)
+	{
 		/* If old target has no label, it cannot be jumped to */
-		if (TYPE(l) == OPINSTRLAB &&
-		    INSTRLAB(l) == INSTRLAB(oldtarg->b_start)) {
+		if (TYPE(l) == OPINSTRLAB && INSTRLAB(l) == INSTRLAB(oldtarg->b_start))
+		{
 			INSTRLAB(l) = label(newtarg);
 		}
 	}
 
-	if (c->b_next == oldtarg && INSTR(l) != op_bra) {
+	if (c->b_next == oldtarg && INSTR(l) != op_bra)
+	{
 		line_p new = newline(OPINSTRLAB);
 
 		INSTRLAB(new) = label(newtarg);
@@ -136,7 +134,6 @@ STATIC void adjust_jump(newtarg,oldtarg,c)
 		DLINK(l, new);
 	}
 }
-
 
 void make_header(loop_p lp)
 {
@@ -146,12 +143,13 @@ void make_header(loop_p lp)
 	 * If there is no header yet, create one.
 	 */
 
-	bblock_p b,c,entry;
-	line_p branch,last;
-	Lindex i,next;
+	bblock_p b, c, entry;
+	line_p branch, last;
+	Lindex i, next;
 
-	if (lp->LP_HEADER != (bblock_p) 0) return;
-	OUTTRACE("creating a new header block",0);
+	if (lp->LP_HEADER != (bblock_p)0)
+		return;
+	OUTTRACE("creating a new header block", 0);
 	/* The loop has no header yet. The main problem is to
 	 * keep all relations (SUCC, PRED, NEXT, IDOM, LOOPS)
 	 * up to date.
@@ -177,22 +175,24 @@ void make_header(loop_p lp)
 	b->b_succ = Lempty_set();
 	b->b_pred = Lempty_set();
 
-	for (i = Lfirst(entry->b_pred); i != (Lindex) 0; i = next ) {
-		next = Lnext(i,entry->b_pred);
-		c = (bblock_p) Lelem(i);
+	for (i = Lfirst(entry->b_pred); i != (Lindex)0; i = next)
+	{
+		next = Lnext(i, entry->b_pred);
+		c = (bblock_p)Lelem(i);
 		/* c is a predecessor of the entry block */
-		if (!Lis_elem(c,lp->LP_BLOCKS)) {
+		if (!Lis_elem(c, lp->LP_BLOCKS))
+		{
 			/* c is outside the loop */
-			Lremove(c,&entry->b_pred);
-			Lremove(entry,&c->b_succ);
-			Ladd(b,&c->b_succ);
-			Ladd(c,&b->b_pred);
-			adjust_jump(b,entry,c);
+			Lremove(c, &entry->b_pred);
+			Lremove(entry, &c->b_succ);
+			Ladd(b, &c->b_succ);
+			Ladd(c, &b->b_pred);
+			adjust_jump(b, entry, c);
 		}
 	}
 
-	Ladd(b,&entry->b_pred);
-	Ladd(entry,&b->b_succ);
+	Ladd(b, &entry->b_pred);
+	Ladd(entry, &b->b_succ);
 
 	/* put header block at end of procedure */
 	for (c = curproc->p_start; c->b_next != 0; c = c->b_next)
@@ -203,12 +203,12 @@ void make_header(loop_p lp)
 	/* move the END pseudo to header block */
 	last = last_instr(c);
 	assert(INSTR(last) == ps_end);
-	assert(PREV(last) != (line_p) 0);
+	assert(PREV(last) != (line_p)0);
 	PREV(last)->l_next = 0;
 	DLINK(branch, last);
 
 	/* fix loops and dominance */
-	copy_loops(b,entry,lp);
+	copy_loops(b, entry, lp);
 	b->b_idom = entry->b_idom;
 	entry->b_idom = b;
 	lp->LP_HEADER = b;

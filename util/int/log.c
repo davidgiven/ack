@@ -4,28 +4,25 @@
 
 /* $Id$ */
 
-#include	<stdio.h>
-#include	<string.h>
+#include <stdio.h>
+#include <string.h>
 #if __STDC__
-#include	<stdarg.h>
+#include <stdarg.h>
 #else
-#include	<varargs.h>
+#include <varargs.h>
 #endif
 
-#include	"logging.h"
-#include	"global.h"
-#include	"dump.h"
-#include	"linfil.h"
-#include	"io.h"
+#include "logging.h"
+#include "global.h"
+#include "dump.h"
+#include "linfil.h"
+#include "io.h"
 
-#ifdef	LOGGING
+#ifdef LOGGING
 
 extern long mess_id; /* from io.c */
-extern FILE *fcreat_high(); /* from io.c */
 
 /******** The Logging Machine Variables ********/
-
-extern long atol();
 
 long inr; /* current instruction number */
 
@@ -42,20 +39,20 @@ PRIVATE int stdrawflag; /* set if unformatted stack dump */
 
 PRIVATE char log_file[64] = "int.log"; /* Name of log file */
 PRIVATE long at; /* patch to set log_start */
-PRIVATE char *lmask; /* patch to set logmask */
-PRIVATE char *logvar; /* Name of LOG variable */
+PRIVATE char* lmask; /* patch to set logmask */
+PRIVATE char* logvar; /* Name of LOG variable */
 PRIVATE int log_level[128]; /* Holds the log levels */
-PRIVATE FILE *log_fp; /* Filepointer of log file */
+PRIVATE FILE* log_fp; /* Filepointer of log file */
 
 /* arguments for the logging machine */
 PRIVATE int argcount;
-PRIVATE char *arglist[20]; /* arbitrary size */
+PRIVATE char* arglist[20]; /* arbitrary size */
 
-PRIVATE void set_lmask(char *mask);
-PRIVATE char *getpar(char *);
-PRIVATE long longpar(char *, long);
+PRIVATE void set_lmask(char* mask);
+PRIVATE char* getpar(char*);
+PRIVATE long longpar(char*, long);
 
-int logarg(char *str)
+int logarg(char* str)
 {
 	/*	If the string might be an interesting argument for the
 	 logging machine, it is stored in the arglist, and logarg
@@ -63,7 +60,7 @@ int logarg(char *str)
 
 	 The string is interesting if it contains a '='.
 	 */
-	register char *arg = str;
+	register char* arg = str;
 	register char ch;
 
 	while ((ch = *arg) && (ch != '='))
@@ -160,9 +157,7 @@ void open_log(int firsttime)
 			log_start = atoi(getpar(logvar));
 		}
 
-		set_lmask(
-				lmask ? lmask :
-				getpar("LOGMASK") ? getpar("LOGMASK") : "A-Z9d2twx9");
+		set_lmask(lmask ? lmask : getpar("LOGMASK") ? getpar("LOGMASK") : "A-Z9d2twx9");
 	}
 
 	/* Create logfile if needed */
@@ -185,21 +180,20 @@ void close_log(void)
 		fclose(log_fp);
 		log_fp = 0;
 	}
-
 }
 
 /******** The logmask ********/
 
-#define	inrange(c,l,h)		(l <= c && c <= h)
-#define	layout(c)		(c == ' ' || c == '\t' || c == ',')
+#define inrange(c, l, h) (l <= c && c <= h)
+#define layout(c) (c == ' ' || c == '\t' || c == ',')
 
-PRIVATE void set_lmask(char *mask)
+PRIVATE void set_lmask(char* mask)
 {
-	register char *mp = mask;
+	register char* mp = mask;
 
 	while (*mp != 0)
 	{
-		register char *lvp;
+		register char* lvp;
 		register int lev;
 
 		while (layout(*mp))
@@ -218,8 +212,7 @@ PRIVATE void set_lmask(char *mask)
 		{
 			register int mc = *mp;
 
-			if ( inrange(mc, 'a', 'z') || inrange(mc, 'A', 'Z') || mc == '+'
-					|| mc == '*')
+			if (inrange(mc, 'a', 'z') || inrange(mc, 'A', 'Z') || mc == '+' || mc == '*')
 			{
 				log_level[mc] = lev;
 				mp++;
@@ -260,7 +253,7 @@ int check_log(char mark[])
 
 #if __STDC__
 /*VARARGS*/
-void do_log(char *fmt, ...)
+void do_log(char* fmt, ...)
 {
 	va_list ap;
 
@@ -268,15 +261,14 @@ void do_log(char *fmt, ...)
 	{
 
 #else
-		/*VARARGS*/
-		do_log(va_alist)
-		va_dcl
-		{
-			va_list ap;
+/*VARARGS*/
+do_log(va_alist) va_dcl
+{
+	va_list ap;
 
-			va_start(ap);
-			{
-				char *fmt = va_arg(ap, char *);
+	va_start(ap);
+	{
+		char* fmt = va_arg(ap, char*);
 
 #endif
 		if (!check_log(fmt))
@@ -319,7 +311,7 @@ void log_eoi(void)
 
 /******** Service routines ********/
 
-PRIVATE char *getpar(char *var)
+PRIVATE char* getpar(char* var)
 {
 	/*	Looks up the name in the argument list.
 	 */
@@ -328,7 +320,7 @@ PRIVATE char *getpar(char *var)
 
 	for (count = 0; count < argcount; count++)
 	{
-		register char *arg = arglist[count];
+		register char* arg = arglist[count];
 
 		if (strncmp(var, arg, ln) == 0 && arg[ln] == '=')
 		{
@@ -340,14 +332,13 @@ PRIVATE char *getpar(char *var)
 }
 
 PRIVATE long longpar(
-	char *var, /* name of the variable */
-	long def /* default value */
- )
+    char* var, /* name of the variable */
+    long def /* default value */
+)
 {
-	register char *res = getpar(var);
+	register char* res = getpar(var);
 
 	return (res ? atol(res) : def);
 }
 
-#endif	/* LOGGING */
-
+#endif /* LOGGING */

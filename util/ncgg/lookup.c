@@ -52,7 +52,7 @@ symbol *lookup(char *name, symtype type, lookupstyle style)
 			return ((symbol *) 0);
 		case mustexist:
 			fatal("%s is unknown symbol", name);
-			/* NOTREACHED */
+			UNREACHABLE_CODE;
 		case newsymbol:
 		case makeexist:
 			NEW(sy_p, symbol);

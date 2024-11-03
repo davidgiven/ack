@@ -19,7 +19,7 @@
 #include	"noRoption.h"
 
 extern char options[];
-extern char *symbol2str();
+
 
 /*	This chapter asks for the repeated application of code to handle
 	an operation that may be executed at compile time or at run time,

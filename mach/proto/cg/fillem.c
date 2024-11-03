@@ -25,6 +25,7 @@
 #include "salloc.h"
 #include "gencode.h"
 #include "glosym.h"
+#include "codegen.h"
 #ifdef REGVARS
 #include "regvar.h"
 #include <em_reg.h>
@@ -37,10 +38,8 @@
 #define newplb newilb
 #endif
 
-string tostring();
 static string holstr(word n);
 static char *strarg(int t);
-string mystrcpy();
 static int get16(void);
 static long get32(void);
 static int getarg(int typset);
@@ -345,7 +344,6 @@ void dopseudo(void) {
 		} else if (argval == ms_reg) {
 			long r_off;
 			int r_size,r_type,r_score;
-			struct regvar *linkreg();
 
 			if (!regallowed)
 				error("mes 3 not allowed here");
@@ -650,7 +648,7 @@ static long con(int t) {
 		return(argval);
 	}
 	assert(FALSE);
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 extern char *segname[];

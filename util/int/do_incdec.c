@@ -4,18 +4,18 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"global.h"
-#include	"log.h"
-#include	"nofloat.h"
-#include	"trap.h"
-#include	"mem.h"
-#include	"data.h"
-#include	"text.h"
-#include	"stack.h"
-#include	"fra.h"
-#include	"warn.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "global.h"
+#include "log.h"
+#include "nofloat.h"
+#include "trap.h"
+#include "mem.h"
+#include "data.h"
+#include "text.h"
+#include "stack.h"
+#include "fra.h"
+#include "warn.h"
+#include "switch.h"
 
 PRIVATE long inc(long), dec(long);
 
@@ -88,7 +88,6 @@ void DoDEE(register long arg)
 void DoZRL(register long l)
 {
 
-
 	LOG(("@Z6 DoZRL(%ld)", l));
 	spoilFRA();
 	l = arg_l(l);
@@ -110,14 +109,14 @@ void DoZRE(register long arg)
 void DoZRF(register size l)
 {
 
-#ifndef	NOFLOAT
+#ifndef NOFLOAT
 	LOG(("@Z6 DoZRF(%ld)", l));
 	spoilFRA();
 	fpush(0.0, arg_wf(l));
-#else	/* NOFLOAT */
+#else /* NOFLOAT */
 	arg = arg;
 	nofloat();
-#endif	/* NOFLOAT */
+#endif /* NOFLOAT */
 }
 /** ZER w: Load w zero bytes */
 void DoZER(register size l)
@@ -126,15 +125,16 @@ void DoZER(register size l)
 	spoilFRA();
 	npush(0L, arg_w(l));
 
-/*
-	for (i = arg_w(l); i; i -= wsize)
-		wpush(0L);
-*/
+	/*
+	    for (i = arg_w(l); i; i -= wsize)
+	        wpush(0L);
+	*/
 }
 
 PRIVATE long inc(long l)
 {
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
 		if (l == i_maxsw)
 			trap(EIOVFL);
 	}
@@ -143,10 +143,10 @@ PRIVATE long inc(long l)
 
 PRIVATE long dec(long l)
 {
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
 		if (l == i_minsw)
 			trap(EIOVFL);
 	}
 	return (l - 1);
 }
-

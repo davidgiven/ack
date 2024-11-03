@@ -6,7 +6,6 @@
  * Author: Hans van Staveren
  */
 
-extern long atol();
 extern char patid[128];
 extern int lino;
 extern int mlookup(char* name);

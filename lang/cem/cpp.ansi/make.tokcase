@@ -2,8 +2,7 @@ cat <<'--EOT--'
 #include "Lpars.h"
 
 char *
-symbol2str(tok)
-	int tok;
+symbol2str(int tok)
 {
 	static char buf[2] = { '\0', '\0' };
 

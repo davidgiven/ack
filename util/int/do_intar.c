@@ -4,16 +4,16 @@
 
 /* $Id$ */
 
-#include	"em_abs.h"
-#include	"logging.h"
-#include	"global.h"
-#include	"log.h"
-#include	"mem.h"
-#include	"trap.h"
-#include	"warn.h"
-#include	"text.h"
-#include	"fra.h"
-#include	"switch.h"
+#include "em_abs.h"
+#include "logging.h"
+#include "global.h"
+#include "log.h"
+#include "mem.h"
+#include "trap.h"
+#include "warn.h"
+#include "text.h"
+#include "fra.h"
+#include "switch.h"
 
 PRIVATE long adi(long, long, size), sbi(long, long, size), dvi(long, long, size);
 PRIVATE long mli(long, long, size), rmi(long, long), ngi(long, size);
@@ -100,18 +100,21 @@ void DoSRI(register size l)
 	npush(sri(spop(l), t, l), l);
 }
 
-#define	i_maxs(n)		((n == 2) ? I_MAXS2 : I_MAXS4)
-#define	i_mins(n)		((n == 2) ? I_MINS2 : I_MINS4)
+#define i_maxs(n) ((n == 2) ? I_MAXS2 : I_MAXS4)
+#define i_mins(n) ((n == 2) ? I_MINS2 : I_MINS4)
 
 /** Returns "w1" + "w2". */
 PRIVATE long adi(long w1, long w2, size nbytes)
 {
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
-		if (w1 > 0 && w2 > 0) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
+		if (w1 > 0 && w2 > 0)
+		{
 			if (i_maxs(nbytes) - w1 < w2)
 				trap(EIOVFL);
 		}
-		else if (w1 < 0 && w2 < 0) {
+		else if (w1 < 0 && w2 < 0)
+		{
 			if (i_mins(nbytes) - w1 > w2)
 				trap(EIOVFL);
 		}
@@ -122,13 +125,17 @@ PRIVATE long adi(long w1, long w2, size nbytes)
 /** Returns "w1" - "w2" */
 PRIVATE long sbi(long w1, long w2, size nbytes)
 {
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
-		if (w2 < 0 && w1 > 0) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
+		if (w2 < 0 && w1 > 0)
+		{
 			if (i_maxs(nbytes) + w2 < w1)
 				trap(EIOVFL);
 		}
-		else if (w2 > 0 && w1 < 0) {
-			if (i_mins(nbytes) + w2 > w1) {
+		else if (w2 > 0 && w1 < 0)
+		{
+			if (i_mins(nbytes) + w2 > w1)
+			{
 				trap(EIOVFL);
 			}
 		}
@@ -136,7 +143,7 @@ PRIVATE long sbi(long w1, long w2, size nbytes)
 	return (w1 - w2);
 }
 
-#define	labs(w)		((w < 0) ? (-w) : w)
+#define labs(w) ((w < 0) ? (-w) : w)
 
 /** Returns "w1" * "w2" */
 PRIVATE long mli(long w1, long w2, size nbytes)
@@ -144,19 +151,23 @@ PRIVATE long mli(long w1, long w2, size nbytes)
 	if (w1 == 0 || w2 == 0)
 		return (0L);
 
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
-		if ((w1 > 0 && w2 > 0) || (w2 < 0 && w1 < 0)) {
-			if (	w1 == i_mins(nbytes) || w2 == i_mins(nbytes)
-			||	(i_maxs(nbytes) / labs(w1)) < labs(w2)
-			) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
+		if ((w1 > 0 && w2 > 0) || (w2 < 0 && w1 < 0))
+		{
+			if (w1 == i_mins(nbytes) || w2 == i_mins(nbytes)
+			    || (i_maxs(nbytes) / labs(w1)) < labs(w2))
+			{
 				trap(EIOVFL);
 			}
 		}
-		else if (w1 > 0) {
+		else if (w1 > 0)
+		{
 			if (i_mins(nbytes) / w1 > w2)
 				trap(EIOVFL);
 		}
-		else if (i_mins(nbytes) / w2 > w1) {
+		else if (i_mins(nbytes) / w2 > w1)
+		{
 			trap(EIOVFL);
 		}
 	}
@@ -165,41 +176,50 @@ PRIVATE long mli(long w1, long w2, size nbytes)
 
 PRIVATE long dvi(long w1, long w2, size nbytes)
 {
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
+	if (w2 == 0)
+	{
+		if (!(IgnMask & BIT(EIDIVZ)))
+		{
 			trap(EIDIVZ);
 		}
-		else	return (0L);
+		else
+			return (0L);
 	}
 
 	/* Check for division overflow. */
 	if ((w1 == i_mins(nbytes)) && (w2 == -1))
 	{
-		if (must_test && !(IgnMask&BIT(EIOVFL)))
+		if (must_test && !(IgnMask & BIT(EIOVFL)))
 		{
 			trap(EIOVFL);
-		} else return i_mins(nbytes);
+		}
+		else
+			return i_mins(nbytes);
 	}
-
 
 	return (w1 / w2);
 }
 
 PRIVATE long rmi(long w1, long w2)
 {
-	if (w2 == 0) {
-		if (!(IgnMask&BIT(EIDIVZ))) {
+	if (w2 == 0)
+	{
+		if (!(IgnMask & BIT(EIDIVZ)))
+		{
 			trap(EIDIVZ);
 		}
-		else	return (0L);
+		else
+			return (0L);
 	}
 	return (w1 % w2);
 }
 
 PRIVATE long ngi(long w1, size nbytes)
 {
-	if (must_test && !(IgnMask&BIT(EIOVFL))) {
-		if (w1 == i_mins(nbytes)) {
+	if (must_test && !(IgnMask & BIT(EIOVFL)))
+	{
+		if (w1 == i_mins(nbytes))
+		{
 			trap(EIOVFL);
 		}
 	}
@@ -209,20 +229,24 @@ PRIVATE long ngi(long w1, size nbytes)
 /** "w1" << "w2" */
 PRIVATE long sli(long w1, long w2, size nbytes)
 {
-	if (must_test) {
-#ifdef	LOGGING
+	if (must_test)
+	{
+#ifdef LOGGING
 		/* check shift distance */
-		if (w2 < 0)	{
+		if (w2 < 0)
+		{
 			warning(WSHNEG);
 			w2 = 0;
 		}
-		if (w2 >= nbytes*8)	{
+		if (w2 >= nbytes * 8)
+		{
 			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
+			w2 = nbytes * 8 - 1;
 		}
-#endif	/* LOGGING */
-	
-		if (!(IgnMask&BIT(EIOVFL))) {
+#endif /* LOGGING */
+
+		if (!(IgnMask & BIT(EIOVFL)))
+		{
 			/* check overflow */
 
 			/* If the value is positive, then check, this is taken
@@ -237,32 +261,33 @@ PRIVATE long sli(long w1, long w2, size nbytes)
 			{
 				trap(EIOVFL);
 			}
-
 		}
-	}	
+	}
 
 	/* calculate result */
 	return (w1 << w2);
 }
 
 /*ARGSUSED*/
-PRIVATE long sri(long w1, long w2, size nbytes)	/* w1 >> w2 */
+PRIVATE long sri(long w1, long w2, size nbytes) /* w1 >> w2 */
 {
-#ifdef	LOGGING
-	if (must_test) {
+#ifdef LOGGING
+	if (must_test)
+	{
 		/* check shift distance */
-		if (w2 < 0)	{
+		if (w2 < 0)
+		{
 			warning(WSHNEG);
 			w2 = 0;
 		}
-		if (w2 >= nbytes*8)	{
+		if (w2 >= nbytes * 8)
+		{
 			warning(WSHLARGE);
-			w2 = nbytes*8 - 1;
+			w2 = nbytes * 8 - 1;
 		}
 	}
-#endif	/* LOGGING */
-	
+#endif /* LOGGING */
+
 	/* calculate result */
 	return (w1 >> w2);
 }
-

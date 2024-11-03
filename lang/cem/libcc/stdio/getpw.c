@@ -32,5 +32,5 @@ getpw(uid, buf)
 		}
 		if (i == uid) return(0);
 	}
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }

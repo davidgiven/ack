@@ -247,7 +247,7 @@ void fillemlines(void) {
 }
 
 void
-dopseudo() {
+dopseudo(void) {
 	int b,t;
 	full n;
 	long save;
@@ -687,7 +687,7 @@ static long con(int t) {
 		return(argval);
 	}
 	assert(FALSE);
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 extern char *segname[];

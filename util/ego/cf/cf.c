@@ -40,7 +40,7 @@ extern char em_flag[];
 STATIC cset lpi_set; /* set of procedures used in LPI instruction */
 STATIC cset cai_set; /* set of all procedures doing a CAI */
 
-/* The procedure getbblocks reads the EM textfile and 
+/* The procedure getbblocks reads the EM textfile and
  * partitions every procedure into a number of basic blocks.
  */
 
@@ -55,28 +55,28 @@ STATIC cset cai_set; /* set of all procedures doing a CAI */
 /* These global variables are used by getbblocks and nextblock. */
 
 STATIC bblock_p b, *bp; /* b is the current basic block, bp is
-			  * the address where the next block has
-			  * to be linked.
-			  */
+                         * the address where the next block has
+                         * to be linked.
+                         */
 STATIC line_p lnp, *lp; /* lnp is the current line, lp is
-			   * the address where the next line
-			   * has to be linked.
-			   */
+                         * the address where the next line
+                         * has to be linked.
+                         */
 STATIC short state; /* We use a finite state machine with the
-			 * following states:
-			 *  LABEL0: after the first (successive)
-			 *	    instruction label.
-			 *  LABEL1:  after at least two successive
-			 *	    instruction labels.
-			 *  NORMAL: after a normal instruction.
-			 *  JUMP:   after a branch (conditional,
-			 *	    unconditional or CSA/CSB).
-			 *  END:    after an END pseudo
-			 *  AFTERPRO: after we've read a PRO pseudo
-			 *  INIT:   initial state
-			 */
+                     * following states:
+                     *  LABEL0: after the first (successive)
+                     *	    instruction label.
+                     *  LABEL1:  after at least two successive
+                     *	    instruction labels.
+                     *  NORMAL: after a normal instruction.
+                     *  JUMP:   after a branch (conditional,
+                     *	    unconditional or CSA/CSB).
+                     *  END:    after an END pseudo
+                     *  AFTERPRO: after we've read a PRO pseudo
+                     *  INIT:   initial state
+                     */
 
-STATIC void nextblock()
+STATIC void nextblock(void)
 {
 	/* allocate a new basic block structure and
 	 * set b, bp and lp.
@@ -96,8 +96,7 @@ STATIC void nextblock()
 #endif
 }
 
-STATIC short kind(lnp)
-    line_p lnp;
+STATIC short kind(line_p lnp)
 {
 	/* determine if lnp is a label, branch, end or otherwise */
 
@@ -115,8 +114,7 @@ STATIC short kind(lnp)
 	return (short)NORMAL;
 }
 
-STATIC line_p doread_line(p_out)
-    proc_p* p_out;
+STATIC line_p doread_line(proc_p* p_out)
 {
 	/* read a line, and check pseudos for procedure addresses */
 
@@ -139,9 +137,7 @@ STATIC line_p doread_line(p_out)
 	return lnp;
 }
 
-STATIC bool
-getbblocks(FILE *fp, short *kind_out, short *n_out, bblock_p *g_out,
-	   line_p *l_out)
+STATIC bool getbblocks(FILE* fp, short* kind_out, short* n_out, bblock_p* g_out, line_p* l_out)
 {
 	bblock_p head = (bblock_p)0;
 	line_p headl = (line_p)0;
@@ -250,8 +246,7 @@ getbblocks(FILE *fp, short *kind_out, short *n_out, bblock_p *g_out,
 	}
 }
 
-STATIC void interproc_analysis(p)
-    proc_p p;
+STATIC void interproc_analysis(proc_p p)
 {
 	/* Interprocedural analysis of a procedure p determines:
 	 *  - all procedures called by p (the 'call graph')
@@ -300,9 +295,9 @@ STATIC void interproc_analysis(p)
 				case op_lpi:
 					Cadd(PROC(lnp)->p_id, &lpi_set);
 					/* All procedures that have their names used
-			 * in an lpi instruction, may be called via
-			 * a cai instruction.
-			 */
+					 * in an lpi instruction, may be called via
+					 * a cai instruction.
+					 */
 					PROC(lnp)->p_flags1 |= PF_LPI;
 					break;
 				case op_ste:
@@ -360,8 +355,7 @@ STATIC void interproc_analysis(p)
 	}
 }
 
-STATIC void cf_cleanproc(p)
-    proc_p p;
+STATIC void cf_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures of p */
 
@@ -373,8 +367,7 @@ STATIC void cf_cleanproc(p)
 	{
 		oldcfbx(b->b_extend);
 	}
-	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi,
-	                                                   p->p_loops))
+	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
 		lp = (loop_p)Lelem(pi);
 		oldcflpx(lp->lp_extend);
@@ -386,9 +379,7 @@ STATIC void cf_cleanproc(p)
 #define CALLS_UNKNOWN(p) (p->p_flags1 & (byte)PF_CALUNKNOWN)
 #define ENVIRON(p) (p->p_flags1 & (byte)PF_ENVIRON)
 
-STATIC bool add_info(q, p)
-    proc_p q,
-    p;
+STATIC bool add_info(proc_p q, proc_p p)
 {
 	/* Determine the consequences for used/changed variables info
 	 * of the fact that p calls q. If e.g. q changes a variable X
@@ -442,9 +433,9 @@ STATIC bool add_info(q, p)
 	if (!Cis_subset(chq->c_ext, chp->c_ext))
 	{
 		/* q changes global variables (objects) that
-		* p did not (yet) change. Add all variables
-		* changed by q to the c_ext set of p.
-		*/
+		 * p did not (yet) change. Add all variables
+		 * changed by q to the c_ext set of p.
+		 */
 		Cjoin(chq->c_ext, &chp->c_ext);
 		diff = TRUE;
 	}
@@ -475,8 +466,7 @@ STATIC bool add_info(q, p)
 	return diff;
 }
 
-STATIC void trans_clos(head)
-    proc_p head;
+STATIC void trans_clos(proc_p head)
 {
 	/* Compute the transitive closure of the used/changed
 	 * variable information.
@@ -493,8 +483,7 @@ STATIC void trans_clos(head)
 		{
 			if (!BODY_KNOWN(p))
 				continue;
-			for (i = Cfirst(p->p_calling); i != (Cindex)0;
-			     i = Cnext(i, p->p_calling))
+			for (i = Cfirst(p->p_calling); i != (Cindex)0; i = Cnext(i, p->p_calling))
 			{
 				q = pmap[Celem(i)];
 				if (add_info(q, p))
@@ -506,7 +495,7 @@ STATIC void trans_clos(head)
 	}
 }
 
-STATIC void indir_calls()
+STATIC void indir_calls(void)
 {
 	Cindex i;
 	proc_p p;
@@ -520,10 +509,9 @@ STATIC void indir_calls()
 	Cdeleteset(cai_set);
 }
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc, char* argv[])
 {
-	FILE* f, *f2, *gf2; /* The EM input, EM output, basic block output */
+	FILE *f, *f2, *gf2; /* The EM input, EM output, basic block output */
 	bblock_p g;
 	short n, kind;
 	line_p l;

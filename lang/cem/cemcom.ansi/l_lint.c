@@ -30,7 +30,7 @@
 #include	"l_outdef.h"
 
 extern char options[128];
-extern char *symbol2str();
+
 
 PRIVATE struct expr_state *expr2state();
 PRIVATE struct expr_state *value2state();
@@ -119,7 +119,7 @@ value2state(expr, val)
 
 	default:
 		NOTREACHED();
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 
@@ -398,7 +398,7 @@ add_expr_state(value, to_state, espp)
 		break;
 	default:
 		NOTREACHED();
-		/* NOTREACHED */
+		UNREACHABLE_CODE;
 	}
 }
 

@@ -3,7 +3,6 @@
 sed -e '
 s:^.*[ 	]ALLOCDEF[ 	].*"\(.*\)"[ 	]*\([0-9][0-9]*\).*$:\
 /* allocation definitions of struct \1 */\
-extern char *st_alloc();\
 extern struct \1 *h_\1;\
 #ifdef DEBUG\
 extern int cnt_\1;\
@@ -16,7 +15,6 @@ extern char *std_alloc();\
 :' -e '
 s:^.*[ 	]STATICALLOCDEF[ 	].*"\(.*\)"[ 	]*\([0-9][0-9]*\).*$:\
 /* allocation definitions of struct \1 */\
-extern char *st_alloc();\
 struct \1 *h_\1;\
 #ifdef DEBUG\
 int cnt_\1;\

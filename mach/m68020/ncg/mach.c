@@ -96,7 +96,7 @@ struct regsav_t {
 int regnr;
 
 void
-i_regsave()
+i_regsave(void)
 {
 	regnr = 0;
 }
@@ -104,7 +104,7 @@ i_regsave()
 full nlocals;
 
 void
-regreturn()
+regreturn(void)
 {
 	register struct regsav_t *p;
 
@@ -132,7 +132,7 @@ regreturn()
 }
 
 void
-f_regsave()
+f_regsave(void)
 {
 	register struct regsav_t *p;
 
@@ -192,8 +192,8 @@ regsave(const char* s, long off, int size)
 }
 
 void
-prolog(n) full n; {
-
+prolog(full n)
+{
 	nlocals = n;
 }
 
@@ -201,8 +201,7 @@ prolog(n) full n; {
 static int gdb_flag = 0;
 
 void
-mach_option(s)
-	char *s;
+mach_option(char* s)
 {
 	if (! strcmp(s, "-gdb")) {
 		gdb_flag = 1;
@@ -214,7 +213,7 @@ mach_option(s)
 #endif /* MACH_OPTIONS */
 
 void
-mes(type) word type ; {
+mes(word type) {
 	int argt, a1, a2 ;
 
 	switch ( (int)type ) {

@@ -12,6 +12,7 @@
 #include	<flt_arith.h>
 #include    "idf.h"
 #include	"arith.h"
+#include	"LLlex.h"
 #include	"type.h"
 #include	"label.h"
 #include	"expr.h"
@@ -22,7 +23,6 @@
 
 
 extern char options[];
-char *symbol2str();
 
 void ch3mon(int oper, register struct expr **expp)
 {

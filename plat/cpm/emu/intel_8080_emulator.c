@@ -202,7 +202,7 @@ void i8080_push(uint16_t value) {
 	i8080_write(--reg_SP, (uint8_t)value);
 }
 
-uint16_t i8080_pop() {
+uint16_t i8080_pop(void) {
 	uint16_t temp;
 	temp = i8080_read(reg_SP++);
 	temp |= (uint16_t)i8080_read(reg_SP++) << 8;
@@ -220,7 +220,7 @@ void i8080_jump(uint16_t addr) {
 	reg_PC = addr;
 }
 
-void i8080_reset() {
+void i8080_reset(void) {
 	reg_PC = reg_SP = 0x0000;
 	//reg8[FLAGS] = 0x02;
 }

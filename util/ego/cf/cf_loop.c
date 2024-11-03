@@ -8,7 +8,6 @@
  *  C F _ L O O P . C
  */
 
-
 #include <stdlib.h>
 #include "../share/types.h"
 #include "../share/debug.h"
@@ -17,14 +16,12 @@
 #include "../share/utils.h"
 #include "cf.h"
 
-#define MARK_STRONG(b)	b->b_flags |= BF_STRONG
-#define MARK_FIRM(b)	b->b_flags |= BF_FIRM
-#define BF_MARK		04
-#define MARK(b)		b->b_flags |= BF_MARK
-#define MARKED(b)	(b->b_flags&BF_MARK)
-#define INSIDE_LOOP(b,lp)  Lis_elem(b,lp->LP_BLOCKS)
-
-
+#define MARK_STRONG(b) b->b_flags |= BF_STRONG
+#define MARK_FIRM(b) b->b_flags |= BF_FIRM
+#define BF_MARK 04
+#define MARK(b) b->b_flags |= BF_MARK
+#define MARKED(b) (b->b_flags & BF_MARK)
+#define INSIDE_LOOP(b, lp) Lis_elem(b, lp->LP_BLOCKS)
 
 /* The algorithm to detect loops that is used here is taken
  * from: Aho & Ullman, Principles of Compiler Design, section 13.1.
@@ -44,10 +41,7 @@
  * each other (without one being nested inside the other).
  */
 
-
-
-STATIC bool same_loop(l1,l2)
-	loop_p l1,l2;
+STATIC bool same_loop(loop_p l1, loop_p l2)
 {
 	/* Two loops are the same if:
 	 * (1)  they have the same number of basic blocks, and
@@ -57,15 +51,12 @@ STATIC bool same_loop(l1,l2)
 	 *      also is part of the second loop.
 	 */
 
-	return (l1->LP_COUNT == l2->LP_COUNT &&
-		Lis_elem(l1->lp_entry, l2->LP_BLOCKS) &&
-		Lis_elem(l1->lp_end,   l2->LP_BLOCKS));
+	return (
+	    l1->LP_COUNT == l2->LP_COUNT && Lis_elem(l1->lp_entry, l2->LP_BLOCKS)
+	    && Lis_elem(l1->lp_end, l2->LP_BLOCKS));
 }
 
-
-
-STATIC bool inner_loop(l1,l2)
-	loop_p l1,l2;
+STATIC bool inner_loop(loop_p l1, loop_p l2)
 {
 	/* Loop l1 is an inner loop of l2 if:
 	 * (1)  the first loop has fewer basic blocks than
@@ -76,32 +67,26 @@ STATIC bool inner_loop(l1,l2)
 	 *      also is part of the second loop.
 	 */
 
-	return (l1->LP_COUNT < l2->LP_COUNT &&
-		Lis_elem(l1->lp_entry, l2->LP_BLOCKS) &&
-		Lis_elem(l1->lp_end,   l2->LP_BLOCKS));
+	return (
+	    l1->LP_COUNT < l2->LP_COUNT && Lis_elem(l1->lp_entry, l2->LP_BLOCKS)
+	    && Lis_elem(l1->lp_end, l2->LP_BLOCKS));
 }
 
-
-
-STATIC void insrt(b,lpb,s_p)
-	bblock_p b;
-	lset *lpb;
-	lset *s_p;
+STATIC void insrt(bblock_p b, lset* lpb, lset* s_p)
 {
 	/* Auxiliary routine used by 'natural_loop'.
 	 * Note that we use a set rather than a stack,
 	 * as Aho & Ullman do.
 	 */
 
-	if (!Lis_elem(b,*lpb)) {
-		Ladd(b,lpb);
-		Ladd(b,s_p);
+	if (!Lis_elem(b, *lpb))
+	{
+		Ladd(b, lpb);
+		Ladd(b, s_p);
 	}
 }
 
-
-STATIC loop_p natural_loop(d,n)
-	bblock_p d,n;
+STATIC loop_p natural_loop(bblock_p d, bblock_p n)
 {
 	/* Find the basic blocks of the natural loop of the
 	 * back edge 'n->d' (i.e. n->d is an edge in the control
@@ -119,18 +104,19 @@ STATIC loop_p natural_loop(d,n)
 
 	lp = newloop();
 	lp->lp_extend = newcflpx();
-	lp->lp_entry = d;	/* loop entry block */
-	lp->lp_end = n;		/* tail of back edge */
+	lp->lp_entry = d; /* loop entry block */
+	lp->lp_end = n; /* tail of back edge */
 	s = Lempty_set();
 	loopblocks = Lempty_set();
-	Ladd(d,&loopblocks);
-	insrt(n,&loopblocks,&s);
-	while ((pi = Lfirst(s)) != (Lindex) 0) {
-		m = (bblock_p) Lelem(pi);
-		Lremove(m,&s);
-		for (pi = Lfirst(m->b_pred); pi != (Lindex) 0;
-					pi = Lnext(pi,m->b_pred)) {
-			insrt((bblock_p) Lelem(pi),&loopblocks,&s);
+	Ladd(d, &loopblocks);
+	insrt(n, &loopblocks, &s);
+	while ((pi = Lfirst(s)) != (Lindex)0)
+	{
+		m = (bblock_p)Lelem(pi);
+		Lremove(m, &s);
+		for (pi = Lfirst(m->b_pred); pi != (Lindex)0; pi = Lnext(pi, m->b_pred))
+		{
+			insrt((bblock_p)Lelem(pi), &loopblocks, &s);
 		}
 	}
 	lp->LP_BLOCKS = loopblocks;
@@ -138,10 +124,7 @@ STATIC loop_p natural_loop(d,n)
 	return lp;
 }
 
-
-STATIC loop_p org_loop(lp,loops)
-	loop_p lp;
-	lset   loops;
+STATIC loop_p org_loop(loop_p lp, lset loops)
 {
 	/* See if the loop lp was already found via another
 	 * back edge; if so return this loop; else return 0.
@@ -149,46 +132,46 @@ STATIC loop_p org_loop(lp,loops)
 
 	register Lindex li;
 
-	for (li = Lfirst(loops); li != (Lindex) 0; li = Lnext(li,loops)) {
-		if (same_loop((loop_p) Lelem(li), lp)) {
+	for (li = Lfirst(loops); li != (Lindex)0; li = Lnext(li, loops))
+	{
+		if (same_loop((loop_p)Lelem(li), lp))
+		{
 #ifdef DEBUG
 			/* printf("messy loop found\n"); */
 #endif
-			return (loop_p) Lelem(li);
+			return (loop_p)Lelem(li);
 		}
 	}
-	return (loop_p) 0;
+	return (loop_p)0;
 }
 
-
-
-STATIC void collapse_loops(loops_p)
-	lset *loops_p;
+STATIC void collapse_loops(lset* loops_p)
 {
 	register Lindex li1, li2;
-	register loop_p lp1,lp2;
+	register loop_p lp1, lp2;
 
-	for (li1 = Lfirst(*loops_p); li1 != (Lindex) 0; li1 = Lnext(li1,*loops_p)) {
-		lp1 = (loop_p) Lelem(li1);
-		lp1->lp_level = (short) 0;
+	for (li1 = Lfirst(*loops_p); li1 != (Lindex)0; li1 = Lnext(li1, *loops_p))
+	{
+		lp1 = (loop_p)Lelem(li1);
+		lp1->lp_level = (short)0;
 		/* Lnext(li2,*loops_p) must happen before
 		 * Lremove(lp2,loops_p) releases the memory for li2.
 		 */
-		for (li2 = Lfirst(*loops_p); li2 != (Lindex) 0;) {
-			lp2 = (loop_p) Lelem(li2);
-			li2 = Lnext(li2,*loops_p);
-			if (lp1 != lp2 && lp1->lp_entry == lp2->lp_entry) {
-			    Ljoin(lp2->LP_BLOCKS,&lp1->LP_BLOCKS);
-			    oldcflpx(lp2->lp_extend);
-			    Lremove(lp2,loops_p);
+		for (li2 = Lfirst(*loops_p); li2 != (Lindex)0;)
+		{
+			lp2 = (loop_p)Lelem(li2);
+			li2 = Lnext(li2, *loops_p);
+			if (lp1 != lp2 && lp1->lp_entry == lp2->lp_entry)
+			{
+				Ljoin(lp2->LP_BLOCKS, &lp1->LP_BLOCKS);
+				oldcflpx(lp2->lp_extend);
+				Lremove(lp2, loops_p);
 			}
 		}
 	}
 }
 
-
-STATIC void loop_per_block(lp)
-	loop_p lp;
+STATIC void loop_per_block(loop_p lp)
 {
 	bblock_p b;
 
@@ -196,17 +179,14 @@ STATIC void loop_per_block(lp)
 
 	register Lindex bi;
 
-	for (bi = Lfirst(lp->LP_BLOCKS); bi != (Lindex) 0;
-		bi = Lnext(bi,lp->LP_BLOCKS)) {
-			b = (bblock_p) Lelem(bi);
-			Ladd(lp,&(b->b_loops));
+	for (bi = Lfirst(lp->LP_BLOCKS); bi != (Lindex)0; bi = Lnext(bi, lp->LP_BLOCKS))
+	{
+		b = (bblock_p)Lelem(bi);
+		Ladd(lp, &(b->b_loops));
 	}
 }
 
-
-
-STATIC void loop_attrib(loops)
-	lset loops;
+STATIC void loop_attrib(lset loops)
 {
 	/* Compute several attributes */
 
@@ -214,17 +194,15 @@ STATIC void loop_attrib(loops)
 	register loop_p lp;
 	loop_id lastlpid = 0;
 
-	for (li = Lfirst(loops); li != (Lindex) 0; li = Lnext(li,loops)) {
-		lp = (loop_p) Lelem(li);
+	for (li = Lfirst(loops); li != (Lindex)0; li = Lnext(li, loops))
+	{
+		lp = (loop_p)Lelem(li);
 		lp->lp_id = ++lastlpid;
 		loop_per_block(lp);
 	}
 }
 
-
-
-STATIC void nest_levels(loops)
-	lset loops;
+STATIC void nest_levels(lset loops)
 {
 	/* Compute the nesting levels of all loops of
 	 * the current procedure. For every loop we just count
@@ -237,35 +215,33 @@ STATIC void nest_levels(loops)
 	register Lindex li1, li2;
 	register loop_p lp;
 
-	for (li1 = Lfirst(loops); li1 != (Lindex) 0; li1 = Lnext(li1,loops)) {
-		lp = (loop_p) Lelem(li1);
-		lp->lp_level = (short) 0;
-		for (li2 = Lfirst(loops); li2 != (Lindex) 0;
-					li2 = Lnext(li2,loops)) {
-			if (inner_loop(lp,(loop_p) Lelem(li2))) {
+	for (li1 = Lfirst(loops); li1 != (Lindex)0; li1 = Lnext(li1, loops))
+	{
+		lp = (loop_p)Lelem(li1);
+		lp->lp_level = (short)0;
+		for (li2 = Lfirst(loops); li2 != (Lindex)0; li2 = Lnext(li2, loops))
+		{
+			if (inner_loop(lp, (loop_p)Lelem(li2)))
+			{
 				lp->lp_level++;
 			}
 		}
 	}
 }
 
-
-STATIC void cleanup(loops)
-	lset loops;
+STATIC void cleanup(lset loops)
 {
 	/* Throw away the LP_BLOCKS sets */
 
 	register Lindex i;
 
-	for (i = Lfirst(loops); i != (Lindex) 0; i = Lnext(i,loops)) {
-		Ldeleteset(((loop_p) Lelem(i))->LP_BLOCKS);
+	for (i = Lfirst(loops); i != (Lindex)0; i = Lnext(i, loops))
+	{
+		Ldeleteset(((loop_p)Lelem(i))->LP_BLOCKS);
 	}
 }
 
-
-STATIC bool does_exit(b,lp)
-	bblock_p b;
-	loop_p   lp;
+STATIC bool does_exit(bblock_p b, loop_p lp)
 {
 	/* See if b may exit the loop, i.e. if it
 	 * has a successor outside the loop
@@ -273,33 +249,31 @@ STATIC bool does_exit(b,lp)
 
 	Lindex i;
 
-	for (i = Lfirst(b->b_succ); i != (Lindex) 0; i = Lnext(i,b->b_succ)) {
-		if (!INSIDE_LOOP(Lelem(i),lp)) return TRUE;
+	for (i = Lfirst(b->b_succ); i != (Lindex)0; i = Lnext(i, b->b_succ))
+	{
+		if (!INSIDE_LOOP(Lelem(i), lp))
+			return TRUE;
 	}
 	return FALSE;
 }
 
-
-STATIC void mark_succ(b,lp)
-	bblock_p b;
-	loop_p   lp;
+STATIC void mark_succ(bblock_p b, loop_p lp)
 {
 	Lindex i;
 	bblock_p succ;
 
-	for (i = Lfirst(b->b_succ); i != (Lindex) 0; i = Lnext(i,b->b_succ)) {
-		succ = (bblock_p) Lelem(i);
-		if (succ != b && succ != lp->lp_entry && INSIDE_LOOP(succ,lp) &&
-		   !MARKED(succ)) {
+	for (i = Lfirst(b->b_succ); i != (Lindex)0; i = Lnext(i, b->b_succ))
+	{
+		succ = (bblock_p)Lelem(i);
+		if (succ != b && succ != lp->lp_entry && INSIDE_LOOP(succ, lp) && !MARKED(succ))
+		{
 			MARK(succ);
-			mark_succ(succ,lp);
+			mark_succ(succ, lp);
 		}
 	}
 }
 
-
-STATIC void mark_blocks(lp)
-	loop_p lp;
+STATIC void mark_blocks(loop_p lp)
 {
 	/* Mark the strong and firm blocks of a loop.
 	 * The last set of blocks consists of the end-block
@@ -317,10 +291,13 @@ STATIC void mark_blocks(lp)
 	 * the loop.
 	 */
 
-	if (lp->LP_MESSY) return; /* messy loops are hopeless cases */
-	for (b = lp->lp_entry; b != (bblock_p) 0; b = b->b_next) {
-		if (!MARKED(b) && does_exit(b,lp)) {
-			mark_succ(b,lp);
+	if (lp->LP_MESSY)
+		return; /* messy loops are hopeless cases */
+	for (b = lp->lp_entry; b != (bblock_p)0; b = b->b_next)
+	{
+		if (!MARKED(b) && does_exit(b, lp))
+		{
+			mark_succ(b, lp);
 		}
 	}
 
@@ -328,19 +305,19 @@ STATIC void mark_blocks(lp)
 	 * if it is firm and not marked.
 	 */
 
-	for (b = lp->lp_end; ; b = b->b_idom) {
+	for (b = lp->lp_end;; b = b->b_idom)
+	{
 		MARK_FIRM(b);
-		if (!MARKED(b)) {
+		if (!MARKED(b))
+		{
 			MARK_STRONG(b);
 		}
-		if (b == lp->lp_entry) break;
+		if (b == lp->lp_entry)
+			break;
 	}
 }
 
-
-
-STATIC void mark_loopblocks(loops)
-	lset loops;
+STATIC void mark_loopblocks(lset loops)
 {
 	/* Determine for all loops which basic blocks
 	 * of the loop are strong (i.e. are executed
@@ -348,20 +325,18 @@ STATIC void mark_loopblocks(loops)
 	 * firm (i.e. executed during every iteration with
 	 * the only possible exception of the last one).
 	 */
-	
+
 	Lindex i;
 	loop_p lp;
 
-	for (i = Lfirst(loops); i != (Lindex) 0; i = Lnext(i,loops)) {
-		lp = (loop_p) Lelem(i);
+	for (i = Lfirst(loops); i != (Lindex)0; i = Lnext(i, loops))
+	{
+		lp = (loop_p)Lelem(i);
 		mark_blocks(lp);
 	}
 }
 
-
-
-void loop_detection(p)
-	proc_p p;
+void loop_detection(proc_p p)
 {
 	/* Find all natural loops of procedure p. Every loop is
 	 * assigned a unique identifying number, a set of basic
@@ -370,32 +345,37 @@ void loop_detection(p)
 	 * and a set of loops it is part of.
 	 */
 
-	lset loops;  /* the set of all loops */
-	loop_p lp,org;
+	lset loops; /* the set of all loops */
+	loop_p lp, org;
 	register bblock_p b;
 	bblock_p s;
 	Lindex si;
 
 	loops = Lempty_set();
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		for (si = Lfirst(b->b_succ); si != (Lindex) 0;
-						si = Lnext(si,b->b_succ)) {
-			s = (bblock_p) Lelem(si);
-			if (dom(s,b)) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		for (si = Lfirst(b->b_succ); si != (Lindex)0; si = Lnext(si, b->b_succ))
+		{
+			s = (bblock_p)Lelem(si);
+			if (dom(s, b))
+			{
 				/* 'b->s' is a back edge */
-				lp = natural_loop(s,b);
-				if ((org = org_loop(lp,loops)) == (loop_p) 0) {
-				   /* new loop */
-				   Ladd(lp,&loops);
-				} else {
-				   /* Same loop, generated by several back
-				    * edges; such a loop is called a messy
-				    * loop.
-				    */
-				   org->LP_MESSY = TRUE;
-				   Ldeleteset(lp->LP_BLOCKS);
-				   oldcflpx(lp->lp_extend);
-				   oldloop(lp);
+				lp = natural_loop(s, b);
+				if ((org = org_loop(lp, loops)) == (loop_p)0)
+				{
+					/* new loop */
+					Ladd(lp, &loops);
+				}
+				else
+				{
+					/* Same loop, generated by several back
+					 * edges; such a loop is called a messy
+					 * loop.
+					 */
+					org->LP_MESSY = TRUE;
+					Ldeleteset(lp->LP_BLOCKS);
+					oldcflpx(lp->lp_extend);
+					oldloop(lp);
 				}
 			}
 		}

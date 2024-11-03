@@ -298,7 +298,7 @@ put_int(buf, size, value)
 	*((long *) buf) = value;
 	break;
   }
-  /*NOTREACHED*/
+  UNREACHABLE_CODE;
 }
 
 /* buffer to real and vice versa routines */
@@ -314,7 +314,7 @@ get_real(buf, size)
   default:
 	return *((double *) buf);
   }
-  /*NOTREACHED*/
+  UNREACHABLE_CODE;
 }
 
 put_real(buf, size, value)
@@ -330,7 +330,7 @@ put_real(buf, size, value)
 	*((double *) buf) = value;
 	break;
   }
-  /* NOTREACHED */
+  UNREACHABLE_CODE;
 }
 
 int

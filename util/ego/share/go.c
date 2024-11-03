@@ -27,7 +27,7 @@ STATIC bool report_flag = FALSE; /* report #optimizations found? */
 STATIC bool core_flag = FALSE; /* report core usage? */
 #endif
 
-STATIC void mach_init(char* machfile, void (*phase_machinit)(void *))
+STATIC void mach_init(char* machfile, void (*phase_machinit)(void*))
 {
 	/* Read target machine dependent information */
 
@@ -42,14 +42,18 @@ STATIC void mach_init(char* machfile, void (*phase_machinit)(void *))
 	fclose(f);
 }
 
-void go(int argc, char * const *argv,
-	void (*initialize)(void *), void (*optimize)(void *),
-	void (*phase_machinit)(void *), void (*proc_flag)(void *))
+void go(
+    int argc,
+    char* const* argv,
+    void (*initialize)(void*),
+    void (*optimize)(void*),
+    void (*phase_machinit)(void*),
+    void (*proc_flag)(void*))
 {
 	struct files* files = findfiles(argc, argv);
-	FILE* f, *gf, *f2, *gf2; /* The EM input and output and
-				 * the basic block graphs input and output
-				 */
+	FILE *f, *gf, *f2, *gf2; /* The EM input and output and
+	                          * the basic block graphs input and output
+	                          */
 	bblock_p g;
 	line_p l;
 	short kind;
@@ -145,7 +149,9 @@ void go(int argc, char * const *argv,
 }
 
 /* ARGSUSED */
-void no_action(void *vp) {}
+void no_action(void* vp)
+{
+}
 
 void core_usage(void)
 {

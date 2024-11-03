@@ -18,15 +18,13 @@
 #include	"expr.h"
 #include	"def.h"
 #include	"Lpars.h"
+#include	"LLlex.h"
 #include    "error.h"
 #include    "ch3bin.h"
 #include	"file_info.h"
+#include	"decspecs.h"
 
 extern char options[];
-extern char *symbol2str();
-extern struct type *qualifier_type();
-
-
 
 /*	Most expression-handling routines have a pointer to a
 	(struct type *) as first parameter. The object under the pointer

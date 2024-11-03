@@ -52,13 +52,12 @@ lab_id lastlid = 0;
 offset mespar = UNKNOWN_SIZE;
 /* argumument of ps_par message of current procedure */
 
-STATIC void process_lines(FILE *);
-STATIC int readline(short *, line_p *);
-STATIC line_p readoperand(short);
+STATIC void process_lines(FILE*);
+STATIC int readline(short*, line_p*);
+STATIC line_p readoperand(short instr);
 STATIC line_p inpseudo(short);
 
-int main(argc, argv) int argc;
-char* argv[];
+int main(int argc, char* argv[])
 {
 	/* The input files must be legal EM Compact
 	 * Assembly Language files, as produced by the EM Peephole
@@ -91,7 +90,7 @@ char* argv[];
 	FILE* pfile;
 
 	hol0_db = block_of_lab((char*)0);
-	while (next_file(argc-8, argv+8) != NULL)
+	while (next_file(argc - 8, argv + 8) != NULL)
 	{
 		/* Read all EM input files, process the code
 		 * and concatenate all output.
@@ -133,7 +132,7 @@ char* argv[];
 #define END_INSTR 4
 #define DELETED_INSTR 5
 
-STATIC void add_end()
+STATIC void add_end(void)
 {
 	/* Add an end-pseudo to the current instruction list */
 
@@ -142,8 +141,7 @@ STATIC void add_end()
 	lastline->l_instr = ps_end;
 }
 
-STATIC void process_lines(fout)
-    FILE* fout;
+STATIC void process_lines(FILE* fout)
 {
 	line_p lnp;
 	short instr;
@@ -235,7 +233,7 @@ STATIC void process_lines(fout)
 	}
 }
 
-STATIC int readline(short *instr_out, line_p *lnp_out)
+STATIC int readline(short* instr_out, line_p* lnp_out)
 {
 	register line_p lnp;
 	short n;
@@ -306,7 +304,7 @@ STATIC int readline(short *instr_out, line_p *lnp_out)
 				return PRO_INSTR;
 			return NORMAL;
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 STATIC line_p readoperand(short instr)
@@ -342,8 +340,7 @@ STATIC line_p readoperand(short instr)
 			{
 				case PAR_G:
 					lnp = newline(OPOBJECT);
-					OBJ(lnp) = object(curhol, (offset)tabval,
-					    opr_size(instr));
+					OBJ(lnp) = object(curhol, (offset)tabval, opr_size(instr));
 					break;
 				case PAR_B:
 					lnp = newline(OPINSTRLAB);
@@ -361,8 +358,7 @@ STATIC line_p readoperand(short instr)
 			if (flag == PAR_G)
 			{
 				lnp = newline(OPOBJECT);
-				OBJ(lnp) = object(curhol, tabval2,
-				    opr_size(instr));
+				OBJ(lnp) = object(curhol, tabval2, opr_size(instr));
 				break;
 			}
 			lnp = newline(OPOFFSET);
@@ -377,19 +373,16 @@ STATIC line_p readoperand(short instr)
 		case DLBX:
 			/* applied occurrence data label */
 			lnp = newline(OPOBJECT);
-			OBJ(lnp) = object(string, (offset)0,
-			    opr_size(instr));
+			OBJ(lnp) = object(string, (offset)0, opr_size(instr));
 			break;
 		case VALX1:
 			lnp = newline(OPOBJECT);
-			OBJ(lnp) = object(string, (offset)tabval,
-			    opr_size(instr));
+			OBJ(lnp) = object(string, (offset)tabval, opr_size(instr));
 			break;
 #ifdef LONGOFF
 		case VALX2:
 			lnp = newline(OPOBJECT);
-			OBJ(lnp) = object(string, tabval2,
-			    opr_size(instr));
+			OBJ(lnp) = object(string, tabval2, opr_size(instr));
 			break;
 #endif
 		case sp_pnam:
@@ -403,7 +396,7 @@ STATIC line_p readoperand(short instr)
 	return lnp;
 }
 
-static char* hol_label()
+static char* hol_label(void)
 {
 	static int holno;
 	line_p lnp;
@@ -587,5 +580,5 @@ STATIC line_p inpseudo(short n)
 		default:
 			assert(FALSE);
 	}
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }

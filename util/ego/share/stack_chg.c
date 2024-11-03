@@ -5,7 +5,6 @@
  */
 /* S T A C K _ C H A N G E . C */
 
-
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -15,42 +14,51 @@
 
 #include "pop_push.h"
 
-#define IS_LOC(l)	(l!=(line_p) 0 && INSTR(l)==op_loc && TYPE(l)==OPSHORT)
+#define IS_LOC(l) (l != (line_p)0 && INSTR(l) == op_loc && TYPE(l) == OPSHORT)
 
 STATIC int stack_change(line_p l, char sign)
 {
 	/* Interpret the string in the third column of the em_table file */
 
-	char *s;
+	char* s;
 	bool argdef;
 	short arg = 0;
 	int sum = 0;
 	line_p p = PREV(l);
-	line_p pp = (p == (line_p) 0 ? (line_p) 0 : PREV(p));
+	line_p pp = (p == (line_p)0 ? (line_p)0 : PREV(p));
 	short i = INSTR(l);
 
-	if (i < sp_fmnem || i > sp_lmnem) {
+	if (i < sp_fmnem || i > sp_lmnem)
+	{
 		return 0;
 	}
-	if (TYPE(l) == OPSHORT) {
+	if (TYPE(l) == OPSHORT)
+	{
 		arg = SHORT(l);
-		if (arg < ws) {
+		if (arg < ws)
+		{
 			/* E.g. a LOI 1 loads word-size bytes,
 			 * not 1 byte!
 			 */
 			arg = ws;
 		}
 		argdef = TRUE;
-	} else {
+	}
+	else
+	{
 		argdef = FALSE;
 	}
 	s = pop_push[i];
-	if (*s == '0') return 0;
-	while (*s != '\0') {
-		if (*s++ == sign) {
-			switch(*s) {
+	if (*s == '0')
+		return 0;
+	while (*s != '\0')
+	{
+		if (*s++ == sign)
+		{
+			switch (*s)
+			{
 				case 'w':
-					sum +=  ws;
+					sum += ws;
 					break;
 				case 'd':
 					sum += 2 * ws;
@@ -59,21 +67,28 @@ STATIC int stack_change(line_p l, char sign)
 					sum += ps;
 					break;
 				case 'a':
-					if (!argdef) return -1;
-					sum +=  arg;
+					if (!argdef)
+						return -1;
+					sum += arg;
 					break;
 				case 'x':
-					if (IS_LOC(p)) {
+					if (IS_LOC(p))
+					{
 						sum += SHORT(p);
 						break;
-					} else {
+					}
+					else
+					{
 						return -1;
 					}
 				case 'y':
-					if (IS_LOC(pp)) {
+					if (IS_LOC(pp))
+					{
 						sum += SHORT(pp);
 						break;
-					} else {
+					}
+					else
+					{
 						return -1;
 					}
 				case '?':
@@ -87,17 +102,13 @@ STATIC int stack_change(line_p l, char sign)
 	return sum;
 }
 
-
-
-void line_change(line_p l, bool *ok_out, int *pop_out, int *push_out)
+void line_change(line_p l, bool* ok_out, int* pop_out, int* push_out)
 {
-	short pop,push;
+	short pop, push;
 
-	pop = stack_change(l,'-');
-	push = stack_change(l,'+');
+	pop = stack_change(l, '-');
+	push = stack_change(l, '+');
 	*ok_out = (pop != -1 && push != -1);
 	*pop_out = pop;
 	*push_out = push;
 }
-
-

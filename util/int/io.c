@@ -1,66 +1,66 @@
 /** @file
-	In and output, error messages, etc.
+    In and output, error messages, etc.
 */
 
 /* $Id$ */
 
-#include	<fcntl.h>
-#include	<stdio.h>
-#include	<stdarg.h>
-#include	<unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
 
-#include	"logging.h"
-#include	"global.h"
-#include	"mem.h"
-#include	"io.h"
-#include	"warn.h"
-#include	"log.h"
-#include	"linfil.h"
-#include	"whatever.h"
+#include "logging.h"
+#include "global.h"
+#include "mem.h"
+#include "io.h"
+#include "warn.h"
+#include "log.h"
+#include "linfil.h"
+#include "whatever.h"
 
-extern int running;			/* from main.c */
-extern char *prog_name;			/* from main.c */
-extern char *load_name;			/* from init.c */
+extern int running; /* from main.c */
+extern char* prog_name; /* from main.c */
+extern char* load_name; /* from init.c */
 
 extern void core_dump(void);
 
 /********  The message file  ********/
 
-extern char mess_file[64];		/* from main.c */
-long mess_id;				/* Id, to determine unique mess file */
-FILE *mess_fp;				/* Filepointer of message file */
+extern char mess_file[64]; /* from main.c */
+long mess_id; /* Id, to determine unique mess file */
+FILE* mess_fp; /* Filepointer of message file */
 
-PRIVATE void do_fatal(FILE *, char *, va_list);
+PRIVATE void do_fatal(FILE*, char*, va_list);
 
 void incr_mess_id(void)
-{	/* for a new child */
+{ /* for a new child */
 	mess_id++;
 }
 
-#ifdef	LOGGING
-extern long inr;			/* from log.c */
-#endif	/* LOGGING */
+#ifdef LOGGING
+extern long inr; /* from log.c */
+#endif /* LOGGING */
 
 /********  General file handling  ********/
 
-PRIVATE int highestfd();
+PRIVATE int highestfd(int fd);
 
-int fd_limit = 100;			/* first non-available file descriptor */
+int fd_limit = 100; /* first non-available file descriptor */
 
 /**	Creates an unbuffered FILE with name "fn"  on the highest
  *  possible file descriptor.
  */
-FILE *fcreat_high(char *fn)
+FILE* fcreat_high(char* fn)
 {
 	register int fd;
-	register FILE *fp;
-	
+	register FILE* fp;
+
 	if ((fd = creat(fn, 0644)) == -1)
 		return NULL;
 	fd = highestfd(fd);
 	if ((fp = fdopen(fd, "w")) == NULL)
 		return NULL;
-	setbuf(fp, (char *) 0);		/* unbuffered! */
+	setbuf(fp, (char*)0); /* unbuffered! */
 	fd_limit = fd;
 	return fp;
 }
@@ -68,7 +68,7 @@ FILE *fcreat_high(char *fn)
 /**	Moves the (open) file descriptor "fd" to the highest available
  *  position and returns the new "fd".  Does this without knowing
  *  how many fd-s are available.
-*/
+ */
 PRIVATE int highestfd(int fd)
 {
 
@@ -76,10 +76,12 @@ PRIVATE int highestfd(int fd)
 
 	/* try to get a better fd */
 	newfd = dup(fd);
-	if (newfd < 0) {
+	if (newfd < 0)
+	{
 		return fd;
 	}
-	if (newfd > 99) {
+	if (newfd > 99)
+	{
 		/* for systems with an unlimited supply of file descriptors */
 		close(newfd);
 		return fd;
@@ -88,13 +90,14 @@ PRIVATE int highestfd(int fd)
 	/* occupying the new fd, try to do even better */
 	higherfd = highestfd(newfd);
 	close(fd);
-	return higherfd;		/* this is a deep one */
+	return higherfd; /* this is a deep one */
 }
 
 void init_ofiles(int firsttime)
 {
-	if (!firsttime) {
-		fclose(mess_fp);	/* old message file */
+	if (!firsttime)
+	{
+		fclose(mess_fp); /* old message file */
 		mess_fp = 0;
 		sprintf(mess_file, "%s_%ld", mess_file, mess_id);
 	}
@@ -104,15 +107,15 @@ void init_ofiles(int firsttime)
 		fatal("Cannot create messagefile '%s'", mess_file);
 	init_wmsg();
 
-	mess_id = 1;			/* ID of next child */
+	mess_id = 1; /* ID of next child */
 
-#ifdef	LOGGING
+#ifdef LOGGING
 	open_log(firsttime);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 }
 
 /*VARARGS0*/
-void fatal(char *fmt, ...)
+void fatal(char* fmt, ...)
 {
 	va_list ap;
 
@@ -124,7 +127,8 @@ void fatal(char *fmt, ...)
 	}
 	va_end(ap);
 
-	if (mess_fp) {
+	if (mess_fp)
+	{
 		va_start(ap, fmt);
 		{
 			do_fatal(mess_fp, fmt, ap);
@@ -134,26 +138,27 @@ void fatal(char *fmt, ...)
 
 	if (running)
 		core_dump();
-	
+
 	close_down(1);
 }
 
 void close_down(int rc)
 {
 	/* all exits should go through here */
-	if (mess_fp) {
+	if (mess_fp)
+	{
 		fclose(mess_fp);
 		mess_fp = 0;
 	}
 
-#ifdef	LOGGING
+#ifdef LOGGING
 	close_log();
-#endif	/* LOGGING */
+#endif /* LOGGING */
 
 	exit(rc);
 }
 
-PRIVATE void do_fatal(FILE *fp, char *fmt, va_list ap)
+PRIVATE void do_fatal(FILE* fp, char* fmt, va_list ap)
 {
 	fprintf(fp, "(Fatal error) ");
 	if (load_name)
@@ -163,7 +168,7 @@ PRIVATE void do_fatal(FILE *fp, char *fmt, va_list ap)
 }
 
 /*VARARGS0*/
-void message(char *fmt, ...)
+void message(char* fmt, ...)
 {
 	va_list ap;
 
@@ -178,22 +183,20 @@ void message(char *fmt, ...)
 	fprintf(mess_fp, " at %s\n", position());
 }
 
-char *position(void)			/* transient */
+char* position(void) /* transient */
 {
 	static char buff[300];
-	register char *fn = dt_fname(getFIL());
-	
-#ifdef	LOGGING
+	register char* fn = dt_fname(getFIL());
+
+#ifdef LOGGING
 	sprintf(buff, "\"%s\", line %ld, INR = %ld", fn, getLIN(), inr);
-#else	/* LOGGING */
+#else /* LOGGING */
 	sprintf(buff, "\"%s\", line %ld", fn, getLIN());
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	return buff;
 }
 
-char *dt_fname(p)
-	ptr p;
+char* dt_fname(ptr p)
 {
 	return (p ? &data_loc(p) : "<unknown>");
 }
-

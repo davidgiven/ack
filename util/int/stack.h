@@ -1,15 +1,14 @@
 /*  Copyright (c) 2019 ACK Project.
- *  See the copyright notice in the ACK home directory, 
+ *  See the copyright notice in the ACK home directory,
  *  in the file "Copyright".
  *
  *  Created on: 2019-03-15
- *  
+ *
  */
 #ifndef STACK_H_
 #define STACK_H_
 
 #include "global.h"
-
 
 void init_stack(void);
 void newSP(ptr ap);

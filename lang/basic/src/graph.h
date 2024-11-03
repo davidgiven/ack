@@ -37,7 +37,7 @@ extern Linerecord	*firstline,
 		*lastline;
 extern List	*forwardlabel;
 
-extern List	*gosublabel();
+extern List	*gosublabel(void);
 extern void jumpelm(int nr);
 extern int gotolabel(int nr);
 extern void linewarnings(void);

@@ -19,8 +19,7 @@
 #include "alloc.h"
 #include "put.h"
 
-FILE *curoutp;
-
+FILE* curoutp;
 
 /* The output can be either 'typed' or 'untyped'. Typed data
  * consists of a value preceded by a byte specifying what kind
@@ -38,9 +37,11 @@ STATIC void outobject(obj_p);
 
 STATIC void putargs(arg_p ap)
 {
-	while (ap != (arg_p) 0) {
-		outbyte((byte) ap->a_type & BMASK);
-		switch(ap->a_type) {
+	while (ap != (arg_p)0)
+	{
+		outbyte((byte)ap->a_type & BMASK);
+		switch (ap->a_type)
+		{
 			case ARGOFF:
 				outoff(ap->a_a.a_offset);
 				break;
@@ -65,43 +66,43 @@ STATIC void putargs(arg_p ap)
 		}
 		ap = ap->a_next;
 	}
-	outbyte((byte) ARGCEND);
+	outbyte((byte)ARGCEND);
 }
 
-
-
-STATIC void putstr(argb_p abp) {
+STATIC void putstr(argb_p abp)
+{
 	argb_p tbp;
 	int length;
 
 	length = 0;
 	tbp = abp;
-	while (tbp!= (argb_p) 0) {
+	while (tbp != (argb_p)0)
+	{
 		length += tbp->ab_index;
 		tbp = tbp->ab_next;
 	}
 	outshort(length);
-	while (abp != (argb_p) 0) {
-		for (length=0;length<abp->ab_index;length++)
-			outbyte( (byte) abp->ab_contents[length] );
+	while (abp != (argb_p)0)
+	{
+		for (length = 0; length < abp->ab_index; length++)
+			outbyte((byte)abp->ab_contents[length]);
 		abp = abp->ab_next;
 	}
 }
 
+void outoff(offset off)
+{
 
-void outoff(offset off) {
-
-	outshort( (short) (off&0177777L) );
-	outshort( (short) (off>>16) );
+	outshort((short)(off & 0177777L));
+	outshort((short)(off >> 16));
 }
 
+void outshort(short i)
+{
 
-void outshort(short i) {
-
-	outbyte( (byte) (i&BMASK) );
-	outbyte( (byte) (i>>8) );
+	outbyte((byte)(i & BMASK));
+	outbyte((byte)(i >> 8));
 }
-
 
 STATIC void outint(int i)
 {
@@ -110,31 +111,34 @@ STATIC void outint(int i)
 	 * integer to be either a short or a long.
 	 */
 
-	if (sizeof(int) == sizeof(short)) {
+	if (sizeof(int) == sizeof(short))
+	{
 		outshort(i);
-	} else {
+	}
+	else
+	{
 		/* Fails with 4-byte int, 8-byte long:
 		 * assert (sizeof(int) == sizeof(offset)); */
-		outoff((offset) i);
+		outoff((offset)i);
 	}
 }
 
-STATIC void outlab(lab_id lid) {
-	outshort((short) lid);
+STATIC void outlab(lab_id lid)
+{
+	outshort((short)lid);
 }
 
-
-STATIC void outobject(obj_p obj) {
-	outshort((short) obj->o_id);
+STATIC void outobject(obj_p obj)
+{
+	outshort((short)obj->o_id);
 }
 
-
-void outproc(proc_p p) {
-	outshort((short) p->p_id);
+void outproc(proc_p p)
+{
+	outshort((short)p->p_id);
 }
 
-
-short putlines(line_p l, FILE *lf)
+short putlines(line_p l, FILE* lf)
 {
 	/* Output the list of em instructions headed by l.
 	 * Return the number of instruction written.
@@ -143,17 +147,19 @@ short putlines(line_p l, FILE *lf)
 	register line_p lnp;
 	line_p next;
 	short instr;
-	short count= 0;
+	short count = 0;
 
-	curoutp = lf;	/* Set f to the EM-text output file */
-	for (lnp = l; lnp != (line_p) 0; lnp = next) {
+	curoutp = lf; /* Set f to the EM-text output file */
+	for (lnp = l; lnp != (line_p)0; lnp = next)
+	{
 		VL(lnp);
 		count++;
 		next = lnp->l_next;
 		instr = INSTR(lnp);
-		outbyte((byte) instr);
-		outbyte((byte) TYPE(lnp));
-		switch(TYPE(lnp)) {
+		outbyte((byte)instr);
+		outbyte((byte)TYPE(lnp));
+		switch (TYPE(lnp))
+		{
 			case OPSHORT:
 				outshort(SHORT(lnp));
 				break;
@@ -178,18 +184,14 @@ short putlines(line_p l, FILE *lf)
 	return count;
 }
 
-
-
-
-
 /* putdtable */
 
-#define outmark(m)	outbyte((byte) m)
-
+#define outmark(m) outbyte((byte)m)
 
 STATIC void putobjects(obj_p obj)
 {
-	while (obj != (obj_p) 0) {
+	while (obj != (obj_p)0)
+	{
 		outmark(MARK_OBJ);
 		outshort(obj->o_id);
 		outoff(obj->o_size);
@@ -198,18 +200,17 @@ STATIC void putobjects(obj_p obj)
 	}
 }
 
-
-
 STATIC void putvalues(arg_p arg)
 {
-	while (arg != (arg_p) 0) {
+	while (arg != (arg_p)0)
+	{
 		assert(arg->a_type == ARGOFF);
 		outmark(MARK_ARG);
 		outoff(arg->a_a.a_offset);
 		arg = arg->a_next;
 	}
 }
-void putdtable(dblock_p head, FILE *df)
+void putdtable(dblock_p head, FILE* df)
 {
 	/* Write the datablock table to the data block file df. */
 
@@ -218,16 +219,18 @@ void putdtable(dblock_p head, FILE *df)
 	dblock_p next;
 	register short n = 0;
 
-	curoutp = df;	    /* set f to the data block output file */
+	curoutp = df; /* set f to the data block output file */
 	/* Count the number of objects */
-	for (dbl = head; dbl != (dblock_p) 0; dbl = dbl->d_next) {
-		for (obj = dbl->d_objlist; obj != (obj_p) 0;
-						obj = obj->o_next) {
+	for (dbl = head; dbl != (dblock_p)0; dbl = dbl->d_next)
+	{
+		for (obj = dbl->d_objlist; obj != (obj_p)0; obj = obj->o_next)
+		{
 			n++;
 		}
 	}
-	outshort(n);  /* The table is preceded by #objects . */
-	for (dbl = head; dbl != (dblock_p) 0; dbl = next) {
+	outshort(n); /* The table is preceded by #objects . */
+	for (dbl = head; dbl != (dblock_p)0; dbl = next)
+	{
 		next = dbl->d_next;
 		outmark(MARK_DBLOCK);
 		outshort(dbl->d_id);
@@ -240,16 +243,13 @@ void putdtable(dblock_p head, FILE *df)
 		olddblock(dbl);
 	}
 	fclose(curoutp);
-	if (omap != (obj_p *) 0) {
-		oldmap((void **) omap,olength);  /* release memory for omap */
+	if (omap != (obj_p*)0)
+	{
+		oldmap((void**)omap, olength); /* release memory for omap */
 	}
 }
 
-
-
 /* putptable */
-
-
 
 STATIC void outcset(cset s)
 {
@@ -260,14 +260,13 @@ STATIC void outcset(cset s)
 	register short i;
 
 	outshort(s->v_size);
-	for (i = 0; i <= DIVWL(s->v_size - 1); i++) {
+	for (i = 0; i <= DIVWL(s->v_size - 1); i++)
+	{
 		outint(s->v_bits[i]);
 	}
 }
 
-
-
-void putptable(proc_p head, FILE *pf, bool all)
+void putptable(proc_p head, FILE* pf, bool all)
 {
 	register proc_p p;
 	proc_p next;
@@ -276,17 +275,20 @@ void putptable(proc_p head, FILE *pf, bool all)
 
 	curoutp = pf;
 	/* Determine the number of procs */
-	for (p = head; p != (proc_p) 0; p = p->p_next) {
+	for (p = head; p != (proc_p)0; p = p->p_next)
+	{
 		n++;
 	}
-	outshort(n);  /* The table is preceded by its length. */
-	outshort ((all?1:0)); /* if all=false, only some of the attributes
-			         are written. */
-	for (p = head; p != (proc_p) 0; p = next) {
+	outshort(n); /* The table is preceded by its length. */
+	outshort((all ? 1 : 0)); /* if all=false, only some of the attributes
+	                    are written. */
+	for (p = head; p != (proc_p)0; p = next)
+	{
 		next = p->p_next;
 		outshort(p->p_id);
 		outbyte(p->p_flags1);
-		if (p->p_flags1 & PF_BODYSEEN) {
+		if (p->p_flags1 & PF_BODYSEEN)
+		{
 			/* If we have no access to the EM text of the
 			 * body of a procedure, we have no information
 			 * about it whatsoever, so there is nothing
@@ -295,7 +297,8 @@ void putptable(proc_p head, FILE *pf, bool all)
 			outshort(p->p_nrlabels);
 			outoff(p->p_localbytes);
 			outoff(p->p_nrformals);
-			if (all) {
+			if (all)
+			{
 				outcset(p->p_change->c_ext);
 				outshort(p->p_change->c_flags);
 				outshort(p->p_use->u_flags);
@@ -309,36 +312,36 @@ void putptable(proc_p head, FILE *pf, bool all)
 		oldproc(p);
 	}
 	fclose(curoutp);
-	if (pmap != (proc_p *) 0) {
-		oldmap((void **) pmap,plength);  /* release memory for pmap */
+	if (pmap != (proc_p*)0)
+	{
+		oldmap((void**)pmap, plength); /* release memory for pmap */
 	}
 }
-
-
 
 /* putunit */
 
-STATIC void outloop(void *vp)
+STATIC void outloop(void* vp)
 {
 	loop_p l = vp;
 
-	outshort((short) l->lp_id);
+	outshort((short)l->lp_id);
 }
 
-
-STATIC void outblock(void *vp)
+STATIC void outblock(void* vp)
 {
 	bblock_p b = vp;
 
-	if (b == (bblock_p) 0) {
-		outshort((short) 0);
-	} else {
-		outshort((short) b->b_id);
+	if (b == (bblock_p)0)
+	{
+		outshort((short)0);
+	}
+	else
+	{
+		outshort((short)b->b_id);
 	}
 }
 
-
-STATIC void outlset(lset s, void (*p)(void *))
+STATIC void outlset(lset s, void (*p)(void*))
 {
 	/* A 'long' set is represented externally as a
 	 * a sequence of elements terminated by a 0 word.
@@ -348,41 +351,43 @@ STATIC void outlset(lset s, void (*p)(void *))
 
 	register Lindex i;
 
-	for (i = Lfirst(s); i != (Lindex) 0; i = Lnext(i,s)) {
+	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
+	{
 		(*p)(Lelem(i));
 	}
-	outshort((short) 0);
+	outshort((short)0);
 }
 
-
-
-void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
+void putunit(short kind, proc_p p, line_p l, FILE* gf, FILE* lf)
 {
 	register bblock_p b;
 	register short n = 0;
-	Lindex   pi;
+	Lindex pi;
 	bblock_p nextb;
-	loop_p   lp;
+	loop_p lp;
 
 	curoutp = gf;
-	if (kind == LDATA) {
+	if (kind == LDATA)
+	{
 		outshort(0); /* No basic blocks */
-		n = putlines(l,lf);
+		n = putlines(l, lf);
 		curoutp = gf;
 		outshort(n);
 		return;
 	}
 	/* Determine the number of basic blocks */
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
 		n++;
 	}
 	outshort(n); /* # basic blocks */
-	outshort(Lnrelems(p->p_loops));  /* # loops */
-	for (b = p->p_start; b != (bblock_p) 0; b = b->b_next) {
-		n = putlines(b->b_start,lf);
+	outshort(Lnrelems(p->p_loops)); /* # loops */
+	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
+	{
+		n = putlines(b->b_start, lf);
 		curoutp = gf;
-		outblock(b);  /* put its block_id */
-		outshort(n);  /* #instructions of the block */
+		outblock(b); /* put its block_id */
+		outshort(n); /* #instructions of the block */
 		outlset(b->b_succ, outblock); /* put succ set */
 		outlset(b->b_pred, outblock); /* put pred set */
 		outblock(b->b_idom); /* put id of immediate dominator */
@@ -393,10 +398,10 @@ void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
 	 * by a description of the loops of the procedure.
 	 * Every loop contains an id, an entry block and a level.
 	 */
-	for (pi = Lfirst(p->p_loops); pi != (Lindex) 0;
-					 pi = Lnext(pi,p->p_loops)) {
-		lp = (loop_p) Lelem(pi);
-		outloop(lp);	/* id */
+	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
+	{
+		lp = (loop_p)Lelem(pi);
+		outloop(lp); /* id */
 		outshort(lp->lp_level); /* nesting level */
 		outblock(lp->lp_entry); /* loop entry block */
 		outblock(lp->lp_end);
@@ -408,7 +413,8 @@ void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
 	 * after it has been written, because there may be references
 	 * to it from other (later) blocks.
 	 */
-	for (b = p->p_start; b != (bblock_p) 0; b = nextb) {
+	for (b = p->p_start; b != (bblock_p)0; b = nextb)
+	{
 		Ldeleteset(b->b_loops);
 		Ldeleteset(b->b_succ);
 		Ldeleteset(b->b_pred);
@@ -417,9 +423,13 @@ void putunit(short kind, proc_p p, line_p l, FILE *gf, FILE *lf)
 		oldbblock(b);
 	}
 	/* Release the memory for the lmap, lbmap, bmap, lpmap tables */
-	if (lmap != (line_p *) 0) oldmap((void **) lmap,llength);
-	if (lbmap != (bblock_p *) 0) oldmap((void **) lbmap,llength);
-	if (bmap != (bblock_p *) 0)  oldmap((void **) bmap,blength);
-	if (lpmap != (loop_p *) 0) oldmap((void **) lpmap,lplength);
+	if (lmap != (line_p*)0)
+		oldmap((void**)lmap, llength);
+	if (lbmap != (bblock_p*)0)
+		oldmap((void**)lbmap, llength);
+	if (bmap != (bblock_p*)0)
+		oldmap((void**)bmap, blength);
+	if (lpmap != (loop_p*)0)
+		oldmap((void**)lpmap, lplength);
 	curoutp = lf;
 }

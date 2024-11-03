@@ -254,7 +254,7 @@ void crash(char *fmt, ...)
 #else	/* DEBUG */
 	sys_stop(S_EXIT);
 #endif	/* DEBUG */
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 /*VARARGS*/
@@ -270,7 +270,7 @@ void fatal(char *fmt, ...)
 
 	if (C_busy()) C_close();
 	sys_stop(S_EXIT);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 #else
 /*VARARGS*/
@@ -501,7 +501,7 @@ void crash(va_alist)				/* fmt, args */
 #else	/* DEBUG */
 	sys_stop(S_EXIT);
 #endif	/* DEBUG */
-	/* NOTREACHED */
+	UNREACHABLE_CODE;
 }
 
 /*VARARGS*/
@@ -519,7 +519,7 @@ void fatal(va_alist)				/* fmt, args */
 
 	if (C_busy()) C_close();
 	sys_stop(S_EXIT);
-	/*NOTREACHED*/
+	UNREACHABLE_CODE;
 }
 #endif
 
@@ -593,7 +593,7 @@ static void _error(int class, char *fn, unsigned int ln, char* fmt, va_list ap)
 		break;
 #endif /* DEBUG */
 	default:
-		/*NOTREACHED*/;
+		UNREACHABLE_CODE;
 	}
 	
 #ifdef	LINT

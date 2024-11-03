@@ -1,22 +1,22 @@
 /* $Id$ */
 
-#include	"logging.h"
-#include	"global.h"
-#include	"mem.h"
-#include	"shadow.h"
-#include	"fra.h"
-#include	"alloc.h"
+#include "logging.h"
+#include "global.h"
+#include "mem.h"
+#include "shadow.h"
+#include "fra.h"
+#include "alloc.h"
 
-#ifdef	LOGGING
-char *FRA_sh; /* shadowbytes */
-#endif	/* LOGGING */
+#ifdef LOGGING
+char* FRA_sh; /* shadowbytes */
+#endif /* LOGGING */
 
 void init_FRA(void)
 {
 	FRA = Malloc(FRALimit, "Function Return Area");
-#ifdef	LOGGING
+#ifdef LOGGING
 	FRA_sh = Malloc(FRALimit, "shadowspace for Function Return Area");
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	FRA_def = UNDEFINED; /* set FRA illegal */
 }
 
@@ -31,9 +31,9 @@ void pushFRA(size sz)
 	for (i = 0; i < sz; i++)
 	{
 		stack_loc(SP + i) = FRA[i];
-#ifdef	LOGGING
+#ifdef LOGGING
 		st_sh(SP + i) = (i < FRASize ? FRA_sh[i] : UNDEFINED);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	}
 }
 
@@ -47,10 +47,9 @@ void popFRA(size sz)
 	for (i = 0; i < sz; i++)
 	{
 		FRA[i] = stack_loc(SP + i);
-#ifdef	LOGGING
+#ifdef LOGGING
 		FRA_sh[i] = st_sh(SP + i);
-#endif	/* LOGGING */
+#endif /* LOGGING */
 	}
 	st_dec(max(sz, wsize));
 }
-

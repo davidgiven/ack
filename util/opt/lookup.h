@@ -27,18 +27,18 @@ struct sym {
 #define SYMSEEN		000040
 
 #define NSYMHASH	127
-extern sym_p symhash[NSYMHASH],symlookup();
+extern sym_p symhash[NSYMHASH];
 #define OCCURRING	0
 #define DEFINING	1
 #define NOTHING		2
 
 /** Return the hash value of the specified string. */
-unsigned hash(char *string);
-num_p numlookup(unsigned number);
+extern unsigned hash(char *string);
+extern num_p numlookup(unsigned number);
 /** Search the hash table for the specified name
  *  and symbol type specified in `flags`.
  */
-sym_p symlookup(char *name, int status, int flags);
+extern sym_p symlookup(char *name, int status, int flags);
 
 
 #endif /* LOOKUP_H_ */

@@ -18,6 +18,7 @@
 #include	"type.h"
 #include	"code.h"
 #include	"error.h"
+#include	"lookup.h"
 }
 
 Constant(register struct node **pnd;)
