@@ -34,7 +34,7 @@ jobs:
         run: container-init & timeout 600 vmshell exit 0
 
       - name: pkgman
-        run: 'vmshell pkgman install -y make'
+        run: 'vmshell pkgman install -y make lua5.1 bison flex'
 
       - name: checkout
         uses: 'actions/checkout@v3'
