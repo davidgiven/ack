@@ -14,29 +14,29 @@
 #include <stdlib.h>
 
 #define BSIZ 1024
-char *prog;
+char* prog;
 
 int dflag = 0; /* suppress "file.c :" */
 
 struct namelist
 {
-	struct namelist *next;
-	char *name;
+	struct namelist* next;
+	char* name;
 };
 
-struct namelist *freelist;
-struct namelist *new_namelist();
-struct namelist *nl = 0;
+struct namelist* freelist;
+struct namelist* new_namelist();
+struct namelist* nl = 0;
 
-char *Malloc(unsigned int);
+char* Malloc(unsigned int);
 
-char *include_line(char *);
-int dofile(char *);
+char* include_line(char*);
+int dofile(char*);
 
-char *Malloc(u)
-	unsigned u;
+char* Malloc(u)
+unsigned u;
 {
-	char *sp;
+	char* sp;
 
 	if ((sp = malloc(u)) == 0)
 	{
@@ -46,10 +46,9 @@ char *Malloc(u)
 	return sp;
 }
 
-struct namelist *
-new_namelist()
+struct namelist* new_namelist()
 {
-	struct namelist *nlp = freelist;
+	struct namelist* nlp = freelist;
 
 	if (nlp)
 	{
@@ -57,10 +56,10 @@ new_namelist()
 		return nlp;
 	}
 
-	return (struct namelist *) Malloc(sizeof(struct namelist));
+	return (struct namelist*)Malloc(sizeof(struct namelist));
 }
 
-void free_namelist(struct namelist *nlp)
+void free_namelist(struct namelist* nlp)
 {
 	if (nlp)
 	{
@@ -70,7 +69,7 @@ void free_namelist(struct namelist *nlp)
 	}
 }
 
-void add_name(char *nm)
+void add_name(char* nm)
 {
 	struct namelist *nlp = nl, *lnlp = 0, *nnlp;
 
@@ -85,8 +84,7 @@ void add_name(char *nm)
 		nlp = nlp->next;
 	}
 
-	(nnlp = new_namelist())->name = strcpy(Malloc((unsigned) strlen(nm) + 1),
-			nm);
+	(nnlp = new_namelist())->name = strcpy(Malloc((unsigned)strlen(nm) + 1), nm);
 
 	if (lnlp)
 	{
@@ -100,7 +98,7 @@ void add_name(char *nm)
 	}
 }
 
-void print_namelist(char *nm, struct namelist *nlp)
+void print_namelist(char* nm, struct namelist* nlp)
 {
 	while (nlp)
 	{
@@ -112,14 +110,14 @@ void print_namelist(char *nm, struct namelist *nlp)
 }
 
 /*ARGSUSED*/
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	int err = 0;
 
 	prog = *argv++;
 	if (*argv && **argv == '-')
 	{
-		char *opt = &(*argv++)[1];
+		char* opt = &(*argv++)[1];
 
 		if (*opt++ != 'd' || *opt)
 		{
@@ -140,7 +138,7 @@ int main(int argc, char *argv[])
 	exit(err ? 1 : 0);
 }
 
-int contains_slash(char *s)
+int contains_slash(char* s)
 {
 	while (*s)
 		if (*s++ == '/')
@@ -148,11 +146,11 @@ int contains_slash(char *s)
 	return 0;
 }
 
-int dofile(char *fn)
+int dofile(char* fn)
 {
 	char buf[BSIZ];
-	FILE *fp;
-	char *nm;
+	FILE* fp;
+	char* nm;
 
 	if ((fp = fopen(fn, "r")) == 0)
 	{
@@ -162,9 +160,7 @@ int dofile(char *fn)
 
 	if (contains_slash(fn))
 	{
-		fprintf(stderr,
-				"%s: (warning) %s not in current directory; not checked\n",
-				prog, fn);
+		fprintf(stderr, "%s: (warning) %s not in current directory; not checked\n", prog, fn);
 		fclose(fp);
 		return 1;
 	}
@@ -181,7 +177,7 @@ int dofile(char *fn)
 	return 1;
 }
 
-char *include_line(char *s)
+char* include_line(char* s)
 {
 	while ((*s == '\t') || (*s == ' '))
 		s++;
@@ -190,14 +186,14 @@ char *include_line(char *s)
 	{
 		while ((*s == '\t') || (*s == ' '))
 			s++;
-		if ((*s++ == 'i') && (*s++ == 'n') && (*s++ == 'c') && (*s++ == 'l')
-				&& (*s++ == 'u') && (*s++ == 'd') && (*s++ == 'e'))
+		if ((*s++ == 'i') && (*s++ == 'n') && (*s++ == 'c') && (*s++ == 'l') && (*s++ == 'u')
+		    && (*s++ == 'd') && (*s++ == 'e'))
 		{
 			while ((*s == '\t') || (*s == ' '))
 				s++;
 			if (*s++ == '"')
 			{
-				char *nm = s;
+				char* nm = s;
 
 				while (*s != 0 && *s != '"')
 					s++;
@@ -206,5 +202,5 @@ char *include_line(char *s)
 			}
 		}
 	}
-	return (char *) 0;
+	return (char*)0;
 }
