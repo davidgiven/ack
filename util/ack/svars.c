@@ -8,109 +8,127 @@
 #include "ack.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
+static char rcs_id[] = "$Id$";
 #endif
 
 /*      The processing of string valued variables,
-	this is an almost self contained module.
+    this is an almost self contained module.
 
-	Five externally visible routines:
+    Five externally visible routines:
 
-	setsvar(name,result)
-		Associate the name with the result.
+    setsvar(name,result)
+        Associate the name with the result.
 
-		name    a string pointer
-		result  a string pointer
+        name    a string pointer
+        result  a string pointer
 
-	setpvar(name,routine)
-		Associate the name with the routine.
+    setpvar(name,routine)
+        Associate the name with the routine.
 
-		name    a string pointer
-		routine a routine id
+        name    a string pointer
+        routine a routine id
 
-	   The parameters name and result are supposed to be pointing to
-	   non-volatile string storage used only for this call.
+       The parameters name and result are supposed to be pointing to
+       non-volatile string storage used only for this call.
 
-	char *getvar(name)
-		returns the pointer to a string associated with name,
-		the pointer is produced by returning result or the
-		value returned by calling the routine.
+    char *getvar(name)
+        returns the pointer to a string associated with name,
+        the pointer is produced by returning result or the
+        value returned by calling the routine.
 
-		name    a string pointer
+        name    a string pointer
 
-	Other routines called
+    Other routines called
 
-	fatal(args*)    When something goes wrong
-	getcore(size)   Core allocation
+    fatal(args*)    When something goes wrong
+    getcore(size)   Core allocation
 
 */
 
-struct vars {
-	char                            *v_name;
-	enum { routine, string }        v_type;
+struct vars
+{
+	char* v_name;
+	enum
+	{
+		routine,
+		string
+	} v_type;
 
-	union {
-		char    *v_string;
-		char    *(*v_routine)(void);
-	}                               v_value ;
-	struct vars                     *v_next ;
+	union
+	{
+		char* v_string;
+		char* (*v_routine)(void);
+	} v_value;
+	struct vars* v_next;
 };
 
-static struct vars *v_first ;
+static struct vars* v_first;
 
-static struct vars *newvar(char *name) {
-	struct vars *new ;
+static struct vars* newvar(char* name)
+{
+	struct vars* new;
 
-	for ( new=v_first ; new ; new= new->v_next ) {
-		if ( strcmp(name,new->v_name)==0 ) {
-			throws(name) ;
-			if ( new->v_type== string ) {
-				throws(new->v_value.v_string) ;
+	for (new = v_first; new; new = new->v_next)
+	{
+		if (strcmp(name, new->v_name) == 0)
+		{
+			throws(name);
+			if (new->v_type == string)
+			{
+				throws(new->v_value.v_string);
 			}
-			return new ;
+			return new;
 		}
 	}
-	new= (struct vars *)getcore(sizeof (struct vars));
-	new->v_name= name ;
-	new->v_next= v_first ;
-	v_first= new ;
-	return new ;
+	new = (struct vars*)getcore(sizeof(struct vars));
+	new->v_name = name;
+	new->v_next = v_first;
+	v_first = new;
+	return new;
 }
 
-void setsvar(char *name, char *str) {
-	struct vars *new ;
+void setsvar(char* name, char* str)
+{
+	struct vars* new;
 
-	new= newvar(name);
+	new = newvar(name);
 #ifdef DEBUG
-	if ( debug>=2 ) vprint("%s=%s\n", new->v_name, str) ;
+	if (debug >= 2)
+		vprint("%s=%s\n", new->v_name, str);
 #endif
-	new->v_type= string;
-	new->v_value.v_string= str;
+	new->v_type = string;
+	new->v_value.v_string = str;
 }
 
-void setpvar(char *name, char *(*rout)(void)) {
-	struct vars *new ;
+void setpvar(char* name, char* (*rout)(void))
+{
+	struct vars* new;
 
-	new= newvar(name);
+	new = newvar(name);
 #ifdef DEBUG
-	if ( debug>=2 ) vprint("%s= (*%o)()\n", new->v_name, rout) ;
+	if (debug >= 2)
+		vprint("%s= (*%o)()\n", new->v_name, rout);
 #endif
-	new->v_type= routine;
-	new->v_value.v_routine= rout;
+	new->v_type = routine;
+	new->v_value.v_routine = rout;
 }
 
-char *getvar(const char *name) {
-	struct vars *scan ;
+char* getvar(const char* name)
+{
+	struct vars* scan;
 
-	for ( scan=v_first ; scan ; scan= scan->v_next ) {
-		if ( strcmp(name,scan->v_name)==0 ) {
-			switch ( scan->v_type ) {
-			case string:
-				return scan->v_value.v_string ;
-			case routine:
-				return (*scan->v_value.v_routine)() ;
+	for (scan = v_first; scan; scan = scan->v_next)
+	{
+		if (strcmp(name, scan->v_name) == 0)
+		{
+			switch (scan->v_type)
+			{
+				case string:
+					return scan->v_value.v_string;
+				case routine:
+					return (*scan->v_value.v_routine)();
 			}
 		}
 	}
-	return (char *)0 ;
+	return (char*)0;
 }

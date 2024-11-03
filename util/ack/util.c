@@ -19,57 +19,70 @@
 #include "ack.h"
 
 #ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
+static char rcs_id[] = "$Id$";
 #endif
 
-extern  char    *progname ;
-extern  int     w_flag ;
-extern  int     n_error;
+extern char* progname;
+extern int w_flag;
+extern int n_error;
 
 #ifdef DEBUG
-# define STDOUT stdout
+#define STDOUT stdout
 #else
-# define STDOUT stderr
+#define STDOUT stderr
 #endif
 
-char *ack_basename(const char *string) {
-	static char retval[256] ;
-	const char *last_dot, *last_start, *fetch ;
-	char *store ;
-	int ctoken ;
+char* ack_basename(const char* string)
+{
+	static char retval[256];
+	const char *last_dot, *last_start, *fetch;
+	char* store;
+	int ctoken;
 
-	last_dot= (char *)0 ;
-	last_start= string ;
-	for ( fetch=string ; ; fetch++ ) {
-		switch ( ctoken= *fetch&0377 ) {
-		case SUFCHAR : last_dot=fetch ; break ;
-		case '/'     : last_start=fetch+1 ; break ;
-		case  0      : goto out ;
+	last_dot = (char*)0;
+	last_start = string;
+	for (fetch = string;; fetch++)
+	{
+		switch (ctoken = *fetch & 0377)
+		{
+			case SUFCHAR:
+				last_dot = fetch;
+				break;
+			case '/':
+				last_start = fetch + 1;
+				break;
+			case 0:
+				goto out;
 		}
 	}
 out:
-	if ( ! *last_start ) fuerror("empty filename \"%s\"",string) ;
-	for ( fetch= last_start, store=retval ;
-		*fetch && fetch!=last_dot && store< &retval[sizeof retval-1] ;
-		      fetch++, store++ ) {
-				*store= *fetch ;
+	if (!*last_start)
+		fuerror("empty filename \"%s\"", string);
+	for (fetch = last_start, store = retval;
+	     *fetch && fetch != last_dot && store < &retval[sizeof retval - 1]; fetch++, store++)
+	{
+		*store = *fetch;
 	}
-	*store= 0 ;
-	return retval ;
+	*store = 0;
+	return retval;
 }
 
-char *skipblank(char *str) {
-	char *ptr ;
+char* skipblank(char* str)
+{
+	char* ptr;
 
-	for ( ptr=str ; *ptr==SPACE || *ptr==TAB ; ptr++ ) ;
-	return ptr ;
+	for (ptr = str; *ptr == SPACE || *ptr == TAB; ptr++)
+		;
+	return ptr;
 }
 
-char *firstblank(char *str) {
-	char *ptr ;
+char* firstblank(char* str)
+{
+	char* ptr;
 
-	for ( ptr=str ; *ptr && *ptr!=SPACE && *ptr!=TAB ; ptr++ ) ;
-	return ptr ;
+	for (ptr = str; *ptr && *ptr != SPACE && *ptr != TAB; ptr++)
+		;
+	return ptr;
 }
 
 /* VARARGS1 */
@@ -78,12 +91,11 @@ void fatal(const char* fmt, ...)
 	/* Fatal internal error */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT,"%s: fatal internal error, ",progname) ;
+	fprintf(STDOUT, "%s: fatal internal error, ", progname);
 	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT,"\n") ;
-	quit(-2) ;
+	fprintf(STDOUT, "\n");
+	quit(-2);
 }
-
 
 /* VARARGS1 */
 void vprint(const char* fmt, ...)
@@ -96,72 +108,83 @@ void vprint(const char* fmt, ...)
 }
 
 /* VARARGS1 */
-void fuerror(const char *fmt, ...) {
+void fuerror(const char* fmt, ...)
+{
 	/* Fatal user error */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT,"%s: ",progname) ;
+	fprintf(STDOUT, "%s: ", progname);
 	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT,"\n") ;
-	quit(-1) ;
+	fprintf(STDOUT, "\n");
+	quit(-1);
 }
 
 /* VARARGS1 */
-void werror(const char *fmt, ...) {
+void werror(const char* fmt, ...)
+{
 	/* Warning user error, w_flag */
 	va_list ap;
-	if ( w_flag ) return ;
+	if (w_flag)
+		return;
 	va_start(ap, fmt);
-	fprintf(STDOUT,"%s: warning, ",progname) ;
+	fprintf(STDOUT, "%s: warning, ", progname);
 	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT,"\n") ;
+	fprintf(STDOUT, "\n");
 	va_end(ap);
 }
 
 /* VARARGS1 */
-void error(const char *fmt, ...) {
+void error(const char* fmt, ...)
+{
 	/* User error, it is the callers responsibility to quit */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT,"%s: ",progname) ;
+	fprintf(STDOUT, "%s: ", progname);
 	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT,"\n") ;
-	n_error++ ;
+	fprintf(STDOUT, "\n");
+	n_error++;
 	va_end(ap);
 }
 
-void quit(int code) {
+void quit(int code)
+{
 	rmtemps();
 	exit(code);
 }
 
 /******
-	char *keeps(string)
-		Keep the string in stable storage.
-	throws(string)
-		Remove the string stored by keep from stable storage.
-		throws() is now a macro in ack.h.
+    char *keeps(string)
+        Keep the string in stable storage.
+    throws(string)
+        Remove the string stored by keep from stable storage.
+        throws() is now a macro in ack.h.
 ***********/
 
-char *keeps(const char *str) {
-	char *result ;
-	result= getcore( (unsigned)(strlen(str)+1) ) ;
-	if ( !result ) fatal("Out of core") ;
-	return strcpy(result,str) ;
+char* keeps(const char* str)
+{
+	char* result;
+	result = getcore((unsigned)(strlen(str) + 1));
+	if (!result)
+		fatal("Out of core");
+	return strcpy(result, str);
 }
 
-void *getcore(size_t size) {
-	void *retptr ;
+void* getcore(size_t size)
+{
+	void* retptr;
 
-	retptr= calloc(1,size) ;
-	if ( !retptr ) fatal("Out of memory") ;
-	return retptr ;
+	retptr = calloc(1, size);
+	if (!retptr)
+		fatal("Out of memory");
+	return retptr;
 }
 
-void *changecore(void *ptr, size_t size) {
-	void *retptr ;
+void* changecore(void* ptr, size_t size)
+{
+	void* retptr;
 
-	retptr= realloc(ptr,size) ;
-	if ( !retptr ) fatal("Out of memory") ;
-	return retptr ;
+	retptr = realloc(ptr, size);
+	if (!retptr)
+		fatal("Out of memory");
+	return retptr;
 }

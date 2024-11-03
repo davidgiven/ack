@@ -10,119 +10,161 @@
 #include <ctype.h>
 
 #ifndef NORCSID
-static char rcs_id[] = "$Id$" ;
+static char rcs_id[] = "$Id$";
 #endif
 
-char *fname = 0 ;
-char dname[200] ;
-char *tail ;
+char* fname = 0;
+char dname[200];
+char* tail;
 
-FILE *intab ;
-FILE *dmach ;
+FILE* intab;
+FILE* dmach;
 
-int offset ;
+int offset;
 
-void start(const char *) ;
-void stop(int) ;
-void readm(void) ;
+void start(const char*);
+void stop(int);
+void readm(void);
 
-int main(int argc, char **argv) {
-	int i ;
+int main(int argc, char** argv)
+{
+	int i;
 
-	start(argv[1]) ;
-	for ( i=2 ; i<argc ; i++ ) {
-		fname= argv[i] ;
-		readm() ;
+	start(argv[1]);
+	for (i = 2; i < argc; i++)
+	{
+		fname = argv[i];
+		readm();
 	}
-	stop(argc>2) ;
-	return 0 ;
+	stop(argc > 2);
+	return 0;
 }
 
-void start(const char *dir) {
-	tail= dname ;
-	while ( *dir ) {
-		*tail++ = *dir ++ ;
+void start(const char* dir)
+{
+	tail = dname;
+	while (*dir)
+	{
+		*tail++ = *dir++;
 	}
-	if ( tail!=dname ) *tail++= '/' ;
-	offset=0 ;
-	intab= fopen("intable.c","w");
-	dmach= fopen("dmach.c","w");
-	if ( intab==NULL || dmach==NULL ) {
-		fprintf(stderr,"Couln't create output file(s)\n");
-		exit ( 1) ;
+	if (tail != dname)
+		*tail++ = '/';
+	offset = 0;
+	intab = fopen("intable.c", "w");
+	dmach = fopen("dmach.c", "w");
+	if (intab == NULL || dmach == NULL)
+	{
+		fprintf(stderr, "Couln't create output file(s)\n");
+		exit(1);
 	}
-	fprintf(dmach,"#include \"dmach.h\"\n\ndmach\tmassoc[] = {\n") ;
-	fprintf(intab,"char intable[] = {\n") ;
+	fprintf(dmach, "#include \"dmach.h\"\n\ndmach\tmassoc[] = {\n");
+	fprintf(intab, "char intable[] = {\n");
 }
 
-void stop(int filled) {
-	fprintf(dmach,"\t{\"\",\t-1\t}\n} ;\n") ;
-	if ( !filled ) fprintf(intab,"\t0\n") ;
-	fprintf(intab,"\n} ;\n") ;
-	fclose(dmach); fclose(intab) ;
+void stop(int filled)
+{
+	fprintf(dmach, "\t{\"\",\t-1\t}\n} ;\n");
+	if (!filled)
+		fprintf(intab, "\t0\n");
+	fprintf(intab, "\n} ;\n");
+	fclose(dmach);
+	fclose(intab);
 }
 
-FILE *do_open(const char *file) {
-	FILE *fd;
+FILE* do_open(const char* file)
+{
+	FILE* fd;
 
-	strcpy(tail,file) ;
-	strcat(tail,"/");
-	strcat(tail,"descr");
-	if ((fd = fopen(dname,"r")) != NULL) return fd;
-	strcpy(tail,"descr/");
-	strcat(tail,file);
-	return fopen(dname,"r");
+	strcpy(tail, file);
+	strcat(tail, "/");
+	strcat(tail, "descr");
+	if ((fd = fopen(dname, "r")) != NULL)
+		return fd;
+	strcpy(tail, "descr/");
+	strcat(tail, file);
+	return fopen(dname, "r");
 }
 
-void
-readm(void) {
-	int i ;
-	int token ;
-	FILE *in ;
+void readm(void)
+{
+	int i;
+	int token;
+	FILE* in;
 
-	in=do_open(fname) ;
-	if ( in==NULL ) {
-		fprintf(stderr,"Cannot open %s\n",fname) ;
-		return ;
+	in = do_open(fname);
+	if (in == NULL)
+	{
+		fprintf(stderr, "Cannot open %s\n", fname);
+		return;
 	}
-	i=0 ;
-	fprintf(dmach,"\t{\"%s\",\t%d\t},\n",fname,offset) ;
-	fprintf(intab,"\n/* %s */\n\t",fname) ;
-	for (;;) {
-		token=getc(in) ;
-		offset++ ;
-		if ( ++i == 10 ) {
-			fprintf(intab,"\n\t") ;
-			i=0 ;
-		} else {
-			fprintf(intab," ") ;
+	i = 0;
+	fprintf(dmach, "\t{\"%s\",\t%d\t},\n", fname, offset);
+	fprintf(intab, "\n/* %s */\n\t", fname);
+	for (;;)
+	{
+		token = getc(in);
+		offset++;
+		if (++i == 10)
+		{
+			fprintf(intab, "\n\t");
+			i = 0;
 		}
-		if ( !isascii(token) || !(isprint(token) || isspace(token)) ){
-			if ( token!=EOF ) {
-			  fprintf(stderr,"warning: non-ascii in %s\n",fname) ;
-			  fprintf(intab,"%4d,",token) ;
-			} else {
-			  fprintf(intab,"  0,") ;
-			  break ;
-			}
-		} else if ( isprint(token) ) {
-			switch ( token ) {
-			case '\'': fprintf(intab,"'\\''") ; break ;
-			case '\\': fprintf(intab,"'\\\\'") ; break ;
-			default:   fprintf(intab," '%c'",token) ; break ;
-			}
-		} else switch ( token ) {
-		case '\n' : fprintf(intab,"'\\n'") ; break ;
-		case '\t' : fprintf(intab,"'\\t'") ; break ;
-		case '\r' : fprintf(intab,"'\\r'") ; break ;
-		case '\f' : fprintf(intab,"'\\f'") ; break ;
-		case ' '  : fprintf(intab," ' '")  ; break ;
-		default :   fprintf(stderr,"warning: unrec. %d\n",
-				token) ;
-			    fprintf(intab,"%4d",token) ;
-			    break ;
+		else
+		{
+			fprintf(intab, " ");
 		}
-		fprintf(intab,",") ;
+		if (!isascii(token) || !(isprint(token) || isspace(token)))
+		{
+			if (token != EOF)
+			{
+				fprintf(stderr, "warning: non-ascii in %s\n", fname);
+				fprintf(intab, "%4d,", token);
+			}
+			else
+			{
+				fprintf(intab, "  0,");
+				break;
+			}
+		}
+		else if (isprint(token))
+		{
+			switch (token)
+			{
+				case '\'':
+					fprintf(intab, "'\\''");
+					break;
+				case '\\':
+					fprintf(intab, "'\\\\'");
+					break;
+				default:
+					fprintf(intab, " '%c'", token);
+					break;
+			}
+		}
+		else
+			switch (token)
+			{
+				case '\n':
+					fprintf(intab, "'\\n'");
+					break;
+				case '\t':
+					fprintf(intab, "'\\t'");
+					break;
+				case '\r':
+					fprintf(intab, "'\\r'");
+					break;
+				case '\f':
+					fprintf(intab, "'\\f'");
+					break;
+				case ' ':
+					fprintf(intab, " ' '");
+					break;
+				default:
+					fprintf(stderr, "warning: unrec. %d\n", token);
+					fprintf(intab, "%4d", token);
+					break;
+			}
+		fprintf(intab, ",");
 	}
-	fclose(in) ;
+	fclose(in);
 }
