@@ -38,14 +38,8 @@ CFLAGS ?= -g \
 	-Werror=strict-prototypes \
 	-fsanitize=unreachable
 
-MANDATORYCFLAGS = \
-	-DUNREACHABLE_CODE='__builtin_unreachable()' \
-	-DNORETURN=_Noreturn
-
 LDFLAGS ?= -g \
 	-fsanitize=unreachable
-
-MANDATORYLDFLAGS =
 
 # Various commands.
 
@@ -81,6 +75,12 @@ INSDIR = $(abspath $(BUILDDIR)/staging)
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
+
+MANDATORYCFLAGS = \
+	-DUNREACHABLE_CODE='__builtin_unreachable()' \
+	-DNORETURN=_Noreturn
+
+MANDATORYLDFLAGS =
 
 .NOTPARALLEL:
 
