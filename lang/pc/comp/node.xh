@@ -2,13 +2,16 @@
 #ifndef NODE_H_
 #define NODE_H_
 
+#if defined Value
+#undef Value
+#endif
 
 struct node {
 	struct node *nd_left;
 #define nd_next nd_left
 	struct node *nd_right;
 	int nd_class;		/* kind of node */
-#define ValueN		0	/* constant */
+#define Value		0	/* constant */
 #define Name		1	/* an identifier */
 #define Uoper		2	/* unary operator */
 #define Boper		3	/* binary operator */
