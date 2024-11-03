@@ -35,11 +35,9 @@ BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 CFLAGS ?= -g \
 	-Werror=return-type \
 	-Werror=implicit-function-declaration \
-	-Werror=strict-prototypes \
-	-fsanitize=unreachable
+	-Werror=strict-prototypes
 
-LDFLAGS ?= -g \
-	-fsanitize=unreachable
+LDFLAGS ?= -g
 
 # Various commands.
 
