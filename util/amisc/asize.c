@@ -4,43 +4,48 @@
  */
 /* $Id$ */
 
-#include	<stdlib.h>
-#include	<stdio.h>
-#include	"object.h"
-#include 	"out.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "object.h"
+#include "out.h"
 
 /*
-	asize -- determine object size
+    asize -- determine object size
 
 */
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	struct outhead	buf;
-	struct outsect	sbuf;
-	unsigned short	nrsect;
-	long		sum;
-	int		gorp;
+	struct outhead buf;
+	struct outsect sbuf;
+	unsigned short nrsect;
+	long sum;
+	int gorp;
 
-	if (--argc == 0) {
+	if (--argc == 0)
+	{
 		argc = 1;
 		argv[1] = "a.out";
 	}
 	gorp = argc;
 
-	while(argc--) {
-		if (! rd_open(*++argv)) {
+	while (argc--)
+	{
+		if (!rd_open(*++argv))
+		{
 			fprintf(stderr, "asize: cannot open %s\n", *argv);
 			continue;
 		}
 		rd_ohead(&buf);
-		if(BADMAGIC(buf)) {
+		if (BADMAGIC(buf))
+		{
 			fprintf(stderr, "asize: %s-- bad format\n", *argv);
 			rd_close();
 			continue;
 		}
 		nrsect = buf.oh_nsect;
-		if (nrsect == 0) {
+		if (nrsect == 0)
+		{
 			fprintf(stderr, "asize: %s-- no sections\n", *argv);
 			rd_close();
 			continue;
@@ -49,7 +54,8 @@ int main(int argc, char **argv)
 			printf("%s: ", *argv);
 
 		sum = 0;
-		while (nrsect-- > 0) {
+		while (nrsect-- > 0)
+		{
 			rd_sect(&sbuf, 1);
 			printf("%ld", sbuf.os_size);
 			sum += sbuf.os_size;

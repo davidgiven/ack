@@ -13,25 +13,25 @@
 
 /*
 
-	astrip -- remove symbols and relocation bits
+    astrip -- remove symbols and relocation bits
 
 */
 
 char* tname;
-FILE	*tf;
+FILE* tf;
 struct outhead buf;
-int	readerror, writeerror;
+int readerror, writeerror;
 
+static int copy(char*, char*, long, FILE*, FILE*);
+static int strip(char*);
 
-static int copy(char *, char *, long, FILE *, FILE *);
-static int strip(char *);
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	int	status;
+	int status;
 
 	tname = sys_maketempfile("ack", "dat");
-	while(--argc) {
+	while (--argc)
+	{
 		if ((status = strip(argv[argc])) > 1)
 			break;
 	}
@@ -39,22 +39,24 @@ int main(int argc, char **argv)
 	return status;
 }
 
-int strip(char *name)
+int strip(char* name)
 {
 	long size;
-	FILE *fw;
+	FILE* fw;
 
-	if (! rd_open(name)) {
+	if (!rd_open(name))
+	{
 		fprintf(stderr, "astrip: cannot open %s\n", name);
-		return(1);
+		return (1);
 	}
 	readerror = 0;
 	writeerror = 0;
 	rd_ohead(&buf);
-	if(readerror || BADMAGIC(buf)) {
+	if (readerror || BADMAGIC(buf))
+	{
 		fprintf(stderr, "astrip: %s-- bad format\n", name);
 		rd_close();
-		return(1);
+		return (1);
 	}
 	size = OFF_RELO(buf) - SZ_HEAD;
 	buf.oh_flags &= ~HF_LINK;
@@ -62,78 +64,87 @@ int strip(char *name)
 	buf.oh_nname = 0;
 	buf.oh_nchar = 0;
 
-
-	if (! wr_open(tname)) {
+	if (!wr_open(tname))
+	{
 		fprintf(stderr, "astrip: cannot create temp file %s\n", tname);
 		rd_close();
-		return(2);
+		return (2);
 	}
 	wr_ohead(&buf);
 	wr_close();
-	if (writeerror) {
+	if (writeerror)
+	{
 		fprintf(stderr, "astrip: write error on temp file %s\n", tname);
 		rd_close();
-		return(1);
+		return (1);
 	}
 	fw = fopen(tname, "ab");
-	if ((fw == NULL) || (fseek(fw, (long)SZ_HEAD, SEEK_SET)!=0)) {
+	if ((fw == NULL) || (fseek(fw, (long)SZ_HEAD, SEEK_SET) != 0))
+	{
 		fprintf(stderr, "astrip: cannot create temp file %s\n", tname);
 		rd_close();
 		fclose(fw);
-		return(2);
+		return (2);
 	}
-	if(copy(name, tname, size, rd_fd(), fw)) {
+	if (copy(name, tname, size, rd_fd(), fw))
+	{
 		rd_close();
 		fclose(fw);
-		return(1);
+		return (1);
 	}
 	rd_close();
 	fclose(fw);
 	size += SZ_HEAD;
-	if (! rd_open(tname)) {
+	if (!rd_open(tname))
+	{
 		fprintf(stderr, "astrip: cannot read temp file %s\n", tname);
-		return(2);
+		return (2);
 	}
 	fw = fopen(name, "wb");
-	if (fw == NULL) {
+	if (fw == NULL)
+	{
 		fprintf(stderr, "astrip: cannot write %s\n", name);
 		rd_close();
-		return(1);
+		return (1);
 	}
-	if(copy(tname, name, size, rd_fd(), fw)) {
+	if (copy(tname, name, size, rd_fd(), fw))
+	{
 		fclose(fw);
 		rd_close();
-		return(2);
+		return (2);
 	}
 	fclose(fw);
 	rd_close();
 	/* Change the mode to everything. */
-	chmod(name,S_IRWXU | S_IRWXG | S_IRWXO);
-	return(0);
+	chmod(name, S_IRWXU | S_IRWXG | S_IRWXO);
+	return (0);
 }
 
-static int copy(char *fnam, char *tnam, long size, FILE *fr, FILE *fw)
+static int copy(char* fnam, char* tnam, long size, FILE* fr, FILE* fw)
 {
 	int s;
 	char lbuf[512];
 
-	while(size != (long)0) {
+	while (size != (long)0)
+	{
 		s = 512;
-		if(size < 512)
-			s = (int) size;
-		rd_bytes(fr, lbuf, (long) s);
-		if (readerror) {
+		if (size < 512)
+			s = (int)size;
+		rd_bytes(fr, lbuf, (long)s);
+		if (readerror)
+		{
 			fprintf(stderr, "astrip: unexpected eof on %s\n", fnam);
-			return(1);
+			return (1);
 		}
-		wr_bytes(fw, lbuf, (long) s);
-		if (writeerror) {
+		wr_bytes(fw, lbuf, (long)s);
+		if (writeerror)
+		{
 			fprintf(stderr, "astrip: write error on %s\n", tnam);
-			return(1);
+			return (1);
 		}
 		size -= (long)s;
 	}
-	return(0);
+	return (0);
 }
 
 void rd_fatal(void)
