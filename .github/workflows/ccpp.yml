@@ -45,7 +45,7 @@ jobs:
           tar -cf - ./ | vmshell tar -xf - -C ./src/
 
       - name: build
-        run: vmshell make -C src
+        run: vmshell make -C src LUA=lua5.1
 
   build-windows:
     runs-on: windows-latest
