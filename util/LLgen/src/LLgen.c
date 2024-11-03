@@ -79,14 +79,14 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC void newnorder(int index);
-STATIC void newtorder(int index);
-STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
-STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
-STATIC p_gram copyrule(register p_gram p,int length);
+static void newnorder(int index);
+static void newtorder(int index);
+static void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
+static void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
+static p_gram copyrule(register p_gram p,int length);
 /* and of course LLparse() */
 
-STATIC void newnorder(int index) {
+static void newnorder(int index) {
 	static int porder;
 
 	if (norder != -1) {
@@ -97,7 +97,7 @@ STATIC void newnorder(int index) {
 	nonterms[porder].n_next = -1;
 }
 
-STATIC void newtorder(int index) {
+static void newtorder(int index) {
 	static int porder;
 
 	if (torder != -1) {
@@ -540,7 +540,7 @@ goto L_3;
 # line 304 "LLgen.g"
 
 
-STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
+static void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
 {
 	/*
 	 * Create an alternation and initialise it.
@@ -850,7 +850,7 @@ break;
 # line 452 "LLgen.g"
 
 
-STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
+static void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
 {
 	/*
 	 * Create a term, initialise it and return
@@ -1300,7 +1300,7 @@ LL_NOSCANDONE(';');
 # line 645 "LLgen.g"
 
 
-STATIC p_gram copyrule(register p_gram p,int length)
+static p_gram copyrule(register p_gram p,int length)
 {
 	/*
 	 * Returns a pointer to a grammar rule that was created in

@@ -38,8 +38,8 @@ static int nt_highest;
 extern int nbytes;
 extern p_set start_firsts;
 
-STATIC void save_rule(register p_gram p, int tail);
-STATIC void save_set(p_set p);
+static void save_rule(register p_gram p, int tail);
+static void save_set(p_set p);
 
 /* t_list will contain terms to be `flattened' */
 static struct t_list
@@ -269,7 +269,7 @@ void save_grammar(FILE* f)
 	fprintf(fgram, "#define LLNNONTERMINALS %d\n", nt_highest - assval + 1);
 }
 
-STATIC void save_rule(register p_gram p, int tail)
+static void save_rule(register p_gram p, int tail)
 {
 	/*
 	 Walk through rule p, saving it. The non-terminal tail is
@@ -368,7 +368,7 @@ STATIC void save_rule(register p_gram p, int tail)
 	}
 }
 
-STATIC void save_set(p_set p)
+static void save_set(p_set p)
 {
 	register int k;
 	register unsigned i;

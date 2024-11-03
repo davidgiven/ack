@@ -32,8 +32,8 @@ static string rcsid8 = "$Id$";
 
 /* In this file the following routines are defined: */
 void co_reach(void);
-STATIC void reachable(register p_nont p);
-STATIC void reachwalk(p_gram p);
+static void reachable(register p_nont p);
+static void reachwalk(p_gram p);
 
 
 
@@ -87,7 +87,7 @@ void co_reach(void)
 	}
 }
 
-STATIC void reachable(register p_nont p)
+static void reachable(register p_nont p)
 {
 	/*
 	 * Enter the fact that p is reachable, and look for implications
@@ -101,7 +101,7 @@ STATIC void reachable(register p_nont p)
 	}
 }
 
-STATIC void reachwalk(p_gram p)
+static void reachwalk(p_gram p)
 {
 	/*
 	 * Walk through rule p, looking for nonterminals.

@@ -72,11 +72,11 @@ int input(void);
 void unput(int c);
 void skipcomment(int flag);
 # ifdef LINE_DIRECTIVE
-STATIC void linedirective(void); 
+static void linedirective(void); 
 # endif
-STATIC string cpy(int s,register string p,int inserted); 
-STATIC string vallookup(int s);
-STATIC void copyact(char ch1,char ch2,int flag,int level);
+static string cpy(int s,register string p,int inserted); 
+static string vallookup(int s);
+static void copyact(char ch1,char ch2,int flag,int level);
 
 static int	nparams;
 # line 76 "tokens.g"
@@ -122,7 +122,7 @@ static t_token	savedtok;	/* to save lextoken in case of an insertion */
 static	int	nostartline;	/* = 0 if at the start of a line */
 # endif
 
-STATIC void copyact(char ch1,char ch2,int flag,int level)
+static void copyact(char ch1,char ch2,int flag,int level)
 {
 	/*
 	 * Copy an action to file f. Opening bracket is ch1, closing bracket
@@ -425,7 +425,7 @@ void skipcomment(int flag)
 }
 
 # ifdef LINE_DIRECTIVE
-STATIC void linedirective(void) 
+static void linedirective(void) 
 {
 	/*
 	 * Read a line directive
@@ -474,7 +474,7 @@ STATIC void linedirective(void)
 }
 # endif
 
-STATIC string vallookup(int s) 
+static string vallookup(int s) 
 {
 	/*
 	 * Look up the keyword that has token number s
@@ -488,7 +488,7 @@ STATIC string vallookup(int s)
 	return 0;
 }
 
-STATIC string cpy(int s,register string p,int inserted) 
+static string cpy(int s,register string p,int inserted) 
 {
 	/*
 	 * Create a piece of error message for token s and put it at p.

@@ -38,8 +38,8 @@ static p_entry entries, maxentries;
 static t_info token_info, nont_info;
 
 /* Defined in this file are: */
-STATIC int hash(string str);
-STATIC p_entry newentry(string str, p_entry next);
+static int hash(string str);
+static p_entry newentry(string str, p_entry next);
 
 
 
@@ -55,7 +55,7 @@ void name_init(void)
 #endif
 }
 
-STATIC p_entry newentry(string str, p_entry next)
+static p_entry newentry(string str, p_entry next)
 {
 	register p_entry p;
 
@@ -102,7 +102,7 @@ string store(string s)
 /*
  * Compute the hash for string str
  */
-STATIC int hash(string str)
+static int hash(string str)
 {
 	register int i;
 	register string l;

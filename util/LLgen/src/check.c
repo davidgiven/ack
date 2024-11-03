@@ -36,15 +36,15 @@ static int level;
 
 /* In this file are defined : */
 void conflchecks(void);
-STATIC void prline(char*);
-STATIC void printset(register p_set, string);
-STATIC int check(register p_gram);
-STATIC void moreverbose(register p_set);
-STATIC void prrule(p_gram);
-STATIC void cfcheck(p_set, p_set, int);
-STATIC void resolve(p_gram);
-STATIC void propagate(p_set, register p_gram);
-STATIC void spaces(void);
+static void prline(char*);
+static void printset(register p_set, string);
+static int check(register p_gram);
+static void moreverbose(register p_set);
+static void prrule(p_gram);
+static void cfcheck(p_set, p_set, int);
+static void resolve(p_gram);
+static void propagate(p_set, register p_gram);
+static void spaces(void);
 
 /*
  * Check for conflicts, that is,
@@ -120,13 +120,13 @@ void conflchecks(void)
 		fclose(fout);
 }
 
-STATIC void prline(char* s)
+static void prline(char* s)
 {
 	fputs(s, fout);
 	spaces();
 }
 
-STATIC void printset(register p_set p, string s)
+static void printset(register p_set p, string s)
 {
 	/*
 	 * Print the elements of a set
@@ -188,7 +188,7 @@ STATIC void printset(register p_set p, string s)
 	prline("}\n");
 }
 
-STATIC int check(register p_gram p)
+static int check(register p_gram p)
 {
 	/*
 	 * Search for conflicts in a grammar rule.
@@ -301,7 +301,7 @@ STATIC int check(register p_gram p)
 	}
 }
 
-STATIC void moreverbose(register p_set t)
+static void moreverbose(register p_set t)
 {
 	/*
 	 * t points to a set containing conflicting symbols and pssibly
@@ -319,7 +319,7 @@ STATIC void moreverbose(register p_set t)
 		}
 }
 
-STATIC void prrule(p_gram p)
+static void prrule(p_gram p)
 {
 	/*
 	 * Create a verbose printout of grammar rule p
@@ -451,7 +451,7 @@ STATIC void prrule(p_gram p)
 	}
 }
 
-STATIC void cfcheck(p_set s1, p_set s2, int flag)
+static void cfcheck(p_set s1, p_set s2, int flag)
 {
 	/*
 	 * Check if s1 and s2 have elements in common.
@@ -481,7 +481,7 @@ STATIC void cfcheck(p_set s1, p_set s2, int flag)
 	free((p_mem)temp);
 }
 
-STATIC void resolve(p_gram p)
+static void resolve(p_gram p)
 {
 	/*
 	 * resolve conflicts, as specified by the user
@@ -523,7 +523,7 @@ STATIC void resolve(p_gram p)
 	}
 }
 
-STATIC void propagate(p_set set, register p_gram p)
+static void propagate(p_set set, register p_gram p)
 {
 	/*
 	 * Propagate the fact that on the elements of set the grammar rule
@@ -536,7 +536,7 @@ STATIC void propagate(p_set set, register p_gram p)
 	}
 }
 
-STATIC void spaces(void)
+static void spaces(void)
 {
 	if (level > 0)
 		fprintf(fout, "%*c", level, ' ');

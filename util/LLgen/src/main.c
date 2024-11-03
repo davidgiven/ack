@@ -29,9 +29,9 @@ static string rcsid6 = "$Id$";
 # endif
 
 /* In this file the following routines are defined: */
-STATIC void readgrammar(int, char *[]);
-STATIC void doparse(register p_file);
-STATIC void comfatal(void);
+static void readgrammar(int, char *[]);
+static void doparse(register p_file);
+static void comfatal(void);
 
 int main(int argc, register string argv[])
 {
@@ -221,7 +221,7 @@ int main(int argc, register string argv[])
 	exit(EXIT_SUCCESS);
 }
 
-STATIC void readgrammar(int argc, char *argv[])
+static void readgrammar(int argc, char *argv[])
 {
 	/*
 	 * Do just what the name suggests : read the grammar
@@ -267,7 +267,7 @@ STATIC void readgrammar(int argc, char *argv[])
 		comfatal();
 }
 
-STATIC void doparse(register p_file p)
+static void doparse(register p_file p)
 {
 	linecount = 0;
 	p->f_name = f_input;
@@ -318,7 +318,7 @@ void fatal(int lineno, string s, string t)
 	comfatal();
 }
 
-STATIC void comfatal(void)
+static void comfatal(void)
 {
 	/*
 	 * Some common code for exit on errors
