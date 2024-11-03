@@ -26,6 +26,25 @@ jobs:
       run: |
         make
 
+  build-haiku:
+    runs-on: 'ubuntu-latest'
+    container: 'docker.io/hectorm/qemu-haiku:latest'
+    steps:
+      - name: startvm
+        run: 'container-init & timeout 600 vmshell exit 0'
+
+      - name: pkgman
+        run: 'vmshell pkgman install -y make'
+
+      - name: checkout
+        uses: 'actions/checkout@v3'
+
+      - name: copy
+        run: 'vmshell mkdir ./src/; tar -cf - ./ | vmshell tar -xf - -C ./src/'
+
+      - name: build
+        run: 'vmshell make'
+
   build-windows:
     runs-on: windows-latest
     defaults:

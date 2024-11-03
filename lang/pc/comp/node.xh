@@ -2,8 +2,25 @@
 #ifndef NODE_H_
 #define NODE_H_
 
+/* Values for nd_class below. */
 enum {
-    Value           = 0       /* constant */
+    Value           = 0,      /* constant */
+    Name            = 1,      /* an identifier */
+    Uoper           = 2,      /* unary operator */
+    Boper           = 3,      /* binary operator */
+    Xset            = 4,      /* a set */
+    Set             = 5,      /* a set constant */
+    Call            = 6,      /* a function call */
+    NameOrCall      = 7,      /* call or name of function */
+    Arrow           = 8,      /* ^ construction */
+    Arrsel          = 9,      /* array selection */
+    Def             = 10,     /* an identified name */
+    Link            = 11,
+    LinkDef         = 12,
+    Cast            = 13,     /* convert integer to real */
+    IntCoerc        = 14,     /* coercion of integers to longs */
+    IntReduc        = 15      /* reduction of longs to integers */
+              /* do NOT change the order or the numbers!!! */
 };
     
 struct node {
@@ -11,22 +28,6 @@ struct node {
 #define nd_next nd_left
     struct node *nd_right;
     int nd_class;               /* kind of node */
-#define Name            1       /* an identifier */
-#define Uoper           2       /* unary operator */
-#define Boper           3       /* binary operator */
-#define Xset            4       /* a set */
-#define Set             5       /* a set constant */
-#define Call            6       /* a function call */
-#define NameOrCall      7       /* call or name of function */
-#define Arrow           8       /* ^ construction */
-#define Arrsel          9       /* array selection */
-#define Def             10      /* an identified name */
-#define Link            11
-#define LinkDef         12
-#define Cast            13      /* convert integer to real */
-#define IntCoerc        14      /* coercion of integers to longs */
-#define IntReduc        15      /* reduction of longs to integers */
-                /* do NOT change the order or the numbers!!! */
     struct type *nd_type;       /* type of this node */
     struct token nd_token;
 #define nd_def          nd_token.tk_data.tk_def
