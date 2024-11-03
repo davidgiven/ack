@@ -36,11 +36,15 @@ CFLAGS ?= -g \
 	-Werror=return-type \
 	-Werror=implicit-function-declaration \
 	-Werror=strict-prototypes \
-	-fsanitize=unreachable \
+	-fsanitize=unreachable
+
+MANDATORYCFLAGS = \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn
 
-LDFLAGS ?= -g \
+LDFLAGS ?= -g
+
+MANDATORYLDFLAGS = \
 	-fsanitize=unreachable
 
 # Various commands.
@@ -138,8 +142,8 @@ $(build-file): first/ackbuilder.lua Makefile $(lua-files)
 		PREFIX="$(PREFIX)" \
 		AR=$(AR) \
 		CC=$(CC) \
-		CFLAGS="$(CFLAGS)" \
-		LDFLAGS="$(LDFLAGS)" \
+		CFLAGS="$(MANDATORYCFLAGS) $(CFLAGS)" \
+		LDFLAGS="$(MANDATORYLDFLAGS) $(LDFLAGS)" \
 		> $(build-file)
 
 ack-setup.exe: etc/windows-installer.nsi
