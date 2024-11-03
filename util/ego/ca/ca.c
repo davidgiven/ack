@@ -38,7 +38,7 @@ char **dnames, **pnames; /* Dynamically allocated arrays of strings.
                           * of the procedure  with proc_id i.
                           */
 
-STATIC line_p get_ca_lines(FILE* lf, proc_p* p_out)
+static line_p get_ca_lines(FILE* lf, proc_p* p_out)
 {
 	/* Read lines of EM text and link them.
 	 * Register messages are outputted immediately after the PRO.
@@ -108,7 +108,7 @@ STATIC line_p get_ca_lines(FILE* lf, proc_p* p_out)
 	return head;
 }
 
-STATIC int makedmap(dblock_p dbl)
+static int makedmap(dblock_p dbl)
 {
 	/* construct the dmap table */
 
@@ -129,7 +129,7 @@ STATIC int makedmap(dblock_p dbl)
 	return cnt;
 }
 
-STATIC void getdnames(FILE* dumpd)
+static void getdnames(FILE* dumpd)
 {
 	/* Read the names of the datalabels from
 	 * the dump file.
@@ -149,7 +149,7 @@ STATIC void getdnames(FILE* dumpd)
 	}
 }
 
-STATIC void getpnames(FILE* dumpp)
+static void getpnames(FILE* dumpp)
 {
 	/* Read the names of the procedures from
 	 * the dump file.
@@ -169,7 +169,7 @@ STATIC void getpnames(FILE* dumpp)
 	}
 }
 
-STATIC void new_name(char** s)
+static void new_name(char** s)
 {
 	static int nn = 0;
 	char buf[20];
@@ -185,7 +185,7 @@ STATIC void new_name(char** s)
 	strcpy(*s, buf);
 }
 
-STATIC void uniq_names(void)
+static void uniq_names(void)
 {
 	/* The names of all internal procedures and data blocks
 	 * are made different. As the optimizer combines several

@@ -30,7 +30,7 @@ bool same_size(int t1, int t2)
 	return tsize(t1) == tsize(t2);
 }
 
-STATIC bool is_reg(offset off, int s)
+static bool is_reg(offset off, int s)
 {
 	/* See if there is a register message
 	 * for the local or parameter at offset off

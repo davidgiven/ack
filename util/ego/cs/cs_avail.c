@@ -22,7 +22,7 @@
 
 avail_p avails; /* The list of available expressions. */
 
-STATIC bool commutative(int instr)
+static bool commutative(int instr)
 {
 	/* Is instr a commutative operator? */
 
@@ -43,7 +43,7 @@ STATIC bool commutative(int instr)
 	}
 }
 
-STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
+static bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 {
 	/* Two expressions are the same if they have the same operator,
 	 * the same size, and their operand(s) have the same value.
@@ -77,7 +77,7 @@ STATIC bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 	UNREACHABLE_CODE;
 }
 
-STATIC void check_local(avail_p avp)
+static void check_local(avail_p avp)
 {
 	/* Check if the local in which the result of avp was stored,
 	 * still holds this result. Update if not.
@@ -92,7 +92,7 @@ STATIC void check_local(avail_p avp)
 	}
 }
 
-STATIC entity_p result_local(offset size, line_p l)
+static entity_p result_local(offset size, line_p l)
 {
 	/* If the result of an expression of size bytes is stored into a
 	 * local for which a registermessage was generated, return a pointer
@@ -117,7 +117,7 @@ STATIC entity_p result_local(offset size, line_p l)
 	return (entity_p)0;
 }
 
-STATIC void copy_avail(int kind, avail_p src, avail_p dst)
+static void copy_avail(int kind, avail_p src, avail_p dst)
 {
 	/* Copy some attributes from src to dst. */
 

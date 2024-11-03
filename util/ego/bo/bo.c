@@ -34,7 +34,7 @@ extern char em_flag[];
 #define newbolpx() (lpext_p) newstruct(lpext_ra)
 #define oldbolpx(x) oldstruct(lpext_ra, x)
 
-STATIC int Sbo; /* #optimizations found */
+static int Sbo; /* #optimizations found */
 
 #define DLINK(l1, l2)                                                                              \
 	l1->l_next = l2;                                                                               \
@@ -61,7 +61,7 @@ STATIC int Sbo; /* #optimizations found */
  *	are done by this optimization.
  */
 
-STATIC line_p last_code(line_p lines, bool skip_pseu)
+static line_p last_code(line_p lines, bool skip_pseu)
 {
 	/* Determine the last line of a list */
 
@@ -77,10 +77,10 @@ STATIC line_p last_code(line_p lines, bool skip_pseu)
 	return l;
 }
 
-STATIC short cc_tab[12] = { op_blt, op_zlt, op_ble, op_zle, op_beq, op_zeq,
+static short cc_tab[12] = { op_blt, op_zlt, op_ble, op_zle, op_beq, op_zeq,
 	                        op_zne, op_bne, op_zgt, op_bgt, op_zge, op_bge };
 
-STATIC short rev_cond(short cond)
+static short rev_cond(short cond)
 {
 	register int i;
 
@@ -92,12 +92,12 @@ STATIC short rev_cond(short cond)
 	return op_nop;
 }
 
-STATIC bool is_bcc(line_p l)
+static bool is_bcc(line_p l)
 {
 	return rev_cond(INSTR(l)) != op_nop;
 }
 
-STATIC void bo_optloop(proc_p p, bblock_p b, bblock_p x, line_p bra, line_p bcc)
+static void bo_optloop(proc_p p, bblock_p b, bblock_p x, line_p bra, line_p bcc)
 {
 	bblock_p prevb, n;
 	line_p l;
@@ -156,7 +156,7 @@ STATIC void bo_optloop(proc_p p, bblock_p b, bblock_p x, line_p bra, line_p bcc)
 	b->b_next = x;
 }
 
-STATIC void bo_tryloop(proc_p p, lset loop)
+static void bo_tryloop(proc_p p, lset loop)
 {
 	Lindex i, j;
 	bblock_p b, x;
@@ -183,7 +183,7 @@ STATIC void bo_tryloop(proc_p p, lset loop)
 	}
 }
 
-STATIC void bo_loops(proc_p p)
+static void bo_loops(proc_p p)
 {
 	Lindex i;
 	loop_p lp;
@@ -195,7 +195,7 @@ STATIC void bo_loops(proc_p p)
 	}
 }
 
-STATIC void mv_code(bblock_p b1, bblock_p b2)
+static void mv_code(bblock_p b1, bblock_p b2)
 {
 	line_p l, x;
 
@@ -210,7 +210,7 @@ STATIC void mv_code(bblock_p b1, bblock_p b2)
 	}
 }
 
-STATIC void bo_switch(bblock_p b)
+static void bo_switch(bblock_p b)
 {
 	bblock_p s, x;
 	Lindex i;
@@ -260,7 +260,7 @@ STATIC void bo_switch(bblock_p b)
 	}
 }
 
-STATIC void bo_extproc(proc_p p)
+static void bo_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
@@ -274,7 +274,7 @@ STATIC void bo_extproc(proc_p p)
 	}
 }
 
-STATIC void loop_blocks(proc_p p)
+static void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
@@ -290,7 +290,7 @@ STATIC void loop_blocks(proc_p p)
 	}
 }
 
-STATIC void bo_cleanproc(proc_p p)
+static void bo_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 

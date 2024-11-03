@@ -33,7 +33,7 @@ entity_p find_entity(valnum vn)
 	return (entity_p)0;
 }
 
-STATIC bool same_entity(entity_p enp1, entity_p enp2)
+static bool same_entity(entity_p enp1, entity_p enp2)
 {
 	if (enp1->en_kind != enp2->en_kind)
 		return FALSE;
@@ -70,7 +70,7 @@ STATIC bool same_entity(entity_p enp1, entity_p enp2)
 	}
 }
 
-STATIC void copy_entity(entity_p src, entity_p dst)
+static void copy_entity(entity_p src, entity_p dst)
 {
 	dst->en_static = src->en_static;
 	dst->en_kind = src->en_kind;

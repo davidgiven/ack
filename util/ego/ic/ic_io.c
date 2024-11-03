@@ -19,12 +19,12 @@
 #include "../share/alloc.h"
 #include "ic_io.h"
 
-STATIC short libstate;
-STATIC long bytecnt;
+static short libstate;
+static long bytecnt;
 
-STATIC FILE* infile; /* The current EM input file */
+static FILE* infile; /* The current EM input file */
 
-STATIC int readbyte(void)
+static int readbyte(void)
 {
 	if (libstate == ARCHIVE && bytecnt-- == 0L)
 	{
@@ -97,13 +97,13 @@ offset get_off(void)
 	}
 }
 
-STATIC void make_string(int n)
+static void make_string(int n)
 {
 
 	sprintf(string, ".%u", n);
 }
 
-STATIC void inident(void)
+static void inident(void)
 {
 	register int n;
 	register char* p = string;

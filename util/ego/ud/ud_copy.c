@@ -39,7 +39,7 @@ short nrcopies; /* number of copies in the current procedure
 #define COUNT 0
 #define MAP 1
 
-STATIC void traverse_defs(proc_p p, int action)
+static void traverse_defs(proc_p p, int action)
 {
 	bblock_p b;
 	line_p l;
@@ -88,7 +88,7 @@ STATIC void traverse_defs(proc_p p, int action)
 	}
 }
 
-STATIC void make_copytab(proc_p p)
+static void make_copytab(proc_p p)
 {
 	/* Make a table of all copies appearing in procedure p.
 	 * We first count how many there are, because we
@@ -99,7 +99,7 @@ STATIC void make_copytab(proc_p p)
 	traverse_defs(p, MAP);
 }
 
-STATIC bool is_changed(line_p varl, line_p start, line_p stop)
+static bool is_changed(line_p varl, line_p start, line_p stop)
 {
 	/* See if the variable used by instruction varl
 	 * is changed anywhere between 'start' and 'stop'
@@ -124,7 +124,7 @@ STATIC bool is_changed(line_p varl, line_p start, line_p stop)
 	return FALSE;
 }
 
-STATIC void gen_kill_copies(proc_p p)
+static void gen_kill_copies(proc_p p)
 {
 	/* Compute C_GEN and C_KILL for every basic block
 	 * of p.
@@ -175,7 +175,7 @@ STATIC void gen_kill_copies(proc_p p)
 	}
 }
 
-STATIC void intersect_outs(lset bbset, cset* setp, cset full_set)
+static void intersect_outs(lset bbset, cset* setp, cset full_set)
 {
 	/* Take the intersection of C_OUT(b), for all b in bbset,
 	 * and put the result in setp.
@@ -190,7 +190,7 @@ STATIC void intersect_outs(lset bbset, cset* setp, cset full_set)
 	}
 }
 
-STATIC void init_cin(proc_p p, cset full_set)
+static void init_cin(proc_p p, cset full_set)
 {
 	/* Initialize C_IN(b) and C_OUT(b), for every basic block b.
 	 * C_IN of the root of the CFG (i.e. the procedure entry block)
@@ -222,7 +222,7 @@ STATIC void init_cin(proc_p p, cset full_set)
 	}
 }
 
-STATIC void solve_cin(proc_p p)
+static void solve_cin(proc_p p)
 {
 	/* Solve the data flow equations for reaching
 	 * definitions of procedure p.

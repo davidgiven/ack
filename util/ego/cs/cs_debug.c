@@ -18,7 +18,7 @@
 
 extern char em_mnem[]; /* The mnemonics of the EM instructions. */
 
-STATIC void showinstr(line_p lnp)
+static void showinstr(line_p lnp)
 {
 	/* Makes the instruction in `lnp' human readable. Only lines that
 	 * can occur in expressions that are going to be eliminated are
@@ -93,7 +93,7 @@ void OUTAVAILS(void)
 	}
 }
 
-STATIC char* enkinds[] = { "constant",
+static char* enkinds[] = { "constant",
 	                       "local",
 	                       "external",
 	                       "indirect",

@@ -49,7 +49,7 @@ offset opr_size(short instr)
 
 /* dblockdef */
 
-STATIC offset argsize(arg_p arg)
+static offset argsize(arg_p arg)
 {
 	/* Compute the size (in bytes) that the given initializer
 	 * will occupy.
@@ -92,7 +92,7 @@ STATIC offset argsize(arg_p arg)
 	UNREACHABLE_CODE;
 }
 
-STATIC offset blocksize(byte pseudo, arg_p args)
+static offset blocksize(byte pseudo, arg_p args)
 {
 	/* Determine the number of bytes of a datablock */
 
@@ -123,7 +123,7 @@ STATIC offset blocksize(byte pseudo, arg_p args)
 	UNREACHABLE_CODE;
 }
 
-STATIC arg_p copy_arg(arg_p arg)
+static arg_p copy_arg(arg_p arg)
 {
 	/* Copy one argument */
 
@@ -135,7 +135,7 @@ STATIC arg_p copy_arg(arg_p arg)
 	return new;
 }
 
-STATIC arg_p copy_rom(arg_p args)
+static arg_p copy_rom(arg_p args)
 {
 	/* Make a copy of the values of a rom,
 	 * provided that the rom contains only integer values,
@@ -247,7 +247,7 @@ void combine(dblock_p db, line_p l1, line_p l2, byte pseu)
 
 /* arglist */
 
-STATIC void arg_string(offset length, register argb_p abp)
+static void arg_string(offset length, register argb_p abp)
 {
 
 	while (length--)
@@ -367,7 +367,7 @@ dblock_p block_of_lab(char* ident)
 
 /* object */
 
-STATIC obj_p make_object(dblock_p dbl, offset off, offset size)
+static obj_p make_object(dblock_p dbl, offset off, offset size)
 {
 	/* Allocate an obj struct with the given attributes
 	 * (if it did not exist already).

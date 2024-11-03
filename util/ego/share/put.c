@@ -31,11 +31,11 @@ FILE* curoutp;
 
 /* putlines */
 
-STATIC void putstr(argb_p);
-STATIC void outlab(lab_id);
-STATIC void outobject(obj_p);
+static void putstr(argb_p);
+static void outlab(lab_id);
+static void outobject(obj_p);
 
-STATIC void putargs(arg_p ap)
+static void putargs(arg_p ap)
 {
 	while (ap != (arg_p)0)
 	{
@@ -69,7 +69,7 @@ STATIC void putargs(arg_p ap)
 	outbyte((byte)ARGCEND);
 }
 
-STATIC void putstr(argb_p abp)
+static void putstr(argb_p abp)
 {
 	argb_p tbp;
 	int length;
@@ -104,7 +104,7 @@ void outshort(short i)
 	outbyte((byte)(i >> 8));
 }
 
-STATIC void outint(int i)
+static void outint(int i)
 {
 	/* Write an integer to the output file. This routine is
 	 * only used when outputting a bitvector-set. We expect  an
@@ -123,12 +123,12 @@ STATIC void outint(int i)
 	}
 }
 
-STATIC void outlab(lab_id lid)
+static void outlab(lab_id lid)
 {
 	outshort((short)lid);
 }
 
-STATIC void outobject(obj_p obj)
+static void outobject(obj_p obj)
 {
 	outshort((short)obj->o_id);
 }
@@ -188,7 +188,7 @@ short putlines(line_p l, FILE* lf)
 
 #define outmark(m) outbyte((byte)m)
 
-STATIC void putobjects(obj_p obj)
+static void putobjects(obj_p obj)
 {
 	while (obj != (obj_p)0)
 	{
@@ -200,7 +200,7 @@ STATIC void putobjects(obj_p obj)
 	}
 }
 
-STATIC void putvalues(arg_p arg)
+static void putvalues(arg_p arg)
 {
 	while (arg != (arg_p)0)
 	{
@@ -251,7 +251,7 @@ void putdtable(dblock_p head, FILE* df)
 
 /* putptable */
 
-STATIC void outcset(cset s)
+static void outcset(cset s)
 {
 	/* A 'compact' set is represented externally as a row of words
 	 * (its bitvector) preceded by its length.
@@ -320,14 +320,14 @@ void putptable(proc_p head, FILE* pf, bool all)
 
 /* putunit */
 
-STATIC void outloop(void* vp)
+static void outloop(void* vp)
 {
 	loop_p l = vp;
 
 	outshort((short)l->lp_id);
 }
 
-STATIC void outblock(void* vp)
+static void outblock(void* vp)
 {
 	bblock_p b = vp;
 
@@ -341,7 +341,7 @@ STATIC void outblock(void* vp)
 	}
 }
 
-STATIC void outlset(lset s, void (*p)(void*))
+static void outlset(lset s, void (*p)(void*))
 {
 	/* A 'long' set is represented externally as a
 	 * a sequence of elements terminated by a 0 word.

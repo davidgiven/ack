@@ -41,7 +41,7 @@
  * each other (without one being nested inside the other).
  */
 
-STATIC bool same_loop(loop_p l1, loop_p l2)
+static bool same_loop(loop_p l1, loop_p l2)
 {
 	/* Two loops are the same if:
 	 * (1)  they have the same number of basic blocks, and
@@ -56,7 +56,7 @@ STATIC bool same_loop(loop_p l1, loop_p l2)
 	    && Lis_elem(l1->lp_end, l2->LP_BLOCKS));
 }
 
-STATIC bool inner_loop(loop_p l1, loop_p l2)
+static bool inner_loop(loop_p l1, loop_p l2)
 {
 	/* Loop l1 is an inner loop of l2 if:
 	 * (1)  the first loop has fewer basic blocks than
@@ -72,7 +72,7 @@ STATIC bool inner_loop(loop_p l1, loop_p l2)
 	    && Lis_elem(l1->lp_end, l2->LP_BLOCKS));
 }
 
-STATIC void insrt(bblock_p b, lset* lpb, lset* s_p)
+static void insrt(bblock_p b, lset* lpb, lset* s_p)
 {
 	/* Auxiliary routine used by 'natural_loop'.
 	 * Note that we use a set rather than a stack,
@@ -86,7 +86,7 @@ STATIC void insrt(bblock_p b, lset* lpb, lset* s_p)
 	}
 }
 
-STATIC loop_p natural_loop(bblock_p d, bblock_p n)
+static loop_p natural_loop(bblock_p d, bblock_p n)
 {
 	/* Find the basic blocks of the natural loop of the
 	 * back edge 'n->d' (i.e. n->d is an edge in the control
@@ -124,7 +124,7 @@ STATIC loop_p natural_loop(bblock_p d, bblock_p n)
 	return lp;
 }
 
-STATIC loop_p org_loop(loop_p lp, lset loops)
+static loop_p org_loop(loop_p lp, lset loops)
 {
 	/* See if the loop lp was already found via another
 	 * back edge; if so return this loop; else return 0.
@@ -145,7 +145,7 @@ STATIC loop_p org_loop(loop_p lp, lset loops)
 	return (loop_p)0;
 }
 
-STATIC void collapse_loops(lset* loops_p)
+static void collapse_loops(lset* loops_p)
 {
 	register Lindex li1, li2;
 	register loop_p lp1, lp2;
@@ -171,7 +171,7 @@ STATIC void collapse_loops(lset* loops_p)
 	}
 }
 
-STATIC void loop_per_block(loop_p lp)
+static void loop_per_block(loop_p lp)
 {
 	bblock_p b;
 
@@ -186,7 +186,7 @@ STATIC void loop_per_block(loop_p lp)
 	}
 }
 
-STATIC void loop_attrib(lset loops)
+static void loop_attrib(lset loops)
 {
 	/* Compute several attributes */
 
@@ -202,7 +202,7 @@ STATIC void loop_attrib(lset loops)
 	}
 }
 
-STATIC void nest_levels(lset loops)
+static void nest_levels(lset loops)
 {
 	/* Compute the nesting levels of all loops of
 	 * the current procedure. For every loop we just count
@@ -229,7 +229,7 @@ STATIC void nest_levels(lset loops)
 	}
 }
 
-STATIC void cleanup(lset loops)
+static void cleanup(lset loops)
 {
 	/* Throw away the LP_BLOCKS sets */
 
@@ -241,7 +241,7 @@ STATIC void cleanup(lset loops)
 	}
 }
 
-STATIC bool does_exit(bblock_p b, loop_p lp)
+static bool does_exit(bblock_p b, loop_p lp)
 {
 	/* See if b may exit the loop, i.e. if it
 	 * has a successor outside the loop
@@ -257,7 +257,7 @@ STATIC bool does_exit(bblock_p b, loop_p lp)
 	return FALSE;
 }
 
-STATIC void mark_succ(bblock_p b, loop_p lp)
+static void mark_succ(bblock_p b, loop_p lp)
 {
 	Lindex i;
 	bblock_p succ;
@@ -273,7 +273,7 @@ STATIC void mark_succ(bblock_p b, loop_p lp)
 	}
 }
 
-STATIC void mark_blocks(loop_p lp)
+static void mark_blocks(loop_p lp)
 {
 	/* Mark the strong and firm blocks of a loop.
 	 * The last set of blocks consists of the end-block
@@ -317,7 +317,7 @@ STATIC void mark_blocks(loop_p lp)
 	}
 }
 
-STATIC void mark_loopblocks(lset loops)
+static void mark_loopblocks(lset loops)
 {
 	/* Determine for all loops which basic blocks
 	 * of the loop are strong (i.e. are executed

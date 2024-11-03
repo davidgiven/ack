@@ -69,7 +69,7 @@ void apriori(proc_p proctab)
 	}
 }
 
-STATIC void check_labels(proc_p p, arg_p arglist)
+static void check_labels(proc_p p, arg_p arglist)
 {
 	/* Check if any of the arguments contains an instruction
 	 * label; if so, make p unsuitable.
@@ -90,7 +90,7 @@ STATIC void check_labels(proc_p p, arg_p arglist)
 	}
 }
 
-STATIC void anal_instr(proc_p p, bblock_p b, FILE* cf)
+static void anal_instr(proc_p p, bblock_p b, FILE* cf)
 {
 	/* Analyze the instructions of block b
 	 * within procedure p.

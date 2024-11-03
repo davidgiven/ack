@@ -22,7 +22,7 @@
 #include "il3_change.h"
 #include "il3_subst.h"
 
-STATIC line_p fetch_text(FILE* lf, call_p c)
+static line_p fetch_text(FILE* lf, call_p c)
 {
 	/* Read the EM text of the called procedure.
 	 * We use random access I/O here.

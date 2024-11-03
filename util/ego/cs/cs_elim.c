@@ -20,7 +20,7 @@
 #include "cs_partit.h"
 #include "cs_debug.h"
 
-STATIC void dlink(line_p l1, line_p l2)
+static void dlink(line_p l1, line_p l2)
 {
 	/* Doubly link the lines in l1 and l2. */
 
@@ -30,7 +30,7 @@ STATIC void dlink(line_p l1, line_p l2)
 		l2->l_prev = l1;
 }
 
-STATIC void remove_lines(line_p first, line_p last)
+static void remove_lines(line_p first, line_p last)
 {
 	/* Throw away the lines between and including first and last.
 	 * Don't worry about any pointers; they (must) have been taken care of.
@@ -45,7 +45,7 @@ STATIC void remove_lines(line_p first, line_p last)
 	}
 }
 
-STATIC bool contained(occur_p ocp1, occur_p ocp2)
+static bool contained(occur_p ocp1, occur_p ocp2)
 {
 	/* Determine whether ocp1 is contained within ocp2. */
 
@@ -61,7 +61,7 @@ STATIC bool contained(occur_p ocp1, occur_p ocp2)
 	return FALSE;
 }
 
-STATIC void delete(occur_p ocp, avail_p start)
+static void delete(occur_p ocp, avail_p start)
 {
 	/* Delete all occurrences that are contained within ocp.
 	 * They must have been entered in the list before start:
@@ -91,7 +91,7 @@ STATIC void delete(occur_p ocp, avail_p start)
 	}
 }
 
-STATIC void complete_aar(line_p lnp, int instr, valnum descr_vn)
+static void complete_aar(line_p lnp, int instr, valnum descr_vn)
 {
 	/* Lnp is an instruction that loads the address of an array-element.
 	 * Instr tells us what effect we should achieve; load (instr is op_lar)
@@ -107,7 +107,7 @@ STATIC void complete_aar(line_p lnp, int instr, valnum descr_vn)
 	dlink(lnp, lindir);
 }
 
-STATIC void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
+static void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
 {
 	/* Complete a / b as a % b = a - b * (a / b). For the first
 	 * occurrence, lnp must stack q, where q = a / b. We prepend a
@@ -144,7 +144,7 @@ STATIC void complete_dv_as_rm(line_p lnp, avail_p avp, bool first)
 	dlink(lnp, ml);
 }
 
-STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
+static void replace(occur_p ocp, offset tmp, avail_p avp)
 {
 	/* Replace the lines in the occurrence in ocp by a load of the
 	 * temporary with offset tmp.
@@ -219,7 +219,7 @@ STATIC void replace(occur_p ocp, offset tmp, avail_p avp)
 	remove_lines(first, last);
 }
 
-STATIC void append(avail_p avp, offset tmp)
+static void append(avail_p avp, offset tmp)
 {
 	/* Avp->av_found points to a line with an operator in it. This
 	 * routine emits a sequence of instructions that saves the result
@@ -269,7 +269,7 @@ STATIC void append(avail_p avp, offset tmp)
 	}
 }
 
-STATIC void set_replace(avail_p avp, offset tmp)
+static void set_replace(avail_p avp, offset tmp)
 {
 	/* Avp->av_occurs is now a set of occurrences, each of which will be
 	 * replaced by a reference to a local.
@@ -290,7 +290,7 @@ STATIC void set_replace(avail_p avp, offset tmp)
 	}
 }
 
-STATIC int reg_score(entity_p enp)
+static int reg_score(entity_p enp)
 {
 	/* Enp is a local that will go into a register.
 	 * We return its score upto now.
@@ -299,7 +299,7 @@ STATIC int reg_score(entity_p enp)
 	return regv_arg(enp->en_loc, 4);
 }
 
-STATIC line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
+static line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
 {
 	/* Generate a register message for the local that will hold the
 	 * result of the expression in avp, at the appropriate place in
@@ -313,7 +313,7 @@ STATIC line_p gen_mesreg(offset off, avail_p avp, proc_p pp)
 	return reg;
 }
 
-STATIC void change_score(line_p mes, int score)
+static void change_score(line_p mes, int score)
 {
 	/* Change the score in the register message in mes to score. */
 

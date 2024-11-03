@@ -65,7 +65,7 @@ line_p move_pointer(offset tmp, int dir)
 
 /* make_header */
 
-STATIC void copy_loops(bblock_p b1, bblock_p b2, loop_p except)
+static void copy_loops(bblock_p b1, bblock_p b2, loop_p except)
 {
 	/* Copy the loopset of b2 to b1, except for 'except' */
 
@@ -81,7 +81,7 @@ STATIC void copy_loops(bblock_p b1, bblock_p b2, loop_p except)
 	}
 }
 
-STATIC lab_id label(bblock_p b)
+static lab_id label(bblock_p b)
 {
 	/* Find the label at the head of block b. If there is
 	 * no such label yet, create one.
@@ -105,7 +105,7 @@ STATIC lab_id label(bblock_p b)
 	return INSTRLAB(l);
 }
 
-STATIC void adjust_jump(bblock_p newtarg, bblock_p oldtarg, bblock_p c)
+static void adjust_jump(bblock_p newtarg, bblock_p oldtarg, bblock_p c)
 {
 	/* If the last instruction of c is a jump to the
 	 * old target, then change it into a jump to the

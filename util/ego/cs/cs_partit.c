@@ -28,7 +28,7 @@
 #define PTR 1
 #define FLT 2
 
-STATIC struct
+static struct
 {
 	byte i_group; /* Group of instruction. */
 	byte i_op1; /* Indication of size of operand of unary operator. */
@@ -748,7 +748,7 @@ bool stack_group(int instr)
 	}
 }
 
-STATIC offset argw(line_p lnp)
+static offset argw(line_p lnp)
 {
 	/* Some EM-instructions have their argument either on the same line,
 	 * or on top of the stack. We give up when the argument is on top of

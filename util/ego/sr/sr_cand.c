@@ -38,7 +38,7 @@
  * Only local variables for which a register message is given are considered.
  */
 
-STATIC lset cand, /* set of candidates */
+static lset cand, /* set of candidates */
     dism; /* set of dismissed variables */
 
 #define ALL_LINES(lnp, list)                                                                       \
@@ -46,7 +46,7 @@ STATIC lset cand, /* set of candidates */
 	lnp != (line_p)0;                                                                              \
 	lnp = lnp->l_next
 
-STATIC void un_cand(line_p lnp)
+static void un_cand(line_p lnp)
 {
 	/* remove the variable stored into by lnp from the list of
 	 * candidates (if it was there anyway).
@@ -65,7 +65,7 @@ STATIC void un_cand(line_p lnp)
 	}
 }
 
-STATIC bool is_cand(line_p lnp)
+static bool is_cand(line_p lnp)
 {
 	/* see if the variable stored into by lnp is a candate */
 
@@ -81,7 +81,7 @@ STATIC bool is_cand(line_p lnp)
 	return FALSE;
 }
 
-STATIC void make_cand(line_p lnp)
+static void make_cand(line_p lnp)
 {
 	/* make the variable stored into by lnp a candidate */
 
@@ -89,12 +89,12 @@ STATIC void make_cand(line_p lnp)
 	Ladd(lnp, &cand);
 }
 
-STATIC void do_dismiss(line_p lnp)
+static void do_dismiss(line_p lnp)
 {
 	Ladd(lnp, &dism);
 }
 
-STATIC void dismiss(line_p lnp)
+static void dismiss(line_p lnp)
 {
 	/* The variable referenced by lnp is turned definitely into
 	 * a non-candidate.
@@ -106,7 +106,7 @@ STATIC void dismiss(line_p lnp)
 	do_dismiss(lnp); /* add it to the set of dismissed variables */
 }
 
-STATIC bool not_dismissed(line_p lnp)
+static bool not_dismissed(line_p lnp)
 {
 	Lindex i;
 
@@ -120,7 +120,7 @@ STATIC bool not_dismissed(line_p lnp)
 	return TRUE;
 }
 
-STATIC void try_cand(line_p lnp, bblock_p b)
+static void try_cand(line_p lnp, bblock_p b)
 {
 	/* If the variable stored into by lnp was not already a candidate
 	 * and was not dismissed, then it is made a candidate

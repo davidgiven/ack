@@ -18,7 +18,7 @@ void* myalloc(size_t);
 
 #ifdef DEBUG
 
-STATIC size_t maxuse, curruse;
+static size_t maxuse, curruse;
 
 void* newcore(size_t size)
 {

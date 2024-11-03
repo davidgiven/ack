@@ -23,9 +23,9 @@
 #include "sr_cand.h"
 #include "sr_iv.h"
 
-STATIC lset ivvars; /* set of induction variables */
+static lset ivvars; /* set of induction variables */
 
-STATIC short nature(line_p lnp)
+static short nature(line_p lnp)
 {
 	/* Auxiliary routine used by inc_or_dec, is_add and plus_or_min.
 	 * Determine if lnp had INCREMENT/DECREMENT-nature (1),
@@ -56,7 +56,7 @@ STATIC short nature(line_p lnp)
 #define plus_or_min(l) (nature(l) > 1)
 #define inc_or_dec(l) (nature(l) == 1)
 
-STATIC bool is_same(line_p l, line_p lnp)
+static bool is_same(line_p l, line_p lnp)
 {
 	/* lnp is a STL x , where x is a candidate
 	 * induction variable. See if l is a LOL x
@@ -67,7 +67,7 @@ STATIC bool is_same(line_p l, line_p lnp)
 	return l != (line_p)0 && INSTR(l) == op_lol && off_set(l) == off_set(lnp);
 }
 
-STATIC void ivar(line_p lnp, int step)
+static void ivar(line_p lnp, int step)
 {
 	/* Record the fact that we've found a new induction variable.
 	 * lnp points to the last instruction of the code that
@@ -83,7 +83,7 @@ STATIC void ivar(line_p lnp, int step)
 	Ladd(i, &ivvars);
 }
 
-STATIC int sign(line_p lnp)
+static int sign(line_p lnp)
 {
 	switch (INSTR(lnp))
 	{
@@ -103,7 +103,7 @@ STATIC int sign(line_p lnp)
 	UNREACHABLE_CODE;
 }
 
-STATIC void try_patterns(line_p lnp)
+static void try_patterns(line_p lnp)
 {
 	/* lnp is a STL x; try to recognize
 	 * one of the patterns:

@@ -25,7 +25,7 @@
 
 extern char em_flag[];
 
-STATIC void succeeds(bblock_p succ, bblock_p pred)
+static void succeeds(bblock_p succ, bblock_p pred)
 {
 	assert(pred != (bblock_p)0);
 	if (succ != (bblock_p)0)
@@ -42,7 +42,7 @@ STATIC void succeeds(bblock_p succ, bblock_p pred)
 #define TARGET(lnp) (lbmap[INSTRLAB(lnp)])
 #define ATARGET(arg) (lbmap[arg->a_a.a_instrlab])
 
-STATIC arg_p skip_const(arg_p arg)
+static arg_p skip_const(arg_p arg)
 {
 	assert(arg != (arg_p)0);
 	switch (arg->a_type)
@@ -57,7 +57,7 @@ STATIC arg_p skip_const(arg_p arg)
 	return arg->a_next;
 }
 
-STATIC arg_p use_label(arg_p arg, bblock_p b)
+static arg_p use_label(arg_p arg, bblock_p b)
 {
 	if (arg->a_type == ARGINSTRLAB)
 	{
@@ -67,7 +67,7 @@ STATIC arg_p use_label(arg_p arg, bblock_p b)
 	return arg->a_next;
 }
 
-STATIC void case_flow(short instr, line_p desc, bblock_p b)
+static void case_flow(short instr, line_p desc, bblock_p b)
 {
 	/* Analyse the case descriptor (given as a ROM pseudo instruction).
 	 * Every instruction label appearing in the descriptor
@@ -112,7 +112,7 @@ STATIC void case_flow(short instr, line_p desc, bblock_p b)
 	}
 }
 
-STATIC line_p case_descr(line_p lnp)
+static line_p case_descr(line_p lnp)
 {
 	/* lnp is the instruction just before a csa or csb,
 	 * so it is the instruction that pushes the address
@@ -169,7 +169,7 @@ STATIC line_p case_descr(line_p lnp)
 	UNREACHABLE_CODE;
 }
 
-STATIC void last2_instrs(bblock_p b, line_p* last_out, line_p* prev_out)
+static void last2_instrs(bblock_p b, line_p* last_out, line_p* prev_out)
 {
 	/* Determine the last and one-but-last instruction
 	 * of basic block b. An end-pseudo is not regarded

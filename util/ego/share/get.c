@@ -73,7 +73,7 @@ offset getoff(void)
 	return l | (h_byte * 256L * 256 * 256L);
 }
 
-STATIC int getint(void)
+static int getint(void)
 {
 	/* Read an integer from the input file. This routine is
 	 * only used when reading a bitvector-set. We expect  an
@@ -94,7 +94,7 @@ STATIC int getint(void)
 
 /* getptable */
 
-STATIC void* getloop(loop_id id)
+static void* getloop(loop_id id)
 {
 	/* Map a loop identifier onto a loop struct.
 	 * If no struct was alocated yet for this identifier then
@@ -110,7 +110,7 @@ STATIC void* getloop(loop_id id)
 	return (lpmap[id]);
 }
 
-STATIC void* getblock(block_id id)
+static void* getblock(block_id id)
 {
 	/* Map a basic block identifier onto a block struct
 	 * If no struct was alocated yet for this identifier then
@@ -128,7 +128,7 @@ STATIC void* getblock(block_id id)
 	return (bmap[id]);
 }
 
-STATIC lset getlset(void* (*p)(short))
+static lset getlset(void* (*p)(short))
 {
 	/* Read a 'long' set. Such a set is represented externally
 	 * as a sequence of identifying numbers terminated by a 0.
@@ -147,7 +147,7 @@ STATIC lset getlset(void* (*p)(short))
 	return s;
 }
 
-STATIC cset getcset(void)
+static cset getcset(void)
 {
 	/* Read a 'compact' set. Such a set is represented externally
 	 * a row of bytes (its bitvector) preceded by its length.
@@ -294,7 +294,7 @@ dblock_p getdtable(const char* dname)
 
 /* getbblocks */
 
-STATIC void argstring(short length, argb_p abp)
+static void argstring(short length, argb_p abp)
 {
 
 	while (length--)
@@ -305,7 +305,7 @@ STATIC void argstring(short length, argb_p abp)
 	}
 }
 
-STATIC arg_p readargs(void)
+static arg_p readargs(void)
 {
 	/* Read a list of arguments and allocate structures
 	 * for them. Return a pointer to the head of the list.

@@ -18,7 +18,7 @@
 #include "ra_aux.h"
 #include "ra_profits.h"
 
-STATIC bool test_cond(short cond, offset val)
+static bool test_cond(short cond, offset val)
 {
 	switch (cond)
 	{
@@ -34,7 +34,7 @@ STATIC bool test_cond(short cond, offset val)
 	UNREACHABLE_CODE;
 }
 
-STATIC short map_value(struct cond_tab tab[], offset val, bool time)
+static short map_value(struct cond_tab tab[], offset val, bool time)
 {
 	cond_p p;
 
@@ -47,7 +47,7 @@ STATIC short map_value(struct cond_tab tab[], offset val, bool time)
 	}
 }
 
-STATIC short index_value(struct cond_tab tab[], short n, bool time)
+static short index_value(struct cond_tab tab[], short n, bool time)
 {
 	cond_p p;
 
@@ -55,7 +55,7 @@ STATIC short index_value(struct cond_tab tab[], short n, bool time)
 	return (time ? p->mc_tval : p->mc_sval);
 }
 
-STATIC void allocscore(
+static void allocscore(
     short itemtyp,
     short localtyp,
     short size,
@@ -104,7 +104,7 @@ STATIC void allocscore(
 	*/
 }
 
-STATIC void
+static void
 opening_cost(short itemtyp, short localtyp, offset off, short* time_out, short* space_out)
 {
 	cond_p m;
@@ -157,7 +157,7 @@ void regsave_cost(short regs[], short* time_out, short* space_out)
 	*/
 }
 
-STATIC short dyn_inits(lset inits)
+static short dyn_inits(lset inits)
 {
 	Lindex i;
 	short sum = 0;

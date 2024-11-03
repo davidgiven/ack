@@ -112,7 +112,7 @@ interv_p proc_lifetime(proc_p p)
 	return cons_interval(0, b->B_END);
 }
 
-STATIC void set_min_max(interv_p* iv1, interv_p* iv2)
+static void set_min_max(interv_p* iv1, interv_p* iv2)
 {
 	/* Auxiliary routine of intersect */
 

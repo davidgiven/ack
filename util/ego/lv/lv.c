@@ -36,12 +36,12 @@
 
 short nrvars;
 
-STATIC int Slv;
-STATIC bool mesgflag = FALSE; /* Suppress generation of live/dead info */
+static int Slv;
+static bool mesgflag = FALSE; /* Suppress generation of live/dead info */
 
-STATIC void app_block(line_p l, bblock_p b);
+static void app_block(line_p l, bblock_p b);
 
-STATIC void clean_up(void)
+static void clean_up(void)
 {
 	local_p* p;
 
@@ -52,7 +52,7 @@ STATIC void clean_up(void)
 	oldmap((void**)locals, nrlocals);
 }
 
-STATIC bool is_dir_use(line_p l)
+static bool is_dir_use(line_p l)
 {
 	/* See if l is a direct use of some variable
 	 * (i.e. not through a pointer). A LIL is a
@@ -84,7 +84,7 @@ STATIC bool is_dir_use(line_p l)
 	UNREACHABLE_CODE;
 }
 
-STATIC bool is_indir_use(line_p l)
+static bool is_indir_use(line_p l)
 {
 	/* See if instruction l uses some variable(s) indirectly,
 	 * i.e. through a pointer or via a procedure call.
@@ -110,7 +110,7 @@ STATIC bool is_indir_use(line_p l)
 	UNREACHABLE_CODE;
 }
 
-STATIC bool is_def(line_p l)
+static bool is_def(line_p l)
 {
 	/* See if l does a direct definition */
 
@@ -129,7 +129,7 @@ STATIC bool is_def(line_p l)
 	UNREACHABLE_CODE;
 }
 
-STATIC void def_use(proc_p p)
+static void def_use(proc_p p)
 {
 	/* Compute DEF(b) and USE(b), for every basic block b
 	 * of procedure p. DEF(b) contains the variables that
@@ -200,7 +200,7 @@ STATIC void def_use(proc_p p)
 	Cdeleteset(all_ind_uses);
 }
 
-STATIC void unite_ins(lset bbset, cset* setp)
+static void unite_ins(lset bbset, cset* setp)
 {
 	/* Take the union of L_IN(b), for all b in bbset,
 	 * and put the result in setp.
@@ -215,7 +215,7 @@ STATIC void unite_ins(lset bbset, cset* setp)
 	}
 }
 
-STATIC void solve_lv(proc_p p)
+static void solve_lv(proc_p p)
 {
 	/* Solve the data flow equations for Live Variables,
 	 * for procedure p. These equations are:
@@ -253,7 +253,7 @@ STATIC void solve_lv(proc_p p)
 	Cdeleteset(newout);
 }
 
-STATIC void live_variables_analysis(proc_p p)
+static void live_variables_analysis(proc_p p)
 {
 	make_localtab(p);
 	nrvars = nrglobals + nrlocals;
@@ -261,7 +261,7 @@ STATIC void live_variables_analysis(proc_p p)
 	solve_lv(p);
 }
 
-STATIC void init_live_dead(bblock_p b)
+static void init_live_dead(bblock_p b)
 {
 	/* For every register variable, see if it is
 	 * live or dead at the end of b.
@@ -284,7 +284,7 @@ STATIC void init_live_dead(bblock_p b)
 	}
 }
 
-STATIC line_p make_mesg(short mesg, local_p loc)
+static line_p make_mesg(short mesg, local_p loc)
 {
 	/* Create a line for a message stating that
 	 * local variable loc is live/dead. This message
@@ -307,7 +307,7 @@ STATIC line_p make_mesg(short mesg, local_p loc)
 	return l;
 }
 
-STATIC void block_entry(bblock_p b, bblock_p prev)
+static void block_entry(bblock_p b, bblock_p prev)
 {
 	short v, vn;
 	local_p loc;
@@ -342,7 +342,7 @@ STATIC void block_entry(bblock_p b, bblock_p prev)
 	}
 }
 
-STATIC void app_block(line_p l, bblock_p b)
+static void app_block(line_p l, bblock_p b)
 {
 	line_p x = b->b_start;
 
@@ -367,7 +367,7 @@ STATIC void app_block(line_p l, bblock_p b)
 	}
 }
 
-STATIC void definition(line_p l, bool* useless_out, short* v_out, bool mesgflag)
+static void definition(line_p l, bool* useless_out, short* v_out, bool mesgflag)
 {
 	/* Process a definition. If the defined (register-) variable
 	 * is live after 'l', then create a live-message and put
@@ -418,7 +418,7 @@ STATIC void definition(line_p l, bool* useless_out, short* v_out, bool mesgflag)
 	}
 }
 
-STATIC void use(line_p l, bool mesgflag)
+static void use(line_p l, bool mesgflag)
 {
 	/* Process a use. If the defined (register-) variable
 	 * is dead after 'l', then create a dead-message and put
@@ -445,11 +445,11 @@ STATIC void use(line_p l, bool mesgflag)
 }
 
 /* ARGSUSED */
-STATIC void nothing(line_p l1, line_p l2, offset size)
+static void nothing(line_p l1, line_p l2, offset size)
 {
 } /* No action to be undertaken at level 0 of parser */
 
-STATIC void rem_code(line_p l1, line_p l2, bblock_p b)
+static void rem_code(line_p l1, line_p l2, bblock_p b)
 {
 	line_p l, x, y, next;
 
@@ -476,7 +476,7 @@ STATIC void rem_code(line_p l1, line_p l2, bblock_p b)
 
 #define SIZE(v) ((offset)locals[TO_LOCAL(v)]->lc_size)
 
-STATIC void lv_mesg(proc_p p, bool mesgflag)
+static void lv_mesg(proc_p p, bool mesgflag)
 {
 	/* Create live/dead messages for every possible register
 	 * variable of p. A dead-message is put after a "use" of
@@ -555,7 +555,7 @@ STATIC void lv_mesg(proc_p p, bool mesgflag)
 	}
 }
 
-STATIC void lv_extend(proc_p p)
+static void lv_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
@@ -567,7 +567,7 @@ STATIC void lv_extend(proc_p p)
 	}
 }
 
-STATIC void lv_cleanup(proc_p p)
+static void lv_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 

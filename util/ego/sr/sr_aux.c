@@ -63,7 +63,7 @@ bool is_caddress(line_p lnp, lset vars) /* variables changed in loop */
 	UNREACHABLE_CODE;
 }
 
-STATIC arg_p find_arg(int n, arg_p list)
+static arg_p find_arg(int n, arg_p list)
 {
 	/* Find the n-th element of the list */
 

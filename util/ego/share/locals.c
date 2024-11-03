@@ -28,7 +28,7 @@ short nrglobals;
 short nrlocals;
 local_p* locals; /* dynamic array */
 
-STATIC void localvar(offset off, short size, local_p* locs, bool reg, offset score)
+static void localvar(offset off, short size, local_p* locs, bool reg, offset score)
 {
 	/* process a reference to a local variable.
 	 * A local is characterized by a (offset,size) pair.
@@ -69,7 +69,7 @@ STATIC void localvar(offset off, short size, local_p* locs, bool reg, offset sco
 	}
 }
 
-STATIC void check_message(line_p l, local_p* locs)
+static void check_message(line_p l, local_p* locs)
 {
 	/* See if l is a register message */
 
@@ -82,7 +82,7 @@ STATIC void check_message(line_p l, local_p* locs)
 	}
 }
 
-STATIC void check_local_use(line_p l, local_p* locs)
+static void check_local_use(line_p l, local_p* locs)
 {
 	short sz;
 

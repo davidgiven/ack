@@ -31,8 +31,6 @@ void OUTVERBOSE(const char*, int, int);
  * global when debugging.
  */
 
-#define STATIC
-
 void VI(short);
 void VL(line_p);
 void VD(dblock_p);
@@ -42,7 +40,6 @@ void VP(proc_p);
 
 #else /*DEBUG*/
 
-#define STATIC static
 #define NDEBUG /* disable assert() */
 
 #define VI(i)

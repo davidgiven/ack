@@ -15,8 +15,8 @@
 
 #define STACK_DEPTH 250
 
-STATIC struct token Stack[STACK_DEPTH];
-STATIC token_p free_token;
+static struct token Stack[STACK_DEPTH];
+static token_p free_token;
 
 #define Delete_top()                                                                               \
 	{                                                                                              \

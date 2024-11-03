@@ -22,7 +22,7 @@
 #include "cs_getent.h"
 #include "cs_profit.h"
 
-STATIC void push_entity(entity_p enp, line_p lfirst)
+static void push_entity(entity_p enp, line_p lfirst)
 {
 	/* Build token and Push it. */
 
@@ -34,7 +34,7 @@ STATIC void push_entity(entity_p enp, line_p lfirst)
 	Push(&tk);
 }
 
-STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
+static void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
 	struct avail av;
 	occur_p ocp;
@@ -48,7 +48,7 @@ STATIC void put_expensive_load(bblock_p bp, line_p lnp, line_p lfirst, entity_p 
 	av_enter(&av, ocp, EXPENSIVE_LOAD);
 }
 
-STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
+static void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 {
 	/* Enter the implicit AAR in a LAR or SAR, where enp points to
 	 * the ENARRELEM, and AAR computes its address.
@@ -75,7 +75,7 @@ STATIC void put_aar(bblock_p bp, line_p lnp, line_p lfirst, entity_p enp)
 	}
 }
 
-STATIC void push_avail(avail_p avp, line_p lfirst)
+static void push_avail(avail_p avp, line_p lfirst)
 {
 	struct token tk;
 
@@ -85,7 +85,7 @@ STATIC void push_avail(avail_p avp, line_p lfirst)
 	Push(&tk);
 }
 
-STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
+static void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 {
 	struct avail av;
 	occur_p ocp;
@@ -99,7 +99,7 @@ STATIC void push_unair_op(bblock_p bp, line_p lnp, token_p tkp1)
 	push_avail(av_enter(&av, ocp, UNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
+static void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 {
 	struct avail av;
 	occur_p ocp;
@@ -114,7 +114,7 @@ STATIC void push_binair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 	push_avail(av_enter(&av, ocp, BINAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2, token_p tkp3)
+static void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2, token_p tkp3)
 {
 	struct avail av;
 	occur_p ocp;
@@ -130,7 +130,7 @@ STATIC void push_ternair_op(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2,
 	push_avail(av_enter(&av, ocp, TERNAIR_OP), tkp1->tk_lfirst);
 }
 
-STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
+static void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 {
 	/* Enter the implicit division tkp1 / tkp2,
 	 * then push the remainder tkp1 % tkp2.
@@ -162,7 +162,7 @@ STATIC void push_remainder(bblock_p bp, line_p lnp, token_p tkp1, token_p tkp2)
 	push_avail(av_enter(&av, ocp, REMAINDER), tkp1->tk_lfirst);
 }
 
-STATIC void fiddle_stack(line_p lnp)
+static void fiddle_stack(line_p lnp)
 {
 	/* The instruction in lnp does something to the valuenumber-stack. */
 
@@ -243,7 +243,7 @@ STATIC void fiddle_stack(line_p lnp)
 	}
 }
 
-STATIC proc_p find_proc(valnum vn)
+static proc_p find_proc(valnum vn)
 {
 	/* Find the procedure-identifier with valuenumber vn. */
 
@@ -257,7 +257,7 @@ STATIC proc_p find_proc(valnum vn)
 	return (proc_p)0;
 }
 
-STATIC void side_effects(line_p lnp)
+static void side_effects(line_p lnp)
 {
 	/* Lnp contains a cai or cal instruction. We try to find the callee
 	 * and see what side-effects it has.
@@ -285,7 +285,7 @@ STATIC void side_effects(line_p lnp)
 	}
 }
 
-STATIC void hopeless(int instr)
+static void hopeless(int instr)
 {
 	/* The effect of `instr' is too difficult to
 	 * compute. We assume worst case behaviour.

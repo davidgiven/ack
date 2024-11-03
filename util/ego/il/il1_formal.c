@@ -71,7 +71,7 @@ formal_p find_formal(proc_p p, int type, offset off)
 	return nf;
 }
 
-STATIC void no_inl_pars(proc_p p)
+static void no_inl_pars(proc_p p)
 {
 	/* p may not have any in line parameters */
 
@@ -79,7 +79,7 @@ STATIC void no_inl_pars(proc_p p)
 	remov_formals(p);
 }
 
-STATIC void inc_use(formal_p f, bblock_p b)
+static void inc_use(formal_p f, bblock_p b)
 {
 	/* Increment the use count of formal f.
 	 * The counter has only three states: not used,

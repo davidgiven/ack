@@ -19,7 +19,7 @@
 #define ARGW 3
 #define ARDESC3 4
 
-STATIC struct inf_entity
+static struct inf_entity
 {
 	byte inf_instr; /* Key.				*/
 	byte inf_used; /* Kind of entity used by key.	*/
@@ -44,7 +44,7 @@ STATIC struct inf_entity
 #define ENKIND(ip) ip->inf_used
 #define SIZEINF(ip) ip->inf_size
 
-STATIC struct inf_entity* getinf(int n)
+static struct inf_entity* getinf(int n)
 {
 	struct inf_entity* ip;
 
