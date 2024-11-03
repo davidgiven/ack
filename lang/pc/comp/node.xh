@@ -8,6 +8,7 @@ struct node {
 #define nd_next nd_left
 	struct node *nd_right;
 	int nd_class;		/* kind of node */
+#define ValueN		0	/* constant */
 #define Name		1	/* an identifier */
 #define Uoper		2	/* unary operator */
 #define Boper		3	/* binary operator */
@@ -23,7 +24,6 @@ struct node {
 #define Cast		13	/* convert integer to real */
 #define IntCoerc	14	/* coercion of integers to longs */
 #define IntReduc	15	/* reduction of longs to integers */
-#define Value		0	/* constant */
 				/* do NOT change the order or the numbers!!! */
 	struct type *nd_type;	/* type of this node */
 	struct token nd_token;
