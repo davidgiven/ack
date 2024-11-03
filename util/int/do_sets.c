@@ -13,7 +13,7 @@
 #include "fra.h"
 #include "switch.h"
 
-PRIVATE void bit_test(size), create_set(size);
+static void bit_test(size), create_set(size);
 
 /** INN w: Bit test on w byte set (bit number on top of stack) */
 void DoINN(register size l)
@@ -36,7 +36,7 @@ void DoSET(register size l)
  *  ON --> push 1 on stack.
  *  OFF -> push 0 on stack.
  **/
-PRIVATE void bit_test(size w)
+static void bit_test(size w)
 {
 	register int bitno = (int)swpop(); /* bitno on TOS */
 	register char test_byte = (char)0; /* default value to be tested */
@@ -64,7 +64,7 @@ PRIVATE void bit_test(size w)
  *  The w bytes constituting the set are
  *  pushed on the stack.
  **/
-PRIVATE void create_set(size w)
+static void create_set(size w)
 {
 	register int bitno = (int)swpop();
 	register size nbytes = w;

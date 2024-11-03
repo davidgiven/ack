@@ -30,27 +30,27 @@ int must_log; /* set if logging may be required */
 long log_start; /* first instruction to be logged */
 int logging; /* set as soon as logging starts */
 
-PRIVATE long stop; /* inr after which to stop */
-PRIVATE long gdump; /* inr at which to dump GDA */
-PRIVATE ptr gmin, gmax; /* GDA dump limits */
-PRIVATE long hdump; /* inr at which to dump the heap */
-PRIVATE long stdsize; /* optional size of stack dump */
-PRIVATE int stdrawflag; /* set if unformatted stack dump */
+static long stop; /* inr after which to stop */
+static long gdump; /* inr at which to dump GDA */
+static ptr gmin, gmax; /* GDA dump limits */
+static long hdump; /* inr at which to dump the heap */
+static long stdsize; /* optional size of stack dump */
+static int stdrawflag; /* set if unformatted stack dump */
 
-PRIVATE char log_file[64] = "int.log"; /* Name of log file */
-PRIVATE long at; /* patch to set log_start */
-PRIVATE char* lmask; /* patch to set logmask */
-PRIVATE char* logvar; /* Name of LOG variable */
-PRIVATE int log_level[128]; /* Holds the log levels */
-PRIVATE FILE* log_fp; /* Filepointer of log file */
+static char log_file[64] = "int.log"; /* Name of log file */
+static long at; /* patch to set log_start */
+static char* lmask; /* patch to set logmask */
+static char* logvar; /* Name of LOG variable */
+static int log_level[128]; /* Holds the log levels */
+static FILE* log_fp; /* Filepointer of log file */
 
 /* arguments for the logging machine */
-PRIVATE int argcount;
-PRIVATE char* arglist[20]; /* arbitrary size */
+static int argcount;
+static char* arglist[20]; /* arbitrary size */
 
-PRIVATE void set_lmask(char* mask);
-PRIVATE char* getpar(char*);
-PRIVATE long longpar(char*, long);
+static void set_lmask(char* mask);
+static char* getpar(char*);
+static long longpar(char*, long);
 
 int logarg(char* str)
 {
@@ -187,7 +187,7 @@ void close_log(void)
 #define inrange(c, l, h) (l <= c && c <= h)
 #define layout(c) (c == ' ' || c == '\t' || c == ',')
 
-PRIVATE void set_lmask(char* mask)
+static void set_lmask(char* mask)
 {
 	register char* mp = mask;
 
@@ -311,7 +311,7 @@ void log_eoi(void)
 
 /******** Service routines ********/
 
-PRIVATE char* getpar(char* var)
+static char* getpar(char* var)
 {
 	/*	Looks up the name in the argument list.
 	 */
@@ -331,7 +331,7 @@ PRIVATE char* getpar(char* var)
 	return 0;
 }
 
-PRIVATE long longpar(
+static long longpar(
     char* var, /* name of the variable */
     long def /* default value */
 )

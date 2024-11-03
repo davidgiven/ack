@@ -29,10 +29,10 @@ char *strcpy(), *strcat();
 char *long2str();
 extern int InputLevel;
 
-PRIVATE struct mlist	*ReplaceList;	/* list of currently active macros */
+static struct mlist	*ReplaceList;	/* list of currently active macros */
 
-PRIVATE macro_func();
-PRIVATE char *macro2buffer();
+static macro_func();
+static char *macro2buffer();
 extern char **getactuals();
 
 EXPORT int
@@ -138,7 +138,7 @@ replace(idef)
 
 GSTATIC char FilNamBuf[PATHLENGTH];
 
-PRIVATE
+static
 macro_func(idef)
 	register struct idf *idef;
 {
@@ -167,7 +167,7 @@ macro_func(idef)
 	}
 }
 
-PRIVATE char *
+static char *
 macro2buffer(idef, actpars, siztext)
 	struct idf *idef;
 	char **actpars;

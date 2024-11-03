@@ -9,17 +9,17 @@
 
 #include <pwd.h>
 
-#define PRIVATE static
+#define static static
 
 
-PRIVATE char  _pw_file[] = "/etc/passwd";
-PRIVATE char  _pwbuf[256];
-PRIVATE char  _buffer[1024];
-PRIVATE char *_pnt;
-PRIVATE char *_buf;
-PRIVATE int   _pw = -1;
-PRIVATE int   _bufcnt;
-PRIVATE struct passwd    pwd;
+static char  _pw_file[] = "/etc/passwd";
+static char  _pwbuf[256];
+static char  _buffer[1024];
+static char *_pnt;
+static char *_buf;
+static int   _pw = -1;
+static int   _bufcnt;
+static struct passwd    pwd;
 
 setpwent() 
 {

@@ -31,7 +31,7 @@
 
 
 
-PRIVATE check_ev_order();
+static check_ev_order();
 
 check_and_merge(expr, espp, esp)
 	struct expr *expr;
@@ -90,7 +90,7 @@ check_and_merge(expr, espp, esp)
 	esp->next = p1;
 }
 
-PRIVATE
+static
 check_ev_order(esp1, esp2, expr)
 	struct expr_state *esp1, *esp2;
 	struct expr *expr;

@@ -6,8 +6,8 @@ static char rcsidp3[] = "$Id$";
 
 #define UPDATEWORST(backups) if(backups>mostbackups) mostbackups = backups;
 
-PRIVATE int rightmatch(struct mnems,struct mnems,int, int);
-PRIVATE int leftmatch(struct mnems, struct mnems, int, int);
+static int rightmatch(struct mnems,struct mnems,int, int);
+static int leftmatch(struct mnems, struct mnems, int, int);
 
 
 void findworst(struct mnems patt,struct mnems repl)
@@ -112,7 +112,7 @@ void findfail(int state, int *resout, int *rescpy, int *resgto)
 	*resgto = 0;
 }
 
-PRIVATE int leftmatch(struct mnems patt,struct mnems repl,int i,int j)
+static int leftmatch(struct mnems patt,struct mnems repl,int i,int j)
 {
 	/*
 	/ Return the first complete match of the mnems <ri,ri+1,..,rj> of
@@ -134,7 +134,7 @@ PRIVATE int leftmatch(struct mnems patt,struct mnems repl,int i,int j)
 	return(0);
 }
 
-PRIVATE int rightmatch(struct mnems patt,struct mnems repl,int i,int j)
+static int rightmatch(struct mnems patt,struct mnems repl,int i,int j)
 {
 	/*
 	/ Return the first complete match of the mnems <ri,ri+1,..,rj> of

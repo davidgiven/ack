@@ -30,10 +30,10 @@
 #endif /* not __STDC__ */
 #define SMALL (1.0 / MAXDOUBLE)
 
-PRIVATE double adf(double, double), sbf(double, double), mlf(double, double), dvf(double, double);
-PRIVATE double ttttp(double, int);
-PRIVATE double floor(double), fabs(double);
-PRIVATE void fef(double, size), fif(double, double, size);
+static double adf(double, double), sbf(double, double), mlf(double, double), dvf(double, double);
+static double ttttp(double, int);
+static double floor(double), fabs(double);
+static void fef(double, size), fif(double, double, size);
 
 #endif /* NOFLOAT */
 
@@ -138,7 +138,7 @@ void DoFEF(register size l)
 /* Service routines */
 
 /** Returns "f1" + "f2" */
-PRIVATE double adf(double f1, double f2)
+static double adf(double f1, double f2)
 {
 	if (must_test && !(IgnMask & BIT(EFOVFL)))
 	{
@@ -163,7 +163,7 @@ PRIVATE double adf(double f1, double f2)
 }
 
 /** Returns "f1" - "f2" */
-PRIVATE double sbf(double f1, double f2)
+static double sbf(double f1, double f2)
 {
 	if (must_test && !(IgnMask & BIT(EFOVFL)))
 	{
@@ -188,7 +188,7 @@ PRIVATE double sbf(double f1, double f2)
 }
 
 /** Returns "f1" * "f2" */
-PRIVATE double mlf(double f1, double f2)
+static double mlf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -223,7 +223,7 @@ PRIVATE double mlf(double f1, double f2)
 }
 
 /** Returns "f1" / "f2" */
-PRIVATE double dvf(double f1, double f2)
+static double dvf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -267,7 +267,7 @@ PRIVATE double dvf(double f1, double f2)
 	return (f1 / f2);
 }
 
-PRIVATE void fif(double f1, double f2, size n)
+static void fif(double f1, double f2, size n)
 {
 	double f = mlf(f1, f2);
 	double fl = floor(fabs(f));
@@ -276,7 +276,7 @@ PRIVATE void fif(double f1, double f2, size n)
 	fpush((f < 0.0) ? -fl : fl, n); /* push integer-part */
 }
 
-PRIVATE void fef(double f, size n)
+static void fef(double f, size n)
 {
 	register long exponent, sign = (long)(f < 0.0);
 
@@ -299,12 +299,12 @@ PRIVATE void fef(double f, size n)
 
 /* floating point service routines, to avoid having to use -lm */
 
-PRIVATE double fabs(double f)
+static double fabs(double f)
 {
 	return (f < 0.0 ? -f : f);
 }
 
-PRIVATE double floor(double f)
+static double floor(double f)
 {
 	double res, d;
 	register int sign = 1;
@@ -343,7 +343,7 @@ PRIVATE double floor(double f)
 }
 
 /** Times ten to the power. */
-PRIVATE double ttttp(double f, int n)
+static double ttttp(double f, int n)
 {
 	while (n > 0)
 	{

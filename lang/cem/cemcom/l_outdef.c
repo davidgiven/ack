@@ -42,15 +42,15 @@ extern char *strchr();
 int stat_number = 9999;			/* static scope number */
 struct outdef OutDef;
 
-PRIVATE struct outdef OutCall;
+static struct outdef OutCall;
 
-PRIVATE local_EFDC();
-PRIVATE output_def();
-PRIVATE outargs();
-PRIVATE outarg();
-PRIVATE outargstring();
-PRIVATE outargtype();
-PRIVATE add_expr_arg();
+static local_EFDC();
+static output_def();
+static outargs();
+static outarg();
+static outargstring();
+static outargtype();
+static add_expr_arg();
 
 lint_declare_idf(idf, sc)
 	struct idf *idf;
@@ -141,7 +141,7 @@ set_od_valreturned(n)
 	OutDef.od_valreturned = n;
 }
 
-PRIVATE
+static
 local_EFDC(idf)
 	struct idf *idf;
 {
@@ -282,7 +282,7 @@ outcall()
 	output_def(&OutCall);
 }
 
-PRIVATE
+static
 output_def(od)
 	struct outdef *od;
 {
@@ -351,7 +351,7 @@ output_def(od)
 	printf(":%u:%s\n", od->od_line, od->od_file);
 }
 
-PRIVATE
+static
 outargs(arg, n)
 	struct argument *arg;
 {
@@ -374,7 +374,7 @@ outargs(arg, n)
 	}
 }
 
-PRIVATE
+static
 outarg(arg)
 	struct argument *arg;
 {
@@ -413,7 +413,7 @@ outarg(arg)
 	}
 }
 
-PRIVATE
+static
 outargstring(arg)
 	struct argument *arg;
 {
@@ -428,7 +428,7 @@ outargstring(arg)
 	printf("\"%s\"", buff);
 }
 
-PRIVATE
+static
 outargtype(tp)
 	struct type *tp;
 {
@@ -484,7 +484,7 @@ outargtype(tp)
 }
 
 #ifdef	IMPLICIT
-PRIVATE
+static
 implicit_func_decl(idf, file, line)
 	struct idf *idf;
 	char *file;
@@ -538,7 +538,7 @@ fill_outcall(ex, used)
 	OutCall.od_valused = used;	/* USED, IGNORED or VOIDED */
 }
 
-PRIVATE
+static
 add_expr_arg(e)
 	struct expr *e;
 {

@@ -11,7 +11,7 @@
 
 #define CODE_EXPANDER
 #define EXPORT
-#define PRIVATE static
+#define static static
 
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -26,7 +26,7 @@ extern char em_flag[];	/* One per EM instruction: indicates parameter kind */
 extern short em_ptyp[];	/* One per parameter kind: indicates parameter type */
 char *C_error;
 
-PRIVATE C_dopseudo();
+static C_dopseudo();
 
 EXPORT int
 C_out(p)
@@ -109,7 +109,7 @@ C_out(p)
 	return 1;
 }
 
-PRIVATE
+static
 C_dopseudo(p)
 	register struct e_instr *p;
 {

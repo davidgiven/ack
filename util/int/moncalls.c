@@ -129,12 +129,12 @@ struct timeb
  *									*
  ************************************************************************/
 
-PRIVATE size buf_cnt[5]; /* Current sizes of the buffers */
-PRIVATE char* buf[5]; /* Pointers to the buffers */
+static size buf_cnt[5]; /* Current sizes of the buffers */
+static char* buf[5]; /* Pointers to the buffers */
 
-PRIVATE void check_buf(int n, size sz);
-PRIVATE int savestr(int n, ptr addr);
-PRIVATE int vec(int n1, int n2, ptr addr, char*** vecvec);
+static void check_buf(int n, size sz);
+static int savestr(int n, ptr addr);
+static int vec(int n1, int n2, ptr addr, char*** vecvec);
 
 void moncall(void)
 {
@@ -1064,7 +1064,7 @@ void moncall(void)
 
 /* Buffer administration */
 
-PRIVATE void check_buf(int n, size sz)
+static void check_buf(int n, size sz)
 {
 	if (buf_cnt[n] == 0)
 	{
@@ -1078,7 +1078,7 @@ PRIVATE void check_buf(int n, size sz)
 	}
 }
 
-PRIVATE int savestr(int n, ptr addr)
+static int savestr(int n, ptr addr)
 {
 	register size len;
 	register char *cp, ch;
@@ -1109,7 +1109,7 @@ PRIVATE int savestr(int n, ptr addr)
 	return 1;
 }
 
-PRIVATE int vec(int n1, int n2, ptr addr, char*** vecvec)
+static int vec(int n1, int n2, ptr addr, char*** vecvec)
 {
 	register char *cp1, *cp2;
 	ptr p, ldp;

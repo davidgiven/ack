@@ -13,7 +13,7 @@
 
 #define  DIRECT_SIZE  (sizeof (struct direct))
 
-PRIVATE _PROTOTYPE(void  go_back, (char *path) );
+static _PROTOTYPE(void  go_back, (char *path) );
 
 char *getcwd(buffer, size)
 char *buffer;
@@ -103,7 +103,7 @@ int size;
   return(chdir(buffer) ? (char *)NULL : buffer);
 }
 
-PRIVATE void go_back(path)
+static void go_back(path)
 char *path;
 {
 /* If getcwd() gets in trouble and can't complete normally, reverse the

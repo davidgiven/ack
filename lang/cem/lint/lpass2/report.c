@@ -22,7 +22,7 @@ extern panic(char *, ...);
 
 extern int LineNr;
 
-PRIVATE rep_loc();
+static rep_loc();
 
 #if __STDC__
 /* VARARGS */
@@ -105,7 +105,7 @@ report(va_alist)
 	va_end(ap);
 }
 
-PRIVATE
+static
 rep_loc(id)
 	struct inpdef *id;
 {

@@ -26,15 +26,15 @@
 #define	EOS		'\0'
 #define	overflow()	(fatal("actual parameter buffer overflow"))
 
-PRIVATE char apbuf[LAPBUF]; /* temporary storage for actual parameters	*/
-PRIVATE char *actparams[NPARAMS]; /* pointers to the text of the actuals */
-PRIVATE char *aptr;	/* pointer to last inserted character in apbuf	*/
+static char apbuf[LAPBUF]; /* temporary storage for actual parameters	*/
+static char *actparams[NPARAMS]; /* pointers to the text of the actuals */
+static char *aptr;	/* pointer to last inserted character in apbuf	*/
 
 #define	copy(ch)	((aptr < &apbuf[LAPBUF]) ? (*aptr++ = ch) : overflow())
 
-PRIVATE int nr_of_params;	/* number of actuals read until now	*/
+static int nr_of_params;	/* number of actuals read until now	*/
 
-PRIVATE copyact();
+static copyact();
 
 char **
 getactuals(idef)
@@ -81,7 +81,7 @@ getactuals(idef)
 	return actparams;
 }
 
-PRIVATE
+static
 copyact(ch1, ch2, lvl)
 	char ch1, ch2;
 	int lvl;

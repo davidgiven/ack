@@ -25,7 +25,7 @@
 extern int running; /* from main.c */
 
 /* Forward declarations */
-PRIVATE void lfr(size), ret(size);
+static void lfr(size), ret(size);
 
 /** CAI -: Call procedure (procedure identifier on stack) */
 void DoCAI(void) /* proc identifier on top of stack */
@@ -82,7 +82,7 @@ void call(long new_PI, int rsbcode)
  *		Loading a function result.										*
  ************************************************************************/
 
-PRIVATE void lfr(size sz)
+static void lfr(size sz)
 {
 	if (sz > FRALimit)
 	{
@@ -110,7 +110,7 @@ PRIVATE void lfr(size sz)
  *		Returning from a procedure.				*
  ************************************************************************/
 
-PRIVATE void ret(size sz)
+static void ret(size sz)
 {
 	if (sz > FRALimit)
 	{

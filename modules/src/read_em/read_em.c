@@ -40,7 +40,7 @@
 static FILE *fd;
 static char *_ich;
 
-PRIVATE int _fill(void)
+static int _fill(void)
 {
 	static char text[BUFSIZ + 1];
 	static int sz;
@@ -97,7 +97,7 @@ static char *argrange = "Argument range error";
 /* Error handling
  */
 
-PRIVATE void xerror(char *s)
+static void xerror(char *s)
 {
 	if (emhead->em_type != EM_FATAL)
 		emhead->em_type = EM_ERROR;
@@ -106,7 +106,7 @@ PRIVATE void xerror(char *s)
 }
 
 #ifdef COMPACT
-PRIVATE void xfatal(char *s)
+static void xfatal(char *s)
 {
 	emhead->em_type = EM_FATAL;
 	if (!EM_error) EM_error = s;
@@ -177,7 +177,7 @@ EXPORT void EM_close(void)
  again, but also to deliver the arguments on next calls to EM_getinstr.
  This is indicated by the variable "argp".
  */
-PRIVATE void startmes(register struct e_instr *p)
+static void startmes(register struct e_instr *p)
 {
 
 	getarg(cst_ptyp, &(p->em_arg));

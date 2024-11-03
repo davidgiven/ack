@@ -13,7 +13,7 @@
 
 /** Procedure table */
 struct proc* proctab;
-PRIVATE long pr_cnt;
+static long pr_cnt;
 
 /** Allocates and initializes the procedure table. */
 void init_proctab(void)

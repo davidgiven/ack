@@ -18,7 +18,7 @@
 #include "stack.h"
 #include "switch.h"
 
-PRIVATE void compare_obj(size);
+static void compare_obj(size);
 
 void DoCMI(register size l)
 {
@@ -135,7 +135,7 @@ void DoTGT(void)
  *	is performed. Checking for undefined bytes
  *	is done when LOGGING is defined.
  ********************************************************/
-PRIVATE void compare_obj(size obj_size)
+static void compare_obj(size obj_size)
 {
 	register ptr addr1; /* ADDRess in object highest on st. */
 	register ptr addr2; /* ADDRess in object deeper in st. */

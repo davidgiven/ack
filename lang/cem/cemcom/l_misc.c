@@ -30,9 +30,9 @@
 
 extern struct type *func_type;
 
-PRIVATE lint_enum_arith();
-PRIVATE lint_conversion();
-PRIVATE int numsize();
+static lint_enum_arith();
+static lint_conversion();
+static int numsize();
 
 check_hiding(idf, lvl, sc)
 	struct idf *idf;
@@ -243,7 +243,7 @@ lint_new_oper(expr)
 	}
 }
 
-PRIVATE
+static
 lint_enum_arith(l_fund, oper, r_fund)
 	int l_fund, oper, r_fund;
 {
@@ -266,7 +266,7 @@ lint_enum_arith(l_fund, oper, r_fund)
 	}
 }
 
-PRIVATE
+static
 lint_conversion(from_expr, to_fund)
 	struct expr *from_expr;
 	int to_fund;
@@ -302,7 +302,7 @@ lint_conversion(from_expr, to_fund)
 	}
 }
 
-PRIVATE int
+static int
 numsize(fund)
 {
 	switch (fund) {

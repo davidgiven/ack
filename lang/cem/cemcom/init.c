@@ -15,7 +15,7 @@
 #include	"idf.h"
 #include	"interface.h"
 
-PRIVATE struct mkey	{
+static struct mkey	{
 	char *mk_reserved;
 	int mk_key;
 } mkey[] =	{

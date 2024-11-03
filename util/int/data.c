@@ -23,8 +23,8 @@ extern size maxheap; /* from main.c */
 
 #ifdef LOGGING
 char* data_sh; /* shadowbytes */
-PRIVATE void warn_dtbits(ptr, size);
-PRIVATE void dt_clear_area(ptr, ptr);
+static void warn_dtbits(ptr, size);
+static void dt_clear_area(ptr, ptr);
 #endif /* LOGGING */
 
 /** Initialize the heap with "hb" address. */
@@ -433,7 +433,7 @@ void dt_mvs(ptr d, ptr s, size n) /* s -> d */
 
 #ifdef LOGGING
 
-PRIVATE void warn_dtbits(ptr addr, size n)
+static void warn_dtbits(ptr addr, size n)
 {
 	register int or_bits = 0;
 	register int and_bits = 0xff;

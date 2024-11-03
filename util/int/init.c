@@ -46,8 +46,8 @@
 
 extern char** environ;
 
-PRIVATE size alignedstrlen(char* s);
-PRIVATE ptr storestring(ptr addr, char* s);
+static size alignedstrlen(char* s);
+static ptr storestring(ptr addr, char* s);
 
 char* load_name;
 
@@ -149,14 +149,14 @@ void init(int ac, char** av)
 	wpush((long)ac); /* push argc */
 }
 
-PRIVATE size alignedstrlen(char* s)
+static size alignedstrlen(char* s)
 {
 	register size len = strlen(s) + 1;
 
 	return (len + wsize - 1) / wsize * wsize;
 }
 
-PRIVATE ptr storestring(ptr addr, char* s)
+static ptr storestring(ptr addr, char* s)
 {
 	/*	Store string, aligned to a fit multiple of wsize bytes.
 	    Return first address on a wordsize boundary after string.

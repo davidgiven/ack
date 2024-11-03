@@ -32,8 +32,8 @@ long LIN;
 /** Pointer to the filename. */
 ptr FIL;
 
-PRIVATE void index_jump(size), range_check(size), search_jump(size);
-PRIVATE void gto(ptr);
+static void index_jump(size), range_check(size), search_jump(size);
+static void gto(ptr);
 
 #define asp(l) newSP(SP + arg_f(l))
 
@@ -372,7 +372,7 @@ void DoTRP(void)
 
 /* Service routines */
 
-PRIVATE void gto(ptr p)
+static void gto(ptr p)
 {
 	register ptr old_LB = LB;
 	register ptr new_PC = dt_ldip(p);
@@ -428,7 +428,7 @@ void putFIL(ptr fil)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE void index_jump(size nbytes)
+static void index_jump(size nbytes)
 {
 	register ptr cdp = dppop(); /* Case Descriptor Pointer */
 	register long t_index = /* Table INDEX */
@@ -457,7 +457,7 @@ PRIVATE void index_jump(size nbytes)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE void search_jump(size nbytes)
+static void search_jump(size nbytes)
 {
 	register ptr cdp = dppop(); /* Case Descriptor Pointer */
 	register long sv = spop(nbytes); /* Search Value */
@@ -490,7 +490,7 @@ PRIVATE void search_jump(size nbytes)
  *	3. Generate trap if necessary.			*
  *	4. DON'T remove integer.			*
  ********************************************************/
-PRIVATE void range_check(size nbytes)
+static void range_check(size nbytes)
 {
 	register ptr rdp = dppop(); /* Range check Descriptor Pointer */
 	register long cv = /* Check Value */

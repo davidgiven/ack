@@ -9,11 +9,11 @@
 
 #include <ctype.h>
 
-PRIVATE struct string *getstring(int isident);
+static struct string *getstring(int isident);
 
 /* get16, get32: read a signed constant
 */
-PRIVATE int get16(void)
+static int get16(void)
 {
 	register int l_byte, h_byte;
 
@@ -23,7 +23,7 @@ PRIVATE int get16(void)
 	return l_byte | (h_byte << 8);
 }
 
-PRIVATE arith get32(void)
+static arith get32(void)
 {
 	register arith l;
 	register int h_byte;
@@ -39,7 +39,7 @@ PRIVATE arith get32(void)
 /* getarg : read an argument of any type, and check it against "typset"
    if neccesary. Put result in "ap".
 */
-PRIVATE void getarg(int typset, register struct e_arg *ap)
+static void getarg(int typset, register struct e_arg *ap)
 {
 	register int i = getbyte();
 #ifdef CHECKING
@@ -186,7 +186,7 @@ PRIVATE void getarg(int typset, register struct e_arg *ap)
 #ifdef CHECKING
 /* checkident: check that a string indeed represents an identifier
 */
-PRIVATE int checkident(register struct string *s)
+static int checkident(register struct string *s)
 {
 	register char *p;
 	register int n;
@@ -208,7 +208,7 @@ PRIVATE int checkident(register struct string *s)
 /* getstring: read a string from the input
 */
 /*ARGSUSED*/
-PRIVATE struct string *getstring(int isident)
+static struct string *getstring(int isident)
 {
 	register char *p;
 	register int n;
@@ -252,7 +252,7 @@ PRIVATE struct string *getstring(int isident)
 
 /* gethead: read the start of an EM-line
 */
-PRIVATE void gethead(register struct e_instr *p)
+static void gethead(register struct e_instr *p)
 {
 	register int i;
 

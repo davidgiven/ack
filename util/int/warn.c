@@ -26,12 +26,12 @@ struct warn_msg
 
 #define WMASK 0x5555 /* powers of 4 */
 
-PRIVATE struct warn_msg warn_msg[] = {
+static struct warn_msg warn_msg[] = {
 #include "warn_msg" /* generated from $(EM)/doc/int */
 	{ 0, 0 } /* sentinel */
 };
 
-PRIVATE char* warn_text[WMSG + 1];
+static char* warn_text[WMSG + 1];
 
 void init_wmsg(void)
 {
@@ -59,10 +59,10 @@ struct warn_cnt
 	long wc_cnt; /* the counter */
 };
 
-PRIVATE struct warn_cnt* warn_cnt[WMSG];
-PRIVATE char warnmask[WMSG];
+static struct warn_cnt* warn_cnt[WMSG];
+static char warnmask[WMSG];
 
-PRIVATE long count_wrn(int nr)
+static long count_wrn(int nr)
 { /*	returns the occurrence counter for the warning with number
 	  nr; keeps track of the warnings, sorted by warning number,
 	  file name and line number.
@@ -97,7 +97,7 @@ PRIVATE long count_wrn(int nr)
 
 #define wmask_on(i) (warnmask[i])
 
-PRIVATE int latest_warning_printed; /* set if ... */
+static int latest_warning_printed; /* set if ... */
 
 /*ARGSUSED*/
 void do_warn(int nr, int L, const char* F)

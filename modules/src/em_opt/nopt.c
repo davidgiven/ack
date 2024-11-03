@@ -46,7 +46,7 @@ int OO_wrstats = 1; /* pattern statistics output */
  **************************/
 #define BTSCPY(pp,qq,i,p,q,n) for(pp=(p),qq=(q),i=(n);i--;*pp++ = *qq++)
 
-PRIVATE void allocmem(void);
+static void allocmem(void);
 
 void O_init(arith wsize, arith psize)
 {
@@ -107,7 +107,7 @@ void OO_dfa(register int last)
 	}
 }
 
-PRIVATE void fatal(s, a)
+static void fatal(s, a)
 	char *s;int a;
 {
 	fprint(STDERR, "%s: ", filename ? filename : "standard input");
@@ -116,7 +116,7 @@ PRIVATE void fatal(s, a)
 	sys_stop(S_EXIT);
 }
 
-PRIVATE void allocmem(void)
+static void allocmem(void)
 {
 	/* Allocate memory for queues on heap */
 	OO_buffer = (p_instr) Malloc(

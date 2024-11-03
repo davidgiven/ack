@@ -36,7 +36,7 @@ struct timeb
 
 /******** System to EM memory ********/
 
-PRIVATE void mem_stfld(ptr addr, size offset, size length, long val)
+static void mem_stfld(ptr addr, size offset, size length, long val)
 {
 	mem_stn(addr + offset, val, length);
 }
@@ -129,7 +129,7 @@ int ltchars2mem(ptr addr, struct ltchars* ltcharsb)
 
 /******** EM memory to system ********/
 
-PRIVATE unsigned long mem_ldfld(ptr addr, size offset, size length)
+static unsigned long mem_ldfld(ptr addr, size offset, size length)
 {
 	return mem_ldu(addr + offset, length);
 }

@@ -17,7 +17,7 @@
 #include "warn.h"
 #include "switch.h"
 
-PRIVATE long inc(long), dec(long);
+static long inc(long), dec(long);
 
 /** INC -: Increment word on top of stack by 1 (*) */
 void DoINC(void)
@@ -131,7 +131,7 @@ void DoZER(register size l)
 	*/
 }
 
-PRIVATE long inc(long l)
+static long inc(long l)
 {
 	if (must_test && !(IgnMask & BIT(EIOVFL)))
 	{
@@ -141,7 +141,7 @@ PRIVATE long inc(long l)
 	return (l + 1);
 }
 
-PRIVATE long dec(long l)
+static long dec(long l)
 {
 	if (must_test && !(IgnMask & BIT(EIOVFL)))
 	{

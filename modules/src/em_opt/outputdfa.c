@@ -9,23 +9,23 @@ static char rcsidp5[] = "$Id$";
 
 FILE *ofile;
 
-PRIVATE void openofile(char *);
-PRIVATE void installofile(void);
-PRIVATE void UNLINK(char *);
-PRIVATE void RENAME(char *, char *);
-PRIVATE void increase_next(unsigned int);
-PRIVATE void store_row(int, register int *);
-PRIVATE void outdfa(void);
-PRIVATE void outmnems(struct mnems);
-PRIVATE int sametest(int, int, struct exp_node *, struct exp_node *);
-PRIVATE int samerepl(int, int, struct mnems, struct mnems);
-PRIVATE int samecode(int, int);
-PRIVATE void outdotrans(void);
-PRIVATE void outoneaction(int, struct action *);
-PRIVATE void outrepl(int, struct mnems);
-PRIVATE void outexp(struct exp_node *, int);
-PRIVATE void outext(struct exp_node *);
-PRIVATE void outop(int op);
+static void openofile(char *);
+static void installofile(void);
+static void UNLINK(char *);
+static void RENAME(char *, char *);
+static void increase_next(unsigned int);
+static void store_row(int, register int *);
+static void outdfa(void);
+static void outmnems(struct mnems);
+static int sametest(int, int, struct exp_node *, struct exp_node *);
+static int samerepl(int, int, struct mnems, struct mnems);
+static int samecode(int, int);
+static void outdotrans(void);
+static void outoneaction(int, struct action *);
+static void outrepl(int, struct mnems);
+static void outexp(struct exp_node *, int);
+static void outext(struct exp_node *);
+static void outop(int op);
 
 void outputnopt(void)
 {
@@ -43,7 +43,7 @@ void outputnopt(void)
 static char ofilename[80];
 static char ofiletemp[80];
 
-PRIVATE void openofile(char *filename)
+static void openofile(char *filename)
 {
 	strcpy(ofilename, filename);
 	strcpy(ofiletemp, filename);
@@ -55,7 +55,7 @@ PRIVATE void openofile(char *filename)
 	}
 }
 
-PRIVATE void installofile(void)
+static void installofile(void)
 {
 	/*
 	 * if contents of newly generated ofiletemp is different
@@ -91,13 +91,13 @@ PRIVATE void installofile(void)
 		UNLINK(ofiletemp);
 }
 
-PRIVATE void UNLINK(char *x)
+static void UNLINK(char *x)
 {
 	/* Must remove the file "x" */
 	remove(x); /* systemcall to remove file */
 }
 
-PRIVATE void RENAME(char *x, char*y)
+static void RENAME(char *x, char*y)
 {
 	/* Must move the file "x" to the file "y" */
 	if (rename(x, y) != 0)
@@ -114,7 +114,7 @@ int *next, *check, *base;
 unsigned currsize; /* current size of next and check arrays */
 int maxpos = 0; /* highest used position in these arrayes */
 
-PRIVATE void increase_next(unsigned int size)
+static void increase_next(unsigned int size)
 {
 	/* realloc arrays next and check so they are at least
 	 * of size 'size'
@@ -135,7 +135,7 @@ PRIVATE void increase_next(unsigned int size)
 	currsize = newsize;
 }
 
-PRIVATE void store_row(int state, register int *row)
+static void store_row(int state, register int *row)
 {
 	/* find a place to store row in arrays */
 	register int b, i, o;
@@ -169,7 +169,7 @@ PRIVATE void store_row(int state, register int *row)
 	}
 }
 
-PRIVATE void outdfa(void)
+static void outdfa(void)
 {
 	register int s, i;
 	register struct state *p;
@@ -252,14 +252,14 @@ PRIVATE void outdfa(void)
 	fprintf(ofile, "};\n\n");
 }
 
-PRIVATE void outmnems(struct mnems l)
+static void outmnems(struct mnems l)
 {
 	int i;
 	for (i = 1; i <= l.m_len; i++)
 		fprintf(ofile, "%s ", l.m_elems[i - 1]->op_code->id_text);
 }
 
-PRIVATE int sametest(int s1, int s2, struct exp_node *e1, struct exp_node *e2)
+static int sametest(int s1, int s2, struct exp_node *e1, struct exp_node *e2)
 {
 	/* return 1 if tests are identical */
 	if (e1)
@@ -324,7 +324,7 @@ PRIVATE int sametest(int s1, int s2, struct exp_node *e1, struct exp_node *e2)
 		return (e2 == 0);
 }
 
-PRIVATE int samerepl(int s1, int s2, struct mnems r1, struct mnems r2)
+static int samerepl(int s1, int s2, struct mnems r1, struct mnems r2)
 {
 	/* return 1 if replacements are identical */
 	register int i;
@@ -343,7 +343,7 @@ PRIVATE int samerepl(int s1, int s2, struct mnems r1, struct mnems r2)
 	return 1;
 }
 
-PRIVATE int samecode(int s1, int s2)
+static int samecode(int s1, int s2)
 {
 	/* return 1 if replacement code of state s1 and s2 are identical */
 	register struct action *a1, *a2;
@@ -367,7 +367,7 @@ PRIVATE int samecode(int s1, int s2)
 	return 1;
 }
 
-PRIVATE void outdotrans(void)
+static void outdotrans(void)
 {
 	register int s, t;
 	struct action *a;
@@ -441,7 +441,7 @@ PRIVATE void outdotrans(void)
 	fprintf(ofile, "};\n");
 }
 
-PRIVATE void outoneaction(int s, struct action *a)
+static void outoneaction(int s, struct action *a)
 {
 	fprintf(ofile, "\t\t/* -> ");
 	outmnems(a->replacement);
@@ -454,7 +454,7 @@ PRIVATE void outoneaction(int s, struct action *a)
 	findworst(patterns[s], a->replacement);
 }
 
-PRIVATE void outrepl(int state, struct mnems repl)
+static void outrepl(int state, struct mnems repl)
 {
 	/*  Contruct <repl>=r1 r2 ... rn and put on output queue.
 	 */
@@ -512,7 +512,7 @@ PRIVATE void outrepl(int state, struct mnems repl)
 	}
 }
 
-PRIVATE void outexp(struct exp_node *e, int state)
+static void outexp(struct exp_node *e, int state)
 {
 	switch (e->node_type)
 	{
@@ -622,7 +622,7 @@ PRIVATE void outexp(struct exp_node *e, int state)
 	}
 }
 
-PRIVATE void outext(struct exp_node *e)
+static void outext(struct exp_node *e)
 {
 	if (e->node_type != PATARG)
 	{
@@ -632,7 +632,7 @@ PRIVATE void outext(struct exp_node *e)
 	fprintf(ofile, "patt+%d", e->leaf_val - 1);
 }
 
-PRIVATE void outop(int op)
+static void outop(int op)
 {
 	switch (op)
 	{

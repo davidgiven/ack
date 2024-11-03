@@ -29,10 +29,10 @@ extern size maxstack; /* from main.c */
 #ifdef LOGGING
 char* stack_sh; /* stadowbytes */
 char* stackML_sh; /* speed up access of stadowbytes */
-PRIVATE void st_clear_area(ptr, ptr);
+static void st_clear_area(ptr, ptr);
 #endif /* LOGGING */
 
-PRIVATE void warn_stbits(ptr, size);
+static void warn_stbits(ptr, size);
 
 /** Initialize and allocate the operand stack space "stack". */
 void init_stack(void)
@@ -852,7 +852,7 @@ void fpush(double f, size n)
 
 #ifdef LOGGING
 
-PRIVATE void warn_stbits(ptr addr, size n)
+static void warn_stbits(ptr addr, size n)
 {
 	register int or_bits = 0;
 	register int and_bits = 0xff;
@@ -882,7 +882,7 @@ PRIVATE void warn_stbits(ptr addr, size n)
 		warningcont(WWASINSP);
 }
 
-PRIVATE void st_clear_area(ptr from, ptr to)
+static void st_clear_area(ptr from, ptr to)
 {
 	/* includes both *from and *to (since ML+1 is unexpressible) */
 	register ptr a;

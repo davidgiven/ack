@@ -15,9 +15,9 @@
 #include "fra.h"
 #include "switch.h"
 
-PRIVATE long adi(long, long, size), sbi(long, long, size), dvi(long, long, size);
-PRIVATE long mli(long, long, size), rmi(long, long), ngi(long, size);
-PRIVATE long sli(long, long, size), sri(long, long, size);
+static long adi(long, long, size), sbi(long, long, size), dvi(long, long, size);
+static long mli(long, long, size), rmi(long, long), ngi(long, size);
+static long sli(long, long, size), sri(long, long, size);
 
 /** ADI w: Addition (*) */
 void DoADI(register size l)
@@ -104,7 +104,7 @@ void DoSRI(register size l)
 #define i_mins(n) ((n == 2) ? I_MINS2 : I_MINS4)
 
 /** Returns "w1" + "w2". */
-PRIVATE long adi(long w1, long w2, size nbytes)
+static long adi(long w1, long w2, size nbytes)
 {
 	if (must_test && !(IgnMask & BIT(EIOVFL)))
 	{
@@ -123,7 +123,7 @@ PRIVATE long adi(long w1, long w2, size nbytes)
 }
 
 /** Returns "w1" - "w2" */
-PRIVATE long sbi(long w1, long w2, size nbytes)
+static long sbi(long w1, long w2, size nbytes)
 {
 	if (must_test && !(IgnMask & BIT(EIOVFL)))
 	{
@@ -146,7 +146,7 @@ PRIVATE long sbi(long w1, long w2, size nbytes)
 #define labs(w) ((w < 0) ? (-w) : w)
 
 /** Returns "w1" * "w2" */
-PRIVATE long mli(long w1, long w2, size nbytes)
+static long mli(long w1, long w2, size nbytes)
 {
 	if (w1 == 0 || w2 == 0)
 		return (0L);
@@ -174,7 +174,7 @@ PRIVATE long mli(long w1, long w2, size nbytes)
 	return (w1 * w2);
 }
 
-PRIVATE long dvi(long w1, long w2, size nbytes)
+static long dvi(long w1, long w2, size nbytes)
 {
 	if (w2 == 0)
 	{
@@ -200,7 +200,7 @@ PRIVATE long dvi(long w1, long w2, size nbytes)
 	return (w1 / w2);
 }
 
-PRIVATE long rmi(long w1, long w2)
+static long rmi(long w1, long w2)
 {
 	if (w2 == 0)
 	{
@@ -214,7 +214,7 @@ PRIVATE long rmi(long w1, long w2)
 	return (w1 % w2);
 }
 
-PRIVATE long ngi(long w1, size nbytes)
+static long ngi(long w1, size nbytes)
 {
 	if (must_test && !(IgnMask & BIT(EIOVFL)))
 	{
@@ -227,7 +227,7 @@ PRIVATE long ngi(long w1, size nbytes)
 }
 
 /** "w1" << "w2" */
-PRIVATE long sli(long w1, long w2, size nbytes)
+static long sli(long w1, long w2, size nbytes)
 {
 	if (must_test)
 	{
@@ -269,7 +269,7 @@ PRIVATE long sli(long w1, long w2, size nbytes)
 }
 
 /*ARGSUSED*/
-PRIVATE long sri(long w1, long w2, size nbytes) /* w1 >> w2 */
+static long sri(long w1, long w2, size nbytes) /* w1 >> w2 */
 {
 #ifdef LOGGING
 	if (must_test)

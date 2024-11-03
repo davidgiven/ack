@@ -34,13 +34,13 @@
 extern char options[128];
 
 
-PRIVATE struct expr_state *expr2state();
-PRIVATE struct expr_state *value2state();
-PRIVATE struct expr_state *oper2state();
-PRIVATE expr_ignored();
-PRIVATE add_expr_state();
-PRIVATE referred_esp();
-PRIVATE free_expr_states();
+static struct expr_state *expr2state();
+static struct expr_state *value2state();
+static struct expr_state *oper2state();
+static expr_ignored();
+static add_expr_state();
+static referred_esp();
+static free_expr_states();
 
 lint_init()
 {
@@ -59,7 +59,7 @@ lint_expr(expr, used)
 	free_expr_states(esp);
 }
 
-PRIVATE struct expr_state *
+static struct expr_state *
 expr2state(expr, val, used)
 	register struct expr *expr;
 	int val;			/* RVAL or LVAL */
@@ -89,7 +89,7 @@ expr2state(expr, val, used)
 	}
 }
 
-PRIVATE struct expr_state *
+static struct expr_state *
 value2state(expr, val)
 	struct expr *expr;
 	int val;			/* RVAL or LVAL */
@@ -135,7 +135,7 @@ value2state(expr, val)
 	4.	set the result of the LHS to SET, if it is a named variable
 */
 
-PRIVATE struct expr_state *
+static struct expr_state *
 oper2state(expr, val, used)
 	struct expr *expr;
 	int val;			/* RVAL or LVAL */
@@ -285,7 +285,7 @@ oper2state(expr, val, used)
 	}
 }
 
-PRIVATE
+static
 expr_ignored(expr)
 	struct expr *expr;
 {
@@ -360,7 +360,7 @@ expr_ignored(expr)
 	}
 }
 
-PRIVATE
+static
 add_expr_state(value, to_state, espp)
 	struct value value;
 	struct expr_state **espp;
@@ -404,7 +404,7 @@ add_expr_state(value, to_state, espp)
 	}
 }
 
-PRIVATE
+static
 referred_esp(esp)
 	struct expr_state *esp;
 {
@@ -421,7 +421,7 @@ referred_esp(esp)
 	}
 }
 
-PRIVATE
+static
 free_expr_states(esp)
 	register struct expr_state *esp;
 {

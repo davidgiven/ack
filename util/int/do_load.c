@@ -15,7 +15,7 @@
 #include "warn.h"
 #include "switch.h"
 
-PRIVATE ptr lexback_LB(unsigned long);
+static ptr lexback_LB(unsigned long);
 
 /** LOC c: Load constant (i.e. push one word onto the stack) */
 void DoLOC(register long l)
@@ -179,7 +179,7 @@ void DoLPI(register long pi)
 	npush(arg_p(pi), psize);
 }
 
-PRIVATE ptr lexback_LB(unsigned long n)
+static ptr lexback_LB(unsigned long n)
 {
 	/* LB n static levels back */
 	register ptr lb = LB;

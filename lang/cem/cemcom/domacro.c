@@ -36,27 +36,27 @@ extern char	options[];
 
 IMPORT char **inctable;	/* list of include directories		*/
 IMPORT char *getwdir();
-PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
+static char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
 
 int	nestlevel = -1;
 
-PRIVATE do_include();
-PRIVATE ifexpr();
-PRIVATE do_define();
-PRIVATE push_if();
-PRIVATE do_elif();
-PRIVATE do_else();
-PRIVATE do_endif();
-PRIVATE do_if();
-PRIVATE do_ifdef();
-PRIVATE do_undef();
-PRIVATE int getparams();
-PRIVATE char *get_text();
-PRIVATE int macroeq();
-PRIVATE SkipRestOfLine();
-PRIVATE do_line();
+static do_include();
+static ifexpr();
+static do_define();
+static push_if();
+static do_elif();
+static do_else();
+static do_endif();
+static do_if();
+static do_ifdef();
+static do_undef();
+static int getparams();
+static char *get_text();
+static int macroeq();
+static SkipRestOfLine();
+static do_line();
 
 struct idf *
 GetIdentifier()
@@ -159,7 +159,7 @@ domacro()
 int lint_skip_comment;
 #endif
 
-PRIVATE
+static
 skip_block(to_endif)
 {
 	/*	skip_block() skips the input from
@@ -258,7 +258,7 @@ skip_block(to_endif)
 	}
 }
 
-PRIVATE
+static
 ifexpr()
 {
 	/*	ifexpr() returns whether the restricted constant
@@ -281,7 +281,7 @@ ifexpr()
 	return (errors == err_occurred) && (ifval != (arith)0);
 }
 
-PRIVATE
+static
 do_include()
 {
 	/*	do_include() performs the inclusion of a file.
@@ -322,7 +322,7 @@ do_include()
 	}
 }
 
-PRIVATE
+static
 do_define()
 {
 	/*	do_define() interprets a #define control line.
@@ -369,7 +369,7 @@ do_define()
 	LineNumber++;
 }
 
-PRIVATE
+static
 push_if()
 {
 	if (nestlevel >= IFDEPTH)
@@ -378,7 +378,7 @@ push_if()
 		ifstack[++nestlevel] = 0;
 }
 
-PRIVATE
+static
 do_elif()
 {
 	if (nestlevel <= nestlow || (ifstack[nestlevel])) {
@@ -392,7 +392,7 @@ do_elif()
 	}
 }
 
-PRIVATE
+static
 do_else()
 {
 	SkipRestOfLine();
@@ -404,7 +404,7 @@ do_else()
 	}
 }
 
-PRIVATE
+static
 do_endif()
 {
 	SkipRestOfLine();
@@ -414,7 +414,7 @@ do_endif()
 	else	nestlevel--;
 }
 
-PRIVATE
+static
 do_if()
 {
 	push_if();
@@ -422,7 +422,7 @@ do_if()
 		skip_block(0);
 }
 
-PRIVATE
+static
 do_ifdef(how)
 {
 	register struct idf *id;
@@ -442,7 +442,7 @@ do_ifdef(how)
 		SkipRestOfLine();
 }
 
-PRIVATE
+static
 do_undef()
 {
 	register struct idf *id;
@@ -459,7 +459,7 @@ do_undef()
 	SkipRestOfLine();
 }
 
-PRIVATE int
+static int
 getparams(buf, parbuf)
 	char *buf[];
 	char parbuf[];
@@ -554,7 +554,7 @@ macro_def(id, text, nformals, length, flags)
 	newdef->mc_count = 0;
 }
 
-PRIVATE int
+static int
 find_name(nm, index)
 	char *nm, *index[];
 {
@@ -571,7 +571,7 @@ find_name(nm, index)
 	return 0;
 }
 
-PRIVATE char *
+static char *
 get_text(formals, length)
 	char *formals[];
 	int *length;
@@ -678,7 +678,7 @@ get_text(formals, length)
 	as strings, without taking care of the leading and trailing
 	blanks (spaces and tabs).
 */
-PRIVATE int
+static int
 macroeq(s, t)
 	register char *s, *t;
 {
@@ -729,7 +729,7 @@ domacro()
 }
 #endif /* NOPP */
 
-PRIVATE
+static
 SkipRestOfLine()
 {
 	/*	we do a PushBack because we don't want to skip the next line
@@ -739,7 +739,7 @@ SkipRestOfLine()
 	skipline();
 }
 
-PRIVATE
+static
 do_line(l)
 	unsigned int l;
 {

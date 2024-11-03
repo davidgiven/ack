@@ -17,7 +17,7 @@
 #define SAR 2
 #define AAR 3
 
-PRIVATE void arr(int, size);
+static void arr(int, size);
 
 void DoLAR(size arg)
 {
@@ -51,7 +51,7 @@ void DoAAR(size arg)
  *	6. Perform the correct function.		*
  *********************************************************/
 
-PRIVATE void
+static void
 arr(int type, /* operation TYPE */
     size elm_size /* ELeMent SIZE */
 )

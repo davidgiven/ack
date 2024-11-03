@@ -32,8 +32,8 @@ static int argnum;		/* Number of arguments */
 #define COMMENTSTARTER	';'
 
 /* Forward declarations */
-PRIVATE void gettyp(int, register struct e_arg *);
-PRIVATE int getexpr(register int, register struct e_arg *);
+static void gettyp(int, register struct e_arg *);
+static int getexpr(register int, register struct e_arg *);
 
 /* External definitions */
 extern char em_mnem[][4];
@@ -41,7 +41,7 @@ extern char em_pseu[][4];
 
 /* inithash, pre_hash, hash: Simple hashtable mechanism
 */
-PRIVATE int hash(register char *s)
+static int hash(register char *s)
 {
 	register int h = 0;
 
@@ -52,7 +52,7 @@ PRIVATE int hash(register char *s)
 	return h;
 }
 
-PRIVATE void pre_hash(int i, char *s)
+static void pre_hash(int i, char *s)
 {
 	register int h;
 
@@ -72,7 +72,7 @@ PRIVATE void pre_hash(int i, char *s)
 
 
 
-PRIVATE void inithash(void)
+static void inithash(void)
 {
 	register int i;
 
@@ -90,7 +90,7 @@ PRIVATE void inithash(void)
 /* nospace: skip until we find a non-space character. Also skip
 	comments.
 */
-PRIVATE int nospace(void)
+static int nospace(void)
 {
 	register int c;
 
@@ -107,7 +107,7 @@ PRIVATE int nospace(void)
 
 /* syntax: Put an error message in EM_error and skip to the end of the line
 */
-PRIVATE void syntax(char *s)
+static void syntax(char *s)
 {
 	register int c;
 
@@ -119,7 +119,7 @@ PRIVATE void syntax(char *s)
 
 /* checkeol: check that we have a complete line (except maybe for spaces)
 */
-PRIVATE void checkeol(void)
+static void checkeol(void)
 {
 
 	if (nospace() != '\n') {
@@ -130,7 +130,7 @@ PRIVATE void checkeol(void)
 
 /* getescape: read a '\' escape sequence
 */
-PRIVATE int getescape(void)
+static int getescape(void)
 {
 	register int c, j, r;
 
@@ -162,7 +162,7 @@ PRIVATE int getescape(void)
 
 /* getname: Read a string of characters representing an identifier
 */
-PRIVATE struct string *getname(void)
+static struct string *getname(void)
 {
 	register char *p;
 	register struct string *s;
@@ -200,7 +200,7 @@ PRIVATE struct string *getname(void)
 
 /* getstring: read a string of characters between quotes
 */
-PRIVATE struct string *getstring(int isident)
+static struct string *getstring(int isident)
 {
 	register char *p;
 	struct string *s;
@@ -252,7 +252,7 @@ PRIVATE struct string *getstring(int isident)
 
 
 
-PRIVATE int offsetted(int argtyp, arith *ap)
+static int offsetted(int argtyp, arith *ap)
 {
 	register int c;
 
@@ -270,7 +270,7 @@ PRIVATE int offsetted(int argtyp, arith *ap)
 	return argtyp;
 }
 
-PRIVATE int getnumber(register int c, register struct e_arg *ap)
+static int getnumber(register int c, register struct e_arg *ap)
 {
 	char str[256 + 1];
 	register char *p = str;
@@ -358,7 +358,7 @@ PRIVATE int getnumber(register int c, register struct e_arg *ap)
 }
 
 
-PRIVATE int getfactor(register int c, register struct e_arg *ap)
+static int getfactor(register int c, register struct e_arg *ap)
 {
 	if (c == '(') {
 		if (getexpr(nospace(), ap) != sp_cst4) {
@@ -373,7 +373,7 @@ PRIVATE int getfactor(register int c, register struct e_arg *ap)
 	return getnumber(c, ap);
 }
 
-PRIVATE int getterm(register int c, register struct e_arg *ap)
+static int getterm(register int c, register struct e_arg *ap)
 {
 	arith left;
 
@@ -398,7 +398,7 @@ PRIVATE int getterm(register int c, register struct e_arg *ap)
 	return sp_cst4;
 }
 
-PRIVATE int getexpr(register int c, register struct e_arg *ap)
+static int getexpr(register int c, register struct e_arg *ap)
 {
 	arith left;
 
@@ -422,7 +422,7 @@ PRIVATE int getexpr(register int c, register struct e_arg *ap)
 	return sp_cst4;
 }
 
-PRIVATE int get15u(void)
+static int get15u(void)
 {
 	struct e_arg dummy;
 
@@ -433,7 +433,7 @@ PRIVATE int get15u(void)
 	return (int) (dummy.ema_cst);
 }
 
-PRIVATE void gettyp(int typset, register struct e_arg *ap)
+static void gettyp(int typset, register struct e_arg *ap)
 {
 	register int c, t;
 	register int argtyp;
@@ -507,7 +507,7 @@ PRIVATE void gettyp(int typset, register struct e_arg *ap)
 	}
 }
 
-PRIVATE void getarg(int typset, struct e_arg *ap)
+static void getarg(int typset, struct e_arg *ap)
 {
 	register int c;
 
@@ -527,7 +527,7 @@ PRIVATE void getarg(int typset, struct e_arg *ap)
 /* getmnem: We found the start of either an instruction or a pseudo.
 	get the rest of it
 */
-PRIVATE void getmnem(int c, register struct e_instr *p)
+static void getmnem(int c, register struct e_instr *p)
 {
 	register int h;
 	int i;
@@ -567,7 +567,7 @@ PRIVATE void getmnem(int c, register struct e_instr *p)
 	}
 }
 
-PRIVATE void line_line(void)
+static void line_line(void)
 {
 	static char filebuf[256 + 1];
 	struct e_arg dummy;
@@ -579,7 +579,7 @@ PRIVATE void line_line(void)
 	EM_filename = filebuf;
 }
 
-PRIVATE void getlabel(int c, register struct e_instr *p)
+static void getlabel(int c, register struct e_instr *p)
 {
 
 	ungetbyte(c);
@@ -600,7 +600,7 @@ PRIVATE void getlabel(int c, register struct e_instr *p)
 	checkeol();
 }
 
-PRIVATE void gethead(register struct e_instr *p)
+static void gethead(register struct e_instr *p)
 {
 	register int c;
 

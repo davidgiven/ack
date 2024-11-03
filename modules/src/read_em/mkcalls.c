@@ -31,7 +31,7 @@ static int listtype = 0;	/* indicates pseudo when generating code for
 	The argument must be of a type allowed by "typset".
 	Return a pointer to the next argument.
 */
-PRIVATE int checkarg(register struct e_arg *arg, int typset)
+static int checkarg(register struct e_arg *arg, int typset)
 {
 
 	if (((!typset) && arg->ema_argtype) ||
@@ -56,7 +56,7 @@ PRIVATE int checkarg(register struct e_arg *arg, int typset)
 
 /*	EM_doinstr: An EM instruction
 */
-PRIVATE void EM_doinstr(register struct e_instr *p)
+static void EM_doinstr(register struct e_instr *p)
 {
 	register int parametertype;	/* parametertype of the instruction */
 
@@ -90,7 +90,7 @@ PRIVATE void EM_doinstr(register struct e_instr *p)
 #include "C_mnem.h"
 }
 
-PRIVATE void EM_dopseudo(register struct e_instr *p)
+static void EM_dopseudo(register struct e_instr *p)
 {
 
 	switch(p->em_opcode) {
@@ -320,7 +320,7 @@ PRIVATE void EM_dopseudo(register struct e_instr *p)
 	}
 }
 
-PRIVATE void EM_docon(register struct e_instr *p)
+static void EM_docon(register struct e_instr *p)
 {
 	checkarg(&(p->em_arg), val_ptyp);
 	switch(p->em_argtype) {
@@ -357,7 +357,7 @@ PRIVATE void EM_docon(register struct e_instr *p)
 	}
 }
 
-PRIVATE void EM_dostartmes(register struct e_instr *p)
+static void EM_dostartmes(register struct e_instr *p)
 {
 
 	if (listtype) {

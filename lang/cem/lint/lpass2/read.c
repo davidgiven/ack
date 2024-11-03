@@ -26,12 +26,12 @@ int LineNr = 1;
 #define	pushback(ch) PushBack(); if (ch=='\n') LineNr--
 
 /* all the ReadX() functions return 0 upon EOI */
-PRIVATE int ReadString();
-PRIVATE int ReadInt();
-PRIVATE int ReadArgs();
-PRIVATE int ReadArg();
+static int ReadString();
+static int ReadInt();
+static int ReadArgs();
+static int ReadArg();
 
-PRIVATE SkipChar();
+static SkipChar();
 
 int
 get_id(id)
@@ -85,7 +85,7 @@ get_id(id)
 	return 1;
 }
 
-PRIVATE int
+static int
 ReadString(buf, delim, maxsize)
 	char *buf;
 {
@@ -119,7 +119,7 @@ ReadString(buf, delim, maxsize)
 	return 1;
 }
 
-PRIVATE int
+static int
 ReadInt(ip)
 	int *ip;
 {
@@ -152,7 +152,7 @@ ReadInt(ip)
 	return 1;
 }
 
-PRIVATE int
+static int
 ReadArgs(nrargs, buf)
 	char *buf;
 {
@@ -182,7 +182,7 @@ ReadArgs(nrargs, buf)
 	return 1;
 }
 
-PRIVATE int
+static int
 ReadArg(buf, size)
 	char *buf;
 	int size;
@@ -208,7 +208,7 @@ ReadArg(buf, size)
 	}
 }
 
-PRIVATE SkipChar(ch)
+static SkipChar(ch)
 {
 	int c;
 

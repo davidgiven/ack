@@ -48,12 +48,12 @@ long ENTRY;
 long NLINE;
 size SZDATA;
 
-PRIVATE FILE* load_fp; /* Filepointer of load file */
+static FILE* load_fp; /* Filepointer of load file */
 
-PRIVATE ptr rd_repeat(ptr, size, ptr);
-PRIVATE ptr rd_descr(int, size, ptr);
-PRIVATE int rd_byte(void);
-PRIVATE long rd_int(size);
+static ptr rd_repeat(ptr, size, ptr);
+static ptr rd_descr(int, size, ptr);
+static int rd_byte(void);
+static long rd_int(size);
 
 void rd_open(char* fname)
 { /* Open loadfile */
@@ -203,7 +203,7 @@ void rd_close(void)
  *	number is also stored in a double.				*
  ************************************************************************/
 
-PRIVATE ptr rd_repeat(ptr pos, size count, ptr prev_pos)
+static ptr rd_repeat(ptr pos, size count, ptr prev_pos)
 {
 	register size diff = pos - prev_pos;
 	register size j;
@@ -225,7 +225,7 @@ PRIVATE ptr rd_repeat(ptr pos, size count, ptr prev_pos)
 	return pos;
 }
 
-PRIVATE ptr rd_descr(int type, size count, ptr pos)
+static ptr rd_descr(int type, size count, ptr pos)
 {
 	register size j;
 	char fl_rep[128]; /* fp number representation */
@@ -305,7 +305,7 @@ PRIVATE ptr rd_descr(int type, size count, ptr pos)
 	return pos;
 }
 
-PRIVATE int rd_byte(void)
+static int rd_byte(void)
 {
 	register int i;
 
@@ -314,7 +314,7 @@ PRIVATE int rd_byte(void)
 	return (i);
 }
 
-PRIVATE long rd_int(size n)
+static long rd_int(size n)
 {
 	register long l;
 	register int i;

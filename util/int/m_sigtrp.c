@@ -29,10 +29,10 @@
 #ifndef NSIG
 #define NSIG _NSIG
 #endif
-PRIVATE int sig_map[NSIG + 1]; /* maps signals onto trap numbers */
+static int sig_map[NSIG + 1]; /* maps signals onto trap numbers */
 
-PRIVATE void HndlIntSig(int); /* handle signal to interpreter */
-PRIVATE void HndlEmSig(int); /* handle signal to user program */
+static void HndlIntSig(int); /* handle signal to interpreter */
+static void HndlEmSig(int); /* handle signal to user program */
 
 void init_signals(void)
 {
@@ -127,7 +127,7 @@ void trap_signal(void)
 	trap(sig_map[old_sig]);
 }
 
-PRIVATE void HndlIntSig(int sn)
+static void HndlIntSig(int sn)
 {
 	/* The interpreter got the signal */
 	signal(sn, SIG_IGN); /* peace and quiet for close_down() */
@@ -136,7 +136,7 @@ PRIVATE void HndlIntSig(int sn)
 	close_down(1);
 }
 
-PRIVATE void HndlEmSig(int sn)
+static void HndlEmSig(int sn)
 {
 	/* The EM machine got the signal */
 	signal(sn, HndlIntSig); /* Revert to old situation */

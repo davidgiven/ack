@@ -32,7 +32,7 @@ extern int must_test;
 #define sbu(w1, w2) (unsigned long)(w1 - w2)
 #define mlu(w1, w2) (unsigned long)(w1 * w2)
 
-PRIVATE unsigned long dvu(unsigned long w1, unsigned long w2)
+static unsigned long dvu(unsigned long w1, unsigned long w2)
 {
 	if (w2 == 0)
 	{
@@ -46,7 +46,7 @@ PRIVATE unsigned long dvu(unsigned long w1, unsigned long w2)
 	return (w1 / w2);
 }
 
-PRIVATE unsigned long rmu(unsigned long w1, unsigned long w2)
+static unsigned long rmu(unsigned long w1, unsigned long w2)
 {
 	if (w2 == 0)
 	{
@@ -61,7 +61,7 @@ PRIVATE unsigned long rmu(unsigned long w1, unsigned long w2)
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
+static unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
 {
 	/* w1 << w2 */
 #ifdef LOGGING
@@ -81,7 +81,7 @@ PRIVATE unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
+static unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
 {
 	/* w1 >> w2 */
 #ifdef LOGGING

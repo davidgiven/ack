@@ -33,13 +33,13 @@ extern long inr; /* from log.c */
 */
 
 /* Forward declarations */
-PRIVATE char *displ_undefs(int, ptr), *displ_fil(ptr), *displ_sh(char, int), *displ_code(int);
-PRIVATE ptr std_raw(ptr, int), std_rsb(ptr);
-PRIVATE int std_bytes(ptr, ptr, int), dtd_bytes(ptr, ptr, int), FRAd_bytes(int, int, int);
-PRIVATE void std_item(ptr), std_left_undefs(int, ptr);
-PRIVATE void gdad_item(ptr), gdad_left_undefs(int, ptr);
-PRIVATE void hpd_item(ptr), hpd_left_undefs(int, ptr);
-PRIVATE void FRA_dump(void), FRA_item(int);
+static char *displ_undefs(int, ptr), *displ_fil(ptr), *displ_sh(char, int), *displ_code(int);
+static ptr std_raw(ptr, int), std_rsb(ptr);
+static int std_bytes(ptr, ptr, int), dtd_bytes(ptr, ptr, int), FRAd_bytes(int, int, int);
+static void std_item(ptr), std_left_undefs(int, ptr);
+static void gdad_item(ptr), gdad_left_undefs(int, ptr);
+static void hpd_item(ptr), hpd_left_undefs(int, ptr);
+static void FRA_dump(void), FRA_item(int);
 
 /******** Stack Dump ********/
 
@@ -84,7 +84,7 @@ void std_all(long sz, int rawfl)
 	LOG((" d2 "));
 }
 
-PRIVATE ptr std_raw(ptr addr, int rawfl)
+static ptr std_raw(ptr addr, int rawfl)
 {
 	/*	Produces a formatted dump of the stack segment starting
 	    at  addr, up to the Return Status Block (identified
@@ -117,7 +117,7 @@ PRIVATE ptr std_raw(ptr addr, int rawfl)
 	return addr;
 }
 
-PRIVATE void std_item(ptr addr)
+static void std_item(ptr addr)
 {
 	if (is_wordaligned(addr) && is_in_stack(addr, psize)
 	    && std_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
@@ -144,7 +144,7 @@ PRIVATE void std_item(ptr addr)
 }
 
 /** Dumps the Return Status Block. */
-PRIVATE ptr std_rsb(ptr addr)
+static ptr std_rsb(ptr addr)
 {
 	ptr dmp_lb;
 	int code;
@@ -192,7 +192,7 @@ PRIVATE ptr std_rsb(ptr addr)
 	return addr - rsbsize;
 }
 
-PRIVATE char* displ_code(int rsbcode)
+static char* displ_code(int rsbcode)
 {
 	switch (rsbcode)
 	{
@@ -210,7 +210,7 @@ PRIVATE char* displ_code(int rsbcode)
 	UNREACHABLE_CODE;
 }
 
-PRIVATE void std_left_undefs(int nundef, ptr addr)
+static void std_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
 	switch (nundef)
@@ -227,7 +227,7 @@ PRIVATE void std_left_undefs(int nundef, ptr addr)
 	}
 }
 
-PRIVATE void FRA_dump(void)
+static void FRA_dump(void)
 {
 	register int addr;
 
@@ -239,7 +239,7 @@ PRIVATE void FRA_dump(void)
 	}
 }
 
-PRIVATE void FRA_item(int addr)
+static void FRA_item(int addr)
 {
 	if (is_wordaligned(addr) && is_in_FRA(addr, psize)
 	    && FRAd_bytes(addr, (int)(addr + psize), SH_DATAP | SH_INSP))
@@ -311,7 +311,7 @@ void gdad_all(ptr low, ptr high)
 	LOG((" +1 "));
 }
 
-PRIVATE void gdad_item(ptr addr)
+static void gdad_item(ptr addr)
 {
 	if (is_wordaligned(addr) && is_in_data(addr, psize)
 	    && dtd_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
@@ -338,7 +338,7 @@ PRIVATE void gdad_item(ptr addr)
 	}
 }
 
-PRIVATE void gdad_left_undefs(int nundef, ptr addr)
+static void gdad_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
 	switch (nundef)
@@ -394,7 +394,7 @@ void hpd_all(void)
 	LOG((" *1 "));
 }
 
-PRIVATE void hpd_item(ptr addr)
+static void hpd_item(ptr addr)
 {
 	if (is_wordaligned(addr) && is_in_data(addr, psize)
 	    && dtd_bytes(addr, addr + psize, SH_DATAP | SH_INSP))
@@ -421,7 +421,7 @@ PRIVATE void hpd_item(ptr addr)
 	}
 }
 
-PRIVATE void hpd_left_undefs(int nundef, ptr addr)
+static void hpd_left_undefs(int nundef, ptr addr)
 {
 	/* handle pending undefineds */
 	switch (nundef)
@@ -440,7 +440,7 @@ PRIVATE void hpd_left_undefs(int nundef, ptr addr)
 
 /* Service routines */
 
-PRIVATE int std_bytes(ptr low, ptr high, int bits)
+static int std_bytes(ptr low, ptr high, int bits)
 {
 	/*	True if all stack bytes from low to high-1 have one of the
 	    bits in bits on.
@@ -456,7 +456,7 @@ PRIVATE int std_bytes(ptr low, ptr high, int bits)
 	return byte & bits;
 }
 
-PRIVATE int dtd_bytes(ptr low, ptr high, int bits)
+static int dtd_bytes(ptr low, ptr high, int bits)
 {
 	/*	True if all data bytes from low to high-1 have one of the
 	    bits in bits on.
@@ -472,7 +472,7 @@ PRIVATE int dtd_bytes(ptr low, ptr high, int bits)
 	return byte & bits;
 }
 
-PRIVATE int FRAd_bytes(int low, int high, int bits)
+static int FRAd_bytes(int low, int high, int bits)
 {
 	/*	True if all data bytes from low to high-1 have one of the
 	    bits in bits on.
@@ -488,7 +488,7 @@ PRIVATE int FRAd_bytes(int low, int high, int bits)
 	return byte & bits;
 }
 
-PRIVATE char* displ_undefs(int nundef, ptr addr)
+static char* displ_undefs(int nundef, ptr addr)
 {
 	/*	Given the number of undefineds, we want to report the number
 	    of words with the left-over numbers of bytes on both sides:
@@ -533,7 +533,7 @@ PRIVATE char* displ_undefs(int nundef, ptr addr)
 	return buf;
 }
 
-PRIVATE char* displ_fil(ptr fil)
+static char* displ_fil(ptr fil)
 { /*	Returns a buffer containing a representation of the
 	  filename derived from FIL-value fil.
   */
@@ -561,7 +561,7 @@ PRIVATE char* displ_fil(ptr fil)
 	return &buf[0];
 }
 
-PRIVATE char* displ_sh(char shadow, int byte)
+static char* displ_sh(char shadow, int byte)
 { /*	Returns a buffer containing a description of the
 	  shadow byte.
   */

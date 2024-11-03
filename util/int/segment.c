@@ -23,9 +23,9 @@
 #define DATA_SEGMENT -2
 #define HEAP_SEGMENT -1
 
-PRIVATE ptr* AB_list;
-PRIVATE size frame_limit;
-PRIVATE size curr_frame;
+static ptr* AB_list;
+static size frame_limit;
+static size curr_frame;
 
 /** Allocate space for AB_list & initialize frame variables */
 void init_AB_list(void)

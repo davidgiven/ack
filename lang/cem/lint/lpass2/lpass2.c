@@ -16,24 +16,24 @@ extern char *strcpy();
 
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 
-PRIVATE char cur_name[NAMESIZE];
-PRIVATE struct inpdef *dot, *lib, *proto, *ext, *sta;
+static char cur_name[NAMESIZE];
+static struct inpdef *dot, *lib, *proto, *ext, *sta;
 
-PRIVATE one_name();
-PRIVATE chk_def();
-PRIVATE ext_decls();
-PRIVATE proto_defs();
-PRIVATE chk_proto();
-PRIVATE ext_def();
-PRIVATE get_dot();
-PRIVATE init();
-PRIVATE lib_def();
-PRIVATE one_ext_decl();
-PRIVATE one_func_call();
-PRIVATE one_var_usage();
-PRIVATE stat_def();
-PRIVATE statics();
-PRIVATE usage();
+static one_name();
+static chk_def();
+static ext_decls();
+static proto_defs();
+static chk_proto();
+static ext_def();
+static get_dot();
+static init();
+static lib_def();
+static one_ext_decl();
+static one_func_call();
+static one_var_usage();
+static stat_def();
+static statics();
+static usage();
 
 #define	same_name()	(dot && streq(cur_name, dot->id_name))
 #define	same_obj(stnr)	(same_name() && dot->id_statnr == stnr)
@@ -71,7 +71,7 @@ main(argc, argv)
 char loptions[128];
 static char *table[] = {0};
 
-PRIVATE init(argc, argv)
+static init(argc, argv)
 	char *argv[];
 {
 /*
@@ -106,7 +106,7 @@ PRIVATE init(argc, argv)
 	}
 }
 
-PRIVATE get_dot()
+static get_dot()
 {
 	if (!get_id(dot)) {
 		free_inpdef(dot);
@@ -118,7 +118,7 @@ PRIVATE get_dot()
 	}
 }
 
-PRIVATE one_name()
+static one_name()
 {
 	strcpy(cur_name, dot->id_name);
 	lib_def();
@@ -142,7 +142,7 @@ PRIVATE one_name()
 
 /******** L I B R A R Y ********/
 
-PRIVATE lib_def()
+static lib_def()
 {
 	if (same_obj(0) && is_class(dot, CL_LIB)) {
 		lib = dot;
@@ -158,7 +158,7 @@ PRIVATE lib_def()
 
 
 /******** P R O T O T Y P E S ********/
-PRIVATE proto_defs()
+static proto_defs()
 {
 	if (same_obj(0) && dot->id_class == PFDF) {
 		if (lib) {
@@ -175,7 +175,7 @@ PRIVATE proto_defs()
 	}
 }
 
-PRIVATE chk_proto(def)
+static chk_proto(def)
 	struct inpdef *def;
 {
 	if (proto->id_args) {
@@ -190,7 +190,7 @@ PRIVATE chk_proto(def)
 
 /******** E X T E R N ********/
 
-PRIVATE ext_def()
+static ext_def()
 {
 	if (same_obj(0) && is_class(dot, CL_EXT|CL_DEF)) {
 		if (lib && !proto) {
@@ -211,7 +211,7 @@ PRIVATE ext_def()
 	}
 }
 
-PRIVATE ext_decls()
+static ext_decls()
 {
 	while (same_obj(0) && dot->id_class == EFDC) {
 		one_ext_decl("function", "variable", CL_VAR);
@@ -226,7 +226,7 @@ PRIVATE ext_decls()
 	}
 }
 
-PRIVATE one_ext_decl(kind, other_kind, other_class)
+static one_ext_decl(kind, other_kind, other_class)
 	char *kind;
 	char *other_kind;
 	int other_class;
@@ -268,7 +268,7 @@ PRIVATE one_ext_decl(kind, other_kind, other_class)
 
 /******** U S A G E ********/
 
-PRIVATE usage(stnr)
+static usage(stnr)
 	int stnr;
 {
 	register struct inpdef *def =
@@ -305,7 +305,7 @@ PRIVATE usage(stnr)
 	}
 }
 
-PRIVATE one_func_call(def)
+static one_func_call(def)
 	struct inpdef *def;
 {
 	if (!def) {
@@ -347,7 +347,7 @@ PRIVATE one_func_call(def)
 	get_dot();
 }
 
-PRIVATE one_var_usage(def)
+static one_var_usage(def)
 	struct inpdef *def;
 {
 	if (!def) {
@@ -367,7 +367,7 @@ PRIVATE one_var_usage(def)
 
 /******** S T A T I C ********/
 
-PRIVATE statics()
+static statics()
 {
 	while (same_name()) {
 		int stnr = dot->id_statnr;
@@ -394,7 +394,7 @@ PRIVATE statics()
 	}
 }
 
-PRIVATE stat_def(stnr)
+static stat_def(stnr)
 	int stnr;
 {
 	if (same_obj(stnr) && is_class(dot, CL_STAT|CL_DEF)) {
@@ -423,7 +423,7 @@ PRIVATE stat_def(stnr)
 	}
 }
 
-PRIVATE chk_def(def)
+static chk_def(def)
 	struct inpdef *def;
 {
 	if (!def)

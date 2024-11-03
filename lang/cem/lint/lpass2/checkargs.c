@@ -14,14 +14,14 @@ extern char *strcpy();
 #define	streq(s1,s2)	(strcmp(s1, s2) == 0)
 
 /* a format is developed into a normal parameter definition */
-PRIVATE int is_formatargs;		/* present or not */
-PRIVATE char formatargs[1000];		/* the definitions */
+static int is_formatargs;		/* present or not */
+static char formatargs[1000];		/* the definitions */
 
-PRIVATE chk_argtps();
-PRIVATE char *next_argtype();
-PRIVATE int type_match();
-PRIVATE form_type();
-PRIVATE conv_format();
+static chk_argtps();
+static char *next_argtype();
+static int type_match();
+static form_type();
+static conv_format();
 
 int
 type_equal(act, form)
@@ -67,7 +67,7 @@ chk_args(id, def)
 	}
 }
 
-PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
+static chk_argtps(id, def, nrargs, act_tp, form_tp)
 	struct inpdef *id;		/* the actual call */
 	struct inpdef *def;		/* 0 for format-derived definition */
 	int *nrargs;			/* in-out parameter, counting */
@@ -121,7 +121,7 @@ PRIVATE chk_argtps(id, def, nrargs, act_tp, form_tp)
 	}
 }
 
-PRIVATE char *
+static char *
 next_argtype(tp)
 	char *tp;
 {
@@ -135,7 +135,7 @@ next_argtype(tp)
 }
 
 int
-PRIVATE type_match(id, act, form)
+static type_match(id, act, form)
 	struct inpdef *id;
 	char *act, *form;
 {
@@ -167,7 +167,7 @@ PRIVATE type_match(id, act, form)
 	return 0;
 }
 
-PRIVATE conv_format(id, act, form)
+static conv_format(id, act, form)
 	struct inpdef *id;
 	char *act, *form;
 {
@@ -265,7 +265,7 @@ PRIVATE conv_format(id, act, form)
 	*fmt++ = '\0';
 }
 
-PRIVATE form_type(buff, tp)
+static form_type(buff, tp)
 	char buff[];
 	char *tp;
 {	/*	store a formatted version of tp in buff
