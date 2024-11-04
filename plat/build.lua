@@ -20,7 +20,6 @@ definerule("ackfile",
 			name = e.name,
 			srcs = e.srcs,
 			deps = {
-				"lang/b/compiler+pkg",
 				"lang/basic/src+pkg",
 				"lang/cem/cemcom.ansi+pkg",
 				"lang/cem/cpp.ansi+pkg",
@@ -133,12 +132,10 @@ definerule("build_plat_libs",
 	},
 	function(e)
 		local installmap = {
-			"lang/b/lib+pkg_"..e.plat,
 			"lang/basic/lib+pkg_"..e.plat,
 			"lang/cem/libcc.ansi+pkg_"..e.plat,
 			"lang/m2/libm2+pkg_"..e.plat,
 			"lang/pc/libpc+pkg_"..e.plat,
-			"lang/b/lib+pkg_"..e.plat,
 			["$(PLATIND)/"..e.plat.."/libem.a"] = "mach/"..e.arch.."/libem+lib_"..e.plat,
 			["$(PLATIND)/"..e.plat.."/libend.a"] = "mach/"..e.arch.."/libend+lib_"..e.plat,
 		}
