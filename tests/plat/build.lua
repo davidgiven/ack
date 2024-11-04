@@ -6,7 +6,7 @@ definerule("plat_testsuite",
 		plat = { type="string" },
 		method = { type="string" },
 		-- added bugs/bug-203-ego-sr_c-O3.c
-		sets = { type="table", default={"core", "b", "bugs", "m2", "floats", "long-long"}},
+		sets = { type="table", default={"core", "bugs", "m2", "floats", "long-long"}},
 		skipsets = { type="table", default={}},
 		tests = { type="targets", default={} },
 	},
@@ -31,7 +31,6 @@ definerule("plat_testsuite",
 			name = "lib",
 			srcs = {
 				"tests/plat/lib/test.c",
-				"tests/plat/lib/test_b.c",
 			},
 			hdrs = {
 				"tests/plat/lib/test.h",
