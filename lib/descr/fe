@@ -170,17 +170,6 @@ name a68s
         need .8
         callname a68s
 end
-name b
-        from .b
-        to .k
-        program {EM}/lib/ack/em_b
-		mapflag -B* ABC_F={ABC_F?} -B*
-        args -i < -o > -w {p} {ABC_F?}
-        prep cond
-        rts .b
-        need .b
-        callname abc
-end
 name encode
 	from .e
 	to .k
