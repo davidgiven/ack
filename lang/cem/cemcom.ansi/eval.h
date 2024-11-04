@@ -18,10 +18,10 @@ struct expr;
 struct value;
 struct type;
 
-void EVAL(register struct expr *expr, int val, int code, label true_label, label false_label);
+void EVAL(struct expr *expr, int val, int code, label true_label, label false_label);
 
 /*	assop() generates the opcode of an assignment operators op=	*/
-void assop(register struct type *type, int oper);
+void assop(struct type *type, int oper);
 /*	store_val() generates code for a store operation.
 	There are four ways of storing data:
 	- into a global variable
@@ -29,8 +29,8 @@ void assop(register struct type *type, int oper);
 	- into a local static variable
 	- absolute addressing
 */
-void store_val(register struct value *vl, register struct type *tp);
-void load_val(register struct expr *expr, int rlval);
+void store_val(struct value *vl, struct type *tp);
+void load_val(struct expr *expr, int rlval);
 void load_cst(writh val, arith siz);
 
 #endif /* LINT */

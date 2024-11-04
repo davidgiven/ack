@@ -72,7 +72,7 @@ declaration
 	makes all hope of writing a specific grammar for typedefs illusory.
 */
 
-decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
+decl_specifiers	/* non-empty */ (struct decspecs *ds;)
 	/*	Reads a non-empty decl_specifiers and fills the struct
 		decspecs *ds.
 	*/
@@ -92,7 +92,7 @@ decl_specifiers	/* non-empty */ (register struct decspecs *ds;)
 ;
 
 /* 8.1 */
-other_specifier(register struct decspecs *ds;):
+other_specifier(struct decspecs *ds;):
 	[ AUTO | STATIC | EXTERN | TYPEDEF | REGISTER ]
 	{	if (ds->ds_sc_given)
 			error("repeated storage class specifier");
@@ -130,7 +130,7 @@ type_specifier(struct type **tpp;)
 	{*tpp = Ds.ds_type;}
 ;
 
-single_type_specifier(register struct decspecs *ds;):
+single_type_specifier(struct decspecs *ds;):
 	%default TYPE_IDENTIFIER	/* this includes INT, CHAR, etc. */
 	{idf2type(dot.tk_idf, &ds->ds_type);}
 |
@@ -159,7 +159,7 @@ init_declarator_list(struct decspecs *ds;):
 	[ ',' init_declarator(ds) ]*
 ;
 
-init_declarator(register struct decspecs *ds;)
+init_declarator(struct decspecs *ds;)
 	{
 		struct declarator Dc;
 	}
@@ -252,7 +252,7 @@ initializer(struct idf *idf; int sc;)
 	we just include the (formal) parameter list in the declarator
 	description list dc.
 */
-declarator(register struct declarator *dc;)
+declarator(struct declarator *dc;)
 	{
 		arith count;
 		struct formal *fm = 0;
@@ -276,7 +276,7 @@ declarator(register struct declarator *dc;)
 	{add_decl_unary(dc, POINTER, (arith)0, NO_PARAMS);}
 ;
 
-primary_declarator(register struct declarator *dc;) :
+primary_declarator(struct declarator *dc;) :
 	identifier(&dc->dc_idf)
 |
 	'(' declarator(dc) ')'
@@ -310,7 +310,7 @@ formal(struct formal **fmp;)
 :
 	identifier(&idf)
 	{
-		register struct formal *new = new_formal();
+		struct formal *new = new_formal();
 
 		new->fm_idf = idf;
 		new->next = *fmp;
@@ -319,7 +319,7 @@ formal(struct formal **fmp;)
 ;
 
 /* Change 2 */
-enum_specifier(register struct type **tpp;)
+enum_specifier(struct type **tpp;)
 	{
 		struct idf *idf;
 		arith l = (arith)0;
@@ -348,7 +348,7 @@ enum_specifier(register struct type **tpp;)
 	]
 ;
 
-enumerator_pack(register struct type *tp; arith *lp;) :
+enumerator_pack(struct type *tp; arith *lp;) :
 	'{'
 	enumerator(tp, lp)
 	[%while(AHEAD != '}')		/* >>> conflict on ',' */
@@ -382,11 +382,11 @@ enumerator(struct type *tp; arith *lp;)
 ;
 
 /* 8.5 */
-struct_or_union_specifier(register struct type **tpp;)
+struct_or_union_specifier(struct type **tpp;)
 	{
 		int fund;
 		struct idf *idfX;
-		register struct idf *idf;
+		struct idf *idf;
 	}
 :
 	[ STRUCT | UNION ]
@@ -419,7 +419,7 @@ struct_or_union_specifier(register struct type **tpp;)
 	]
 ;
 
-struct_declaration_pack(register struct type *stp;)
+struct_declaration_pack(struct type *stp;)
 	{
 		struct sdef **sdefp = &stp->tp_sdef;
 		arith size = (arith)0;
@@ -509,7 +509,7 @@ cast(struct type **tpp;)	{struct declarator Dc;} :
 /*	This code is an abject copy of that of 'declarator', for lack of
 	a two-level grammar.
 */
-abstract_declarator(register struct declarator *dc;)
+abstract_declarator(struct declarator *dc;)
 	{arith count;}
 :
 	primary_abstract_declarator(dc)

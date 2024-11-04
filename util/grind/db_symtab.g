@@ -184,7 +184,7 @@ name(char **s;)
 const_name(p_symbol cst;)
   { int type_index[2];
     long iconst;
-    register char *p;
+    char *p;
   }
 :
   '='
@@ -483,7 +483,7 @@ type(p_type *ptp; int *type_index; p_symbol sy;)
 			}
 ;
 
-structure_type(register p_type tp; p_symbol sy;)
+structure_type(p_type tp; p_symbol sy;)
   { register struct fields *fldp;
     char *str;
   }
@@ -503,10 +503,10 @@ structure_type(register p_type tp; p_symbol sy;)
 			}
 ;
 
-enum_type(register p_type tp;)
+enum_type(p_type tp;)
   { register struct literal *litp;
     long maxval = 0;
-    register p_symbol s;
+    p_symbol s;
   }
 :
   [			{ litp = get_literal_space(tp); }
@@ -594,9 +594,9 @@ DBSonerror(tk, p)
 
 DBSlex()
 {
-  register char *cp = DbPtr;
+  char *cp = DbPtr;
   int allow_name = AllowName;
-  register int c;
+  int c;
 
   AllowName = 0;
   DbOldPtr = cp;
@@ -674,10 +674,10 @@ DBSlex()
 
 static struct fields *
 get_field_space(tp, s)
-  register p_type tp;
+  p_type tp;
   char	*s;
 {
-  register struct fields *p;
+  struct fields *p;
   p_symbol	sy;
 
   if (! (tp->ty_nfields & 07)) {
@@ -695,7 +695,7 @@ get_field_space(tp, s)
 
 static
 end_field(tp)
-  register p_type tp;
+  p_type tp;
 {
   tp->ty_fields = (struct fields *)
 	Realloc((char *) tp->ty_fields,
@@ -704,7 +704,7 @@ end_field(tp)
 
 static struct literal *
 get_literal_space(tp)
-  register p_type tp;
+  p_type tp;
 {
   if (! (tp->ty_nenums & 07)) {
 	tp->ty_literals = (struct literal *)
@@ -718,8 +718,8 @@ static char *
 string_val(s)
   char	*s;
 {
-  register char *ns = s, *os = s;
-  register unsigned int i = 1;
+  char *ns = s, *os = s;
+  unsigned int i = 1;
 
   for (;;) {
 	if (!*os) break;
@@ -747,8 +747,8 @@ DbRead(f)
   char	*f;
 {
   struct outhead h;
-  register struct outname *n;
-  register struct outname *line_file = 0;
+  struct outname *n;
+  struct outname *line_file = 0;
   long OffsetStrings;
   int lbrac_required = 0;
   int needs_newscope = 0;

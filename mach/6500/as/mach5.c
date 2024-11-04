@@ -8,9 +8,9 @@
  * Mostek 6500 special routines.
  */
 
-void branch(register int opc, expr_t exp)
+void branch(int opc, expr_t exp)
 {
-	register int	dist;
+	int	dist;
 
 	dist = exp.val - (DOTVAL + 2);
 	if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))
@@ -27,7 +27,7 @@ void branch(register int opc, expr_t exp)
 	}
 }
 
-void code(expr_t exp, register int opc1, register int opc2)
+void code(expr_t exp, int opc1, int opc2)
 {
 	if (small((exp.typ & S_TYP) == S_ABS && fits_zeropage(exp.val), 1)) {
 		emit1(opc1); emit1(exp.val);

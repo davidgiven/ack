@@ -33,7 +33,7 @@ static int
 in_item_list(p)
   p_tree	p;
 {
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   while (i) {
 	if (i->i_node == p) return 1;
@@ -60,7 +60,7 @@ item_addr_actions(a, mess_type, may_stop)
   /* Perform actions associated with position 'a', and return stop_reason
      if we must stop there, and 0 if not.
   */
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   stop_reason = 0;
   for (i = item_list.il_first; i != 0; i = i->i_next) {
@@ -114,7 +114,7 @@ item_addr_actions(a, mess_type, may_stop)
 
 handle_displays()
 {
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   while (i) {
 	register p_tree p = i->i_node;
@@ -149,7 +149,7 @@ add_to_item_list(p)
 remove_from_item_list(n)
   int	n;
 {
-  register p_item i = item_list.il_first, prev = 0;
+  p_item i = item_list.il_first, prev = 0;
   p_tree	p;
 
   if (n == 0) {
@@ -199,7 +199,7 @@ p_tree
 get_from_item_list(n)
   int	n;
 {
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   if (n == 0) {
 	n = stop_reason;
@@ -216,8 +216,8 @@ get_from_item_list(n)
 able_item(n, kind)
   int	n;
 {
-  register p_item i = item_list.il_first;
-  register p_tree p;
+  p_item i = item_list.il_first;
+  p_tree p;
 
   if (n == 0) {
 	n = stop_reason;
@@ -258,7 +258,7 @@ able_item(n, kind)
 
 print_items()
 {
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   for (; i; i = i->i_next) {
 	pr_item(i);
@@ -267,7 +267,7 @@ print_items()
 
 perform_items()
 {
-  register p_item i = item_list.il_first;
+  p_item i = item_list.il_first;
 
   for (; i; i = i->i_next) {
 	if (! i->i_disabled && i->i_node->t_oper != OP_DUMP) eval(i->i_node);

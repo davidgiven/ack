@@ -48,12 +48,12 @@ long ENTRY;
 long NLINE;
 size SZDATA;
 
-PRIVATE FILE* load_fp; /* Filepointer of load file */
+static FILE* load_fp; /* Filepointer of load file */
 
-PRIVATE ptr rd_repeat(ptr, size, ptr);
-PRIVATE ptr rd_descr(int, size, ptr);
-PRIVATE int rd_byte(void);
-PRIVATE long rd_int(size);
+static ptr rd_repeat(ptr, size, ptr);
+static ptr rd_descr(int, size, ptr);
+static int rd_byte(void);
+static long rd_int(size);
 
 void rd_open(char* fname)
 { /* Open loadfile */
@@ -123,9 +123,9 @@ void rd_text(void)
 
 void rd_gda(void)
 {
-	register int type, prev_type;
-	register ptr pos, prev_pos; /* prev_pos invalid if prev_type==0 */
-	register long i;
+	int type, prev_type;
+	ptr pos, prev_pos; /* prev_pos invalid if prev_type==0 */
+	long i;
 
 	type = prev_type = 0;
 	pos = prev_pos = i2p(0);
@@ -136,7 +136,7 @@ void rd_gda(void)
 		if (type == 0)
 		{
 			/* repetition descriptor */
-			register size count = rd_int(psize);
+			size count = rd_int(psize);
 
 			LOG((" r6 rd_gda(), case 0: count = %lu", count));
 			if (prev_type == 0)
@@ -149,7 +149,7 @@ void rd_gda(void)
 		else
 		{
 			/* filling descriptor */
-			register size count = btol(rd_byte());
+			size count = btol(rd_byte());
 
 			LOG((" r6 rd_gda(), case %d: count = %lu", type, count));
 			prev_pos = pos;
@@ -165,13 +165,13 @@ void rd_gda(void)
 
 void rd_proctab(void)
 {
-	register long p;
+	long p;
 
 	init_proctab();
 	for (p = 0; p < NPROC; p++)
 	{
-		register long nloc = rd_int(psize);
-		register ptr ep = i2p(rd_int(psize));
+		long nloc = rd_int(psize);
+		ptr ep = i2p(rd_int(psize));
 
 		add_proc(nloc, ep);
 	}
@@ -203,14 +203,14 @@ void rd_close(void)
  *	number is also stored in a double.				*
  ************************************************************************/
 
-PRIVATE ptr rd_repeat(ptr pos, size count, ptr prev_pos)
+static ptr rd_repeat(ptr pos, size count, ptr prev_pos)
 {
-	register size diff = pos - prev_pos;
-	register size j;
+	size diff = pos - prev_pos;
+	size j;
 
 	for (j = 0; j < count; j++)
 	{
-		register long i;
+		long i;
 
 		for (i = 0; i < diff; i++)
 		{
@@ -225,11 +225,11 @@ PRIVATE ptr rd_repeat(ptr pos, size count, ptr prev_pos)
 	return pos;
 }
 
-PRIVATE ptr rd_descr(int type, size count, ptr pos)
+static ptr rd_descr(int type, size count, ptr pos)
 {
-	register size j;
+	size j;
 	char fl_rep[128]; /* fp number representation */
-	register int fl_cnt;
+	int fl_cnt;
 
 	switch (type)
 	{
@@ -305,19 +305,19 @@ PRIVATE ptr rd_descr(int type, size count, ptr pos)
 	return pos;
 }
 
-PRIVATE int rd_byte(void)
+static int rd_byte(void)
 {
-	register int i;
+	int i;
 
 	if ((i = getc(load_fp)) == EOF)
 		fatal("EOF reached during initialization");
 	return (i);
 }
 
-PRIVATE long rd_int(size n)
+static long rd_int(size n)
 {
-	register long l;
-	register int i;
+	long l;
+	int i;
 
 	l = btol(rd_byte());
 	for (i = 1; i < n; i++)

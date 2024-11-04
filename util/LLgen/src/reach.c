@@ -32,8 +32,8 @@ static string rcsid8 = "$Id$";
 
 /* In this file the following routines are defined: */
 void co_reach(void);
-STATIC void reachable(register p_nont p);
-STATIC void reachwalk(p_gram p);
+static void reachable(p_nont p);
+static void reachwalk(p_gram p);
 
 
 
@@ -42,11 +42,11 @@ void co_reach(void)
 	/*
 	 * Check for undefined or unreachable nonterminals.
 	 */
-	register p_nont		p;
-	register p_token	t;
-	register p_start	st;
-	register p_file		x;
-	register int		s;
+	p_nont		p;
+	p_token	t;
+	p_start	st;
+	p_file		x;
+	int		s;
 
 	/* Check for undefined nonterminals */
 	for (p = nonterms; p < maxnt; p++) {
@@ -87,7 +87,7 @@ void co_reach(void)
 	}
 }
 
-STATIC void reachable(register p_nont p)
+static void reachable(p_nont p)
 {
 	/*
 	 * Enter the fact that p is reachable, and look for implications
@@ -101,7 +101,7 @@ STATIC void reachable(register p_nont p)
 	}
 }
 
-STATIC void reachwalk(p_gram p)
+static void reachwalk(p_gram p)
 {
 	/*
 	 * Walk through rule p, looking for nonterminals.
@@ -117,12 +117,12 @@ STATIC void reachwalk(p_gram p)
 			reachwalk(g_getterm(p)->t_rule);
 			break;
 		  case NONTERM : {
-			register p_nont n = &nonterms[g_getcont(p)];
+			p_nont n = &nonterms[g_getcont(p)];
 
 			reachable(n);
 			if (n->n_rule && g_gettype(n->n_rule) == EORULE &&
 			    ! g_getnpar(p) && (getntparams(n) == 0)) {
-				register p_gram np = p;
+				p_gram np = p;
 				do {
 					*np = *(np + 1);
 					np++;

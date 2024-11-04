@@ -9,12 +9,12 @@ struct procgroup *group=nil, *highest_group;
 int deadlock=0;
 
 void pc_begin(s_brk, id)
-	register void *s_brk;
+	void *s_brk;
 	identification id;
 /* Sets up a group of processes and puts the current process in it */
 {
-	register struct procgroup *pg;
-	register struct process *p;
+	struct procgroup *pg;
+	struct process *p;
 
 	pg= (struct procgroup *) alloc(sizeof *pg);
 	p= (struct process *) alloc(sizeof *p);
@@ -41,8 +41,8 @@ int pc_fork(id) identification id;
  * current process, 0 in the copied process. The current process runs first.
  */
 {
-	register struct process *newp;
-	register wordsize size;
+	struct process *newp;
+	wordsize size;
 
 	newp= (struct process *) alloc(sizeof *newp);
 
@@ -68,7 +68,7 @@ int pc_fork(id) identification id;
 void init_between(group) register struct procgroup *group;
 /* Allocates memory to hold the stack space between s_brk and up->s_brk. */
 {
-	register wordsize size;
+	wordsize size;
 
 	if (group->up==nil
 	    || (size= (wordsize) group->up->s_brk - (wordsize) group->s_brk)==0)
@@ -82,7 +82,7 @@ void block_move();
 void save_between(group) register struct procgroup *group;
 /* Saves the stack space between  s_brk and up->s_brk. */
 {
-	register wordsize size;
+	wordsize size;
 
 	if (group->between!=nil) {
 	    	size= (wordsize) group->up->s_brk - (wordsize) group->s_brk;
@@ -96,8 +96,8 @@ void load_betweens()
  * place (i.e. s_brk).
  */
 {
-	register struct procgroup *gr=group, *up;
-	register wordsize size;
+	struct procgroup *gr=group, *up;
+	wordsize size;
 
 	while (gr!=highest_group) {
 		up=gr->up;
@@ -121,7 +121,7 @@ void *malloc();
 
 void *alloc(size) unsigned size;
 {
-	register void *mem;
+	void *mem;
 
 	if ((mem=malloc(size))==nil) {
 		write(2, "Heap error\n", 14);

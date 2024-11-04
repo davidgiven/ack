@@ -10,28 +10,28 @@
 #include <stdlib.h>
 
 static unsigned long
-string2long(register const char* nptr, char** endptr,
+string2long(const char* nptr, char** endptr,
     int base, int is_signed);
 
 long int
-strtol(register const char* nptr, char** endptr, int base)
+strtol(const char* nptr, char** endptr, int base)
 {
 	return (signed long)string2long(nptr, endptr, base, 1);
 }
 
 unsigned long int
-strtoul(register const char* nptr, char** endptr, int base)
+strtoul(const char* nptr, char** endptr, int base)
 {
 	return (unsigned long)string2long(nptr, endptr, base, 0);
 }
 
 static unsigned long
-string2long(register const char* nptr, char** const endptr,
+string2long(const char* nptr, char** const endptr,
     int base, int is_signed)
 {
-	register unsigned int v;
-	register unsigned long val = 0;
-	register int c;
+	unsigned int v;
+	unsigned long val = 0;
+	int c;
 	int ovfl = 0, sign = 1;
 	const char *startnptr = nptr, *nrstart;
 

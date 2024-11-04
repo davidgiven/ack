@@ -28,9 +28,9 @@ extern char	options[];
 #endif
 char *
 getwdir(fn)
-	register char *fn;
+	char *fn;
 {
-	register char *p;
+	char *p;
 	char *strrchr();
 
 	p = strrchr(fn, '/');

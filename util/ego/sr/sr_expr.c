@@ -26,11 +26,11 @@
 #define ME_LOOPCONST 3
 #define ME_IV 4
 
-STATIC iv_p last_iv;
-STATIC int iv_sign;
-STATIC lset ivars, loopvars;
+static iv_p last_iv;
+static int iv_sign;
+static lset ivars, loopvars;
 
-STATIC bool is_loadiv(line_p lnp)
+static bool is_loadiv(line_p lnp)
 {
 	/* See if lnp is a LOL iv instruction, where iv is an
 	 * induction variable of the set ivars. If so, set the
@@ -59,7 +59,7 @@ STATIC bool is_loadiv(line_p lnp)
 
 #define size_ok(l) (TYPE(l) == OPSHORT && SHORT(l) == ws)
 
-STATIC int me_kind(line_p l, int sign_in, int* sign_out)
+static int me_kind(line_p l, int sign_in, int* sign_out)
 {
 	if (l != (line_p)0)
 	{
@@ -107,7 +107,7 @@ STATIC int me_kind(line_p l, int sign_in, int* sign_out)
 	return ME_NONE;
 }
 
-STATIC bool match_expr(line_p l, bool iv_allowed, line_p* lbegin, bool* iv_seen, int sign)
+static bool match_expr(line_p l, bool iv_allowed, line_p* lbegin, bool* iv_seen, int sign)
 {
 	/* This routine is a top down parser for simple
 	 * EM expressions. It recognizes expressions that

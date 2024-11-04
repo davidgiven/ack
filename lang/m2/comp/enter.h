@@ -18,8 +18,8 @@ struct def;
 
 struct def *Enter(char *name, int kind, struct type  *type, int pnam);
 struct def *EnterType(char *name, struct type  *type);
-void EnterEnumList(struct node *Idlist, register struct type  *type);
-void EnterFieldList(struct node *Idlist, register struct type  *type, struct scope *scope,
+void EnterEnumList(struct node *Idlist, struct type  *type);
+void EnterFieldList(struct node *Idlist, struct type  *type, struct scope *scope,
 	arith *addr);
 /*	Enter a list of identifiers representing variables into the
 	name list. "type" represents the type of the variables.

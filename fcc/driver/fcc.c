@@ -174,7 +174,7 @@ main(argc, argv)
 	char **argvec;
 	int count;
 	char *ext;
-	register struct arglist *call = &CALL_VEC;
+	struct arglist *call = &CALL_VEC;
 	char *file;
 	char *ldfile;
 	int compile_cnt = 0;
@@ -302,7 +302,7 @@ main(argc, argv)
 	count = SRCFILES.al_argc;
 	argvec = &(SRCFILES.al_argv[0]);
 	while (count-- > 0) {
-		register char *f;
+		char *f;
 		basename(file = *argvec++, BASE);
 
 		ext = extension(file);
@@ -423,8 +423,8 @@ expand_string(s)
 	char	*s;
 {
 	char	buf[1024];
-	register char	*p = s;
-	register char	*q = &buf[0];
+	char	*p = s;
+	char	*q = &buf[0];
 	int expanded = 0;
 
 	if (!p) return p;
@@ -457,7 +457,7 @@ expand_string(s)
 }
 
 append(al, arg)
-	register struct arglist *al;
+	struct arglist *al;
 	char *arg;
 {
 	if (!arg || !*arg) return;
@@ -467,10 +467,10 @@ append(al, arg)
 }
 
 expand(al)
-	register struct arglist *al;
+	struct arglist *al;
 {
-	register int i = al->al_argc;
-	register char **p = &(al->al_argv[0]);
+	int i = al->al_argc;
+	char **p = &(al->al_argv[0]);
 
 	while (i-- > 0) {
 		*p = expand_string(*p);
@@ -481,9 +481,9 @@ expand(al)
 concat(al1, al2)
 	struct arglist *al1, *al2;
 {
-	register i = al2->al_argc;
-	register char **p = &(al1->al_argv[al1->al_argc]);
-	register char **q = &(al2->al_argv[0]);
+	i = al2->al_argc;
+	char **p = &(al1->al_argv[al1->al_argc]);
+	char **q = &(al2->al_argv[0]);
 
 	if ((al1->al_argc += i) >= MAXARGC)
 		panic("argument list overflow");
@@ -501,8 +501,8 @@ mkstr(char *dst, ...)
 
 	va_start(ap, dst);
 	{
-		register char *p;
-		register char *q;
+		char *p;
+		char *q;
 
 		q = dst;
 		p = va_arg(ap, char *);
@@ -528,8 +528,8 @@ mkstr(va_alist)
 
 	va_start(ap);
 	{
-		register char *p;
-		register char *q;
+		char *p;
+		char *q;
 
 		dst = q = va_arg(ap, char *);
 		p = va_arg(ap, char *);
@@ -548,10 +548,10 @@ mkstr(va_alist)
 
 basename(str, dst)
 	char *str;
-	register char *dst;
+	char *dst;
 {
-	register char *p1 = str;
-	register char *p2 = p1;
+	char *p1 = str;
+	char *p2 = p1;
 
 	while (*p1)
 		if (*p1++ == '/')
@@ -571,7 +571,7 @@ char *
 extension(fn)
 	char *fn;
 {
-	register char *c = fn;
+	char *c = fn;
 
 	while (*c++) ;
 	while (*--c != '.' && c >= fn) { }
@@ -642,9 +642,9 @@ panic(str)
 }
 
 pr_vec(vec)
-	register struct arglist *vec;
+	struct arglist *vec;
 {
-	register char **ap = &vec->al_argv[1];
+	char **ap = &vec->al_argv[1];
 
 	vec->al_argv[vec->al_argc] = 0;
 	fprintf(stderr, "%s", *ap);
@@ -656,7 +656,7 @@ pr_vec(vec)
 extern int errno;
 
 ex_vec(vec)
-	register struct arglist *vec;
+	struct arglist *vec;
 {
 	if (noexec)
 		exit(0);

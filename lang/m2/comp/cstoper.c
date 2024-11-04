@@ -46,7 +46,7 @@ arith min_int[] =   { 0L, -128L, -32768L, 0L, -2147483647L-1 };
 
 extern char options[];
 
-static void CutSize(register struct node *);
+static void CutSize(struct node *);
 
 
 static void overflow(struct node *expp)
@@ -58,9 +58,9 @@ static void overflow(struct node *expp)
 
 static void commonbin(struct node **expp)
 {
-	register struct node *exp = *expp;
+	struct node *exp = *expp;
 	struct type *tp = exp->nd_type;
-	register struct node *right = exp->nd_RIGHT;
+	struct node *right = exp->nd_RIGHT;
 	
 	exp->nd_RIGHT = 0;
 	FreeNode(exp);
@@ -73,9 +73,9 @@ void cstunary(struct node **expp)
 	/*	The unary operation in "expp" is performed on the constant
 		expression below it, and the result stored in expp.
 	*/
-	register struct node *exp = *expp;
-	register struct node *right = exp->nd_RIGHT;
-	register arith o1 = right->nd_INT;
+	struct node *exp = *expp;
+	struct node *right = exp->nd_RIGHT;
+	arith o1 = right->nd_INT;
 
 	switch(exp->nd_symb) {
 	/* Should not get here
@@ -110,8 +110,8 @@ static void divide(arith *pdiv, arith *prem)
 	/*	Unsigned divide *pdiv by *prem, and store result in *pdiv,
 		remainder in *prem
 	*/
-	register arith o1 = *pdiv;
-	register arith o2 = *prem;
+	arith o1 = *pdiv;
+	arith o2 = *prem;
 
 	*pdiv = (unsigned arith) o1 / (unsigned arith) o2;
 	*prem = (unsigned arith) o1 % (unsigned arith) o2;
@@ -123,10 +123,10 @@ void cstibin(struct node **expp)
 		expressions below it, and the result restored in expp.
 		This version is for INTEGER expressions.
 	*/
-	register struct node *exp = *expp;
-	register arith o1 = exp->nd_LEFT->nd_INT;
-	register arith o2 = exp->nd_RIGHT->nd_INT;
-	register int sz = exp->nd_type->tp_size;
+	struct node *exp = *expp;
+	arith o1 = exp->nd_LEFT->nd_INT;
+	arith o2 = exp->nd_RIGHT->nd_INT;
+	int sz = exp->nd_type->tp_size;
 
 	assert(exp->nd_class == Oper);
 	assert(exp->nd_LEFT->nd_class == Value);
@@ -232,10 +232,10 @@ void cstfbin(struct node **expp)
 		expressions below it, and the result restored in expp.
 		This version is for REAL expressions.
 	*/
-	register struct node *exp = *expp;
-	register struct real *p = exp->nd_LEFT->nd_REAL;
-	register flt_arith *o1 = &p->r_val;
-	register flt_arith *o2 = &exp->nd_RIGHT->nd_RVAL;
+	struct node *exp = *expp;
+	struct real *p = exp->nd_LEFT->nd_REAL;
+	flt_arith *o1 = &p->r_val;
+	flt_arith *o2 = &exp->nd_RIGHT->nd_RVAL;
 	int compar = 0;
 	int cmpval = 0;
 
@@ -319,10 +319,10 @@ void cstubin(struct node **expp)
 		expressions below it, and the result restored in
 		expp.
 	*/
-	register struct node *exp = *expp;
+	struct node *exp = *expp;
 	arith o1 = exp->nd_LEFT->nd_INT;
 	arith o2 = exp->nd_RIGHT->nd_INT;
-	register int sz = exp->nd_type->tp_size;
+	int sz = exp->nd_type->tp_size;
 	arith tmp1, tmp2;
 
 	assert(exp->nd_class == Oper);
@@ -420,10 +420,10 @@ void cstubin(struct node **expp)
 
 void cstset(struct node **expp)
 {
-	register struct node *exp = *expp;
-	register arith *set1, *set2, *set3;
-	register unsigned int setsize;
-	register int j;
+	struct node *exp = *expp;
+	arith *set1, *set2, *set3;
+	unsigned int setsize;
+	int j;
 
 	assert(exp->nd_RIGHT->nd_class == Set);
 	assert(exp->nd_symb == IN || exp->nd_LEFT->nd_class == Set);
@@ -537,8 +537,8 @@ void cstcall(struct node **expp, int call)
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
 	*/
-	register struct node *expr;
-	register struct type *tp;
+	struct node *expr;
+	struct type *tp;
 
 	assert((*expp)->nd_class == Call);
 	expr = (*expp)->nd_RIGHT->nd_LEFT;
@@ -606,12 +606,12 @@ void cstcall(struct node **expp, int call)
 	}
 }
 
-static void CutSize(register struct node *expr)
+static void CutSize(struct node *expr)
 {
 	/*	The constant value of the expression expr is made to
 		conform to the size of the type of the expression.
 	*/
-	register struct type *tp = BaseType(expr->nd_type);
+	struct type *tp = BaseType(expr->nd_type);
 
 	assert(expr->nd_class == Value);
 	if (tp->tp_fund == T_REAL) return;
@@ -627,9 +627,9 @@ static void CutSize(register struct node *expr)
 
 void InitCst(void)
 {
-	register int i = 0;
+	int i = 0;
 #ifndef NOCROSS
-	register arith bt = (arith)0;
+	arith bt = (arith)0;
 
 	while (!(bt < 0))	{
 		i++;

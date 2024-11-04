@@ -36,7 +36,7 @@ extern label	data_label;
 int LblWalkNode(label lbl, struct node *nd, int exit, int reach);
 void def_ilb(label l);
 /* Generate line information as necessary for "nd". */
-void DoLineno(register struct node* nd);
+void DoLineno(struct node* nd);
 /*	Generate filename information, when needed.
 	This routine is called at the generation of a
 	procedure entry, and after generating a call to
@@ -49,26 +49,26 @@ void DoFilename(int needed);
 	Also generate code for its body.
 	This code is collected in an initialization routine.
 */
-void WalkModule(register struct def* module);
+void WalkModule(struct def* module);
 /*	Walk through the definition of a procedure and all its
 	local definitions, checking and generating code.
 */
-void WalkProcedure(register struct def* procedure);
+void WalkProcedure(struct def* procedure);
 
 /*	Walk node "nd", which is a link.
 	"exit_label" is set to a label number when inside a LOOP.
 	"end_reached" maintains info about reachability (REACH_FLAG),
 	and whether an EXIT statement was seen (EXIT_FLAG).
 */
-int WalkLink(register struct node* nd, label exit_label, int end_reached);
+int WalkLink(struct node* nd, label exit_label, int end_reached);
 /* Walk through a statement node "nd", generating code for it. */
-int WalkStat(register struct node* nd, label exit_label, int end_reached);
+int WalkStat(struct node* nd, label exit_label, int end_reached);
 /*	Generate code to evaluate a boolean expression "pnd" */
-void ExpectBool(register struct node** pnd, label true_label, label false_label);
+void ExpectBool(struct node** pnd, label true_label, label false_label);
 /* Check designator and generate code for it */
 int WalkDesignator(struct node** pnd, struct desig* ds, int flags);
 
-void DoAssign(register struct node* nd);
+void DoAssign(struct node* nd);
 
 int DoForInit(struct node* nd);
 

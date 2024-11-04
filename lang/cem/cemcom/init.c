@@ -15,7 +15,7 @@
 #include	"idf.h"
 #include	"interface.h"
 
-PRIVATE struct mkey	{
+static struct mkey	{
 	char *mk_reserved;
 	int mk_key;
 } mkey[] =	{
@@ -48,10 +48,10 @@ init_pp()
 		id_resmac field of the identifier.
 	*/
 	{
-		register struct mkey *mk = &mkey[0];
+		struct mkey *mk = &mkey[0];
 
 		while (mk->mk_reserved)	{
-			register struct idf *idf = str2idf(mk->mk_reserved);
+			struct idf *idf = str2idf(mk->mk_reserved);
 			
 			if (idf->id_resmac)
 				fatal("maximum identifier length insufficient");

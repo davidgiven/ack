@@ -81,8 +81,8 @@ readfile(filename, psiz)
 	int *psiz;
 {
 	struct stat stbuf;	/* for `stat' to get filesize		*/
-	register int fd;	/* filedescriptor for `filename'	*/
-	register char *cbuf;	/* pointer to buffer to be returned	*/
+	int fd;	/* filedescriptor for `filename'	*/
+	char *cbuf;	/* pointer to buffer to be returned	*/
 
 	if (((fd = open(filename, 0)) < 0) || (fstat(fd, &stbuf) != 0))
 		return 0;
@@ -99,7 +99,7 @@ int
 writefile(filename, text, size)
 	char *filename, *text;
 {
-	register fd;
+	fd;
 
 	if ((fd = open(filename, 1)) < 0)
 		return 0;
@@ -133,10 +133,10 @@ insert(ptree, id)
 	struct node **ptree;
 	char *id;
 {
-	register cmp;
+	cmp;
 
 	if (*ptree == 0) {
-		register struct node *nnode = new_node();
+		struct node *nnode = new_node();
 
 		nnode->name = id;
 		nnode->left = nnode->right = 0;
@@ -155,7 +155,7 @@ find(tree, id)
 	struct node *tree;
 	char *id;
 {
-	register cmp;
+	cmp;
 
 	if (tree == 0)
 		return 0;
@@ -170,10 +170,10 @@ edit(text, tree)
 	char *text;
 	struct node *tree;
 {
-	register char *ptr = text;
+	char *ptr = text;
 	char idbuf[IDFSIZE];
-	register char *id;
-	register char *save_ptr;
+	char *id;
+	char *save_ptr;
 
 	while (*ptr) {
 		if (

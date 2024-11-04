@@ -22,7 +22,7 @@
 #include "il1_aux.h"
 #include "../share/parser.h"
 
-STATIC actual_p acts, *app;
+static actual_p acts, *app;
 
 #define INIT_ACTS()                                                                                \
 	{                                                                                              \
@@ -35,7 +35,7 @@ STATIC actual_p acts, *app;
 		app = &a->ac_next;                                                                         \
 	}
 
-STATIC void make_actual(line_p l1, line_p l2, offset size)
+static void make_actual(line_p l1, line_p l2, offset size)
 {
 	/* Allocate a struct for a new actual parameter
 	 * expression, the code of which extends from
@@ -50,7 +50,7 @@ STATIC void make_actual(line_p l1, line_p l2, offset size)
 	APPEND_ACTUAL(a); /* append it to actual-list */
 }
 
-STATIC bool chck_asp(proc_p p, line_p l)
+static bool chck_asp(proc_p p, line_p l)
 {
 	/* We require a call to a procedure p that has n formal
 	 * parameters to be followed by an 'asp n' instruction
@@ -63,7 +63,7 @@ STATIC bool chck_asp(proc_p p, line_p l)
 	        && SHORT(l) == p->p_nrformals));
 }
 
-STATIC void inc_count(proc_p caller, proc_p callee)
+static void inc_count(proc_p caller, proc_p callee)
 {
 	/* Update the call-count information.
 	 * Record the fact that there is one more call

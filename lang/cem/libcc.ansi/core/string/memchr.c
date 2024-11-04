@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-void* memchr(const void* s, register int c, register size_t n)
+void* memchr(const void* s, int c, size_t n)
 {
-	register const unsigned char* s1 = s;
+	const unsigned char* s1 = s;
 
 	c = (unsigned char)c;
 	if (n)

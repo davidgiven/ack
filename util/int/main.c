@@ -39,7 +39,7 @@ size maxheap; /* if set, max heap size */
 extern long inr; /* from log.c */
 #endif /* LOGGING */
 
-PRIVATE char* dflt_av[] = { "e.out", 0 }; /* default arguments */
+static char* dflt_av[] = { "e.out", 0 }; /* default arguments */
 
 /** Check dynamically that the interpreter can run on the target machine. */
 static void check_requirements(char* name)
@@ -60,8 +60,8 @@ static void check_requirements(char* name)
 
 int main(int argc, char* argv[])
 {
-	register int i;
-	register int nosetjmp = 1;
+	int i;
+	int nosetjmp = 1;
 	int must_disassemble = 0;
 	int must_tally = 0;
 

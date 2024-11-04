@@ -52,7 +52,7 @@ qualident(struct node **p;)
 	]*
 ;
 
-selector(register struct node **pnd;)
+selector(struct node **pnd;)
 { struct node *nd;
 } :
 	'.'	{ nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
@@ -74,7 +74,7 @@ ExpList(struct node **pnd;)
 	]*
 ;
 
-ConstExpression(register struct node **pnd;)
+ConstExpression(struct node **pnd;)
 {
 }:
 	expression(pnd)
@@ -98,7 +98,7 @@ ConstExpression(register struct node **pnd;)
 		}
 ;
 
-expression(register struct node **pnd;)
+expression(struct node **pnd;)
 {
 } :
 	SimpleExpression(pnd)
@@ -117,7 +117,7 @@ relation:
 ;
 */
 
-SimpleExpression(register struct node **pnd;)
+SimpleExpression(struct node **pnd;)
 {
 	register struct node *nd = 0;
 } :
@@ -170,7 +170,7 @@ MulOperator:
 ;
 */
 
-factor(register struct node **p;)
+factor(struct node **p;)
 {
 	register struct node *nd;
 	struct node *nd1;
@@ -246,7 +246,7 @@ ActualParameters(struct node **pnd;):
 	'(' ExpList(pnd)? ')'
 ;
 
-element(register struct node *nd;) :
+element(struct node *nd;) :
 	expression(&(nd->nd_RIGHT))
 	[
 		UPTO
@@ -265,7 +265,7 @@ designator(struct node **pnd;)
 	designator_tail(pnd)
 ;
 
-designator_tail(register struct node **pnd;):
+designator_tail(struct node **pnd;):
 	visible_designator_tail(pnd)
 	[ %persistent
 		%default

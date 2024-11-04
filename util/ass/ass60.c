@@ -21,7 +21,7 @@ static char *r_data[] =
 
 cons_t nicepr(int typ, addr_u *ap)
 {
-	register proc_t *pl;
+	proc_t *pl;
 
 	switch (typ)
 	{
@@ -51,7 +51,7 @@ cons_t nicepr(int typ, addr_u *ap)
 char *pflags(int flg)
 {
 	static char res[9];
-	register char *cp;
+	char *cp;
 
 	cp = res;
 	if (flg & OPESC)
@@ -76,10 +76,10 @@ char *pflags(int flg)
 
 void dump(int n)
 {
-	register glob_t *gb;
-	register line_t *ln;
-	register locl_t *lbp;
-	register locl_t *lbhead;
+	glob_t *gb;
+	line_t *ln;
+	locl_t *lbp;
+	locl_t *lbhead;
 	proc_t *pl;
 	int i;
 	int insno;
@@ -193,7 +193,7 @@ void dump(int n)
 			}
 		if (r_flag)
 		{
-			register relc_t *rl;
+			relc_t *rl;
 			printf("\nData relocation\n");
 			printf("\n\t%10s %10s %10s\n", "offset", "type", "value");
 			for (rl = f_data; rl; rl = rl->r_next)

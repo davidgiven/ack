@@ -29,7 +29,7 @@ typedef struct state {
 void savestatus(void);
 #endif
 
-void restorestatus(register state_p sp);
-void savestatus(register state_p sp);
+void restorestatus(state_p sp);
+void savestatus(state_p sp);
 
 #endif /* STATE_H_ */

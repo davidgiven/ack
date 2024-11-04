@@ -154,7 +154,7 @@ void link_instr(int sz, int areg);
 void move(int sz);
 void move_special(int sz);
 void movem(int dr, int sz, int regs);
-int reverse(register int regs, int max);
+int reverse(int regs, int max);
 void movep(int sz);
 void branch(int opc, expr_t exp);
 void cpbcc(int opc, expr_t exp);

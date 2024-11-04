@@ -8,12 +8,12 @@
 
 long int
 strtol(nptr, endptr, base)
-	register char	*nptr;
+	char	*nptr;
 	char		**endptr;
 {
-	register int v;
-	register long val = 0;
-	register int c;
+	int v;
+	long val = 0;
+	int c;
 	int sign = 1;
 	char *startnptr = nptr, *nrstart;
 

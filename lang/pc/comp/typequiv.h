@@ -13,20 +13,20 @@ struct type;
 struct node;
 
 /*	test if two types are equivalent. */
-int TstTypeEquiv(register struct type *tp1, register struct type *tp2);
-arith IsString(register struct type *tp);
+int TstTypeEquiv(struct type *tp1, struct type *tp2);
+arith IsString(struct type *tp);
 /*	test if two types are compatible string-types. */
-int TstStrCompat(register struct type *tp1, register struct type *tp2);
+int TstStrCompat(struct type *tp1, struct type *tp2);
 /*	test if two types are compatible. ISO 6.4.5 */
-int TstCompat(register struct type *tp1,register struct type *tp2);
+int TstCompat(struct type *tp1, struct type *tp2);
 /*	test if two types are assignment compatible. ISO 6.4.6 */
-int TstAssCompat(register struct type *tp1,register struct type *tp2);
+int TstAssCompat(struct type *tp1, struct type *tp2);
 /*	Test if two parameter types are equivalent.  ISO 6.6.3.6 */
-int TstParEquiv(register struct type *tp1, register struct type *tp2);
+int TstParEquiv(struct type *tp1, struct type *tp2);
 /*	Test if two procedure types are equivalent. ISO 6.6.3.6 */
-int TstProcEquiv(register struct type *tp1, register struct type *tp2);
+int TstProcEquiv(struct type *tp1, struct type *tp2);
 /*	Check type compatibility for a parameter in a procedure call. */
-int TstParCompat(register struct type *formaltype, register struct type *actualtype,
+int TstParCompat(struct type *formaltype, struct type *actualtype,
 	int VARflag, struct node *nd, int new_par_section);
 /*	Check conformability.
 
@@ -36,7 +36,7 @@ int TstParCompat(register struct type *formaltype, register struct type *actualt
 
 	Do as much checking on indextypes as possible.
 */
-int TstConform(register struct type *formaltype, register struct type * actualtype, int new_par_section);
+int TstConform(struct type *formaltype, struct type * actualtype, int new_par_section);
 
 
 #endif /* TYPEQUIV_H_ */

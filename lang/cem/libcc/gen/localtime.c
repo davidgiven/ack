@@ -7,8 +7,8 @@
 
 static int
 last_sunday(d, t)
-	register int d;
-	register struct tm *t;
+	int d;
+	struct tm *t;
 {
 	int first = FIRSTSUNDAY(t);
 
@@ -29,7 +29,7 @@ struct tm *
 localtime(clock)
 	long *clock;
 {
-	register struct tm *gmt;
+	struct tm *gmt;
 	long cl;
 	int begindst, enddst;
 	extern int __daylight;

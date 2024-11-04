@@ -47,7 +47,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register struct outsect *p;
+	struct outsect *p;
 	char *malloc();
 
 	input = stdin;
@@ -129,10 +129,10 @@ symtab(name, string)
 	struct outname *name;
 	char *string;
 {
-	register struct outname *oname = name;
-	register char *strings = string+nstrings;
-	register int c;
-	register char *b;
+	struct outname *oname = name;
+	char *strings = string+nstrings;
+	int c;
+	char *b;
 	struct nlist n;
 
 	oname->on_valu = 0; oname->on_foff = strings - string + OFF_CHAR(outhead); oname->on_desc = 0;

@@ -45,9 +45,9 @@ void eval_field(
 	int code)
 {
 	int op = expr->OP_OPER;
-	register struct expr *leftop = expr->OP_LEFT;
-	register struct expr *rightop = expr->OP_RIGHT;
-	register struct field *fd = leftop->ex_type->tp_field;
+	struct expr *leftop = expr->OP_LEFT;
+	struct expr *rightop = expr->OP_RIGHT;
+	struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
 	arith tmpvar = 0;
 	struct type *atype = ( tp->tp_unsigned
@@ -116,7 +116,7 @@ void eval_field(
 			retrieval) is on top of stack.
 		*/
 		if (tp->tp_unsigned == 0) {	/* sign extension */
-			register arith shift = (int)word_size * 8 - fd->fd_width;
+			arith shift = (int)word_size * 8 - fd->fd_width;
 
 			C_loc(shift);
 			C_sli(word_size);
@@ -128,10 +128,10 @@ void eval_field(
 }
 
 void store_field(
-	register struct field *fd,
+	struct field *fd,
 	int uns,
 	int code,
-	register struct expr *leftop,
+	struct expr *leftop,
 	arith tmpvar)
 {
 	arith high_mask;

@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-void* memset(void* s, register int c, register size_t n)
+void* memset(void* s, int c, size_t n)
 {
-	register char* s1 = s;
+	char* s1 = s;
 
 	if (n > 0)
 	{

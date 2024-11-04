@@ -8,7 +8,7 @@ static char rcsid[] = "$Id$" ;
 #endif
 
 con_part(sz, w)
-	register int	sz;
+	int	sz;
 	word		w;
 {
 	while (part_size % sz) part_size++;
@@ -71,8 +71,8 @@ i_regsave() {
 }
 
 f_regsave(){
-	register i;
-	register int c = ' ';
+	i;
+	int c = ' ';
 
 	fprintf(codefile, "enter [");
 	for (i=0; i<n_regvars; i++) {
@@ -95,8 +95,8 @@ regsave(regstr,off,size) char *regstr; long off; {
 }
 
 regreturn() {
-	register int i;
-	register int c = ' ';
+	int i;
+	int c = ' ';
 
 	fprintf(codefile, "exit [");
 	for (i=1; i<n_regvars; i++) {

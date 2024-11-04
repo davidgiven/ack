@@ -4,4 +4,4 @@
  */
 /* $Id$ */
 
-#define	PRIVATE		static		/* or empty, for adb and profile */
+#define	static		static		/* or empty, for adb and profile */

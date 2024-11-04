@@ -48,7 +48,7 @@ extern int	err_occurred; /* error.c */
 
 
 /* Forward internal declarations */
-static void operands(register struct expr *, int);
+static void operands(struct expr *, int);
 static void ptr_add(arith size);
 static void truthvalue(int relop);
 static void compare(int relop, label lbl);
@@ -79,10 +79,10 @@ static void compare(int relop, label lbl);
 		labels, in case they are specified (i.e. are non-zero)
 */
 
-void EVAL(register struct expr *expr, int val, int code, label true_label, label false_label)
+void EVAL(struct expr *expr, int val, int code, label true_label, label false_label)
 {
 	int vol = (code != TRUE && recurqual(expr->ex_type, TQ_VOLATILE));
-	register int gencode = code == TRUE;
+	int gencode = code == TRUE;
 
 	if (err_occurred) return;
 	switch (expr->ex_class) {
@@ -124,9 +124,9 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 	case Oper:	/* compound expression	*/
 	{
 		int oper = expr->OP_OPER;
-		register struct expr *left = expr->OP_LEFT;
-		register struct expr *right = expr->OP_RIGHT;
-		register struct type *tp = expr->OP_TYPE;
+		struct expr *left = expr->OP_LEFT;
+		struct expr *right = expr->OP_RIGHT;
+		struct type *tp = expr->OP_TYPE;
 
 		switch (oper) {
 		case '+':
@@ -491,7 +491,7 @@ void EVAL(register struct expr *expr, int val, int code, label true_label, label
 		}
 		case '(':
 		{
-			register struct expr *ex;
+			struct expr *ex;
 			arith ParSize = (arith)0;
 			label setjmp_label = 0;
 			arith retspace = 0;
@@ -732,10 +732,10 @@ static void truthvalue(int relop)
 
 
 /*	assop() generates the opcode of an assignment operators op=	*/
-void assop(register struct type *type, int oper)
+void assop(struct type *type, int oper)
 {
-	register arith size;
-	register int uns = type->tp_unsigned;
+	arith size;
+	int uns = type->tp_unsigned;
 
 	if ((int)(size = type->tp_size) < (int)word_size)
 		size = word_size;
@@ -853,10 +853,10 @@ static void ptr_add(arith size)
 	- into a local static variable
 	- absolute addressing
 */
-void store_val(register struct value *vl, register struct type *tp)
+void store_val(struct value *vl, struct type *tp)
 {
-	register int inword = 0;
-	register int indword = 0;
+	int inword = 0;
+	int indword = 0;
 	writh wval = vl->vl_value;
 	arith val = (arith)wval;
 
@@ -870,8 +870,8 @@ void store_val(register struct value *vl, register struct type *tp)
 		else if (tp->tp_size == dword_size) indword = 1;
 	}
 	if (vl->vl_class == Name) {
-		register struct idf *id = vl->vl_data.vl_idf;
-		register struct def *df = id->id_def;
+		struct idf *id = vl->vl_data.vl_idf;
+		struct def *df = id->id_def;
 
 		/* if (df->df_level == L_GLOBAL) { // } ??? re-examine */
 		if (df->df_sc == GLOBAL
@@ -925,11 +925,11 @@ void store_val(register struct value *vl, register struct type *tp)
 
 	rlval generate rlval or lval
 */
-void load_val(register struct expr *expr, int rlval)
+void load_val(struct expr *expr, int rlval)
 {
-	register struct type *tp = expr->ex_type;
+	struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
-	register int inword = 0, indword = 0;
+	int inword = 0, indword = 0;
 	writh wval = expr->VL_VALUE;
 	arith val = (arith)wval;
 
@@ -971,8 +971,8 @@ void load_val(register struct expr *expr, int rlval)
 		}
 	}
 	else {
-		register struct idf *id = expr->VL_IDF;
-		register struct def *df = id->id_def;
+		struct idf *id = expr->VL_IDF;
+		struct def *df = id->id_def;
 		int fund = df->df_type->tp_fund;
 
 		assert(ISNAME(expr));
@@ -1043,7 +1043,7 @@ void load_cst(writh val, arith siz)
 	}
 }
 
-static void operands(register struct expr *expr, int gencode)
+static void operands(struct expr *expr, int gencode)
 {
 	EVAL(expr->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
 	EVAL(expr->OP_RIGHT, RVAL, gencode, NO_LABEL, NO_LABEL);

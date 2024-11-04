@@ -26,16 +26,16 @@ extern int	(*DesigChkTable[])(struct node **, int);	/* table of designator check
 #define dec_refcount(s)		(*((int *)(s) - 1) -= 1)
 #define refcount(s)		(*((int *)(s) - 1))
 
-void MkCoercion(struct node **pnd, register struct type *tp);
-int ChkVariable(register struct node **expp, int flags);
+void MkCoercion(struct node **pnd, struct type *tp);
+int ChkVariable(struct node **expp, int flags);
 int ChkCall(struct node **expp);
-void TryToString(register struct node *nd, struct type *tp);
+void TryToString(struct node *nd, struct type *tp);
 
 /* Generates a set of "size" bytes and increments its reference count. */
 arith *MkSet(unsigned int size);
 /* Decrements the reference counter of set "s" and if reference count
  * is zero, then it frees the memory associated with the set.
  */
-void FreeSet(register arith *s);
+void FreeSet(arith *s);
 
 #endif /* CHK_EXPR_H_ */

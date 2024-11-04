@@ -9,7 +9,7 @@ VOID s_rnge(varn, offset, procn, line)
 char *varn, *procn;
 long int offset, line;
 {
-register int i;
+int i;
 
 fprintf(stderr, "Subscript out of range on file line %ld, procedure ", line);
 while((i = *procn) && i != '_' && i != ' ')

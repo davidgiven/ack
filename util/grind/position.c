@@ -26,8 +26,8 @@ get_position_from_addr(t)
   t_addr t;
 {
   static t_position retval;
-  register struct outname *p;
-  register int i,j;
+  struct outname *p;
+  int i,j;
 
   if (! f_start) return 0;
   i = 0;
@@ -58,14 +58,14 @@ t_addr
 get_addr_from_position(p)
   p_position p;
 {
-  register p_symbol sym = Lookup(findidf(p->filename), PervasiveScope, FILESYM);
+  p_symbol sym = Lookup(findidf(p->filename), PervasiveScope, FILESYM);
 
   if (sym) {
-	register unsigned int i;
-	register p_file map = sym->sy_file;
+	unsigned int i;
+	p_file map = sym->sy_file;
 
 	for (i = p->lineno; i > 0; i--) {
-		register struct outname *n = map->f_line_addr[HASH(i)];
+		struct outname *n = map->f_line_addr[HASH(i)];
 
 		while (n) {
 			if (n->on_desc == i) return (t_addr) n->on_valu;
@@ -83,14 +83,14 @@ get_addr_from_position(p)
 */
 add_position_addr(filename, n)
   char *filename;
-  register struct outname *n;
+  struct outname *n;
 {
   static char *lastfile = 0;
   static p_file lastmap = 0;
-  register p_file map = lastmap;
+  p_file map = lastmap;
 
   if (filename != lastfile) {	/* new file ... */
-	register p_symbol sym;
+	p_symbol sym;
 
 	lastfile = filename;
 	if (! filename) {	/* last call */
@@ -123,10 +123,10 @@ print_position(a, print_function)
   t_addr	a;
   int		print_function;
 {
-  register p_position	pos = get_position_from_addr(a);
+  p_position	pos = get_position_from_addr(a);
 
   if (print_function) {
-  	register p_scope sc = base_scope(get_scope_from_addr(a));
+  	p_scope sc = base_scope(get_scope_from_addr(a));
 	if (sc) fprintf(db_out, "in %s ", sc->sc_definedby->sy_idf->id_text);
   }
   if (pos) fprintf(db_out, "at \"%s\":%u", pos->filename, pos->lineno);

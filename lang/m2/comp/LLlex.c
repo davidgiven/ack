@@ -53,8 +53,8 @@ static void SkipComment(void)
 	/*	Skip Modula-2 comments (* ... *).
 		Note that comments may be nested (par. 3.5).
 	*/
-	register int ch, c;
-	register int CommentLevel = 0;
+	int ch, c;
+	int CommentLevel = 0;
 
 	LoadChar(ch);
 	if (ch == '$') {
@@ -125,11 +125,11 @@ static struct string *GetString(int upto)
 {
 	/*	Read a Modula-2 string, delimited by the character "upto".
 	*/
-	register int ch;
-	register struct string *str = (struct string *)
+	int ch;
+	struct string *str = (struct string *)
 			Malloc((unsigned) sizeof(struct string));
-	register char *p;
-	register int len;
+	char *p;
+	int len;
 	
 	len = ISTRSIZE;
 	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
@@ -169,7 +169,7 @@ static char *s_error = "illegal line directive";
 
 static int getch(void)
 {
-	register int ch;
+	int ch;
 
 	while (LoadChar(ch), (ch & 0200) && ch != EOI) {
 		error("non-ascii '\\%03o' read", ch & 0377);
@@ -179,10 +179,10 @@ static int getch(void)
 
 void CheckForLineDirective(void)
 {
-	register int ch = getch();
-	register int	i = 0;
+	int ch = getch();
+	int	i = 0;
 	char		buf[IDFSIZE];
-	register char	*c = buf;
+	char	*c = buf;
 
 
 	for (;;) {
@@ -240,7 +240,7 @@ void CheckForLineDirective(void)
 
 static void CheckForLet(void)
 {
-	register int ch;
+	int ch;
 
 	LoadChar(ch);
 	if (ch != EOI) {
@@ -256,9 +256,9 @@ int LLlex(void)
 	/*	LLlex() is the Lexical Analyzer.
 		The putting aside of tokens is taken into account.
 	*/
-	register t_token *tk = &dot;
+	t_token *tk = &dot;
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 2];
-	register int ch, nch;
+	int ch, nch;
 
 	toktype = error_type;
 
@@ -345,8 +345,8 @@ again:
 
 	case STIDF:
 	{
-		register char *tag = &buf[0];
-		register struct idf *id;
+		char *tag = &buf[0];
+		struct idf *id;
 
 		do	{
 			if (tag - buf < idfsize) *tag++ = ch;
@@ -367,7 +367,7 @@ again:
 	}
 
 	case STSTR: {
-		register struct string *str = GetString(ch);
+		struct string *str = GetString(ch);
 
 		if (str->s_length == 1) {
 			tk->TOK_INT = *(str->s_str) & 0377;
@@ -393,9 +393,9 @@ again:
 			complex finite automaton.
 		*/
 		enum statetp {Oct,OptHex,Hex,Dec,OctEndOrHex,End,OptReal,Real};
-		register enum statetp state;
-		register int base = 8;
-		register char *np = &buf[0];
+		enum statetp state;
+		int base = 8;
+		char *np = &buf[0];
 
 		*np++ = ch;
 		state = is_oct(ch) ? Oct : Dec;

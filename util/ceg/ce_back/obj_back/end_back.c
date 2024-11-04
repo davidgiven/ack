@@ -9,8 +9,8 @@ finish_tables()
 /* Prepare tables for do_local_relocation() and output().
  */
 {
-	register struct outname *np = symbol_table;
-	register int i = nname;
+	struct outname *np = symbol_table;
+	int i = nname;
 
 	for (; i; i--, np++) {
 		if ((np->on_type & S_COM) && ! (np->on_type & S_EXT)) {

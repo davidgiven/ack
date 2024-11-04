@@ -7,7 +7,7 @@
 
  void
 sig_die(s, kill)
-register char *s;
+char *s;
 int kill;
 {
 	/* print error message, then clear buffers */

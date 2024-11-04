@@ -10,13 +10,13 @@
 
 struct expr;
 
-void ch3mon(int oper, register struct expr **expp);
-void ch3bin(register struct expr **expp, int oper, struct expr *expr);
-void pntminuspnt(register struct expr **expp, int oper, register struct expr *expr);
+void ch3mon(int oper, struct expr **expp);
+void ch3bin(struct expr **expp, int oper, struct expr *expr);
+void pntminuspnt(struct expr **expp, int oper, struct expr *expr);
 int arg_switched(int oper);
-void mk_binop(struct expr **expp, int oper, register struct expr *expr, int commutative);
-void pointer_arithmetic(register struct expr **expp1, int oper, register struct expr **expp2);
-void pointer_binary(register struct expr **expp, int oper, register struct expr *expr);
+void mk_binop(struct expr **expp, int oper, struct expr *expr, int commutative);
+void pointer_arithmetic(struct expr **expp1, int oper, struct expr **expp2);
+void pointer_binary(struct expr **expp, int oper, struct expr *expr);
 
 
 #endif /* CH3MON_H_ */

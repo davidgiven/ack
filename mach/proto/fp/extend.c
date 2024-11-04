@@ -38,7 +38,7 @@ unsigned long	*from;
 EXTEND	*to;
 int	size;
 {
-	register char *cpt1;
+	char *cpt1;
 	unsigned long	tmp;
 	int	leadbit = 0;
 

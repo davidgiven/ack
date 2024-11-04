@@ -7,6 +7,6 @@
 #define OPTIONS_H_
 
 /* Parse command line options */
-void DoOption(register char *text);
+void DoOption(char *text);
 
 #endif /* OPTIONS_H_ */

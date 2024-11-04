@@ -18,11 +18,11 @@ void
 mul_ext(e1,e2)
 EXTEND	*e1,*e2;
 {
-	register int	i,j;		/* loop control	*/
+	int	i,j;		/* loop control	*/
 	unsigned short	mp[4];		/* multiplier */
 	unsigned short	mc[4];		/* multipcand */
 	unsigned short	result[8];	/* result */
-	register unsigned short *pres;
+	unsigned short *pres;
 
 	/* first save the sign (XOR)			*/
 	e1->sign ^= e2->sign;

@@ -45,7 +45,7 @@ int regbit[] = {	/* push-pull coding */
 
 
 /* Motorola 6809 specific routines */
-void branch(register int opc, expr_t exp);
-int regno(register int r);
+void branch(int opc, expr_t exp);
+int regno(int r);
 void emit1or2(int n);
-void offset(register int reg, expr_t exp, register int ind);
+void offset(int reg, expr_t exp, int ind);

@@ -36,9 +36,9 @@ void ch3sel(struct expr **expp, int oper, struct idf *idf)
 	/*	The selector idf is applied to *expp; oper may be '.' or
 		ARROW.
 	*/
-	register struct expr *exp;
-	register struct type *tp;
-	register struct sdef *sd;
+	struct expr *exp;
+	struct type *tp;
+	struct sdef *sd;
 
 	any2opnd(expp, oper);
 	exp = *expp;
@@ -171,15 +171,15 @@ void ch3incr(struct expr **expp, int oper)
 	ch3asgn(expp, oper, intexpr((arith)1, INT));
 }
 
-void ch3cast(register struct expr **expp, int oper, register struct type *tp)
+void ch3cast(struct expr **expp, int oper, struct type *tp)
 {
 	/*	The expression *expp is cast to type tp; the cast is
 		caused by the operator oper.  If the cast has
 		to be passed on to run time, its left operand will be an
 		expression of class Type.
 	*/
-	register struct type *oldtp;
-	register struct expr *exp = *expp;
+	struct type *oldtp;
+	struct expr *exp = *expp;
 	int qual_lev, ascompat = 0;
 
 	if (oper == RETURN && tp->tp_fund == VOID) {
@@ -408,7 +408,7 @@ void ch3cast(register struct expr **expp, int oper, register struct type *tp)
 
 /*	Determine whether two types are equal.
 */
-int equal_type(register struct type *tp,register struct type *otp, int qual_lev, int diag)
+int equal_type(struct type *tp,struct type *otp, int qual_lev, int diag)
 {
 	 if (tp == otp)
 		return 1;
@@ -469,7 +469,7 @@ int equal_type(register struct type *tp,register struct type *otp, int qual_lev,
 	}
 }
 
-int check_pseudoproto(register struct proto *pl,register struct proto *opl, int diag)
+int check_pseudoproto(struct proto *pl,struct proto *opl, int diag)
 {
 	int retval = 1;
 
@@ -516,7 +516,7 @@ int legal_mixture(struct type *tp, struct type *otp, int diag)
 {
 	struct proto *pl = tp->tp_proto, *opl = otp->tp_proto;
 	int retval = 1;
-	register struct proto *prot;
+	struct proto *prot;
 	int fund;
 
 	assert( (pl != 0) ^ (opl != 0));
@@ -553,7 +553,7 @@ int legal_mixture(struct type *tp, struct type *otp, int diag)
 	return retval;
 }
 
-int equal_proto(register struct proto *pl, register struct proto *opl, int diag)
+int equal_proto(struct proto *pl, struct proto *opl, int diag)
 {
 	if (pl == opl)
 		return 1;
@@ -577,7 +577,7 @@ int equal_proto(register struct proto *pl, register struct proto *opl, int diag)
 /* check if a type has a consqualified member */
 int recurqual(struct type *tp, int qual)
 {
-	register struct sdef *sdf;
+	struct sdef *sdf;
 
 	assert(tp);
 
@@ -612,7 +612,7 @@ void ch3asgn(struct expr **expp, int oper, struct expr *expr)
 			      f     (typeof (f op e))e
 		EVAL should however take care of evaluating (typeof (f op e))f
 	*/
-	register struct expr *exp = *expp;
+	struct expr *exp = *expp;
 	int fund = exp->ex_type->tp_fund;
 	struct type *tp;
 	char *oper_string = symbol2str(oper);
@@ -672,7 +672,7 @@ void ch3asgn(struct expr **expp, int oper, struct expr *expr)
 
 /*	Some interesting (?) questions answered.
 */
-int is_integral_type(register struct type *tp)
+int is_integral_type(struct type *tp)
 {
 	switch (tp->tp_fund)	{
 	case CHAR:
@@ -691,7 +691,7 @@ int is_integral_type(register struct type *tp)
 	}
 }
 
-int is_arith_type(register struct type *tp)
+int is_arith_type(struct type *tp)
 {
 	switch (tp->tp_fund)	{
 	case CHAR:

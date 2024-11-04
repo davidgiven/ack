@@ -68,7 +68,7 @@ struct scope * open_and_close_scope(int scopetype);
 void InitScope(void);
 void close_scope(int flag);
 #ifdef DEBUG
-void DumpScope(register struct def *df);
+void DumpScope(struct def *df);
 #endif
 
 

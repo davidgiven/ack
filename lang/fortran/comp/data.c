@@ -30,11 +30,11 @@ static char *cur_varname;
 
 /* another initializer, called from parser */
 dataval(repp, valp)
-register expptr repp, valp;
+expptr repp, valp;
 {
 	int i, nrep;
 	ftnint elen;
-	register Addrp p;
+	Addrp p;
 	Addrp nextdata();
 
 	if (parstate < INDATA) {
@@ -81,13 +81,13 @@ ret:
 Addrp nextdata(elenp)
 ftnint *elenp;
 {
-	register struct Impldoblock *ip;
+	struct Impldoblock *ip;
 	struct Primblock *pp;
-	register Namep np;
-	register struct Rplblock *rp;
+	Namep np;
+	struct Rplblock *rp;
 	tagptr p;
 	expptr neltp;
-	register expptr q;
+	expptr q;
 	int skip;
 	ftnint off, vlen;
 
@@ -222,17 +222,17 @@ LOCAL FILEP dfile;
 
 
 setdata(varp, valp, elen)
-register Addrp varp;
+Addrp varp;
 ftnint elen;
-register Constp valp;
+Constp valp;
 {
 	struct Constblock con;
-	register int type;
+	int type;
 	int i, k, valtype;
 	ftnint offset;
 	char *dataname(), *varname;
 	static Addrp badvar;
-	register unsigned char *s;
+	unsigned char *s;
 	static int last_lineno;
 	static char *last_varname;
 
@@ -346,7 +346,7 @@ char *dataname(stg,memno)
  long memno;
 {
 	static char varname[64];
-	register char *s, *t;
+	char *s, *t;
 	char buf[16], *memname();
 
 	if (stg == STGCOMMON) {
@@ -370,8 +370,8 @@ char *dataname(stg,memno)
 frdata(p0)
 chainp p0;
 {
-	register struct Chain *p;
-	register tagptr q;
+	struct Chain *p;
+	tagptr q;
 
 	for(p = p0 ; p ; p = p->nextp)
 	{
@@ -403,10 +403,10 @@ int type;
 
  void
 make_param(p, e)
- register struct Paramblock *p;
+ struct Paramblock *p;
  expptr e;
 {
-	register expptr q;
+	expptr q;
 
 	p->vclass = CLPARAM;
 	impldcl((Namep)p);

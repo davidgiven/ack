@@ -16,8 +16,8 @@
 
 unsigned hash(char *string)
 {
-	register char *p;
-	register unsigned i, sum;
+	char *p;
+	unsigned i, sum;
 
 	for (sum = i = 0, p = string; *p; i += 3)
 		sum ^= (*p++) << (i & 07);
@@ -26,8 +26,8 @@ unsigned hash(char *string)
 
 sym_p symlookup(char *name, int status, int flags)
 {
-	register sym_p *spp, sp;
-	register int i;
+	sym_p *spp, sp;
+	int i;
 	static short genfrag = 32767;
 
 	spp = &symhash[hash(name) % NSYMHASH];
@@ -68,7 +68,7 @@ sym_p symlookup(char *name, int status, int flags)
 
 num_p numlookup(unsigned number)
 {
-	register num_p *npp, np;
+	num_p *npp, np;
 
 	npp = &curpro.numhash[number % NNUMHASH];
 	while (*npp != (num_p) 0)

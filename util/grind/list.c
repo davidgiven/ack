@@ -22,7 +22,7 @@ mk_filnm(dir, file, newname)
   char	*file;
   char	**newname;
 {
-  register char	*dst = Malloc((unsigned) (strlen(dir) + strlen(file) + 2));
+  char	*dst = Malloc((unsigned) (strlen(dir) + strlen(file) + 2));
 
   *newname = dst;
   if (*dir) {
@@ -57,13 +57,13 @@ open_file(fn, mode, ffn)
 }
 
 lines(file, l1, l2)
-  register p_file file;
+  p_file file;
   int		l1, l2;
 {
   static p_file last_file;
   static FILE *last_f;
-  register FILE	*f;
-  register int	n;
+  FILE	*f;
+  int	n;
 
   if (last_file != file) {
 	if (last_f) fclose(last_f);
@@ -88,7 +88,7 @@ lines(file, l1, l2)
 
   fseek(f, *(file->f_linepos+(l1-1)), 0);
   for (n = l1; n < l1 + l2; n++) {
-	register int	c;
+	int	c;
 
 	if (interrupted) return;
 	fprintf(db_out, "%c%5d\t", currfile && file == currfile->sy_file && n == currline ? '>' : ' ', n);
@@ -104,12 +104,12 @@ lines(file, l1, l2)
 static
 line_positions(file, f)
   p_file	file;
-  register FILE	*f;
+  FILE	*f;
 {
   int		nl;
   unsigned int	n_alloc = 256;
-  register long	cnt = 0;
-  register int	c;
+  long	cnt = 0;
+  int	c;
 
   file->f_linepos = (long *) Malloc(n_alloc * sizeof(long));
   file->f_linepos[0] = 0;

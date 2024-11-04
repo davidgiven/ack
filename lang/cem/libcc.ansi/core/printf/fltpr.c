@@ -10,11 +10,11 @@
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_STDIO_FLOAT
 
 static char*
-_pfloat(long double r, register char* s, int n, int flags)
+_pfloat(long double r, char* s, int n, int flags)
 {
-	register char* s1;
+	char* s1;
 	int sign, dp;
-	register int i;
+	int i;
 
 	s1 = _fcvt(r, n, &dp, &sign);
 	if (sign)
@@ -48,10 +48,10 @@ _pfloat(long double r, register char* s, int n, int flags)
 }
 
 static char*
-_pscien(long double r, register char* s, int n, int flags)
+_pscien(long double r, char* s, int n, int flags)
 {
 	int sign, dp;
-	register char* s1;
+	char* s1;
 
 	s1 = _ecvt(r, n + 1, &dp, &sign);
 	if (sign)
@@ -99,9 +99,9 @@ static char*
 _gcvt(long double value, int ndigit, char* s, int flags)
 {
 	int sign, dp;
-	register char *s1, *s2;
-	register int i;
-	register int nndigit = ndigit;
+	char *s1, *s2;
+	int i;
+	int nndigit = ndigit;
 
 	s1 = _ecvt(value, ndigit, &dp, &sign);
 	s2 = s;
@@ -177,7 +177,7 @@ _gcvt(long double value, int ndigit, char* s, int flags)
 
 char* _f_print(va_list* ap, int flags, char* s, char c, int precision)
 {
-	register char* old_s = s;
+	char* old_s = s;
 	long double ld_val;
 
 	if (flags & FL_LONGDOUBLE)

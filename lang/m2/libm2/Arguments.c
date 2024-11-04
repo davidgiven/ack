@@ -26,7 +26,7 @@ static char* findname(char* s1, char* s2)
 
 static unsigned int scopy(char* src, char* dst, unsigned int max)
 {
-	register unsigned int i = 0;
+	unsigned int i = 0;
 
 	while (*src && i <= max)
 	{
@@ -59,8 +59,8 @@ unsigned int _Arguments__Argv(int n, char* argument, int l, unsigned int u, int 
 unsigned int _Arguments__GetEnv(
     char* name, int nn, unsigned int nu, int ns, char* value, int l, unsigned int u, int s)
 {
-	register char** p = environ;
-	register char* v = 0;
+	char** p = environ;
+	char* v = 0;
 
 	while (*p && !(v = findname(name, *p++)))
 	{

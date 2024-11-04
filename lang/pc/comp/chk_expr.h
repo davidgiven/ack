@@ -13,13 +13,13 @@ extern int	(*VarAccChkTable[])(struct node*);	/* table of variable-access checki
 #define	ChkExpression(expp)	((*ExprChkTable[(expp)->nd_class])(expp))
 #define	ChkVarAccess(expp)	((*VarAccChkTable[(expp)->nd_class])(expp))
 
-int ChkConstant(register struct node *expp);
-int ChkVariable(register struct node *expp);
+int ChkConstant(struct node *expp);
+int ChkVariable(struct node *expp);
 /* Check that "expp" indicates an item that can be the lhs
    of an assignment, return 1 if possible, on return 0.
  */
-int ChkLhs(register struct node *expp);
-int ChkLinkOrName(register struct node *expp);
-char *ChkAllowedVar(register struct node *nd, int reading);
-int ChkCall(register struct node *expp);
-void MarkUsed(register struct node *nd);
+int ChkLhs(struct node *expp);
+int ChkLinkOrName(struct node *expp);
+char *ChkAllowedVar(struct node *nd, int reading);
+int ChkCall(struct node *expp);
+void MarkUsed(struct node *nd);

@@ -6,7 +6,7 @@
 
 
 /* library routine for copying structs */
-void __stb(register int n, register char *f, register char *t)
+void __stb(int n, char *f, char *t)
 {
 	if (n > 0)
 		do

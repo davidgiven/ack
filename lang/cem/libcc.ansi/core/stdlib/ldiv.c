@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 ldiv_t
-ldiv(register long numer, register long denom)
+ldiv(long numer, long denom)
 {
 	ldiv_t r;
 

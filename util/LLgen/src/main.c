@@ -29,13 +29,13 @@ static string rcsid6 = "$Id$";
 # endif
 
 /* In this file the following routines are defined: */
-STATIC void readgrammar(int, char *[]);
-STATIC void doparse(register p_file);
-STATIC void comfatal(void);
+static void readgrammar(int, char *[]);
+static void doparse(p_file);
+static void comfatal(void);
 
-int main(int argc, register string argv[])
+int main(int argc, string argv[])
 {
-	register string arg;
+	string arg;
 
 	f_dir = ".";
 	f_temp = maketempfile();
@@ -221,12 +221,12 @@ int main(int argc, register string argv[])
 	exit(EXIT_SUCCESS);
 }
 
-STATIC void readgrammar(int argc, char *argv[])
+static void readgrammar(int argc, char *argv[])
 {
 	/*
 	 * Do just what the name suggests : read the grammar
 	 */
-	register p_file p;
+	p_file p;
 
 	linecount = 0;
 	f_input = "no filename";
@@ -267,7 +267,7 @@ STATIC void readgrammar(int argc, char *argv[])
 		comfatal();
 }
 
-STATIC void doparse(register p_file p)
+static void doparse(p_file p)
 {
 	linecount = 0;
 	p->f_name = f_input;
@@ -318,7 +318,7 @@ void fatal(int lineno, string s, string t)
 	comfatal();
 }
 
-STATIC void comfatal(void)
+static void comfatal(void)
 {
 	/*
 	 * Some common code for exit on errors
@@ -339,8 +339,8 @@ void copyfile(string file)
 	/*
 	 * Copies a file indicated by the parameter to filedescriptor fpars.
 	 */
-	register int c;
-	register FILE *f;
+	int c;
+	FILE *f;
 
 	if ((f = fopen(file, "r")) == NULL)
 	{
@@ -389,8 +389,8 @@ void install(string target, string source)
 	 * if allowed (which means that the target must be generated
 	 * by LLgen from the source, or that the target is not present
 	 */
-	register int c1, c2;
-	register FILE *f1, *f2;
+	int c1, c2;
+	FILE *f1, *f2;
 	int cnt;
 	string realtarget = !isabspath(target) ? aprintf("%s/%s", f_dir, target) : target;
 

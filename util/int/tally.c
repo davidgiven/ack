@@ -25,16 +25,16 @@ struct file_tally
 	struct line_tally* ft_line; /* pointer to line array */
 };
 
-PRIVATE struct file_tally* first_tally; /* start of chain */
-PRIVATE struct file_tally* file; /* present file */
+static struct file_tally* first_tally; /* start of chain */
+static struct file_tally* file; /* present file */
 
-PRIVATE long lastLIN;
+static long lastLIN;
 
-PRIVATE FILE* tally_fp;
+static FILE* tally_fp;
 
 /* Forward declarations. */
-PRIVATE void tally_newFIL(ptr);
-PRIVATE void enlarge(struct file_tally*, long);
+static void tally_newFIL(ptr);
+static void enlarge(struct file_tally*, long);
 
 void tally(void)
 {
@@ -59,7 +59,7 @@ void tally(void)
 	file->ft_line[LIN].lt_instr++;
 }
 
-PRIVATE void tally_newFIL(ptr f)
+static void tally_newFIL(ptr f)
 {
 	struct file_tally** hook = &first_tally;
 
@@ -90,7 +90,7 @@ PRIVATE void tally_newFIL(ptr f)
 	file = *hook;
 }
 
-PRIVATE void enlarge(struct file_tally* ft, long l)
+static void enlarge(struct file_tally* ft, long l)
 {
 	long limit = allocfrac(l < 100 ? 100 : l);
 
@@ -120,7 +120,7 @@ void out_tally(void)
 	while (*hook)
 	{
 		struct file_tally* ft = *hook;
-		register long i;
+		long i;
 
 		fprintf(tally_fp, "%s:\n", dt_fname(ft->ft_fil));
 		for (i = 0; i < ft->ft_limit; i++)

@@ -73,8 +73,8 @@ extern struct node *dot2leaf(int class);
 struct node *getnode(int class);
 struct node *dot2node(int class, struct node *left, struct node *right);
 struct node *dot2leaf(int class);
-void FreeNode(register struct node *nd);
-int NodeCrash(register struct node* expp, label exit_label, int end_reached);
+void FreeNode(struct node *nd);
+int NodeCrash(struct node* expp, label exit_label, int end_reached);
 int PNodeCrash(struct node **expp, int flags);
 
 #endif /* NODE_H_ */

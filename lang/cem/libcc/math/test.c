@@ -177,7 +177,7 @@ testbessel()
 #define J10__PI_2	0.00000002326614794865976450546482206 /* j10(pi/2) */
 
 	extern double j0(), j1(), jn(), yn();
-	register int n;
+	int n;
 	double x;
 	extern char *sprintf();
 	char buf[100];

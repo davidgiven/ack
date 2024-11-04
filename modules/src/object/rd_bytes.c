@@ -23,11 +23,11 @@ extern void rd_fatal(void);
  * Just read "cnt" bytes from file-descriptor "fd".
  */
 void
-rd_bytes(FILE* fd, register char *string, register long cnt)
+rd_bytes(FILE* fd, char *string, long cnt)
 {
     size_t read_bytes;
     while (cnt) {
-        register size_t n = cnt >= maxchunk ? maxchunk : cnt;
+        size_t n = cnt >= maxchunk ? maxchunk : cnt;
 
         read_bytes = fread(string, 1, n, fd);
         if (read_bytes != n)

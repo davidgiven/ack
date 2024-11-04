@@ -17,7 +17,7 @@ SINGLE	s1;
 struct fef4_returns	*r;
 {
 	EXTEND	buf;
-	register struct fef4_returns	*p = r;	/* make copy; r might refer
+	struct fef4_returns	*p = r;	/* make copy; r might refer
 						   to itself (see table)
 						*/
 

@@ -37,7 +37,7 @@ init_languages()
 find_language(suff)
   char	*suff;
 {
-  register struct langlist *p = list;
+  struct langlist *p = list;
 
   if (! suff) {
 	currlang = c_dep;

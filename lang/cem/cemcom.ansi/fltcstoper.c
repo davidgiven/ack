@@ -23,7 +23,7 @@
 extern int ResultKnown;
 
 
-void fltcstbin(register struct expr **expp, int oper, register struct expr *expr)
+void fltcstbin(struct expr **expp, int oper, struct expr *expr)
 {
 	/*	The operation oper is performed on the constant
 		expressions *expp(ld) and expr(ct), and the result restored in

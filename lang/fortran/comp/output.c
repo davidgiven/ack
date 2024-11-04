@@ -297,8 +297,8 @@ expptr left, right;
 
  static int
 samefpconst(c1, c2, n)
- register Constp c1, c2;
- register int n;
+ Constp c1, c2;
+ int n;
 {
 	char *s1, *s2;
 	if (!c1->vstg && !c2->vstg)
@@ -310,7 +310,7 @@ samefpconst(c1, c2, n)
 
  static int
 sameconst(c1, c2)
- register Constp c1, c2;
+ Constp c1, c2;
 {
 	switch(c1->vtype) {
 		case TYCOMPLEX:
@@ -399,7 +399,7 @@ static char *Longfmt = "%ld";
 
 void out_const(fp, cp)
  FILE *fp;
- register Constp cp;
+ Constp cp;
 {
     static char real_buf[50], imag_buf[50];
     unsigned int k;
@@ -709,9 +709,9 @@ struct Exprblock *e;
 
  static char *
 findconst(m)
- register long m;
+ long m;
 {
-	register struct Literal *litp, *litpe;
+	struct Literal *litp, *litpe;
 
 	litp = litpool;
 	for(litpe = litp + nliterals; litp < litpe; litp++)
@@ -727,9 +727,9 @@ opconv_fudge(fp,e)
  struct Exprblock *e;
 {
 	/* special handling for ichar and character*1 */
-	register expptr lp = e->leftp;
-	register union Expression *Offset;
-	register char *cp;
+	expptr lp = e->leftp;
+	union Expression *Offset;
+	char *cp;
 	int lt = lp->headblock.vtype;
 	char buf[8];
 	unsigned int k;
@@ -925,7 +925,7 @@ expptr len, name, args;
 				   routine */
     int done_once;		/* Used for writing commas to   outfile   */
     int narg, t;
-    register expptr q;
+    expptr q;
     long L;
     Argtypes *at;
     Atype *A;
@@ -1169,7 +1169,7 @@ char tr_tab[Table_size];
 void out_init ()
 {
     extern int tab_size;
-    register char *s;
+    char *s;
 
     s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+-.";
     while(*s)
@@ -1318,7 +1318,7 @@ output_rbrace(outfile, s)
  char *s;
 {
 	extern int last_was_label;
-	register char *fmt;
+	char *fmt;
 
 	if (last_was_label) {
 		last_was_label = 0;

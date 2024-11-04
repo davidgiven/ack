@@ -14,11 +14,11 @@
 
 #define MAXWIDTH 32
 
-char *long2str(register long val, register int base)
+char *long2str(long val, int base)
 {
 	static char numbuf[MAXWIDTH];
 	static char vec[] = "0123456789ABCDEF";
-	register char *p = &numbuf[MAXWIDTH];
+	char *p = &numbuf[MAXWIDTH];
 	int sign = (base > 0);
 
 	*--p = '\0';		/* null-terminate string	*/
@@ -37,7 +37,7 @@ char *long2str(register long val, register int base)
 		if (base < 0) {			/* unsigned */
 			base = -base;
 			if (val < 0L) {	/* taken from Amoeba src */
-				register int mod, i;
+				int mod, i;
 			overflow:
 				mod = 0;
 				for (i = 0; i < 8 * (int)sizeof(val); i++) {

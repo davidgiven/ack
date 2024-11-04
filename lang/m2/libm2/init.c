@@ -86,7 +86,7 @@ static int blablabla; /*	We cannot use end, because then also
 void killbss(void)
 {
 	extern char* bkillbss;
-	register char* p = (char*)&bkillbss;
+	char* p = (char*)&bkillbss;
 
 	while (p < (char*)&blablabla)
 		*p++ = 0x66;

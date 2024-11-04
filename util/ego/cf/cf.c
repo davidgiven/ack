@@ -37,8 +37,8 @@
 
 extern char em_flag[];
 
-STATIC cset lpi_set; /* set of procedures used in LPI instruction */
-STATIC cset cai_set; /* set of all procedures doing a CAI */
+static cset lpi_set; /* set of procedures used in LPI instruction */
+static cset cai_set; /* set of all procedures doing a CAI */
 
 /* The procedure getbblocks reads the EM textfile and
  * partitions every procedure into a number of basic blocks.
@@ -54,15 +54,15 @@ STATIC cset cai_set; /* set of all procedures doing a CAI */
 
 /* These global variables are used by getbblocks and nextblock. */
 
-STATIC bblock_p b, *bp; /* b is the current basic block, bp is
+static bblock_p b, *bp; /* b is the current basic block, bp is
                          * the address where the next block has
                          * to be linked.
                          */
-STATIC line_p lnp, *lp; /* lnp is the current line, lp is
+static line_p lnp, *lp; /* lnp is the current line, lp is
                          * the address where the next line
                          * has to be linked.
                          */
-STATIC short state; /* We use a finite state machine with the
+static short state; /* We use a finite state machine with the
                      * following states:
                      *  LABEL0: after the first (successive)
                      *	    instruction label.
@@ -76,7 +76,7 @@ STATIC short state; /* We use a finite state machine with the
                      *  INIT:   initial state
                      */
 
-STATIC void nextblock(void)
+static void nextblock(void)
 {
 	/* allocate a new basic block structure and
 	 * set b, bp and lp.
@@ -96,7 +96,7 @@ STATIC void nextblock(void)
 #endif
 }
 
-STATIC short kind(line_p lnp)
+static short kind(line_p lnp)
 {
 	/* determine if lnp is a label, branch, end or otherwise */
 
@@ -114,15 +114,15 @@ STATIC short kind(line_p lnp)
 	return (short)NORMAL;
 }
 
-STATIC line_p doread_line(proc_p* p_out)
+static line_p doread_line(proc_p* p_out)
 {
 	/* read a line, and check pseudos for procedure addresses */
 
-	register line_p lnp = read_line(p_out);
+	line_p lnp = read_line(p_out);
 
 	if (lnp && TYPE(lnp) == OPLIST && INSTR(lnp) != ps_mes)
 	{
-		register arg_p arg = ARG(lnp);
+		arg_p arg = ARG(lnp);
 
 		while (arg)
 		{
@@ -137,7 +137,7 @@ STATIC line_p doread_line(proc_p* p_out)
 	return lnp;
 }
 
-STATIC bool getbblocks(FILE* fp, short* kind_out, short* n_out, bblock_p* g_out, line_p* l_out)
+static bool getbblocks(FILE* fp, short* kind_out, short* n_out, bblock_p* g_out, line_p* l_out)
 {
 	bblock_p head = (bblock_p)0;
 	line_p headl = (line_p)0;
@@ -246,7 +246,7 @@ STATIC bool getbblocks(FILE* fp, short* kind_out, short* n_out, bblock_p* g_out,
 	}
 }
 
-STATIC void interproc_analysis(proc_p p)
+static void interproc_analysis(proc_p p)
 {
 	/* Interprocedural analysis of a procedure p determines:
 	 *  - all procedures called by p (the 'call graph')
@@ -355,12 +355,12 @@ STATIC void interproc_analysis(proc_p p)
 	}
 }
 
-STATIC void cf_cleanproc(proc_p p)
+static void cf_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures of p */
 
-	register bblock_p b;
-	register Lindex pi;
+	bblock_p b;
+	Lindex pi;
 	loop_p lp;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
@@ -379,7 +379,7 @@ STATIC void cf_cleanproc(proc_p p)
 #define CALLS_UNKNOWN(p) (p->p_flags1 & (byte)PF_CALUNKNOWN)
 #define ENVIRON(p) (p->p_flags1 & (byte)PF_ENVIRON)
 
-STATIC bool add_info(proc_p q, proc_p p)
+static bool add_info(proc_p q, proc_p p)
 {
 	/* Determine the consequences for used/changed variables info
 	 * of the fact that p calls q. If e.g. q changes a variable X
@@ -466,13 +466,13 @@ STATIC bool add_info(proc_p q, proc_p p)
 	return diff;
 }
 
-STATIC void trans_clos(proc_p head)
+static void trans_clos(proc_p head)
 {
 	/* Compute the transitive closure of the used/changed
 	 * variable information.
 	 */
 
-	register proc_p p, q;
+	proc_p p, q;
 	Cindex i;
 	bool changes = TRUE;
 
@@ -495,7 +495,7 @@ STATIC void trans_clos(proc_p head)
 	}
 }
 
-STATIC void indir_calls(void)
+static void indir_calls(void)
 {
 	Cindex i;
 	proc_p p;

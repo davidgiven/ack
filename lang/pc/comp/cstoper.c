@@ -28,16 +28,16 @@ char *maxint_str;	/* string representation of maximum integer */
 arith wrd_bits;		/* number of bits in a word */
 arith max_intset;	/* largest value of set of integer */
 
-void CutSize(register struct node *expr);
+void CutSize(struct node *expr);
 
 void overflow(struct node *expp)
 {
 	node_warning(expp, "overflow in constant expression");
 }
 
-void cstunary(register struct node *expp)
+void cstunary(struct node *expp)
 {
-	register arith o1 = expp->nd_right->nd_INT;
+	arith o1 = expp->nd_right->nd_INT;
 
 	switch( expp->nd_symb )	{
 		/* Should not get here
@@ -66,13 +66,13 @@ void cstunary(register struct node *expp)
 	expp->nd_right = NULLNODE;
 }
 
-void cstbin(register struct node *expp)
+void cstbin(struct node *expp)
 {
 	/*	The binary operation in "expp" is performed on the constant
 		expressions below it, and the result restored in expp.
 	*/
-	register arith o1, o2;
-	register char *s1, *s2;
+	arith o1, o2;
+	char *s1, *s2;
 	int str = expp->nd_left->nd_type->tp_fund & T_STRINGCONST;
 
 	if( str )	{
@@ -194,12 +194,12 @@ void cstbin(register struct node *expp)
 	expp->nd_left = expp->nd_right = NULLNODE;
 }
 
-void cstset(register struct node *expp)
+void cstset(struct node *expp)
 {
-	register arith *set1, *set2;
+	arith *set1, *set2;
 	arith *resultset = (arith *) 0;
 	int empty_result = 0;
-	register int setsize, j;
+	int setsize, j;
 
 	assert(expp->nd_right->nd_class == Set);
 	assert(expp->nd_symb == IN || expp->nd_left->nd_class == Set);
@@ -348,12 +348,12 @@ void cstset(register struct node *expp)
 	expp->nd_left = expp->nd_right = NULLNODE;
 }
 
-void cstcall(register struct node *expp, int req)
+void cstcall(struct node *expp, int req)
 {
 	/*	a standard procedure call is found that can be evaluated
 		compile time, so do so.
 	*/
-	register struct node *expr = NULLNODE;
+	struct node *expr = NULLNODE;
 
 	assert(expp->nd_class == Call);
 
@@ -435,13 +435,13 @@ void cstcall(register struct node *expp, int req)
 	expp->nd_right = expp->nd_left = NULLNODE;
 }
 
-void CutSize(register struct node *expr)
+void CutSize(struct node *expr)
 {
 	/* The constant value of the expression expr is made to conform
 	 * to the size of the type of the expression
 	 */
-	register arith o1 = expr->nd_INT;
-	register struct type *tp = BaseType(expr->nd_type);
+	arith o1 = expr->nd_INT;
+	struct type *tp = BaseType(expr->nd_type);
 	int size = tp->tp_size;
 	long remainder = o1 & ~full_mask[size];
 
@@ -469,8 +469,8 @@ void CutSize(register struct node *expr)
 
 void InitCst(void)
 {
-	register int i = 0;
-	register arith bt = (arith)0;
+	int i = 0;
+	arith bt = (arith)0;
 
 	while( !(bt < 0) )	{
 		bt = (bt << 8) + 0377;

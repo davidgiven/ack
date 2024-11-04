@@ -59,7 +59,7 @@ l_g(buf, absn) char *buf; double absn;
  static void
 l_put(s) register char *s;
 {
-	register int c, (*pn)() = putn;
+	int c, (*pn)() = putn;
 	while(c = *s++)
 		(*pn)(c);
 	}

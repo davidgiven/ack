@@ -10,8 +10,8 @@
 
 struct expr;
 
-void cstbin(register struct expr **expp, int oper, register struct expr *expr);
-void cut_size(register struct expr *expr);
+void cstbin(struct expr **expp, int oper, struct expr *expr);
+void cut_size(struct expr *expr);
 void init_cst(void);
 
 #endif /* CSTOPER_H_ */

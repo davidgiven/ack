@@ -89,9 +89,9 @@ int main(int argc, char **argv)
 
 static void readin(void)
 {
-	register struct opform *nextform;
+	struct opform *nextform;
 	char *firstid;
-	register int maxl;
+	int maxl;
 
 	maxl = 0;
 	for (nextform = intable; !feof(stdin) && nextform < &intable[NOTAB];)
@@ -135,8 +135,8 @@ static char *ident(void)
 	 */
 
 	static char array[200];
-	register int c;
-	register char *cc;
+	int c;
+	char *cc;
 
 	do
 	{
@@ -339,10 +339,10 @@ static int decflag(char *str)
 
 static void writeout(void)
 {
-	register struct opform *next;
+	struct opform *next;
 	int elem[sp_lmnem - sp_fmnem + 1 + 1];
 	/* for each op points to first of descr. */
-	register int i, currop;
+	int i, currop;
 	int nch;
 
 	qsort(intable, (lastform - intable) + 1, sizeof intable[0], compare);
@@ -444,8 +444,8 @@ char negc[NMNEM], zc[NMNEM], posc[NMNEM];
 
 static void checkall(void)
 {
-	register int i, flag;
-	register struct opform *next;
+	int i, flag;
+	struct opform *next;
 	int opc, low;
 
 	for (i = 0; i < NMNEM; i++)

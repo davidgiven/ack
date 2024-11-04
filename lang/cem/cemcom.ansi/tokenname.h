@@ -14,6 +14,6 @@ struct tokenname	{	/*	Used for defining the name of a
 	char *tn_name;
 };
 
-void reserve(register struct tokenname resv[]);
+void reserve(struct tokenname resv[]);
 
 #endif /* TOKENNAME_H_ */

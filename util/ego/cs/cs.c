@@ -24,7 +24,7 @@
 
 int Scs; /* Number of optimizations found. */
 
-STATIC void cs_clear(void)
+static void cs_clear(void)
 {
 	clr_avails();
 	clr_entities();
@@ -33,12 +33,12 @@ STATIC void cs_clear(void)
 	start_valnum();
 }
 
-STATIC void cs_optimize(void* vp)
+static void cs_optimize(void* vp)
 {
 	/* Optimize all basic blocks of one procedure. */
 
 	proc_p p = vp;
-	register bblock_p rbp, bdone;
+	bblock_p rbp, bdone;
 
 	if (IS_ENTERED_WITH_GTO(p))
 		return;

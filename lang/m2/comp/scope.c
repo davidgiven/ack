@@ -44,8 +44,8 @@ void open_scope(int scopetype)
 {
 	/*	Open a scope that is either open (automatic imports) or closed.
 	*/
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	struct scope *sc = new_scope();
+	struct scopelist *ls = new_scopelist();
 	
 	assert(scopetype == OPENSCOPE || scopetype == CLOSEDSCOPE);
 
@@ -72,8 +72,8 @@ struct scope * open_and_close_scope(int scopetype)
 
 void InitScope(void)
 {
-	register struct scope *sc = new_scope();
-	register struct scopelist *ls = new_scopelist();
+	struct scope *sc = new_scope();
+	struct scopelist *ls = new_scopelist();
 
 	sc->sc_level = proclevel;
 	PervasiveScope = sc;
@@ -81,7 +81,7 @@ void InitScope(void)
 	CurrVis = ls;
 }
 
-static void chk_proc(register struct def *df)
+static void chk_proc(struct def *df)
 {
 	/*	Called at scope closing. Check all definitions, and if one
 		is a D_PROCHEAD, the procedure was not defined.
@@ -109,11 +109,11 @@ static void chk_forw(struct def **pdf)
 		if the scope was a closed scope, give an error message for
 		them, and otherwise move them to the enclosing scope.
 	*/
-	register struct def *df;
+	struct def *df;
 
 	while ( (df = *pdf) ) {
 		while (df->df_kind == D_FORWTYPE) {
-			register struct def *df2 = df->df_nextinscope;
+			struct def *df2 = df->df_nextinscope;
 			pdf = NULL;
 			ForceForwardTypeDef(df);	/* removes df */
 			df = df2;
@@ -135,9 +135,9 @@ df->df_idf->id_text);
 				   Maybe the definitions are in the
 				   enclosing scope?
 				*/
-				register struct scopelist *ls =
+				struct scopelist *ls =
 						nextvisible(CurrVis);
-				register struct def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
+				struct def *df1 = lookup(df->df_idf, ls->sc_scope, 0, 0);
 
 				if (pdf)
 					*pdf = df->df_nextinscope;
@@ -166,7 +166,7 @@ void Reverse(struct def **pdf)
 		Also, while we're at it, remove uninteresting definitions
 		from this list.
 	*/
-	register struct def *df, *df1;
+	struct def *df, *df1;
 #define INTERESTING (D_MODULE|D_PROCEDURE|D_PROCHEAD|D_VARIABLE|D_IMPORTED|D_TYPE|D_CONST|D_FIELD)
 
 	df = 0;
@@ -191,7 +191,7 @@ void close_scope(int flag)
 		either POINTER declarations, or EXPORTs, or forward references
 		to MODULES
 	*/
-	register struct scope *sc = CurrentScope;
+	struct scope *sc = CurrentScope;
 
 	assert(sc != 0);
 
@@ -208,7 +208,7 @@ void close_scope(int flag)
 }
 
 #ifdef DEBUG
-void DumpScope(register struct def *df)
+void DumpScope(struct def *df)
 {
 	while (df) {
 		PrDef(df);

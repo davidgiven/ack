@@ -6,7 +6,7 @@
  * close a directory.
  */
 closedir(dirp)
-register DIR *dirp;
+DIR *dirp;
 {
 	if (dirp->dd_fd >= 0) close(dirp->dd_fd);
 	dirp->dd_fd = -1;

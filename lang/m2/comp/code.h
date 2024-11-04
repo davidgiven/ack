@@ -21,7 +21,7 @@ struct type;
 /*	Generate code to push constant "cst" with size "size" bytes. */
 void CodeConst(arith cst, int size);
 /* Generate constant character or string. */
-void CodeString(register struct node *nd);
+void CodeString(struct node *nd);
 /* Generate code for an expression contained in "nd". */
 void CodeExpr(struct node *nd, struct desig *ds, label true_label, label false_label);
 /* Generate implicit type conversion code. */
@@ -31,15 +31,15 @@ void CodeCoercion(struct type *t1, struct type *t2);
 void CodeCall(struct node *nd);
 void CodePString(struct node *nd, struct type *tp);
 /* Generate a range check if necessary */
-void RangeCheck(register struct type *tpl, struct type *tpr);
-void CodeOper(register struct node *expr, label true_label, label false_label);
+void RangeCheck(struct type *tpl, struct type *tpr);
+void CodeOper(struct node *expr, label true_label, label false_label);
 /*	Generate code to push the value of the expression "nd"
 	on the stack. */
-void CodePExpr(register struct node *nd);
+void CodePExpr(struct node *nd);
 /*	Generate code to store the expression on the stack into the
 	designator "nd".
 */
-void CodeDStore(register struct node *nd);
+void CodeDStore(struct node *nd);
 
 #ifdef SQUEEZE
 void c_bra(label l);

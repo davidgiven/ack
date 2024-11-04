@@ -19,9 +19,9 @@
 
 int move(token_p tp1,token_p tp2,int ply,int toplevel,unsigned int maxcost)
 {
-	register move_p mp;
-	register unsigned t;
-	register struct reginfo *rp;
+	move_p mp;
+	unsigned t;
+	struct reginfo *rp;
 	tkdef_p tdp;
 	int i;
 

@@ -6,7 +6,7 @@ extern int _sigtramp();
 extern int errno;
 
 sigvec(sig,vec,ovec)
-	register struct sigvec *vec;
+	struct sigvec *vec;
 	struct sigvec *ovec;
 {
 	struct sigvec tmp;

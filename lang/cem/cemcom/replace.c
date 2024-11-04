@@ -29,15 +29,15 @@ char *strcpy(), *strcat();
 char *long2str();
 extern int InputLevel;
 
-PRIVATE struct mlist	*ReplaceList;	/* list of currently active macros */
+static struct mlist	*ReplaceList;	/* list of currently active macros */
 
-PRIVATE macro_func();
-PRIVATE char *macro2buffer();
+static macro_func();
+static char *macro2buffer();
 extern char **getactuals();
 
 EXPORT int
 replace(idef)
-	register struct idf *idef;
+	struct idf *idef;
 {
 	/*	replace() is called by the lexical analyzer to perform
 		macro replacement.  "idef" is the description of the
@@ -48,9 +48,9 @@ replace(idef)
 		replace() returns 1 if the replacement succeeded and 0 if
 		some error has occurred.
 	*/
-	register struct macro *mac = idef->id_macro;
-	register struct mlist *repl;
-	register int c;
+	struct macro *mac = idef->id_macro;
+	struct mlist *repl;
+	int c;
 	char **actpars;
 	char *reptext;
 	int size;
@@ -138,16 +138,16 @@ replace(idef)
 
 GSTATIC char FilNamBuf[PATHLENGTH];
 
-PRIVATE
+static
 macro_func(idef)
-	register struct idf *idef;
+	struct idf *idef;
 {
 	/*	macro_func() performs the special actions needed with some
 		macros.  These macros are __FILE__ and __LINE__ which
 		replacement texts must be evaluated at the time they are
 		used.
 	*/
-	register struct macro *mac = idef->id_macro;
+	struct macro *mac = idef->id_macro;
 
 	switch (idef->id_text[2]) { /* This switch is very blunt... */
 	case 'F' :			/* __FILE__	*/
@@ -167,7 +167,7 @@ macro_func(idef)
 	}
 }
 
-PRIVATE char *
+static char *
 macro2buffer(idef, actpars, siztext)
 	struct idf *idef;
 	char **actpars;
@@ -183,15 +183,15 @@ macro2buffer(idef, actpars, siztext)
 		If there are no parameters, this function behaves
 		the same as strcpy().
 	*/
-	register int size = 8;
-	register char *text = Malloc(size);
-	register int pos = 0;
-	register char *ptr = idef->id_macro->mc_text;
+	int size = 8;
+	char *text = Malloc(size);
+	int pos = 0;
+	char *ptr = idef->id_macro->mc_text;
 
 	while (*ptr) {
 		if (*ptr & FORMALP) {	/* non-asc formal param. mark	*/
-			register int n = *ptr++ & 0177;
-			register char *p;
+			int n = *ptr++ & 0177;
+			char *p;
 
 			ASSERT(n != 0);
 			/*	copy the text of the actual parameter
@@ -223,7 +223,7 @@ DoUnstack()
 EXPORT
 EnableMacros()
 {
-	register struct mlist *p = ReplaceList, *prev = 0;
+	struct mlist *p = ReplaceList, *prev = 0;
 
 	ASSERT(Unstacked > 0);
 	while (p) {

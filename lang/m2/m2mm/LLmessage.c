@@ -25,7 +25,7 @@ extern char		*symbol2str();
 extern struct idf	*gen_anon_idf();
 
 LLmessage(tk)
-	register int tk;
+	int tk;
 {
 	if (tk > 0)	{
 		/* if (tk > 0), it represents the token to be inserted.

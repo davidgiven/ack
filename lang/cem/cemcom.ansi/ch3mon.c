@@ -24,11 +24,11 @@
 
 extern char options[];
 
-void ch3mon(int oper, register struct expr **expp)
+void ch3mon(int oper, struct expr **expp)
 {
 	/*	The monadic prefix operator oper is applied to *expp.
 	*/
-	register struct expr *expr;
+	struct expr *expr;
 
 	if (oper != PLUSPLUS && oper != MINMIN)
 		any2opnd(expp, oper);
@@ -86,7 +86,7 @@ void ch3mon(int oper, register struct expr **expp)
 		else {
 			/* assume that enums are already filtered out	*/
 			if (ISNAME(*expp)) {
-				register struct def *def =
+				struct def *def =
 					(*expp)->VL_IDF->id_def;
 
 				/*	&<var> indicates that <var>

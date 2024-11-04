@@ -64,7 +64,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 	byte *bp;
 	int n;
 	unsigned mindistance, dist;
-	register int i;
+	int i;
 	int cindex;
 	int npos, npos2, pos[MAXPOS], pos2[MAXPOS];
 #ifdef STONSTACK
@@ -83,7 +83,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 	token_p tp;
 	tkdef_p tdp;
 	int tinstno;
-	register struct reginfo *rp;
+	struct reginfo *rp;
 	struct reginfo **rpp;
 	token_t token, mtoken, token2;
 	int propno;
@@ -319,7 +319,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 				{
 					if (!match(tp, &machsets[tokexp[i]], 0))
 					{
-						register c3_p cp = findcoerc(tp, &machsets[tokexp[i]]);
+						c3_p cp = findcoerc(tp, &machsets[tokexp[i]]);
 						if (cp == 0)
 						{
 							for (j = 0; j < nregneeded; j++)
@@ -368,7 +368,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 					tp = &fakestack[stackpad - 1];
 					while (i < tokpatlen && tp >= fakestack)
 					{
-						register c3_p cp = findcoerc((token_p) 0,
+						c3_p cp = findcoerc((token_p) 0,
 								&machsets[tokexp[i]]);
 						if (cp == 0)
 						{

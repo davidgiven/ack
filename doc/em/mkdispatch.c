@@ -48,7 +48,7 @@ void ckop(int, int, int, int);
 int readchar(void);
 void pushback(int);
 void writeout(void);
-void prx(register int, int, int);
+void prx(int, int, int);
 void readin(void);
 int getmnem(char *);
 void error(char *str, ...);
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 
 void readin(void)
 {
-	register struct opform *nextform;
+	struct opform *nextform;
 	char *firstid;
 
 	for (nextform = intable; !feof(stdin) && nextform < &intable[NOTAB];)
@@ -131,8 +131,8 @@ char *ident(void)
 	 */
 
 	static char array[200];
-	register int c;
-	register char *cc;
+	int c;
+	char *cc;
 
 	do
 	{
@@ -346,8 +346,8 @@ char negc[NMNEM], zc[NMNEM], posc[NMNEM], lnegc[NMNEM], lposc[NMNEM];
 
 void checkall(void)
 {
-	register int i, flag;
-	register struct opform *next;
+	int i, flag;
+	struct opform *next;
 	int opc, low;
 
 	for (i = 0; i < NMNEM; i++)
@@ -571,7 +571,7 @@ void pushback(int c)
 
 void writeout(void)
 {
-	register int i;
+	int i;
 
 	printf("DISPATCH1");
 	for (i = 0; i < 256;)
@@ -616,7 +616,7 @@ void writeout(void)
 	putchar('\n');
 }
 
-void prx(register int flg, int low, int opc)
+void prx(int flg, int low, int opc)
 {
 	int arg = opc - low;
 

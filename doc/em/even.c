@@ -1,5 +1,5 @@
 main() {
-	register int l,j ;
+	int l,j ;
 
 	for ( j=0 ; (l=getchar()) != -1 ; j++ ) {
 		if ( j%16 == 15 ) printf("%3d\n",l&0377 ) ;

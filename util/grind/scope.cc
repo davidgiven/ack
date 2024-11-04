@@ -24,7 +24,7 @@ static int
 cmp_starts(s1, s2)
   char	*s1, *s2;
 {
-  register p_scope c1 = (p_scope)s1, c2 = (p_scope)s2;
+  p_scope c1 = (p_scope)s1, c2 = (p_scope)s2;
 
   return c1->sc_start < c2->sc_start
 	 ? -1
@@ -38,7 +38,7 @@ open_scope(name, has_activation)
   p_symbol name;
   int has_activation;
 {
-  register p_scope sc = new_scope();
+  p_scope sc = new_scope();
 
   sc->sc_has_activation_record = has_activation;
   sc->sc_static_encl = CurrentScope;
@@ -50,7 +50,7 @@ open_scope(name, has_activation)
 
 init_scope()
 {
-  register p_scope sc = new_scope();
+  p_scope sc = new_scope();
 
   PervasiveScope = sc;
   CurrentScope = sc;
@@ -62,7 +62,7 @@ init_scope()
 
 close_scope()
 {
-  register p_scope sc = CurrentScope;
+  p_scope sc = CurrentScope;
 
   assert(sc != 0);
   CurrentScope = sc->sc_static_encl;
@@ -112,7 +112,7 @@ get_next_scope_from_addr(a)
 */
 int
 has_static_link(sc)
-  register p_scope	sc;
+  p_scope	sc;
 {
   return sc->sc_proclevel > 1;
 }
@@ -122,7 +122,7 @@ has_static_link(sc)
 */
 p_scope
 base_scope(sc)
-  register p_scope	sc;
+  p_scope	sc;
 {
   while (sc && ! sc->sc_has_activation_record) {
 	sc = sc->sc_static_encl;
@@ -137,7 +137,7 @@ int
 scope_encloses(scope, from_scope)
   p_scope	scope, from_scope;
 {
-  register p_scope sc = from_scope;
+  p_scope sc = from_scope;
 
   while (sc) {
 	if (sc == scope) return 1;

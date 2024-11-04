@@ -32,20 +32,20 @@ long LIN;
 /** Pointer to the filename. */
 ptr FIL;
 
-PRIVATE void index_jump(size), range_check(size), search_jump(size);
-PRIVATE void gto(ptr);
+static void index_jump(size), range_check(size), search_jump(size);
+static void gto(ptr);
 
 #define asp(l) newSP(SP + arg_f(l))
 
 /** ASP f: Adjust the stack pointer by f */
-void DoASP(register long l)
+void DoASP(long l)
 {
 	LOG(("@M6 DoASP(%ld)", l));
 	asp(l);
 }
 
 /** ASS w: Adjust the stack pointer by w-byte integer */
-void DoASS(register size l)
+void DoASS(size l)
 {
 	LOG(("@M6 DoASS(%ld)", l));
 	spoilFRA();
@@ -70,9 +70,9 @@ void DoASS(register size l)
 	}
 
 /** BLM z: Block move z bytes; first pop destination addr, then source addr */
-void DoBLM(register size l)
+void DoBLM(size l)
 {
-	register ptr dp1, dp2; /* Destination Pointers */
+	ptr dp1, dp2; /* Destination Pointers */
 
 	LOG(("@M6 DoBLM(%ld)", l));
 	spoilFRA();
@@ -82,9 +82,9 @@ void DoBLM(register size l)
 }
 
 /** BLS w: Block move, size is in w-byte integer on top of stack */
-void DoBLS(register size l)
+void DoBLS(size l)
 {
-	register ptr dp1, dp2;
+	ptr dp1, dp2;
 
 	LOG(("@M6 DoBLS(%ld)", l));
 	spoilFRA();
@@ -95,7 +95,7 @@ void DoBLS(register size l)
 }
 
 /** CSA w: Case jump; address of jump table at top of stack */
-void DoCSA(register size l)
+void DoCSA(size l)
 {
 	LOG(("@M6 DoCSA(%ld)", l));
 	spoilFRA();
@@ -103,7 +103,7 @@ void DoCSA(register size l)
 }
 
 /** CSB w: Table lookup jump; address of jump table at top of stack */
-void DoCSB(register size l)
+void DoCSB(size l)
 {
 	LOG(("@M6 DoCSB(%ld)", l));
 	spoilFRA();
@@ -113,7 +113,7 @@ void DoCSB(register size l)
 /** DCH -: Follow dynamic chain, convert LB to LB of caller */
 void DoDCH(void)
 {
-	register ptr lb;
+	ptr lb;
 
 	LOG(("@M6 DoDCH()"));
 	spoilFRA();
@@ -128,7 +128,7 @@ void DoDCH(void)
 /** DUP s: Duplicate top s bytes */
 void DoDUP(size arg)
 {
-	register ptr oldSP = SP;
+	ptr oldSP = SP;
 
 	LOG(("@M6 DoDUP(%ld)", arg));
 	spoilFRA();
@@ -137,9 +137,9 @@ void DoDUP(size arg)
 }
 
 /** DUS w: Duplicate top w bytes */
-void DoDUS(register size l)
+void DoDUS(size l)
 {
-	register ptr oldSP;
+	ptr oldSP;
 
 	LOG(("@M6 DoDUS(%ld)", l));
 	spoilFRA();
@@ -150,9 +150,9 @@ void DoDUS(register size l)
 }
 
 /** EXG w: Exchange top w bytes */
-void DoEXG(register size l)
+void DoEXG(size l)
 {
-	register ptr oldSP = SP;
+	ptr oldSP = SP;
 
 	LOG(("@M6 DoEXG(%ld)", l));
 	spoilFRA();
@@ -164,9 +164,9 @@ void DoEXG(register size l)
 }
 
 /** FIL g: File name (external 4 := g) */
-void DoFIL(register unsigned long arg)
+void DoFIL(unsigned long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@M6 DoFIL(%lu)", p));
 	spoilFRA();
@@ -178,9 +178,9 @@ void DoFIL(register unsigned long arg)
 }
 
 /** GTO g: Non-local goto, descriptor at g */
-void DoGTO(register unsigned long arg)
+void DoGTO(unsigned long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@M6 DoGTO(%lu)", p));
 	gto(arg_gto(p));
@@ -195,7 +195,7 @@ void DoLIM(void)
 }
 
 /** LIN n: Line number (external 0 := n) */
-void DoLIN(register unsigned long l)
+void DoLIN(unsigned long l)
 {
 	LOG(("@M6 DoLIN(%lu)", l));
 	spoilFRA();
@@ -211,7 +211,7 @@ void DoLNI(void)
 }
 
 /** LOR r: Load register (0=LB, 1=SP, 2=HP) */
-void DoLOR(register long l)
+void DoLOR(long l)
 {
 	LOG(("@M6 DoLOR(%ld)", l));
 	spoilFRA();
@@ -232,7 +232,7 @@ void DoLOR(register long l)
 /** LPB -: Convert local base to argument base */
 void DoLPB(void)
 {
-	register ptr lb;
+	ptr lb;
 
 	LOG(("@M6 DoLPB()"));
 	spoilFRA();
@@ -261,7 +261,7 @@ void DoNOP(void)
 }
 
 /** RCK w: Range check; trap on error */
-void DoRCK(register size l)
+void DoRCK(size l)
 {
 	LOG(("@M6 DoRCK(%ld)", l));
 	spoilFRA();
@@ -306,7 +306,7 @@ void DoRTT(void)
 /** SIG -: Trap errors to proc identifier on top of stack, \-2 resets default */
 void DoSIG(void)
 {
-	register long tpi = spop(psize);
+	long tpi = spop(psize);
 
 	LOG(("@M6 DoSIG()"));
 	spoilFRA();
@@ -338,7 +338,7 @@ void DoSIM(void)
 }
 
 /** STR r: Store register (0=LB, 1=SP, 2=HP) */
-void DoSTR(register long l)
+void DoSTR(long l)
 {
 	LOG(("@M6 DoSTR(%ld)", l));
 	spoilFRA();
@@ -360,7 +360,7 @@ void DoSTR(register long l)
 /** TRP -: Cause trap to occur (Error number on stack) */
 void DoTRP(void)
 {
-	register unsigned int tr = (unsigned int)uwpop();
+	unsigned int tr = (unsigned int)uwpop();
 
 	LOG(("@M6 DoTRP()"));
 	spoilFRA();
@@ -372,12 +372,12 @@ void DoTRP(void)
 
 /* Service routines */
 
-PRIVATE void gto(ptr p)
+static void gto(ptr p)
 {
-	register ptr old_LB = LB;
-	register ptr new_PC = dt_ldip(p);
-	register ptr new_SP = dt_lddp(p + psize);
-	register ptr new_LB = dt_lddp(p + (2 * psize));
+	ptr old_LB = LB;
+	ptr new_PC = dt_ldip(p);
+	ptr new_SP = dt_lddp(p + psize);
+	ptr new_LB = dt_lddp(p + (2 * psize));
 
 	while (old_LB < new_LB)
 	{
@@ -428,12 +428,12 @@ void putFIL(ptr fil)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE void index_jump(size nbytes)
+static void index_jump(size nbytes)
 {
-	register ptr cdp = dppop(); /* Case Descriptor Pointer */
-	register long t_index = /* Table INDEX */
+	ptr cdp = dppop(); /* Case Descriptor Pointer */
+	long t_index = /* Table INDEX */
 	    spop(nbytes) - mem_lds(cdp + psize, nbytes);
-	register ptr nPC = 0; /* New Program Counter */
+	ptr nPC = 0; /* New Program Counter */
 
 	if (t_index >= 0 && t_index <= mem_lds(cdp + nbytes + psize, nbytes))
 	{
@@ -457,13 +457,13 @@ PRIVATE void index_jump(size nbytes)
  *	6. Else: load default value.			*
  ********************************************************/
 
-PRIVATE void search_jump(size nbytes)
+static void search_jump(size nbytes)
 {
-	register ptr cdp = dppop(); /* Case Descriptor Pointer */
-	register long sv = spop(nbytes); /* Search Value */
-	register long nt = /* Number of Table-entries */
+	ptr cdp = dppop(); /* Case Descriptor Pointer */
+	long sv = spop(nbytes); /* Search Value */
+	long nt = /* Number of Table-entries */
 	    mem_lds(cdp + psize, nbytes);
-	register ptr nPC; /* New Program Counter */
+	ptr nPC; /* New Program Counter */
 
 	while (--nt >= 0)
 	{
@@ -490,10 +490,10 @@ PRIVATE void search_jump(size nbytes)
  *	3. Generate trap if necessary.			*
  *	4. DON'T remove integer.			*
  ********************************************************/
-PRIVATE void range_check(size nbytes)
+static void range_check(size nbytes)
 {
-	register ptr rdp = dppop(); /* Range check Descriptor Pointer */
-	register long cv = /* Check Value */
+	ptr rdp = dppop(); /* Range check Descriptor Pointer */
+	long cv = /* Check Value */
 	    st_lds(SP, nbytes);
 
 	if (must_test && !(IgnMask & BIT(ERANGE)))

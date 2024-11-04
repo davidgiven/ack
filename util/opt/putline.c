@@ -25,15 +25,15 @@
 #define outbyte(b) putc(b,outfile)
 
 /* Forward declarations. */
-static void numlab(register num_p);
-static void putargs(register arg_p);
-static void putstr(register argb_p);
+static void numlab(num_p);
+static void putargs(arg_p);
+static void putstr(argb_p);
 
-void putlines(register line_p lnp)
+void putlines(line_p lnp)
 {
-	register arg_p ap;
+	arg_p ap;
 	line_p temp;
-	register int instr;
+	int instr;
 	short curlin = -2;
 	short thislin;
 
@@ -202,7 +202,7 @@ void putlines(register line_p lnp)
 	}
 }
 
-static void putargs(register arg_p ap)
+static void putargs(arg_p ap)
 {
 
 	while (ap != (arg_p) 0)
@@ -246,10 +246,10 @@ static void putargs(register arg_p ap)
 	}
 }
 
-static void putstr(register argb_p abp)
+static void putstr(argb_p abp)
 {
-	register argb_p tbp;
-	register int length;
+	argb_p tbp;
+	int length;
 
 	length = 0;
 	tbp = abp;
@@ -267,7 +267,7 @@ static void putstr(register argb_p abp)
 	}
 }
 
-void outdef(register sym_p sp)
+void outdef(sym_p sp)
 {
 
 	/*
@@ -287,7 +287,7 @@ void outdef(register sym_p sp)
 	 */
 }
 
-void outocc(register sym_p sp)
+void outocc(sym_p sp)
 {
 
 	if ((sp->s_flags & SYMOUT) == 0)
@@ -354,7 +354,7 @@ void outshort(short i)
 	outbyte((byte ) (i >> 8));
 }
 
-static void numlab(register num_p np)
+static void numlab(num_p np)
 {
 	if (np->n_number < sp_nilb0)
 		outbyte((byte) (np->n_number + sp_filb0));
@@ -362,7 +362,7 @@ static void numlab(register num_p np)
 		outnum(np);
 }
 
-void outnum(register num_p np)
+void outnum(num_p np)
 {
 	if (np->n_number < 256)
 	{
@@ -376,10 +376,10 @@ void outnum(register num_p np)
 	}
 }
 
-void outsym(register sym_p sp)
+void outsym(sym_p sp)
 {
-	register char *p;
-	register unsigned num;
+	char *p;
+	unsigned num;
 
 	if (sp->s_name[0] == '.')
 	{

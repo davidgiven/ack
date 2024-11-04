@@ -33,9 +33,9 @@ extern int must_test;
 /** AND w: Boolean and on two groups of w bytes. Size of objects to be compared
  *  (in bytes) on top of stack
  */
-void DoAND(register size l)
+void DoAND(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@X6 DoAND(%ld)", l));
 	spoilFRA();
@@ -49,9 +49,9 @@ void DoAND(register size l)
 }
 
 /** IOR w: Boolean inclusive or on two groups of w bytes */
-void DoIOR(register size l)
+void DoIOR(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@X6 DoIOR(%ld)", l));
 	spoilFRA();
@@ -65,9 +65,9 @@ void DoIOR(register size l)
 }
 
 /** XOR w: Boolean exclusive or on two groups of w bytes */
-void DoXOR(register size l)
+void DoXOR(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@X6 DoXOR(%ld)", l));
 	spoilFRA();
@@ -81,9 +81,9 @@ void DoXOR(register size l)
 }
 
 /** COM w: Complement (one's complement of top w bytes) */
-void DoCOM(register size l)
+void DoCOM(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@X6 DoCOM(%ld)", l));
 	spoilFRA();
@@ -96,10 +96,10 @@ void DoCOM(register size l)
 }
 
 /** ROL w: Rotate left a group of w bytes */
-void DoROL(register size l)
+void DoROL(size l)
 {
-	register long s, t = uwpop();
-	register long signbit;
+	long s, t = uwpop();
+	long signbit;
 
 	LOG(("@X6 DoROL(%ld)", l));
 	spoilFRA();
@@ -132,10 +132,10 @@ void DoROL(register size l)
 }
 
 /** ROR w: Rotate right a group of w bytes */
-void DoROR(register size l)
+void DoROR(size l)
 {
-	register long s, t = uwpop();
-	register long signbit;
+	long s, t = uwpop();
+	long signbit;
 
 	LOG(("@X6 DoROR(%ld)", l));
 	spoilFRA();

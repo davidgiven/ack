@@ -61,7 +61,7 @@ extern int err_occurred;	/* "error.c"	*/
 
 extern int GetChar(void);
 extern int LLlex(void);
-extern int GetToken(register struct token* ptok);
+extern int GetToken(struct token* ptok);
 extern char* symbol2str(int tok);
 
 #endif /* LLLEX_H_ */

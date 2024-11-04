@@ -3,10 +3,10 @@
 
 int
 putw(w, iop)
-	register FILE *iop;
+	FILE *iop;
 {
-	register int cnt = sizeof(int);
-	register char *p = (char *) &w;
+	int cnt = sizeof(int);
+	char *p = (char *) &w;
 
 	while (cnt--) {
 		putc(*p++, iop);

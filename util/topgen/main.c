@@ -60,7 +60,7 @@ void error(char *s, char* s1)
     putc('\n',stderr);
 }
 
-int onlyspace(register char* s)
+int onlyspace(char* s)
 {
     
     while (*s) {

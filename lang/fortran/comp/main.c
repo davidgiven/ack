@@ -286,8 +286,8 @@ comm2dcl()
 write_typedefs(outfile)
  FILE *outfile;
 {
-	register int i;
-	register char *s, *p = 0;
+	int i;
+	char *s, *p = 0;
 	static char st[4] = { TYREAL, TYCOMPLEX, TYDCOMPLEX, TYCHAR };
 	static char stl[4] = { 'E', 'C', 'Z', 'H' };
 
@@ -320,10 +320,10 @@ write_typedefs(outfile)
 
  static void
 commonprotos(outfile)
- register FILE *outfile;
+ FILE *outfile;
 {
-	register Extsym *e, *ee;
-	register Argtypes *at;
+	Extsym *e, *ee;
+	Argtypes *at;
 	Atype *a, *ae;
 	int k;
 	extern int proc_protochanges;

@@ -2,7 +2,7 @@
 #include	<stdio.h>
 
 setbuf(iop, buffer)
-register FILE *iop;
+FILE *iop;
 char *buffer;
 {
 	if ( iop->_buf && io_testflag(iop,IO_MYBUF) )

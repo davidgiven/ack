@@ -26,9 +26,9 @@ integer f_end(a) alist *a;
  static int
 copy(from, len, to)
  char *from, *to;
- register long len;
+ long len;
 {
-	register int n;
+	int n;
 	int k, rc = 0, tmp;
 	char buf[BUFSIZ];
 

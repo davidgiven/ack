@@ -30,7 +30,7 @@ bool same_size(int t1, int t2)
 	return tsize(t1) == tsize(t2);
 }
 
-STATIC bool is_reg(offset off, int s)
+static bool is_reg(offset off, int s)
 {
 	/* See if there is a register message
 	 * for the local or parameter at offset off
@@ -162,9 +162,9 @@ int proclength(proc_p p)
 {
 	/* count the number of EM instructions of p */
 
-	register int cnt;
-	register bblock_p b;
-	register line_p l;
+	int cnt;
+	bblock_p b;
+	line_p l;
 
 	cnt = 0;
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

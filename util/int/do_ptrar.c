@@ -34,10 +34,10 @@
 #endif /* SEGCHECK */
 
 /** ADP f: Add f to pointer on top of stack */
-void DoADP(register long l)
+void DoADP(long l)
 {
 
-	register ptr p, t = st_lddp(SP);
+	ptr p, t = st_lddp(SP);
 
 	LOG(("@R6 DoADP(%ld)", l));
 	spoilFRA();
@@ -52,10 +52,10 @@ void DoADP(register long l)
 }
 
 /** ADS w: Add w-byte value and pointer */
-void DoADS(register size l)
+void DoADS(size l)
 {
-	register long t = spop(arg_wi(l));
-	register ptr p, s = st_lddp(SP);
+	long t = spop(arg_wi(l));
+	ptr p, s = st_lddp(SP);
 
 	LOG(("@R6 DoADS(%ld)", l));
 	spoilFRA();
@@ -70,11 +70,11 @@ void DoADS(register size l)
 }
 
 /** SBS w: Subtract pointers in same fragment and push diff as size w integer */
-void DoSBS(register size l)
+void DoSBS(size l)
 {
-	register ptr t = st_lddp(SP);
-	register ptr s = st_lddp(SP + psize);
-	register long w;
+	ptr t = st_lddp(SP);
+	ptr s = st_lddp(SP + psize);
+	long w;
 
 	LOG(("@R6 DoSBS(%ld)", l));
 	spoilFRA();

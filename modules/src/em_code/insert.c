@@ -65,7 +65,7 @@ getbyte(b)
 }
 #endif
 
-static void C_out_parts(register PartOfPart *pp);
+static void C_out_parts(PartOfPart *pp);
 static Part *C_findpart(int part);
 
 static int outpart(int id)
@@ -81,7 +81,7 @@ static int outpart(int id)
 	return 0;
 }
 
-static void C_out_parts(register PartOfPart *pp)
+static void C_out_parts(PartOfPart *pp)
 {
 	/*	Output the list of chunks started by "pp".
 		The list is build in reverse order, so this routine is
@@ -103,7 +103,7 @@ static void C_out_parts(register PartOfPart *pp)
 		}
 		else {
 			/* copy the chunk to output */
-			register long b = pp->pp_begin;
+			long b = pp->pp_begin;
 
 			while (b < pp->pp_end) {
 #ifdef INCORE
@@ -128,7 +128,7 @@ static Part *C_findpart(int part)
 	/*	Look for part "part" in the table.
 		Return 0 if not present,
 	*/
-	register Part *p = C_stable[part % TABSIZ];
+	Part *p = C_stable[part % TABSIZ];
 
 	while (p && p->p_id != part) {
 		p = p->p_next;
@@ -145,7 +145,7 @@ static int swttmp(void)
 	if (C_tmpfile == NULL) {
 
 		static char tmpbuf[FILENAME_MAX];
-		register char *p = tmpbuf;
+		char *p = tmpbuf;
 
 		if (C_tmpdir == NULL)
 		{
@@ -221,8 +221,8 @@ static int available(int part)
 	/*	See if part "part", and all the parts it consists of,
 		are available. Return 1 if they are, 0 otherwize
 	*/
-	register Part *p = C_findpart(part);
-	register PartOfPart *pp;
+	Part *p = C_findpart(part);
+	PartOfPart *pp;
 	int retval = 1;
 
 	if (p == 0) return 0;
@@ -255,8 +255,8 @@ static Part *mkpart(int part)
 		pointer to it, after checking that is does not exist
 		already.
 	*/
-	register Part *p = C_findpart(part);
-	register int index = part % TABSIZ;
+	Part *p = C_findpart(part);
+	int index = part % TABSIZ;
 
 	if (p != 0) {
 		/* multiple defined part ... */
@@ -273,13 +273,13 @@ static Part *mkpart(int part)
 	return p;
 }
 
-static void end_partofpart(register Part *p)
+static void end_partofpart(Part *p)
 {
 	/*	End the current chunk of part *p.
 	*/
 
 	if (p) {
-		register PartOfPart *pp = p->p_parts;
+		PartOfPart *pp = p->p_parts;
 
 		pp->pp_end = C_current_out - C_BASE;
 		if (pp->pp_begin == pp->pp_end) {
@@ -290,12 +290,12 @@ static void end_partofpart(register Part *p)
 	}
 }
 
-static void resume(register Part *p)
+static void resume(Part *p)
 {
 	/*	Resume part "p", by creating a new PartOfPart structure
 		for it.
 	*/
-	register PartOfPart *pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
+	PartOfPart *pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
 
 	swttmp();
 	C_curr_part = p;
@@ -311,8 +311,8 @@ void C_insertpart(int part)
 		still set and the part to be inserted is available now,
 		just write it out.
 	*/
-	register Part *p;
-	register PartOfPart *pp;
+	Part *p;
+	PartOfPart *pp;
 
 	C_outpart = outpart;
 	C_swttmp = swttmp;
@@ -348,7 +348,7 @@ void C_beginpart(int part)
 		Suspend the current part, and add part "part" to the
 		table.
 	*/
-	register Part *p = mkpart(part);
+	Part *p = mkpart(part);
 
 	C_outpart = outpart;
 	C_swttmp = swttmp;
@@ -365,7 +365,7 @@ void C_endpart(int part)
 	/*	End the current part. The parameter "part" is just there
 		for the checking. Do we really need it ???
 	*/
-	register Part *p = C_curr_part;
+	Part *p = C_curr_part;
 
 	if (p->p_id != part) {
 		/* illegal C_endpart ... */

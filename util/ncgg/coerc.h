@@ -22,7 +22,7 @@ struct varinfo *gen_label(int arg);
 struct varinfo *gen_preturn(void);
 struct varinfo *gen_tlab(int n);
 void n_stack(int s, int e, int p, struct varinfo *vi);
-void checkstacking(register short *sp);
+void checkstacking(short *sp);
 void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_p inp);
 void checkunstacking(int setno);
 

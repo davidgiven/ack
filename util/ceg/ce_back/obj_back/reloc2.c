@@ -26,7 +26,7 @@ char *sym;
 arith off;
 int pcrel;
 {
-	register struct outrelo *r;
+	struct outrelo *r;
 
 	if ( relo - reloc_info >= size_reloc)
 		mem_relo();

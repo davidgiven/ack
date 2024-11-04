@@ -5,11 +5,11 @@
 
 #include <stdio.h>
 
-int getw(register FILE* stream)
+int getw(FILE* stream)
 {
-	register int cnt = sizeof(int);
+	int cnt = sizeof(int);
 	int w;
-	register char* p = (char*)&w;
+	char* p = (char*)&w;
 
 	while (cnt--)
 	{

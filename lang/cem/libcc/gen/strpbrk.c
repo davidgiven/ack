@@ -1,9 +1,9 @@
 /* $Id$ */
 char *
 strpbrk(string, brk)
-	register char *string, *brk;
+	char *string, *brk;
 {
-	register char *s1;
+	char *s1;
 
 	while (*string) {
 		for (s1 = brk; *s1 && *s1 != *string; s1++) /* nothing */ ;

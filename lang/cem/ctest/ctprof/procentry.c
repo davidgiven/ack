@@ -8,7 +8,7 @@ char rcs_id[] = "$Id$" ;
 
 static int level = 0 ;
 int procentry(name) char *name ; {
-	register int count ;
+	int count ;
 
 	count=level++ ;
 	while ( count-- ) {
@@ -17,7 +17,7 @@ int procentry(name) char *name ; {
 	printf("Entering %s\n",name) ;
 }
 int procexit(name) char *name ; {
-	register int count ;
+	int count ;
 
 	count= --level ;
 	while ( count-- ) {

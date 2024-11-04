@@ -18,20 +18,20 @@
 #include "stack.h"
 #include "switch.h"
 
-PRIVATE void compare_obj(size);
+static void compare_obj(size);
 
-void DoCMI(register size l)
+void DoCMI(size l)
 {
 	/* CMI w: Compare w byte integers, Push negative, zero, positive for <, = or > */
-	register long t = spop(arg_wi(l));
-	register long s = spop(l);
+	long t = spop(arg_wi(l));
+	long s = spop(l);
 
 	LOG(("@T6 DoCMI(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-void DoCMF(register size l)
+void DoCMF(size l)
 {
 	/* CMF w: Compare w byte reals */
 #ifndef NOFLOAT
@@ -46,18 +46,18 @@ void DoCMF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoCMU(register size l)
+void DoCMU(size l)
 {
 	/* CMU w: Compare w byte unsigneds */
-	register unsigned long t = upop(arg_wi(l));
-	register unsigned long s = upop(l);
+	unsigned long t = upop(arg_wi(l));
+	unsigned long s = upop(l);
 
 	LOG(("@T6 DoCMU(%ld)", l));
 	spoilFRA();
 	wpush((long)(t < s ? 1 : t > s ? -1 : 0));
 }
 
-void DoCMS(register size l)
+void DoCMS(size l)
 {
 	/* CMS w: Compare w byte values, can only be used for bit for bit equality test */
 
@@ -69,7 +69,7 @@ void DoCMS(register size l)
 void DoCMP(void)
 {
 	/* CMP -: Compare pointers */
-	register ptr t, s;
+	ptr t, s;
 
 	LOG(("@T6 DoCMP()"));
 	spoilFRA();
@@ -135,11 +135,11 @@ void DoTGT(void)
  *	is performed. Checking for undefined bytes
  *	is done when LOGGING is defined.
  ********************************************************/
-PRIVATE void compare_obj(size obj_size)
+static void compare_obj(size obj_size)
 {
-	register ptr addr1; /* ADDRess in object highest on st. */
-	register ptr addr2; /* ADDRess in object deeper in st. */
-	register int comp_res = 0; /* COMPare RESult */
+	ptr addr1; /* ADDRess in object highest on st. */
+	ptr addr2; /* ADDRess in object deeper in st. */
+	int comp_res = 0; /* COMPare RESult */
 
 	for (addr1 = SP, addr2 = SP + obj_size; addr1 < SP + obj_size; addr1++, addr2++)
 	{

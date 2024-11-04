@@ -36,7 +36,7 @@ main(argc,argv)
 	char **argv;
 {
 	struct e_instr buf;
-	register struct e_instr *p = &buf;
+	struct e_instr *p = &buf;
 	int ac;
 	char **av;
 

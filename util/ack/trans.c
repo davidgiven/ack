@@ -61,10 +61,10 @@ int transform(trf* phase)
 
 void getmapflags(trf* phase)
 {
-	register path* l_in;
-	register list_elem* elem;
+	path* l_in;
+	list_elem* elem;
 	int scanned;
-	register char* ptr;
+	char* ptr;
 
 	scanlist(l_first(flags), elem)
 	{
@@ -162,8 +162,8 @@ void add_tail(const char* str)
 
 void transini(void)
 {
-	register list_elem* elem;
-	register trf* phase;
+	list_elem* elem;
+	trf* phase;
 
 	scanlist(l_first(tr_list), elem)
 	{
@@ -182,9 +182,9 @@ void transini(void)
 
 static void set_Rflag(char* argp)
 {
-	register char* eos;
-	register list_elem* prog;
-	register int length;
+	char* eos;
+	list_elem* prog;
+	int length;
 	char *eq, *colon;
 
 	eos = strchr(&argp[2], '-');
@@ -517,8 +517,8 @@ static growstring scanexpr(const char* line)
 
 static void condit(growstring* line, list_head* fsuff, list_head* lsuff, char* tailval)
 {
-	register list_elem* first;
-	register list_elem* last;
+	list_elem* first;
+	list_elem* last;
 
 #ifdef DEBUG
 	if (debug >= 4)
@@ -560,7 +560,7 @@ static int mapflag(list_head* maplist, const char* cflag)
 	   when not, (char *)0.
 	   The replacement sits in stable storage.
 	*/
-	register list_elem* elem;
+	list_elem* elem;
 
 	scanlist(l_first(*maplist), elem)
 	{

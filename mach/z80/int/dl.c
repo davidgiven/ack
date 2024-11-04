@@ -29,8 +29,8 @@ char	*progname;
 char	hex[] = "0123456789ABCDEF";
 
 main(argc,argv) char **argv; {
-	register nd,pc,sg,osg,first;
-	register char *s;
+	nd,pc,sg,osg,first;
+	char *s;
 	int uid;
 
 	progname = argv[0];
@@ -164,7 +164,7 @@ put(c) {
 }
 
 reply() {
-	register i;
+	i;
 	int c;
 
 	if (echo == 0)
@@ -175,7 +175,7 @@ reply() {
 }
 
 get2c(f) FILE *f; {
-	register c;
+	c;
 
 	c = getc(f);
 	return((getc(f) << 8) | c);

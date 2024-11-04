@@ -216,7 +216,7 @@ TypeDefinition
 			}
 ;
 
-TypeDenoter(register struct type **ptp;):
+TypeDenoter(struct type **ptp;):
 	/* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
 	 */
@@ -229,7 +229,7 @@ TypeDenoter(register struct type **ptp;):
 	EnumeratedType(ptp)
 ;
 
-TypeIdentifierOrSubrangeType(register struct type **ptp;)
+TypeIdentifierOrSubrangeType(struct type **ptp;)
 {
 	struct node *nd1, *nd2;
 } :
@@ -263,7 +263,7 @@ TypeIdentifierOrSubrangeType(register struct type **ptp;)
 ]
 ;
 
-TypeIdentifier(register struct type **ptp;):
+TypeIdentifier(struct type **ptp;):
 	IDENT			{ register struct node *nd = MkLeaf(Name, &dot);
 				  chk_type_id(ptp, nd);
 				  FreeNode(nd);
@@ -317,7 +317,7 @@ ProcedureDeclaration
 	]
 ;
 
-ProcedureHeading(register struct node **pnd; register struct type **ptp;)
+ProcedureHeading(struct node **pnd; register struct type **ptp;)
 {
 	struct node *fpl;
 } :
@@ -405,7 +405,7 @@ FunctionDeclaration
 	]
 ;
 
-FunctionHeading(register struct node **pnd; register struct type **ptp;)
+FunctionHeading(struct node **pnd; register struct type **ptp;)
 {
 	/*	This is the Function AND FunctionIdentification part.
 		If it is a identification, *ptp is set to NULLTYPE.
@@ -445,7 +445,7 @@ FunctionHeading(register struct node **pnd; register struct type **ptp;)
 ;
 
 /* ISO section 6.4.2.1, p. 96 */
-OrdinalType(register struct type **ptp;):
+OrdinalType(struct type **ptp;):
 	/* This is a changed rule, because the grammar as specified in the
 	 * reference states that a SubrangeType can start with an IDENT and
 	 * so can an OrdinalTypeIdentifier, and this is not LL(1).
@@ -456,7 +456,7 @@ OrdinalType(register struct type **ptp;):
 ;
 
 /* ISO section 6.4.2.3, p. 97 */
-EnumeratedType(register struct type **ptp;)
+EnumeratedType(struct type **ptp;)
 {
 	struct node *EnumList;
 	arith i = (arith) 1;
@@ -480,7 +480,7 @@ EnumeratedType(register struct type **ptp;)
 		}
 ;
 
-IdentifierList(register struct node **nd;)
+IdentifierList(struct node **nd;)
 {
 	register struct node *tnd;
 } :
@@ -494,7 +494,7 @@ IdentifierList(register struct node **nd;)
 ;
 
 /* ISO section 6.4.3.2, p. 98 */
-StructuredType(register struct type **ptp;)
+StructuredType(struct type **ptp;)
 {
 	unsigned short packed = 0;
 } :
@@ -504,7 +504,7 @@ StructuredType(register struct type **ptp;)
 	UnpackedStructuredType(ptp, packed)
 ;
 
-UnpackedStructuredType(register struct type **ptp; unsigned short packed;):
+UnpackedStructuredType(struct type **ptp; unsigned short packed;):
 	ArrayType(ptp, packed)
 |
 	RecordType(ptp, packed)
@@ -515,7 +515,7 @@ UnpackedStructuredType(register struct type **ptp; unsigned short packed;):
 ;
 
 /* ISO section 6.4.3.2, p. 98 */
-ArrayType(register struct type **ptp; unsigned short packed;)
+ArrayType(struct type **ptp; unsigned short packed;)
 {
 	struct type *tp;
 	register struct type *tp2;
@@ -542,16 +542,16 @@ ArrayType(register struct type **ptp; unsigned short packed;)
 			}
 ;
 
-Indextype(register struct type **ptp;):
+Indextype(struct type **ptp;):
 	OrdinalType(ptp)
 ;
 
-ComponentType(register struct type **ptp;):
+ComponentType(struct type **ptp;):
 	TypeDenoter(ptp)
 ;
 
 /* ISO section 6.4.3.3, p. 99 */
-RecordType(register struct type **ptp; unsigned short packed;)
+RecordType(struct type **ptp; unsigned short packed;)
 {
 	register struct scope *scope;
 	register struct def *df;
@@ -729,7 +729,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 			}
 ;
 
-VariantTail(register struct scope *scope; arith *tcnt; arith *max; arith *cnt;
+VariantTail(struct scope *scope; arith *tcnt; arith *max; arith *cnt;
 		int *palign; unsigned short packed; struct selector *sel;):
 	/* This is a new rule because the grammar specified by the standard
 	 * is not exactly LL(1).
@@ -750,7 +750,7 @@ VariantTail(register struct scope *scope; arith *tcnt; arith *max; arith *cnt;
 	]
 ;
 
-VariantSelector(register struct type **ptp; register struct idf **pid;)
+VariantSelector(struct type **ptp; register struct idf **pid;)
 {
 	register struct node *nd;
 } :
@@ -803,13 +803,13 @@ CaseConstantList(struct node **nd;)
 ;
 
 /* ISO section 6.4.3.4, p. 101 */
-SetType(register struct type **ptp; unsigned short packed;):
+SetType(struct type **ptp; unsigned short packed;):
 	SET OF OrdinalType(ptp)
 		{ *ptp = set_type(*ptp, packed); }
 ;
 
 /* ISO section 6.4.3.5, p. 101 */
-FileType(register struct type **ptp;):
+FileType(struct type **ptp;):
 	FILET OF
 			{ *ptp = construct_type(T_FILE, NULLTYPE);
 			  (*ptp)->tp_flags |= T_HASFILE;
@@ -829,7 +829,7 @@ FileType(register struct type **ptp;):
 ;
 
 /* ISO section 6.4.4, p. 103 */
-PointerType(register struct type **ptp;)
+PointerType(struct type **ptp;)
 {
 	register struct node *nd;
 	register struct def *df;
@@ -913,14 +913,14 @@ FormalParameterSection(struct node *nd;):
 ]
 ;
 
-ProceduralParameterSpecification(register struct node **pnd;
+ProceduralParameterSpecification(struct node **pnd;
 						register struct type **ptp;):
 				{ parlevel++; }
 	ProcedureHeading(pnd, ptp)
 				{ parlevel--; }
 ;
 
-FunctionalParameterSpecification(register struct node **pnd;
+FunctionalParameterSpecification(struct node **pnd;
 						register struct type **ptp;):
 				{ parlevel++; }
 	FunctionHeading(pnd, ptp)
@@ -933,14 +933,14 @@ FunctionalParameterSpecification(register struct node **pnd;
 				}
 ;
 
-ConformantArraySchema(register struct type **ptp;):
+ConformantArraySchema(struct type **ptp;):
 	PackedConformantArraySchema(ptp)
 |
 	%default
 	UnpackedConformantArraySchema(ptp)
 ;
 
-PackedConformantArraySchema(register struct type **ptp;)
+PackedConformantArraySchema(struct type **ptp;)
 {
 	struct type *tp;
 } :
@@ -960,7 +960,7 @@ PackedConformantArraySchema(register struct type **ptp;)
 				}
 ;
 
-UnpackedConformantArraySchema(register struct type **ptp;)
+UnpackedConformantArraySchema(struct type **ptp;)
 {
 	struct type *tp, *tp2;
 } :
@@ -990,7 +990,7 @@ UnpackedConformantArraySchema(register struct type **ptp;)
 				}
 ;
 
-Index_TypeSpecification(register struct type **ptp; register struct type *tp;)
+Index_TypeSpecification(struct type **ptp; register struct type *tp;)
 {
 	register struct def *df1, *df2;
 } :

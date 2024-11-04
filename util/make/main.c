@@ -42,9 +42,9 @@ static void usage(void);
 
 int main(int argc, char** argv)
 {
-    register char *     p;      /*  For argument processing  */
+    char *     p;      /*  For argument processing  */
     int         estat = 0;  /*  For question  */
-    register struct name *  np;
+    struct name *  np;
     int         nargc = 0;
     char            **nargv;
     int         fflag = 0;

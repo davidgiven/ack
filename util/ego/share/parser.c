@@ -41,7 +41,7 @@ typedef struct class* class_p;
  * generated automatically from the file classdefs.src.
  */
 
-STATIC bool classes(int instr, int* src_out, int* res_out)
+static bool classes(int instr, int* src_out, int* res_out)
 {
 	/* Determine the classes of the given instruction */
 
@@ -57,7 +57,7 @@ STATIC bool classes(int instr, int* src_out, int* res_out)
 	return TRUE;
 }
 
-STATIC bool uses_arg(int class)
+static bool uses_arg(int class)
 {
 	/* See if a member of the given class uses
 	 * an argument.
@@ -78,7 +78,7 @@ STATIC bool uses_arg(int class)
 	UNREACHABLE_CODE;
 }
 
-STATIC bool uses_2args(int class)
+static bool uses_2args(int class)
 {
 	/* See if a member of the given class uses
 	 * 2 arguments.
@@ -87,7 +87,7 @@ STATIC bool uses_2args(int class)
 	return class == CLASS10;
 }
 
-STATIC bool parse_locs(line_p l, offset* c1_out, offset* c2_out)
+static bool parse_locs(line_p l, offset* c1_out, offset* c2_out)
 {
 	if (INSTR(l) == op_loc && INSTR(PREV(l)) == op_loc)
 	{
@@ -98,7 +98,7 @@ STATIC bool parse_locs(line_p l, offset* c1_out, offset* c2_out)
 	return FALSE;
 }
 
-STATIC bool check_args(line_p l, int src_class, int res_class, offset* arg1_out, offset* arg2_out)
+static bool check_args(line_p l, int src_class, int res_class, offset* arg1_out, offset* arg2_out)
 {
 	/* Several EM instructions have an argument
 	 * giving the size of the operand(s) of
@@ -138,7 +138,7 @@ STATIC bool check_args(line_p l, int src_class, int res_class, offset* arg1_out,
 	return TRUE; /* no argument needed */
 }
 
-STATIC offset nrbytes(int class, offset arg1, offset arg2)
+static offset nrbytes(int class, offset arg1, offset arg2)
 {
 	/* Determine the number of bytes of the given
 	 * arguments and class.
@@ -176,7 +176,7 @@ STATIC offset nrbytes(int class, offset arg1, offset arg2)
 	return 0;
 }
 
-STATIC void attrib(line_p l, offset* expect_out, offset* srcb_out, offset* resb_out)
+static void attrib(line_p l, offset* expect_out, offset* srcb_out, offset* resb_out)
 {
 	/* Determine a number of attributes of an EM
 	 * instruction appearing in an expression.

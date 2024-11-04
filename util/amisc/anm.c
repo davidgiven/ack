@@ -10,87 +10,93 @@
 **	anm [-gopruns] [name ...]
 */
 
-#include	<stdio.h>
-#include	<stdlib.h>
-#include    <string.h>
-#include	<ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
-#include	"object.h"
-#include	"out.h"
-#include	"arch.h"
-#include	"ranlib.h"
+#include "object.h"
+#include "out.h"
+#include "arch.h"
+#include "ranlib.h"
 
-int	numsort_flg;
-int	sectsort_flg;
-int	undef_flg;
-int	revsort_flg = 1;
-int	globl_flg;
-int	nosort_flg;
-int	arch_flg;
-int	prep_flg;
-int	read_error;
-struct	outhead	hbuf;
-struct	outsect	sbuf;
-long	off;
-long	s_base[S_MAX];	/* for specially encoded bases */
-char	*filename;
-int	narg;
+int numsort_flg;
+int sectsort_flg;
+int undef_flg;
+int revsort_flg = 1;
+int globl_flg;
+int nosort_flg;
+int arch_flg;
+int prep_flg;
+int read_error;
+struct outhead hbuf;
+struct outsect sbuf;
+long off;
+long s_base[S_MAX]; /* for specially encoded bases */
+char* filename;
+int narg;
 
-static void process(FILE *);
-static void do_file(FILE *);
-static int compare(const void *p1, const void *p2);
+static void process(FILE*);
+static void do_file(FILE*);
+static int compare(const void* p1, const void* p2);
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 
-	if (--argc>0 && argv[1][0]=='-' && argv[1][1]!=0) {
+	if (--argc > 0 && argv[1][0] == '-' && argv[1][1] != 0)
+	{
 		argv++;
-		while (*++*argv) switch (**argv) {
-		case 'n':		/* sort numerically */
-			numsort_flg++;
-			continue;
+		while (*++*argv)
+			switch (**argv)
+			{
+				case 'n': /* sort numerically */
+					numsort_flg++;
+					continue;
 
-		case 's':		/* sort in section order */
-			sectsort_flg++;
-			continue;
+				case 's': /* sort in section order */
+					sectsort_flg++;
+					continue;
 
-		case 'g':		/* globl symbols only */
-			globl_flg++;
-			continue;
+				case 'g': /* globl symbols only */
+					globl_flg++;
+					continue;
 
-		case 'u':		/* undefined symbols only */
-			undef_flg++;
-			continue;
+				case 'u': /* undefined symbols only */
+					undef_flg++;
+					continue;
 
-		case 'r':		/* sort in reverse order */
-			revsort_flg = -1;
-			continue;
+				case 'r': /* sort in reverse order */
+					revsort_flg = -1;
+					continue;
 
-		case 'p':		/* don't sort -- symbol table order */
-			nosort_flg++;
-			continue;
+				case 'p': /* don't sort -- symbol table order */
+					nosort_flg++;
+					continue;
 
-		case 'o':		/* prepend a name to each line */
-			prep_flg++;
-			continue;
+				case 'o': /* prepend a name to each line */
+					prep_flg++;
+					continue;
 
-		default:		/* oops */
-			fprintf(stderr, "anm: invalid argument -%c\n", *argv[0]);
-			exit(1);
-		}
+				default: /* oops */
+					fprintf(stderr, "anm: invalid argument -%c\n", *argv[0]);
+					exit(1);
+			}
 		argc--;
 	}
-	if (argc == 0) {
+	if (argc == 0)
+	{
 		argc = 1;
 		argv[1] = "a.out";
 	}
 	narg = argc;
 
-	while(argc--) {
-		FILE *fd;
+	while (argc--)
+	{
+		FILE* fd;
 
 		filename = *++argv;
-		if ((fd = fopen(filename, "rb")) == NULL) {
+		if ((fd = fopen(filename, "rb")) == NULL)
+		{
 			fprintf(stderr, "anm: cannot open %s\n", filename);
 			continue;
 		}
@@ -100,239 +106,266 @@ int main(int argc, char **argv)
 	exit(EXIT_SUCCESS);
 }
 
-
-static void process(FILE *fd)
+static void process(FILE* fd)
 {
-	unsigned int	magic;
-	long		nextpos;
-	struct ar_hdr	archive_header;
-	static char	buf[sizeof(archive_header.ar_name)+1];
+	unsigned int magic;
+	long nextpos;
+	struct ar_hdr archive_header;
+	static char buf[sizeof(archive_header.ar_name) + 1];
 
-	if (narg > 1) printf("\n%s:\n", filename);
+	if (narg > 1)
+		printf("\n%s:\n", filename);
 
 	magic = rd_unsigned2(fd);
-	switch(magic) {
-	case O_MAGIC:
-		fseek(fd, 0L, SEEK_SET);
-		do_file(fd);
-		break;
-	case ARMAG:
-	case AALMAG:
-		while (rd_arhdr(fd, &archive_header)) {
-			nextpos = ftell(fd) + archive_header.ar_size;
-			if (nextpos & 1) nextpos++;
-			strncpy(buf,archive_header.ar_name,sizeof(archive_header.ar_name));
-			filename = buf;
-			if ( strcmp(filename, SYMDEF)) {
-				printf("\n%s:\n", filename);
-				do_file(fd);
+	switch (magic)
+	{
+		case O_MAGIC:
+			fseek(fd, 0L, SEEK_SET);
+			do_file(fd);
+			break;
+		case ARMAG:
+		case AALMAG:
+			while (rd_arhdr(fd, &archive_header))
+			{
+				nextpos = ftell(fd) + archive_header.ar_size;
+				if (nextpos & 1)
+					nextpos++;
+				strncpy(buf, archive_header.ar_name, sizeof(archive_header.ar_name));
+				filename = buf;
+				if (strcmp(filename, SYMDEF))
+				{
+					printf("\n%s:\n", filename);
+					do_file(fd);
+				}
+				fseek(fd, nextpos, SEEK_SET);
 			}
-			fseek(fd, nextpos, SEEK_SET);
-		}
-		break;
-	default:
-		fprintf(stderr, "anm: %s -- bad format\n", filename);
-		break;
+			break;
+		default:
+			fprintf(stderr, "anm: %s -- bad format\n", filename);
+			break;
 	}
 }
 
-static void do_file(FILE *fd)
+static void do_file(FILE* fd)
 {
-	struct	outname	*nbufp = NULL;
-	struct	outname	nbuf;
-	char		*cbufp;
-	long		fi_to_co;
-	long		n;
-	unsigned	readcount;
-	int		i,j;
+	struct outname* nbufp = NULL;
+	struct outname nbuf;
+	char* cbufp;
+	long fi_to_co;
+	long n;
+	unsigned readcount;
+	int i, j;
 
 	read_error = 0;
 	rd_fdopen(fd);
 
 	rd_ohead(&hbuf);
-	if (read_error) {
+	if (read_error)
+	{
 		return;
 	}
-	if (BADMAGIC(hbuf)) {
+	if (BADMAGIC(hbuf))
+	{
 		return;
 	}
 
 	n = hbuf.oh_nname;
-	if (n == 0) {
+	if (n == 0)
+	{
 		fprintf(stderr, "anm: %s -- no name list\n", filename);
 		return;
 	}
 
-	if (hbuf.oh_nchar == 0) {
+	if (hbuf.oh_nchar == 0)
+	{
 		fprintf(stderr, "anm: %s -- no names\n", filename);
 		return;
 	}
-	if ((readcount = hbuf.oh_nchar) != hbuf.oh_nchar) {
+	if ((readcount = hbuf.oh_nchar) != hbuf.oh_nchar)
+	{
 		fprintf(stderr, "anm: string area too big in %s\n", filename);
 		exit(2);
 	}
 
 	/* store special section bases ??? */
-	if (hbuf.oh_flags & HF_8086) {
+	if (hbuf.oh_flags & HF_8086)
+	{
 		rd_sect(&sbuf, hbuf.oh_nsect);
-		if (read_error) {
+		if (read_error)
+		{
 			return;
 		}
-		for (i=0; i<hbuf.oh_nsect; i++) {
-			s_base[i+S_MIN] =
-				(sbuf.os_base>>12) & 03777760;
+		for (i = 0; i < hbuf.oh_nsect; i++)
+		{
+			s_base[i + S_MIN] = (sbuf.os_base >> 12) & 03777760;
 		}
 	}
 
-	if ((cbufp = (char *)malloc(readcount)) == NULL) {
+	if ((cbufp = (char*)malloc(readcount)) == NULL)
+	{
 		fprintf(stderr, "anm: out of memory on %s\n", filename);
 		exit(2);
 	}
 	rd_string(cbufp, hbuf.oh_nchar);
-	if (read_error) {
+	if (read_error)
+	{
 		free(cbufp);
 		return;
 	}
 
-	fi_to_co = (long) (cbufp - OFF_CHAR(hbuf));
+	fi_to_co = (long)(cbufp - OFF_CHAR(hbuf));
 	i = 0;
-	while (--n >= 0) {
+	while (--n >= 0)
+	{
 		rd_name(&nbuf, 1);
-		if (read_error) {
+		if (read_error)
+		{
 			break;
 		}
 
-		if (globl_flg && (nbuf.on_type&S_EXT)==0)
+		if (globl_flg && (nbuf.on_type & S_EXT) == 0)
 			continue;
 
-		if (undef_flg
-		    &&
-		    ((nbuf.on_type&S_TYP)!=S_UND || (nbuf.on_type&S_ETC)!=0))
+		if (undef_flg && ((nbuf.on_type & S_TYP) != S_UND || (nbuf.on_type & S_ETC) != 0))
 			continue;
 
-		if (nbuf.on_foff == 0) nbuf.on_mptr = 0;
-		else nbuf.on_mptr = (char *) (nbuf.on_foff + fi_to_co);
+		if (nbuf.on_foff == 0)
+			nbuf.on_mptr = 0;
+		else
+			nbuf.on_mptr = (char*)(nbuf.on_foff + fi_to_co);
 
 		/* adjust value for specially encoded bases */
-		if (hbuf.oh_flags & HF_8086) {
-		    if (((nbuf.on_type&S_ETC) == 0) ||
-			((nbuf.on_type&S_ETC) == S_SCT)) {
-			j = nbuf.on_type&S_TYP;
-			if ((j>=S_MIN) && (j<=S_MAX))
-			    nbuf.on_valu += s_base[j];
-		    }
+		if (hbuf.oh_flags & HF_8086)
+		{
+			if (((nbuf.on_type & S_ETC) == 0) || ((nbuf.on_type & S_ETC) == S_SCT))
+			{
+				j = nbuf.on_type & S_TYP;
+				if ((j >= S_MIN) && (j <= S_MAX))
+					nbuf.on_valu += s_base[j];
+			}
 		}
 
 		if (nbufp == NULL)
-			nbufp = (struct outname *)malloc(sizeof(struct outname));
+			nbufp = (struct outname*)malloc(sizeof(struct outname));
 		else
-			nbufp = (struct outname *)realloc(nbufp, (i+1)*sizeof(struct outname));
-		if (nbufp == NULL) {
+			nbufp = (struct outname*)realloc(nbufp, (i + 1) * sizeof(struct outname));
+		if (nbufp == NULL)
+		{
 			fprintf(stderr, "anm: out of memory on %s\n", filename);
 			exit(2);
 		}
 		nbufp[i++] = nbuf;
 	}
 
-	if (nbufp && nosort_flg==0)
+	if (nbufp && nosort_flg == 0)
 		qsort(nbufp, i, sizeof(struct outname), compare);
 
-	for (n=0; n<i; n++) {
-		char	cs1[4];
-		char	cs2[4];
+	for (n = 0; n < i; n++)
+	{
+		char cs1[4];
+		char cs2[4];
 
 		if (prep_flg)
 			printf("%s:", filename);
 
-		switch(nbufp[n].on_type&S_ETC) {
-		case S_SCT:
-			sprintf(cs1, "%2d", (nbufp[n].on_type&S_TYP) - S_MIN);
-			sprintf(cs2, " S");
-			break;
-		case S_FIL:
-			sprintf(cs1, " -");
-			sprintf(cs2, " F");
-			break;
-		case S_MOD:
-			sprintf(cs1, " -");
-			sprintf(cs2, " M");
-			break;
-		case S_COM:
-			sprintf(cs1, " C");
-			if (nbufp[n].on_type&S_EXT)
-				sprintf(cs2, " E");
-			else
-				sprintf(cs2, " -");
-			break;
-		case 0:
-			if (nbufp[n].on_type&S_EXT)
-				sprintf(cs2, " E");
-			else
-				sprintf(cs2, " -");
-
-			switch(nbufp[n].on_type&S_TYP) {
-			case S_UND:
-				sprintf(cs1, " U");
+		switch (nbufp[n].on_type & S_ETC)
+		{
+			case S_SCT:
+				sprintf(cs1, "%2d", (nbufp[n].on_type & S_TYP) - S_MIN);
+				sprintf(cs2, " S");
 				break;
-			case S_ABS:
-				sprintf(cs1, " A");
+			case S_FIL:
+				sprintf(cs1, " -");
+				sprintf(cs2, " F");
+				break;
+			case S_MOD:
+				sprintf(cs1, " -");
+				sprintf(cs2, " M");
+				break;
+			case S_COM:
+				sprintf(cs1, " C");
+				if (nbufp[n].on_type & S_EXT)
+					sprintf(cs2, " E");
+				else
+					sprintf(cs2, " -");
+				break;
+			case 0:
+				if (nbufp[n].on_type & S_EXT)
+					sprintf(cs2, " E");
+				else
+					sprintf(cs2, " -");
+
+				switch (nbufp[n].on_type & S_TYP)
+				{
+					case S_UND:
+						sprintf(cs1, " U");
+						break;
+					case S_ABS:
+						sprintf(cs1, " A");
+						break;
+					default:
+						sprintf(cs1, "%2d", (nbufp[n].on_type & S_TYP) - S_MIN);
+				}
 				break;
 			default:
-				sprintf(cs1, "%2d", (nbufp[n].on_type&S_TYP) - S_MIN);
-			}
-			break;
-		default:
-			sprintf(cs1, "??");
-			sprintf(cs2, " ?");
+				sprintf(cs1, "??");
+				sprintf(cs2, " ?");
 		}
 
-		printf("%8lx %s %s %s\n",nbufp[n].on_valu,cs1,cs2,nbufp[n].on_mptr ? nbufp[n].on_mptr : "(NULL)");
+		printf(
+		    "%8lx %s %s %s\n", nbufp[n].on_valu, cs1, cs2,
+		    nbufp[n].on_mptr ? nbufp[n].on_mptr : "(NULL)");
 	}
 
 	if (nbufp)
-		free((char *)nbufp);
+		free((char*)nbufp);
 	if (cbufp)
-		free((char *)cbufp);
+		free((char*)cbufp);
 }
 
 static int compare(const void* v1, const void* v2)
 {
 	const struct outname* p1 = v1;
 	const struct outname* p2 = v2;
-	int	i;
+	int i;
 
-	if (sectsort_flg) {
-		if ((p1->on_type&S_TYP) > (p2->on_type&S_TYP))
-			return(revsort_flg);
-		if ((p1->on_type&S_TYP) < (p2->on_type&S_TYP))
-			return(-revsort_flg);
+	if (sectsort_flg)
+	{
+		if ((p1->on_type & S_TYP) > (p2->on_type & S_TYP))
+			return (revsort_flg);
+		if ((p1->on_type & S_TYP) < (p2->on_type & S_TYP))
+			return (-revsort_flg);
 	}
 
-	if (numsort_flg) {
+	if (numsort_flg)
+	{
 		if (p1->on_valu > p2->on_valu)
-			return(revsort_flg);
+			return (revsort_flg);
 		if (p1->on_valu < p2->on_valu)
-			return(-revsort_flg);
+			return (-revsort_flg);
 	}
 
-	if (! p1->on_mptr) {
-		if (! p2->on_mptr) return 0;
+	if (!p1->on_mptr)
+	{
+		if (!p2->on_mptr)
+			return 0;
 		return -revsort_flg;
 	}
-	if (! p2->on_mptr) return revsort_flg;
+	if (!p2->on_mptr)
+		return revsort_flg;
 
 	i = strcmp(p1->on_mptr, p2->on_mptr);
 
 	if (i > 0)
-		return(revsort_flg);
+		return (revsort_flg);
 	if (i < 0)
-		return(-revsort_flg);
+		return (-revsort_flg);
 
-	return(0);
+	return (0);
 }
 
 void rd_fatal(void)
 {
-	fprintf(stderr,"read error on %s\n", filename);
+	fprintf(stderr, "read error on %s\n", filename);
 	read_error = 1;
 }

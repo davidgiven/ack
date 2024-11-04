@@ -1,6 +1,6 @@
 /* $Id$ */
 char *strcat(s1, s2)
-register char *s1, *s2;
+char *s1, *s2;
 {
   /* Append s2 to the end of s1. */
 

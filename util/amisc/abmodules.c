@@ -17,33 +17,32 @@
 #include "warnings.h"
 #include "stringlist.h"
 
-int	numsort_flg;
-int	sectsort_flg;
-int	undef_flg;
-int	revsort_flg = 1;
-int	globl_flg;
-int	nosort_flg;
-int	arch_flg;
-int	prep_flg;
-int	read_error;
-struct	outsect	sbuf;
-long	off;
-long	s_base[S_MAX];	/* for specially encoded bases */
-char	*filename;
-int	narg;
-
+int numsort_flg;
+int sectsort_flg;
+int undef_flg;
+int revsort_flg = 1;
+int globl_flg;
+int nosort_flg;
+int arch_flg;
+int prep_flg;
+int read_error;
+struct outsect sbuf;
+long off;
+long s_base[S_MAX]; /* for specially encoded bases */
+char* filename;
+int narg;
 
 static const char prefix[] = "_bmodule_";
 
 static struct stringlist modules;
 
-static void do_file(FILE *fd)
+static void do_file(FILE* fd)
 {
 	struct outhead hbuf;
-	char		*cbufp;
-	long		fi_to_co;
-	long		n;
-	unsigned	readcount;
+	char* cbufp;
+	long fi_to_co;
+	long n;
+	unsigned readcount;
 
 	read_error = 0;
 	rd_fdopen(fd);
@@ -67,7 +66,7 @@ static void do_file(FILE *fd)
 	if (read_error)
 		goto corrupt;
 
-	fi_to_co = (long) (cbufp - OFF_CHAR(hbuf));
+	fi_to_co = (long)(cbufp - OFF_CHAR(hbuf));
 	while (--n >= 0)
 	{
 		struct outname nbuf;
@@ -84,11 +83,11 @@ static void do_file(FILE *fd)
 		if (nbuf.on_foff == 0)
 			nbuf.on_mptr = 0;
 		else
-			nbuf.on_mptr = (char *) (nbuf.on_foff + fi_to_co);
+			nbuf.on_mptr = (char*)(nbuf.on_foff + fi_to_co);
 
 		if (strlen(nbuf.on_mptr) <= sizeof(prefix))
 			continue;
-		if (memcmp(nbuf.on_mptr, prefix, sizeof(prefix)-1) != 0)
+		if (memcmp(nbuf.on_mptr, prefix, sizeof(prefix) - 1) != 0)
 			continue;
 
 		stringlist_add(&modules, strdup(nbuf.on_mptr + sizeof(prefix) - 1));
@@ -105,7 +104,8 @@ corrupt:
 static void process(FILE* fd)
 {
 	uint16_t magic = rd_unsigned2(fd);
-	switch(magic) {
+	switch (magic)
+	{
 		case O_MAGIC:
 			fseek(fd, 0L, SEEK_SET);
 			do_file(fd);
@@ -115,7 +115,7 @@ static void process(FILE* fd)
 		case AALMAG:
 		{
 			struct ar_hdr archive_header;
-			static char	buf[sizeof(archive_header.ar_name)+1];
+			static char buf[sizeof(archive_header.ar_name) + 1];
 
 			while (rd_arhdr(fd, &archive_header))
 			{
@@ -131,7 +131,7 @@ static void process(FILE* fd)
 			}
 			break;
 		}
-		
+
 		default:
 			fatal("file %s is of unknown format", filename);
 	}
@@ -163,7 +163,7 @@ int main(int argc, char* const argv[])
 
 	for (;;)
 	{
-		FILE *fd;
+		FILE* fd;
 
 		filename = argv[optind++];
 		if (!filename)

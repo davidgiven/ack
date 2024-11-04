@@ -17,7 +17,7 @@ struct node *MkNode(int class, struct node *left, struct node *right, struct tok
 {
 	/*	Create a node and initialize it with the given parameters
 	*/
-	register struct node *nd = new_node();
+	struct node *nd = new_node();
 
 	nd->nd_left = left;
 	nd->nd_right = right;
@@ -29,7 +29,7 @@ struct node *MkNode(int class, struct node *left, struct node *right, struct tok
 
 struct node *MkLeaf(int class, struct token *token)
 {
-	register struct node *nd = new_node();
+	struct node *nd = new_node();
 
 	nd->nd_left = nd->nd_right = NULLNODE;
 	nd->nd_token = *token;
@@ -38,7 +38,7 @@ struct node *MkLeaf(int class, struct token *token)
 	return nd;
 }
 
-void FreeNode(register struct node *nd)
+void FreeNode(struct node *nd)
 {
 	/*	Put nodes that are no longer needed back onto the free list
 	*/
@@ -63,7 +63,7 @@ void indnt(int lvl)
 		print("  ");
 }
 
-void printnode(register struct node *nd, int lvl)
+void printnode(struct node *nd, int lvl)
 {
 	indnt(lvl);
 	print("Class: %d; Symbol: %s\n", nd->nd_class, symbol2str(nd->nd_symb));
@@ -75,7 +75,7 @@ void printnode(register struct node *nd, int lvl)
 	}
 }
 
-void PrNode(register struct node *nd, int lvl)
+void PrNode(struct node *nd, int lvl)
 {
 	if( !nd )	{
 		indnt(lvl); print("<nilnode>\n");

@@ -8,7 +8,7 @@
 
 #include "ack_string.h"
 
-char *btscpy(register char *b1, register char *b2, register int n)
+char *btscpy(char *b1, char *b2, int n)
 {
 	char *b1s = b1;
 

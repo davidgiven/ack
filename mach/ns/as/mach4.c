@@ -88,7 +88,7 @@ operation:
 	|	ADD_I	gen1 ',' gen2
 		/* format 4 */
 			{
-			  register opc ;
+			  opc ;
 			  opc=id_op($1) ;
 			  if ( opc==0x9 ) not_imm(&mode1) ; /* addr */
 			  if ( opc!=0x1 ) not_imm(&mode2) ; /* !cmp */
@@ -153,7 +153,7 @@ operation:
 	|	MOVM	gen1 ',' gen2 ',' expr
 		/* format 7 */
 			{
-			  register s_size ;
+			  s_size ;
 			  s_size= id_g1($1)+1 ;
 			  /* $6.val= $6.val*s_size - s_size ; */
 			  $6.val= $6.val -1 ;

@@ -243,7 +243,7 @@ expr_error(va_alist)			/* expr, fmt, args */
 
 	va_start(ap);
 	{
-		register struct expr *expr = va_arg(ap, struct expr *);
+		struct expr *expr = va_arg(ap, struct expr *);
 		char *fmt = va_arg(ap, char *);
 
 		if (!(expr->ex_flags & EX_ERROR)) {
@@ -298,7 +298,7 @@ def_warning(va_alist)			/* def, fmt, args */
 
 	va_start(ap);
 	{
-		register struct def *def = va_arg(ap, struct def *);
+		struct def *def = va_arg(ap, struct def *);
 		char *fmt = va_arg(ap, char *);
 
 		_error(WARNING, def->df_file, def->df_line, fmt, ap);

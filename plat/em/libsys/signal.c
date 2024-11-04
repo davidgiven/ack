@@ -47,7 +47,7 @@ static int      catchtrp(int trapno) ;
 static int      procesig(int signo) ;
 
 sighandler_t signal(int sig, sighandler_t func) {
-	register index, i ;
+	int index, i ;
 	sighandler_t  prev ;
 
 	index= sig-1 ;
@@ -60,7 +60,7 @@ sighandler_t signal(int sig, sighandler_t func) {
 	}
 	prev= vector[index] ;
 	if ( prev!=func ) {
-		register int mapval ;
+		int mapval ;
 		vector[index]= func ;
 		if ( func==SIG_IGN ) {
 			mapval= -3;
@@ -88,7 +88,7 @@ static int catchtrp(int trapno) {
 }
 
 static int procesig(int sig) {
-	register index ;
+	int index ;
 	sighandler_t  trf ;
 
 	index= sig-1 ;

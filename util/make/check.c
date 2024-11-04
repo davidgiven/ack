@@ -12,8 +12,8 @@
  */
 static void check(struct name *np)
 {
-	register struct depend * dp;
-	register struct line * lp;
+	struct depend * dp;
+	struct line * lp;
 
 	if (np->n_flag & N_MARK)
 		fatal("Circular dependency from %s", np->n_name);
@@ -34,11 +34,11 @@ static void check(struct name *np)
  */
 void prt(void)
 {
-	register struct name * np;
-	register struct depend * dp;
-	register struct line * lp;
-	register struct cmd * cp;
-	register struct macro * mp;
+	struct name * np;
+	struct depend * dp;
+	struct line * lp;
+	struct cmd * cp;
+	struct macro * mp;
 
 	for (mp = macrohead; mp; mp = mp->m_next)
 		fprintf(stderr, "%s = %s\n", mp->m_name, mp->m_val);
@@ -78,7 +78,7 @@ void prt(void)
  */
 void circh(void)
 {
-	register struct name * np;
+	struct name * np;
 
 	for (np = namehead.n_next; np; np = np->n_next)
 		check(np);
@@ -89,9 +89,9 @@ void circh(void)
  */
 void precious(void)
 {
-	register struct depend * dp;
-	register struct line * lp;
-	register struct name * np;
+	struct depend * dp;
+	struct line * lp;
+	struct name * np;
 
 	if (!((np = newname(".PRECIOUS"))->n_flag & N_TARG))
 		return;

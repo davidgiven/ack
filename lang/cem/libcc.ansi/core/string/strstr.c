@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strstr(register const char* s, register const char* wanted)
+char* strstr(const char* s, const char* wanted)
 {
-	register const int len = strlen(wanted);
+	const int len = strlen(wanted);
 
 	if (len == 0)
 		return (char*)s;

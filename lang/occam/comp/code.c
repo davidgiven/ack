@@ -18,7 +18,7 @@ enum addr_val { address, value };
 void code_val(e) register struct expr *e;
 /* Compile e for its value, which is put on the stack. */
 {
-	register struct expr *left, *right;
+	struct expr *left, *right;
 
 	if (err) return;
 
@@ -109,7 +109,7 @@ void code_val(e) register struct expr *e;
 		}
 		break;
 	case E_VAR: {
-		register struct symbol *var=e->u.var;
+		struct symbol *var=e->u.var;
 
 		if (var->s_type&T_BUILTIN)
 			Loe(var->s_info.vc.st.builtin, var->s_info.vc.offset);
@@ -145,9 +145,9 @@ static void subscript(e, av) register struct expr *e; enum addr_val av;
  * the address of e->left[e->right->left FOR e->right->right].
  */
 {
-	register char *des;
-	register struct expr *left;
-	register struct expr *index;
+	char *des;
+	struct expr *left;
+	struct expr *index;
 
 	code_addr(left=e->u.node.left);
 
@@ -160,7 +160,7 @@ static void subscript(e, av) register struct expr *e; enum addr_val av;
 		else
 			des= e->type&T_BYTE ? "maxbdes" : "maxwdes";
 	} else {
-		register lsiz=left->arr_siz;
+		lsiz=left->arr_siz;
 
 		if (left->type&T_BYTE && !(e->type&T_BYTE))
 			lsiz/=vz;
@@ -189,7 +189,7 @@ static void subscript(e, av) register struct expr *e; enum addr_val av;
 		}
 	}
 	if (constant(index)) {
-		register offset=index->u.cst;
+		offset=index->u.cst;
 
 		if ((left->type&T_TYPE)==T_CHAN)
 			offset*=(wz+vz);
@@ -231,7 +231,7 @@ void code_addr(e) register struct expr *e;
 		subscript(e, address);
 		break;
 	case E_VAR: {	/* variable or channel */
-		register struct symbol *var=e->u.var;
+		struct symbol *var=e->u.var;
 
 		if (var->s_type&T_BUILTIN)
 			lae(var->s_info.vc.st.builtin, var->s_info.vc.offset);
@@ -262,9 +262,9 @@ void code_addr(e) register struct expr *e;
 }
 
 void code_bool(e, pos, T, F)
-	register struct expr *e;
-	register pos;
-	register int *T, *F;
+	struct expr *e;
+	pos;
+	int *T, *F;
 /* if e = pos then
 	fall through or jump to T;
    else
@@ -272,13 +272,13 @@ void code_bool(e, pos, T, F)
    fi
  */
 {
-	register Default=0;
+	Default=0;
 
 	if (err) return;
 
 	if (e->kind==E_NODE) {
-		register struct expr *left=e->u.node.left;
-		register struct expr *right=e->u.node.right;
+		struct expr *left=e->u.node.left;
+		struct expr *right=e->u.node.right;
 
 		switch(e->u.node.op) {
 		case '<':
@@ -331,11 +331,11 @@ void code_bool(e, pos, T, F)
 void code_assignment(e) register struct expr *e;
 /* e->left := e->right */
 {
-	register struct expr *left=e->u.node.left;
-	register struct expr *right=e->u.node.right;
+	struct expr *left=e->u.node.left;
+	struct expr *right=e->u.node.right;
 
 	if (left->type&T_ARR) {
-		register siz=left->arr_siz;
+		siz=left->arr_siz;
 
 		code_addr(right);
 		code_addr(left);
@@ -393,7 +393,7 @@ void code_any(e, NO) register struct expr *e; int *NO;
  */
 {
 	int YES=0;
-	register struct expr_list *elp;
+	struct expr_list *elp;
 
 	if (err) return;
 
@@ -423,7 +423,7 @@ void code_void(e) register struct expr *e;
 		code_assignment(e);
 		break;
 	case E_IO: {
-		register struct expr_list *elp;
+		struct expr_list *elp;
 
 		code_addr(e->u.io.chan);
 
@@ -439,10 +439,10 @@ void code_void(e) register struct expr *e;
 		}
 		break;
 	case E_CALL: {
-		register size=0;
-		register struct expr_list *elp=e->u.call.c_args;
-		register struct symbol *proc=e->u.call.c_proc->u.var;
-		register struct par_list *pars=proc->s_info.proc.pars;
+		size=0;
+		struct expr_list *elp=e->u.call.c_args;
+		struct symbol *proc=e->u.call.c_proc->u.var;
+		struct par_list *pars=proc->s_info.proc.pars;
 
 		while (elp!=nil) {
 			if (pars->pr_type==T_VALUE) {
@@ -506,8 +506,8 @@ void epilogue(proc) register struct symbol *proc;
 
 void rep_init(v, e1, e2, r_info)
 	struct symbol *v;
-	register struct expr *e1, *e2;
-	register struct replicator *r_info;
+	struct expr *e1, *e2;
+	struct replicator *r_info;
 /* Compile v=[e1 FOR e2].  Info tells rep_test what decisions rep_init makes. */
 {
 	if (err) return;
@@ -534,9 +534,9 @@ void rep_init(v, e1, e2, r_info)
 }
 
 void rep_test(v, e1, e2, r_info)
-	register struct symbol *v;
-	register struct expr *e1, *e2;
-	register struct replicator *r_info;
+	struct symbol *v;
+	struct expr *e1, *e2;
+	struct replicator *r_info;
 {
 	if (err) return;
 

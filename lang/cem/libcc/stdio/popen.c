@@ -18,7 +18,7 @@ popen(command, type)
 	
 	if (pid == 0) {
 		/* child */
-		register int *p;
+		int *p;
 
 		for (p = pids; p < &pids[20]; p++) {
 			if (*p) close(p - pids);

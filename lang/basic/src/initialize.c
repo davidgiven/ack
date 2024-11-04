@@ -19,7 +19,7 @@ extern void fillkex(void);
 
 void initialize(void)
 {
-	register char *cindex, *cptr;
+	char *cindex, *cptr;
         int result1, result2;
 
 	/* Find the basename */

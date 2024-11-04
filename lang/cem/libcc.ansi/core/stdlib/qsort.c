@@ -22,10 +22,10 @@ void qsort(void* base, size_t nel, size_t width,
 }
 
 static void
-qsort1(char* a1, char* a2, register size_t width)
+qsort1(char* a1, char* a2, size_t width)
 {
-	register char *left, *right;
-	register char *lefteq, *righteq;
+	char *left, *right;
+	char *lefteq, *righteq;
 	int cmp;
 
 	for (;;)
@@ -122,10 +122,10 @@ qsort1(char* a1, char* a2, register size_t width)
 }
 
 static void
-qexchange(register char* p, register char* q,
-    register size_t n)
+qexchange(char* p, char* q,
+    size_t n)
 {
-	register int c;
+	int c;
 
 	while (n-- > 0)
 	{
@@ -136,10 +136,10 @@ qexchange(register char* p, register char* q,
 }
 
 static void
-q3exchange(register char* p, register char* q, register char* r,
-    register size_t n)
+q3exchange(char* p, char* q, char* r,
+    size_t n)
 {
-	register int c;
+	int c;
 
 	while (n-- > 0)
 	{

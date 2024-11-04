@@ -25,14 +25,14 @@ extern int parlevel;
 
 
 
-struct def *Enter(char *name, long kind, register struct type *type, int pnam)
+struct def *Enter(char *name, long kind, struct type *type, int pnam)
 {
 	/*	Enter a definition for "name" with kind "kind" and type
 	 "type" in the Current Scope. If it is a standard name, also
 	 put its number in the definition structure, and mark the
 	 name as set, to inhibit warnings about used before set.
 	 */
-	register struct def *df;
+	struct def *df;
 
 	df = define(str2idf(name, 0), CurrentScope, kind);
 	df->df_type = type;
@@ -48,10 +48,10 @@ struct def *Enter(char *name, long kind, register struct type *type, int pnam)
 	return df;
 }
 
-void EnterProgList(register struct node *Idlist)
+void EnterProgList(struct node *Idlist)
 {
-	register struct node *idlist = Idlist;
-	register struct def *df;
+	struct node *idlist = Idlist;
+	struct def *df;
 
 	for (; idlist; idlist = idlist->nd_next)
 		if (!strcmp(input, idlist->nd_IDF->id_text)
@@ -96,13 +96,13 @@ void EnterProgList(register struct node *Idlist)
 	FreeNode(Idlist);
 }
 
-void EnterEnumList(struct node *Idlist, register struct type *type)
+void EnterEnumList(struct node *Idlist, struct type *type)
 {
 	/*	Put a list of enumeration literals in the symbol table.
 	 They all have type "type". Also assign numbers to them.
 	 */
-	register struct def *df, *df1 = 0;
-	register struct node *idlist = Idlist;
+	struct def *df, *df1 = 0;
+	struct node *idlist = Idlist;
 
 	type->enm_ncst = 0;
 	for (; idlist; idlist = idlist->nd_next)
@@ -122,14 +122,14 @@ void EnterEnumList(struct node *Idlist, register struct type *type)
 	FreeNode(Idlist);
 }
 
-void EnterFieldList(struct node *Idlist, register struct type *type,
+void EnterFieldList(struct node *Idlist, struct type *type,
 		struct scope *scope, arith *addr, unsigned short packed)
 {
 	/*	Put a list of fields in the symbol table.
 	 They all have type "type", and are put in scope "scope".
 	 */
-	register struct def *df;
-	register struct node *idlist = Idlist;
+	struct def *df;
+	struct node *idlist = Idlist;
 
 	for (; idlist; idlist = idlist->nd_next)
 		if ( (df = define(idlist->nd_IDF, scope, D_FIELD)) )
@@ -157,9 +157,9 @@ void EnterVarList(struct node *Idlist, struct type *type, int local)
 	 "local" is set if the variables are declared local to a
 	 procedure.
 	 */
-	register struct def *df;
-	register struct node *idlist = Idlist;
-	register struct scopelist *sc = CurrVis;
+	struct def *df;
+	struct node *idlist = Idlist;
+	struct scopelist *sc = CurrVis;
 
 	for (; idlist; idlist = idlist->nd_next)
 	{
@@ -204,10 +204,10 @@ static void LinkParam(struct paramlist **parlist, struct def *df)
 }
 
 
-arith EnterParamList(register struct node *fpl, struct paramlist **parlist)
+arith EnterParamList(struct node *fpl, struct paramlist **parlist)
 {
-	register arith nb_pars = (proclevel > 1) ? pointer_size : 0;
-	register struct node *id;
+	arith nb_pars = (proclevel > 1) ? pointer_size : 0;
+	struct node *id;
 	struct type *tp;
 	struct def *df;
 
@@ -242,13 +242,13 @@ arith EnterParamList(register struct node *fpl, struct paramlist **parlist)
 	return nb_pars;
 }
 
-arith EnterParTypes(register struct node *fpl, struct paramlist **parlist)
+arith EnterParTypes(struct node *fpl, struct paramlist **parlist)
 {
 	/* parameters.h in heading of procedural and functional
 	 parameters (only types are important, not the names).
 	 */
-	register arith nb_pars = 0;
-	register struct node *id;
+	arith nb_pars = 0;
+	struct node *id;
 	struct type *tp;
 	struct def *df;
 

@@ -5,9 +5,9 @@ getpw(uid, buf)
 	int uid;
 	char buf[];
 {
-	register FILE *pwf;
-	register int ch, i;
-	register char *bp;
+	FILE *pwf;
+	int ch, i;
+	char *bp;
 
 	pwf = fopen("/etc/passwd", "r");
 	if (pwf == NULL) return(1);

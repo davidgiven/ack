@@ -120,7 +120,7 @@ void badsyntax(void)
 
 void regsize(int sz)
 {
-        register int bit;
+        int bit;
 
         bit = (sz&1) ? 0 : IS_R8;
         if ((is_reg(reg_1) && (reg_1 & IS_R8) != bit) ||
@@ -171,7 +171,7 @@ void indexed(void) {
         }
 }
 
-void ebranch(register int opc,expr_t exp)
+void ebranch(int opc,expr_t exp)
 {
         /*      Conditional branching; Full displacements are available
                 on the 80386, so the welknown trick with the reverse branch
@@ -180,8 +180,8 @@ void ebranch(register int opc,expr_t exp)
                 can be set with a prefix. In this case, the user gets what
                 he asked for.
         */
-        register int sm;
-        register long dist;
+        int sm;
+        long dist;
         int saving = address_long ? 4 : 2;
 
         if (opc == 0353) saving--;
@@ -214,12 +214,12 @@ void ebranch(register int opc,expr_t exp)
         }
 }
 
-void branch(register int opc,expr_t exp)
+void branch(int opc,expr_t exp)
 {
         /*      LOOP, JCXZ, etc. branch instructions.
                 Here, the offset just must fit in a byte.
         */
-        register long dist;
+        long dist;
 
         dist = exp.val - (DOTVAL + 2);
         if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))
@@ -229,7 +229,7 @@ void branch(register int opc,expr_t exp)
         emit1((int)dist);
 }
 
-void pushop(register int opc)
+void pushop(int opc)
 {
 
         regsize(1);
@@ -303,7 +303,7 @@ void adsize_exp(expr_t exp, int relpc)
         }
 }
 
-void addop(register int opc)
+void addop(int opc)
 {
 
         regsize(opc);
@@ -336,9 +336,9 @@ void addop(register int opc)
                 badsyntax();
 }
 
-void rolop(register int opc)
+void rolop(int opc)
 {
-        register int oreg;
+        int oreg;
 
         oreg = reg_2;
         reg_2 = reg_1;
@@ -365,7 +365,7 @@ void rolop(register int opc)
                 badsyntax();
 }
 
-void incop(register int opc)
+void incop(int opc)
 {
 
         regsize(opc);
@@ -378,7 +378,7 @@ void incop(register int opc)
         }
 }
 
-void callop(register int opc)
+void callop(int opc)
 {
 
         regsize(1);
@@ -397,7 +397,7 @@ void callop(register int opc)
         }
 }
 
-void xchg(register int opc)
+void xchg(int opc)
 {
 
         regsize(opc);
@@ -412,7 +412,7 @@ void xchg(register int opc)
                 badsyntax();
 }
 
-void test(register int opc)
+void test(int opc)
 {
 
         regsize(opc);
@@ -436,7 +436,7 @@ void test(register int opc)
                 badsyntax();
 }
 
-void mov(register int opc)
+void mov(int opc)
 {
 
         regsize(opc);

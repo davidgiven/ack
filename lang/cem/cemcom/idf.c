@@ -63,12 +63,12 @@ idf_hashed(tg, size, hc)
 		The identifier has already been truncated to idfsize
 		characters.
 	*/
-	register struct idf **hook = &idf_hashtable[hc], *notch;
+	struct idf **hook = &idf_hashtable[hc], *notch;
 
 	while ((notch = *hook))	{
-		register char *s1 = tg;
-		register char *cp = notch->id_text;
-		register int cmp;
+		char *s1 = tg;
+		char *cp = notch->id_text;
+		int cmp;
 
 		while (!(cmp = (*s1 - *cp++))) {
 			if (*s1++ == '\0') {
@@ -102,11 +102,11 @@ idf_hashed(tg, size, hc)
 hash_stat()
 {
 	if (options['h'])	{
-		register int i;
+		int i;
 
 		print("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
-			register struct idf *notch = idf_hashtable[i];
+			struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
 
 			while (notch)	{
@@ -130,12 +130,12 @@ str2idf(tg)
 		but its hash value is not; otherwise idf_hashed() is to
 		be used.
 	*/
-	register char *cp = tg;
-	register int hash;
-	register int pos = -1;
-	register int ch;
+	char *cp = tg;
+	int hash;
+	int pos = -1;
+	int ch;
 	char ntg[IDFSIZE + 1];
-	register char *ncp = ntg;
+	char *ncp = ntg;
 
 	hash = STARTHASH();
 	while (++pos < idfsize && (ch = *cp++))	{
@@ -183,14 +183,14 @@ declare_idf(ds, dc, lvl)
 		This routine implements the rich semantics of C
 		declarations.
 	*/
-	register struct idf *idf = dc->dc_idf;
-	register int sc = ds->ds_sc;
+	struct idf *idf = dc->dc_idf;
+	int sc = ds->ds_sc;
 		/*	This local copy is essential:
 				char b(), c;
 			makes b GLOBAL and c AUTO.
 		*/
-	register struct def *def = idf->id_def;		/* may be NULL */
-	register struct type *type;
+	struct def *def = idf->id_def;		/* may be NULL */
+	struct type *type;
 	struct stack_level *stl = stack_level_of(lvl);
 	char formal_array = 0;
 
@@ -334,7 +334,7 @@ declare_idf(ds, dc, lvl)
 		declare_idf(ds, dc, L_GLOBAL);
 	}
 	else	{ /* fill in the def block */
-		register struct def *newdef = new_def();
+		struct def *newdef = new_def();
 
 		newdef->next = def;
 		newdef->df_level = lvl;
@@ -387,7 +387,7 @@ actual_declaration(sc, tp)
 {
 	/*	An actual_declaration needs space, right here and now.
 	*/
-	register int fund = tp->tp_fund;
+	int fund = tp->tp_fund;
 
 	if (sc == ENUM || sc == TYPEDEF) /* virtual declarations */
 		return 0;
@@ -399,8 +399,8 @@ actual_declaration(sc, tp)
 }
 
 global_redecl(idf, new_sc, tp)
-	register struct idf *idf;
-	register struct type *tp;
+	struct idf *idf;
+	struct type *tp;
 {
 	/*	A global identifier may be declared several times,
 		provided the declarations do not conflict; they might
@@ -408,10 +408,10 @@ global_redecl(idf, new_sc, tp)
 		an array) or they might conflict or supplement each other
 		in storage class.
 	*/
-	register struct def *def = idf->id_def;
+	struct def *def = idf->id_def;
 
 	if (tp != def->df_type)	{
-		register struct type *otp = def->df_type;
+		struct type *otp = def->df_type;
 		if (	tp->tp_fund != ARRAY || otp->tp_fund != ARRAY ||
 			tp->tp_up != otp->tp_up
 		)	{
@@ -554,8 +554,8 @@ global_redecl(idf, new_sc, tp)
 
 int
 good_formal(def, idf)
-	register struct def *def;
-	register struct idf *idf;
+	struct def *def;
+	struct idf *idf;
 {
 	/*	Succeeds if def is a proper L_FORMAL1 definition and
 		gives an error message otherwise.
@@ -570,11 +570,11 @@ good_formal(def, idf)
 }
 
 declare_params(dc)
-	register struct declarator *dc;
+	struct declarator *dc;
 {
 	/*	Declares the formal parameters if they exist.
 	*/
-	register struct formal *fm = dc->dc_formal;
+	struct formal *fm = dc->dc_formal;
 
 	while (fm)	{
 		declare_parameter(fm->fm_idf);
@@ -585,11 +585,11 @@ declare_params(dc)
 }
 
 init_idf(idf)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	The topmost definition of idf is set to initialized.
 	*/
-	register struct def *def = idf->id_def;	/* the topmost */
+	struct def *def = idf->id_def;	/* the topmost */
 
 	if (def->df_initialized)
 		error("multiple initialization of %s", idf->id_text);
@@ -627,7 +627,7 @@ declare_formals(fp)
 		An address is assigned to each formal parameter.
 		The total size of the formals is returned in *fp;
 	*/
-	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
+	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
 	arith f_offset = (arith)0;
 
 #ifdef	DEBUG
@@ -635,7 +635,7 @@ declare_formals(fp)
 		dumpidftab("start declare_formals", 0);
 #endif	/* DEBUG */
 	while (se)	{
-		register struct def *def = se->se_idf->id_def;
+		struct def *def = se->se_idf->id_def;
 
 		def->df_address = f_offset;
 		/*	the alignment convention for parameters is: align on
@@ -699,12 +699,12 @@ add_def(idf, sc, tp, lvl)
 }
 
 update_ahead(idf)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	The tk_symb of the token ahead is updated in the light of new
 		information about the identifier idf.
 	*/
-	register int tk_symb = AHEAD;
+	int tk_symb = AHEAD;
 
 	if (	(tk_symb == IDENTIFIER || tk_symb == TYPE_IDENTIFIER) &&
 		ahead.tk_idf == idf
@@ -714,7 +714,7 @@ update_ahead(idf)
 }
 
 free_formals(fm)
-	register struct formal *fm;
+	struct formal *fm;
 {
 	while (fm)	{
 		struct formal *tmp = fm->next;
@@ -731,7 +731,7 @@ init_hmask()
 	/*	A simple congruence random number generator, as
 		described in Knuth, vol 2.
 	*/
-	register int h, rnd = HASH_X;
+	int h, rnd = HASH_X;
 
 	for (h = 0; h < IDFSIZE; h++)	{
 		hmask[h] = rnd;

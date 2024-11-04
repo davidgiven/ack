@@ -25,8 +25,8 @@ struct symtab * findident(char *s, int mode, struct symtab **table)
 	 * If mode = ENTERING, a new entry will be made if s is not in the
 	 * table yet, otherwise an error results
 	 */
-	register struct symtab *p;
-	register int n;
+	struct symtab *p;
+	int n;
 
 	if (!*table)
 	{ /* No entry for this symbol */

@@ -36,15 +36,15 @@ static int level;
 
 /* In this file are defined : */
 void conflchecks(void);
-STATIC void prline(char*);
-STATIC void printset(register p_set, string);
-STATIC int check(register p_gram);
-STATIC void moreverbose(register p_set);
-STATIC void prrule(p_gram);
-STATIC void cfcheck(p_set, p_set, int);
-STATIC void resolve(p_gram);
-STATIC void propagate(p_set, register p_gram);
-STATIC void spaces(void);
+static void prline(char*);
+static void printset(p_set, string);
+static int check(p_gram);
+static void moreverbose(p_set);
+static void prrule(p_gram);
+static void cfcheck(p_set, p_set, int);
+static void resolve(p_gram);
+static void propagate(p_set, p_gram);
+static void spaces(void);
 
 /*
  * Check for conflicts, that is,
@@ -55,8 +55,8 @@ STATIC void spaces(void);
  */
 void conflchecks(void)
 {
-	register p_nont p;
-	register int s;
+	p_nont p;
+	int s;
 	p_file x = files;
 
 	f_input = x->f_name;
@@ -120,20 +120,20 @@ void conflchecks(void)
 		fclose(fout);
 }
 
-STATIC void prline(char* s)
+static void prline(char* s)
 {
 	fputs(s, fout);
 	spaces();
 }
 
-STATIC void printset(register p_set p, string s)
+static void printset(p_set p, string s)
 {
 	/*
 	 * Print the elements of a set
 	 */
-	register int i;
-	register int j;
-	register p_token pt;
+	int i;
+	int j;
+	p_token pt;
 	string name;
 	int k;
 	int hulp;
@@ -188,13 +188,13 @@ STATIC void printset(register p_set p, string s)
 	prline("}\n");
 }
 
-STATIC int check(register p_gram p)
+static int check(p_gram p)
 {
 	/*
 	 * Search for conflicts in a grammar rule.
 	 */
-	register p_set temp;
-	register int retval;
+	p_set temp;
+	int retval;
 
 	retval = 0;
 	for (;;)
@@ -205,7 +205,7 @@ STATIC int check(register p_gram p)
 				return retval;
 			case NONTERM:
 			{
-				register p_nont n;
+				p_nont n;
 
 				n = &nonterms[g_getcont(p)];
 				if (g_getnpar(p) != getntparams(n))
@@ -216,7 +216,7 @@ STATIC int check(register p_gram p)
 			}
 			case TERM:
 			{
-				register p_term q;
+				p_term q;
 
 				q = g_getterm(p);
 				retval |= check(q->t_rule);
@@ -264,7 +264,7 @@ STATIC int check(register p_gram p)
 			}
 			case ALTERNATION:
 			{
-				register p_link l;
+				p_link l;
 
 				l = g_getlink(p);
 				temp = setalloc();
@@ -301,15 +301,15 @@ STATIC int check(register p_gram p)
 	}
 }
 
-STATIC void moreverbose(register p_set t)
+static void moreverbose(p_set t)
 {
 	/*
 	 * t points to a set containing conflicting symbols and pssibly
 	 * also containing nonterminals.
 	 * Take care that a printout will be prepared for these nonterminals
 	 */
-	register int i;
-	register p_nont p;
+	int i;
+	p_nont p;
 
 	if (verbose == 2)
 		for (i = 0, p = nonterms; i < nnonterms; i++, p++)
@@ -319,12 +319,12 @@ STATIC void moreverbose(register p_set t)
 		}
 }
 
-STATIC void prrule(p_gram p)
+static void prrule(p_gram p)
 {
 	/*
 	 * Create a verbose printout of grammar rule p
 	 */
-	register FILE* f;
+	FILE* f;
 	int present = 0;
 	int firstalt = 1;
 
@@ -338,8 +338,8 @@ STATIC void prrule(p_gram p)
 				return;
 			case TERM:
 			{
-				register p_term q;
-				register int c;
+				p_term q;
+				int c;
 
 				q = g_getterm(p);
 				if (present)
@@ -395,7 +395,7 @@ STATIC void prrule(p_gram p)
 				break;
 			case ALTERNATION:
 			{
-				register p_link l;
+				p_link l;
 
 				l = g_getlink(p);
 				if (firstalt)
@@ -437,7 +437,7 @@ STATIC void prrule(p_gram p)
 			case LITERAL:
 			case TERMINAL:
 			{
-				register p_token pt = &tokens[g_getcont(p)];
+				p_token pt = &tokens[g_getcont(p)];
 
 				fprintf(f, pt->t_tokno < 0400 ? "'%s' " : "%s ", pt->t_string);
 				break;
@@ -451,7 +451,7 @@ STATIC void prrule(p_gram p)
 	}
 }
 
-STATIC void cfcheck(p_set s1, p_set s2, int flag)
+static void cfcheck(p_set s1, p_set s2, int flag)
 {
 	/*
 	 * Check if s1 and s2 have elements in common.
@@ -459,7 +459,7 @@ STATIC void cfcheck(p_set s1, p_set s2, int flag)
 	 * conflict resolver, otherwise, flag must be zero, indicating
 	 * that there is not.
 	 */
-	register p_set temp;
+	p_set temp;
 
 	temp = setalloc();
 	setunion(temp, s1);
@@ -481,7 +481,7 @@ STATIC void cfcheck(p_set s1, p_set s2, int flag)
 	free((p_mem)temp);
 }
 
-STATIC void resolve(p_gram p)
+static void resolve(p_gram p)
 {
 	/*
 	 * resolve conflicts, as specified by the user
@@ -497,7 +497,7 @@ STATIC void resolve(p_gram p)
 				break;
 			case ALTERNATION:
 			{
-				register p_link l;
+				p_link l;
 
 				l = g_getlink(p);
 				if (l->l_flag & AVOIDING)
@@ -523,7 +523,7 @@ STATIC void resolve(p_gram p)
 	}
 }
 
-STATIC void propagate(p_set set, register p_gram p)
+static void propagate(p_set set, p_gram p)
 {
 	/*
 	 * Propagate the fact that on the elements of set the grammar rule
@@ -536,7 +536,7 @@ STATIC void propagate(p_set set, register p_gram p)
 	}
 }
 
-STATIC void spaces(void)
+static void spaces(void)
 {
 	if (level > 0)
 		fprintf(fout, "%*c", level, ' ');

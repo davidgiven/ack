@@ -46,7 +46,7 @@ static int TstTypeEquiv(struct type *tp1, struct type *tp2)
 		   (tp2 == error_type);
 }
 
-static int TstParEquiv(register struct type *tp1, register struct type *tp2)
+static int TstParEquiv(struct type *tp1, struct type *tp2)
 {
 	/*	test if two parameter types are equivalent. This routine
 		is used to check if two different procedure declarations
@@ -73,7 +73,7 @@ int TstProcEquiv(struct type *tp1, struct type *tp2)
 		may also be used for the testing of assignment compatibility
 		between procedure variables and procedures.
 	*/
-	register struct paramlist *p1, *p2;
+	struct paramlist *p1, *p2;
 
 	/* First check if the result types are equivalent
 	*/
@@ -97,7 +97,7 @@ int TstProcEquiv(struct type *tp1, struct type *tp2)
 	return p1 == p2;
 }
 
-int TstCompat(register struct type *tp1, register struct type *tp2)
+int TstCompat(struct type *tp1, struct type *tp2)
 {
 	/*	test if two types are compatible. See section 6.3 of the
 		Modula-2 Report for a definition of "compatible".
@@ -134,7 +134,7 @@ int TstCompat(register struct type *tp1, register struct type *tp2)
 	;
 }
 
-int TstAssCompat(register struct type *tp1, register struct type *tp2)
+int TstAssCompat(struct type *tp1, struct type *tp2)
 {
 	/*	Test if two types are assignment compatible.
 		See Def 9.1.
@@ -171,7 +171,7 @@ int TstAssCompat(register struct type *tp1, register struct type *tp2)
 	return 0;
 }
 
-char *incompat(register struct type *tp1, register struct type *tp2)
+char *incompat(struct type *tp1, struct type *tp2)
 {
 	
 	if (tp1->tp_fund == T_HIDDEN || tp2->tp_fund == T_HIDDEN) {
@@ -180,7 +180,7 @@ char *incompat(register struct type *tp1, register struct type *tp2)
 	return "type incompatibility";
 }
 
-int TstParCompat(int parno, register struct type *formaltype, int VARflag, struct node **nd, struct def *edf)
+int TstParCompat(int parno, struct type *formaltype, int VARflag, struct node **nd, struct def *edf)
 {
 	/*	Check type compatibility for a parameter in a procedure call.
 		Assignment compatibility may do if the parameter is
@@ -189,7 +189,7 @@ int TstParCompat(int parno, register struct type *formaltype, int VARflag, struc
 		may do too.
 		Or: a WORD may do.
 	*/
-	register struct type *actualtype = (*nd)->nd_type;
+	struct type *actualtype = (*nd)->nd_type;
 	char ebuf[256];
 
 	if (edf) {
@@ -256,7 +256,7 @@ int TstParCompat(int parno, register struct type *formaltype, int VARflag, struc
 	return 0;
 }
 
-int CompatCheck(register struct node **nd, struct type *tp, char *message, int (*fc)(struct type*, struct type*))
+int CompatCheck(struct node **nd, struct type *tp, char *message, int (*fc)(struct type*, struct type*))
 {
 	if (! (*fc)(tp, (*nd)->nd_type)) {
 		if (message) {

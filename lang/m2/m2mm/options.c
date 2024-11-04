@@ -17,7 +17,7 @@
 static int	ndirs = 1;
 
 DoOption(text)
-	register char *text;
+	char *text;
 {
 	extern char *mflags;
 	extern char *suff;
@@ -71,8 +71,8 @@ DoOption(text)
 AddInclDir(text)
 	char *text;
 {
-	register int i;
-	register char *new = text;
+	int i;
+	char *new = text;
 
 	if (! *text) {
 		DEFPATH[ndirs] = 0;

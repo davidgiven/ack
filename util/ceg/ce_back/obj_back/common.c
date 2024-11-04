@@ -5,7 +5,7 @@ common(n)
 arith n;
 {
 	extern int Label, Label_waiting;
-	register struct outname *nm = &symbol_table[Label];
+	struct outname *nm = &symbol_table[Label];
 
 	if (Label_waiting) {
 		/*	If possible, generate a common. Local commons must

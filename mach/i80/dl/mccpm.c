@@ -56,7 +56,7 @@ convert ()
 		while (sect[i].os_size) {
 			unsigned int sz = 8096, fl;
 			extern char *calloc();
-			register char *buf;
+			char *buf;
 			char *pbuf;
 
 			if (sz > sect[i].os_size) sz = sect[i].os_size;
@@ -87,7 +87,7 @@ convert ()
 
 
 data (sz, pc, buf)
-	register char *buf;
+	char *buf;
 {
 	printf (":");
 	outbyte (sz);

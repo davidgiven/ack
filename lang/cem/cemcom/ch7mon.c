@@ -22,11 +22,11 @@ extern long full_mask[/*MAXSIZE*/];	/* cstoper.c */
 char *symbol2str();
 
 ch7mon(oper, expp)
-	register struct expr **expp;
+	struct expr **expp;
 {
 	/*	The monadic prefix operator oper is applied to *expp.
 	*/
-	register struct expr *expr;
+	struct expr *expr;
 
 	switch (oper)	{
 	case '*':			/* RM 7.2 */
@@ -72,7 +72,7 @@ ch7mon(oper, expp)
 		else {
 			/* assume that enums are already filtered out	*/
 			if (ISNAME(*expp)) {
-				register struct def *def =
+				struct def *def =
 					(*expp)->VL_IDF->id_def;
 
 				/*	&<var> indicates that <var>

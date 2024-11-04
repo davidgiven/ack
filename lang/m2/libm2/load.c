@@ -23,7 +23,7 @@ void load(size_t siz, char* addr, int p)
 	    handled by the LOI instruction ends up at the same place,
 	    where it would, were the LOI instruction used.
 	*/
-	register char* q = (char*)&p;
+	char* q = (char*)&p;
 	char t[4];
 
 	if (siz < EM_WSIZE && EM_WSIZE % siz == 0)

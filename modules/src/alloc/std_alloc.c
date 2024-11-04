@@ -17,10 +17,10 @@ extern char *malloc();
 
 #include	"alloc.h"
 
-char *std_alloc(char **phead, register unsigned int size, int count, int *pcnt)
+char *std_alloc(char **phead, unsigned int size, int count, int *pcnt)
 {
-	register char *p;
-	register long *q;
+	char *p;
+	long *q;
 	char *retval;
 
 	if (*phead == 0)	{

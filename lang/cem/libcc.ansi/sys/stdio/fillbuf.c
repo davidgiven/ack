@@ -9,10 +9,10 @@
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_EMULATED_FILE
 
-int __fillbuf(register FILE* stream)
+int __fillbuf(FILE* stream)
 {
 	static unsigned char ch[FOPEN_MAX];
-	register int i;
+	int i;
 
 	stream->_count = 0;
 	if (fileno(stream) < 0)

@@ -30,7 +30,7 @@ static char rcsid[] = "$Id$";
 char *filename; /* Name of input file */
 int errors; /* Number of errors */
 extern char *C_error;
-extern int C_out(register struct e_instr *);
+extern int C_out(struct e_instr *);
 
 void error(const char *, ...);
 void fatal(const char *, ...);
@@ -38,7 +38,7 @@ void fatal(const char *, ...);
 int main(int argc, char **argv)
 {
 	struct e_instr buf;
-	register struct e_instr *p = &buf;
+	struct e_instr *p = &buf;
 
 	if (argc >= 2)
 	{

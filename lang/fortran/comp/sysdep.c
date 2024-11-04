@@ -260,8 +260,8 @@ fmt_init()
 {
 	static char *str1fmt[6] =
 		{ "\\b", "\\t", "\\n", "\\f", "\\r", "\\%03o" };
-	register int i, j;
-	register char *s;
+	int i, j;
+	char *s;
 
 	/* str_fmt */
 
@@ -370,8 +370,8 @@ dsort(from, to)
 		};
 	typedef struct Memb memb;
 	memb *mb, *mb1;
-	register char *x, *x0, *xe;
-	register int c, n;
+	char *x, *x0, *xe;
+	int c, n;
 	FILE *f;
 	char **z, **z0;
 	int nn = 0;

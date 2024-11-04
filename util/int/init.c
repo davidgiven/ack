@@ -46,18 +46,18 @@
 
 extern char** environ;
 
-PRIVATE size alignedstrlen(char* s);
-PRIVATE ptr storestring(ptr addr, char* s);
+static size alignedstrlen(char* s);
+static ptr storestring(ptr addr, char* s);
 
 char* load_name;
 
 void init(int ac, char** av)
 {
-	register char** p;
-	register size env_vec_size; /* size of environ vector */
-	register size arg_vec_size; /* size of argument vector */
-	register size string_size = 0; /* total size arg, env, strings */
-	register ptr ARGB, vecp, strp;
+	char** p;
+	size env_vec_size; /* size of environ vector */
+	size arg_vec_size; /* size of argument vector */
+	size string_size = 0; /* total size arg, env, strings */
+	ptr ARGB, vecp, strp;
 
 	init_ofiles(1); /* Initialize all output files */
 	init_signals();
@@ -149,21 +149,21 @@ void init(int ac, char** av)
 	wpush((long)ac); /* push argc */
 }
 
-PRIVATE size alignedstrlen(char* s)
+static size alignedstrlen(char* s)
 {
-	register size len = strlen(s) + 1;
+	size len = strlen(s) + 1;
 
 	return (len + wsize - 1) / wsize * wsize;
 }
 
-PRIVATE ptr storestring(ptr addr, char* s)
+static ptr storestring(ptr addr, char* s)
 {
 	/*	Store string, aligned to a fit multiple of wsize bytes.
 	    Return first address on a wordsize boundary after string.
 	*/
-	register size oldlen = strlen(s) + 1;
-	register size newlen = ((oldlen + wsize - 1) / wsize) * wsize;
-	register long i;
+	size oldlen = strlen(s) + 1;
+	size newlen = ((oldlen + wsize - 1) / wsize) * wsize;
+	long i;
 
 	LOG(("@g6 storestring(%lu, %s), oldlen = %ld, newlen = %ld", addr, s, oldlen, newlen));
 	ch_in_data(addr, newlen);

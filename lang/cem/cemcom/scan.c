@@ -26,24 +26,24 @@
 #define	EOS		'\0'
 #define	overflow()	(fatal("actual parameter buffer overflow"))
 
-PRIVATE char apbuf[LAPBUF]; /* temporary storage for actual parameters	*/
-PRIVATE char *actparams[NPARAMS]; /* pointers to the text of the actuals */
-PRIVATE char *aptr;	/* pointer to last inserted character in apbuf	*/
+static char apbuf[LAPBUF]; /* temporary storage for actual parameters	*/
+static char *actparams[NPARAMS]; /* pointers to the text of the actuals */
+static char *aptr;	/* pointer to last inserted character in apbuf	*/
 
 #define	copy(ch)	((aptr < &apbuf[LAPBUF]) ? (*aptr++ = ch) : overflow())
 
-PRIVATE int nr_of_params;	/* number of actuals read until now	*/
+static int nr_of_params;	/* number of actuals read until now	*/
 
-PRIVATE copyact();
+static copyact();
 
 char **
 getactuals(idef)
-	register struct idf *idef;
+	struct idf *idef;
 {
 	/*	getactuals() collects the actual parameters and turns them
 		into a list of strings, a pointer to which is returned.
 	*/
-	register acnt = idef->id_macro->mc_nps;
+	acnt = idef->id_macro->mc_nps;
 
 	nr_of_params = 0;
 	actparams[0] = aptr = &apbuf[0];
@@ -53,7 +53,7 @@ getactuals(idef)
 	if (!nr_of_params++)	{		/* 0 or 1 parameter	*/
 		/* there could be a ( <spaces, comment, ...> )
 		*/
-		register char *p = actparams[0];
+		char *p = actparams[0];
 
 		while ((class(*p) == STSKIP) || (*p == '\n')) {
 				++p;
@@ -81,7 +81,7 @@ getactuals(idef)
 	return actparams;
 }
 
-PRIVATE
+static
 copyact(ch1, ch2, lvl)
 	char ch1, ch2;
 	int lvl;
@@ -98,8 +98,8 @@ copyact(ch1, ch2, lvl)
 		Opening bracket is ch1, closing bracket is ch2. If
 		lvl != 0, copy opening and closing parameters too.
 	*/
-	register int ch;		/* Current char */
-	register int match;		/* used to read strings */
+	int ch;		/* Current char */
+	int match;		/* used to read strings */
 
 	if (lvl) {
 		copy(ch1);

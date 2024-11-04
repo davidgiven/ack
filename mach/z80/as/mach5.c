@@ -33,9 +33,9 @@ void xymem(int r,int byte)
 	}
 }
 
-void branch(register int opc,expr_t exp)
+void branch(int opc,expr_t exp)
 {
-	register int sm,dist;
+	int sm,dist;
 
 	dist = exp.val - (DOTVAL + 2);
 	if (pass == PASS_2 && dist > 0 && !(exp.typ & S_DOT))

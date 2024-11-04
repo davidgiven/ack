@@ -26,8 +26,8 @@ extern int peephole(void);
 
 static void relabel(void)
 {
-	register num_p *npp, np, tp;
-	register num_p repl, ttp;
+	num_p *npp, np, tp;
+	num_p repl, ttp;
 
 	/*
 	 * For each label find its final destination after crossjumping.
@@ -62,7 +62,7 @@ static void relabel(void)
 
 static void symknown(void)
 {
-	register sym_p *spp, sp;
+	sym_p *spp, sp;
 
 	for (spp = symhash; spp < &symhash[NSYMHASH]; spp++)
 		for (sp = *spp; sp != (sym_p) 0; sp = sp->s_next)
@@ -72,7 +72,7 @@ static void symknown(void)
 
 static void cleanlocals(void)
 {
-	register num_p *npp, np, tp;
+	num_p *npp, np, tp;
 
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
 	{
@@ -89,7 +89,7 @@ static void cleanlocals(void)
 
 static void checklocs(void)
 {
-	register num_p *npp, np;
+	num_p *npp, np;
 
 	for (npp = curpro.numhash; npp < &curpro.numhash[NNUMHASH]; npp++)
 		for (np = *npp; np != (num_p) 0; np = np->n_next)
@@ -106,10 +106,10 @@ static offset align(offset count, offset alignment)
 
 static void symvalue(void)
 {
-	register line_p lp;
-	register sym_p sp;
-	register arg_p ap;
-	register argb_p abp;
+	line_p lp;
+	sym_p sp;
+	arg_p ap;
+	argb_p abp;
 	short curfrag = 0;
 	offset count;
 
@@ -170,7 +170,7 @@ static void symvalue(void)
 
 static void do_tes(void)
 {
-	register line_p insptr = instrs, oldlin = NULL, oldlin2 = NULL;
+	line_p insptr = instrs, oldlin = NULL, oldlin2 = NULL;
 
 	init_state();
 	tes_pseudos();

@@ -6,7 +6,7 @@
 
 FILE *freopen(name,mode,fp)
 char *name , *mode;
-register FILE *fp;
+FILE *fp;
 {
 	int fd,
 	flags = fp->_flags & ~(IO_WRITEMODE|IO_READMODE|IO_ERR|IO_EOF|IO_PERPRINTF);
@@ -38,7 +38,7 @@ register FILE *fp;
 	}
 
 	if (fd < 0) {
-		register int i;
+		int i;
 
 		for (i = 0; i < _NFILES; i++) {
 			if (fp == _io_table[i]) {

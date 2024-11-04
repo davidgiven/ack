@@ -9,7 +9,7 @@
  * machine dependent back end routines for the z8000
  */
 
-void con_part(register int sz, word w)
+void con_part(int sz, word w)
 {
 	while (part_size % sz)
 		part_size++;

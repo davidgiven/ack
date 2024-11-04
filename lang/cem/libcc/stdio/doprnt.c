@@ -11,8 +11,8 @@ extern char     *gcvt();
 # define wsize(par) ( (sizeof par) / sizeof (int) )
 
 
-static char *gnum(f,ip,app) register char *f; int *ip; va_list *app; {
-	register int    i,c;
+static char *gnum(f,ip,app) char *f; int *ip; va_list *app; {
+	int    i,c;
 
 	if (*f == '*') {
 		*ip = va_arg((*app), int);
@@ -64,9 +64,9 @@ static char *l_compute(l1,d,s) long l1; char *s; {
 #endif
 
 _doprnt(fmt,ap,stream)
-	register char *fmt; va_list ap ; FILE *stream;
+	char *fmt; va_list ap ; FILE *stream;
 {
-	register char   *s;
+	char   *s;
 #ifndef NOLONG
 	long            l;
 	int             lflag ;
@@ -79,7 +79,7 @@ _doprnt(fmt,ap,stream)
 #endif
 	int             inte ;
 	unsigned int    uint ;
-	register int    j ;
+	int    j ;
 	int             i,c,rjust,width,ndigit,ndfnd,zfill;
 	char            *oldfmt,*s1,buf[1025];
 
@@ -223,7 +223,7 @@ _doprnt(fmt,ap,stream)
 		}
 #ifndef NOFLOAT
 		if (capitalE) {
-			register char *p = buf;
+			char *p = buf;
 			capitalE=0;
 			while (*p && *p != 'e') p++;
 			if (*p == 'e') *p = 'E';

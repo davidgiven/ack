@@ -68,8 +68,8 @@ must fix:
  * For C and D where nothing is specified, use "."
  *
  * Example:
- *     M68KMAKE_OP(abcd, 8, rr, .)   abcd, size 8, register to register, default EA
- *     M68KMAKE_OP(abcd, 8, mm, ax7) abcd, size 8, memory to memory, register X is A7
+ *     M68KMAKE_OP(abcd, 8, rr, .)   abcd, size 8, to register, default EA
+ *     M68KMAKE_OP(abcd, 8, mm, ax7) abcd, size 8, memory to memory, X is A7
  *     M68KMAKE_OP(tst, 16, ., pcix) tst, size 16, PCIX addressing
  *
  * All opcode handler primitives end with a closing curly brace "}" at column 1

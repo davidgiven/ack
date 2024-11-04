@@ -2,9 +2,9 @@
 char *
 memchr(s, c, n)
 char *s;
-register int n;
+int n;
 {
-	register unsigned char *s1 = (unsigned char *) s;
+	unsigned char *s1 = (unsigned char *) s;
 	
 	c &= 0377;
 	while (n-- > 0) {

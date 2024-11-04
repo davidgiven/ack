@@ -34,8 +34,8 @@ extern void dopattern(int stackcoerc, varinfo *kills, varinfo *allocates,
 
 void n_move(int s1, int e1, int s2, int e2, struct varinfo *vi)
 {
-	register move_p mp;
-	register int i, j;
+	move_p mp;
+	int i, j;
 
 	NEXT(nmoves, MAXMOVES, "Moves");
 	mp = &l_moves[nmoves - 1];
@@ -55,7 +55,7 @@ void n_move(int s1, int e1, int s2, int e2, struct varinfo *vi)
 
 int existmove(iocc_t from, short *sp)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < MAXREGS + MAXTOKENS; i++)
 		if (BIT(from.in_set, i))
@@ -67,7 +67,7 @@ int existmove(iocc_t from, short *sp)
 int existalmove(iocc_t from, int prpno)
 {
 	short s[SETSIZE];
-	register int i;
+	int i;
 
 	for (i = 0; i < SETSIZE; i++)
 		s[i] = i < SZOFSET(MAXREGS) ? l_props[prpno].pr_regset[i] : 0;
@@ -76,7 +76,7 @@ int existalmove(iocc_t from, int prpno)
 
 struct varinfo *gen_move(iocc_t from, iocc_t to)
 {
-	register struct varinfo *vp;
+	struct varinfo *vp;
 
 	if (existmove(from, to.in_set) == 0)
 	{
@@ -96,8 +96,8 @@ short postests[SETSIZE];
 
 void n_test(int s, int e, struct varinfo *vi)
 {
-	register test_p tp;
-	register int i;
+	test_p tp;
+	int i;
 
 	NEXT(ntests, MAXTESTS, "Tests");
 	tp = &l_tests[ntests - 1];
@@ -113,7 +113,7 @@ void n_test(int s, int e, struct varinfo *vi)
 
 struct varinfo *gen_test(iocc_t from)
 {
-	register struct varinfo *vp;
+	struct varinfo *vp;
 
 	if (!subset(from.in_set, postests, SETSIZE))
 	{
@@ -128,7 +128,7 @@ struct varinfo *gen_test(iocc_t from)
 
 struct varinfo *gen_label(int arg)
 {
-	register struct varinfo *vp;
+	struct varinfo *vp;
 
 	NEW(vp, struct varinfo);
 	vp->vi_int[0] = INSLABDEF;
@@ -138,7 +138,7 @@ struct varinfo *gen_label(int arg)
 
 struct varinfo *gen_preturn(void)
 {
-	register struct varinfo *vp;
+	struct varinfo *vp;
 
 	NEW(vp, struct varinfo);
 	vp->vi_int[0] = INSPRETURN;
@@ -147,7 +147,7 @@ struct varinfo *gen_preturn(void)
 
 struct varinfo *gen_tlab(int n)
 {
-	register struct varinfo *vp;
+	struct varinfo *vp;
 
 	assert(n >= 0 && n <= 9);
 	NEW(vp, struct varinfo);
@@ -162,9 +162,9 @@ set_t ustackset, cstackset;
 
 void n_stack(int s, int e, int p, struct varinfo *vi)
 {
-	register c1_p c1p;
-	register short *sp;
-	register int i;
+	c1_p c1p;
+	short *sp;
+	int i;
 
 	NEXT(nstacks, MAXSTACKS, "Stacks");
 	c1p = &l_stacks[nstacks - 1];
@@ -182,10 +182,10 @@ void n_stack(int s, int e, int p, struct varinfo *vi)
 		sp[i] |= l_sets[s].set_val[i];
 }
 
-void checkstacking(register short *sp)
+void checkstacking(short *sp)
 {
-	register int i;
-	register short *chkset;
+	int i;
+	short *chkset;
 	char *warn;
 
 	if (subset(sp, ustackset.set_val, SETSIZE))
@@ -210,9 +210,9 @@ set_t unstackset;
 
 void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, iocc_p inp)
 {
-	register c3_p c3p;
-	register int i;
-	register struct varinfo *vi;
+	c3_p c3p;
+	int i;
+	struct varinfo *vi;
 
 	if (ti != 0)
 	{
@@ -256,8 +256,8 @@ void n_coerc(int ti, int be, struct varinfo *al, struct varinfo *ge, struct vari
 
 void checkunstacking(int setno)
 {
-	register short *sp;
-	register int i;
+	short *sp;
+	int i;
 	short hallset[SETSIZE];
 
 	sp = l_sets[setno].set_val;
@@ -271,9 +271,9 @@ c2_t l_split[MAXSPLCOERC];
 
 void n_split(int ti, int be, struct varinfo *al, struct varinfo *ge, struct varinfo *rp, int n)
 {
-	register c2_p c2p;
-	register int i;
-	register struct varinfo *vi;
+	c2_p c2p;
+	int i;
+	struct varinfo *vi;
 
 	NEXT(nsplit, MAXSPLCOERC, "Splitting coercions");
 	c2p = &l_split[nsplit - 1];

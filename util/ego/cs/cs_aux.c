@@ -49,7 +49,7 @@ entity_p en_elem(Lindex i)
  * start at 1.
  */
 
-STATIC valnum val_no;
+static valnum val_no;
 
 valnum newvalnum(void)
 {

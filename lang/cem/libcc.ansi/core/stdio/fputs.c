@@ -7,9 +7,9 @@
 
 #if ACKCONF_WANT_STDIO
 
-int fputs(register const char* s, register FILE* stream)
+int fputs(const char* s, FILE* stream)
 {
-	register int i = 0;
+	int i = 0;
 
 	while (*s)
 		if (putc(*s++, stream) == EOF)

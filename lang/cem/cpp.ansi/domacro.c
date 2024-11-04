@@ -52,7 +52,7 @@ static int find_name(char*, char*[]);
 static char* get_text(char*[], int*);
 static int getparams(char*[], char[]);
 static int ifexpr(void);
-static int macroeq(register char*, register char*);
+static int macroeq(char*, char*);
 static void skip_block(int);
 static void do_error(void);
 
@@ -90,7 +90,7 @@ char* GetIdentifier(int skiponerr /* skip the rest of the line on error */
 void domacro(void)
 {
 	struct token tk; /* the token itself			*/
-	register struct idf* id;
+	struct idf* id;
 	int toknum;
 
 	ReplaceMacros = 0;
@@ -182,8 +182,8 @@ static void skip_block(int to_endif)
 	        #ifndef or #elif until the corresponding #endif is
 	        seen.
 	*/
-	register int ch;
-	register int skiplevel = nestlevel; /* current nesting level	*/
+	int ch;
+	int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
 	int toknum;
 	struct idf* id;
@@ -388,13 +388,13 @@ static void do_define(void)
 {
 	/*	do_define() interprets a #define control line.
 	 */
-	register char* str; /* the #defined identifier's descriptor	*/
+	char* str; /* the #defined identifier's descriptor	*/
 	int nformals = -1; /* keep track of the number of formals	*/
 	char* formals[NPARAMS]; /* pointers to the names of the formals	*/
 	char parbuf[PARBUFSIZE]; /* names of formals	*/
 	char* repl_text; /* start of the replacement text	*/
 	int length; /* length of the replacement text	*/
-	register int ch;
+	int ch;
 
 	/* read the #defined macro's name	*/
 	if (!(str = GetIdentifier(1)))
@@ -498,8 +498,8 @@ static void do_if(void)
 
 static void do_ifdef(int how)
 {
-	register struct idf* id;
-	register char* str;
+	struct idf* id;
+	char* str;
 
 	/*	how == 1 : ifdef; how == 0 : ifndef
 	 */
@@ -530,8 +530,8 @@ static void do_ifdef(int how)
 /* argstr != NULL when the undef came from a -U option */
 void do_undef(char* argstr)
 {
-	register struct idf* id;
-	register char* str = argstr;
+	struct idf* id;
+	char* str = argstr;
 
 	/* Forget a macro definition.	*/
 	if (str || (str = GetIdentifier(1)))
@@ -585,10 +585,10 @@ static int getparams(char* buf[], char parbuf[])
 	    Note that the '(' has already been eaten.
 	    The names of the formal parameters are stored into parbuf.
 	*/
-	register char** pbuf = &buf[0];
-	register int c;
-	register char* ptr = &parbuf[0];
-	register char** pbuf2;
+	char** pbuf = &buf[0];
+	int c;
+	char* ptr = &parbuf[0];
+	char** pbuf2;
 
 	c = GetChar();
 	c = skipspaces(c, 0);
@@ -646,9 +646,9 @@ static int getparams(char* buf[], char parbuf[])
 	UNREACHABLE_CODE;
 }
 
-void macro_def(register struct idf* id, char* text, int nformals, int length, int flags)
+void macro_def(struct idf* id, char* text, int nformals, int length, int flags)
 {
-	register struct macro* newdef = id->id_macro;
+	struct macro* newdef = id->id_macro;
 
 	/*	macro_def() puts the contents and information of a macro
 	    definition into a structure and stores it into the symbol
@@ -669,7 +669,7 @@ void macro_def(register struct idf* id, char* text, int nformals, int length, in
 	else
 	{
 #ifdef DOBITS
-		register char* p = id->id_text;
+		char* p = id->id_text;
 #define setbit(bx)                                                                                 \
 	if (!*p)                                                                                       \
 		goto go_on;                                                                                \
@@ -699,7 +699,7 @@ static int find_name(char* nm, char* index[])
 	    "index" if it can be found there.  0 is returned if it is
 	    not there.
 	*/
-	register char** ip = &index[0];
+	char** ip = &index[0];
 
 	while (*ip)
 		if (strcmp(nm, *ip++) == 0)
@@ -734,9 +734,9 @@ static char* get_text(char* formals[], int* length)
 	    4-  comment, same as for 1
 	    Other tokens will not be seen as such.
 	*/
-	register int c;
+	int c;
 	struct repl repls;
-	register struct repl* repl = &repls;
+	struct repl* repl = &repls;
 	int blank = 0;
 
 	c = GetChar();
@@ -754,7 +754,7 @@ static char* get_text(char* formals[], int* length)
 
 		if (c == '\'' || c == '"')
 		{
-			register int delim = c;
+			int delim = c;
 
 			if (blank)
 			{
@@ -803,7 +803,7 @@ static char* get_text(char* formals[], int* length)
 		else if (formals && (class(c) == STIDF || class(c) == STELL))
 		{
 			char id_buf[IDFSIZE + 1];
-			register char* idp = id_buf;
+			char* idp = id_buf;
 			int n;
 
 			/* read identifier: it may be a formal parameter */
@@ -884,7 +884,7 @@ static char* get_text(char* formals[], int* length)
     as strings, without taking care of the leading and trailing
     blanks (spaces and tabs).
 */
-static int macroeq(register char* s, register char* t)
+static int macroeq(char* s, char* t)
 {
 
 	/* skip leading spaces	*/

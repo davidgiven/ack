@@ -8,13 +8,13 @@
 
 VOID getarg_(n, s, ls)
 long int *n;
-register char *s;
+char *s;
 long int ls;
 {
 extern int xargc;
 extern char **xargv;
-register char *t;
-register int i;
+char *t;
+int i;
 
 if(*n>=0 && *n<xargc)
 	t = xargv[*n];

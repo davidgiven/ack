@@ -3,7 +3,7 @@ double TIMESTE(pow, a)
   double a;
   int pow;
   { int p ;
-    register double n, t, r, s;
+    double n, t, r, s;
     p = pow < 0 ? -pow : pow;
     n = 5.0;
     t = 2.0;

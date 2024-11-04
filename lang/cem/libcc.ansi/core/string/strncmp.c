@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-int strncmp(register const char* s1, register const char* s2, register size_t n)
+int strncmp(const char* s1, const char* s2, size_t n)
 {
 	if (n)
 	{

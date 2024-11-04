@@ -18,7 +18,7 @@
 
 FILE* freopen(const char* name, const char* mode, FILE* stream)
 {
-	register int i;
+	int i;
 	int rwmode = 0, rwflags = 0;
 	int fd, flags = stream->_flags & (_IONBF | _IOFBF | _IOLBF | _IOMYBUF);
 

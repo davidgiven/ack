@@ -75,7 +75,7 @@ ModuleDeclaration
 			}
 ;
 
-priority(register struct node **prio;):
+priority(struct node **prio;):
 	[
 		'[' ConstExpression(prio) ']'
 			{ if (! ((*prio)->nd_type->tp_fund & T_CARDINAL)) {

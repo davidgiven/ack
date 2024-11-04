@@ -64,7 +64,7 @@ primitive { struct expr *e; } :
 	| SKIP
 	;
 
-guard(register *F;)		{	struct expr *e1, *e2;
+guard(*F;)		{	struct expr *e1, *e2;
 					register full_guard=0;
 					int T=0;
 		static char EXPECT_INP[]="input process expected as guard";
@@ -107,7 +107,7 @@ guard(register *F;)		{	struct expr *e1, *e2;
 	| SKIP
 	;
 
-guarded_process(register *END;)	{	struct symbol *v;
+guarded_process(*END;)	{	struct symbol *v;
 					struct expr *e1, *e2;
 					struct replicator to_test;
 					register line, oind;
@@ -129,7 +129,7 @@ guarded_process(register *END;)	{	struct symbol *v;
 	  ]
 	;
 
-conditional(register *END; )	{	struct symbol *v;
+conditional(*END; )	{	struct symbol *v;
 					struct expr *e1, *e2;
 					struct replicator to_test;
 					register line, oind;
@@ -158,7 +158,7 @@ conditional(register *END; )	{	struct symbol *v;
 	  ]
 	;
 
-replicator(register struct symbol **s; register struct expr **e1; register struct expr **e2; )
+replicator(struct symbol **s; register struct expr **e1; register struct expr **e2; )
 				{	register char *index; }:
 	  IDENTIFIER		{	index=token.t_sval; }
 	  '=' '[' val_expr(e1) FOR val_expr(e2) ']'
@@ -264,7 +264,7 @@ construct			{	struct symbol *v;
 				}
 	;
 
-subscript(register *byte; register struct expr **e; )
+subscript(*byte; register struct expr **e; )
 				{	struct expr *e1;
 					register slice=0, err=0;
 				} :
@@ -355,7 +355,7 @@ const_def { register char *name; struct expr *e; }:
 				}
 	;
 
-form_parm(register struct par_list ***aapars; register *g_type;)
+form_parm(struct par_list ***aapars; register *g_type;)
 				{	register char *name;
 					register type= *g_type;
 				}:
@@ -419,7 +419,7 @@ proc_declaration		{	struct par_list *pars=nil;
 				}
 	;
 
-vector_constant(register struct expr **e;)
+vector_constant(struct expr **e;)
 				{	struct table *pt=nil, **apt= &pt;
 					register Tlen=0;
 				}:
@@ -446,7 +446,7 @@ vector_constant(register struct expr **e;)
 				}
 	;
 
-item(register struct expr **e;)
+item(struct expr **e;)
 				{	struct expr *e1;
 					register struct symbol *var;
 					struct par_list *pars=nil;
@@ -510,7 +510,7 @@ item(register struct expr **e;)
 	  ]?
 	;
 
-statement(register struct expr **e;)
+statement(struct expr **e;)
 				{	struct expr *e1;
 					struct expr_list *elp=nil, **aelp= &elp;
 					register out;
@@ -540,7 +540,7 @@ io_arg(struct expr **e; ) :
 	| ANY			{	*e=nil;	}
 	;
 
-table(register struct expr **e;)	
+table(struct expr **e;)	
 				{	struct table *pt=nil, **apt= &pt;
 					struct expr *e1;
 					register type;
@@ -581,7 +581,7 @@ boolean_op:	AND | OR
 shift_op:	LS | RS
 	;
 
-monadic_op(register *op;):
+monadic_op(*op;):
 	  '-'			{	*op='~'; }
 	| NOT			{	*op=NOT; }
 	;
@@ -589,7 +589,7 @@ monadic_op(register *op;):
 operator: arithmetic_op | comparison_op | logical_op | boolean_op | shift_op
 	;
 
-element(register struct expr **e;) :
+element(struct expr **e;) :
 	  %default NUMBER	{	*e=new_const(token.t_lval); }
 	| statement(e)
 	| TRUE			{	*e=new_const(-1L); }
@@ -601,7 +601,7 @@ element(register struct expr **e;) :
 				}
 	;
 
-expression(register struct expr **e;)
+expression(struct expr **e;)
 				{	int op=0;
 					struct expr *e1;
 				}:
@@ -616,7 +616,7 @@ expression(register struct expr **e;)
 				{	*e=new_node(op, e1, (char *)nil, 0); }
 	;
 
-val_expr(register struct expr **e;) :
+val_expr(struct expr **e;) :
 	  expression(e)		{	used(*e); }
 	;
 

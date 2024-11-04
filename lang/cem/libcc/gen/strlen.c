@@ -3,7 +3,7 @@ int
 strlen(s)
 	char *s;
 {
-	register char *b = s;
+	char *b = s;
 
 	while (*b++)
 		;

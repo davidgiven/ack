@@ -420,13 +420,13 @@ arith l;
 
 void
 C_scon(s, l)
-register char *s;
-register arith l;
+char *s;
+arith l;
 {
 	if (db_mes) {
 		fprint(codefile, ".stabs \"");
 		while (--l) {
-			register int c = *s++;
+			int c = *s++;
 
 			if (isprint(c) && c != '"' && c != '\\')
 				fprint(codefile, "%c", c);

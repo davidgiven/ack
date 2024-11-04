@@ -37,7 +37,7 @@ extern struct scopelist
 void InitScope(void);
 void open_scope(void);
 void close_scope(int doclean);
-void Forward(register struct node *nd, register struct type *tp);
+void Forward(struct node *nd, register struct type *tp);
 void chk_prog_params(void);
 void chk_directives(void);
 

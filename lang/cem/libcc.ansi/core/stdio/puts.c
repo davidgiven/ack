@@ -7,10 +7,10 @@
 
 #if ACKCONF_WANT_STDIO
 
-int puts(register const char* s)
+int puts(const char* s)
 {
-	register FILE* file = stdout;
-	register int i = 0;
+	FILE* file = stdout;
+	int i = 0;
 
 	while (*s)
 	{

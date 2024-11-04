@@ -15,8 +15,8 @@
 
 #define STACK_DEPTH 250
 
-STATIC struct token Stack[STACK_DEPTH];
-STATIC token_p free_token;
+static struct token Stack[STACK_DEPTH];
+static token_p free_token;
 
 #define Delete_top()                                                                               \
 	{                                                                                              \
@@ -103,9 +103,9 @@ void Dup(line_p lnp)
 {
 	/* Duplicate top bytes on the Stack. */
 
-	register token_p bottom = Top;
-	register token_p oldtop = Top;
-	register offset nbytes = off_set(lnp);
+	token_p bottom = Top;
+	token_p oldtop = Top;
+	offset nbytes = off_set(lnp);
 	struct token dummy;
 
 	/* Find the bottom of the bytes to be duplicated.

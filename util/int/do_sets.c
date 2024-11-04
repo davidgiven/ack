@@ -13,10 +13,10 @@
 #include "fra.h"
 #include "switch.h"
 
-PRIVATE void bit_test(size), create_set(size);
+static void bit_test(size), create_set(size);
 
 /** INN w: Bit test on w byte set (bit number on top of stack) */
-void DoINN(register size l)
+void DoINN(size l)
 {
 	LOG(("@Y6 DoINN(%ld)", l));
 	spoilFRA();
@@ -24,7 +24,7 @@ void DoINN(register size l)
 }
 
 /** SET w: Create singleton w byte set with bit n on (n is top of stack) */
-void DoSET(register size l)
+void DoSET(size l)
 {
 	LOG(("@Y6 DoSET(%ld)", l));
 	spoilFRA();
@@ -36,12 +36,12 @@ void DoSET(register size l)
  *  ON --> push 1 on stack.
  *  OFF -> push 0 on stack.
  **/
-PRIVATE void bit_test(size w)
+static void bit_test(size w)
 {
-	register int bitno = (int)swpop(); /* bitno on TOS */
-	register char test_byte = (char)0; /* default value to be tested */
-	register int wordoff = bitno / 8;
-	register int bitoff = bitno % 8;
+	int bitno = (int)swpop(); /* bitno on TOS */
+	char test_byte = (char)0; /* default value to be tested */
+	int wordoff = bitno / 8;
+	int bitoff = bitno % 8;
 
 	if (bitoff < 0)
 		bitoff += 8;
@@ -64,12 +64,12 @@ PRIVATE void bit_test(size w)
  *  The w bytes constituting the set are
  *  pushed on the stack.
  **/
-PRIVATE void create_set(size w)
+static void create_set(size w)
 {
-	register int bitno = (int)swpop();
-	register size nbytes = w;
-	register int wordoff = bitno / 8;
-	register int bitoff = bitno % 8;
+	int bitno = (int)swpop();
+	size nbytes = w;
+	int wordoff = bitno / 8;
+	int bitoff = bitno % 8;
 
 	if (bitoff < 0)
 		bitoff += 8;

@@ -21,7 +21,7 @@ char *segname[] = {
 };
 
 con_part(sz, w)
-	register int	sz;
+	int	sz;
 	word		w;
 {
 	while (part_size % sz) part_size++;

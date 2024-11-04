@@ -8,9 +8,9 @@
 
 #include "ack_string.h"
 
-int btscmp(register char *b1, int n1, register char *b2, int n2)
+int btscmp(char *b1, int n1, char *b2, int n2)
 {
-	register int n = (n1 <= n2) ? n1 : n2;
+	int n = (n1 <= n2) ? n1 : n2;
 
 	while (n-- > 0) {
 		if (*b1++ != *b2++)

@@ -52,15 +52,15 @@
  * the code has become smaller.
  */
 
-STATIC int Scj; /* number of optimizations found */
+static int Scj; /* number of optimizations found */
 
-STATIC void showinstr(line_p lnp);
+static void showinstr(line_p lnp);
 
 #define DLINK(l1, l2)                                                                              \
 	l1->l_next = l2;                                                                               \
 	l2->l_prev = l1
 
-STATIC bool same_instr(line_p l1, line_p l2)
+static bool same_instr(line_p l1, line_p l2)
 {
 	/* See if l1 and l2 are the same instruction */
 
@@ -87,11 +87,11 @@ STATIC bool same_instr(line_p l1, line_p l2)
 	}
 }
 
-STATIC line_p last_mnem(bblock_p b)
+static line_p last_mnem(bblock_p b)
 {
 	/* Determine the last line of a list */
 
-	register line_p l;
+	line_p l;
 
 	for (l = b->b_start; l->l_next != (line_p)0; l = l->l_next)
 		;
@@ -102,7 +102,7 @@ STATIC line_p last_mnem(bblock_p b)
 	return l;
 }
 
-STATIC bool is_desirable(line_p text)
+static bool is_desirable(line_p text)
 {
 	/* We avoid to generate a BRAnch in the middle of some expression,
 	 * as the code generator will write the contents of the fakestack
@@ -141,7 +141,7 @@ STATIC bool is_desirable(line_p text)
 	return TRUE;
 }
 
-STATIC void cp_loops(bblock_p b1, bblock_p b2)
+static void cp_loops(bblock_p b1, bblock_p b2)
 {
 	/* Copy the loopset of b2 to b1 */
 
@@ -154,7 +154,7 @@ STATIC void cp_loops(bblock_p b1, bblock_p b2)
 	}
 }
 
-STATIC void jump_cross(line_p l1, line_p l2, bblock_p b1, bblock_p b2)
+static void jump_cross(line_p l1, line_p l2, bblock_p b1, bblock_p b2)
 {
 	/* A cross-jump from block b2 to block b1 is found; the code in
 	 * block b2 from line l2 up to the BRAnch is removed; block b1 is
@@ -230,7 +230,7 @@ STATIC void jump_cross(line_p l1, line_p l2, bblock_p b1, bblock_p b2)
 	INSTRLAB(l) = INSTRLAB(b->b_start);
 }
 
-STATIC bool try_tail(bblock_p b1, bblock_p b2)
+static bool try_tail(bblock_p b1, bblock_p b2)
 {
 	/* See if b1 and b2 end on the same sequence of instructions */
 
@@ -286,14 +286,14 @@ STATIC bool try_tail(bblock_p b1, bblock_p b2)
 	return FALSE;
 }
 
-STATIC bool try_pred(bblock_p b)
+static bool try_pred(bblock_p b)
 {
 	/* See if there is any pair (b1,b2), both in PRED(b) for
 	 * which we can perform cross jumping.
 	 */
 
-	register bblock_p b1, b2;
-	register Lindex i, j;
+	bblock_p b1, b2;
+	Lindex i, j;
 	lset s = b->b_pred;
 
 	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 
 extern char em_mnem[]; /* The mnemonics of the EM instructions. */
 
-STATIC void showinstr(line_p lnp)
+static void showinstr(line_p lnp)
 {
 
 	/* Makes the instruction in `lnp' human readable. Only lines that

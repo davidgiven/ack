@@ -54,11 +54,11 @@ p_tree		run_command;
 
 static void
 ITOBUF(p, l, sz)
-  register char	*p;
+  char	*p;
   long	l;
   int sz;
 {
-  register int i;
+  int i;
 
   p +=sz;
   for (i = sz; i > 0; i--) {
@@ -69,11 +69,11 @@ ITOBUF(p, l, sz)
 
 static long
 BUFTOI(p, sz)
-  register char	*p;
+  char	*p;
   int sz;
 {
-  register long	l = 0;
-  register int i;
+  long	l = 0;
+  int i;
 
   for (i = sz; i>0; i--) {
 	l = (l << 8) | (*p++ & 0377);
@@ -109,7 +109,7 @@ start_child(p)
   /* start up the process to be debugged and set up communication */
 
   char *argp[MAXARG];				/* argument list */
-  register p_tree pt = p->t_args[0], pt1 = 0;
+  p_tree pt = p->t_args[0], pt1 = 0;
   unsigned int	nargs = 1;			/* #args */
   char	*in_redirect = 0;			/* standard input redirected */
   char	*out_redirect = 0;			/* standard output redirected */
@@ -640,7 +640,7 @@ get_EM_regs(level)
 {
   struct message_hdr	m;
   static t_addr buf[5];
-  register t_addr *to = &buf[0];
+  t_addr *to = &buf[0];
 
   m.m_type = M_GETEMREGS;
   ITOBUF(m.m_buf+1, (long) level, LS);

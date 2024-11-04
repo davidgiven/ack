@@ -1,8 +1,8 @@
 /* $Id$ */
 int
 strncmp(s, t, n)
-	register char *s, *t;
-	register int n;
+	char *s, *t;
+	int n;
 {
 	while (n-- > 0) {
 		if (*s == *t++) {

@@ -25,7 +25,7 @@ char    *rindex();
 
 ttyslot()
 {
-	register char *tp, *p;
+	char *tp, *p;
 	int fd;
 	int retval = 1;
 #ifdef __USG

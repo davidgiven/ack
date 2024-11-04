@@ -12,7 +12,7 @@
 #define rev_cond_branch(opc)	((opc) ^ 1)
 
 /* Process one operand. */
-static void oprnd(register struct operand *p)
+static void oprnd(struct operand *p)
 {
 	int	sm;
 
@@ -203,9 +203,9 @@ static void oprnd(register struct operand *p)
 /* Give an upper bound on the size of the operands */
 static int size_ops(void)
 {
-	register struct operand *p = &opnd[0];
-	register int i;
-	register int sz = 0;
+	struct operand *p = &opnd[0];
+	int i;
+	int sz = 0;
 
 	for (i = op_ind; i > 0; i--) {
 		if (p->index_reg >= 0 && p->mode != DISPL) {
@@ -337,7 +337,7 @@ void ext_branch(int opc, expr_t exp)
 /* Generate code for the operands */
 void operands(void)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < op_ind; i++) {
 		oprnd(&opnd[i]);

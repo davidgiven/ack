@@ -13,7 +13,7 @@
 
 void
 add_ext(e1,e2)
-register EXTEND	*e1,*e2;
+EXTEND	*e1,*e2;
 {
 	if ((e2->m1 | e2->m2) == 0L) {
 		return;

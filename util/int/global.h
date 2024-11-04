@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-/********* PRIVATE/static *********/
+/********* static/static *********/
 
-#define PRIVATE static /* or not */
+#define static static /* or not */
 
 /********* The internal data types ********/
 

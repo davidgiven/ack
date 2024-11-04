@@ -3,7 +3,7 @@
 
 int
 _flushbuf(c, iop)
-	register FILE *iop;
+	FILE *iop;
 {
 	if (fileno(iop) < 0) return EOF;
 	if (! io_testflag(iop, IO_UNBUFF)) {
@@ -57,7 +57,7 @@ _flushbuf(c, iop)
 
 _cleanup()
 {
-	register int i;
+	int i;
 
 	for ( i = 0 ; i < _NFILES ; i++ )
 		if ( _io_table[i] != NULL )

@@ -29,7 +29,7 @@
 
 
 
-PRIVATE check_ev_order();
+static check_ev_order();
 
 check_and_merge(expr, espp, esp)
 	struct expr *expr;
@@ -40,7 +40,7 @@ check_and_merge(expr, espp, esp)
  * united.
  * *espp will be pointing to this new list. esp is used for this list.
  */
-	register struct expr_state **pp, *p1, *p2;
+	struct expr_state **pp, *p1, *p2;
 	int oper = expr->OP_OPER;
 	int is_sequencer =
 		(oper == '?' || oper == OR || oper == AND || oper ==',');
@@ -88,7 +88,7 @@ check_and_merge(expr, espp, esp)
 	esp->next = p1;
 }
 
-PRIVATE
+static
 check_ev_order(esp1, esp2, expr)
 	struct expr_state *esp1, *esp2;
 	struct expr *expr;

@@ -95,7 +95,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register struct outsect *p;
+	struct outsect *p;
 	char *malloc();
 
 	input = stdin;
@@ -166,12 +166,12 @@ symtab(name, string)
 	struct outname *name;
 	char *string;
 {
-	register struct outname *oname = name;
-	register char *strings = string;
-	register int c;
+	struct outname *oname = name;
+	char *strings = string;
+	int c;
 	unsigned nnames = 3;
-	register long ssize = bh.ssize;
-	register char *b;
+	long ssize = bh.ssize;
+	char *b;
 
 	oname->on_valu = 0; oname->on_foff = 0; oname->on_desc = 0;
 	oname->on_type = (S_MIN+TEXTSG) | S_SCT;
@@ -245,9 +245,9 @@ symtab(name, string)
 
 long
 get4(c)
-	register char *c;
+	char *c;
 {
-	register long l = (long) (*c++ & 0377) << 24;
+	long l = (long) (*c++ & 0377) << 24;
 
 	l |= (long) (*c++ & 0377) << 16;
 	l |= (long) (*c++ & 0377) << 8;
@@ -256,8 +256,8 @@ get4(c)
 }
 
 put4(l, c)
-	register char *c;
-	register long l;
+	char *c;
+	long l;
 {
 	*c++ = (l >> 24);
 	*c++ = (l >> 16);
@@ -269,10 +269,10 @@ relo(orelo, txt, data)
 	struct outrelo *orelo;
 	char *txt, *data;
 {
-	register struct outrelo *relo = orelo;
-	register relocnt = outhead.oh_nrelo;
+	struct outrelo *relo = orelo;
+	relocnt = outhead.oh_nrelo;
 	struct reloc rel;
-	register struct reloc *relp = &rel;
+	struct reloc *relp = &rel;
 	int ndat = bh.rdsize / sizeof(struct reloc);	
 
 	while (relocnt-- > 0) {
@@ -304,7 +304,7 @@ relo(orelo, txt, data)
 			relo->or_type = RELO2|RELBR|RELWR;
 			break;
 		case RLONG: {
-			register char *sct = (relocnt >= ndat ? txt : data) +
+			char *sct = (relocnt >= ndat ? txt : data) +
 						relo->or_addr;
 			long x;
 

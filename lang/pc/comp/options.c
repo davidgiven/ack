@@ -25,13 +25,13 @@ recognize some keywords!
 extern int	idfsize;
 
 
-static int txt2int(register char **tp)
+static int txt2int(char **tp)
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0;
-	register int ch;
+	int val = 0;
+	int ch;
 
 	while( ch = **tp, ch >= '0' && ch <= '9' )	{
 		val = val * 10 + ch - '0';
@@ -40,7 +40,7 @@ static int txt2int(register char **tp)
 	return val;
 }
 
-void DoOption(register char *text)
+void DoOption(char *text)
 {
 	switch( *text++ )	{
 
@@ -104,8 +104,8 @@ void DoOption(register char *text)
 	case 'V' :	{ /* set object sizes and alignment requirements */
 			  /* syntax : -V[ [w|i|l|f|p] size? [.alignment]? ]* */
 #ifndef NOCROSS
-		register arith size;
-		register int align;
+		arith size;
+		int align;
 		char c, *t;
 
 		while( (c = *text++) !=0 )	{

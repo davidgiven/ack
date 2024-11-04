@@ -51,10 +51,10 @@ void LexScan(void);
 void Info(void);
 #endif
 
-int main(int argc, register char **argv)
+int main(int argc, char **argv)
 {
-	register int Nargc = 1;
-	register char **Nargv = &argv[0];
+	int Nargc = 1;
+	char **Nargv = &argv[0];
 
 	ProgName = *argv++;
 
@@ -143,7 +143,7 @@ int Compile(char *src, char *dst)
 #ifdef DEBUG
 void LexScan(void)
 {
-	register struct token *tkp = &dot;
+	struct token *tkp = &dot;
 
 
 	while( LLlex() > 0 )	{
@@ -174,7 +174,7 @@ void LexScan(void)
 
 void AddRequired(void)
 {
-	register struct def *df;
+	struct def *df;
 	static struct node maxintnode = { 0, 0, Value, 0, { INTEGER, 0 } };
 
 	/* PROCEDURES */

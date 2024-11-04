@@ -20,13 +20,13 @@
 #include	"lookup.h"
 #include	"error.h"
 
-struct def *MkDef(register struct idf *id, register struct scope *scope,
+struct def *MkDef(struct idf *id, struct scope *scope,
 		long kind)
 {
 	/*	Create a new definition structure in scope "scope", with
 	 *	id "id" and kind "kind".
 	 */
-	register struct def *df = new_def();
+	struct def *df = new_def();
 
 	df->df_idf = id;
 	df->df_scope = scope;
@@ -42,7 +42,7 @@ struct def *MkDef(register struct idf *id, register struct scope *scope,
 	return df;
 }
 
-struct def *define(register struct idf *id, register struct scope *scope,
+struct def *define(struct idf *id, struct scope *scope,
 		long kind)
 {
 	/*	Declare an identifier in a scope, but first check if it
@@ -50,7 +50,7 @@ struct def *define(register struct idf *id, register struct scope *scope,
 	 If so, then check for the cases in which this is legal,
 	 and otherwise give an error message.
 	 */
-	register struct def *df;
+	struct def *df;
 
 	if ( (df = lookup(id, scope, 0L)) )
 	{
@@ -177,10 +177,10 @@ void DoDirective(struct idf *directive, struct node *nd, struct type *tp,
 	}
 }
 
-struct def *DeclProc(register struct node *nd, struct type *tp,
-		register struct scopelist *scl)
+struct def *DeclProc(struct node *nd, struct type *tp,
+		struct scopelist *scl)
 {
-	register struct def *df;
+	struct def *df;
 
 	if ( (df = define(nd->nd_IDF, CurrentScope, D_PROCEDURE)) )
 	{
@@ -213,10 +213,10 @@ struct def *DeclProc(register struct node *nd, struct type *tp,
 }
 
 struct def *
-DeclFunc(register struct node *nd, struct type *tp,
-		register struct scopelist *scl)
+DeclFunc(struct node *nd, struct type *tp,
+		struct scopelist *scl)
 {
-	register struct def *df;
+	struct def *df;
 
 	if ( (df = define(nd->nd_IDF, CurrentScope, D_FUNCTION)) )
 	{
@@ -253,7 +253,7 @@ DeclFunc(register struct node *nd, struct type *tp,
 	return df;
 }
 
-void EndFunc(register struct def *df)
+void EndFunc(struct def *df)
 {
 	/* assignment to functionname is illegal outside the functionblock */
 	df->prc_res = 0;
@@ -268,10 +268,10 @@ void EndFunc(register struct def *df)
 	}
 }
 
-void EndBlock(register struct def *block_df)
+void EndBlock(struct def *block_df)
 {
-	register struct def *tmp_def = CurrentScope->sc_def;
-	register struct def *df;
+	struct def *tmp_def = CurrentScope->sc_def;
+	struct def *df;
 
 	while (tmp_def)
 	{

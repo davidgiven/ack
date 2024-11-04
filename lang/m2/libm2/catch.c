@@ -54,10 +54,10 @@ static struct errm
 
 void catch (int trapno)
 {
-	register struct errm* ep = &errors[0];
+	struct errm* ep = &errors[0];
 	char* errmessage;
 	char buf[20];
-	register char *p, *s;
+	char *p, *s;
 
 	while (ep->errno != trapno && ep->errmes != 0)
 		ep++;

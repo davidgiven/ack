@@ -43,14 +43,14 @@ static int	max_rules;
 #define RULEINCR	32
 
 /* Here are defined : */
-STATIC void newnorder(int index);
-STATIC void newtorder(int index);
-STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
-STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
-STATIC p_gram copyrule(register p_gram p,int length);
+static void newnorder(int index);
+static void newtorder(int index);
+static void mkalt(p_gram prod, int condition,int lc,register p_gram res); 
+static void mkterm(p_gram prod, int flags,int lc,register p_gram result); 
+static p_gram copyrule(p_gram p,int length);
 /* and of course LLparse() */
 
-STATIC void newnorder(int index) {
+static void newnorder(int index) {
 	static int porder;
 
 	if (norder != -1) {
@@ -61,7 +61,7 @@ STATIC void newnorder(int index) {
 	nonterms[porder].n_next = -1;
 }
 
-STATIC void newtorder(int index) {
+static void newtorder(int index) {
 	static int porder;
 
 	if (torder != -1) {
@@ -298,7 +298,7 @@ productions(p_gram *p;)
 	;
 {
 
-STATIC void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
+static void mkalt(p_gram prod, int condition,int lc,register p_gram res) 
 {
 	/*
 	 * Create an alternation and initialise it.
@@ -446,7 +446,7 @@ simpleproduction(p_gram *p; register int *conflres;)
 	;
 {
 
-STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
+static void mkterm(p_gram prod, int flags,int lc,register p_gram result) 
 {
 	/*
 	 * Create a term, initialise it and return
@@ -470,7 +470,7 @@ STATIC void mkterm(p_gram prod, int flags,int lc,register p_gram result)
 }
 }
 
-elem (register p_gram pres;)
+elem (p_gram pres;)
 	{	register int	t = 0;
 		p_gram		p1;
 		int		ln;
@@ -639,7 +639,7 @@ firsts	{	register string p; }
 	;
 {
 
-STATIC p_gram copyrule(register p_gram p,int length)
+static p_gram copyrule(p_gram p,int length)
 {
 	/*
 	 * Returns a pointer to a grammar rule that was created in

@@ -7,7 +7,7 @@
  * Only values returned by "telldir" should be passed to seekdir.
  */
 seekdir(dirp, loc)
-register DIR *dirp;
+DIR *dirp;
 long loc;
 {
 	long curloc, base, offset;

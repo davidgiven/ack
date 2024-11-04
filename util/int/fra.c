@@ -22,7 +22,7 @@ void init_FRA(void)
 
 void pushFRA(size sz)
 {
-	register int i;
+	int i;
 
 	if (sz == 0)
 		return;
@@ -39,7 +39,7 @@ void pushFRA(size sz)
 
 void popFRA(size sz)
 {
-	register int i;
+	int i;
 
 	if (sz == 0)
 		return;

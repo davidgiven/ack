@@ -47,7 +47,7 @@ main()
 }
 
 char *alloc(size) {
-	register char *retval ;
+	char *retval ;
 
 	retval=alptr ;
 	alptr += size ;

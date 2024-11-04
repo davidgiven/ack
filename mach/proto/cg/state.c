@@ -27,7 +27,7 @@ state_p stlist=0;
 #endif
 
 
-static void bmove(register short *from, register short *to, register int nbytes)
+static void bmove(short *from, short *to, int nbytes)
 {
 	if (nbytes<=0)
 		return;
@@ -39,12 +39,12 @@ static void bmove(register short *from, register short *to, register int nbytes)
 }
 
 #ifdef STONSTACK
-void savestatus(register state_p sp)
+void savestatus(state_p sp)
 {
 #else
 void savestatus(void)
 {
-	register state_p sp;
+	state_p sp;
 
 	if ((sp=stlist)==0)
 		sp = (state_p) myalloc( sizeof( *sp ) );
@@ -66,7 +66,7 @@ void savestatus(void)
 	sp->st_ns = nstab;
 }
 
-void restorestatus(register state_p sp)
+void restorestatus(state_p sp)
 {
 	stackheight = sp->st_sh;
 	bmove((short *)sp->st_fs,(short *)fakestack,stackheight*sizeof(token_t));

@@ -36,7 +36,7 @@
 #define NOT_MARKED(b) (!(b->b_flags & BF_MARK))
 #define IN_LOOP(b) (Lnrelems(b->b_loops) > 0)
 
-STATIC int Ssp; /* number of optimizations */
+static int Ssp; /* number of optimizations */
 
 /* According to the EM definition, the stack must be cleaned up
  * before any return. However, for some backends it causes no harm
@@ -44,11 +44,11 @@ STATIC int Ssp; /* number of optimizations */
  * more globally.
  */
 
-STATIC int globl_sp_allowed;
+static int globl_sp_allowed;
 
 #define IS_ASP(l) (INSTR(l) == op_asp && TYPE(l) == OPSHORT && SHORT(l) > 0)
 
-STATIC void sp_machinit(void* vp)
+static void sp_machinit(void* vp)
 {
 	/* Read target machine dependent information for this phase */
 	FILE* f = vp;
@@ -65,7 +65,7 @@ STATIC void sp_machinit(void* vp)
 	fscanf(f, "%d", &globl_sp_allowed);
 }
 
-STATIC void comb_asps(line_p l1, line_p l2, bblock_p b)
+static void comb_asps(line_p l1, line_p l2, bblock_p b)
 {
 	assert(INSTR(l1) == op_asp);
 	assert(INSTR(l2) == op_asp);
@@ -76,13 +76,13 @@ STATIC void comb_asps(line_p l1, line_p l2, bblock_p b)
 	rm_line(l1, b);
 }
 
-STATIC void stack_pollution(bblock_p b)
+static void stack_pollution(bblock_p b)
 {
 	/* For every pair of successive ASP instructions in basic
 	 * block b, try to combine the two into one ASP.
 	 */
 
-	register line_p l;
+	line_p l;
 	line_p asp, next = b->b_start;
 	bool asp_seen = FALSE;
 	int stack_diff, pop, push;
@@ -143,10 +143,10 @@ STATIC void stack_pollution(bblock_p b)
 	} while (asp != (line_p)0);
 }
 
-STATIC bool block_save(bblock_p b)
+static bool block_save(bblock_p b)
 {
 
-	register line_p l;
+	line_p l;
 	int stack_diff, pop, push;
 	bool ok;
 
@@ -172,7 +172,7 @@ STATIC bool block_save(bblock_p b)
 	return stack_diff >= 0;
 }
 
-STATIC void mark_pred(bblock_p b)
+static void mark_pred(bblock_p b)
 {
 	Lindex i;
 	bblock_p x;
@@ -188,9 +188,9 @@ STATIC void mark_pred(bblock_p b)
 	}
 }
 
-STATIC void mark_unsave_blocks(proc_p p)
+static void mark_unsave_blocks(proc_p p)
 {
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -202,10 +202,10 @@ STATIC void mark_unsave_blocks(proc_p p)
 	}
 }
 
-STATIC void sp_optimize(void* vp)
+static void sp_optimize(void* vp)
 {
 	proc_p p = vp;
-	register bblock_p b;
+	bblock_p b;
 
 	if (IS_ENTERED_WITH_GTO(p))
 		return;
@@ -228,8 +228,8 @@ int main(int argc, char* argv[])
 debug_stack_pollution(p)
     proc_p p;
 {
-    register bblock_p b;
-    register line_p l;
+    bblock_p b;
+    line_p l;
     int lcnt,aspcnt,instr;
 
     for (b = p->p_start; b != 0; b = b->b_next) {

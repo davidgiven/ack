@@ -22,7 +22,7 @@ entity_p find_entity(valnum vn)
 {
 	/* Try to find the entity with valuenumber vn. */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
@@ -33,7 +33,7 @@ entity_p find_entity(valnum vn)
 	return (entity_p)0;
 }
 
-STATIC bool same_entity(entity_p enp1, entity_p enp2)
+static bool same_entity(entity_p enp1, entity_p enp2)
 {
 	if (enp1->en_kind != enp2->en_kind)
 		return FALSE;
@@ -70,7 +70,7 @@ STATIC bool same_entity(entity_p enp1, entity_p enp2)
 	}
 }
 
-STATIC void copy_entity(entity_p src, entity_p dst)
+static void copy_entity(entity_p src, entity_p dst)
 {
 	dst->en_static = src->en_static;
 	dst->en_kind = src->en_kind;
@@ -117,8 +117,8 @@ entity_p en_enter(entity_p enp)
 	/* Put the entity in enp in the entity set, if it is not already there.
 	 * Return pointer to stored entity.
 	 */
-	register Lindex i;
-	register entity_p new;
+	Lindex i;
+	entity_p new;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{
@@ -138,7 +138,7 @@ void clr_entities(void)
 {
 	/* Throw away all pseudo-symboltable information. */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(entities); i != (Lindex)0; i = Lnext(i, entities))
 	{

@@ -1,9 +1,9 @@
 /*	@(#)fmtlib.c	1.2	*/
 #define MAXINTLENGTH 23
 char *icvt(value,ndigit,sign, base) long value; int *ndigit,*sign;
-register int base;
+int base;
 {	static char buf[MAXINTLENGTH+1];
-	register int i;
+	int i;
 	if(value>0) *sign=0;
 	else if(value<0)
 	{	value = -value;

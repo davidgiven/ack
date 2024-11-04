@@ -133,10 +133,10 @@ void rem_call(call_p c)
 
 /* remunit */
 
-STATIC void remlines(line_p l)
+static void remlines(line_p l)
 {
 
-	register line_p lnp;
+	line_p lnp;
 	line_p next;
 
 	for (lnp = l; lnp != (line_p)0; lnp = next)
@@ -148,7 +148,7 @@ STATIC void remlines(line_p l)
 
 void remunit(short kind, proc_p p, line_p l)
 {
-	register bblock_p b;
+	bblock_p b;
 	bblock_p next;
 	Lindex pi;
 
@@ -301,7 +301,7 @@ calcnt_p getcc(FILE* ccf, proc_p p)
 
 /* The following routines are only used by the Inline Substitution phase */
 
-STATIC void putactuals(actual_p alist, FILE* cfile)
+static void putactuals(actual_p alist, FILE* cfile)
 {
 	/* output a list of actual parameters */
 

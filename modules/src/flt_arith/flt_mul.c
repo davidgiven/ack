@@ -10,12 +10,12 @@
 
 void flt_mul(flt_arith *e1, flt_arith *e2, flt_arith *res)
 {
-	register int	i,j;		/* loop control	*/
+	int	i,j;		/* loop control	*/
 	unsigned short	mp[4];
 	unsigned short	mc[4];
 	unsigned short	result[8];	/* result */
 
-	register unsigned short *pres;
+	unsigned short *pres;
 
 	flt_status = 0;
 

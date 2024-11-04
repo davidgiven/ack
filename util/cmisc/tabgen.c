@@ -3,10 +3,10 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*
-	chtabgen - character table generator
+    chtabgen - character table generator
 
-	Author: Erik Baalbergen (..tjalk!erikb)
-	Many mods by Ceriel Jacobs
+    Author: Erik Baalbergen (..tjalk!erikb)
+    Many mods by Ceriel Jacobs
 */
 
 #include <ctype.h>
@@ -79,7 +79,7 @@ char* Salloc(char* s)
 void option(char* str)
 {
 	/*	note that *str indicates the source of the option:
-		either COMCOM (from command line) or FILECOM (from a file).
+	    either COMCOM (from command line) or FILECOM (from a file).
 	*/
 	switch (*++str)
 	{
@@ -125,8 +125,7 @@ void option(char* str)
 
 			if (i <= 0 || i > MAXTAB)
 			{
-				fprintf(stderr, "%s: size would exceed maximum\n",
-				    ProgCall);
+				fprintf(stderr, "%s: size would exceed maximum\n", ProgCall);
 			}
 			else
 			{
@@ -203,7 +202,7 @@ int process(char* str, int format)
 	char* Name = cstr; /* overwrite original string!	*/
 
 	/* strip of the entry name
-	*/
+	 */
 	while (*str && *str != ':')
 	{
 		if (*str == '\\')
@@ -215,8 +214,7 @@ int process(char* str, int format)
 
 	if (*str != ':')
 	{
-		fprintf(stderr, "%s: bad specification: \"%s\", ignored\n",
-		    ProgCall, Name);
+		fprintf(stderr, "%s: bad specification: \"%s\", ignored\n", ProgCall, Name);
 		return 0;
 	}
 	*cstr = '\0';

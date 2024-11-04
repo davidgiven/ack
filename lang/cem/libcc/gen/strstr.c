@@ -2,7 +2,7 @@
 /* find first occurrence of wanted in s */
 char *
 strstr(s, wanted)
-	register char *s, *wanted;
+	char *s, *wanted;
 {
 	int len = strlen(wanted);
 

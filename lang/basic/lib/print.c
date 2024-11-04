@@ -30,7 +30,7 @@ void _prinum(int i)
 }
 void _str(double f, char* buffer)
 {
-	register char* c = buffer;
+	char* c = buffer;
 	int eformat = 0;
 	if (f >= 0)
 	{

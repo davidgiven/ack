@@ -21,7 +21,7 @@ static char	Xtable[128];
  */
 
 _doscanf (iop, format, ap)
-register FILE	*iop;
+FILE	*iop;
 char           *format;		/* the format control string */
 va_list ap;
 {
@@ -37,7 +37,7 @@ va_list ap;
 	int             done_some;	/* true if we have seen some data */
 	int		reverse;	/* reverse the checking in [...] */
 	int		kind;
-	register int	ic;
+	int	ic;
 #ifndef NOFLOAT
 	extern double	atof();
 	int		dotseen;
@@ -155,7 +155,7 @@ va_list ap;
 		case 'c':
 			if (!widflag)
 				width = 1;
-			{ register char *p;
+			{ char *p;
 			  if (do_assign)
 				p = va_arg(ap, char *);
 			  while (width-- && ic >= 0) {
@@ -173,7 +173,7 @@ va_list ap;
 		case 's':
 			if (!widflag)
 				width = 0xffff;
-			{ register char *p;
+			{ char *p;
 			  if (do_assign)
 				p = va_arg(ap, char *);
 			  while (width-- && !isspace (ic) && ic > 0) {
@@ -202,7 +202,7 @@ va_list ap;
 			} else
 				reverse = 0;
 			
-			{ register char *c;
+			{ char *c;
 			  for (c = Xtable; c < &Xtable[128]; c++) *c = 0;
 			}
 			while (*format && *format != ']') {
@@ -211,7 +211,7 @@ va_list ap;
 			if (!*format)
 				goto quit;
 			
-			{ register char *p;
+			{ char *p;
 			  if (do_assign)
 				p = va_arg(ap, char *);
 			  while (width-- && ic > 0 &&
@@ -234,7 +234,7 @@ va_list ap;
 #ifndef NOFLOAT:
 		case 'e':
 		case 'f': {
-			register char *c = buffer;
+			char *c = buffer;
 
 			if (!widflag) width = 127;
 			if (width >= 128) width = 127;

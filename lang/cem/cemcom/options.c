@@ -49,7 +49,7 @@ static int txt2int();
 do_option(text)
 	char *text;
 {
-	register char opt;
+	char opt;
 
 next_option:			/* to allow combined one-char options */
 	switch (opt = *text++)	{
@@ -136,7 +136,7 @@ deleted, is now a debug-flag
 
 	case 'D' :	{	/* -Dname :	predefine name		*/
 #ifndef NOPP
-		register char *cp = text, *name, *mactext;
+		char *cp = text, *name, *mactext;
 
 		if (class(*cp) != STIDF)	{
 			error("identifier missing in -D%s", text);
@@ -185,7 +185,7 @@ deleted, is now a debug-flag
 #ifndef NOPP
 		if (*text)	{
 			int i;
-			register char *new = text;
+			char *new = text;
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
@@ -248,7 +248,7 @@ deleted, is now a debug-flag
 
 	case 'U' :	{	/* -Uname :	undefine predefined	*/
 #ifndef NOPP
-		register struct idf *idef;
+		struct idf *idef;
 
 		if (*text)	{
 			if ((idef = str2idf(text))->id_macro) {
@@ -269,7 +269,7 @@ deleted, is now a debug-flag
 		break;
 #else /* NOCROSS */
 	{
-		register arith sz, algn;
+		arith sz, algn;
 		char c;
 
 		while (c = *text++)	{
@@ -357,12 +357,12 @@ deleted, is now a debug-flag
 
 static int
 txt2int(tp)
-	register char **tp;
+	char **tp;
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0, ch;
+	int val = 0, ch;
 
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';

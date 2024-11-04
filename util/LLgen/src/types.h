@@ -274,10 +274,4 @@ p_mem alloc(size_t);
 p_mem ralloc(p_mem, size_t);
 p_mem new_mem(p_info);
 
-# ifdef NDEBUG
-# define STATIC static
-# else /* not NDEBUG */
-# define STATIC extern
-# endif /* not NDEBUG */
-
 #endif /* TYPES_H_ */

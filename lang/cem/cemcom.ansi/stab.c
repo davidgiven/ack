@@ -70,7 +70,7 @@ static void adds_db_str(char *s)
 		addc_db_str(*s++);
 }
 
-static void stb_type(register struct type *tp)
+static void stb_type(struct type *tp)
 {
 	char buf[128], *range;
 	static int stb_count;
@@ -153,11 +153,11 @@ static void stb_type(register struct type *tp)
 		}
 		addc_db_str('e');
 		{
-			register struct stack_entry *se = local_level->sl_entry;
+			struct stack_entry *se = local_level->sl_entry;
 
 			while (se)
 			{
-				register struct def *edef = se->se_idf->id_def;
+				struct def *edef = se->se_idf->id_def;
 				while (edef)
 				{
 					if (edef->df_type == tp && edef->df_sc == ENUM)
@@ -187,7 +187,7 @@ static void stb_type(register struct type *tp)
 				sprint(buf, "%c%ld", tp->tp_fund == STRUCT ? 's' : 'u',
 						tp->tp_size));
 		{
-			register struct sdef *sdef = tp->tp_sdef;
+			struct sdef *sdef = tp->tp_sdef;
 
 			while (sdef)
 			{
@@ -220,7 +220,7 @@ static void stb_type(register struct type *tp)
 	}
 }
 
-void stb_tag(register struct tag *tg, char *str)
+void stb_tag(struct tag *tg, char *str)
 {
 	create_db_str();
 	adds_db_str(str);
@@ -233,7 +233,7 @@ void stb_tag(register struct tag *tg, char *str)
 					0 : (int) tg->tg_type->tp_size, (arith) 0);
 }
 
-void stb_typedef(register struct type *tp, char *str)
+void stb_typedef(struct type *tp, char *str)
 {
 	create_db_str();
 	adds_db_str(str);
@@ -245,9 +245,9 @@ void stb_typedef(register struct type *tp, char *str)
 			(arith) 0);
 }
 
-void stb_string(register struct def *df, int kind, char* str)
+void stb_string(struct def *df, int kind, char* str)
 {
-	register struct type *tp = df->df_type;
+	struct type *tp = df->df_type;
 
 	create_db_str();
 	adds_db_str(str);

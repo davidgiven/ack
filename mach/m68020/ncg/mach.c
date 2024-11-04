@@ -106,7 +106,7 @@ full nlocals;
 void
 regreturn(void)
 {
-	register struct regsav_t *p;
+	struct regsav_t *p;
 
 	if (regnr > 1)  {
 #ifdef SYNTAX_68020
@@ -134,7 +134,7 @@ regreturn(void)
 void
 f_regsave(void)
 {
-	register struct regsav_t *p;
+	struct regsav_t *p;
 
 	nlocals += regnr*4;
 #ifdef TBL68020

@@ -16,7 +16,7 @@
 
 #define IS_LOC(l) (l != (line_p)0 && INSTR(l) == op_loc && TYPE(l) == OPSHORT)
 
-STATIC int stack_change(line_p l, char sign)
+static int stack_change(line_p l, char sign)
 {
 	/* Interpret the string in the third column of the em_table file */
 

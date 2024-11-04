@@ -36,7 +36,7 @@ static unsigned argmax; /* The maximum number of arguments so far */
 
 int runphase(trf* phase)
 {
-	register list_elem* elem;
+	list_elem* elem;
 	char* prog;
 	int result;
 
@@ -105,7 +105,7 @@ static int run_exec(trf* phase)
 
 		oldstdin = dup(0);
 		close(0);
-		if (open(in.p_path, O_RDONLY|O_BINARY) != 0)
+		if (open(in.p_path, O_RDONLY | O_BINARY) != 0)
 		{
 			error("cannot open %s", in.p_path);
 			exit(1);
@@ -119,7 +119,7 @@ static int run_exec(trf* phase)
 
 		oldstdout = dup(1);
 		close(1);
-		if (open(out.p_path, O_CREAT|O_TRUNC|O_WRONLY|O_BINARY, 0666) != 1)
+		if (open(out.p_path, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666) != 1)
 		{
 			close(1);
 			dup(2);
@@ -128,7 +128,7 @@ static int run_exec(trf* phase)
 		}
 	}
 
-	status = sys_system(phase->t_prog, (const char* const*) arglist);
+	status = sys_system(phase->t_prog, (const char* const*)arglist);
 
 	if (oldstdin != -1)
 	{

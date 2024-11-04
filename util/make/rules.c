@@ -27,10 +27,10 @@ char *suffix(char *name)
  */
 bool dyndep(struct name *np)
 {
-    register char *     p;
-    register char *     q;
-    register char *     suff;       /*  Old suffix  */
-    register char *     basename;   /*  Name without suffix  */
+    char *     p;
+    char *     q;
+    char *     suff;       /*  Old suffix  */
+    char *     basename;   /*  Name without suffix  */
     struct name *       op;     /*  New dependent  */
     struct name *       sp;     /*  Suffix  */
     struct line *       lp;

@@ -44,7 +44,7 @@ void error(char *msg, char* a1)
  */
 bool mgetline(char* str, FILE* fd)
 {
-    register char *     p;
+    char *     p;
     char *          q;
     int         pos = 0;
 
@@ -101,7 +101,7 @@ bool mgetline(char* str, FILE* fd)
  */
 char *gettok(char **ptr)
 {
-    register char *     p;
+    char *     p;
 
 
     while (isspace(**ptr))  /*  Skip spaces  */

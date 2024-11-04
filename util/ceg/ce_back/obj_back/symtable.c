@@ -41,9 +41,9 @@ int find_sym( sym, isdef)
 char *sym;
 int isdef;
 {
-	register struct outname *s;
-	register struct Hashitem *ip;
-	register int h;
+	struct outname *s;
+	struct Hashitem *ip;
+	int h;
 
 	if (isdef != FORCE_DEF) {
 	    if ( index_symbol_table != -1 )	{
@@ -60,7 +60,7 @@ int isdef;
 	    h = Hash(sym);
 	    for ( ip = Hashtab[h] + Hashitems ; ip != Hashitems; 
 					  ip = (ip->hs_next) + Hashitems) {
-		register char *p = sym, *q;
+		char *p = sym, *q;
 
 		s = symbol_table + ip->hs_nami;
 		q = string_area + s->on_foff;
@@ -99,7 +99,7 @@ int isdef;
 	if ( sym == string) 
 	        string += string_lengte;
 	else {    /* zie C_fil, C_lin, C_lni */
-		register char *p;
+		char *p;
 
 		string_lengte = 0;
 		for( p=sym; *p != '\0' ; p++) {
@@ -125,8 +125,8 @@ int isdef;
 static int Hash(sym)
 	char *sym;
 {
-	register unsigned h;
-	register char *s = sym;
+	unsigned h;
+	char *s = sym;
 
 	h = 0;
 	while (*s) {

@@ -11,10 +11,10 @@
 void flt_div(flt_arith *e1,flt_arith *e2,flt_arith *res)
 {
 	uint32_t result[2];
-	register uint32_t *rp;
+	uint32_t *rp;
 	unsigned short u[9], v[5];
-	register int j;
-	register unsigned short *u_p = u;
+	int j;
+	unsigned short *u_p = u;
 	int maxv = 4;
 	flt_arith cpe1 = *e1;
 

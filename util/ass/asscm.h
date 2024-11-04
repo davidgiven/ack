@@ -13,7 +13,7 @@
  */
 area_t getarea(unsigned int size);
 /* Frees an area of memory of "size" bytes. */
-void freearea(register area_t ptr, unsigned int size);
+void freearea(area_t ptr, unsigned int size);
 
 #ifdef MEMUSE
 void memuse(void);

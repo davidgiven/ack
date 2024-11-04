@@ -65,9 +65,9 @@ void beginoutput(void)
  */
 static void generate_section_names(void)
 {
-	register struct outname* name;
-	register int sectindex;
-	register size_t size;
+	struct outname* name;
+	int sectindex;
+	size_t size;
 	extern struct outsect outsect[];
 
 	size = outhead.oh_nsect * sizeof(struct outname);

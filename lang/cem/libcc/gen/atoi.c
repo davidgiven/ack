@@ -1,9 +1,9 @@
 /* $Id$ */
 atoi(s)
-register char *s;
+char *s;
 {
-  register int total = 0;
-  register unsigned digit;
+  int total = 0;
+  unsigned digit;
   int minus = 0;
 
   while (*s == ' ' || *s == '\t')

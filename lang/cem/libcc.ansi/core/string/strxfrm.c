@@ -7,9 +7,9 @@
 #include <string.h>
 
 size_t
-strxfrm(register char* s1, register const char* save, register size_t n)
+strxfrm(char* s1, const char* save, size_t n)
 {
-	register const char* s2 = save;
+	const char* s2 = save;
 
 	while (*s2)
 	{

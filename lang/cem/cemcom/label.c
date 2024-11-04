@@ -17,7 +17,7 @@
 extern char options[];
 
 enter_label(idf, defining)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	The identifier idf is entered as a label. If it is new,
 		it is entered into the idf list with the largest possible
@@ -25,7 +25,7 @@ enter_label(idf, defining)
 		If defining, the label comes from a label statement.
 	*/
 	if (idf->id_def)	{
-		register struct def *def = idf->id_def;
+		struct def *def = idf->id_def;
 		
 		if (def->df_sc == LABEL)	{
 			if (defining && def->df_initialized)
@@ -42,7 +42,7 @@ enter_label(idf, defining)
 			if (def->df_level == level)	/* but alas, no */
 				error("%s is not a label", idf->id_text);
 			else	{
-				register int lvl = def->df_level + 1;
+				int lvl = def->df_level + 1;
 				
 #ifndef NOROPTION
 				if (options['R'] && def->df_level > L_LOCAL)
@@ -65,7 +65,7 @@ enter_label(idf, defining)
 }
 
 unstack_label(idf)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	The scope in which the label idf occurred is left.
 	*/

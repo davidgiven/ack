@@ -2,7 +2,7 @@
 
 cleenup()
   {
-    register FILE *iop ;
+    FILE *iop ;
     extern FILE *_lastbuf ;
 
     for ( iop = _iob ; iop < _lastbuf ; iop ++ )

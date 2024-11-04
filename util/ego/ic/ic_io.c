@@ -19,12 +19,12 @@
 #include "../share/alloc.h"
 #include "ic_io.h"
 
-STATIC short libstate;
-STATIC long bytecnt;
+static short libstate;
+static long bytecnt;
 
-STATIC FILE* infile; /* The current EM input file */
+static FILE* infile; /* The current EM input file */
 
-STATIC int readbyte(void)
+static int readbyte(void)
 {
 	if (libstate == ARCHIVE && bytecnt-- == 0L)
 	{
@@ -39,7 +39,7 @@ STATIC int readbyte(void)
 
 short readshort(void)
 {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = readbyte();
 	h_byte = readbyte();
@@ -51,8 +51,8 @@ short readshort(void)
 #ifdef LONGOFF
 offset readoffset(void)
 {
-	register long l;
-	register int h_byte;
+	long l;
+	int h_byte;
 
 	l = readbyte();
 	l |= ((unsigned)readbyte()) * 256;
@@ -97,17 +97,17 @@ offset get_off(void)
 	}
 }
 
-STATIC void make_string(int n)
+static void make_string(int n)
 {
 
 	sprintf(string, ".%u", n);
 }
 
-STATIC void inident(void)
+static void inident(void)
 {
-	register int n;
-	register char* p = string;
-	register int c;
+	int n;
+	char* p = string;
+	int c;
 
 	n = get_int();
 	while (n--)
@@ -171,7 +171,7 @@ int table3(int n)
 
 int table1(void)
 {
-	register int n;
+	int n;
 
 	n = readbyte();
 	if (n == EOF)
@@ -196,7 +196,7 @@ int table1(void)
 
 int table2(void)
 {
-	register int n;
+	int n;
 
 	n = readbyte();
 	if ((n < sp_fcst0 + sp_ncst0) && (n >= sp_fcst0))

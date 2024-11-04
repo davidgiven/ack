@@ -15,10 +15,10 @@
 #include "warn.h"
 #include "switch.h"
 
-PRIVATE ptr lexback_LB(unsigned long);
+static ptr lexback_LB(unsigned long);
 
 /** LOC c: Load constant (i.e. push one word onto the stack) */
-void DoLOC(register long l)
+void DoLOC(long l)
 {
 	LOG(("@L6 DoLOC(%ld)", l));
 	spoilFRA();
@@ -26,7 +26,7 @@ void DoLOC(register long l)
 }
 
 /** LDC d: Load double constant ( push two words ) */
-void DoLDC(register long l)
+void DoLDC(long l)
 {
 	LOG(("@L6 DoLDC(%ld)", l));
 	spoilFRA();
@@ -35,7 +35,7 @@ void DoLDC(register long l)
 }
 
 /** LOL l: Load word at l-th local (l<0) or parameter (l>=0) */
-void DoLOL(register long l)
+void DoLOL(long l)
 {
 	LOG(("@L6 DoLOL(%ld)", l));
 	spoilFRA();
@@ -44,9 +44,9 @@ void DoLOL(register long l)
 }
 
 /** LOE g: Load external word g */
-void DoLOE(register long arg)
+void DoLOE(long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@L6 DoLOE(%lu)", p));
 	spoilFRA();
@@ -54,7 +54,7 @@ void DoLOE(register long arg)
 }
 
 /** LIL l: Load word pointed to by l-th local or parameter */
-void DoLIL(register long l)
+void DoLIL(long l)
 {
 	LOG(("@L6 DoLIL(%ld)", l));
 	spoilFRA();
@@ -63,9 +63,9 @@ void DoLIL(register long l)
 }
 
 /** LOF f: Load offsetted (top of stack + f yield address) */
-void DoLOF(register long l)
+void DoLOF(long l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@L6 DoLOF(%ld)", l));
 	spoilFRA();
@@ -73,7 +73,7 @@ void DoLOF(register long l)
 }
 
 /** LAL l: Load address of local or parameter */
-void DoLAL(register long l)
+void DoLAL(long l)
 {
 
 	LOG(("@L6 DoLAL(%ld)", l));
@@ -83,10 +83,10 @@ void DoLAL(register long l)
 }
 
 /** LAE g: Load address of external */
-void DoLAE(register unsigned long arg)
+void DoLAE(unsigned long arg)
 {
 
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@L6 DoLAE(%lu)", p));
 	spoilFRA();
@@ -94,9 +94,9 @@ void DoLAE(register unsigned long arg)
 }
 
 /** LXL n: Load lexical (address of LB n static levels back) */
-void DoLXL(register unsigned long l)
+void DoLXL(unsigned long l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@L6 DoLXL(%lu)", l));
 	spoilFRA();
@@ -106,9 +106,9 @@ void DoLXL(register unsigned long l)
 }
 
 /** LXA n: Load lexical (address of AB n static levels back) */
-void DoLXA(register unsigned long l)
+void DoLXA(unsigned long l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@L6 DoLXA(%lu)", l));
 	spoilFRA();
@@ -118,9 +118,9 @@ void DoLXA(register unsigned long l)
 }
 
 /** LOI o: Load indirect o bytes (address is popped from the stack) */
-void DoLOI(register size l)
+void DoLOI(size l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@L6 DoLOI(%ld)", l));
 	spoilFRA();
@@ -130,9 +130,9 @@ void DoLOI(register size l)
 
 /** LOS w: Load indirect, w-byte integer on top of stack gives
  *  object size */
-void DoLOS(register size l)
+void DoLOS(size l)
 {
-	register ptr p;
+	ptr p;
 
 	LOG(("@L6 DoLOS(%ld)", l));
 	spoilFRA();
@@ -143,7 +143,7 @@ void DoLOS(register size l)
 }
 
 /** LDL l: Load double local or parameter (two consecutive words are stacked) */
-void DoLDL(register long l)
+void DoLDL(long l)
 {
 	LOG(("@L6 DoLDL(%ld)", l));
 	spoilFRA();
@@ -152,9 +152,9 @@ void DoLDL(register long l)
 }
 
 /** LDE g: Load double external (two consecutive externals are stacked) */
-void DoLDE(register long arg)
+void DoLDE(long arg)
 {
-	register ptr p = i2p(arg);
+	ptr p = i2p(arg);
 
 	LOG(("@L6 DoLDE(%lu)", p));
 	spoilFRA();
@@ -162,9 +162,9 @@ void DoLDE(register long arg)
 }
 
 /** LDF f: Load double offsetted (top of stack + f yield address) */
-void DoLDF(register long l)
+void DoLDF(long l)
 {
-	register ptr p = dppop();
+	ptr p = dppop();
 
 	LOG(("@L6 DoLDF(%ld)", l));
 	spoilFRA();
@@ -172,17 +172,17 @@ void DoLDF(register long l)
 }
 
 /** LPI p: Load procedure identifier */
-void DoLPI(register long pi)
+void DoLPI(long pi)
 {
 	LOG(("@L6 DoLPI(%ld)", pi));
 	spoilFRA();
 	npush(arg_p(pi), psize);
 }
 
-PRIVATE ptr lexback_LB(unsigned long n)
+static ptr lexback_LB(unsigned long n)
 {
 	/* LB n static levels back */
-	register ptr lb = LB;
+	ptr lb = LB;
 
 	while (n != 0)
 	{

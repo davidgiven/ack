@@ -21,22 +21,22 @@
 
 FILE* outfile;
 
-STATIC proc_p thispro;
+static proc_p thispro;
 
-STATIC void outinst(int m)
+static void outinst(int m)
 {
 
 	outbyte((byte)m);
 }
 
-STATIC void coutshort(short i)
+static void coutshort(short i)
 {
 
 	outbyte((byte)(i & BMASK));
 	outbyte((byte)(i >> 8));
 }
 
-STATIC void coutint(short i)
+static void coutint(short i)
 {
 
 	if (i >= -sp_zcst0 && i < sp_ncst0 - sp_zcst0)
@@ -48,7 +48,7 @@ STATIC void coutint(short i)
 	}
 }
 
-STATIC void coutoff(offset off)
+static void coutoff(offset off)
 {
 
 	if ((short)off == off)
@@ -61,10 +61,10 @@ STATIC void coutoff(offset off)
 	}
 }
 
-STATIC void outsym(const char* s, int t)
+static void outsym(const char* s, int t)
 {
-	register byte* p;
-	register unsigned num;
+	byte* p;
+	unsigned num;
 
 	if (s[0] == '.')
 	{
@@ -94,18 +94,18 @@ STATIC void outsym(const char* s, int t)
 	}
 }
 
-STATIC void outdsym(dblock_p dbl)
+static void outdsym(dblock_p dbl)
 {
 	if (dnames[dbl->d_id])
 		outsym(dnames[dbl->d_id], sp_dnam);
 }
 
-STATIC void outpsym(proc_p p)
+static void outpsym(proc_p p)
 {
 	outsym(pnames[p->p_id], sp_pnam);
 }
 
-STATIC void outddef(short id)
+static void outddef(short id)
 {
 
 	dblock_p dbl;
@@ -119,7 +119,7 @@ STATIC void outddef(short id)
 	}
 }
 
-STATIC void outpdef(proc_p p)
+static void outpdef(proc_p p)
 {
 	p->p_flags2 |= PF_SYMOUT;
 	if (p->p_flags1 & PF_EXTERNAL)
@@ -129,7 +129,7 @@ STATIC void outpdef(proc_p p)
 	}
 }
 
-STATIC void outdocc(obj_p obj)
+static void outdocc(obj_p obj)
 {
 	dblock_p dbl;
 
@@ -145,7 +145,7 @@ STATIC void outdocc(obj_p obj)
 	}
 }
 
-STATIC void outpocc(proc_p p)
+static void outpocc(proc_p p)
 {
 	if ((p->p_flags2 & PF_SYMOUT) == 0)
 	{
@@ -158,7 +158,7 @@ STATIC void outpocc(proc_p p)
 	}
 }
 
-STATIC void coutobject(obj_p obj)
+static void coutobject(obj_p obj)
 {
 	/* In general, an object is defined by a global data
 	 * label and an offset. There are two special cases:
@@ -185,10 +185,10 @@ STATIC void coutobject(obj_p obj)
 	}
 }
 
-STATIC void cputstr(argb_p abp)
+static void cputstr(argb_p abp)
 {
-	register argb_p tbp;
-	register int length;
+	argb_p tbp;
+	int length;
 
 	length = 0;
 	tbp = abp;
@@ -206,7 +206,7 @@ STATIC void cputstr(argb_p abp)
 	}
 }
 
-STATIC void outnum(int n)
+static void outnum(int n)
 {
 	if (n < 256)
 	{
@@ -220,7 +220,7 @@ STATIC void outnum(int n)
 	}
 }
 
-STATIC void numlab(int n)
+static void numlab(int n)
 {
 	if (n < sp_nilb0)
 	{
@@ -232,9 +232,9 @@ STATIC void numlab(int n)
 	}
 }
 
-STATIC void cputargs(line_p lnp)
+static void cputargs(line_p lnp)
 {
-	register arg_p ap;
+	arg_p ap;
 	int cnt = 0;
 	ap = ARG(lnp);
 	while (ap != (arg_p)0)
@@ -283,7 +283,7 @@ STATIC void cputargs(line_p lnp)
 	}
 }
 
-STATIC void outoperand(line_p lnp)
+static void outoperand(line_p lnp)
 {
 	/* Output the operand of instruction lnp */
 
@@ -348,7 +348,7 @@ STATIC void outoperand(line_p lnp)
 	}
 }
 
-STATIC void outvisibility(line_p lnp)
+static void outvisibility(line_p lnp)
 {
 	/* In EM names of datalabels and procedures can be made
 	 * externally visible, so they can be used in other files.

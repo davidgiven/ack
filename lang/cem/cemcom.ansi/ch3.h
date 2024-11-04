@@ -16,14 +16,14 @@ struct idf;
 
 void ch3sel(struct expr **expp, int oper, struct idf *idf);
 void ch3incr(struct expr **expp, int oper);
-void ch3cast(register struct expr **expp, int oper, register struct type *tp);
-int equal_type(register struct type *tp,register struct type *otp, int qual_lev, int diag);
-int check_pseudoproto(register struct proto *pl,register struct proto *opl, int diag);
+void ch3cast(struct expr **expp, int oper, struct type *tp);
+int equal_type(struct type *tp,struct type *otp, int qual_lev, int diag);
+int check_pseudoproto(struct proto *pl,struct proto *opl, int diag);
 int legal_mixture(struct type *tp, struct type *otp, int diag);
-int equal_proto(register struct proto *pl, register struct proto *opl, int diag);
+int equal_proto(struct proto *pl, struct proto *opl, int diag);
 int recurqual(struct type *tp, int qual);
 void ch3asgn(struct expr **expp, int oper, struct expr *expr);
-int is_integral_type(register struct type *tp);
-int is_arith_type(register struct type *tp);
+int is_integral_type(struct type *tp);
+int is_arith_type(struct type *tp);
 
 #endif /* CH3_H_ */

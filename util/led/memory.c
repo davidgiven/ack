@@ -141,9 +141,9 @@ void init_core(void)
 		}
 	}
 #else /* ifndef USEMALLOC */
-	register char* base;
-	register ind_t total_size;
-	register struct memory* mem;
+	char* base;
+	ind_t total_size;
+	struct memory* mem;
 
 #include "mach.h"
 #define ALIGN 8 /* minimum alignment for pieces */
@@ -244,7 +244,7 @@ static ind_t move_up(int piece, ind_t incr)
 	}
 	return 0;
 #else /* ifndef USEMALLOC */
-	register struct memory* mem;
+	struct memory* mem;
 #ifndef NOSTATISTICS
 	extern int statistics;
 #endif
@@ -356,8 +356,8 @@ static bool compact(int piece, ind_t incr, int flag)
 	return TRUE;
 
 #else /* ifndef USEMALLOC */
-	register ind_t gain, size;
-	register struct memory* mem;
+	ind_t gain, size;
+	struct memory* mem;
 	int min = piece, max = piece;
 #define SHIFT_COUNT                                                                                \
 	2 /* let pieces only contribute if their free                                                  \
@@ -481,7 +481,7 @@ of its occupied memory                                                          
 
 	if (gain < incr)
 	{
-		register ind_t up = (ind_t)0;
+		ind_t up = (ind_t)0;
 
 		for (mem = &mems[max]; mem > &mems[piece]; mem--)
 		{
@@ -527,9 +527,9 @@ of its occupied memory                                                          
  */
 static void copy_down(struct memory* mem, ind_t dist)
 {
-	register char* old;
-	register char* new;
-	register ind_t size;
+	char* old;
+	char* new;
+	ind_t size;
 
 	size = mem->mem_full;
 	old = mem->mem_base;
@@ -547,9 +547,9 @@ static void copy_down(struct memory* mem, ind_t dist)
  */
 static void copy_up(struct memory* mem, ind_t dist)
 {
-	register char* old;
-	register char* new;
-	register ind_t size;
+	char* old;
+	char* new;
+	ind_t size;
 
 	size = mem->mem_full;
 	old = mem->mem_base + size;
@@ -571,9 +571,9 @@ static int alloctype = NORMAL;
  */
 ind_t alloc(int piece, size_t size)
 {
-	register ind_t incr = 0;
+	ind_t incr = 0;
 	ind_t left = mems[piece].mem_left;
-	register ind_t full = mems[piece].mem_full;
+	ind_t full = mems[piece].mem_full;
 
 	assert(passnumber == FIRST || (!incore && piece == ALLOMODL));
 	if (size == 0)
@@ -616,8 +616,8 @@ ind_t alloc(int piece, size_t size)
  */
 ind_t hard_alloc(int piece, size_t size)
 {
-	register ind_t ret;
-	register int i;
+	ind_t ret;
+	int i;
 
 	if (size != (ind_t)size)
 		return BADOFF;
@@ -665,9 +665,9 @@ ind_t hard_alloc(int piece, size_t size)
  */
 static void free_saved_moduls(void)
 {
-	register ind_t size;
-	register char *old, *new;
-	register struct memory* mem = &mems[ALLOMODL];
+	ind_t size;
+	char *old, *new;
+	struct memory* mem = &mems[ALLOMODL];
 
 	size = mem->mem_full - core_position;
 	new = mem->mem_base;
@@ -698,7 +698,7 @@ void dealloc(int piece)
 
 char* core_alloc(int piece, size_t size)
 {
-	register ind_t off;
+	ind_t off;
 
 	if ((off = alloc(piece, size)) == BADOFF)
 		return (char*)0;
@@ -720,7 +720,7 @@ void core_free(int piece, char* p)
  */
 void freeze_core(void)
 {
-	register int i;
+	int i;
 
 	core_position = (ind_t)0;
 
@@ -754,7 +754,7 @@ void write_bytes(void)
 {
 	unsigned short nsect;
 	long offchar;
-	register struct memory* mem;
+	struct memory* mem;
 	extern long NLChars, NGChars;
 	extern int flagword;
 	extern struct outhead outhead;

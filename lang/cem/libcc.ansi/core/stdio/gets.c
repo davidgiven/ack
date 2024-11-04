@@ -7,9 +7,9 @@
 
 char* gets(char* s)
 {
-	register FILE* stream = stdin;
-	register int ch;
-	register char* ptr;
+	FILE* stream = stdin;
+	int ch;
+	char* ptr;
 
 	ptr = s;
 	while ((ch = getc(stream)) != EOF && ch != '\n')

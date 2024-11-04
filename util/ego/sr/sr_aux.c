@@ -63,7 +63,7 @@ bool is_caddress(line_p lnp, lset vars) /* variables changed in loop */
 	UNREACHABLE_CODE;
 }
 
-STATIC arg_p find_arg(int n, arg_p list)
+static arg_p find_arg(int n, arg_p list)
 {
 	/* Find the n-th element of the list */
 
@@ -104,7 +104,7 @@ void concatenate(line_p list1, line_p list2)
 {
 	/* Append list2 to the end of list1. list1 may not be empty. */
 
-	register line_p l;
+	line_p l;
 
 	assert(list1 != (line_p)0);
 	for (l = list1; l->l_next != (line_p)0; l = l->l_next)

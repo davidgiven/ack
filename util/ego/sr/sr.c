@@ -71,7 +71,7 @@ void sr_machinit(void* vp)
 	fscanf(f, "%d", &sli_threshold);
 }
 
-STATIC void del_ivs(lset ivs)
+static void del_ivs(lset ivs)
 {
 	/* Delete the set of iv structs */
 
@@ -84,7 +84,7 @@ STATIC void del_ivs(lset ivs)
 	Ldeleteset(ivs);
 }
 
-STATIC void do_loop(loop_p loop)
+static void do_loop(loop_p loop)
 {
 	lset ivs, vars;
 
@@ -110,12 +110,12 @@ STATIC void do_loop(loop_p loop)
 	Ldeleteset(vars);
 }
 
-STATIC void loopblocks(proc_p p)
+static void loopblocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
-	register bblock_p b;
-	register Lindex i;
+	bblock_p b;
+	Lindex i;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -126,7 +126,7 @@ STATIC void loopblocks(proc_p p)
 	}
 }
 
-STATIC void opt_proc(proc_p p)
+static void opt_proc(proc_p p)
 {
 	/* Optimize all loops of one procedure. We first do all
 	 * outer loops at the lowest nesting level and proceed
@@ -158,7 +158,7 @@ STATIC void opt_proc(proc_p p)
 	}
 }
 
-STATIC bblock_p header(loop_p lp)
+static bblock_p header(loop_p lp)
 {
 	/* Try to determine the 'header' block of loop lp.
 	 * If 'e' is the entry block of loop L, then block 'b' is
@@ -177,12 +177,12 @@ STATIC bblock_p header(loop_p lp)
 	return (bblock_p)0;
 }
 
-STATIC void sr_extproc(proc_p p)
+static void sr_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
+	loop_p lp;
+	Lindex pi;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -196,12 +196,12 @@ STATIC void sr_extproc(proc_p p)
 	}
 }
 
-STATIC void sr_cleanproc(proc_p p)
+static void sr_cleanproc(proc_p p)
 {
 	/* Remove the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
+	loop_p lp;
+	Lindex pi;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{

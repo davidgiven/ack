@@ -13,11 +13,11 @@ static char rcsidp2[] = "$Id$";
 extern char em_flag[];
 extern char em_mnem[][4];
 
-PRIVATE void idinit(char *, int, int);
+static void idinit(char *, int, int);
 
 void initlex(void)
 {
-	register int i,j;
+	int i,j;
 	init_idf();
 	idinit("lab",op_lab,DEFILB);
 	for(i=sp_fmnem;i<=sp_lmnem;i++) {
@@ -48,7 +48,7 @@ void initlex(void)
 }
 
 
-PRIVATE void idinit(char *tag, int opcode, int argfmt)
+static void idinit(char *tag, int opcode, int argfmt)
 {
 	struct idf *p;
 	p = str2idf(tag,0);

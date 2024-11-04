@@ -22,7 +22,7 @@ extern panic(char *, ...);
 
 extern int LineNr;
 
-PRIVATE rep_loc();
+static rep_loc();
 
 #if __STDC__
 /* VARARGS */
@@ -43,8 +43,8 @@ report(va_alist)
 	{
 		char *fmt = va_arg(ap, char*);
 #endif
-		register char *f = fmt;
-		register char fc;
+		char *f = fmt;
+		char fc;
 
 		/*	First see if the first arg is an inpdef with
 			a global file name not ending in .c; if so,
@@ -52,9 +52,9 @@ report(va_alist)
 		*/
 		if (f[0] == '%' && f[1] == 'L') {
 			/* it is an inpdef */
-			register struct inpdef *id =
+			struct inpdef *id =
 				va_arg(ap, struct inpdef *);
-			register char *fn = id->id_file;
+			char *fn = id->id_file;
 
 			f += 2;
 			
@@ -75,9 +75,9 @@ report(va_alist)
 		while ((fc = *f++)) {
 			if (fc == '%') {
 				switch (*f++) {
-					register struct inpdef *id;
-					register char *s;
-					register int i;
+					struct inpdef *id;
+					char *s;
+					int i;
 				case 'L':	/* a location item */
 					id = va_arg(ap, struct inpdef *);
 					rep_loc(id);
@@ -105,7 +105,7 @@ report(va_alist)
 	va_end(ap);
 }
 
-PRIVATE
+static
 rep_loc(id)
 	struct inpdef *id;
 {

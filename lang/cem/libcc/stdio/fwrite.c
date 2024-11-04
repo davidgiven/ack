@@ -3,8 +3,8 @@
 
 fwrite(ptr, size, count, file)
 unsigned size, count;
-register char *ptr;
-register FILE *file;
+char *ptr;
+FILE *file;
 {
 	unsigned s;
 	unsigned ndone = 0;

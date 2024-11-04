@@ -20,7 +20,7 @@ extern struct expr *intexpr();
 }
 
 /* 7.1 */
-primary(register struct expr **expp;) :
+primary(struct expr **expp;) :
 	IDENTIFIER
 	{dot2expr(expp);}
 |
@@ -35,7 +35,7 @@ primary(register struct expr **expp;) :
 	{(*expp)->ex_flags |= EX_PARENS;}
 ;
 
-secundary(register struct expr **expp;) :
+secundary(struct expr **expp;) :
 	primary(expp)
 	[
 		index_pack(expp)
@@ -97,7 +97,7 @@ postfixed(struct expr **expp;)
 
 %first	first_of_type_specifier, type_specifier;
 
-unary(register struct expr **expp;)
+unary(struct expr **expp;)
 	{struct type *tp; int oper;}
 :
 %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
@@ -114,7 +114,7 @@ unary(register struct expr **expp;)
 	size_of(expp)
 ;
 
-size_of(register struct expr **expp;)
+size_of(struct expr **expp;)
 	{struct type *tp;}
 :
 	SIZEOF
@@ -287,7 +287,7 @@ binop(int *oper;) :
 	{*oper = DOT;}
 ;
 
-asgnop(register int *oper;):
+asgnop(int *oper;):
 	'=' {*oper = DOT;}
 |
 	'+' '=' {*oper = PLUSAB;}

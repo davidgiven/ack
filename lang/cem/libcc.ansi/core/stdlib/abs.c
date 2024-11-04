@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-int abs(register int i)
+int abs(int i)
 {
 	return i >= 0 ? i : -i;
 }

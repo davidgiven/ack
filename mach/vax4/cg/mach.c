@@ -16,7 +16,7 @@ static char rcsid[] = "$Id$";
 /*
  * Byte order: |  3  |  2  |  1  |  0  |
  */
-void con_part(register int sz, word w)
+void con_part(int sz, word w)
 {
 	/*
 	 * Align new bytes on boundary of its on size.
@@ -206,10 +206,10 @@ void regsave(char *str, long off, int size)
  */
 void f_regsave(void)
 {
-	register struct s_reg	*p;
-	register int	mask;
-	register int	i;
-	register int	count;
+	struct s_reg	*p;
+	int	mask;
+	int	i;
+	int	count;
 
 	mask = 0;
 	count = p_reg - a_reg;
@@ -260,7 +260,7 @@ regreturn() { }
 
 int regscore(long off, int size, int typ, int score, int totyp)
 {
-	register int	i = score;
+	int	i = score;
 
 	/*
 	 * If the offset doesn't fit in a byte, word-offset is used,

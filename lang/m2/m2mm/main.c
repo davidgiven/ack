@@ -44,9 +44,9 @@ basename(s)
 
 char *
 getwdir(fn)
-        register char *fn;
+        char *fn;
 {
-        register char *p;
+        char *p;
 
         p = strrchr(fn, '/');
         while (p && *(p + 1) == '\0') { /* remove trailing /'s */
@@ -55,7 +55,7 @@ getwdir(fn)
         }
 
         if (p) {
-		register char **d = DEFPATH;
+		char **d = DEFPATH;
 
                 *p = '\0';
 		while (*d && strcmp(*d, fn) != 0) d++;
@@ -82,7 +82,7 @@ char *suff = "o";
 char *llibs = 0;
 
 main(argc, argv)
-	register char **argv;
+	char **argv;
 {
 	extern struct tokenname tkidf[];
 	extern char *getwdir();
@@ -122,7 +122,7 @@ struct file_list *
 new_file_list()
 {
 	static struct file_list *p;
-	register struct file_list *f;
+	struct file_list *f;
 	static int cnt;
 
 	if (--cnt < 0) {
@@ -142,7 +142,7 @@ Add(parglist, f, d, copy)
 	char *f, *d;
 	struct file_list **parglist;
 {
-	register struct file_list *a, *b = 0;
+	struct file_list *a, *b = 0;
 
 	if (f == 0) return;
 
@@ -166,7 +166,7 @@ Add(parglist, f, d, copy)
 
 int
 openfile(a)
-	register struct file_list *a;
+	struct file_list *a;
 {
 	char *fn;
 
@@ -183,10 +183,10 @@ openfile(a)
 
 ProcessArgs()
 {
-	register struct file_list *a;
+	struct file_list *a;
 
 	f_walk(arglist, a) {
-		register char *p = strrchr(f_filename(a), '.');
+		char *p = strrchr(f_filename(a), '.');
 
 		CurrentArg = a;
 		DEFPATH[0] = f_dir(a);
@@ -235,7 +235,7 @@ AddToList(name, ext)
 
 find_dependencies()
 {
-	register struct file_list *arg;
+	struct file_list *arg;
 
 	print("\nall:\t");
 	f_walk(arglist, arg) {
@@ -243,7 +243,7 @@ find_dependencies()
 		char *dotspot = strrchr(fn, '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = f_idf(arg);
+			struct idf *id = f_idf(arg);
 
 			if (! f_notfound(arg) && id) {
 				if (id->id_type == PROGRAM) {
@@ -262,7 +262,7 @@ find_dependencies()
 		char *dotspot = strrchr(fn, '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = f_idf(arg);
+			struct idf *id = f_idf(arg);
 
 			if (! f_notfound(arg) && id) {
 				if (id->id_type == PROGRAM) {
@@ -277,18 +277,18 @@ find_dependencies()
 }
 
 file_dep(id)
-	register struct idf *id;
+	struct idf *id;
 {
-	register struct lnk *m;
+	struct lnk *m;
 
 	if (id->id_ddependson || id->id_mdependson) return;
 	if (id->id_def) Add(&(id->id_mdependson), id->id_def, id->id_dir, 0);
 	for (m = id->id_defimports; m; m = m->lnk_next) {
-		register struct idf *iid = m->lnk_imp;
+		struct idf *iid = m->lnk_imp;
 
 		Add(&(id->id_mdependson), iid->id_def, iid->id_dir, 0);
 		if (Add(&(id->id_ddependson), iid->id_def, iid->id_dir, 0)) {
-			register struct file_list *p;
+			struct file_list *p;
 
 			file_dep(iid);
 			f_walk(iid->id_ddependson, p) {
@@ -300,10 +300,10 @@ file_dep(id)
 		}
 	}
 	for (m = id->id_modimports; m; m = m->lnk_next) {
-		register struct idf *iid = m->lnk_imp;
+		struct idf *iid = m->lnk_imp;
 
 		if (Add(&(id->id_mdependson), iid->id_def, iid->id_dir, 0)) {
-			register struct file_list *p;
+			struct file_list *p;
 
 			file_dep(iid);
 			f_walk(iid->id_ddependson, p) {
@@ -316,7 +316,7 @@ file_dep(id)
 
 char *
 object(arg)
-	register struct file_list *arg;
+	struct file_list *arg;
 {
 	static char buf[512];
 	char *dotp = strrchr(f_filename(arg), '.');
@@ -336,7 +336,7 @@ object(arg)
 }
 
 pr_arg(a)
-	register struct file_list *a;
+	struct file_list *a;
 {
 	char *f = f_filename(a);
 	char *d = f_dir(a);
@@ -349,17 +349,17 @@ pr_arg(a)
 
 print_dep()
 {
-	register struct file_list *arg;
+	struct file_list *arg;
 
 	f_walk(arglist, arg) {
 		char *dotspot = strrchr(f_filename(arg), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = f_idf(arg);
+			struct idf *id = f_idf(arg);
 
 			if (! f_notfound(arg) && id) {
 				char *obj = object(arg);
-				register struct file_list *a;
+				struct file_list *a;
 
 				print("%s: \\\n\t", obj);
 				pr_arg(arg);
@@ -378,11 +378,11 @@ print_dep()
 }
 
 prog_dep(id, a)
-	register struct idf *id;
+	struct idf *id;
 	struct file_list *a;
 {
-	register struct lnk *m;
-	register struct file_list *p;
+	struct lnk *m;
+	struct file_list *p;
 
 	id->id_mdependson = 0;
 	id->id_def = 0;
@@ -394,7 +394,7 @@ prog_dep(id, a)
 		Add(&(id->id_mdependson), id->id_text, id->id_dir, 0);
 	}
 	for (m = id->id_modimports; m; m = m->lnk_next) {
-		register struct idf *iid = m->lnk_imp;
+		struct idf *iid = m->lnk_imp;
 
 		if (Add(&(id->id_mdependson), iid->id_text, iid->id_dir, 0)) {
 			if (iid->id_def) prog_dep(iid);
@@ -409,7 +409,7 @@ prog_dep(id, a)
 module_in_arglist(n)
 	char *n;
 {
-	register struct file_list *a;
+	struct file_list *a;
 
 	f_walk(arglist, a) {
 		char *dotp = strrchr(f_filename(a), '.');
@@ -427,10 +427,10 @@ module_in_arglist(n)
 }
 
 pr_prog_dep(id, a)
-	register struct idf *id;
+	struct idf *id;
 	struct file_list *a;
 {
-	register struct file_list *p;
+	struct file_list *p;
 
 	print("\nOBS_%s =", id->id_text);
 	f_walk(id->id_mdependson, p) {
@@ -455,13 +455,13 @@ pr_prog_dep(id, a)
 
 programs()
 {
-	register struct file_list *a;
+	struct file_list *a;
 
 	f_walk(arglist, a) {
 		char *dotspot = strrchr(f_filename(a), '.');
 
 		if (dotspot && strcmp(dotspot, ".mod") == 0) {
-			register struct idf *id = f_idf(a);
+			struct idf *id = f_idf(a);
 
 			if (! f_notfound(a) && id && id->id_type == PROGRAM) {
 				prog_dep(id, a);

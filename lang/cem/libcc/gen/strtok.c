@@ -3,10 +3,10 @@ extern char *strpbrk();
 
 char *
 strtok(string, separators)
-	register char *string;
+	char *string;
 	char *separators;
 {
-	register char *s1, *s2;
+	char *s1, *s2;
 	static char *savestring;
 
 	if (!string) string = savestring;

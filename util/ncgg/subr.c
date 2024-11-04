@@ -30,7 +30,7 @@ extern set_t l_sets[];
 
 void n_proc(char *name)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 
 	sy_p = lookup(name, symproc, newsymbol);
 	sy_p->sy_value.syv_procoff = npatbytes + 1;
@@ -53,9 +53,9 @@ struct varinfo * make_erase(char *name)
 void n_instr(char *name, char *asname, operand *oplist, struct varinfo *eraselist,
 		  struct varinfo *cost)
 {
-	register int instrno;
-	register int cc_count;
-	register instr_p ip;
+	int instrno;
+	int cc_count;
+	instr_p ip;
 
 	instrno = NEXT(ninstr, MAXINSTR, "Instructions");
 	ip = &l_instr[instrno];
@@ -92,7 +92,7 @@ void n_instr(char *name, char *asname, operand *oplist, struct varinfo *eraselis
 
 void n_set(char *name, int number)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 
 	sy_p = lookup(name, symset, newsymbol);
 	sy_p->sy_value.syv_setno = number;
@@ -101,9 +101,9 @@ void n_set(char *name, int number)
 void n_tok(char *name, struct varinfo *atts, int size,
 		 struct varinfo *cost, struct varinfo *format)
 {
-	register symbol *sy_p;
-	register token_p tp;
-	register struct varinfo *vip;
+	symbol *sy_p;
+	token_p tp;
+	struct varinfo *vip;
 	int i;
 	int tokno;
 	int thistokensize;
@@ -170,8 +170,8 @@ void n_tok(char *name, struct varinfo *atts, int size,
 
 void checkprintformat(int n)
 {
-	register short *s;
-	register int i;
+	short *s;
+	int i;
 
 	s = l_sets[n].set_val;
 	for (i = nregs; i < nregs + ntokens; i++)
@@ -183,7 +183,7 @@ void checkprintformat(int n)
 void n_prop(char *name, int size)
 {
 	int propno;
-	register symbol *sp;
+	symbol *sp;
 
 	propno = NEXT(nprops, MAXPROPS, "Properties");
 	sp = lookup(name, symprop, newsymbol);
@@ -198,7 +198,7 @@ void n_prop(char *name, int size)
 
 void prophall(int n)
 {
-	register int i;
+	int i;
 	short hallset[SETSIZE];
 
 	if (n < 0)
@@ -210,8 +210,8 @@ void prophall(int n)
 
 int n_reg(char *name, char *printstring, int nmemb, int member1, int member2)
 {
-	register symbol *sy_p;
-	register reginfo *ri_p;
+	symbol *sy_p;
+	reginfo *ri_p;
 	int regno;
 
 	sy_p = lookup(name, symreg, newsymbol);
@@ -242,7 +242,7 @@ int cmustbeset(char *ident)
 
 void n_const(char *ident, int val)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 
 	sy_p = lookup(ident, symconst, newsymbol);
 	sy_p->sy_value.syv_cstval = val;
@@ -250,7 +250,7 @@ void n_const(char *ident, int val)
 
 void n_sconst(char *ident, char *val)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 
 	sy_p = lookup(ident, symsconst, newsymbol);
 	sy_p->sy_value.syv_stringno = strlookup(val);
@@ -333,9 +333,9 @@ static void add_regvar(int rvnum, reginfo *regp, int rv)
 
 void regline(varinfo *rl, varinfo *pl, int rv)
 {
-	register varinfo *rrl, *rpl;
-	register short *sp;
-	register reginfo *regp;
+	varinfo *rrl, *rpl;
+	short *sp;
+	reginfo *regp;
 	int thissize;
 	int propno;
 
@@ -392,9 +392,9 @@ void setallreg(struct varinfo *vi)
 	}
 }
 
-void freevi(register struct varinfo *vip)
+void freevi(struct varinfo *vip)
 {
-	register int i;
+	int i;
 
 	if (vip == 0)
 		return;
@@ -405,10 +405,10 @@ void freevi(register struct varinfo *vip)
 	free(vip);
 }
 
-int myatoi(register char *s)
+int myatoi(char *s)
 {
-	register int base = 10;
-	register int sum = 0;
+	int base = 10;
+	int sum = 0;
 
 	if (*s == '0')
 	{
@@ -466,16 +466,16 @@ int myatoi(register char *s)
 
 char *mystrcpy(char *s)
 {
-	register char *p;
+	char *p;
 
 	p = myalloc(strlen(s) + 1);
 	strcpy(p, s);
 	return (p);
 }
 
-char *myalloc(register int n)
+char *myalloc(int n)
 {
-	register char *p, *result;
+	char *p, *result;
 
 	result = p = malloc(n);
 	if (p == (char *) 0)
@@ -496,7 +496,7 @@ int chkincl(int value, int lwb, int upb)
 
 int subset(short *sp1, short *sp2, int setsize)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < setsize; i++)
 		if ((sp1[i] | sp2[i]) != sp2[i])
@@ -504,9 +504,9 @@ int subset(short *sp1, short *sp2, int setsize)
 	return (1);
 }
 
-int vilength(register struct varinfo *vip)
+int vilength(struct varinfo *vip)
 {
-	register int l = 0;
+	int l = 0;
 
 	while (vip != 0)
 	{

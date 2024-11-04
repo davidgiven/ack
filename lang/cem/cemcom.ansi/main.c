@@ -42,7 +42,7 @@ struct sp_id special_ids[] =	{
 
 void compile(int argc, char *argv[]);
 static void init(void);
-static void init_specials(register struct sp_id *si);
+static void init_specials(struct sp_id *si);
 #ifdef DEBUG
 void Info(void);
 #endif
@@ -123,7 +123,7 @@ void compile(int argc, char *argv[])
 {
 	char *result;
 #ifndef	LINT
-	register char *destination = 0;
+	char *destination = 0;
 #endif	/* LINT */
 
 	switch (argc) {
@@ -273,7 +273,7 @@ static void init(void)
 	stack_level();
 }
 
-static void init_specials(register struct sp_id *si)
+static void init_specials(struct sp_id *si)
 {
 	while (si->si_identifier)	{
 		struct idf *idf = str2idf(si->si_identifier, 0);

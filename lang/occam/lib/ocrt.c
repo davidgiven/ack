@@ -10,7 +10,7 @@ long any;
 void catch(sig, file, line) int sig; char *file; int line;
 /* Catches traps in the occam program */
 {
-	register char *mes;
+	char *mes;
 
 	switch (sig) {
 	case 0:
@@ -34,8 +34,8 @@ FILE *unix_file[20];
 
 void initfile()
 {
-	register i;
-	register chan *c=file;
+	i;
+	chan *c=file;
 
 	for (i=0; i<20; i++) {
 		c->type=C_T_FILE;

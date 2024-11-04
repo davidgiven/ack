@@ -27,7 +27,7 @@ void chan_in(v, c) long *v; register chan *c;
 			*v=(c->f.preread&0377);
 			c->f.flgs&= ~C_F_READAHEAD;
 		} else {
-			register FILE *fp= unix_file[c->f.index];
+			FILE *fp= unix_file[c->f.index];
 
 			*v= feof(fp) ? C_F_EOF : getc(fp);
 		}
@@ -49,7 +49,7 @@ void chan_out(v, c) long v; register chan *c;
 {
 	switch(c->type) {
 	case C_T_FILE: {
-		register FILE *fp= unix_file[c->f.index];
+		FILE *fp= unix_file[c->f.index];
 		struct sgttyb tty;
 
 		if ((v& ~0xff)==0)	/* Plain character */
@@ -100,13 +100,13 @@ int chan_any(c) register chan *c;
 		if ((c->f.flgs&C_F_READAHEAD)!=0)
 			return 1;
 		else {
-			register FILE *fp= unix_file[c->f.index];
+			FILE *fp= unix_file[c->f.index];
 			
 			if (feof(fp))
 				return 1;
 			else {
 				extern int errno;
-				register ch;
+				ch;
 
 				deadlock=0;
 					/* No deadlock while waiting for key */

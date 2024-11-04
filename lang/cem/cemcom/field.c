@@ -47,9 +47,9 @@ eval_field(expr, code)
 	int code;
 {
 	int op = expr->OP_OPER;
-	register struct expr *leftop = expr->OP_LEFT;
-	register struct expr *rightop = expr->OP_RIGHT;
-	register struct field *fd = leftop->ex_type->tp_field;
+	struct expr *leftop = expr->OP_LEFT;
+	struct expr *rightop = expr->OP_RIGHT;
+	struct field *fd = leftop->ex_type->tp_field;
 	struct type *tp = leftop->ex_type->tp_up;
 	arith tmpvar;
 	struct type *atype = tp->tp_unsigned ? uword_type : word_type;
@@ -166,7 +166,7 @@ eval_field(expr, code)
 			retrieval) is on top of stack.
 		*/
 		if (atype->tp_unsigned == 0) {	/* sign extension */
-			register arith shift = asize * 8 - fd->fd_width;
+			arith shift = asize * 8 - fd->fd_width;
 
 			C_loc(shift);
 			C_sli(asize);

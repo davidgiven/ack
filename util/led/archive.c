@@ -41,10 +41,10 @@ void notelib(long pos);
  */
 static long getsymdeftable(void)
 {
-	register ind_t off;
-	register struct ranlib* ran;
-	register long count;
-	register long nran, nchar;
+	ind_t off;
+	struct ranlib* ran;
+	long count;
+	long nran, nchar;
 	extern FILE* infile;
 
 	count = nran = rd_int4(infile);
@@ -99,8 +99,8 @@ void arch(void)
 	savemagic();
 	do
 	{
-		register ind_t ranindex;
-		register long count;
+		ind_t ranindex;
+		long count;
 
 		debug("(re)scan ranlib table\n", 0, 0, 0, 0);
 		ranindex = (ind_t)0;
@@ -108,10 +108,10 @@ void arch(void)
 		resolved = FALSE;
 		while (count > 0)
 		{
-			register struct ranlib* ran;
-			register char* string;
-			register struct outname* name;
-			register long pos;
+			struct ranlib* ran;
+			char* string;
+			struct outname* name;
+			long pos;
 
 			ran = (struct ranlib*)address(ALLORANL, ranindex);
 			string = address(ALLORANL, (ind_t)ran->ran_off);
@@ -156,7 +156,7 @@ void arch(void)
  */
 void notelib(long pos)
 {
-	register ind_t off;
+	ind_t off;
 
 	if ((off = hard_alloc(ALLOARCH, sizeof(long))) == BADOFF)
 		fatal("no space for archive position");
@@ -177,8 +177,8 @@ static ind_t posindex = (ind_t)0;
  */
 void arch2(void)
 {
-	register long* pos;
-	register ind_t localpos;
+	long* pos;
+	ind_t localpos;
 
 	localpos = posindex;
 	for (pos = (long*)address(ALLOARCH, localpos); *pos != ENDLIB; pos++, localpos += sizeof(long))

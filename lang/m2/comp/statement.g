@@ -27,7 +27,7 @@ static int	loopcount = 0;	/* Count nested loops */
 extern struct node *EmptyStatement;
 }
 
-statement(register struct node **pnd;)
+statement(struct node **pnd;)
 {
 	register struct node *nd;
 	extern int return_occurred;
@@ -110,7 +110,7 @@ ProcedureCall:
 ;
 */
 
-StatementSequence(register struct node **pnd;)
+StatementSequence(struct node **pnd;)
 {
 	struct node *nd;
 	register struct node *nd1;

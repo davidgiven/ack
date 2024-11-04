@@ -58,12 +58,12 @@ static void typealign(enum m_type);
 static void sizealign(cons_t);
 static void extconst(cons_t);
 static void extbss(cons_t);
-static void extloc(register locl_t *);
+static void extloc(locl_t *);
 static void extglob(glob_t *, cons_t);
 static void extpro(proc_t *);
 static void extstring(void);
 static void extxcon(int);
-static long myatol(register char *);
+static long myatol(char *);
 static void extvcon(int);
 
 
@@ -133,7 +133,7 @@ static int table3(int i)
 
 int get16(void)
 {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = get8();
 	h_byte = get8();
@@ -144,7 +144,7 @@ int get16(void)
 
 int getu16(void)
 {
-	register int l_byte, h_byte;
+	int l_byte, h_byte;
 
 	l_byte = get8();
 	h_byte = get8();
@@ -153,8 +153,8 @@ int getu16(void)
 
 cons_t get32(void)
 {
-	register cons_t l;
-	register int h_byte;
+	cons_t l;
+	int h_byte;
 
 	l = get8();
 	l |= (unsigned) get8() * 256;
@@ -167,7 +167,7 @@ cons_t get32(void)
 
 static int table1(void)
 {
-	register int i;
+	int i;
 
 	i = xget8();
 	if (i < sp_fmnem + sp_nmnem && i >= sp_fmnem)
@@ -190,7 +190,7 @@ static int table1(void)
 
 static int table2(void)
 {
-	register int i;
+	int i;
 
 	i = get8();
 	if (i < sp_fcst0 + sp_ncst0 && i >= sp_fcst0)
@@ -204,7 +204,7 @@ static int table2(void)
 /* Read argument of instruction */
 static int getarg(int typset)
 {
-	register int t, argtyp;
+	int t, argtyp;
 
 	argtyp = t = table2();
 	t -= sp_fspec;
@@ -228,7 +228,7 @@ static glob_t *getlab(int status)
 
 static char *getdig(char *str, unsigned int number)
 {
-	register int remain;
+	int remain;
 
 	remain = number % 10;
 	number /= 10;
@@ -246,8 +246,8 @@ static void make_string(unsigned int n)
 
 static void getstring(void)
 {
-	register char *p;
-	register int n;
+	char *p;
+	int n;
 
 	getarg(cst_ptyp);
 	if (argval < 0 || argval >= MAXSTRING - 1)
@@ -272,8 +272,8 @@ static char *inproname(void)
 
 static int needed(void)
 {
-	register glob_t *g;
-	register proc_t *p;
+	glob_t *g;
+	proc_t *p;
 
 	for (;;)
 	{
@@ -337,7 +337,7 @@ static cons_t valsize(void)
 
 void newline(int type)
 {
-	register line_t *n_lnp;
+	line_t *n_lnp;
 
 	if (type > VALLOW)
 		type = VALLOW;
@@ -372,10 +372,10 @@ static void setline(void)
 static void inpseudo(int instr_no)
 {
 	cons_t cst;
-	register proc_t *prptr;
+	proc_t *prptr;
 	cons_t objsize;
 	cons_t par1, par2;
-	register char *pars;
+	char *pars;
 
 	/*
 	 * get operands of pseudo (if needed) and process it.
@@ -544,7 +544,7 @@ static void inpseudo(int instr_no)
  */
 static void compact_line(void)
 {
-	register int instr_no;
+	int instr_no;
 
 
 	curglosym = 0;
@@ -709,7 +709,7 @@ static void setsizes(void)
 static void exchange(int p1, int p2)
 {
 	int size, line;
-	register line_t *t_lnp, *a_lnp, *b_lnp;
+	line_t *t_lnp, *a_lnp, *b_lnp;
 
 	/* Since the lines are linked backwards it is easy
 	 * to count the number of lines backwards.
@@ -802,7 +802,7 @@ static void exchange(int p1, int p2)
 static void doinsert(line_t *lnp, int first, int extra)
 {
 	/* Beware : s_fline will be clobbered and restored */
-	register line_t *t_lnp;
+	line_t *t_lnp;
 
 	t_lnp = pstate.s_fline;
 	pstate.s_fline = lnp->l_next;
@@ -865,7 +865,7 @@ static void chkstart(void)
 	set_mode(DATA_REP);
 	if (wordsize < ABSSIZE)
 	{
-		register int factor = ABSSIZE / wordsize - 1;
+		int factor = ABSSIZE / wordsize - 1;
 		extadr((cons_t) factor);
 		databytes += factor * wordsize;
 	}
@@ -959,7 +959,7 @@ static void extbss(cons_t n)
 	}
 }
 
-static void extloc(register locl_t *lbp)
+static void extloc(locl_t *lbp)
 {
 
 	/*
@@ -973,7 +973,7 @@ static void extloc(register locl_t *lbp)
 
 static void extglob(glob_t *agbp, cons_t off)
 {
-	register glob_t *gbp;
+	glob_t *gbp;
 
 	/*
 	 * generate a word of data that is defined by a global symbol.
@@ -1004,8 +1004,8 @@ static void extpro(proc_t *aprp)
 
 static void extstring(void )
 {
-	register char *s;
-	register int n;
+	char *s;
+	int n;
 
 	/*
 	 * generate data for a string.
@@ -1020,8 +1020,8 @@ static void extstring(void )
 
 static void extxcon(int header)
 {
-	register char *s;
-	register int n;
+	char *s;
+	int n;
 
 	/*
 	 * generate data for a floating constant initialized by a string.
@@ -1040,10 +1040,10 @@ static void extxcon(int header)
 }
 
 /* Added atol() that ignores overflow. --Ceriel */
-static long myatol(register char *s)
+static long myatol(char *s)
 {
-	register long total = 0;
-	register unsigned digit;
+	long total = 0;
+	unsigned digit;
 	int minus = 0;
 
 	while (*s == ' ' || *s == '\t')

@@ -41,7 +41,7 @@ void addpattern(char* str,int l,int np,int nr)
      * "nr" is the number of instructions in the replacement
      * Space is allocated in chunks of 50
      */
-    register struct pattern *p;
+    struct pattern *p;
 
     if (!pattable) {		/* No space allocated yet */
 	pattable = (struct pattern *) malloc(50 * sizeof *pattable);
@@ -69,7 +69,7 @@ static void prconstraint(char* str)
      * prints a constraint, with variable names replaced
      */
     char c;
-    register char *p, *q;
+    char *p, *q;
     struct symtab *name;
 
     p = str;
@@ -110,8 +110,8 @@ void printpatterns(void) {
      * Prints the pattern_descr table and generates the routine
      * "check_constraint"
      */
-    register struct pattern *p;
-    register int i;
+    struct pattern *p;
+    int i;
 
     p = pattable;
     i = 1;

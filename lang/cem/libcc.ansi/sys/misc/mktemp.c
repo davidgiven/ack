@@ -7,8 +7,8 @@
 
 char* mktemp(char* template)
 {
-	register int pid, k;
-	register char* p;
+	int pid, k;
+	char* p;
 
 	pid = getpid(); /* get process id as semi-unique number */
 	p = template;

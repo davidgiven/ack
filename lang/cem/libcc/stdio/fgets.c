@@ -6,8 +6,8 @@ char *str;
 unsigned n;
 FILE *file;
 {
-	register int ch;
-	register char *ptr;
+	int ch;
+	char *ptr;
 
 	ptr = str;
 	while ( --n > 0 && (ch = getc(file)) != EOF){

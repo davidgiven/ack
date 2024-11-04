@@ -25,15 +25,15 @@ extern char loptions[];
 	one token later.
 */
 
-PRIVATE int notreached;
-PRIVATE int varargsN = -1;
-PRIVATE int argsused;
-PRIVATE int formatN;
-PRIVATE int formatVAR;
-PRIVATE char *format;
-PRIVATE char *prev_format;
+static int notreached;
+static int varargsN = -1;
+static int argsused;
+static int formatN;
+static int formatVAR;
+static char *format;
+static char *prev_format;
 
-PRIVATE make_format();
+static make_format();
 
 int LINTLIB;				/* file is lint library */
 int s_NOTREACHED;			/* statement not reached */
@@ -74,8 +74,8 @@ lint_comment_function()
 	formatVAR = 0;
 }
 
-PRIVATE char buf[1000];
-PRIVATE char *bufpos;			/* next free position in buf */
+static char buf[1000];
+static char *bufpos;			/* next free position in buf */
 
 lint_start_comment()
 {
@@ -119,7 +119,7 @@ lint_end_comment()
 	}
 	else
 	if (strncmp(bufpos, "FORMAT", 6) == 0 && isdigit(bufpos[6])) {
-		register int argn;
+		int argn;
 
 		bufpos += 6;
 		argn = *bufpos++ - '0';
@@ -142,13 +142,13 @@ lint_end_comment()
 #define	LETGIT		1
 #define	LETGITSPACE	2
 
-PRIVATE
+static
 make_format(argn, oldf)
 	int argn;
 	char *oldf;
 {
-	register char *newf;
-	register int last_stat;
+	char *newf;
+	int last_stat;
 
 	while (*oldf && *oldf != '$') {
 		oldf++;
@@ -176,7 +176,7 @@ make_format(argn, oldf)
 
 	last_stat = NONE;
 	while (*oldf && *oldf != '$') {
-		register char ch = *oldf++;
+		char ch = *oldf++;
 
 		if (isspace(ch)) {
 			if (last_stat == LETGIT)

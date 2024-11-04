@@ -19,8 +19,8 @@ glosym_p glolist= (glosym_p) 0;
 
 void enterglo(string name,word *romp)
 {
-	register glosym_p gp;
-	register int i;
+	glosym_p gp;
+	int i;
 
 	gp = (glosym_p) myalloc(sizeof *gp);
 	gp->gl_next = glolist;
@@ -33,7 +33,7 @@ void enterglo(string name,word *romp)
 
 glosym_p lookglo(string name)
 {
-	register glosym_p gp;
+	glosym_p gp;
 
 	for (gp=glolist;gp != (glosym_p) 0; gp=gp->gl_next)
 		if (strcmp(gp->gl_name,name)==0)

@@ -63,7 +63,7 @@ subrange_type(A, base_index, c1, c2, result_index)
   long c1, c2;
 {
   int itself = 0;
-  register p_type p;
+  p_type p;
   p_type base_type;
 
   if (!A) {
@@ -102,7 +102,7 @@ subrange_type(A, base_index, c1, c2, result_index)
 	   c1 = -c2 - 1 and base_index indicates int_type or itself -> integer
 	*/
 	if (itself || base_type == int_type) {
-		register struct integer_types *ip = 0;
+		struct integer_types *ip = 0;
 		if (c1 == 0) {
 			ip = &u_types[0];
 		}
@@ -148,7 +148,7 @@ subrange_type(A, base_index, c1, c2, result_index)
 
 static long
 nel(tp)
-  register p_type tp;
+  p_type tp;
 {
   switch(tp->ty_class) {
   case T_SUBRANGE:
@@ -174,7 +174,7 @@ p_type
 array_type(bound_type, el_type)
   p_type bound_type, el_type;
 {
-  register p_type tp = new_type();
+  p_type tp = new_type();
 
   tp->ty_class = T_ARRAY;
   tp->ty_index = bound_type;
@@ -207,7 +207,7 @@ basic_type(fund, size)
   int	fund;
   long	size;
 {
-  register p_type	p = new_type();
+  p_type	p = new_type();
 
   p->ty_class = fund;
   p->ty_size = size;
@@ -215,10 +215,10 @@ basic_type(fund, size)
 }
 
 set_bounds(tp)
-  register p_type	tp;
+  p_type	tp;
 {
   /* Determine the size and low of a set type */
-  register p_type base = tp->ty_setbase;
+  p_type base = tp->ty_setbase;
 
   if (base->ty_class == T_SUBRANGE) {
 	tp->ty_size = (base->ty_up - base->ty_low + 7) >> 3;
@@ -237,8 +237,8 @@ set_bounds(tp)
 
 init_types()
 {
-  register int i = 0;
-  register long x = 0;
+  int i = 0;
+  long x = 0;
 
   while (x >= 0) {
 	i++;
@@ -285,8 +285,8 @@ p_type *
 tp_lookup(type_index)
   int *type_index;
 {
-  register int i;
-  register struct tp_index *p;
+  int i;
+  struct tp_index *p;
 
   while (type_index[0] >= list_len) {
 	if (list_len) {
@@ -319,10 +319,10 @@ tp_lookup(type_index)
 clean_tp_tab()
 {
   if (list_len) {
-  	register int i = list_len;
+  	int i = list_len;
 
   	while (--i >= 0) {
-		register int j = list_row[i].len;
+		int j = list_row[i].len;
 		if (j) {
 			while (--j > 0) {
 				p_type p = list_row[i].row[j/NINCR][j%NINCR];
@@ -348,7 +348,7 @@ clean_tp_tab()
 }
 
 end_literal(tp, maxval)
-  register p_type tp;
+  p_type tp;
   long maxval;
 {
   tp->ty_literals = (struct literal *)
@@ -384,8 +384,8 @@ add_param_type(v, s)
   int	v;		/* 'v' or 'i' for address, 'p' for value */
   p_symbol s;		/* parameter itself */
 {
-  register p_scope sc = base_scope(s->sy_scope);
-  register p_type prc_type;
+  p_scope sc = base_scope(s->sy_scope);
+  p_type prc_type;
 
   if (! sc) return;
   prc_type = sc->sc_definedby->sy_type;

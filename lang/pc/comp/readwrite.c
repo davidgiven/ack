@@ -30,13 +30,13 @@
 
 /* Internal function prototypes */
 static int ChkWriteParameter(struct type *, struct node *, char *);
-static void CodeRead(register struct node *, register struct node *);
-static void CodeRead(register struct node *, register struct node *);
+static void CodeRead(struct node *, struct node *);
+static void CodeRead(struct node *, struct node *);
 static void CodeReadln(struct node *);
-static void CodeWrite(register struct node *, register struct node *);
-static void CodeWriteln(register struct node *);
+static void CodeWrite(struct node *, struct node *);
+static void CodeWriteln(struct node *);
 
-void ChkRead(register struct node *arg)
+void ChkRead(struct node *arg)
 {
 	struct node *file;
 	char *name = "read";
@@ -102,7 +102,7 @@ void ChkRead(register struct node *arg)
 	}
 }
 
-void ChkReadln(register struct node *arg)
+void ChkReadln(struct node *arg)
 {
 	struct node *file;
 	char *name = "readln";
@@ -157,7 +157,7 @@ void ChkReadln(register struct node *arg)
 	CodeReadln(file);
 }
 
-void ChkWrite(register struct node *arg)
+void ChkWrite(struct node *arg)
 {
 	struct node *left, *expp, *file;
 	char *name = "write";
@@ -197,7 +197,7 @@ void ChkWrite(register struct node *arg)
 	}
 }
 
-void ChkWriteln(register struct node *arg)
+void ChkWriteln(struct node *arg)
 {
 	struct node *left, *expp, *file;
 	char *name = "writeln";
@@ -308,8 +308,8 @@ static int ChkWriteParameter(struct type *filetype, struct node *arg, char *name
 
 struct node *ChkStdInOut(char *name, int st_out)
 {
-	register struct def *df;
-	register struct node *nd;
+	struct def *df;
+	struct node *nd;
 
 	if( !(df = lookup(str2idf(st_out ? output : input, 0),
 			    GlobalScope, D_INUSE)) ||
@@ -326,7 +326,7 @@ struct node *ChkStdInOut(char *name, int st_out)
 	return nd;
 }
 
-static void CodeRead(register struct node *file, register struct node *arg)
+static void CodeRead(struct node *file, struct node *arg)
 {
 	struct type *tp = BaseType(arg->nd_type);
 
@@ -392,11 +392,11 @@ static void CodeReadln(struct node *file)
 	C_asp(pointer_size);
 }
 
-static void CodeWrite(register struct node *file, register struct node *arg)
+static void CodeWrite(struct node *file, struct node *arg)
 {
 	int width = 0;
-	register arith nbpars = pointer_size;
-	register struct node *expp = arg->nd_left;
+	arith nbpars = pointer_size;
+	struct node *expp = arg->nd_left;
 	struct node *right = arg->nd_right;
 	struct type *tp = BaseType(expp->nd_type);
 
@@ -477,7 +477,7 @@ static void CodeWrite(register struct node *file, register struct node *arg)
 	}
 }
 
-static void CodeWriteln(register struct node *file)
+static void CodeWriteln(struct node *file)
 {
 	if( err_occurred ) return;
 

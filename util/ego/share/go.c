@@ -22,12 +22,12 @@
 #include "go.h"
 #include "files.h"
 
-STATIC bool report_flag = FALSE; /* report #optimizations found? */
+static bool report_flag = FALSE; /* report #optimizations found? */
 #ifdef DEBUG
-STATIC bool core_flag = FALSE; /* report core usage? */
+static bool core_flag = FALSE; /* report core usage? */
 #endif
 
-STATIC void mach_init(char* machfile, void (*phase_machinit)(void*))
+static void mach_init(char* machfile, void (*phase_machinit)(void*))
 {
 	/* Read target machine dependent information */
 

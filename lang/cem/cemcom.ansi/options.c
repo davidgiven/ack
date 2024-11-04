@@ -28,11 +28,11 @@ extern int density;
 
 
 
-static int txt2int(register char **);
+static int txt2int(char **);
 
 void do_option(char *text)
 {
-	register char opt;
+	char opt;
 
 next_option:			/* to allow combined one-char options */
 	switch (opt = *text++)	{
@@ -124,7 +124,7 @@ next_option:			/* to allow combined one-char options */
 #ifndef NOCROSS
 	case 'V' :	/* set object sizes and alignment requirements	*/
 	{
-		register arith sz, algn;
+		arith sz, algn;
 		char c;
 
 		while ( (c = *text++) !=0)	{
@@ -218,12 +218,12 @@ next_option:			/* to allow combined one-char options */
 	}
 }
 
-static int txt2int(register char **tp)
+static int txt2int(char **tp)
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0, ch;
+	int val = 0, ch;
 	
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';

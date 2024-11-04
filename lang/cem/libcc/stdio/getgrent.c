@@ -7,16 +7,16 @@
 
 #include <grp.h>
 
-#define PRIVATE static
+#define static static
 
-PRIVATE char _gr_file[] = "/etc/group";
-PRIVATE char _grbuf[256];
-PRIVATE char _buffer[1024];
-PRIVATE char *_pnt;
-PRIVATE char *_buf;
-PRIVATE int  _gfd = -1;
-PRIVATE int  _bufcnt;
-PRIVATE struct group grp;
+static char _gr_file[] = "/etc/group";
+static char _grbuf[256];
+static char _buffer[1024];
+static char *_pnt;
+static char *_buf;
+static int  _gfd = -1;
+static int  _bufcnt;
+static struct group grp;
 
 setgrent ()
 {

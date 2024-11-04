@@ -16,16 +16,16 @@ do_local_relocation()
  * Also remove useless relocation structures.
  */
 {
-	register struct outrelo *rp;
+	struct outrelo *rp;
 	int diff = 0;
 	
 	for ( rp = reloc_info; rp < relo; rp++) {
-		register struct outname *np = &symbol_table[rp->or_nami];
+		struct outname *np = &symbol_table[rp->or_nami];
 		int olddiff = diff;
 		
 		if ( np->on_valu  != -1 && ! (np->on_type & S_COM)) {
-			register long oldval,newval;
-			register char *sect;
+			long oldval,newval;
+			char *sect;
 
 			switch( rp->or_sect - S_MIN) {
 				case SEGTXT:

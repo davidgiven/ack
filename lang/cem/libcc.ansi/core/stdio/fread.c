@@ -8,12 +8,12 @@
 #if ACKCONF_WANT_STDIO
 
 size_t
-fread(void* ptr, size_t size, size_t nmemb, register FILE* stream)
+fread(void* ptr, size_t size, size_t nmemb, FILE* stream)
 {
-	register char* cp = ptr;
-	register int c;
+	char* cp = ptr;
+	int c;
 	size_t ndone = 0;
-	register size_t s;
+	size_t s;
 
 	if (size)
 		while (ndone < nmemb)

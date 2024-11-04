@@ -43,7 +43,7 @@ static int	nsubnodes[] = {
 
 struct node *getnode(int class)
 {
-	register struct node *nd = new_node();
+	struct node *nd = new_node();
 
 	if (options['R']) nd->nd_flags |= ROPTION;
 	if (options['A']) nd->nd_flags |= AOPTION;
@@ -53,7 +53,7 @@ struct node *getnode(int class)
 
 struct node *dot2node(int class, struct node *left, struct node *right)
 {
-	register struct node *nd = getnode(class);
+	struct node *nd = getnode(class);
 
 	nd->nd_symb = dot.tk_symb;
 	nd->nd_lineno = dot.tk_lineno;
@@ -64,7 +64,7 @@ struct node *dot2node(int class, struct node *left, struct node *right)
 
 struct node *dot2leaf(int class)
 {
-	register struct node *nd = getnode(class);
+	struct node *nd = getnode(class);
 
 	nd->nd_token = dot;
 	switch(nsubnodes[class]) {
@@ -79,7 +79,7 @@ struct node *dot2leaf(int class)
 	return nd;
 }
 
-void FreeNode(register struct node *nd)
+void FreeNode(struct node *nd)
 {
 	/*	Put nodes that are no longer needed back onto the free
 		list
@@ -98,7 +98,7 @@ void FreeNode(register struct node *nd)
 }
 
 /*ARGSUSED*/
-int NodeCrash(register struct node* expp, label exit_label, int end_reached)
+int NodeCrash(struct node* expp, label exit_label, int end_reached)
 {
 	crash("(NodeCrash) Illegal node");
 }
@@ -120,7 +120,7 @@ void indnt(int lvl)
 	}
 }
 
-void printnode(register struct node *nd, int lvl)
+void printnode(struct node *nd, int lvl)
 {
 	indnt(lvl);
 	print("Class: %d; Symbol: %s; Flags: %d\n", nd->nd_class, symbol2str(nd->nd_symb), nd->nd_flags);
@@ -132,7 +132,7 @@ void printnode(register struct node *nd, int lvl)
 	}
 }
 
-void PrNode(register struct node *nd, int lvl)
+void PrNode(struct node *nd, int lvl)
 {
 	if (! nd) {
 		indnt(lvl); print("<nilnode>\n");

@@ -46,7 +46,7 @@ unsigned short NGlobals = 0; /* Number of global names. */
  */
 void init_symboltable(void)
 {
-	register ind_t* rap;
+	ind_t* rap;
 
 	for (rap = hashtable; rap < &hashtable[NHASH]; rap++)
 		*rap = BADOFF;
@@ -61,11 +61,11 @@ void init_symboltable(void)
  */
 struct outname* searchname(char* string, int hashval)
 {
-	register char* rcp;
-	register char* namestring;
-	register ind_t symindex;
-	register struct outname* name;
-	register struct symbol* sym;
+	char* rcp;
+	char* namestring;
+	ind_t symindex;
+	struct outname* name;
+	struct symbol* sym;
 
 	symindex = hashtable[hashval];
 	debug("looking for %s %d %z:", string, hashval, (size_t)hashtable[hashval], 0);
@@ -102,7 +102,7 @@ void entername(struct outname* name, int hashval)
 	ind_t savindex;
 	ind_t symindex;
 	ind_t namindex;
-	register struct symbol* sym;
+	struct symbol* sym;
 	struct outname* newname;
 
 	debug(
@@ -138,10 +138,10 @@ unsigned int indexof(struct outname* name)
  * 0 <= hash(p) < NHASH, so it can - and will - be used
  * as index in a hash table.
  */
-int hash(register char* p)
+int hash(char* p)
 {
-	register unsigned short h = 0;
-	register int c;
+	unsigned short h = 0;
+	int c;
 
 	while ((c = *p++) != '\0')
 	{

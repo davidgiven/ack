@@ -4,7 +4,7 @@
 char *malloc();
 
 _fillbuf(iop)
-register FILE *iop;
+FILE *iop;
 {
 	static unsigned char ch[_NFILES];
 

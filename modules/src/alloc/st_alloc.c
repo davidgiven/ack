@@ -19,10 +19,10 @@ extern char *malloc();
 
 #include	"alloc.h"
 
-char *st_alloc(char **phead, register unsigned int size, int count)
+char *st_alloc(char **phead, unsigned int size, int count)
 {
-	register char *p = NULL;
-	register long *q;
+	char *p = NULL;
+	long *q;
 	char *retval;
 
 	if (*phead == 0)	{

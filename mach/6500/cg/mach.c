@@ -3,7 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-void con_part(register int sz, word w)
+void con_part(int sz, word w)
 {
 	while (part_size % sz)
 		part_size++;

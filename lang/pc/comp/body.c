@@ -21,7 +21,7 @@
 #include	"typequiv.h"
 #include	"error.h"
 
-void MarkDef(register struct node *nd, unsigned short flags, int on)
+void MarkDef(struct node *nd, unsigned short flags, int on)
 {
 	while (nd && nd->nd_class != Def)
 	{
@@ -52,7 +52,7 @@ void MarkDef(register struct node *nd, unsigned short flags, int on)
 	}
 }
 
-void AssertStat(register struct node *expp, unsigned short line)
+void AssertStat(struct node *expp, unsigned short line)
 {
 	struct desig dsr;
 
@@ -74,9 +74,9 @@ void AssertStat(register struct node *expp, unsigned short line)
 	}
 }
 
-void AssignStat(register struct node *left, register struct node *right)
+void AssignStat(struct node *left, struct node *right)
 {
-	register struct type *ltp, *rtp;
+	struct type *ltp, *rtp;
 	int retval = 0;
 	struct desig dsr;
 
@@ -141,7 +141,7 @@ void AssignStat(register struct node *left, register struct node *right)
 	FreeNode(right);
 }
 
-void ProcStat(register struct node *nd)
+void ProcStat(struct node *nd)
 {
 	if (!ChkCall(nd))
 		return;
@@ -153,9 +153,9 @@ void ProcStat(register struct node *nd)
 	}
 }
 
-void ChkForStat(register struct node *nd)
+void ChkForStat(struct node *nd)
 {
-	register struct def *df;
+	struct def *df;
 	int retvar = 0;
 
 	retvar = ChkVariable(nd);
@@ -214,9 +214,9 @@ void ChkForStat(register struct node *nd)
 	return;
 }
 
-void EndForStat(register struct node *nd)
+void EndForStat(struct node *nd)
 {
-	register struct def *df;
+	struct def *df;
 
 	df = nd->nd_def;
 
@@ -228,7 +228,7 @@ void EndForStat(register struct node *nd)
 	MarkDef(nd, (unsigned short) (D_INLOOP | D_SET), 0);
 }
 
-arith CodeInitFor(register struct node *nd, int priority)
+arith CodeInitFor(struct node *nd, int priority)
 {
 	/* Push final-value, the value may only be evaluated
 	 once, so generate a temporary for it, when not a constant.

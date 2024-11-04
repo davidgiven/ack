@@ -84,8 +84,8 @@ match_name(buf, name)
 	char	*buf;
 	char	*name;
 {
-	register char	*tp = buf;
-	register char	*np;
+	char	*tp = buf;
+	char	*np;
 
 	for (;;) {
 		for (np = name; *np && *tp == *np; np++, tp++) { }
@@ -106,7 +106,7 @@ check_for_tc()
 	char		*savcapab = capab;
 	char		buf[1024];
 	char		terminalname[128];
-	register char	*p = capab + strlen(capab) - 2, *q;
+	char	*p = capab + strlen(capab) - 2, *q;
 
 	while (*p != ':')
 		if (--p < capab)
@@ -281,7 +281,7 @@ char	*cm;
 int	destcol;
 int	destline;
 {
-	register char	*rp;
+	char	*rp;
 	static char	ret[24];
 	char		added[16];
 	int		*dp = &destline;
@@ -402,7 +402,7 @@ static int tens_of_ms_p_char[] = {	/* index as returned by gtty */
  */
 int
 tputs(cp, affcnt, outc)
-register char	*cp;
+char	*cp;
 int		affcnt;
 int		(*outc)();
 {

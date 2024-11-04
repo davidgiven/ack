@@ -1,8 +1,8 @@
 /* $Id$ */
 ffs(i)
-	register int i;
+	int i;
 {
-	register int n;
+	int n;
 
 	for (n = 8*sizeof(int); n > 0; n--, i >>= 1)
 		if ((i&1))

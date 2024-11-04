@@ -70,7 +70,7 @@ void Lremove(Lelem_t x, lset* s_p)
 	 * the set, nothing happens.
 	 */
 
-	register elem_p *epp, ep;
+	elem_p *epp, ep;
 	lset s;
 
 	s = *s_p;
@@ -129,7 +129,7 @@ void Ljoin(lset s1, lset* s2_p)
 	 * first set becomes undefined).
 	 */
 
-	register elem_p *epp, ep;
+	elem_p *epp, ep;
 	lset s2;
 
 	/* First all elements of s1 that are also an element of s2
@@ -162,7 +162,7 @@ void Ljoin(lset s1, lset* s2_p)
 
 void Ldeleteset(lset s)
 {
-	register elem_p ep, next;
+	elem_p ep, next;
 
 	for (ep = s; ep != (elem_p)0; ep = next)
 	{
@@ -175,7 +175,7 @@ bool Lis_subset(lset s1, lset s2)
 {
 	/* See if s1 is a subset of s2 */
 
-	register Lindex i;
+	Lindex i;
 
 	for (i = Lfirst(s1); i != (Lindex)0; i = Lnext(i, s1))
 	{
@@ -189,8 +189,8 @@ short Lnrelems(lset s)
 {
 	/* Compute the number of elements of a set */
 
-	register elem_p ep;
-	register short cnt;
+	elem_p ep;
+	short cnt;
 
 	cnt = 0;
 	for (ep = s; ep != (elem_p)0; ep = ep->e_next)

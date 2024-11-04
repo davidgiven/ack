@@ -50,20 +50,20 @@ extern p_set setalloc(void);
  * a = a union b.
  * Return 1 if the set a changed
  */
-extern int setunion(register p_set a,register p_set b);
+extern int setunion(p_set a, p_set b);
 /*
  * a = a intersect b.
  * return 1 if the result is empty
  */
-extern int setintersect(register p_set a,register p_set b);
+extern int setintersect(p_set a, p_set b);
 /*
  * a = a setminus b
  */
-extern void setminus(register p_set a,register p_set b);
+extern void setminus(p_set a, p_set b);
 /*
  * Return 1 if the set p is empty
  */
-extern int setempty(register p_set p);
+extern int setempty(p_set p);
 /*
  * The set "set" will serve as a recovery set.
  * Search for it in the table. If not present, enter it.
@@ -71,6 +71,6 @@ extern int setempty(register p_set p);
  * sets is examined with linear search.
  */
 extern int findindex(p_set set);
-extern int setcount(register p_set set, int *saved);
+extern int setcount(p_set set, int *saved);
 
 #endif /* SETS_H_ */

@@ -24,12 +24,12 @@ struct tests {
 	{ 0, 0, 0, 0}
 };
 
-int dotest(register struct tests *p);
+int dotest(struct tests *p);
 
 int
 main()
 {
-	register struct tests *p = tests;
+	struct tests *p = tests;
 	int exit_status = 0;
 
 	while (p->op1) {
@@ -39,7 +39,7 @@ main()
 	return exit_status;
 }
 
-int dotest(register struct tests *p)
+int dotest(struct tests *p)
 {
 	char buf[128];
 	flt_arith e1, e2, e;

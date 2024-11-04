@@ -28,10 +28,10 @@ extern bool incore;
 extern unsigned short NLocals;
 extern int flagword;
 
-static void adjust_names(register struct outname*, struct outhead*, register char*);
+static void adjust_names(struct outname*, struct outhead*, char*);
 static void handle_relos(struct outhead*, struct outsect*, struct outname*);
-static void put_locals(struct outname*, register unsigned int);
-static void compute_origins(register struct outsect*, register unsigned int);
+static void put_locals(struct outname*, unsigned int);
+static void compute_origins(struct outsect*, unsigned int);
 
 /*
  * We know all there is to know about the current module.
@@ -67,11 +67,11 @@ void finish(void)
 /*
  * Adjust all local names for the move into core.
  */
-static void adjust_names(register struct outname* name, struct outhead* head, register char* chars)
+static void adjust_names(struct outname* name, struct outhead* head, char* chars)
 
 {
-	register int cnt;
-	register long charoff;
+	int cnt;
+	long charoff;
 	struct outname* base = name;
 
 	cnt = head->oh_nname;
@@ -90,7 +90,7 @@ static void adjust_names(register struct outname* name, struct outhead* head, re
 
 void do_crs(struct outname* base, unsigned int count)
 {
-	register struct outname* name = base;
+	struct outname* name = base;
 
 	while (count--)
 	{
@@ -125,10 +125,10 @@ void do_crs(struct outname* base, unsigned int count)
  */
 static void handle_relos(struct outhead* head, struct outsect* sects, struct outname* names)
 {
-	register struct outrelo* relo;
-	register int sectindex;
-	register int nrelo;
-	register char* emit;
+	struct outrelo* relo;
+	int sectindex;
+	int nrelo;
+	char* emit;
 	static long zeros[MAXSECT];
 
 	if (incore)
@@ -221,11 +221,11 @@ static void handle_relos(struct outhead* head, struct outsect* sects, struct out
 /*
  * Write out the local names that must be saved.
  */
-static void put_locals(struct outname* name, register unsigned int nnames)
+static void put_locals(struct outname* name, unsigned int nnames)
 
 {
-	register struct outname* oname = name;
-	register struct outname* iname = oname;
+	struct outname* oname = name;
+	struct outname* iname = oname;
 
 	while (nnames--)
 	{
@@ -245,10 +245,10 @@ static void put_locals(struct outname* name, register unsigned int nnames)
  * Add all flen's and all (size - flen == zero)'s of preceding sections
  * with the same number.
  */
-static void compute_origins(register struct outsect* sect, register unsigned int nsect)
+static void compute_origins(struct outsect* sect, unsigned int nsect)
 {
 	extern struct orig relorig[];
-	register struct orig* orig = relorig;
+	struct orig* orig = relorig;
 
 	while (nsect--)
 	{
@@ -267,8 +267,8 @@ static void compute_origins(register struct outsect* sect, register unsigned int
 static void put_dbug(long offdbug)
 {
 	char buf[512];
-	register int nbytes;
-	register long dbugsize;
+	int nbytes;
+	long dbugsize;
 	extern long objectsize;
 
 	dbugsize = objectsize - offdbug;

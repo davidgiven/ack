@@ -14,7 +14,7 @@
 
 FILE* fdopen(int fd, const char* mode)
 {
-	register int i;
+	int i;
 	FILE* stream;
 	int flags = 0;
 

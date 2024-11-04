@@ -8,7 +8,7 @@ extern long 	B_base_address[];
 
 do_local_relocation()
 {
-	register struct outrelo *rp;
+	struct outrelo *rp;
 	
 	/* print( "n relocation records %d\n", relo - reloc_info);  */
 
@@ -16,10 +16,10 @@ do_local_relocation()
 	B_base_address[SEGCON] = text - text_area;
 	B_base_address[SEGBSS] = B_base_address[SEGCON] + data - data_area;
 	for ( rp = reloc_info; rp < relo; rp++) {
-		register struct outname *np = &symbol_table[rp->or_nami];
+		struct outname *np = &symbol_table[rp->or_nami];
 
 		if ( np->on_valu  != -1 && ! (np->on_type & S_COM)) {
-			register char *sect;
+			char *sect;
 
 			switch( rp->or_sect - S_MIN) {
 				case SEGTXT:

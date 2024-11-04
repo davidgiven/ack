@@ -51,7 +51,7 @@ expr_t make_expr(int type, int operator, int op1, int op2)
 expr_t regno_expr(int regno)
 {
 	expr_t result;
-	register int i;
+	int i;
 
 	result.ex_typ = TYPREG;
 	result.ex_index = ex_lookup(EX_REG, regno, 0);
@@ -63,7 +63,7 @@ expr_t regno_expr(int regno)
 
 expr_t ident_expr(char *name)
 {
-	register symbol *sy_p;
+	symbol *sy_p;
 
 	sy_p = lookup(name, symany, mustexist);
 	if (sy_p->sy_type == symconst)
@@ -88,10 +88,10 @@ expr_t subreg_expr(int tokarg, int subreg)
 	return (result);
 }
 
-void subregset(register short *sp, int subreg, register short *regset)
+void subregset(short *sp, int subreg, short *regset)
 {
-	register int i;
-	register reginfo *rp;
+	int i;
+	reginfo *rp;
 
 	for (i = 0; i < SZOFSET(MAXREGS); i++)
 		regset[i] = 0;
@@ -117,9 +117,9 @@ void subregset(register short *sp, int subreg, register short *regset)
 
 int membset(int setno, char *name, short *regset, char *appearance, int restyp, int *typp)
 {
-	register short *sp;
-	register token_p tp;
-	register int i, j, k;
+	short *sp;
+	token_p tp;
+	int i, j, k;
 	int thistyp;
 	int typesdiffer = 0;
 	int res_j = -1;
@@ -220,8 +220,8 @@ expr_t perc_ident_expr(char *name)
 expr_t all_expr(int all_no, int subreg)
 {
 	set_t localset;
-	register int i;
-	register short *sp;
+	int i;
+	short *sp;
 	expr_t result;
 
 	sp = l_props[allreg[all_no]].pr_regset;
@@ -376,7 +376,7 @@ void initnodes(void)
 
 int ex_lookup(int operator, int lnode, int rnode)
 {
-	register node_p p;
+	node_p p;
 
 	for (p = nodes + 1; p < &nodes[nnodes]; p++)
 	{

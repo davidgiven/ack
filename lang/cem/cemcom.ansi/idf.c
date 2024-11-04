@@ -73,14 +73,14 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 	 This routine implements the rich semantics of C
 	 declarations.
 	 */
-	register struct idf *idf = dc->dc_idf;
-	register int sc = ds->ds_sc;
+	struct idf *idf = dc->dc_idf;
+	int sc = ds->ds_sc;
 	/*	This local copy is essential:
 	 char b(), c;
 	 makes b GLOBAL and c AUTO.
 	 */
-	register struct def *def = idf->id_def; /* may be NULL */
-	register struct type *type;
+	struct def *def = idf->id_def; /* may be NULL */
+	struct type *type;
 	struct stack_level *stl = stack_level_of(lvl);
 	char formal_array = 0;
 
@@ -213,7 +213,7 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 	}
 	else
 	{ /* fill in the def block */
-		register struct def *newdef = new_def();
+		struct def *newdef = new_def();
 
 		newdef->next = def;
 		newdef->df_level = lvl;
@@ -265,7 +265,7 @@ int actual_declaration(int sc, struct type *tp)
 {
 	/*	An actual_declaration needs space, right here and now.
 	 */
-	register int fund = tp->tp_fund;
+	int fund = tp->tp_fund;
 
 	if (sc == ENUM || sc == TYPEDEF) /* virtual declarations */
 		return 0;
@@ -281,7 +281,7 @@ int actual_declaration(int sc, struct type *tp)
 	return 1;
 }
 
-void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
+void global_redecl(struct idf *idf, int new_sc, struct type *tp)
 {
 	/*	A global identifier may be declared several times,
 	 provided the declarations do not conflict; they might
@@ -289,7 +289,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 	 an array) or they might conflict or supplement each other
 	 in storage class.
 	 */
-	register struct def *def = idf->id_def;
+	struct def *def = idf->id_def;
 
 	while (def->df_level != L_GLOBAL)
 		def = def->next;
@@ -386,7 +386,7 @@ void global_redecl(register struct idf *idf, int new_sc, struct type *tp)
 	}
 }
 
-int good_formal(register struct def *def, register struct idf *idf)
+int good_formal(struct def *def, struct idf *idf)
 {
 	/*	Succeeds if def is a proper L_FORMAL1 definition and
 	 gives an error message otherwise.
@@ -405,7 +405,7 @@ void declare_params(struct declarator *dc)
 {
 	/*	Declares the formal parameters if they exist.
 	 */
-	register struct formal *fm = dc->dc_formal;
+	struct formal *fm = dc->dc_formal;
 
 	while (fm)
 	{
@@ -414,11 +414,11 @@ void declare_params(struct declarator *dc)
 	}
 }
 
-void idf_initialized(register struct idf *idf)
+void idf_initialized(struct idf *idf)
 {
 	/*	The topmost definition of idf is set to initialized.
 	 */
-	register struct def *def = idf->id_def; /* the topmost */
+	struct def *def = idf->id_def; /* the topmost */
 
 	while (def->df_level <= L_PROTO)
 		def = def->next;
@@ -449,9 +449,9 @@ void declare_enum(struct type *tp, struct idf *idf, arith l)
 
 void check_formals(struct idf *idf, struct declarator *dc)
 {
-	register struct formal *fm = dc->dc_formal;
-	register struct proto *pl = idf->id_def->df_type->tp_proto;
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct formal *fm = dc->dc_formal;
+	struct proto *pl = idf->id_def->df_type->tp_proto;
+	struct decl_unary *du = dc->dc_decl_unary;
 
 	if (!du)
 	{ /* error or typdef'ed function */
@@ -505,7 +505,7 @@ void check_formals(struct idf *idf, struct declarator *dc)
 	}
 	else
 	{ /* make a pseudo-prototype */
-		register struct proto *lpl = new_proto();
+		struct proto *lpl = new_proto();
 
 		if (!options['o'])
 			warning("'%s' old-fashioned function definition",
@@ -544,9 +544,9 @@ void declare_formals(struct idf *idf, arith *fp)
 	 An address is assigned to each formal parameter.
 	 The total size of the formals is returned in *fp;
 	 */
-	register struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
+	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
 	arith f_offset = (arith) 0;
-	register int nparams = 0;
+	int nparams = 0;
 	int hasproto;
 	struct def *df = idf->id_def;
 
@@ -654,12 +654,12 @@ void add_def(struct idf *idf, int sc, struct type *tp, int lvl)
 	declare_idf(&Ds, &Dc, lvl);
 }
 
-void update_ahead(register struct idf *idf)
+void update_ahead(struct idf *idf)
 {
 	/*	The tk_symb of the token ahead is updated in the light of new
 	 information about the identifier idf.
 	 */
-	register int tk_symb = AHEAD;
+	int tk_symb = AHEAD;
 
 	if ((tk_symb == IDENTIFIER || tk_symb == TYPE_IDENTIFIER)
 			&& ahead.tk_idf == idf)
@@ -668,7 +668,7 @@ void update_ahead(register struct idf *idf)
 																IDENTIFIER;
 }
 
-void free_formals(register struct formal *fm)
+void free_formals(struct formal *fm)
 {
 	while (fm)
 	{

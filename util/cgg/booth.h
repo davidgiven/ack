@@ -218,23 +218,23 @@ EXTERN int rvnumbers[4][MAXREGVARS];	/* The register numbers */
 #define MUST2BEBOOL(e1,e2) int exp1=e1.expr_index,exp2=e2.expr_index;tstbool(e1);tstbool(e2)
 
 ident_p ilookup(string name, int enterf);
-unsigned hash(register string name);
+unsigned hash(string name);
 int lookup(int comm, int operator, int lnode, int rnode);
 list2 lookstruct(list2 ll);
 string scopy(string s);
 void tabovf(string tablename);
 int strlookup(string s);
-int structsize(register list2 s);
+int structsize(list2 s);
 void yyerror(string s, ...);
 int instno(inst_t inst);
 int yyparse(void);
-int stringno(register string s);
+int stringno(string s);
 int exprlookup(set_t sett);
 void tstint(expr_t e);
 void tstbool(expr_t e);
 void inbetween(void);
-int formconversion(register char *p, register token_p tp);
-void setfields(register token_p tp, string format);
+int formconversion(char *p, token_p tp);
+void setfields(token_p tp, string format);
 void chkregexp(int number);
 int findstructel(int number, string name, int *t);
 int argtyp(int mn);

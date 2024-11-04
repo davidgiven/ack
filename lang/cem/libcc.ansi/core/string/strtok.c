@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strtok(register char* string, const char* separators)
+char* strtok(char* string, const char* separators)
 {
-	register char *s1, *s2;
+	char *s1, *s2;
 	static char* savestring;
 
 	if (string == NULL)

@@ -8,9 +8,9 @@
 
 #include "ack_string.h"
 
-char *btszero(char *b, register int n)
+char *btszero(char *b, int n)
 {
-	register char *s = b;
+	char *s = b;
 
 	while (n-- > 0)
 		*s++ = '\0';

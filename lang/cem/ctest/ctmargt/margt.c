@@ -5,7 +5,7 @@
 char rcs_id[] = "$Id$" ;
 
 main(argc,argv,envp) char **argv,**envp ; {
-	register int rargc ;
+	int rargc ;
 
 	rargc=argc ;
 	printf("main called with argc = %d\n",argc) ;

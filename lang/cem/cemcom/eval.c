@@ -65,11 +65,11 @@ arith NewLocal();	/* util.c */
 */
 
 EVAL(expr, val, code, true_label, false_label)
-	register struct expr *expr;
+	struct expr *expr;
 	int val, code;
 	label true_label, false_label;
 {
-	register int gencode = (code == TRUE && expr->ex_type->tp_size > 0);
+	int gencode = (code == TRUE && expr->ex_type->tp_size > 0);
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
@@ -105,9 +105,9 @@ EVAL(expr, val, code, true_label, false_label)
 	case Oper:	/* compound expression	*/
 	{
 		int oper = expr->OP_OPER;
-		register struct expr *left = expr->OP_LEFT;
-		register struct expr *right = expr->OP_RIGHT;
-		register struct type *tp = expr->OP_TYPE;
+		struct expr *left = expr->OP_LEFT;
+		struct expr *right = expr->OP_RIGHT;
+		struct type *tp = expr->OP_TYPE;
 
 		if (tp->tp_fund == ERRONEOUS || (expr->ex_flags & EX_ERROR)) {
 			/* stop immediately */
@@ -476,7 +476,7 @@ EVAL(expr, val, code, true_label, false_label)
 		}
 		case '(':
 		{
-			register struct expr *ex;
+			struct expr *ex;
 			arith ParSize = (arith)0;
 			label setjmp_label = 0;
 
@@ -497,7 +497,7 @@ EVAL(expr, val, code, true_label, false_label)
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					register struct expr *rght = ex->OP_RIGHT;
+					struct expr *rght = ex->OP_RIGHT;
 					EVAL(rght, RVAL,
 					     rght->ex_type->tp_size > 0,
 							NO_LABEL, NO_LABEL);
@@ -706,11 +706,11 @@ truthvalue(relop)
 
 /*	assop() generates the opcode of an assignment operators op=	*/
 assop(type, oper)
-	register struct type *type;
+	struct type *type;
 	int oper;
 {
-	register arith size;
-	register uns = type->tp_unsigned;
+	arith size;
+	uns = type->tp_unsigned;
 
 	if ((int)(size = type->tp_size) < (int)word_size)
 		size = word_size;
@@ -824,14 +824,14 @@ assop(type, oper)
 	- absolute addressing
 */
 store_val(vl, tp)
-	register struct value *vl;
+	struct value *vl;
 	struct type *tp;
 {
 	arith size = tp->tp_size;
 	int tpalign = tp->tp_align;
 	int al_on_word;
-	register int inword;
-	register int indword;
+	int inword;
+	int indword;
 	arith val = vl->vl_value;
 
 	if (vl->vl_class == Const) {	/* absolute addressing */
@@ -843,8 +843,8 @@ store_val(vl, tp)
 	if (!(inword = (size == word_size && al_on_word)))
 		indword = (size == dword_size && al_on_word);
 	if (vl->vl_class == Name) {
-		register struct idf *id = vl->vl_data.vl_idf;
-		register struct def *df = id->id_def;
+		struct idf *id = vl->vl_data.vl_idf;
+		struct def *df = id->id_def;
 
 		if (df->df_level == L_GLOBAL) {
 			if (inword)
@@ -894,16 +894,16 @@ store_val(vl, tp)
 	- local variable
 */
 load_val(expr, rlval)
-	register struct expr *expr; /* expression containing the value	*/
+	struct expr *expr; /* expression containing the value	*/
 	int rlval;		/* generate either LVAL or RVAL		*/
 {
-	register struct type *tp = expr->ex_type;
+	struct type *tp = expr->ex_type;
 	int rvalue = (rlval == RVAL && expr->ex_lvalue != 0);
 	arith size = tp->tp_size;
 	int tpalign = tp->tp_align;
 	int al_on_word;
-	register int inword, indword;
-	register arith val = expr->VL_VALUE;
+	int inword, indword;
+	arith val = expr->VL_VALUE;
 
 	if (expr->VL_CLASS == Const) {
 		if (rvalue) { /* absolute addressing */
@@ -938,8 +938,8 @@ load_val(expr, rlval)
 		}
 	}
 	else {
-		register struct idf *id = expr->VL_IDF;
-		register struct def *df = id->id_def;
+		struct idf *id = expr->VL_IDF;
+		struct def *df = id->id_def;
 
 		ASSERT(ISNAME(expr));
 		if (df->df_type->tp_fund == FUNCTION) {

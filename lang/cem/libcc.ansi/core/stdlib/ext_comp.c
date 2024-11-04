@@ -27,12 +27,12 @@ static mul_ext(struct EXTEND* e1, struct EXTEND* e2, struct EXTEND* e3)
 	/*	Multiply the extended numbers e1 and e2, and put the
 		result in e3.
 	*/
-	register int i, j; /* loop control	*/
+	int i, j; /* loop control	*/
 	unsigned short mp[4];
 	unsigned short mc[4];
 	unsigned short result[8]; /* result */
 
-	register unsigned short* pres;
+	unsigned short* pres;
 
 	/* first save the sign (XOR)			*/
 	e3->sign = e1->sign ^ e2->sign;
@@ -272,7 +272,7 @@ b64_add(struct mantissa* e1, struct mantissa* e2)
 		 * pointers to 64 bit 'registers'
 		 */
 {
-	register int overflow;
+	int overflow;
 	int carry;
 
 	/* add higher pair of 32 bits */
@@ -499,7 +499,7 @@ static add_exponent(struct EXTEND* e, int exp)
 void _str_ext_cvt(const char* s, char** ss, struct EXTEND* e)
 {
 	/*	Like strtod, but for extended precision */
-	register int c;
+	int c;
 	int dotseen = 0;
 	int digitseen = 0;
 	int exp = 0;
@@ -616,8 +616,8 @@ char* _ext_str_cvt(struct EXTEND* e, int ndigit, int* decpt, int* sign, int ecvt
 
 	static char buf[NDIGITS + 1];
 	struct EXTEND m;
-	register char* p = buf;
-	register char* pe;
+	char* p = buf;
+	char* pe;
 	int findex = 0;
 
 	if (ndigit < 0)
@@ -637,7 +637,7 @@ char* _ext_str_cvt(struct EXTEND* e, int ndigit, int* decpt, int* sign, int ecvt
 	*decpt = 0;
 	if (e->m1 != 0)
 	{
-		register struct EXTEND* pp = &big_ten_powers[1];
+		struct EXTEND* pp = &big_ten_powers[1];
 
 		while (cmp_ext(e, pp) >= 0)
 		{

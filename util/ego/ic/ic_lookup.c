@@ -40,7 +40,7 @@ char* lastname;
 
 lab_id instr_lab(short number)
 {
-	register num_p *npp, np;
+	num_p *npp, np;
 
 	/* In EM assembly language, a label is an unsigned number,
 	 * e.g. 120 in 'BRA *120'. In IC the labels of a procedure
@@ -77,10 +77,10 @@ lab_id instr_lab(short number)
 
 /*  symlookup */
 
-STATIC unsigned hash(const char* string)
+static unsigned hash(const char* string)
 {
-	register const char* p;
-	register unsigned i, sum;
+	const char* p;
+	unsigned i, sum;
 
 	for (sum = i = 0, p = string; *p; i += 3)
 		sum ^= (*p++) << (i & 07);
@@ -98,8 +98,8 @@ dblock_p symlookup(const char* name, int status)
 	 * data label, i.e. a hol block need not have a name.
 	 */
 
-	register sym_p *spp, sp;
-	register dblock_p dp;
+	sym_p *spp, sp;
+	dblock_p dp;
 
 	if (name == (char*)0)
 	{
@@ -208,8 +208,8 @@ proc_p getproc(int status)
 
 proc_p proclookup(const char* name, int status)
 {
-	register prc_p *ppp, pp;
-	register proc_p dp;
+	prc_p *ppp, pp;
+	proc_p dp;
 
 	ppp = &prochash[hash(name) % NPROCHASH];
 	while (*ppp != (prc_p)0)
@@ -279,7 +279,7 @@ proc_p proclookup(const char* name, int status)
 
 void cleaninstrlabs(void)
 {
-	register num_p *npp, np, next;
+	num_p *npp, np, next;
 
 	for (npp = numhash; npp < &numhash[NNUMHASH]; npp++)
 	{
@@ -309,7 +309,7 @@ void dump_procnames(prc_p hash[], int n, FILE* f)
 	 * more than once, the PF_WRITTEN flag is used.
 	 */
 
-	register prc_p *pp, ph;
+	prc_p *pp, ph;
 	proc_p p;
 
 #define PF_WRITTEN 01
@@ -344,7 +344,7 @@ void cleanprocs(prc_p hash[], int n, int mask)
 	 * remaining prc structs are also removed.
 	 */
 
-	register prc_p *pp, ph, x, next;
+	prc_p *pp, ph, x, next;
 
 	for (pp = &hash[0]; pp < &hash[n]; pp++)
 	{
@@ -388,7 +388,7 @@ void dump_dblocknames(sym_p hash[], int n, FILE* f)
 	 * This routine is called once for every input file.
 	 */
 
-	register sym_p *sp, sh;
+	sym_p *sp, sh;
 	dblock_p d;
 
 #define DF_WRITTEN 01
@@ -418,7 +418,7 @@ void cleandblocks(sym_p hash[], int n, int mask)
 	 * of those data blocks that are internal must be removed.
 	 */
 
-	register sym_p *sp, sh, x, next;
+	sym_p *sp, sh, x, next;
 
 	for (sp = &hash[0]; sp < &hash[n]; sp++)
 	{

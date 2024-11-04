@@ -55,7 +55,7 @@ expptr p;
 
 exelse()
 {
-	register struct Ctlframe *c;
+	struct Ctlframe *c;
 
 	for(c = ctlstack; c->ctltype == CTLIFX; --c);
 	if(c->ctltype == CTLIF) {
@@ -101,7 +101,7 @@ new_endif()
 pushctl(code)
  int code;
 {
-	register int i;
+	int i;
 
 	if(++ctlstack >= lastctl)
 		many("loops or if-then-elses", 'c', maxctl);
@@ -127,7 +127,7 @@ popctl()
 
 LOCAL poplab()
 {
-	register struct Labelblock  *lp;
+	struct Labelblock  *lp;
 
 	for(lp = labeltab ; lp < highlabtab ; ++lp)
 		if(lp->labdefined)
@@ -161,8 +161,8 @@ struct Labelblock *lab;
 
 
 exequals(lp, rp)
-register struct Primblock *lp;
-register expptr rp;
+struct Primblock *lp;
+expptr rp;
 {
 	if(lp->tag != TPRIM)
 	{
@@ -199,8 +199,8 @@ mkstfunct(lp, rp)
 struct Primblock *lp;
 expptr rp;
 {
-	register struct Primblock *p;
-	register Namep np;
+	struct Primblock *p;
+	Namep np;
 	chainp args;
 
 	laststfcn = thisstno;
@@ -261,7 +261,7 @@ struct Listblock *args;
 int nstars;
 struct Labelblock *labels[ ];
 {
-	register expptr p;
+	expptr p;
 
 	if (name->vtype != TYSUBR) {
 		if (name->vinfproc && !name->vcalled) {
@@ -292,7 +292,7 @@ struct Labelblock *labels[ ];
 
 exstop(stop, p)
 int stop;
-register expptr p;
+expptr p;
 {
 	char *str;
 	int n;
@@ -359,10 +359,10 @@ int range;			/* end label */
 Namep loopname;
 chainp spec;			/* input spec must have at least 2 exprs */
 {
-	register expptr p;
-	register Namep np;
+	expptr p;
+	Namep np;
 	chainp cp;		/* loops over the fields in   spec */
-	register int i;
+	int i;
 	int dotype;		/* type of the index variable */
 	int incsign;		/* sign of the increment, if it's constant
 				   */
@@ -471,7 +471,7 @@ chainp spec;			/* input spec must have at least 2 exprs */
    not yet consistent */
 
 /* Declare the loop initialization value, casting it properly and declaring a
-   register if need be */
+   if need be */
 
 	if (ISCONST (DOINIT) || !onetripflag)
 /* putx added 6-29-89 (mwm), not sure if fixtype is required, but I doubt it
@@ -587,11 +587,11 @@ exenddo(np)
 enddo(here)
 int here;
 {
-	register struct Ctlframe *q;
+	struct Ctlframe *q;
 	Namep np;			/* name of the current DO index */
 	Addrp ap;
-	register int i;
-	register expptr e;
+	int i;
+	expptr e;
 
 /* Many DO's can end at the same statement, so keep looping over all
    nested indicies */
@@ -641,16 +641,16 @@ int here;
 }
 
 exassign(vname, labelval)
- register Namep vname;
+ Namep vname;
 struct Labelblock *labelval;
 {
 	Addrp p;
 	expptr mkaddcon();
-	register Addrp q;
+	Addrp q;
 	static char nullstr[] = "";
 	char *fs;
-	register chainp cp, cpprev;
-	register ftnint k, stno;
+	chainp cp, cpprev;
+	ftnint k, stno;
 
 	p = mkplace(vname);
 	if( ! ONEOF(p->vtype, MSKINT|MSKADDR) ) {
@@ -727,7 +727,7 @@ exarif(expr, neglab, zerlab, poslab)
 expptr expr;
 struct Labelblock *neglab, *zerlab, *poslab;
 {
-    register int lm, lz, lp;
+    int lm, lz, lp;
 
     lm = neglab->stateno;
     lz = zerlab->stateno;
@@ -796,7 +796,7 @@ exar2(op, e, l1, l2)
    implement the alternate return mechanism */
 
 exreturn(p)
-register expptr p;
+expptr p;
 {
 	if(procclass != CLPROC)
 		warn("RETURN statement in main or block data");
@@ -819,7 +819,7 @@ register expptr p;
 exasgoto(labvar)
 Namep labvar;
 {
-	register Addrp p;
+	Addrp p;
 	void p1_asgoto();
 
 	p = mkplace(labvar);

@@ -18,6 +18,6 @@ void extract(void);
  * Otherwise we just add the accumulated size of all normal parts in preceding
  * sections with the same size.
  */
-void namerelocate(register struct outname* name);
+void namerelocate(struct outname* name);
 
 #endif /* __EXTRACT_H_INCLUDED___ */

@@ -18,8 +18,8 @@ char *m;
 
 
 process_operand( str, op)
-register char *str;
-register struct t_operand *op;
+char *str;
+struct t_operand *op;
 {
 	char *glob_lbl(), *strchr();
 
@@ -178,7 +178,7 @@ char *reg;
 }
 
 int is_reg( str)
-register char *str;
+char *str;
 {
 	switch ( *str) {
 	  case 'a' :
@@ -206,7 +206,7 @@ char *lbl;
 
 
 int mode_reg( eaddr)
-register struct t_operand *eaddr;
+struct t_operand *eaddr;
 {
 	switch ( eaddr->type) {
 	  case IS_A_REG         : return( 0x08 | eaddr->reg);
@@ -249,7 +249,7 @@ register struct t_operand *eaddr;
 
 
 code_extension( eaddr)
-register struct t_operand *eaddr;
+struct t_operand *eaddr;
 {
 
 	switch ( eaddr->type) {
@@ -385,9 +385,9 @@ struct t_operand *dst;
 
 
 int two_log( nr)
-register int nr;
+int nr;
 {
-	register int log;
+	int log;
 
 	for ( log = 0; nr >= 2; nr >>= 1)
 		log++;

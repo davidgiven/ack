@@ -73,11 +73,11 @@ typedef unsigned char uchar;
 
  long
 sum32(sum, x, n)
- register long sum;
- register uchar *x;
+ long sum;
+ uchar *x;
  int n;
 {
-	register uchar *xe;
+	uchar *xe;
 	static long crc_table[256] = {
 		0,		151466134,	302932268,	453595578,
 		-9583591,	-160762737,	-312236747,	-463170141,
@@ -155,7 +155,7 @@ process(s, x)
  char *s;
  int x;
 {
-	register int n;
+	int n;
 	uchar buf[16*1024];
 	long fsize, sum;
 

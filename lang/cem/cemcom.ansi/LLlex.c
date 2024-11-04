@@ -47,8 +47,8 @@ extern int lint_skip_comment;
 /* Internal function declarations */
 static arith char_constant(char*);
 static char* string_token(char *, int , int *);
-static int quoted(register int);
-static int hex_val(register int);
+static int quoted(int);
+static int hex_val(int);
 static void strflt2tok(char [], struct token *);
 static void strint2tok(char [], struct token *);
 
@@ -84,7 +84,7 @@ int LLlex(void)
 }
 
 
-int GetToken(register struct token* ptok)
+int GetToken(struct token* ptok)
 {
 	/*	GetToken() is the actual token recognizer. It calls the
 	    control line interpreter if it encounters a "\n{w}*#"
@@ -92,7 +92,7 @@ int GetToken(register struct token* ptok)
 	    needed.
 	*/
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
-	register int ch, nch;
+	int ch, nch;
 
 	token_nmb++;
 
@@ -269,9 +269,9 @@ go_on: /* rescan, the following character has been read	*/
 		/* fallthrough */
 		case STIDF:
 		{
-			register char* tg = &buf[0];
-			register int pos = -1;
-			register struct idf* idef;
+			char* tg = &buf[0];
+			int pos = -1;
+			struct idf* idef;
 			extern int idfsize; /* ??? */
 			do
 			{ /* read the identifier	*/
@@ -298,8 +298,8 @@ go_on: /* rescan, the following character has been read	*/
 		}
 		case STNUM: /* a numeric constant	*/
 		{
-			register int siz_left = NUMSIZE - 1;
-			register char* np = &buf[0];
+			int siz_left = NUMSIZE - 1;
+			char* np = &buf[0];
 			int flags = 0;
 
 #define store(ch)                                                                                  \
@@ -390,8 +390,8 @@ go_on: /* rescan, the following character has been read	*/
 
 static arith char_constant(char* nm)
 {
-	register arith val = 0;
-	register int ch;
+	arith val = 0;
+	int ch;
 	int size = 0;
 
 	ch = GetChar();
@@ -424,10 +424,10 @@ static arith char_constant(char* nm)
 
 static char* string_token(char *nm, int stop_char, int *plen)
 {
-	register int ch;
-	register int str_size;
-	register char* str = Malloc((unsigned)(str_size = ISTRSIZE));
-	register int pos = 0;
+	int ch;
+	int str_size;
+	char* str = Malloc((unsigned)(str_size = ISTRSIZE));
+	int pos = 0;
 
 	ch = GetChar();
 	while (ch != stop_char)
@@ -455,7 +455,7 @@ static char* string_token(char *nm, int stop_char, int *plen)
 	return str;
 }
 
-static int quoted(register int ch)
+static int quoted(int ch)
 {
 	/*	quoted() replaces an escaped character sequence by the
 	    character meant.
@@ -488,8 +488,8 @@ static int quoted(register int ch)
 				break;
 			case 'x': /* quoted hex */
 			{
-				register int hex = 0;
-				register int vch;
+				int hex = 0;
+				int vch;
 
 				for (;;)
 				{
@@ -505,7 +505,7 @@ static int quoted(register int ch)
 	}
 	else
 	{ /* a quoted octal */
-		register int oct = 0, cnt = 0;
+		int oct = 0, cnt = 0;
 
 		do
 		{
@@ -518,7 +518,7 @@ static int quoted(register int ch)
 	return ch & 0377;
 }
 
-static int hex_val(register int ch)
+static int hex_val(int ch)
 {
 	return is_dig(ch) ? ch - '0' : is_hex(ch) ? (ch - 'a' + 10) & 017 : -1;
 }
@@ -528,7 +528,7 @@ int GetChar(void)
 	/*	The routines GetChar and trigraph parses the trigraph
 	    sequences and removes occurences of \\\n.
 	*/
-	register int ch;
+	int ch;
 
 	LoadChar(ch);
 	return (LexSave = ch);
@@ -539,7 +539,7 @@ int GetChar(void)
  */
 static void strflt2tok(char fltbuf[], struct token* ptok)
 {
-	register char* cp = fltbuf;
+	char* cp = fltbuf;
 	int malformed = 0;
 
 	while (is_dig(*cp))
@@ -593,7 +593,7 @@ static void strflt2tok(char fltbuf[], struct token* ptok)
 
 static void strint2tok(char intbuf[], struct token* ptok)
 {
-	register char* cp = intbuf;
+	char* cp = intbuf;
 	int base = 10, dig;
 	unsigned writh val = 0, ubound;
 	int uns_flg = 0, lng_flg = 0, lnglng_flg = 0;

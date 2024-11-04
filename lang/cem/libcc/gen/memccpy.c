@@ -1,8 +1,8 @@
 /* $Id$ */
 char *
 memccpy(dst, src, c, n)
-	register char *dst, *src;
-	register int n;
+	char *dst, *src;
+	int n;
 {
 	while (n-- > 0) {
 		if ((*dst++ = *src++) == c) return (char *) dst;

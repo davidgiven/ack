@@ -175,7 +175,7 @@ void C_magic(void)
 
 /***    the readable code generating routines	***/
 
-static int wrs(register char *s)
+static int wrs(char *s)
 {
 	while (*s)
 	{
@@ -218,7 +218,7 @@ void C_pt_cst(arith l)
 void C_pt_scon(char *x, arith y)
 {
 	char xbuf[1024];
-	register char *p;
+	char *p;
 
 	C_putbyte('\'');
 	p = bts2str(x, (int) y, xbuf);
@@ -329,7 +329,7 @@ void C_magic(void)
 #define	fit16i(x)	((x) >= (long)(-0x8000) && (x) <= (long)0x7FFF)
 #define	fit8u(x)	((x) <= 0xFF)		/* x is already unsigned */
 
-void C_pt_ilb(register label l)
+void C_pt_ilb(label l)
 {
 	if (fit8u(l))	{
 		put8(sp_ilb1);
@@ -341,7 +341,7 @@ void C_pt_ilb(register label l)
 	}
 }
 
-void C_pt_dlb(register label l)
+void C_pt_dlb(label l)
 {
 	if (fit8u(l))	{
 		put8(sp_dlb1);
@@ -353,7 +353,7 @@ void C_pt_dlb(register label l)
 	}
 }
 
-void C_pt_cst(register arith l)
+void C_pt_cst(arith l)
 {
 	if (l >= (arith) -sp_zcst0 && l < (arith) (sp_ncst0 - sp_zcst0)) {
 		/*	we can convert 'l' to an int because its value
@@ -384,9 +384,9 @@ void C_pt_doff(label l, arith v)
 	}
 }
 
-void C_pt_str(register char *s)
+void C_pt_str(char *s)
 {
-	register int len;
+	int len;
 
 	C_pt_cst((arith) (len = strlen(s)));
 	while (--len >= 0) {
@@ -426,7 +426,7 @@ void C_pt_wcon(int sp, char* v, arith sz)	/* sp_icon, sp_ucon or sp_fcon with in
 	C_pt_str(v);
 }
 
-void C_pt_scon(register char *b, register arith n)
+void C_pt_scon(char *b, arith n)
 {
 	put8(sp_scon);
 	C_pt_cst(n);

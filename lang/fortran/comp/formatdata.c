@@ -397,7 +397,7 @@ int type;
     prev_val = vals = CHNULL;
 
     while (*pointer) {
-	register char *end_ptr, old_val;
+	char *end_ptr, old_val;
 
 /* Move   pointer   to the start of the next word */
 
@@ -600,7 +600,7 @@ make_one_const(type, storage, values)
  chainp values;
 {
     union Constant *Const;
-    register char **L;
+    char **L;
 
     if (type == TYCHAR) {
 	char *str, *str_ptr;
@@ -659,7 +659,7 @@ FILE *infile;
 int *vargroupp;
 char *name;
 {
-    register int i, c;
+    int i, c;
 
     c = getc (infile);
 
@@ -685,7 +685,7 @@ rdlong (infile, n)
 FILE *infile;
 ftnint *n;
 {
-    register int c;
+    int c;
 
     for (c = getc (infile); !feof (infile) && isspace (c); c = getc (infile))
 	;
@@ -738,10 +738,10 @@ memno2info (memno, info)
  static chainp
 do_string(outfile, v, nloc)
  FILEP outfile;
- register chainp v;
+ chainp v;
  ftnint *nloc;
 {
-	register chainp cp, v0;
+	chainp cp, v0;
 	ftnint dloc, k, loc;
 	unsigned long uk;
 	char buf[8], *comma;
@@ -787,10 +787,10 @@ do_string(outfile, v, nloc)
  static chainp
 Ado_string(outfile, v, nloc)
  FILEP outfile;
- register chainp v;
+ chainp v;
  ftnint *nloc;
 {
-	register chainp cp, v0;
+	chainp cp, v0;
 	ftnint dloc, k, loc;
 
 	nice_printf(outfile, "\"");
@@ -848,8 +848,8 @@ wr_equiv_init(outfile, memno, Values, iscomm)
 	char *equiv_name ();
 	int curtype, dtype, filltype, filltype1, j, k, wasblank, xtype;
 	static char Blank[] = "";
-	register char *comma = Blank;
-	register chainp cp, v;
+	char *comma = Blank;
+	chainp cp, v;
 	chainp sentinel, values, v1;
 	ftnint L, L1, dL, dloc, loc, loc0;
 	union Constant Const;

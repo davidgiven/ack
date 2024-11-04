@@ -23,7 +23,7 @@ int OO_signsame(arith a, arith b)
 
 int OO_sfit(arith val, arith nbits)
 {
-	register long mask = ~((1L << (nbits - 1)) - 1);
+	long mask = ~((1L << (nbits - 1)) - 1);
 	return (((val & mask) == 0) | ((val & mask) == mask));
 }
 
@@ -32,7 +32,7 @@ int OO_ufit(arith val, arith nbits)
 	return ((val & (~((1L << (nbits - 1)) - 1))) == 0);
 }
 
-int OO_extsame(register p_instr a1, register p_instr a2)
+int OO_extsame(p_instr a1, p_instr a2)
 {
 	if (a1->em_argtype != a2->em_argtype)
 		return (0);
@@ -54,7 +54,7 @@ int OO_extsame(register p_instr a1, register p_instr a2)
 	}
 }
 
-int OO_namsame(register p_instr a1, register p_instr a2)
+int OO_namsame(p_instr a1, p_instr a2)
 {
 	if (a1->em_argtype != a2->em_argtype)
 		return (0);
@@ -72,7 +72,7 @@ int OO_namsame(register p_instr a1, register p_instr a2)
 	}
 }
 
-arith OO_offset(register p_instr a)
+arith OO_offset(p_instr a)
 {
 	switch (a->em_argtype)
 	{

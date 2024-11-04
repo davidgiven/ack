@@ -39,7 +39,7 @@ int Svalue, Svariable;
 
 cond_p globl_cond_tab, local_cond_tab;
 
-STATIC cond_p getcondtab(FILE* f)
+static cond_p getcondtab(FILE* f)
 {
 	int l, i;
 	cond_p tab;
@@ -54,7 +54,7 @@ STATIC cond_p getcondtab(FILE* f)
 	return tab;
 }
 
-STATIC void ud_machinit(void* vp)
+static void ud_machinit(void* vp)
 {
 	FILE* f = vp;
 	char s[100];
@@ -71,7 +71,7 @@ STATIC void ud_machinit(void* vp)
 	local_cond_tab = getcondtab(f);
 }
 
-STATIC bool test_cond(short cond, offset val)
+static bool test_cond(short cond, offset val)
 {
 	switch (cond)
 	{
@@ -84,7 +84,7 @@ STATIC bool test_cond(short cond, offset val)
 	UNREACHABLE_CODE;
 }
 
-STATIC short map_value(struct cond_tab tab[], offset val, bool time)
+static short map_value(struct cond_tab tab[], offset val, bool time)
 {
 	cond_p p;
 
@@ -97,7 +97,7 @@ STATIC short map_value(struct cond_tab tab[], offset val, bool time)
 	}
 }
 
-STATIC void init_root(bblock_p root)
+static void init_root(bblock_p root)
 {
 	/* Initialise the IN OUT sets of the entry block of the
 	 * current procedure. Global variables and parameters
@@ -126,7 +126,7 @@ STATIC void init_root(bblock_p root)
 	Cjoin(GEN(root), &OUT(root));
 }
 
-STATIC void unite_outs(lset bbset, cset* setp)
+static void unite_outs(lset bbset, cset* setp)
 {
 	/* Take the union of OUT(b), for all b in bbset,
 	 * and put the result in setp.
@@ -141,7 +141,7 @@ STATIC void unite_outs(lset bbset, cset* setp)
 	}
 }
 
-STATIC void solve_equations(proc_p p)
+static void solve_equations(proc_p p)
 {
 	/* Solve the data flow equations for reaching
 	 * definitions of procedure p.
@@ -153,7 +153,7 @@ STATIC void solve_equations(proc_p p)
 	 * solve the equations.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 	bool change;
 	cset newin;
 
@@ -208,7 +208,7 @@ short local_addr_cost(offset off)
 	    map_value(local_cond_tab, off, TRUE), map_value(local_cond_tab, off, FALSE));
 }
 
-STATIC bool fold_is_desirable(line_p old, line_p new)
+static bool fold_is_desirable(line_p old, line_p new)
 {
 	/* See if it is desirable to replace the variable used by the
 	 * EM instruction 'old' by the variable used by 'new'.
@@ -382,7 +382,7 @@ pr_cblocks(p) proc_p p;
 
 #endif
 
-STATIC void ud_analysis(proc_p p)
+static void ud_analysis(proc_p p)
 {
 	/* Perform use-definition analysis on procedure p */
 
@@ -404,7 +404,7 @@ STATIC void ud_analysis(proc_p p)
 #endif
 }
 
-STATIC void clean_maps(void)
+static void clean_maps(void)
 {
 	local_p* p;
 	cset* v;
@@ -422,7 +422,7 @@ STATIC void clean_maps(void)
 	oldmap((void**)vardefs, nrvars);
 }
 
-STATIC bool try_optim(line_p l, bblock_p b)
+static bool try_optim(line_p l, bblock_p b)
 {
 	/* Try copy propagation and constant propagation */
 
@@ -456,7 +456,7 @@ STATIC bool try_optim(line_p l, bblock_p b)
 	return FALSE;
 }
 
-STATIC void value_propagation(proc_p p)
+static void value_propagation(proc_p p)
 {
 	/* Apply value propagation to procedure p */
 
@@ -489,11 +489,11 @@ STATIC void value_propagation(proc_p p)
 	oldtable(def_to_copynr, nrdefs);
 }
 
-STATIC void ud_extend(proc_p p)
+static void ud_extend(proc_p p)
 {
 	/* Allocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -501,11 +501,11 @@ STATIC void ud_extend(proc_p p)
 	}
 }
 
-STATIC void ud_cleanup(proc_p p)
+static void ud_cleanup(proc_p p)
 {
 	/* Deallocate extended data structures for Use Definition analysis */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{

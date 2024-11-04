@@ -1,8 +1,8 @@
 /* $Id$ */
 bfill(dst, len, fill)
-	register char *dst;
-	register int len;
-	register int fill;
+	char *dst;
+	int len;
+	int fill;
 {
 	while (--len >= 0)
 		*dst++ = fill;

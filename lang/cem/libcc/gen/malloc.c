@@ -44,7 +44,7 @@ static char *_bottom, *_top, *_empty;
 static grow(len)
 unsigned len;
 {
-  register char *p;
+  char *p;
 
   ASSERT(NextSlot(_top) == 0);
   p = (char *) Align((ptrint)_top + len, BRKSIZE);
@@ -60,8 +60,8 @@ unsigned len;
 char *malloc(size)
 unsigned size;
 {
-  register char *prev, *p, *next, *new;
-  register unsigned len, ntries;
+  char *prev, *p, *next, *new;
+  unsigned len, ntries;
 
   if (size == 0)
 	size = PTRSIZE;		/* avoid slots less that 2*PTRSIZE */
@@ -108,8 +108,8 @@ char *realloc(old, size)
 char *old;
 unsigned size;
 {
-  register char *prev, *p, *next, *new;
-  register unsigned len, n;
+  char *prev, *p, *next, *new;
+  unsigned len, n;
 
   len = Align(size, PTRSIZE) + PTRSIZE;
   next = NextSlot(old);
@@ -153,7 +153,7 @@ unsigned size;
 free(p)
 char *p;
 {
-  register char *prev, *next;
+  char *prev, *next;
 
   ASSERT(NextSlot(p) > p);
   for (prev = 0, next = _empty; next != 0; prev = next, next = NextFree(next))

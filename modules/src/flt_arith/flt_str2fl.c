@@ -193,12 +193,12 @@ static flt_arith r_big_10pow[] = { /* representation of 10 ** -(28*i) */
 #define BIGSZ	(sizeof(big_10pow)/sizeof(big_10pow[0]))
 #define SMALLSZ	(sizeof(s10pow)/sizeof(s10pow[0]))
 
-static void add_exponent(register flt_arith *e, int exp)
+static void add_exponent(flt_arith *e, int exp)
 {
 	int neg = exp < 0;
 	int divsz, modsz;
 	flt_arith x;
-	register int status = 0;
+	int status = 0;
 
 	if (neg) exp = -exp;
 	divsz = exp / SMALLSZ;
@@ -218,7 +218,7 @@ static void add_exponent(register flt_arith *e, int exp)
 
 void flt_str2flt(const char *s, flt_arith *e)
 {
-	register int	c;
+	int	c;
 	int		dotseen = 0;
 	int		digitseen = 0;
 	int		exp = 0;
@@ -286,14 +286,14 @@ void flt_str2flt(const char *s, flt_arith *e)
 
 #define NDIG 18
 
-static char *flt_ecvt(register flt_arith *e, int *decpt, int *sign)
+static char *flt_ecvt(flt_arith *e, int *decpt, int *sign)
 {
 	/*	Like ecvt(), but for extended precision */
 
 	static char buf[NDIG+1];
-	register char *p = buf;
-	register char *pe;
-	register int findex = 0;
+	char *p = buf;
+	char *pe;
+	int findex = 0;
 
 	pe = &buf[NDIG];
 	buf[0] = '\0';
@@ -306,7 +306,7 @@ static char *flt_ecvt(register flt_arith *e, int *decpt, int *sign)
 
 	*decpt = 0;
 	if (e->m1 != 0) {
-		register flt_arith *pp = &big_10pow[1];
+		flt_arith *pp = &big_10pow[1];
 
 		findex = 1;
 		while (flt_cmp(e, &big_10pow[BIGSZ-1]) >= 0) {
@@ -416,10 +416,10 @@ void flt_flt2str(flt_arith *e, char *buf, int bufsize)
 {
 
 	int sign, dp;
-	register int i;
-	register char *s1;
+	int i;
+	char *s1;
 	char Xbuf[NDIG+12];
-	register char *s = Xbuf;
+	char *s = Xbuf;
 	flt_arith e1;
 
 	e1 = *e;

@@ -27,7 +27,7 @@
 #include "ra_allocl.h"
 #include "ra_interv.h"
 
-STATIC void count_usage(proc_p p, item_p item, short nrloops, short sloopcnt[], short dloopcnt[])
+static void count_usage(proc_p p, item_p item, short nrloops, short sloopcnt[], short dloopcnt[])
 {
 	/* Determine how many times the item is used in every loop.
 	 * We maintain a 'static' count and a 'dynamic' count. The dynamic
@@ -63,7 +63,7 @@ STATIC void count_usage(proc_p p, item_p item, short nrloops, short sloopcnt[], 
 	}
 }
 
-STATIC alloc_p cons_alloc(
+static alloc_p cons_alloc(
     item_p item,
     interv_p timespan,
     short stat_usecount,
@@ -88,7 +88,7 @@ STATIC alloc_p cons_alloc(
 	return x;
 }
 
-STATIC void insert_alloc(alloc_p alloc, alloc_p* list_p)
+static void insert_alloc(alloc_p alloc, alloc_p* list_p)
 {
 	alloc->al_next = *list_p;
 	*list_p = alloc;
@@ -97,7 +97,7 @@ STATIC void insert_alloc(alloc_p alloc, alloc_p* list_p)
 #define MUST_INIT(i, b) (i->it_type != LOCALVAR || contains(b->B_BEGIN, i->it_lives))
 #define MUST_UPDATE(i, b) (i->it_type == LOCALVAR && contains(b->B_BEGIN, i->it_lives))
 
-STATIC lset loop_inits(loop_p lp, item_p item, bblock_p header)
+static lset loop_inits(loop_p lp, item_p item, bblock_p header)
 {
 	/* Build the set of entry points to loop lp where item
 	 * must be initialized
@@ -113,7 +113,7 @@ STATIC lset loop_inits(loop_p lp, item_p item, bblock_p header)
 
 #define IN_LOOP(b) (Lnrelems(b->b_loops) > 0)
 
-STATIC bblock_p init_point(item_p item)
+static bblock_p init_point(item_p item)
 {
 	/* Find the most appropriate point to initialize any register
 	 * containing the item. We want to do the initialization as
@@ -145,7 +145,7 @@ STATIC bblock_p init_point(item_p item)
 	return dom;
 }
 
-STATIC void add_blocks(bblock_p b, cset* s, interv_p* span)
+static void add_blocks(bblock_p b, cset* s, interv_p* span)
 {
 	Lindex pi;
 
@@ -160,7 +160,7 @@ STATIC void add_blocks(bblock_p b, cset* s, interv_p* span)
 	}
 }
 
-STATIC void whole_lifetime(item_p item, bblock_p* ini_out, interv_p* span_out)
+static void whole_lifetime(item_p item, bblock_p* ini_out, interv_p* span_out)
 {
 	/* Find the initialization point and the time_span of the item, if
 	 * we put the item in a register during all its uses.
@@ -187,7 +187,7 @@ STATIC void whole_lifetime(item_p item, bblock_p* ini_out, interv_p* span_out)
 	*span_out = span;
 }
 
-STATIC lset proc_inits(proc_p p, item_p item, bblock_p ini)
+static lset proc_inits(proc_p p, item_p item, bblock_p ini)
 {
 	lset s = Lempty_set();
 
@@ -199,7 +199,7 @@ STATIC lset proc_inits(proc_p p, item_p item, bblock_p ini)
 	return s;
 }
 
-STATIC bool updates_needed(loop_p lp, item_p item)
+static bool updates_needed(loop_p lp, item_p item)
 {
 	/* See if the value of item is live after the loop has
 	 * been exited, i.e. must the item be updated after the loop?
@@ -223,7 +223,7 @@ STATIC bool updates_needed(loop_p lp, item_p item)
 	return FALSE;
 }
 
-STATIC short countuses(lset usage, bblock_p b)
+static short countuses(lset usage, bblock_p b)
 {
 	short cnt = 0;
 	Lindex ti;
@@ -238,7 +238,7 @@ STATIC short countuses(lset usage, bblock_p b)
 	return cnt;
 }
 
-STATIC void allocs_of_item(
+static void allocs_of_item(
     proc_p p,
     item_p item,
     lset loops,
@@ -246,7 +246,7 @@ STATIC void allocs_of_item(
     short* dloopcnt, /* dynamic arrays */
     alloc_p* alloc_list_p)
 {
-	register Lindex li;
+	Lindex li;
 	loop_p lp;
 	bblock_p header, ini;
 	short susecount, dusecount;
@@ -308,7 +308,7 @@ STATIC void allocs_of_item(
 alloc_p build_alloc_list(proc_p p, short nrloops, item_p itemlist)
 {
 	short *sloopcnt, *dloopcnt; /* dynamic arrays */
-	register item_p item;
+	item_p item;
 	alloc_p alloc_list = (alloc_p)0;
 
 	sloopcnt = (short*)newtable(nrloops);
@@ -335,7 +335,7 @@ void build_rivals_graph(alloc_p alloclist)
 	 * allocation.
 	 */
 
-	register alloc_p alloc, x;
+	alloc_p alloc, x;
 
 	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
 	{

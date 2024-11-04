@@ -48,8 +48,8 @@ itoa(p,ptr)
 int p;
 char *ptr;
 {
-    register int k,l;
-    register char *str;
+    int k,l;
+    char *str;
     int sign;
 
     str=ptr;
@@ -74,7 +74,7 @@ char *ptr;
 reverse(s)
 char s[];
 {
-    register int c,i,j;
+    int c,i,j;
 
     for (i=0, j=strlen(s)-1; i<j; i++, j--)
     {
@@ -88,7 +88,7 @@ strlen(str)
 /* returns the length of string str */
 char *str;
 {
-    register char *s, *p;
+    char *s, *p;
 
     p = s = str;
     while (*p)

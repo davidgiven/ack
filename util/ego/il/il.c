@@ -35,16 +35,16 @@
 int calnr;
 int complete_program;
 calcnt_p cchead; /* call-count info of current proc */
-STATIC long space = 0;
-STATIC long total_size = 0;
+static long space = 0;
+static long total_size = 0;
 
-STATIC char* cname;
-STATIC char* ccname;
-STATIC char* cname2;
+static char* cname;
+static char* ccname;
+static char* cname2;
 
 /* For debugging only */
-STATIC char* sname;
-STATIC int kp_temps = 0;
+static char* sname;
+static int kp_temps = 0;
 
 int Ssubst;
 #ifdef VERBOSE
@@ -62,7 +62,7 @@ int Sbig_caller, Sdispensable, Schangedcallee, Sbigcallee, Sspace, Szeroratio;
  * The call descriptors are put in a file (calfile).
  */
 
-STATIC void pass1(const char* lnam, const char* bnam, const char* cnam)
+static void pass1(const char* lnam, const char* bnam, const char* cnam)
 {
 	FILE *f, *gf, *cf, *ccf; /* The EM input, the basic block graph,
 	                          * the call-list file and the calcnt file.
@@ -128,7 +128,7 @@ STATIC void pass1(const char* lnam, const char* bnam, const char* cnam)
  * be expanded in line. It does not use the EM text.
  */
 
-STATIC void pass2(const char* cnam, long space)
+static void pass2(const char* cnam, long space)
 {
 	FILE *cf, *cf2, *ccf;
 	call_p c, a;
@@ -247,13 +247,13 @@ void pass3(const char* lnam, const char* lnam2)
 	}
 }
 
-STATIC void il_extptab(proc_p ptab)
+static void il_extptab(proc_p ptab)
 {
 	/* Allocate space for extension of proctable entries.
 	 * Also, initialise some of the fields just allocated.
 	 */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = ptab; p != (proc_p)0; p = p->p_next)
 	{
@@ -263,11 +263,11 @@ STATIC void il_extptab(proc_p ptab)
 	}
 }
 
-STATIC void il_cleanptab(proc_p ptab)
+static void il_cleanptab(proc_p ptab)
 {
 	/* De-allocate space for extensions */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = ptab; p != (proc_p)0; p = p->p_next)
 	{
@@ -276,7 +276,7 @@ STATIC void il_cleanptab(proc_p ptab)
 }
 
 #ifdef VERBOSE
-STATIC void Sdiagnostics(void)
+static void Sdiagnostics(void)
 {
 	/* print statictical information */
 

@@ -5,10 +5,10 @@
 
 #include <stdio.h>
 
-int putw(int w, register FILE* stream)
+int putw(int w, FILE* stream)
 {
-	register int cnt = sizeof(int);
-	register char* p = (char*)&w;
+	int cnt = sizeof(int);
+	char* p = (char*)&w;
 
 	while (cnt--)
 	{

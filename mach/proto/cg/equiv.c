@@ -31,7 +31,7 @@ static void permute(int index);
 struct perm* tuples(rl_p* regls, int nregneeded)
 {
 	int class = 0;
-	register int i, j;
+	int i, j;
 
 	/*
 	 * First compute equivalence classes of registers.
@@ -67,9 +67,9 @@ struct perm* tuples(rl_p* regls, int nregneeded)
 
 static void permute(int index)
 {
-	register struct perm* pp;
-	register rl_p rlp;
-	register int i, j;
+	struct perm* pp;
+	rl_p rlp;
+	int i, j;
 
 	if (index == maxindex)
 	{

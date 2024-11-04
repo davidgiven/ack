@@ -36,7 +36,7 @@
 #define oldrabx(x) oldstruct(bext_ra, x)
 #define oldralpx(x) oldstruct(lpext_ra, x)
 
-STATIC void stat_regusage(alloc_p list);
+static void stat_regusage(alloc_p list);
 
 short alloc_id;
 static item_p items[NRITEMTYPES];
@@ -58,7 +58,7 @@ short regs_available[] = {
 
 short use_any_as_pointer = 0;
 
-STATIC cond_p getcondtab(FILE* f)
+static cond_p getcondtab(FILE* f)
 {
 	int l, i;
 	cond_p tab;
@@ -73,7 +73,7 @@ STATIC cond_p getcondtab(FILE* f)
 	return tab;
 }
 
-STATIC void get_atab(FILE* f, cond_p tab[NRREGTYPES][NRREGTYPES])
+static void get_atab(FILE* f, cond_p tab[NRREGTYPES][NRREGTYPES])
 {
 	int i, cnt, totyp, regtyp;
 
@@ -87,7 +87,7 @@ STATIC void get_atab(FILE* f, cond_p tab[NRREGTYPES][NRREGTYPES])
 	}
 }
 
-STATIC void get_otab(FILE* f, cond_p tab[NRREGTYPES])
+static void get_otab(FILE* f, cond_p tab[NRREGTYPES])
 {
 	int i, cnt, regtyp;
 
@@ -100,7 +100,7 @@ STATIC void get_otab(FILE* f, cond_p tab[NRREGTYPES])
 	}
 }
 
-STATIC void ra_machinit(void* vp)
+static void ra_machinit(void* vp)
 {
 	/* Read target machine dependent information for this phase */
 	FILE* f = vp;
@@ -133,7 +133,7 @@ STATIC void ra_machinit(void* vp)
 	regsav_cost = getcondtab(f);
 }
 
-STATIC bblock_p header(loop_p lp)
+static bblock_p header(loop_p lp)
 {
 	/* Try to determine the 'header' block of loop lp.
 	 * If 'e' is the entry block of loop L, then block 'b' is
@@ -152,13 +152,13 @@ STATIC bblock_p header(loop_p lp)
 	return (bblock_p)0;
 }
 
-STATIC void ra_extproc(proc_p p)
+static void ra_extproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
-	register bblock_p b;
+	loop_p lp;
+	Lindex pi;
+	bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -172,13 +172,13 @@ STATIC void ra_extproc(proc_p p)
 	}
 }
 
-STATIC void ra_cleanproc(proc_p p)
+static void ra_cleanproc(proc_p p)
 {
 	/* Allocate the extended data structures for procedure p */
 
-	register loop_p lp;
-	register Lindex pi;
-	register bblock_p b;
+	loop_p lp;
+	Lindex pi;
+	bblock_p b;
 
 	for (pi = Lfirst(p->p_loops); pi != (Lindex)0; pi = Lnext(pi, p->p_loops))
 	{
@@ -191,12 +191,12 @@ STATIC void ra_cleanproc(proc_p p)
 	}
 }
 
-STATIC void loop_blocks(proc_p p)
+static void loop_blocks(proc_p p)
 {
 	/* Compute the LP_BLOCKS sets for all loops of p */
 
-	register bblock_p b;
-	register Lindex i;
+	bblock_p b;
+	Lindex i;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -207,13 +207,13 @@ STATIC void loop_blocks(proc_p p)
 	}
 }
 
-STATIC void make_instrmap(proc_p p, line_p map[])
+static void make_instrmap(proc_p p, line_p map[])
 {
 	/* make the instructions map of procedure p */
 
-	register bblock_p b;
-	register line_p l;
-	register int i = 0;
+	bblock_p b;
+	line_p l;
+	int i = 0;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
@@ -226,7 +226,7 @@ STATIC void make_instrmap(proc_p p, line_p map[])
 	}
 }
 
-STATIC bool useful_item(item_p item)
+static bool useful_item(item_p item)
 {
 	/* See if it may be useful to put the item in a register.
 	 * A local variable may always be put in a register.
@@ -238,10 +238,10 @@ STATIC bool useful_item(item_p item)
 	return nruses > 1 || item->it_type == LOCALVAR;
 }
 
-STATIC void cleantimeset(lset s)
+static void cleantimeset(lset s)
 {
-	register Lindex i;
-	register time_p t;
+	Lindex i;
+	time_p t;
 
 	for (i = Lfirst(s); i != (Lindex)0; i = Lnext(i, s))
 	{
@@ -251,13 +251,13 @@ STATIC void cleantimeset(lset s)
 	Ldeleteset(s);
 }
 
-STATIC item_p cat_items(item_p items[])
+static item_p cat_items(item_p items[])
 {
 	/* Make one item list out of an array of itemlists.
 	 * Remove items that are used only once.
 	 */
 
-	register item_p it;
+	item_p it;
 	item_p *ip, head, next;
 	int t;
 
@@ -283,9 +283,9 @@ STATIC item_p cat_items(item_p items[])
 	return head;
 }
 
-STATIC void clean_interval(interv_p list)
+static void clean_interval(interv_p list)
 {
-	register interv_p x, next;
+	interv_p x, next;
 
 	for (x = list; x != (interv_p)0; x = next)
 	{
@@ -294,9 +294,9 @@ STATIC void clean_interval(interv_p list)
 	}
 }
 
-STATIC void clean_allocs(alloc_p list)
+static void clean_allocs(alloc_p list)
 {
-	register alloc_p x, next;
+	alloc_p x, next;
 
 	for (x = list; x != (alloc_p)0; x = next)
 	{
@@ -310,9 +310,9 @@ STATIC void clean_allocs(alloc_p list)
 	}
 }
 
-STATIC void cleanitems(item_p list)
+static void cleanitems(item_p list)
 {
-	register item_p x, next;
+	item_p x, next;
 
 	for (x = list; x != (item_p)0; x = next)
 	{
@@ -474,8 +474,8 @@ print_allocs(list)
 }
 #endif
 
-STATIC short regs_needed[4];
-STATIC void stat_regusage(alloc_p list)
+static short regs_needed[4];
+static void stat_regusage(alloc_p list)
 {
 	int i;
 	alloc_p x;
@@ -501,7 +501,7 @@ int cnt_regtypes[reg_float+1];
 statistics(items)
 	item_p items[];
 {
-	register item_p item,next;
+	item_p item,next;
 	int t,r;
 	int cnt;
 

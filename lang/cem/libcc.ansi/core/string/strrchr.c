@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strrchr(register const char* s, int c)
+char* strrchr(const char* s, int c)
 {
-	register const char* result = NULL;
+	const char* result = NULL;
 
 	c = (char)c;
 

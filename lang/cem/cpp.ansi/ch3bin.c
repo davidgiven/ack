@@ -11,7 +11,7 @@
 #include	"skip.h"
 #include	"error.h"
 
-void ch3bin(register arith *pval, int *pis_uns, int oper, register arith val, int is_uns)
+void ch3bin(arith *pval, int *pis_uns, int oper, arith val, int is_uns)
 {
 	if (is_uns) *pis_uns = 1;
 	switch (oper)	{

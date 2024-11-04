@@ -55,10 +55,10 @@ void init_pp(void)
 		id_resmac field of the identifier.
 	*/
 	{
-		register struct mkey *mk = &mkey[0];
+		struct mkey *mk = &mkey[0];
 
 		while (mk->mk_reserved)	{
-			register struct idf *idf = str2idf(mk->mk_reserved, 0);
+			struct idf *idf = str2idf(mk->mk_reserved, 0);
 			
 			if (idf->id_resmac)
 				fatal("maximum identifier length insufficient");

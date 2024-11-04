@@ -44,7 +44,7 @@ static void p1putddd (/* int, int, int, int */);
 void p1_comment (str)
 char *str;
 {
-    register unsigned char *pointer, *ustr;
+    unsigned char *pointer, *ustr;
 
     if (!str)
 	return;
@@ -139,7 +139,7 @@ expptr expr;
 
 
 static void p1_const(cp)
- register Constp cp;
+ Constp cp;
 {
 	int type = cp->vtype;
 	expptr vleng = cp->vleng;
@@ -201,7 +201,7 @@ ftnint stateno;
 
 
 static void p1_addr (addrp)
- register struct Addrblock *addrp;
+ struct Addrblock *addrp;
 {
     int stg;
 
@@ -435,7 +435,7 @@ struct Labelblock *labels[];
 {
     struct Constblock c;
     int i;
-    register struct Labelblock *L;
+    struct Labelblock *L;
 
     p1put (P1_COMP_GOTO);
     p1_expr (index);

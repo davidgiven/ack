@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-int mbtowc(wchar_t* pwc, register const char* s, size_t n)
+int mbtowc(wchar_t* pwc, const char* s, size_t n)
 {
 	if (s == (const char*)NULL)
 		return 0;

@@ -116,9 +116,9 @@ static int rots[] = {
 
 static
 transpose(data, t, n)
-	register struct block *data;
-	register struct ordering *t;
-	register int n;
+	struct block *data;
+	struct ordering *t;
+	int n;
 {
 	struct block x;
 
@@ -131,10 +131,10 @@ transpose(data, t, n)
 
 static
 rotate(key)
-	register struct block *key;
+	struct block *key;
 {
-	register unsigned char *p = key->b_data;
-	register unsigned char *ep = &(key->b_data[55]);
+	unsigned char *p = key->b_data;
+	unsigned char *ep = &(key->b_data[55]);
 	int data0 = key->b_data[0], data28 = key->b_data[28];
 
 	while (p++ < ep) *(p-1) = *p;
@@ -147,11 +147,11 @@ static struct ordering *EP = &etr;
 static
 f(i, key, a, x)
 	struct block *key, *a;
-	register struct block *x;
+	struct block *x;
 {
 	struct block e, ikey, y;
 	int k;
-	register unsigned char *p, *q, *r;
+	unsigned char *p, *q, *r;
 
 	e = *a;
 	transpose(&e, EP, 48);
@@ -166,7 +166,7 @@ f(i, key, a, x)
 	}
 	q = x->b_data;
 	for (k = 0; k < 8; k++) {
-		register int xb, r;
+		int xb, r;
 
 		r = *p++ << 5;
 		r += *p++ << 3;
@@ -186,7 +186,7 @@ f(i, key, a, x)
 }
 
 setkey(k)
-	register char *k;
+	char *k;
 {
 
 	key = *((struct block *) k);
@@ -196,13 +196,13 @@ setkey(k)
 encrypt(blck, edflag)
 	char *blck;
 {
-	register struct block *p = (struct block *) blck;
-	register int i;
+	struct block *p = (struct block *) blck;
+	int i;
 
 	transpose(p, &InitialTr, 64);
 	for (i = 15; i>= 0; i--) {
 		int j = edflag ? i : 15 - i;
-		register int k;
+		int k;
 		struct block b, x;
 
 		b = *p;
@@ -220,7 +220,7 @@ encrypt(blck, edflag)
 
 char *
 crypt(pw,salt)
-	register char *pw;
+	char *pw;
 	char *salt;
 {
 	/*	Unfortunately, I had to look at the sources of V7 crypt.
@@ -230,12 +230,12 @@ crypt(pw,salt)
 	
 	char pwb[66];
 	static char result[16];
-	register char *p = pwb;
+	char *p = pwb;
 	struct ordering new_etr;
-	register int i;
+	int i;
 
 	while (*pw && p < &pwb[64]) {
-		register int j = 7;
+		int j = 7;
 
 		while (j--) {
 			*p++ = (*pw >> j) & 01;
@@ -252,8 +252,8 @@ crypt(pw,salt)
 	new_etr = etr;
 	EP = &new_etr;
 	for (i = 0; i < 2; i++) {
-		register char c = *salt++;
-		register int j;
+		char c = *salt++;
+		int j;
 
 		result[i] = c;
 		if ( c > 'Z') c -= 6 + 7 + '.';	/* c was a lower case letter */
@@ -278,8 +278,8 @@ crypt(pw,salt)
 	p = pwb;
 	pw = result+2;
 	while (p < &pwb[66]) {
-		register int c = 0;
-		register int j = 6;
+		int c = 0;
+		int j = 6;
 
 		while (j--) {
 			c <<= 1;

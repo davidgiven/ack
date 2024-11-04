@@ -20,7 +20,7 @@
 /* Other external definitions */
 extern void cleanup(void);
 
-void flags(register char *s)
+void flags(char *s)
 {
 	for (s++; *s; s++)
 		switch (*s)

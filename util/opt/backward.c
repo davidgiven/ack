@@ -39,12 +39,12 @@ int rc;
 
 void backward(void)
 {
-	register line_p lnp;
+	line_p lnp;
 	line_p next;
-	register arg_p ap;
+	arg_p ap;
 	line_p i, p;
 	int n;
-	register sym_p sp;
+	sym_p sp;
 
 	i = p = (line_p) 0;
 	curdtyp = 0;

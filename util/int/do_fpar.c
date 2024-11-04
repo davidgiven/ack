@@ -30,14 +30,14 @@
 #endif /* not __STDC__ */
 #define SMALL (1.0 / MAXDOUBLE)
 
-PRIVATE double adf(double, double), sbf(double, double), mlf(double, double), dvf(double, double);
-PRIVATE double ttttp(double, int);
-PRIVATE double floor(double), fabs(double);
-PRIVATE void fef(double, size), fif(double, double, size);
+static double adf(double, double), sbf(double, double), mlf(double, double), dvf(double, double);
+static double ttttp(double, int);
+static double floor(double), fabs(double);
+static void fef(double, size), fif(double, double, size);
 
 #endif /* NOFLOAT */
 
-void DoADF(register size l)
+void DoADF(size l)
 {
 	/* ADF w: Floating add (*) */
 #ifndef NOFLOAT
@@ -51,7 +51,7 @@ void DoADF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoSBF(register size l)
+void DoSBF(size l)
 {
 	/* SBF w: Floating subtract (*) */
 #ifndef NOFLOAT
@@ -65,7 +65,7 @@ void DoSBF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoMLF(register size l)
+void DoMLF(size l)
 {
 	/* MLF w: Floating multiply (*) */
 #ifndef NOFLOAT
@@ -79,7 +79,7 @@ void DoMLF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoDVF(register size l)
+void DoDVF(size l)
 {
 	/* DVF w: Floating divide (*) */
 #ifndef NOFLOAT
@@ -93,7 +93,7 @@ void DoDVF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoNGF(register size l)
+void DoNGF(size l)
 {
 	/** NGF w: Floating negate (*) */
 #ifndef NOFLOAT
@@ -107,7 +107,7 @@ void DoNGF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoFIF(register size l)
+void DoFIF(size l)
 {
 	/* FIF w: Floating multiply and split integer and fraction part (*) */
 #ifndef NOFLOAT
@@ -121,7 +121,7 @@ void DoFIF(register size l)
 #endif /* NOFLOAT */
 }
 
-void DoFEF(register size l)
+void DoFEF(size l)
 {
 	/* FEF w: Split floating number in exponent and fraction part (*) */
 #ifndef NOFLOAT
@@ -138,7 +138,7 @@ void DoFEF(register size l)
 /* Service routines */
 
 /** Returns "f1" + "f2" */
-PRIVATE double adf(double f1, double f2)
+static double adf(double f1, double f2)
 {
 	if (must_test && !(IgnMask & BIT(EFOVFL)))
 	{
@@ -163,7 +163,7 @@ PRIVATE double adf(double f1, double f2)
 }
 
 /** Returns "f1" - "f2" */
-PRIVATE double sbf(double f1, double f2)
+static double sbf(double f1, double f2)
 {
 	if (must_test && !(IgnMask & BIT(EFOVFL)))
 	{
@@ -188,7 +188,7 @@ PRIVATE double sbf(double f1, double f2)
 }
 
 /** Returns "f1" * "f2" */
-PRIVATE double mlf(double f1, double f2)
+static double mlf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -223,7 +223,7 @@ PRIVATE double mlf(double f1, double f2)
 }
 
 /** Returns "f1" / "f2" */
-PRIVATE double dvf(double f1, double f2)
+static double dvf(double f1, double f2)
 {
 	double ff1 = fabs(f1), ff2 = fabs(f2);
 
@@ -267,7 +267,7 @@ PRIVATE double dvf(double f1, double f2)
 	return (f1 / f2);
 }
 
-PRIVATE void fif(double f1, double f2, size n)
+static void fif(double f1, double f2, size n)
 {
 	double f = mlf(f1, f2);
 	double fl = floor(fabs(f));
@@ -276,9 +276,9 @@ PRIVATE void fif(double f1, double f2, size n)
 	fpush((f < 0.0) ? -fl : fl, n); /* push integer-part */
 }
 
-PRIVATE void fef(double f, size n)
+static void fef(double f, size n)
 {
-	register long exponent, sign = (long)(f < 0.0);
+	long exponent, sign = (long)(f < 0.0);
 
 	if (f == 0.0)
 	{
@@ -299,15 +299,15 @@ PRIVATE void fef(double f, size n)
 
 /* floating point service routines, to avoid having to use -lm */
 
-PRIVATE double fabs(double f)
+static double fabs(double f)
 {
 	return (f < 0.0 ? -f : f);
 }
 
-PRIVATE double floor(double f)
+static double floor(double f)
 {
 	double res, d;
-	register int sign = 1;
+	int sign = 1;
 
 	/* eliminate the sign */
 	if (f < 0)
@@ -343,7 +343,7 @@ PRIVATE double floor(double f)
 }
 
 /** Times ten to the power. */
-PRIVATE double ttttp(double f, int n)
+static double ttttp(double f, int n)
 {
 	while (n > 0)
 	{
@@ -364,10 +364,10 @@ PRIVATE double ttttp(double f, int n)
 */
 double str2double(char* str)
 {
-	register char b;
-	register int sign = 1; /* either +1 or -1 */
-	register int frac = 0; /* how far in fraction part ? */
-	register int ex; /* to store exponent */
+	char b;
+	int sign = 1; /* either +1 or -1 */
+	int frac = 0; /* how far in fraction part ? */
+	int ex; /* to store exponent */
 	double mantissa = 0.0; /* to store mantissa */
 	double d; /* double to be returned */
 

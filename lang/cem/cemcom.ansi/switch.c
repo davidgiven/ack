@@ -57,9 +57,9 @@ void code_startswitch(struct expr **expp)
 	/*	Check the expression, stack a new case header and
 		fill in the necessary fields.
 	*/
-	register label l_table = text_label();
-	register label l_break = text_label();
-	register struct switch_hdr *sh = new_switch_hdr();
+	label l_table = text_label();
+	label l_break = text_label();
+	struct switch_hdr *sh = new_switch_hdr();
 	int fund = any2arith(expp, SWITCH);
 			/* INT, LONG, LNGLNG, FLOAT, DOUBLE or LNGDBL */
 	
@@ -89,9 +89,9 @@ void code_startswitch(struct expr **expp)
 
 void code_endswitch(void)
 {
-	register struct switch_hdr *sh = switch_stack;
-	register label tablabel;
-	register struct case_entry *ce;
+	struct switch_hdr *sh = switch_stack;
+	label tablabel;
+	struct case_entry *ce;
 	arith size = sh->sh_type->tp_size;
 
 	if (sh->sh_default == 0)	/* no default occurred yet */
@@ -151,7 +151,7 @@ void code_endswitch(void)
 
 	switch_stack = sh->next;	/* unstack the switch descriptor */
 	for (ce = sh->sh_entries; ce;) { /* free allocated switch structure */
-		register struct case_entry *tmp = ce->next;
+		struct case_entry *tmp = ce->next;
 
 		free_case_entry(ce);
 		ce = tmp;
@@ -163,8 +163,8 @@ void code_endswitch(void)
 void code_case(struct expr *expr)
 {
 	writh val;
-	register struct case_entry *ce;
-	register struct switch_hdr *sh = switch_stack;
+	struct case_entry *ce;
+	struct switch_hdr *sh = switch_stack;
 	
 	assert(is_cp_cst(expr));
 	if (sh == 0) {
@@ -184,7 +184,7 @@ void code_case(struct expr *expr)
 		sh->sh_nrofentries = 1;
 	}
 	else { /* second etc. case entry; put ce into proper place */
-		register struct case_entry *c1 = sh->sh_entries, *c2 = 0;
+		struct case_entry *c1 = sh->sh_entries, *c2 = 0;
 		
 		if (val < sh->sh_lowerbd)
 			sh->sh_lowerbd = val;
@@ -229,7 +229,7 @@ void code_case(struct expr *expr)
 
 void code_default(void)
 {
-	register struct switch_hdr *sh = switch_stack;
+	struct switch_hdr *sh = switch_stack;
 
 	if (sh == 0) {
 		error("default statement not in switch");

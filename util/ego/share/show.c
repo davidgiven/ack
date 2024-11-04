@@ -33,7 +33,7 @@ FILE* f; /* input file */
 
 short getshort()
 {
-	register n;
+	n;
 
 	n = getbyte();
 	n |= getbyte() << 8;
@@ -42,7 +42,7 @@ short getshort()
 
 offset getoff()
 {
-	register offset n;
+	offset n;
 
 	n = getshort() & 0xFFFF;
 	n |= ((offset)getshort()) << 16;
@@ -118,7 +118,7 @@ showcset()
 	/* print a compact (bitvector) set */
 
 	short size;
-	register short i, j;
+	short i, j;
 	int w, mask;
 
 	size = getshort();
@@ -335,7 +335,7 @@ arglist()
 
 showlset()
 {
-	register short x;
+	short x;
 
 	printf("{ ");
 	while (x = getshort())

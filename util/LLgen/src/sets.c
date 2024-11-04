@@ -39,7 +39,7 @@ static t_info	set_info;
  */
 void setinit(int nt_needed)
 {
-	register int	 bitset;
+	int	 bitset;
 
 	nbytes = NBYTES(ntokens);
 	bitset = ALIGN(nbytes);
@@ -58,7 +58,7 @@ p_set get_set(void)
 	/*
 	 * Allocate a set that cannot be freed
 	 */
-	register p_set p, q;
+	p_set p, q;
 	static p_set sets, maxsets;
 
 	if ((p = sets) >= maxsets) {
@@ -77,8 +77,8 @@ p_set setalloc(void)
 	/*
 	 * Allocate a set which can later be freed.
 	 */
-	register p_set	p;
-	register int	size = setsize;
+	p_set	p;
+	int	size = setsize;
 
 	p = (p_set) alloc(size * sizeof(*p)) + size;
 	do {
@@ -87,15 +87,15 @@ p_set setalloc(void)
 	return p;
 }
 
-int setunion(register p_set a,register p_set b)
+int setunion(p_set a, p_set b)
 {
 	/*
 	 * a = a union b.
 	 * Return 1 if the set a changed
 	 */
-	register int	i;
-	register int	j;
-	register int	nsub = 0;
+	int	i;
+	int	j;
+	int	nsub = 0;
 
 	i = setsize;
 	do {
@@ -107,14 +107,14 @@ int setunion(register p_set a,register p_set b)
 	return nsub;
 }
 
-int setintersect(register p_set a,register p_set b)
+int setintersect(p_set a, p_set b)
 {
 	/*
 	 * a = a intersect b.
 	 * return 1 if the result is empty
 	 */
-	register int	i;
-	register int	nempty;
+	int	i;
+	int	nempty;
 
 	nempty = 1;
 	i =  setsize;
@@ -124,12 +124,12 @@ int setintersect(register p_set a,register p_set b)
 	return nempty;
 }
 
-void setminus(register p_set a,register p_set b)
+void setminus(p_set a, p_set b)
 {
 	/*
 	 * a = a setminus b
 	 */
-	register int	i;
+	int	i;
 
 	i = setsize;
 	do {
@@ -137,12 +137,12 @@ void setminus(register p_set a,register p_set b)
 	} while (--i);
 }
 
-int setempty(register p_set p)
+int setempty(p_set p)
 {
 	/*
 	 * Return 1 if the set p is empty
 	 */
-	register int	i;
+	int	i;
 
 	i = tsetsize;
 	do {
@@ -159,10 +159,10 @@ int findindex(p_set set)
 	 * Here is room for improvement. At the moment, the list of
 	 * sets is examined with linear search.
 	 */
-	register p_set	*t;
-	register p_set	a;
-	register p_set	b;
-	register int	i;
+	p_set	*t;
+	p_set	a;
+	p_set	b;
+	int	i;
 	int		saved;
 
 	/*
@@ -196,9 +196,9 @@ int findindex(p_set set)
 	return nbytes * (maxptr++ - setptr);
 }
 
-int setcount(register p_set set, int *saved)
+int setcount(p_set set, int *saved)
 {
-	register int i, j;
+	int i, j;
 
 	for (j = 0, i = 0; i < ntokens; i++) {
 		if (IN(set,i)) {

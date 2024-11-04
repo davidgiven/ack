@@ -76,7 +76,7 @@ control_if_expression
 	constant_expression(&exprX)
 		{
 #ifndef NOPP
-			register struct expr *expr = exprX;
+			struct expr *expr = exprX;
 			if (expr->ex_flags & EX_SIZEOF)
 				expr_error(expr,
 					"sizeof not allowed in preprocessor");
@@ -151,7 +151,7 @@ ext_decl_specifiers(struct decspecs *ds;) :
 	{do_decspecs(ds);}
 ;
 
-non_function(register struct decspecs *ds; register struct declarator *dc;)
+non_function(struct decspecs *ds; struct declarator *dc;)
 :
 	{reject_params(dc);}
 	[
@@ -177,7 +177,7 @@ function(struct decspecs *ds; struct declarator *dc;)
 		arith fbytes;
 	}
 :
-	{	register struct idf *idf = dc->dc_idf;
+	{	struct idf *idf = dc->dc_idf;
 #ifdef	LINT
 		lint_start_function();
 #endif	/* LINT */

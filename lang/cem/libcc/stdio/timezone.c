@@ -28,9 +28,9 @@ static struct zonetable {
 char *
 timezone(zone, dst)
 {
-	register struct zonetable *p = zonetable;
+	struct zonetable *p = zonetable;
 	static char buf[16];
-	register char *c;
+	char *c;
 	int i;
 
 	while (p->offset != -1) {

@@ -61,7 +61,7 @@ bool is_item(line_p l)
 
 item_p item_of(offset off, item_p items[])
 {
-	register item_p x;
+	item_p x;
 
 	for (x = items[LOCALVAR]; x != (item_p)0; x = x->it_next)
 	{
@@ -93,7 +93,7 @@ void fill_item(item_p item, line_p l)
 	}
 }
 
-STATIC bool desirable(line_p l)
+static bool desirable(line_p l)
 {
 	/* See if it is really desirable to put the item of line l
 	 * in a register. We do not put an item in a register if it
@@ -114,7 +114,7 @@ STATIC bool desirable(line_p l)
 	return TRUE;
 }
 
-STATIC int cmp_items(item_p a, item_p b)
+static int cmp_items(item_p a, item_p b)
 {
 	/* This routine defines the <, = and > relations between items,
 	 * used to sort them for fast lookup.
@@ -146,7 +146,7 @@ bool same_item(item_p a, item_p b)
 	return cmp_items(a, b) == 0;
 }
 
-STATIC bool lt_item(item_p a, item_p b)
+static bool lt_item(item_p a, item_p b)
 {
 	return cmp_items(a, b) == -1;
 }
@@ -167,7 +167,7 @@ STATIC bool lt_item(item_p a, item_p b)
 
 static item_p items[NRITEMTYPES]; /* items[i] points to the list of type i */
 
-STATIC short reg_type(item_p item)
+static short reg_type(item_p item)
 {
 	/* See which type of register the item should best be assigned to */
 
@@ -189,7 +189,7 @@ STATIC short reg_type(item_p item)
 	UNREACHABLE_CODE;
 }
 
-STATIC short item_size(item_p item)
+static short item_size(item_p item)
 {
 	/* Determine the size of the item (in bytes) */
 
@@ -212,7 +212,7 @@ STATIC short item_size(item_p item)
 	UNREACHABLE_CODE;
 }
 
-STATIC void init_item(item_p a, item_p b)
+static void init_item(item_p a, item_p b)
 {
 	a->it_type = b->it_type;
 	switch (a->it_type)
@@ -232,13 +232,13 @@ STATIC void init_item(item_p a, item_p b)
 	a->it_desirable = b->it_desirable;
 }
 
-STATIC void add_item(item_p item, time_p t, item_p items[])
+static void add_item(item_p item, time_p t, item_p items[])
 {
 	/* See if there was already a list element for item. In any
 	 * case record the fact that item is used at 't'.
 	 */
 
-	register item_p x, *q;
+	item_p x, *q;
 
 	q = &items[item->it_type]; /* each type has its own list */
 	for (x = *q; x != (item_p)0; x = *q)
@@ -267,7 +267,7 @@ STATIC void add_item(item_p item, time_p t, item_p items[])
 	Ladd(t, &x->it_usage);
 }
 
-STATIC void add_usage(line_p l, bblock_p b, item_p items[])
+static void add_usage(line_p l, bblock_p b, item_p items[])
 {
 	/* An item is used at line l. Add it to the list of items.
 	 * A local variable is only considered to be an item, if
@@ -299,9 +299,9 @@ void build_itemlist(proc_p p, item_p items[], int* nrinstr_out)
 	 * As a side effect, determine the number of instructions of p.
 	 */
 
-	register line_p l;
-	register bblock_p b;
-	register int cnt = 0;
+	line_p l;
+	bblock_p b;
+	int cnt = 0;
 
 	clean_tab(items);
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

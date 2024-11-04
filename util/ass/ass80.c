@@ -73,23 +73,23 @@ void fatal(char *s)
 
 
 
-int xgetc(register FILE *af)
+int xgetc(FILE *af)
 {
-	register int nextc;
+	int nextc;
 	nextc=fgetc(af) ;
 	if ( feof(af) )
 			fatal("unexpected end of file");
 	return nextc ;
 }
 
-void xputc(int c,register FILE *af)
+void xputc(int c, FILE *af)
 {
 	fputc(c,af) ;
 	if ( ferror(af) ) fatal("write error") ;
 }
 
 
-void putblk(register FILE *stream,register char *from, register int amount)
+void putblk(FILE *stream, char *from, int amount)
 {
 	for ( ; amount-- ; from++ ) {
 		fputc(*from,stream) ;
@@ -97,7 +97,7 @@ void putblk(register FILE *stream,register char *from, register int amount)
 	}
 }
 
-int getblk(register FILE *stream, register char *from, register int amount)
+int getblk(FILE *stream, char *from, int amount)
 {
 	for ( ; amount-- ; from++ ) {
 		*from = fgetc(stream) ;
@@ -164,7 +164,7 @@ int xget8(void)
 
 unsigned int get8(void)
 {
-	register int nextc;
+	int nextc;
 	/*
 	 * Read one byte from ifile.
 	 */
@@ -181,7 +181,7 @@ unsigned int get8(void)
 cons_t xgetarb(int l,FILE *f)
 {
 	cons_t val ;
-	register int shift ;
+	int shift ;
 	int c;
 
 	shift=0 ; val=0 ;
@@ -218,7 +218,7 @@ void extword(cons_t w)
 	/* Assemble the word constant w.
 	 * NOTE: The bytes are written low to high.
 	 */
-	register int i ;
+	int i ;
 	for ( i=wordsize ; i-- ; ) {
 		ext8( int_cast w) ;
 		w >>= 8 ;
@@ -230,7 +230,7 @@ void extarb(int size, long value)
 	/* Assemble the 'size' constant value.
 	 * The bytes are again written low to high.
 	 */
-	register int i ;
+	int i ;
 	for ( i=size ; i-- ; ) {
 		ext8( int_cast value ) ;
 		value >>=8 ;
@@ -242,7 +242,7 @@ void extadr(cons_t a)
 	/* Assemble the pointer constant a.
 	 * NOTE: The bytes are written low to high.
 	 */
-	register int i ;
+	int i ;
 	for ( i=ptrsize ; i-- ; ) {
 		ext8( int_cast a) ;
 		a >>= 8 ;
@@ -252,7 +252,7 @@ void extadr(cons_t a)
 void xputa(cons_t a,FILE* f)
 {
 
-	register int i ;
+	int i ;
 	for ( i=ptrsize ; i-- ; ) {
 		xputc( int_cast a,f) ;
 		a >>= 8 ;
@@ -262,7 +262,7 @@ void xputa(cons_t a,FILE* f)
 cons_t xgeta(FILE* f)
 {
 
-	register int i, shift ;
+	int i, shift ;
 	cons_t val ;
 	val = 0 ; shift=0 ;
 	for ( i=ptrsize ; i-- ; ) {

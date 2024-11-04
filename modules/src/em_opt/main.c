@@ -19,7 +19,7 @@ main(argc,argv)
 	char **argv;
 {
 	static struct e_instr buff;
-	register p_instr p = &buff;
+	p_instr p = &buff;
 
 	if (argc >= 2) {
 		filename = argv[1];

@@ -9,8 +9,8 @@
 DIR *opendir(name)
 char *name;
 {
-	register DIR *dirp;
-	register int fd;
+	DIR *dirp;
+	int fd;
 	struct stat stbuf;
 	long siz;
 	extern char *malloc();

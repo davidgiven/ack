@@ -120,8 +120,8 @@ ftnlen len;
 ufloat *p;
 {
 	char s[FMAX+EXPMAXDIGS+4];
-	register int ch;
-	register char *sp, *spe, *sp1;
+	int ch;
+	char *sp, *spe, *sp1;
 	double atof(), x;
 	int scale1, se;
 	long e, exp;

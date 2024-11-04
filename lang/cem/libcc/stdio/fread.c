@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 fread(ptr, size, count, file)
-register char *ptr;
+char *ptr;
 unsigned size, count;
-register FILE *file;
+FILE *file;
 {
 	int c;
 	unsigned ndone = 0, s;

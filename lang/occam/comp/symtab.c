@@ -20,8 +20,8 @@ static struct symbol **search_sym(tree, name)
 	char *name;
 /* Returns a hook in the tree to the where the given name is or should be. */
 {
-	register struct symbol **aps=tree, *ps;
-	register cmp;
+	struct symbol **aps=tree, *ps;
+	cmp;
 
 	while ((ps= *aps)!=nil && (cmp=strcmp(name, ps->s_name))!=0)
 		aps= cmp<0 ? &ps->s_left : &ps->s_right;
@@ -38,7 +38,7 @@ struct symbol *insert(name, type, arr_siz, info)
  * or changed.  Nil is returned on redeclaration.
  */
 {
-	register struct symbol **aps, *ps;
+	struct symbol **aps, *ps;
 	extern included;
 
 	if (*(aps=search_sym(&sym_table->local, name))!=nil) {
@@ -66,8 +66,8 @@ struct symbol *searchall(name) char *name;
  * If it can't be found then it is inserted as undefined.
  */
 {
-	register struct symtab *tab=sym_table;
-	register struct symbol *ps;
+	struct symtab *tab=sym_table;
+	struct symbol *ps;
 
 	while (tab!=nil) {
 		if ((ps= *search_sym(&tab->local, name))!=nil) return ps;
@@ -79,7 +79,7 @@ struct symbol *searchall(name) char *name;
 }
 
 void check_recursion(proc)
-	register struct expr *proc;
+	struct expr *proc;
 {
 	if (proc->kind==E_VAR && proc->u.var->s_type&T_RECURS)
 		warning("recursion not allowed");
@@ -87,7 +87,7 @@ void check_recursion(proc)
 
 void sym_down()
 {
-	register struct symtab *ps;
+	struct symtab *ps;
 
 	ps= (struct symtab *) Malloc(sizeof *ps);
 
@@ -111,7 +111,7 @@ static void sym_destroy(ps) register struct symbol *ps;
 				warning("%s: never assigned", ps->s_name);
 		}
 		if ((ps->s_type&T_TYPE)==T_PROC) {
-			register struct par_list *par, *junk;
+			struct par_list *par, *junk;
 
 			par=ps->s_info.proc.pars;
 			while (par!=nil) {
@@ -129,7 +129,7 @@ static void sym_destroy(ps) register struct symbol *ps;
 
 void sym_up()
 {
-	register struct symtab *ps;
+	struct symtab *ps;
 
 	ps=sym_table->global;
 	curr_offset=sym_table->old_offset;
@@ -165,12 +165,12 @@ int memory(z) int z;
 }
 
 void pars_add(aapars, type, var)
-	register struct par_list ***aapars;
+	struct par_list ***aapars;
 	int type;
 	struct symbol *var;
 /* Add a formal variable to a parameter list using a hook to a hook. */
 {
-	register struct par_list *pl;
+	struct par_list *pl;
 
 	pl= (struct par_list *) Malloc(sizeof *pl);
 
@@ -185,12 +185,12 @@ void pars_add(aapars, type, var)
 int form_offsets(pars) register struct par_list *pars;
 /* Recursively assign offsets to formal variables. */
 {
-	register struct symbol *var;
+	struct symbol *var;
 
 	if (pars==nil) return pz;
 
 	if ((var=pars->pr_var)!=nil) {
-		register offset=form_offsets(pars->pr_next);
+		offset=form_offsets(pars->pr_next);
 
 		switch (var->s_type&T_TYPE) {
 		case T_VAR:

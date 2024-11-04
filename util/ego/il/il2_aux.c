@@ -35,10 +35,10 @@
 #define IS_CHANGED(p) (p->p_flags2 & PF_CHANGED)
 
 #ifdef VERBOSE
-STATIC void Sstat(proc_p proclist, long space);
+static void Sstat(proc_p proclist, long space);
 #endif
 
-STATIC bool match_pars(formal_p fm, actual_p act)
+static bool match_pars(formal_p fm, actual_p act)
 {
 	/* Check if every actual parameter has the same
 	 * size as its corresponding formal. If not, the
@@ -57,7 +57,7 @@ STATIC bool match_pars(formal_p fm, actual_p act)
 	return (fm == (formal_p)0 ? TRUE : FALSE);
 }
 
-STATIC bool change_act(proc_p p, actual_p act)
+static bool change_act(proc_p p, actual_p act)
 {
 	/* See if a call to p migth change any of the
 	 * operands of the actual parameter expression.
@@ -99,7 +99,7 @@ STATIC bool change_act(proc_p p, actual_p act)
 	return FALSE;
 }
 
-STATIC bool is_simple(line_p expr)
+static bool is_simple(line_p expr)
 {
 	/* See if expr is something simple, i.e. a constant or
 	 * a variable. So the expression must consist of
@@ -122,7 +122,7 @@ STATIC bool is_simple(line_p expr)
 	return FALSE;
 }
 
-STATIC bool too_expensive(formal_p fm, actual_p act)
+static bool too_expensive(formal_p fm, actual_p act)
 {
 	/* If the formal parameter is used often and the
 	 * actual parameter is not something simple
@@ -174,7 +174,7 @@ bool anal_params(call_p c)
 	return TRUE;
 }
 
-STATIC short space_saved(call_p c)
+static short space_saved(call_p c)
 {
 	/* When a call gets expanded in line, the total size of the
 	 * code usually gets incremented, because we have to
@@ -190,7 +190,7 @@ STATIC short space_saved(call_p c)
 	return (1 + (c->cl_flags & CLF_INLPARS) + (c->cl_proc->p_nrformals > 0));
 }
 
-STATIC short param_score(call_p c)
+static short param_score(call_p c)
 {
 	/* If a call has an inline parameter that is a constant,
 	 * chances are high that other optimization techniques
@@ -198,7 +198,7 @@ STATIC short param_score(call_p c)
 	 * happens to be "0". So the call gets extra points for this.
 	 */
 
-	register actual_p act;
+	actual_p act;
 	line_p l;
 	short score = 0;
 
@@ -289,7 +289,7 @@ call_p abstract(call_p c)
 	return a;
 }
 
-STATIC void adjust_counts(proc_p callee, FILE* ccf)
+static void adjust_counts(proc_p callee, FILE* ccf)
 {
 	/* A call to callee is expanded in line;
 	 * the text of callee is not removed, so
@@ -307,7 +307,7 @@ STATIC void adjust_counts(proc_p callee, FILE* ccf)
 	remcc(head); /* remove calcnt info */
 }
 
-STATIC bool is_dispensable(proc_p callee, FILE* ccf)
+static bool is_dispensable(proc_p callee, FILE* ccf)
 {
 	/* A call to callee is expanded in line.
 	 * Decrement its P_NRCALLED field and see if
@@ -334,7 +334,7 @@ STATIC bool is_dispensable(proc_p callee, FILE* ccf)
 	}
 }
 
-STATIC call_p nested_calls(call_p a)
+static call_p nested_calls(call_p a)
 {
 	/* Get a list of all calls that will appear in the
 	 * EM text if the call 'a' is expanded in line.
@@ -362,14 +362,14 @@ STATIC call_p nested_calls(call_p a)
 	return head;
 }
 
-STATIC call_p find_origin(call_p c)
+static call_p find_origin(call_p c)
 {
 	/* c is a nested call. Find the original call.
 	 * This origional must be in the P_CALS list
 	 * of the calling procedure.
 	 */
 
-	register call_p x;
+	call_p x;
 
 	for (x = c->cl_caller->P_CALS; x != (call_p)0; x = x->cl_cdr)
 	{
@@ -380,7 +380,7 @@ STATIC call_p find_origin(call_p c)
 	UNREACHABLE_CODE;
 }
 
-STATIC void selected(call_p a)
+static void selected(call_p a)
 {
 	/* The call a is selected for in line expansion.
 	 * Mark the call as being selected and get the
@@ -393,7 +393,7 @@ STATIC void selected(call_p a)
 	a->cl_car = nested_calls(a);
 }
 
-STATIC void compare(call_p x, call_p* best, long space)
+static void compare(call_p x, call_p* best, long space)
 {
 	/* See if x is better than the current best choice */
 
@@ -407,7 +407,7 @@ STATIC void compare(call_p x, call_p* best, long space)
 	}
 }
 
-STATIC call_p best_one(call_p list, long space)
+static call_p best_one(call_p list, long space)
 {
 	/* Find the best candidate of the list
 	 * that has not already been selected. The
@@ -433,7 +433,7 @@ STATIC call_p best_one(call_p list, long space)
 	return best;
 }
 
-STATIC void singles(call_p cals)
+static void singles(call_p cals)
 {
 	/* If a procedure is only called once, this call
 	 * will be expanded in line, because it costs
@@ -468,7 +468,7 @@ STATIC void singles(call_p cals)
 	}
 }
 
-STATIC void single_calls(proc_p proclist)
+static void single_calls(proc_p proclist)
 {
 	proc_p p;
 
@@ -485,7 +485,7 @@ STATIC void single_calls(proc_p proclist)
 	}
 }
 
-STATIC void unused(proc_p proclist)
+static void unused(proc_p proclist)
 {
 	/* See if any procedures are defined but will
 	 * never be called. These can be safely removed.
@@ -566,9 +566,9 @@ void select_calls(proc_p proclist, FILE* ccf, long space)
 #endif
 }
 
-STATIC void nonnested_calls(FILE* cfile)
+static void nonnested_calls(FILE* cfile)
 {
-	register call_p c, a;
+	call_p c, a;
 
 	while ((c = getcall(cfile)) != (call_p)0)
 	{
@@ -585,7 +585,7 @@ STATIC void nonnested_calls(FILE* cfile)
 	}
 }
 
-STATIC void copy_pars(call_p src, call_p dest)
+static void copy_pars(call_p src, call_p dest)
 {
 	/* Copy the actual parameters of src to dest. */
 
@@ -603,7 +603,7 @@ STATIC void copy_pars(call_p src, call_p dest)
 	}
 }
 
-STATIC void nest_pars(call_p cals)
+static void nest_pars(call_p cals)
 {
 	/* Recursive auxiliary procedure of add_actuals. */
 
@@ -644,7 +644,7 @@ void add_actuals(proc_p proclist, FILE* cfile)
 	}
 }
 
-STATIC void clean(call_p* cals)
+static void clean(call_p* cals)
 {
 	call_p c, next, *cpp;
 
@@ -674,7 +674,7 @@ void cleancals(proc_p proclist)
 	 * that were not selected for in line expansion.
 	 */
 
-	register proc_p p;
+	proc_p p;
 
 	for (p = proclist; p != (proc_p)0; p = p->p_next)
 	{
@@ -708,7 +708,7 @@ void append_abstract(call_p a, proc_p p)
  * remaining calls were not expanded inline.
  */
 
-STATIC void Sstatist(call_p list, long space)
+static void Sstatist(call_p list, long space)
 {
 	call_p c;
 
@@ -734,7 +734,7 @@ STATIC void Sstatist(call_p list, long space)
 	}
 }
 
-STATIC void Sstat(proc_p proclist, long space)
+static void Sstat(proc_p proclist, long space)
 {
 	proc_p p;
 

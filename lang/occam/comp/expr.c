@@ -19,14 +19,14 @@ char *Malloc();
 
 struct expr *new_node(op, left, right, byte)
 	int op;
-	register struct expr *left, *right;
+	struct expr *left, *right;
 	int byte;
 /* Makes a new node with given operator, left and right operand.
  * Constant folding is done if possible.
  */
 {
 	if (op!=FOR && constant(left) && (right==nil || constant(right))) {
-		register long lc, rc;
+		long lc, rc;
 
 		lc=left->u.cst;
 		if (right) rc=right->u.cst; else rc = 0;
@@ -65,7 +65,7 @@ struct expr *new_node(op, left, right, byte)
 		left->u.cst=lc;
 		return left;
 	} else {
-		register struct expr *pe;
+		struct expr *pe;
 		int type=0, arr_siz=1;
 
 		switch (op) {
@@ -105,12 +105,12 @@ struct expr *new_node(op, left, right, byte)
 }
 
 struct expr *new_var(var)
-	register struct symbol *var;
+	struct symbol *var;
 /* Given a variable an expression node is constructed.  Note the changes in
  * type!  T_VAR becomes T_VALUE with flag T_LVALUE.
  */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	pe= (struct expr *) Malloc(sizeof *pe);
 
@@ -133,7 +133,7 @@ struct expr *new_const(cst)
 	long cst;
 /* Make a constant, which is a VALUE, of course. */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	pe= (struct expr *) Malloc(sizeof *pe);
 
@@ -145,14 +145,14 @@ struct expr *new_const(cst)
 }
 
 struct expr *new_table(kind, tab)
-	register kind;
-	register struct table *tab;
+	kind;
+	struct table *tab;
 /* One table is being made, it is no doubt a VALUEd ARRay, but maybe even a
  * BYTE array.  A label is reserved for it and the individual elements are
  * rommified.
  */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	pe= (struct expr *) Malloc(sizeof *pe);
 
@@ -163,7 +163,7 @@ struct expr *new_table(kind, tab)
 
 	pe->arr_siz=0;
 	while (tab!=nil) {
-		register struct table *junk=tab;
+		struct table *junk=tab;
 		
 		rom(kind==E_BTAB ? 1 : vz, tab->val);
 
@@ -180,7 +180,7 @@ struct expr *copy_const(e) struct expr *e;
  * useful with).
  */
 {
-	register struct expr *c;
+	struct expr *c;
 
 	c= (struct expr *) Malloc(sizeof *c);
 
@@ -191,7 +191,7 @@ struct expr *copy_const(e) struct expr *e;
 struct expr *new_now()
 /* Now is the time to make a VALUE cell for the clock. */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	pe= (struct expr *) Malloc(sizeof *pe);
 
@@ -203,11 +203,11 @@ struct expr *new_now()
 
 struct expr *new_io(out, chan, args)
 	int out;
-	register struct expr *chan;
+	struct expr *chan;
 	struct expr_list *args;
 /* Either c ? v0; v1; v2; ... (out=0) or c ! e0; e1; e2; ... (out=1). */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	if ( ( (chan->type&T_TYPE) != T_CHAN || (chan->type&T_ARR) )
 		&& ! (chan->type&T_NOTDECL)
@@ -234,7 +234,7 @@ struct expr *new_call(proc, args)
  * compiler generated noise.
  */
 {
-	register struct expr *pe;
+	struct expr *pe;
 
 	pe= (struct expr *) Malloc(sizeof *pe);
 
@@ -253,7 +253,7 @@ struct expr *new_call(proc, args)
 void table_add(aapt, val) register struct table ***aapt; long val;
 /* Adds a value to a table using a hook to a hook. */
 {
-	register struct table *pt;
+	struct table *pt;
 
 	pt= (struct table *) Malloc(sizeof *pt);
 
@@ -265,11 +265,11 @@ void table_add(aapt, val) register struct table ***aapt; long val;
 }
 
 void expr_list_add(aaelp, arg)
-	register struct expr_list ***aaelp;
+	struct expr_list ***aaelp;
 	struct expr *arg;
 /* Another add, this time for actual arguments and the like. */
 {
-	register struct expr_list *elp;
+	struct expr_list *elp;
 
 	elp= (struct expr_list *) Malloc(sizeof *elp);
 
@@ -299,7 +299,7 @@ static void assigned(e) register struct expr *e;
 	if (e->kind==E_VAR || (e->kind==E_NODE && e->u.node.op=='['
 		&& (e=e->u.node.left)->kind==E_VAR)
 	) {
-		register struct symbol *var;
+		struct symbol *var;
 
 		if ((var=e->u.var)->s_type&T_REP) {
 			warning("replicator index %s may not be assigned",
@@ -315,7 +315,7 @@ void used(e) register struct expr *e;
 	if (e->kind==E_VAR || (e->kind==E_NODE && e->u.node.op=='['
 		&& (e=e->u.node.left)->kind==E_VAR)
 	) {
-		register struct symbol *var;
+		struct symbol *var;
 
 		if ( ! ( (var=e->u.var)->s_type&(T_ASSIGNED|T_BUILTIN))
 		    && (var->s_type&T_TYPE)==T_VAR
@@ -342,7 +342,7 @@ static void assignable(l, r) register struct expr *l, *r;
 		report("operands of assignment are not conformable");
 	else
 	if (l->type&T_ARR && ! ( (l->type|r->type)&T_NOTDECL ) ) {
-		register lsiz=l->arr_siz, rsiz=r->arr_siz;
+		lsiz=l->arr_siz, rsiz=r->arr_siz;
 
 		if (lsiz!=0 && rsiz!=0 && lsiz!=rsiz)
 			report("arrays have incompatible sizes");
@@ -368,12 +368,12 @@ static void outputable(e) struct expr *e;
 }
 
 static void subscriptable(l, r, byte, atype, arr_siz)
-	register struct expr *l, *r;
-	register byte;
+	struct expr *l, *r;
+	byte;
 	int *atype, *arr_siz;
 /* Tries to subscript l by r, returning type and array size for slices. */
 {
-	register type= (l->type&T_TYPE)|byte;
+	type= (l->type&T_TYPE)|byte;
 
 	if ( !(l->type&(T_ARR|T_NOTDECL) ) )
 		report("indexing on a non-array");
@@ -399,15 +399,15 @@ static void subscriptable(l, r, byte, atype, arr_siz)
 
 void check_param(aform, act, err)
 	struct par_list **aform;
-	register struct expr *act;
+	struct expr *act;
 	int *err;
 /* Test if formal parameter *aform corresponds with actual act.  Err returns
  * error status.  The aform hook is set to the next formal after the check.
  */
 {
-	register struct par_list *form= *aform;
-	register struct expr *left;
-	register struct symbol *var;
+	struct par_list *form= *aform;
+	struct expr *left;
+	struct symbol *var;
 	static char NONCORR[]="actual and formal parameter don't correspond";
 
 	if (form==nil) {
@@ -460,7 +460,7 @@ void destroy(e) register struct expr *e;
 		case E_CALL:
 			destroy(e->kind==E_IO ? e->u.io.chan : e->u.call.c_proc);
 			{
-				register struct expr_list *elp, *junk;
+				struct expr_list *elp, *junk;
 
 				elp= e->kind==E_IO ? e->u.io.args : e->u.call.c_args;
 

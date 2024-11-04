@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 fgetc(f)
-	register FILE *f;
+	FILE *f;
 {
 	return getc(f);
 }

@@ -80,7 +80,7 @@ long align(a,b)
 
 int
 follows(pa, pb)
-        register struct outsect *pa, *pb;
+        struct outsect *pa, *pb;
 {
         /* return 1 if pa follows pb */
 
@@ -91,7 +91,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register struct exec *e = &exec;
+	struct exec *e = &exec;
 
 	output = stdout;
 	program= argv[0] ;
@@ -217,8 +217,8 @@ wr_long(l)
  * Transfer the emitted byted from one file to another.
  */
 emits(section) struct outsect *section ; {
-	register long	n ;
-	register int	blk;
+	long	n ;
+	int	blk;
 	char		buffer[BUFSIZ];
 
 	n= section->os_flen ;
@@ -245,7 +245,7 @@ emit_symtab()
 {
 	struct outname ACK_name;  /* symbol table entry in ACK format */
 	struct nlist IX_name;	  /* symbol table entry in PC/IX format */
-	register unsigned short i;
+	unsigned short i;
 
 	long l;
 	long off = OFF_CHAR(outhead);

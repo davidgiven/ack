@@ -32,7 +32,7 @@ extern int must_test;
 #define sbu(w1, w2) (unsigned long)(w1 - w2)
 #define mlu(w1, w2) (unsigned long)(w1 * w2)
 
-PRIVATE unsigned long dvu(unsigned long w1, unsigned long w2)
+static unsigned long dvu(unsigned long w1, unsigned long w2)
 {
 	if (w2 == 0)
 	{
@@ -46,7 +46,7 @@ PRIVATE unsigned long dvu(unsigned long w1, unsigned long w2)
 	return (w1 / w2);
 }
 
-PRIVATE unsigned long rmu(unsigned long w1, unsigned long w2)
+static unsigned long rmu(unsigned long w1, unsigned long w2)
 {
 	if (w2 == 0)
 	{
@@ -61,7 +61,7 @@ PRIVATE unsigned long rmu(unsigned long w1, unsigned long w2)
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
+static unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
 {
 	/* w1 << w2 */
 #ifdef LOGGING
@@ -81,7 +81,7 @@ PRIVATE unsigned long slu(unsigned long w1, unsigned long w2, size nbytes)
 }
 
 /*ARGSUSED*/
-PRIVATE unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
+static unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
 {
 	/* w1 >> w2 */
 #ifdef LOGGING
@@ -101,9 +101,9 @@ PRIVATE unsigned long sru(unsigned long w1, unsigned long w2, size nbytes)
 }
 
 /** ADU w: Addition */
-void DoADU(register size l)
+void DoADU(size l)
 {
-	register unsigned long t = upop(arg_wi(l));
+	unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoADU(%ld)", l));
 	spoilFRA();
@@ -111,9 +111,9 @@ void DoADU(register size l)
 }
 
 /** SBU w: Subtraction */
-void DoSBU(register size l)
+void DoSBU(size l)
 {
-	register unsigned long t = upop(arg_wi(l));
+	unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoSBU(%ld)", l));
 	spoilFRA();
@@ -121,9 +121,9 @@ void DoSBU(register size l)
 }
 
 /** MLU w: Multiplication */
-void DoMLU(register size l)
+void DoMLU(size l)
 {
-	register unsigned long t = upop(arg_wi(l));
+	unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoMLU(%ld)", l));
 	spoilFRA();
@@ -131,9 +131,9 @@ void DoMLU(register size l)
 }
 
 /** DVU w: Division */
-void DoDVU(register size l)
+void DoDVU(size l)
 {
-	register unsigned long t = upop(arg_wi(l));
+	unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoDVU(%ld)", l));
 	spoilFRA();
@@ -141,9 +141,9 @@ void DoDVU(register size l)
 }
 
 /** RMU w: Remainder */
-void DoRMU(register size l)
+void DoRMU(size l)
 {
-	register unsigned long t = upop(arg_wi(l));
+	unsigned long t = upop(arg_wi(l));
 
 	LOG(("@U6 DoRMU(%ld)", l));
 	spoilFRA();
@@ -151,9 +151,9 @@ void DoRMU(register size l)
 }
 
 /** SLU w: Shift left */
-void DoSLU(register size l)
+void DoSLU(size l)
 {
-	register unsigned long t = uwpop();
+	unsigned long t = uwpop();
 
 	LOG(("@U6 DoSLU(%ld)", l));
 	spoilFRA();
@@ -162,9 +162,9 @@ void DoSLU(register size l)
 }
 
 /** SRU w: Shift right */
-void DoSRU(register size l)
+void DoSRU(size l)
 {
-	register unsigned long t = uwpop();
+	unsigned long t = uwpop();
 
 	LOG(("@U6 DoSRU(%ld)", l));
 	spoilFRA();

@@ -75,7 +75,7 @@ long align(a,b)
  
 int
 follows(pa, pb)
-        register struct outsect *pa, *pb;
+        struct outsect *pa, *pb;
 {
         /* return 1 if pa follows pb */
  
@@ -86,7 +86,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
+	int		nsect;
 	long			magic ;
 	long			textsize ;
 	long			datasize ;
@@ -196,8 +196,8 @@ main(argc, argv)
  * and zero fill the uninitialized space
  */
 emits(section) struct outsect *section ; {
-	register long	n ;
-	register int	blk;
+	long	n ;
+	int	blk;
 	char		buffer[BUFSIZ];
 
 	n= section->os_flen ;
@@ -225,7 +225,7 @@ emits(section) struct outsect *section ; {
  */
 names()
 {
-	register unsigned	n = outhead.oh_nname - outhead.oh_nsect;
+	unsigned	n = outhead.oh_nname - outhead.oh_nsect;
 	int		type = 0 ;
 	struct outname  outname ;
 	char		buffer[100] ;
@@ -296,8 +296,8 @@ names()
  */
 chars()
 {
-	register long	n = outhead.oh_nchar;
-	register int	blk;
+	long	n = outhead.oh_nchar;
+	int	blk;
 	char	 	*curr ;
 	extern char	*malloc() ;
 
@@ -343,7 +343,7 @@ rname(f,name) struct outname *name ; FILE *f ; {
 }
 
 iconvert(buf,str,fmt) char *buf, *str, *fmt ; {
-	register char *nf, *ni, *no ;
+	char *nf, *ni, *no ;
 	int last, i ;
 	long value ;
 	ni=buf ; no=str ; nf=fmt ;

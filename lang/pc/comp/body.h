@@ -14,20 +14,20 @@ struct node;
 struct scopelist;
 
 
-void MarkDef(register struct node *nd, unsigned short flags, int on);
+void MarkDef(struct node *nd, unsigned short flags, int on);
 
 /* Assert statement */
-void AssertStat(register struct node *expp, unsigned short line);
+void AssertStat(struct node *expp, unsigned short line);
 /** Assign statement */
-void AssignStat(register struct node *left, register struct node *right);
+void AssignStat(struct node *left, struct node *right);
 /** Procedure call statement */
-void ProcStat(register struct node *nd);
+void ProcStat(struct node *nd);
 
 /** ??? */
-void ChkForStat(register struct node *nd);
+void ChkForStat(struct node *nd);
 /** ??? */
-void EndForStat(register struct node *nd);
-arith CodeInitFor(register struct node *nd, int priority);
+void EndForStat(struct node *nd);
+arith CodeInitFor(struct node *nd, int priority);
 void CodeFor(struct node *nd, int stepsize, label l1, label l2);
 void CodeEndFor(struct node *nd, int stepsize, label l1, label l2, arith tmp2);
 

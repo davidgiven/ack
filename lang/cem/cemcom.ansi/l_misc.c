@@ -29,9 +29,9 @@
 
 extern struct type *func_type;
 
-PRIVATE lint_enum_arith();
-PRIVATE lint_conversion();
-PRIVATE int numsize();
+static lint_enum_arith();
+static lint_conversion();
+static int numsize();
 
 check_hiding(idf, lvl, sc)
 	struct idf *idf;
@@ -69,13 +69,13 @@ lint_new_oper(expr)
 		I am not sure we have covered the entire ground, we'll
 		leave the contracting for some rainy day.
 	*/
-	register struct expr *left = expr->OP_LEFT;
-	register struct expr *right = expr->OP_RIGHT;
-	register int oper = expr->OP_OPER;
-	register int l_fund =
+	struct expr *left = expr->OP_LEFT;
+	struct expr *right = expr->OP_RIGHT;
+	int oper = expr->OP_OPER;
+	int l_fund =
 		left == 0 ? 0 :			/* for monadics */
 		left->ex_type->tp_fund;
-	register int r_fund =
+	int r_fund =
 		right == 0 ? 0 :		/* for ( without parameters */
 		right->ex_type->tp_fund;
 
@@ -242,7 +242,7 @@ lint_new_oper(expr)
 	}
 }
 
-PRIVATE
+static
 lint_enum_arith(l_fund, oper, r_fund)
 	int l_fund, oper, r_fund;
 {
@@ -265,12 +265,12 @@ lint_enum_arith(l_fund, oper, r_fund)
 	}
 }
 
-PRIVATE
+static
 lint_conversion(from_expr, to_fund)
 	struct expr *from_expr;
 	int to_fund;
 {
-	register int from_fund = from_expr->ex_type->tp_fund;
+	int from_fund = from_expr->ex_type->tp_fund;
 
 	/*	was there an attempt to reduce the type of the from_expr
 		of the form
@@ -301,7 +301,7 @@ lint_conversion(from_expr, to_fund)
 	}
 }
 
-PRIVATE int
+static int
 numsize(fund)
 {
 	switch (fund) {

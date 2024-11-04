@@ -39,11 +39,11 @@ KTAB keytab[] = {
  */
 keyword(str) char *str;
 {
-	register int high= NKEYWORDS-1;
-	register int low= 0;
-	register int i, cmp;
+	int high= NKEYWORDS-1;
+	int low= 0;
+	int i, cmp;
 	char *lowerupper();
-	register char *key;
+	char *key;
 
 	if ((key=lowerupper(str))==0) return IDENTIFIER;
 
@@ -60,7 +60,7 @@ keyword(str) char *str;
 char *lowerupper(str) register char *str;
 {
 	static char keyword[MAXKEYLEN+1];
-	register char *key=keyword;
+	char *key=keyword;
 
 	if (islower(*str)) {
 		do {
@@ -79,7 +79,7 @@ char *lowerupper(str) register char *str;
 
 char *keyname(key) register int key;
 {
-	register KTAB *kp;
+	KTAB *kp;
 
 	for (kp= keytab; kp< keytab+NKEYWORDS; kp++)
 		if (kp->k_token == key) return kp->k_str;

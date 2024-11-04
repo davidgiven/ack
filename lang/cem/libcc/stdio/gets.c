@@ -4,8 +4,8 @@
 char *gets(str)
 char *str;
 {
-	register int ch;
-	register char *ptr;
+	int ch;
+	char *ptr;
 
 	ptr = str;
 	while ((ch = getc(stdin)) != EOF && ch != '\n')

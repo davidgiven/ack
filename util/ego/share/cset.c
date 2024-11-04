@@ -108,7 +108,7 @@ Cindex Cfirst(cset s)
 
 Cindex Cnext(Cindex i, cset s)
 {
-	register short n;
+	short n;
 
 	for (n = i + 1; n <= s->v_size; n++)
 	{
@@ -133,7 +133,7 @@ void Cjoin(cset s1, cset* s2_p)
 
 	cset s2;
 	short n;
-	register short i;
+	short i;
 
 	s2 = *s2_p;
 	assert(s1->v_size == s2->v_size);
@@ -152,7 +152,7 @@ void Cintersect(cset s1, cset* s2_p)
 
 	cset s2;
 	short n;
-	register short i;
+	short i;
 
 	s2 = *s2_p;
 	assert(s1->v_size == s2->v_size);
@@ -172,7 +172,7 @@ bool Cis_subset(cset s1, cset s2)
 {
 	/* See if s1 is a subset of s2 */
 
-	register short i;
+	short i;
 
 	assert(s1->v_size == s2->v_size);
 	if (s1->v_size == 0)
@@ -190,7 +190,7 @@ bool Cis_subset(cset s1, cset s2)
 void Cclear_set(cset* s_p)
 {
 	cset s;
-	register short i;
+	short i;
 
 	s = *s_p;
 	assert(s != (cset)0);
@@ -203,7 +203,7 @@ void Cclear_set(cset* s_p)
 void Ccopy_set(cset s1, cset* s2_p)
 {
 	cset s2;
-	register short i;
+	short i;
 
 	s2 = *s2_p;
 	assert(s1->v_size == s2->v_size);
@@ -216,7 +216,7 @@ void Ccopy_set(cset s1, cset* s2_p)
 void Csubtract(cset s1, cset* s2_p)
 {
 	cset s2;
-	register short i;
+	short i;
 
 	s2 = *s2_p;
 	assert(s1->v_size == s2->v_size);
@@ -228,7 +228,7 @@ void Csubtract(cset s1, cset* s2_p)
 
 bool Cequal(cset s1, cset s2)
 {
-	register short i;
+	short i;
 
 	assert(s1->v_size == s2->v_size);
 	for (i = 0; i <= DIVWL(s1->v_size - 1); i++)
@@ -241,7 +241,7 @@ bool Cequal(cset s1, cset s2)
 
 short Cnrelems(cset s)
 {
-	register short n, cnt;
+	short n, cnt;
 
 	cnt = 0;
 	for (n = 1; n <= s->v_size; n++)

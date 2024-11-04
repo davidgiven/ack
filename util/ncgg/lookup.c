@@ -18,7 +18,7 @@ static char rcsid[] = "$Id$";
 symbol dumsym; /* dummy to return in case of error */
 
 /* Forward declarations */
-static int hashvalue(register char *);
+static int hashvalue(char *);
 
 symbol *lookup(char *name, symtype type, lookupstyle style)
 {
@@ -65,10 +65,10 @@ symbol *lookup(char *name, symtype type, lookupstyle style)
 	}
 }
 
-static int hashvalue(register char *s)
+static int hashvalue(char *s)
 {
-	register unsigned sum = 0;
-	register int i;
+	unsigned sum = 0;
+	int i;
 
 	for (i = 0; *s; s++, i = (i + 3) & 07)
 		sum += *s << i;

@@ -1,8 +1,8 @@
 /* $Id$ */
 ltol3(cp, lp, n)
-register char	*cp;
-register long	*lp;
-register int	n;
+char	*cp;
+long	*lp;
+int	n;
 {
 	while (n-- > 0) {
 		*cp++ = (*lp >> 16);
@@ -12,9 +12,9 @@ register int	n;
 }
 
 l3tol(lp, cp, n)
-register long	*lp;
+long	*lp;
 char	*cp;
-register int	n;
+int	n;
 {
 	unsigned char *a = (unsigned char *) cp;
 

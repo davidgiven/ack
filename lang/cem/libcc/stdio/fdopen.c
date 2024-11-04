@@ -4,7 +4,7 @@
 FILE *fdopen(fd,mode)
 char *mode;
 {
-	register int i;
+	int i;
 	FILE *fp;
 	char *malloc();
 	int flags = 0;

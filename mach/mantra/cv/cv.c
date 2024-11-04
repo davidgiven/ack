@@ -81,7 +81,7 @@ long align(a,b)
  
 int
 follows(pa, pb)
-        register struct outsect *pa, *pb;
+        struct outsect *pa, *pb;
 {
         /* return 1 if pa follows pb */
  
@@ -92,7 +92,7 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
+	int		nsect;
 	long			magic ;
 	long			textsize ;
 	long			datasize ;
@@ -221,10 +221,10 @@ emits(section) struct outsect *section ; {
 emit_symtab()
 {
 	struct outname *ACK_names;
-	register unsigned short i;
-	register struct outname *A;
-	register char x;
-	register char *p;
+	unsigned short i;
+	struct outname *A;
+	char x;
+	char *p;
 	extern char *malloc(), *calloc();
 	long l;
 	long off = OFF_CHAR(outhead);
@@ -285,7 +285,7 @@ emit_symtab()
 }
 
 write_long(l)
-	register long l;
+	long l;
 {
 	/*	write long "l" in 68000 order
 	*/
@@ -297,7 +297,7 @@ write_long(l)
 }
 
 write_header(h)
-	register struct bhdr *h;
+	struct bhdr *h;
 {
 	write_long(h->fmagic);
 	write_long(h->tsize);

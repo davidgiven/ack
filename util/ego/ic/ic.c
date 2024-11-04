@@ -52,10 +52,10 @@ lab_id lastlid = 0;
 offset mespar = UNKNOWN_SIZE;
 /* argumument of ps_par message of current procedure */
 
-STATIC void process_lines(FILE*);
-STATIC int readline(short*, line_p*);
-STATIC line_p readoperand(short instr);
-STATIC line_p inpseudo(short);
+static void process_lines(FILE*);
+static int readline(short*, line_p*);
+static line_p readoperand(short instr);
+static line_p inpseudo(short);
 
 int main(int argc, char* argv[])
 {
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 #define END_INSTR 4
 #define DELETED_INSTR 5
 
-STATIC void add_end(void)
+static void add_end(void)
 {
 	/* Add an end-pseudo to the current instruction list */
 
@@ -141,7 +141,7 @@ STATIC void add_end(void)
 	lastline->l_instr = ps_end;
 }
 
-STATIC void process_lines(FILE* fout)
+static void process_lines(FILE* fout)
 {
 	line_p lnp;
 	short instr;
@@ -233,9 +233,9 @@ STATIC void process_lines(FILE* fout)
 	}
 }
 
-STATIC int readline(short* instr_out, line_p* lnp_out)
+static int readline(short* instr_out, line_p* lnp_out)
 {
-	register line_p lnp;
+	line_p lnp;
 	short n;
 
 	/* Read one line. If it is a normal EM instruction without
@@ -307,13 +307,13 @@ STATIC int readline(short* instr_out, line_p* lnp_out)
 	UNREACHABLE_CODE;
 }
 
-STATIC line_p readoperand(short instr)
+static line_p readoperand(short instr)
 {
 	/* Read the operand of the given instruction.
 	 * Create a line struct and return a pointer to it.
 	 */
 
-	register line_p lnp;
+	line_p lnp;
 	short flag;
 
 	VI(instr);
@@ -424,7 +424,7 @@ static char* hol_label(void)
 	return lastname;
 }
 
-STATIC line_p inpseudo(short n)
+static line_p inpseudo(short n)
 {
 	int m;
 	line_p lnp;

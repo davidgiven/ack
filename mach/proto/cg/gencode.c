@@ -57,11 +57,11 @@ void tstoutput(void) {
 		error("Write error on output");
 }
 
-void gencode(register char *code)
+void gencode(char *code)
 {
-	register int c;
+	int c;
 	int tokno,fldno,insno,regno,subno;
-	register token_p tp;
+	token_p tp;
 
 	swtxt();
 	while ((c= *code++)!=0) switch(c) {
@@ -156,9 +156,9 @@ void gennl(void)
 
 void prtoken(token_p tp)
 {
-	register int c;
-	register char *code;
-	register tkdef_p tdp;
+	int c;
+	char *code;
+	tkdef_p tdp;
 
 	tdp = &tokens[tp->t_token];
 	assert(tdp->t_format != -1);

@@ -237,8 +237,8 @@ char *wh_first, *wh_next, *wh_last;
 
 fileinit()
 {
-	register char *s;
-	register int i, j;
+	char *s;
+	int i, j;
 	extern void fmt_init(), mem_init(), np_init();
 
 	lastiolabno = 100000;
@@ -287,10 +287,10 @@ fileinit()
 
 hashclear()	/* clear hash table */
 {
-	register struct Hashentry *hp;
-	register Namep p;
-	register struct Dimblock *q;
-	register int i;
+	struct Hashentry *hp;
+	Namep p;
+	struct Dimblock *q;
+	int i;
 
 	for(hp = hashtab ; hp < lasthash ; ++hp)
 		if(p = hp->varp)
@@ -317,7 +317,7 @@ hashclear()	/* clear hash table */
 
 procinit()
 {
-	register struct Labelblock *lp;
+	struct Labelblock *lp;
 	struct Chain *cp;
 	int i;
 	extern struct memblock *curmemblock, *firstmemblock;

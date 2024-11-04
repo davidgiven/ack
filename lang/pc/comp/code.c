@@ -28,18 +28,18 @@
 
 int fp_used;
 
-static void CodeUoper(register struct node *);
-static void CodeBoper(register struct node *, /* the expression tree itself	*/
+static void CodeUoper(struct node *);
+static void CodeBoper(struct node *, /* the expression tree itself	*/
 label);
-static void CodeSet(register struct node *);
-static void CodeEl(register struct node *, register struct type *);
+static void CodeSet(struct node *);
+static void CodeEl(struct node *, struct type *);
 static void CodePString(struct node *, struct type *);
 /* General internal system API calls */
 static void CodeStd(struct node *);
 
-static void genrck(register struct type *);
-static void RegisterMessages(register struct def *);
-static void CodeConfDescr(register struct type *, register struct type *);
+static void genrck(struct type *);
+static void RegisterMessages(struct def *);
+static void CodeConfDescr(struct type *, struct type *);
 
 extern void call_ini(void);
 
@@ -51,14 +51,14 @@ static void CodeFil(void)
 		C_fil_dlb((label ) 1, (arith) 0);
 }
 
-void routine_label(register struct def * df)
+void routine_label(struct def * df)
 {
 	df->prc_label = ++data_label;
 	C_df_dlb(df->prc_label);
 	C_rom_scon(df->df_idf->id_text, (arith)(strlen(df->df_idf->id_text) + 1));
 }
 
-void RomString(register struct node *nd)
+void RomString(struct node *nd)
 {
 	C_df_dlb(++data_label);
 
@@ -71,7 +71,7 @@ void RomString(register struct node *nd)
 	nd->nd_SLA = data_label;
 }
 
-void RomReal(register struct node *nd)
+void RomReal(struct node *nd)
 {
 	if (!nd->nd_RLA)
 	{
@@ -84,7 +84,7 @@ void RomReal(register struct node *nd)
 void BssVar(void)
 {
 	/* generate bss segments for global variables */
-	register struct def *df = GlobalScope->sc_def;
+	struct def *df = GlobalScope->sc_def;
 
 	while (df)
 	{
@@ -99,12 +99,12 @@ void BssVar(void)
 	}
 }
 
-static arith CodeGtoDescr(register struct scope *sc)
+static arith CodeGtoDescr(struct scope *sc)
 {
 	/*	Create code for goto descriptors
 	 */
 
-	register struct node *lb = sc->sc_lablist;
+	struct node *lb = sc->sc_lablist;
 	int first = 1;
 
 	while (lb)
@@ -130,7 +130,7 @@ static arith CodeGtoDescr(register struct scope *sc)
 		return (arith) 0;
 }
 
-arith CodeBeginBlock(register struct def *df)
+arith CodeBeginBlock(struct def *df)
 {
 	/*	Generate code at the beginning of the main program,
 	 procedure or function.
@@ -161,7 +161,7 @@ arith CodeBeginBlock(register struct def *df)
 	else if (df->df_kind & (D_PROCEDURE | D_FUNCTION))
 	{
 		struct type *tp;
-		register struct paramlist *param;
+		struct paramlist *param;
 
 		C_pro_narg(df->prc_name);
 		C_ms_par(df->df_type->prc_nbpar);
@@ -255,7 +255,7 @@ arith CodeBeginBlock(register struct def *df)
 	return StackAdjustment;
 }
 
-void CodeEndBlock(register struct def *df, arith StackAdjustment)
+void CodeEndBlock(struct def *df, arith StackAdjustment)
 {
 	if (df->df_kind == D_PROGRAM)
 	{
@@ -316,10 +316,10 @@ void CodeEndBlock(register struct def *df, arith StackAdjustment)
 	TmpClose();
 }
 
-void CodeExpr(register struct node *nd, register struct desig *ds,
+void CodeExpr(struct node *nd, struct desig *ds,
 		label true_label)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	if (tp->tp_fund == T_REAL)
 		fp_used = 1;
@@ -366,8 +366,8 @@ void CodeExpr(register struct node *nd, register struct desig *ds,
 
 	case Set:
 	{
-		register arith *st = nd->nd_set;
-		register int i;
+		arith *st = nd->nd_set;
+		int i;
 
 		ds->dsg_kind = DSG_LOADED;
 		if (!st)
@@ -468,9 +468,9 @@ void CodeExpr(register struct node *nd, register struct desig *ds,
 	}
 }
 
-static void CodeUoper(register struct node *nd)
+static void CodeUoper(struct node *nd)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	CodePExpr(nd->nd_right);
 
@@ -528,18 +528,18 @@ static void truthvalue(int relop)
 
 
 
-static void Operands(register struct node *leftop, register struct node *rightop)
+static void Operands(struct node *leftop, struct node *rightop)
 {
 	CodePExpr(leftop);
 	CodePExpr(rightop);
 }
 
-static void CodeBoper(register struct node *expr, /* the expression tree itself	*/
+static void CodeBoper(struct node *expr, /* the expression tree itself	*/
 label true_label) /* label to jump to in logical exprs */
 {
-	register struct node *leftop = expr->nd_left;
-	register struct node *rightop = expr->nd_right;
-	register struct type *tp = expr->nd_type;
+	struct node *leftop = expr->nd_left;
+	struct node *rightop = expr->nd_right;
+	struct type *tp = expr->nd_type;
 
 	switch (expr->nd_symb)
 	{
@@ -728,9 +728,9 @@ label true_label) /* label to jump to in logical exprs */
 }
 
 
-static void CodeSet(register struct node *nd)
+static void CodeSet(struct node *nd)
 {
-	register struct type *tp = nd->nd_type;
+	struct type *tp = nd->nd_type;
 
 	C_zer(tp->tp_size);
 	nd = nd->nd_right;
@@ -743,7 +743,7 @@ static void CodeSet(register struct node *nd)
 	}
 }
 
-static void CodeEl(register struct node *nd, register struct type *tp)
+static void CodeEl(struct node *nd, struct type *tp)
 {
 	if (nd->nd_class == Link && nd->nd_symb == UPTO)
 	{
@@ -762,7 +762,7 @@ static void CodeEl(register struct node *nd, register struct type *tp)
 
 static struct type * CodeParameters(struct paramlist *param, struct node *arg)
 {
-	register struct type *tp, *left_tp, *last_tp = (struct type *) 0;
+	struct type *tp, *left_tp, *last_tp = (struct type *) 0;
 	struct node *left;
 	struct desig ds;
 
@@ -806,7 +806,7 @@ static struct type * CodeParameters(struct paramlist *param, struct node *arg)
 	return tp;
 }
 
-static void CodeConfDescr(register struct type *ftp, register struct type *atp)
+static void CodeConfDescr(struct type *ftp, struct type *atp)
 {
 	struct type *elemtp = ftp->arr_elem;
 
@@ -847,15 +847,15 @@ static void CodePString(struct node *nd, struct type *tp)
 	C_loi(tp->tp_size);
 }
 
-void CodeCall(register struct node *nd)
+void CodeCall(struct node *nd)
 {
 	/*	Generate code for a procedure call. Checking of parameters
 	 and result is already done.
 	 */
-	register struct node *left = nd->nd_left;
-	register struct node *right = nd->nd_right;
-	register struct def *df = left->nd_def;
-	register struct type *result_tp;
+	struct node *left = nd->nd_left;
+	struct node *right = nd->nd_right;
+	struct def *df = left->nd_def;
+	struct type *result_tp;
 
 	assert(IsProcCall(left));
 
@@ -916,9 +916,9 @@ void CodeCall(register struct node *nd)
 
 static void CodeStd(struct node *nd)
 {
-	register struct node *arg = nd->nd_right;
-	register struct node *left = arg->nd_left;
-	register struct type *tp = BaseType(left->nd_type);
+	struct node *arg = nd->nd_right;
+	struct node *left = arg->nd_left;
+	struct type *tp = BaseType(left->nd_type);
 	int req = nd->nd_left->nd_def->df_value.df_reqname;
 
 	assert(arg->nd_class == Link && arg->nd_symb == ',');
@@ -1187,7 +1187,7 @@ void Real2Int(void)
 	C_cfi();
 }
 
-void RangeCheck(register struct type *tpl, register struct type *tpr)
+void RangeCheck(struct type *tpl, struct type *tpr)
 {
 	/*	Generate a range check if neccessary
 	 */
@@ -1215,14 +1215,14 @@ void RangeCheck(register struct type *tpl, register struct type *tpr)
 	}
 }
 
-static void genrck(register struct type *tp)
+static void genrck(struct type *tp)
 {
 	/*	Generate a range check descriptor for type "tp" when
 	 necessary. Return its label.
 	 */
 
 	arith lb, ub;
-	register label o1;
+	label o1;
 	int newlabel = 0;
 
 	if (options['R'])
@@ -1253,7 +1253,7 @@ static void genrck(register struct type *tp)
 	C_rck(word_size);
 }
 
-void CodePExpr(register struct node *nd)
+void CodePExpr(struct node *nd)
 {
 	/*	Generate code to push the value of the expression "nd"
 	 on the stack.
@@ -1283,7 +1283,7 @@ void CodeDAddress(struct node *nd)
 	CodeAddress(&designator);
 }
 
-void CodeDStore(register struct node *nd)
+void CodeDStore(struct node *nd)
 {
 	/*	Generate code to store the expression on the stack
 	 into the designator "nd".
@@ -1296,9 +1296,9 @@ void CodeDStore(register struct node *nd)
 	CodeStore(&designator, nd->nd_type);
 }
 
-static void RegisterMessages(register struct def *df)
+static void RegisterMessages(struct def *df)
 {
-	register struct type *tp;
+	struct type *tp;
 
 	for (; df; df = df->df_nextinscope)
 	{

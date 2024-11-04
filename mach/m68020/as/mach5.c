@@ -25,7 +25,7 @@
 
 void emit_instr(void)
 {
-	register instr_t *ip;
+	instr_t *ip;
 
 	for (ip=instr; ip<instrp; emit2((ip++)->i_word)) {
 #ifdef RELOCATION
@@ -72,8 +72,8 @@ void ea_1(int sz, int bits)
 		 * one of these calls is a dummy call.
 		 */
 
-	register int flag;
-	register int sm, sm1, sm2;
+	int flag;
+	int sm, sm1, sm2;
 
 	if (mrg_1 > 074)
 		serror("no specials");
@@ -258,7 +258,7 @@ void shift_op(int opc, int sz)
 
 void bitop(int opc)
 {
-	register int bits;
+	int bits;
 
 	bits = DTA|ALT;
 	if (opc == 0 && (mrg_1 < 010 || mrg_2 != 074))
@@ -365,7 +365,7 @@ int from_dreg(int opc, int sz, int bits)
 
 void cmp(int sz)
 {
-	register int opc;
+	int opc;
 
 	if ((mrg_1&070) == 030 && (mrg_2&070) == 030) {
 		T_EMIT2(0130410 | sz | (mrg_1&7) | (mrg_2&7)<<9, 0, 0, 0);
@@ -411,7 +411,7 @@ void link_instr(int sz, int areg)
 
 void move(int sz)
 {
-	register int opc;
+	int opc;
 
 	if (mrg_1 > 074 || mrg_2 > 074) {
 		move_special(sz);
@@ -472,7 +472,7 @@ void move_special(int sz)
 
 void movem(int dr, int sz, int regs)
 {
-	register int i;
+	int i;
 
 	if ((mrg_2>>3) == 04) {
 		regs = reverse(regs, 16);
@@ -492,9 +492,9 @@ void movem(int dr, int sz, int regs)
 	ea_2(sz, i);
 }
 
-int reverse(register int regs, int max)
+int reverse(int regs, int max)
 {
-	register int r, i;
+	int r, i;
 
 	r = regs; regs = 0;
 	for (i = max; i > 0; i--) {
@@ -524,7 +524,7 @@ void movep(int sz)
 
 void branch(int opc, expr_t exp)
 {
-	register int sm;
+	int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -559,7 +559,7 @@ void branch(int opc, expr_t exp)
 
 void cpbcc(int opc, expr_t exp)
 {
-	register int sm;
+	int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 
@@ -663,7 +663,7 @@ void ea7071(int sz)
 
 void fbranch(int opc, expr_t exp)
 {
-	register int sm;
+	int sm;
 
 	exp.val -= (DOTVAL + 2);
 	if ((pass == PASS_2) 

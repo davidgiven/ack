@@ -36,13 +36,13 @@ int		warning_classes = W_INITIAL;
 int		gdb_flag;
 
 #if (!SQUEEZE) | (!NOCROSS)
-static int txt2int(register char **tp)
+static int txt2int(char **tp)
 {
 	/*	the integer pointed to by *tp is read, while increasing
 		*tp; the resulting value is yielded.
 	*/
-	register int val = 0;
-	register int ch;
+	int val = 0;
+	int ch;
 
 	while (ch = **tp, ch >= '0' && ch <= '9')	{
 		val = val * 10 + ch - '0';
@@ -53,7 +53,7 @@ static int txt2int(register char **tp)
 #endif
 
 
-void DoOption(register char *text)
+void DoOption(char *text)
 {
 	switch(*text++)	{
 
@@ -155,8 +155,8 @@ void DoOption(register char *text)
 
 	case 'I' :
 		if (*text) {
-			register int i;
-			register char *new = text;
+			int i;
+			char *new = text;
 
 			if (nDEF > mDEF) {
 				DEFPATH = (char **)
@@ -177,8 +177,8 @@ void DoOption(register char *text)
 	case 'V' :	/* set object sizes and alignment requirements	*/
 #ifndef NOCROSS
 	{
-		register int size;
-		register int algn;
+		int size;
+		int algn;
 		char c;
 		char *t;
 

@@ -60,8 +60,8 @@ static struct varinfo * genremove(int n)
 
 static int onlyreg(int argno)
 {
-	register int bitno;
-	register short *sp;
+	int bitno;
+	short *sp;
 
 	if (!argno)
 		argno++;
@@ -87,11 +87,11 @@ static void makescratch(int argno)
 
 struct varinfo *gen_inst(char *ident, int star)
 {
-	register struct varinfo *vi, *retval, *eravi;
-	register instr_p ip;
-	register struct operand *op;
-	register int i;
-	register inst_p insta;
+	struct varinfo *vi, *retval, *eravi;
+	instr_p ip;
+	struct operand *op;
+	int i;
+	inst_p insta;
 
 	if (star && !inproc)
 		error("Variable instruction only allowed inside proc");

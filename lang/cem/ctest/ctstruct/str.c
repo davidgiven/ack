@@ -40,7 +40,7 @@ asst() {
 	struct w3 s3t1, s3t2, *s3t3 ;
 
 
-	register int i ;
+	int i ;
 
 	printf("w1\n") ;
 	st1.w1_i = 506 ;
@@ -102,7 +102,7 @@ part() {
 
 	struct w3 pars ;
 
-	register i ;
+	i ;
 
 	for ( i=0 ; i<ASIZE ; i++ ) {
 		pars.w3_a[i]=i+1 ;
@@ -113,7 +113,7 @@ part() {
 }
 
 psc(before,str,after) int before, after ; struct w3 str ; {
-	register int i ;
+	int i ;
 
 	printf("before %d\n",before) ;
 	for ( i=0 ; i<ASIZE ; i++ ) {
@@ -127,7 +127,7 @@ callt() {
 	/* test structure valued functions */
 	extern struct w3 setp1(), setp2() ;
 	struct w3 myp ;
-	register int i ;
+	int i ;
 
 	printf("\nStucture valued functions\n") ;
 	myp = setp1(ASIZE) ;
@@ -158,7 +158,7 @@ static struct w3 myp2 ;
 
 struct w3 setp2() {
 	struct w3 *w3p ;
-	register i ;
+	i ;
 
 	for ( i=0 ; i<ASIZE ; i++ ) {
 		myp2.w3_a[i]= 99+i ;

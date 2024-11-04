@@ -25,33 +25,33 @@
 extern int running; /* from main.c */
 
 /* Forward declarations */
-PRIVATE void lfr(size), ret(size);
+static void lfr(size), ret(size);
 
 /** CAI -: Call procedure (procedure identifier on stack) */
 void DoCAI(void) /* proc identifier on top of stack */
 {
-	register long pi = spop(psize);
+	long pi = spop(psize);
 
 	LOG(("@P6 DoCAI(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
 /** CAL p: Call procedure (with identifier p) */
-void DoCAL(register long pi)
+void DoCAL(long pi)
 {
 	LOG(("@P6 DoCAL(%lu)", pi));
 	call(arg_p(pi), RSB_CAL);
 }
 
 /** LFR s: Load function result */
-void DoLFR(register size l)
+void DoLFR(size l)
 {
 	LOG(("@P6 DoLFR(%ld)", l));
 	lfr(arg_s(l));
 }
 
 /** RET z: Return (function result consists of top z bytes) */
-void DoRET(register size l)
+void DoRET(size l)
 {
 	LOG(("@P6 DoRET(%ld)", l));
 	ret(arg_z(l));
@@ -64,8 +64,8 @@ void DoRET(register size l)
 void call(long new_PI, int rsbcode)
 {
 	/* legality of new_PI has already been checked */
-	register size nloc = proctab[new_PI].pr_nloc;
-	register ptr ep = proctab[new_PI].pr_ep;
+	size nloc = proctab[new_PI].pr_nloc;
+	ptr ep = proctab[new_PI].pr_ep;
 
 	push_frame(SP); /* remember AB */
 	pushrsb(rsbcode);
@@ -82,7 +82,7 @@ void call(long new_PI, int rsbcode)
  *		Loading a function result.										*
  ************************************************************************/
 
-PRIVATE void lfr(size sz)
+static void lfr(size sz)
 {
 	if (sz > FRALimit)
 	{
@@ -110,7 +110,7 @@ PRIVATE void lfr(size sz)
  *		Returning from a procedure.				*
  ************************************************************************/
 
-PRIVATE void ret(size sz)
+static void ret(size sz)
 {
 	if (sz > FRALimit)
 	{

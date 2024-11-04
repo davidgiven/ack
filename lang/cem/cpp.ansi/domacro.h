@@ -10,7 +10,7 @@
 
 struct idf;
 
-extern void macro_def(register struct idf* id, char* text, int nformals, int length, int flags);
+extern void macro_def(struct idf* id, char* text, int nformals, int length, int flags);
 extern void do_undef(char* argstr);
 /*	Control line interpreter. The '#' has already
     been read by the lexical analyzer by which this function is called.

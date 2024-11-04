@@ -10,7 +10,7 @@
 
 static int value(char c, int b)
 {
-	register int ch;
+	int ch;
 
 	ch = c - '0';
 	if ((unsigned) ch <= 9) return ch;
@@ -21,7 +21,7 @@ static int value(char c, int b)
 	return b;
 }
 
-long str2long(register char *str, int base)
+long str2long(char *str, int base)
 {
 	int minus = 0, d;
 	long l = 0;

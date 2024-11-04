@@ -5,7 +5,7 @@ struct node;
 #define is_anon_idf(x)		((x)->id_text[0] == '#')
 #define id_not_declared(x)	(not_declared("identifier", (x), ""))
 
-extern char *gen_proc_name(register struct idf *id, int inp);
+extern char *gen_proc_name(struct idf *id, int inp);
 extern struct idf *gen_anon_idf(void);
-extern void not_declared(char *what, register struct node *id, char *where);
+extern void not_declared(char *what, struct node *id, char *where);
 

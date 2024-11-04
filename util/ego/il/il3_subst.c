@@ -22,7 +22,7 @@
 #include "il3_change.h"
 #include "il3_subst.h"
 
-STATIC line_p fetch_text(FILE* lf, call_p c)
+static line_p fetch_text(FILE* lf, call_p c)
 {
 	/* Read the EM text of the called procedure.
 	 * We use random access I/O here.
@@ -46,7 +46,7 @@ line_p scan_to_cal(line_p lines, short n)
 {
 	/* Find the n-th CAL instruction */
 
-	register line_p l;
+	line_p l;
 
 	for (l = lines; l != (line_p)0; l = l->l_next)
 	{

@@ -25,9 +25,9 @@ extern jmp_buf trapbuf; /* from main.c */
 int must_test; /* TEST-bit on in EM header word 2 */
 int signalled;
 
-PRIVATE int nonreturnable(int nr);
+static int nonreturnable(int nr);
 
-PRIVATE char* trap_msg[] = {
+static char* trap_msg[] = {
 #include "trap_msg" /* generated from $(EM)/etc/traps */
 	""
 };
@@ -60,7 +60,7 @@ void do_trap(int nr, int L, char* F)
 	static int rec_nr; /* Recursive trap number */
 	static int rec_trap = 0; /* To detect traps inside do_trap() */
 
-	register long tpi; /* Trap Procedure Identifier */
+	long tpi; /* Trap Procedure Identifier */
 
 	LOG(("@t1 trap(%d) [%s: %d]", nr, F, L));
 	warning(WMSG + nr);
@@ -102,7 +102,7 @@ void do_trap(int nr, int L, char* F)
 	}
 }
 
-PRIVATE int nonreturnable(int nr)
+static int nonreturnable(int nr)
 {
 	switch (nr)
 	{

@@ -41,9 +41,9 @@ static int argtyp(int mn) {
 	}
 }
 
-byte *trypat(register byte *bp, int len)
+byte *trypat(byte *bp, int len)
 {
-	register int patlen,i;
+	int patlen,i;
 	result_t result;
 
 	getint(patlen,bp);
@@ -91,12 +91,12 @@ byte *trypat(register byte *bp, int len)
 
 
 byte *nextem(int toplevel) {
-	register int i;
+	int i;
 	short hash[3];
-	register byte *bp;
+	byte *bp;
 	byte *cp;
 	int index;
-	register struct emline *ep;
+	struct emline *ep;
 
 	if (toplevel) {
 		if (nemlines && emp>emlines) {

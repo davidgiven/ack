@@ -24,7 +24,7 @@ FILE* popen(const char* command, const char* type)
 	if (pid == 0)
 	{
 		/* child */
-		register int* p;
+		int* p;
 
 		for (p = pids; p < &pids[FOPEN_MAX]; p++)
 		{

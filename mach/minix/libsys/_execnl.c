@@ -12,13 +12,13 @@
 
 _PROTOTYPE(int _execn,(char *name));
 _PROTOTYPE(int _execnl,(char *name, char *arg0));
-PRIVATE _PROTOTYPE(int _nexec,(char *name, char *argv[]));
+static _PROTOTYPE(int _nexec,(char *name, char *argv[]));
 
 PUBLIC int _execn(name)
 char *name;			/* pointer to file to be exec'd */
 {
 /* This funcion uses no arguments at all. */
-  PRIVATE char stack[3 * PTRSIZE];
+  static char stack[3 * PTRSIZE];
 
   return(_callm1(MM, EXEC, _len(name), sizeof(stack), 0, name, stack, NIL_PTR));
 }
@@ -33,7 +33,7 @@ char *arg0;
   return(_nexec(name, &arg0));
 }
 
-PRIVATE int _nexec(name, argv)
+static int _nexec(name, argv)
 char *name;			/* pointer to name of file to be executed */
 char *argv[];			/* pointer to argument array */
 {

@@ -163,8 +163,8 @@ void gengen(int id) {
 	}
 }
 
-void disp(register expr_t *expr, int relpc) {
-	register int sm1, sm2 ;
+void disp(expr_t *expr, int relpc) {
+	int sm1, sm2 ;
 
 	sm1=0 ; sm2=0 ;
 	if (DOTTYP >= 0x2 && DOTTYP<=0x7F &&
@@ -221,7 +221,7 @@ void putdisp(valu_t val,int size)
 	}
 }
 
-void dot_adjust(register expr_t *expr)
+void dot_adjust(expr_t *expr)
 {
 	expr->val -= DOTVAL ;
 	if ( pass==PASS_2 ) {
@@ -251,7 +251,7 @@ int testsize(int type,int val)
 	}
 }
 
-void imm(int i_type,register expr_t *expr)
+void imm(int i_type, expr_t *expr)
 {
 /* emit value of immediate expression , after check on FIT */
 	if (!testsize(i_type,(int)expr->val))
@@ -284,7 +284,7 @@ void imm(int i_type,register expr_t *expr)
 
 int reg_list(int list,int reverse)
 {
-	register int rev_list, i ;
+	int rev_list, i ;
 	if ( !reverse ) {
 		return list ;
 	}

@@ -38,10 +38,10 @@ static void noodstop(int);
 
 int main(int argc, char** argv)
 {
-	register list_elem* elem;
-	register char* frontend;
-	register int* n_sig;
-	register trf* phase;
+	list_elem* elem;
+	char* frontend;
+	int* n_sig;
+	trf* phase;
 
 	progname = argv[0];
 	varinit();
@@ -154,7 +154,7 @@ static char* getsuffix(void)
 static void varinit(void)
 {
 	/* initialize the string variables */
-	register char* envstr;
+	char* envstr;
 	extern char* em_dir;
 
 	if ((envstr = getenv("ACKDIR")) != NULL)
@@ -170,9 +170,9 @@ static void varinit(void)
 
 void vieuwargs(int argc, char** argv)
 {
-	register char* argp;
-	register int nextarg;
-	register int eaten;
+	char* argp;
+	int nextarg;
+	int eaten;
 	int hide;
 
 	firstarg(argv[0]);
@@ -301,7 +301,7 @@ void vieuwargs(int argc, char** argv)
 		}
 		if (!hide)
 		{
-			register char* tokeep;
+			char* tokeep;
 			tokeep = keeps(argp);
 			if (argp[1] == 'R')
 			{
@@ -323,7 +323,7 @@ void vieuwargs(int argc, char** argv)
 
 static void firstarg(char* argp)
 {
-	register char* name;
+	char* name;
 
 	name = strrchr(argp, '/');
 	if (!name)
@@ -345,7 +345,7 @@ static int process(char* arg)
 {
 	/* Process files & library arguments */
 	trf* phase;
-	register trf* tmp;
+	trf* tmp;
 
 #ifdef DEBUG
 	if (debug)
@@ -414,7 +414,7 @@ static int process(char* arg)
 static int startrf(trf* first)
 {
 	/* Start the transformations at the indicated phase */
-	register trf* phase;
+	trf* phase;
 
 	phase = first;
 	for (;;)
@@ -506,7 +506,7 @@ static void block(trf* first)
 	/* One of the input files of this phase could not be produced,
 	   block all combiners taking their input from this one.
 	*/
-	register trf* phase;
+	trf* phase;
 	for (phase = first; phase; phase = phase->t_next)
 	{
 		if (phase->t_combine)
@@ -529,7 +529,7 @@ static int mayprep(void)
 
 static void scanneeds(void)
 {
-	register list_elem* elem;
+	list_elem* elem;
 	scanlist(l_first(head_list), elem)
 	{
 		setneeds(l_content(*elem), 0);

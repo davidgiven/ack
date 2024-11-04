@@ -86,7 +86,7 @@ void init_replacements(short psize, short wsize)
 	 * as a 'Load pointer' instruction.
 	 */
 
-	register int i, j;
+	int i, j;
 	short load_pointer;
 	struct repl* r;
 
@@ -131,19 +131,19 @@ void init_replacements(short psize, short wsize)
 	}
 }
 
-STATIC int repl_index(line_p l)
+static int repl_index(line_p l)
 {
 	return itemtab[INSTR(l) - sp_fmnem].id_replindex;
 }
 
-STATIC bool is_current(alloc_p alloc, short t)
+static bool is_current(alloc_p alloc, short t)
 {
 	/* Is time t part of alloc's timespan? */
 
 	return contains(t, alloc->al_timespan);
 }
 
-STATIC bool match_item(item_p item, line_p l)
+static bool match_item(item_p item, line_p l)
 {
 	/* See if the item used by l is the same one as 'item' */
 	struct item thisitem;
@@ -159,13 +159,13 @@ STATIC bool match_item(item_p item, line_p l)
 	return item->it_type == thisitem.it_type && same_item(item, &thisitem);
 }
 
-STATIC alloc_p find_alloc(alloc_p alloclist, line_p l, short t)
+static alloc_p find_alloc(alloc_p alloclist, line_p l, short t)
 {
 	/* See if any of the allocations of the list applies to instruction
 	 * l at time t.
 	 */
 
-	register alloc_p alloc, m;
+	alloc_p alloc, m;
 
 	for (alloc = alloclist; alloc != (alloc_p)0; alloc = alloc->al_next)
 	{
@@ -180,7 +180,7 @@ STATIC alloc_p find_alloc(alloc_p alloclist, line_p l, short t)
 	return (alloc_p)0;
 }
 
-STATIC void replace_line(line_p l, bblock_p b, line_p list)
+static void replace_line(line_p l, bblock_p b, line_p list)
 {
 	if (b->b_start == l)
 	{
@@ -203,7 +203,7 @@ STATIC void replace_line(line_p l, bblock_p b, line_p list)
 	oldline(l);
 }
 
-STATIC line_p repl_code(line_p lnp, offset regnr)
+static line_p repl_code(line_p lnp, offset regnr)
 {
 	line_p head, *q, l, prev = (line_p)0;
 	int i, index;
@@ -238,7 +238,7 @@ STATIC line_p repl_code(line_p lnp, offset regnr)
 	return head;
 }
 
-STATIC void apply_alloc(bblock_p b, line_p l, alloc_p alloc)
+static void apply_alloc(bblock_p b, line_p l, alloc_p alloc)
 {
 	/* 'l' is an EM instruction using an item that will be put in
 	 * a register. Generate new code that uses the register instead
@@ -277,7 +277,7 @@ STATIC void apply_alloc(bblock_p b, line_p l, alloc_p alloc)
 	}
 }
 
-STATIC int loaditem_tab[NRITEMTYPES][2] = { /* 		WS		2 * WS */
+static int loaditem_tab[NRITEMTYPES][2] = { /* 		WS		2 * WS */
 	                                        /*LOCALVAR*/ op_lol,   op_ldl,
 	                                        /*LOCAL_ADDR*/ op_lal, op_lal,
 	                                        /*GLOBL_ADDR*/ op_lae, op_lae,
@@ -286,7 +286,7 @@ STATIC int loaditem_tab[NRITEMTYPES][2] = { /* 		WS		2 * WS */
 	                                        /*DCONST*/ op_nop,     op_ldc
 };
 
-STATIC line_p load_item(item_p item)
+static line_p load_item(item_p item)
 {
 	/* Generate an EM instruction that loads the item on the stack */
 
@@ -310,7 +310,7 @@ STATIC line_p load_item(item_p item)
 	return l;
 }
 
-STATIC line_p store_local(short size, offset off)
+static line_p store_local(short size, offset off)
 {
 	line_p l = int_line(off);
 
@@ -318,10 +318,10 @@ STATIC line_p store_local(short size, offset off)
 	return l;
 }
 
-STATIC line_p init_place(bblock_p b)
+static line_p init_place(bblock_p b)
 {
 
-	register line_p l, prev;
+	line_p l, prev;
 
 	prev = (line_p)0;
 	for (l = b->b_start; l != (line_p)0; l = l->l_next)
@@ -340,7 +340,7 @@ STATIC line_p init_place(bblock_p b)
 	return prev;
 }
 
-STATIC void append_code(line_p l1, line_p l2, bblock_p b)
+static void append_code(line_p l1, line_p l2, bblock_p b)
 {
 	/* Append instruction l1 and l2 at begin of block b */
 
@@ -365,14 +365,14 @@ STATIC void append_code(line_p l1, line_p l2, bblock_p b)
 	}
 }
 
-STATIC void emit_init_code(alloc_p list)
+static void emit_init_code(alloc_p list)
 {
 	/* Emit initialization code for all packed allocations.
 	 * This code looks like "dummy_local := item", e.g.
 	 * "LOC 25 ; STL -10" in EM terminology.
 	 */
 
-	register alloc_p alloc, m;
+	alloc_p alloc, m;
 	Lindex bi;
 	bblock_p b;
 
@@ -391,7 +391,7 @@ STATIC void emit_init_code(alloc_p list)
 	}
 }
 
-STATIC void emit_mesregs(proc_p p, alloc_p alloclist)
+static void emit_mesregs(proc_p p, alloc_p alloclist)
 {
 	line_p l, m, x;
 	alloc_p alloc;
@@ -410,10 +410,10 @@ STATIC void emit_mesregs(proc_p p, alloc_p alloclist)
 
 #define is_mesreg(l) (INSTR(l) == ps_mes && aoff(ARG(l), 0) == ms_reg)
 
-STATIC void rem_mes(proc_p p)
+static void rem_mes(proc_p p)
 {
-	register bblock_p b;
-	register line_p l, next;
+	bblock_p b;
+	line_p l, next;
 	offset m;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
@@ -437,9 +437,9 @@ void xform_proc(proc_p p, alloc_p alloclist, short nrinstrs, line_p instrmap[])
 	 * at a point where the item is kept in a register.
 	 */
 
-	register short now = 0;
-	register line_p l, next;
-	register bblock_p b;
+	short now = 0;
+	line_p l, next;
+	bblock_p b;
 	alloc_p alloc;
 
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)

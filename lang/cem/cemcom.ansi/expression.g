@@ -33,7 +33,7 @@ int ResultKnown = 0;	/* result of the expression is already known */
 }
 
 /* 3.3.1 */
-primary(register struct expr **expp;) :
+primary(struct expr **expp;) :
 	IDENTIFIER
 	{dot2expr(expp);}
 |
@@ -50,10 +50,10 @@ primary(register struct expr **expp;) :
  * are concatenated into a single character string
  * literal.
  */
-string(register struct expr **expp;)
-	{	register int i, len;
-		register char *str;
-		register int fund;
+string(struct expr **expp;)
+	{	int i, len;
+		char *str;
+		int fund;
 	}
 :
 	STRING
@@ -80,7 +80,7 @@ string(register struct expr **expp;)
 ;
 
 /* 3.3.2 */
-postfix_expression(register struct expr **expp;)
+postfix_expression(struct expr **expp;)
 	{ int oper; 
 	  struct expr *e1 = 0;
 	  struct idf *idf;
@@ -122,7 +122,7 @@ parameter_list(struct expr **expp;)
 %first	first_of_type_specifier, type_specifier;
 
 /* 3.3.3 & 3.3.4 */
-unary(register struct expr **expp;)
+unary(struct expr **expp;)
 	{struct type *tp; int oper;}
 :
 %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
@@ -145,7 +145,7 @@ unary(register struct expr **expp;)
  * mark it as used.
  * extern int i;  ....  sizeof(i)  .... need not have a definition for i
  */
-size_of(register struct expr **expp;)
+size_of(struct expr **expp;)
 	{struct type *tp;}
 :
 	SIZEOF { InSizeof++; }	/* handle (sizeof(sizeof(int))) too */
@@ -324,7 +324,7 @@ binop(int *oper;) :
 	{*oper = DOT;}
 ;
 
-asgnop(register int *oper;):
+asgnop(int *oper;):
 	[ '=' | PLUSAB | MINAB | TIMESAB | DIVAB | MODAB 
 	| LEFTAB | RIGHTAB | ANDAB | XORAB | ORAB ]
 	{ *oper = DOT; }

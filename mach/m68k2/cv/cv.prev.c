@@ -26,10 +26,10 @@ main(argc, argv)
 	int	argc;
 	char	*argv[];
 {
-	register int		nsect;
-	register struct outsect	*sectp;
-	register FILE		*input;
-	register FILE		*output;
+	int		nsect;
+	struct outsect	*sectp;
+	FILE		*input;
+	FILE		*output;
 
 	ASSERT(sizeof(struct outhead) == SZ_HEAD);
 	ASSERT(sizeof(struct outsect) == SZ_SECT);
@@ -60,9 +60,9 @@ main(argc, argv)
 	nsect = outhead.oh_nsect;
 	sectp = outsect;
 	while (nsect--) {
-		register long	flen;
+		long	flen;
 #ifdef DO_BSS
-		register long	zero;
+		long	zero;
 #endif DO_BSS
 		long	base;
 		short	cnt;
@@ -134,7 +134,7 @@ rname(f,name) struct outname *name ; FILE *f ; {
 }
 
 iconvert(buf,str,fmt) char *buf, *str, *fmt ; {
-	register char *nf, *ni, *no ;
+	char *nf, *ni, *no ;
 	int last, i ;
 	long value ;
 	ni=buf ; no=str ; nf=fmt ;

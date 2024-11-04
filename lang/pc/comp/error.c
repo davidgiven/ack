@@ -40,7 +40,7 @@
 
 int err_occurred;
 
-static void _error(int, struct node *, char *, register va_list);
+static void _error(int, struct node *, char *, va_list);
 
 /*	There are three general error-message functions:
 		lexerror()	lexical and pre-processor error messages
@@ -307,7 +307,7 @@ void crash(va_alist)
 }
 #endif
 
-static void _error(int class, struct node *node, char *fmt, register va_list ap)
+static void _error(int class, struct node *node, char *fmt, va_list ap)
 {
 	/*	_error attempts to limit the number of error messages
 		for a given line to MAXERR_LINE.
@@ -316,7 +316,7 @@ static void _error(int class, struct node *node, char *fmt, register va_list ap)
 	unsigned int ln = 0;
 	static char * last_fn = 0;
 	static int e_seen = 0, w_seen = 0;
-	register char *remark = 0;
+	char *remark = 0;
 
 	/*	Since name and number are gathered from different places
 		depending on the class, we first collect the relevant

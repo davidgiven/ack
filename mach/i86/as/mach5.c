@@ -52,7 +52,7 @@ void ea_2(int param) {
 
 void reverse(void)
 {
-	register int m, r;
+	int m, r;
     expr_t e;
 
 	m = mrg_1; mrg_1 = mrg_2; mrg_2 = m;
@@ -68,9 +68,9 @@ void badsyntax(void)
 	serror("bad operands");
 }
 
-void regsize(register int sz)
+void regsize(int sz)
 {
-	register int bit;
+	int bit;
 
 	sz <<= 3;
 	bit = 010;
@@ -104,9 +104,9 @@ void indexed(void)
 	}
 }
 
-void branch(register int opc,expr_t exp)
+void branch(int opc,expr_t exp)
 {
-	register int sm,dist;
+	int sm,dist;
 	int saving = opc == 0353 ? 1 : 3;
 
 	dist = exp.val - (DOTVAL + 2);
@@ -139,7 +139,7 @@ void branch(register int opc,expr_t exp)
 		emit1(dist);
 }
 
-void pushop(register int opc)
+void pushop(int opc)
 {
 
 	regsize(1);
@@ -169,7 +169,7 @@ void pushop(register int opc)
 	}
 }
 
-void addop(register int opc)
+void addop(int opc)
 {
 	regsize(opc);
 	if (mrg_2 >= 0300) {
@@ -205,9 +205,9 @@ void addop(register int opc)
 		badsyntax();
 }
 
-void rolop(register int opc)
+void rolop(int opc)
 {
-	register int cmrg;
+	int cmrg;
 
 	cmrg = mrg_2;
 	mrg_2 = mrg_1;
@@ -226,7 +226,7 @@ void rolop(register int opc)
 		badsyntax();
 }
 
-void incop(register int opc)
+void incop(int opc)
 {
 
 	regsize(opc);
@@ -238,7 +238,7 @@ void incop(register int opc)
 	}
 }
 
-void callop(register int opc)
+void callop(int opc)
 {
 	regsize(1);
 	if (mrg_1 & 040) {
@@ -259,7 +259,7 @@ void callop(register int opc)
 	}
 }
 
-void xchg(register int opc)
+void xchg(int opc)
 {
 	regsize(opc);
 	if (mrg_2 == 0300 || mrg_1 < 0300)
@@ -272,7 +272,7 @@ void xchg(register int opc)
 		badsyntax();
 }
 
-void test(register int opc)
+void test(int opc)
 {
 	regsize(opc);
 	if ((mrg_1 & 040) || mrg_2 >= 0300)
@@ -298,7 +298,7 @@ void test(register int opc)
 		badsyntax();
 }
 
-void mov(register int opc)
+void mov(int opc)
 {
 	regsize(opc);
 	if (mrg_1 & 020) {

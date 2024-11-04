@@ -87,8 +87,8 @@ exit:
 static int
 match_name(const char* buf, const char* name)
 {
-	register const char* tp = buf;
-	register const char* np;
+	const char* tp = buf;
+	const char* np;
 
 	for (;;)
 	{
@@ -114,7 +114,7 @@ check_for_tc(void)
 	const char* savcapab = capab;
 	char buf[1024];
 	char terminalname[128];
-	register char *p = (char*)capab + strlen(capab) - 2, *q;
+	char *p = (char*)capab + strlen(capab) - 2, *q;
 
 	while (*p != ':')
 		if (--p < (char*)capab)
@@ -290,7 +290,7 @@ char* tgetstr(const char* id, char** const area)
  */
 char* tgoto(const char* cm, int destcol, int destline)
 {
-	register char* rp;
+	char* rp;
 	static char ret[24];
 	char added[16];
 	int* dp = &destline;
@@ -421,7 +421,7 @@ static int tens_of_ms_p_char[] = { /* index as returned by gtty */
  *	tputs - put the string cp out onto the terminal, using the function
  *	outc. Also handle padding.
  */
-int tputs(register const char* cp, int affcnt, int (*outc)(int))
+int tputs(const char* cp, int affcnt, int (*outc)(int))
 {
 	int delay = 0;
 	if (cp == NULL)

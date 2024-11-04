@@ -4,8 +4,8 @@ char *
 calloc(nelem, elsize)
 	unsigned int nelem, elsize;
 {
-	register char *p;
-	register long *q;
+	char *p;
+	long *q;
 	unsigned int size = ALIGN(nelem * elsize);
 	extern char *malloc();
 

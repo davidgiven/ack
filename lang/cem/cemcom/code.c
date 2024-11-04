@@ -108,7 +108,7 @@ code_string(val, len, dlb)
 	int len;
 	label dlb;
 {
-	register struct string_cst *sc = new_string_cst();
+	struct string_cst *sc = new_string_cst();
 
 	C_ina_dlb(dlb);
 	sc->next = str_list;
@@ -119,7 +119,7 @@ code_string(val, len, dlb)
 }
 
 def_strings(sc)
-	register struct string_cst *sc;
+	struct string_cst *sc;
 {
 	while (sc) {
 		struct string_cst *sc1 = sc;
@@ -157,14 +157,14 @@ prepend_scopes()
 		and generates those exa's, exp's, ina's and inp's
 		that superior hindsight has provided.
 	*/
-	register struct stack_entry *se = local_level->sl_entry;
+	struct stack_entry *se = local_level->sl_entry;
 
 #ifdef USE_TMP
 	C_beginpart(tmp_id);
 #endif /* USE_TMP */
 	while (se != 0)	{
-		register struct idf *id = se->se_idf;
-		register struct def *df = id->id_def;
+		struct idf *id = se->se_idf;
+		struct def *df = id->id_def;
 
 		if (df && (df->df_initialized || df->df_used || df->df_alloc))
 			code_scope(id->id_text, df);
@@ -178,7 +178,7 @@ prepend_scopes()
 
 code_scope(text, def)
 	char *text;
-	register struct def *def;
+	struct def *def;
 {
 	/*	generates code for one name, text, of the storage class
 		as given by def, if meaningful.
@@ -222,8 +222,8 @@ begin_proc(ds, idf)		/* to be called when entering a procedure */
 			does not fit in the return area
 		-	a fil pseudo instruction
 	*/
-	register char *name = idf->id_text;
-	register struct def *def = idf->id_def;
+	char *name = idf->id_text;
+	struct def *def = idf->id_def;
 
 	while (def->df_level > L_GLOBAL) def = def->next;
 		/* idf->id_def does not indicate the right def structure
@@ -391,7 +391,7 @@ do_return_expr(expr)
 }
 
 code_declaration(idf, expr, lvl, sc)
-	register struct idf *idf;	/* idf to be declared	*/
+	struct idf *idf;	/* idf to be declared	*/
 	struct expr *expr;	/* initialisation; NULL if absent	*/
 	int lvl;		/* declaration level	*/
 	int sc;			/* storage class, as in the declaration */
@@ -419,8 +419,8 @@ code_declaration(idf, expr, lvl, sc)
 		while at the same time forbidding
 			extern int a = 5;
 	*/
-	register struct def *def = idf->id_def;
-	register arith size = def->df_type->tp_size;
+	struct def *def = idf->id_def;
+	arith size = def->df_type->tp_size;
 	int def_sc = def->df_sc;
 
 	if (def_sc == TYPEDEF)	{	/* no code for typedefs		*/
@@ -500,14 +500,14 @@ code_declaration(idf, expr, lvl, sc)
 
 loc_init(expr, id)
 	struct expr *expr;
-	register struct idf *id;
+	struct idf *id;
 {
 	/*	loc_init() generates code for the assignment of
 		expression expr to the local variable described by id.
 		It frees the expression afterwards.
 	*/
-	register struct expr *e = expr;
-	register struct type *tp = id->id_def->df_type;
+	struct expr *e = expr;
+	struct type *tp = id->id_def->df_type;
 
 	ASSERT(id->id_def->df_sc != STATIC);
 	switch (tp->tp_fund)	{
@@ -554,7 +554,7 @@ loc_init(expr, id)
 }
 
 bss(idf)
-	register struct idf *idf;
+	struct idf *idf;
 {
 	/*	bss() allocates bss space for the global idf.
 	*/
@@ -583,12 +583,12 @@ bss(idf)
 }
 
 formal_cvt(df)
-	register struct def *df;
+	struct def *df;
 {
 	/*	formal_cvt() converts a formal parameter of type char or
 		short from int to that type.
 	*/
-	register struct type *tp = df->df_type;
+	struct type *tp = df->df_type;
 
 	if (tp->tp_size != int_size &&
 		(tp->tp_fund == CHAR || tp->tp_fund == SHORT)
@@ -641,7 +641,7 @@ static struct stmt_block *stmt_stack;	/* top of statement stack */
 */
 code_break()
 {
-	register struct stmt_block *stmt_block = stmt_stack;
+	struct stmt_block *stmt_block = stmt_stack;
 
 #ifdef DBSYMTAB
 	if (options['g']) db_line(dot.tk_file, dot.tk_line);
@@ -659,7 +659,7 @@ code_break()
 */
 code_continue()
 {
-	register struct stmt_block *stmt_block = stmt_stack;
+	struct stmt_block *stmt_block = stmt_stack;
 
 	while (stmt_block)	{
 		if (stmt_block->st_continue)	{
@@ -677,7 +677,7 @@ code_continue()
 stack_stmt(break_label, cont_label)
 	label break_label, cont_label;
 {
-	register struct stmt_block *stmt_block = new_stmt_block();
+	struct stmt_block *stmt_block = new_stmt_block();
 
 	stmt_block->next = stmt_stack;
 	stmt_block->st_break = break_label;
@@ -690,7 +690,7 @@ unstack_stmt()
 	/*	unstack_stmt() unstacks the data of a statement
 		which may contain break or continue
 	*/
-	register struct stmt_block *sbp = stmt_stack;
+	struct stmt_block *sbp = stmt_stack;
 	stmt_stack = sbp->next;
 	free_stmt_block(sbp);
 }

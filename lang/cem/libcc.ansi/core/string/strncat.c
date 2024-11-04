@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strncat(char* ret, register const char* s2, size_t n)
+char* strncat(char* ret, const char* s2, size_t n)
 {
-	register char* s1 = ret;
+	char* s1 = ret;
 
 	if (n > 0)
 	{

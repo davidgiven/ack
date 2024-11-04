@@ -106,7 +106,7 @@ bool dom(bblock_p b1, bblock_p b2)
 	 * dominates itself.
 	 */
 
-	register bblock_p b;
+	bblock_p b;
 
 	for (b = b2; b != (bblock_p)0; b = b->b_idom)
 	{
@@ -190,7 +190,7 @@ line_p last_instr(bblock_p b)
 {
 	/* Determine the last line of a list */
 
-	register line_p l = b->b_start;
+	line_p l = b->b_start;
 
 	if (l == (line_p)0)
 		return (line_p)0;

@@ -36,7 +36,7 @@ declare_type(
 		are purely prototypes. Simply add the type list to the
 		function node.
 	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct decl_unary *du = dc->dc_decl_unary;
 
 	while (du)	{
 		tp = construct_type(du->du_fund, tp, du->du_typequal,
@@ -46,13 +46,13 @@ declare_type(
 	return tp;
 }
 
-void add_decl_unary(register struct declarator *dc, int fund, int qual,  arith count, struct formal *fm, struct proto *pl)
+void add_decl_unary(struct declarator *dc, int fund, int qual,  arith count, struct formal *fm, struct proto *pl)
 {
 	/*	A decl_unary describing a constructor with fundamental
 		type fund and with size count is inserted in front of the
 		declarator dc.
 	*/
-	register struct decl_unary *new = new_decl_unary();
+	struct decl_unary *new = new_decl_unary();
 
 	new->next = dc->dc_decl_unary;
 	new->du_fund = fund;
@@ -78,7 +78,7 @@ void remove_declarator(struct declarator *dc)
 	/*	The decl_unary list starting at dc->dc_decl_unary is
 		removed.
 	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct decl_unary *du = dc->dc_decl_unary;
 
 	while (du)	{
 		struct decl_unary *old_du = du;
@@ -88,14 +88,14 @@ void remove_declarator(struct declarator *dc)
 	}
 }
 
-void reject_params(register struct declarator *dc)
+void reject_params(struct declarator *dc)
 {
 	/*	The declarator is checked to have no parameters, if it
 		is an old-style function.  If it is a new-style function,
 		the identifiers are removed.  The function is not called in
 		case of a function definition.
 	*/
-	register struct decl_unary *du = dc->dc_decl_unary;
+	struct decl_unary *du = dc->dc_decl_unary;
 	int	err_given = 0;
 
 	if (dc->dc_formal)	{
@@ -116,7 +116,7 @@ void reject_params(register struct declarator *dc)
 	}
 }
 
-void check_array_subscript(register struct expr *expr)
+void check_array_subscript(struct expr *expr)
 {
 	writh size = expr->VL_VALUE;
 

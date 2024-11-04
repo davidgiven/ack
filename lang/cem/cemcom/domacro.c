@@ -36,27 +36,27 @@ extern char	options[];
 
 IMPORT char **inctable;	/* list of include directories		*/
 IMPORT char *getwdir();
-PRIVATE char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
+static char ifstack[IFDEPTH];	/* if-stack: the content of an entry is	*/
 				/* 1 if a corresponding ELSE has been	*/
 				/* encountered.				*/
 
 int	nestlevel = -1;
 
-PRIVATE do_include();
-PRIVATE ifexpr();
-PRIVATE do_define();
-PRIVATE push_if();
-PRIVATE do_elif();
-PRIVATE do_else();
-PRIVATE do_endif();
-PRIVATE do_if();
-PRIVATE do_ifdef();
-PRIVATE do_undef();
-PRIVATE int getparams();
-PRIVATE char *get_text();
-PRIVATE int macroeq();
-PRIVATE SkipRestOfLine();
-PRIVATE do_line();
+static do_include();
+static ifexpr();
+static do_define();
+static push_if();
+static do_elif();
+static do_else();
+static do_endif();
+static do_if();
+static do_ifdef();
+static do_undef();
+static int getparams();
+static char *get_text();
+static int macroeq();
+static SkipRestOfLine();
+static do_line();
 
 struct idf *
 GetIdentifier()
@@ -159,7 +159,7 @@ domacro()
 int lint_skip_comment;
 #endif
 
-PRIVATE
+static
 skip_block(to_endif)
 {
 	/*	skip_block() skips the input from
@@ -170,8 +170,8 @@ skip_block(to_endif)
 			#ifndef or #elif until the corresponding #endif is
 			seen.
 	*/
-	register int ch;
-	register int skiplevel = nestlevel; /* current nesting level	*/
+	int ch;
+	int skiplevel = nestlevel; /* current nesting level	*/
 	struct token tk;
 
 #ifdef LINT
@@ -258,7 +258,7 @@ skip_block(to_endif)
 	}
 }
 
-PRIVATE
+static
 ifexpr()
 {
 	/*	ifexpr() returns whether the restricted constant
@@ -281,7 +281,7 @@ ifexpr()
 	return (errors == err_occurred) && (ifval != (arith)0);
 }
 
-PRIVATE
+static
 do_include()
 {
 	/*	do_include() performs the inclusion of a file.
@@ -322,7 +322,7 @@ do_include()
 	}
 }
 
-PRIVATE
+static
 do_define()
 {
 	/*	do_define() interprets a #define control line.
@@ -333,7 +333,7 @@ do_define()
 	char parbuf[PARBUFSIZE];		/* names of formals	*/
 	char *repl_text;	/* start of the replacement text	*/
 	int length;		/* length of the replacement text	*/
-	register ch;
+	int ch;
 
 	/* read the #defined macro's name	*/
 	if (!(id = GetIdentifier())) {
@@ -369,7 +369,7 @@ do_define()
 	LineNumber++;
 }
 
-PRIVATE
+static
 push_if()
 {
 	if (nestlevel >= IFDEPTH)
@@ -378,7 +378,7 @@ push_if()
 		ifstack[++nestlevel] = 0;
 }
 
-PRIVATE
+static
 do_elif()
 {
 	if (nestlevel <= nestlow || (ifstack[nestlevel])) {
@@ -392,7 +392,7 @@ do_elif()
 	}
 }
 
-PRIVATE
+static
 do_else()
 {
 	SkipRestOfLine();
@@ -404,7 +404,7 @@ do_else()
 	}
 }
 
-PRIVATE
+static
 do_endif()
 {
 	SkipRestOfLine();
@@ -414,7 +414,7 @@ do_endif()
 	else	nestlevel--;
 }
 
-PRIVATE
+static
 do_if()
 {
 	push_if();
@@ -422,10 +422,10 @@ do_if()
 		skip_block(0);
 }
 
-PRIVATE
+static
 do_ifdef(how)
 {
-	register struct idf *id;
+	struct idf *id;
 
 	/*	how == 1 : ifdef; how == 0 : ifndef
 	*/
@@ -442,10 +442,10 @@ do_ifdef(how)
 		SkipRestOfLine();
 }
 
-PRIVATE
+static
 do_undef()
 {
-	register struct idf *id;
+	struct idf *id;
 
 	/* Forget a macro definition.	*/
 	if (id = GetIdentifier()) {
@@ -459,7 +459,7 @@ do_undef()
 	SkipRestOfLine();
 }
 
-PRIVATE int
+static int
 getparams(buf, parbuf)
 	char *buf[];
 	char parbuf[];
@@ -474,10 +474,10 @@ getparams(buf, parbuf)
 		Note that the '(' has already been eaten.
 		The names of the formal parameters are stored into parbuf.
 	*/
-	register char **pbuf = &buf[0];
-	register int c;
-	register char *ptr = &parbuf[0];
-	register char **pbuf2;
+	char **pbuf = &buf[0];
+	int c;
+	char *ptr = &parbuf[0];
+	char **pbuf2;
 
 	LoadChar(c);
 	c = skipspaces(c,0);
@@ -530,10 +530,10 @@ getparams(buf, parbuf)
 
 EXPORT
 macro_def(id, text, nformals, length, flags)
-	register struct idf *id;
+	struct idf *id;
 	char *text;
 {
-	register struct macro *newdef = id->id_macro;
+	struct macro *newdef = id->id_macro;
 
 	/*	macro_def() puts the contents and information of a macro
 		definition into a structure and stores it into the symbol
@@ -554,7 +554,7 @@ macro_def(id, text, nformals, length, flags)
 	newdef->mc_count = 0;
 }
 
-PRIVATE int
+static int
 find_name(nm, index)
 	char *nm, *index[];
 {
@@ -562,7 +562,7 @@ find_name(nm, index)
 		"index" if it can be found there.  0 is returned if it is
 		not there.
 	*/
-	register char **ip = &index[0];
+	char **ip = &index[0];
 
 	while (*ip)
 		if (strcmp(nm, *ip++) == 0)
@@ -571,7 +571,7 @@ find_name(nm, index)
 	return 0;
 }
 
-PRIVATE char *
+static char *
 get_text(formals, length)
 	char *formals[];
 	int *length;
@@ -591,10 +591,10 @@ get_text(formals, length)
 		identifiers, because they might be replaced by some actual
 		parameter.  Other tokens will not be seen as such.
 	*/
-	register int c;
-	register int text_size;
+	int c;
+	int text_size;
 	char *text = Malloc(text_size = ITEXTSIZE);
-	register int pos = 0;
+	int pos = 0;
 
 	LoadChar(c);
 
@@ -631,8 +631,8 @@ get_text(formals, length)
 		else
 		if (formals && class(c) == STIDF) {
 			char id_buf[IDFSIZE + 1];
-			register id_size = 0;
-			register n;
+			id_size = 0;
+			int n;
 
 			/* read identifier: it may be a formal parameter */
 			id_buf[id_size++] = c;
@@ -650,7 +650,7 @@ get_text(formals, length)
 						text_size += RTEXTSIZE);
 			}
 			else {
-				register char *ptr = &id_buf[0];
+				char *ptr = &id_buf[0];
 
 				while (pos + id_size >= text_size)
 					text = Srealloc(text,
@@ -678,9 +678,9 @@ get_text(formals, length)
 	as strings, without taking care of the leading and trailing
 	blanks (spaces and tabs).
 */
-PRIVATE int
+static int
 macroeq(s, t)
-	register char *s, *t;
+	char *s, *t;
 {
 
 	/* skip leading spaces	*/
@@ -729,7 +729,7 @@ domacro()
 }
 #endif /* NOPP */
 
-PRIVATE
+static
 SkipRestOfLine()
 {
 	/*	we do a PushBack because we don't want to skip the next line
@@ -739,7 +739,7 @@ SkipRestOfLine()
 	skipline();
 }
 
-PRIVATE
+static
 do_line(l)
 	unsigned int l;
 {

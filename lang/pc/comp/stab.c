@@ -65,7 +65,7 @@ static void adds_db_str(char *s)
 	while (*s) addc_db_str(*s++);
 }
 
-static void stb_type(register struct type *tp, int assign_num)
+static void stb_type(struct type *tp, int assign_num)
 {
 	char buf[128];
 	static int	stb_count;
@@ -155,7 +155,7 @@ static void stb_type(register struct type *tp, int assign_num)
 	case T_ENUMERATION:
 		addc_db_str('e');
 		{
-			register struct def	*edef = tp->enm_enums;
+			struct def	*edef = tp->enm_enums;
 
 			while (edef) {
 				adds_db_str(sprint(buf, "%s:%ld,",
@@ -169,7 +169,7 @@ static void stb_type(register struct type *tp, int assign_num)
 	case T_RECORD:
 		adds_db_str(sprint(buf, "s%ld", (long) tp->tp_size));
 		{
-			register struct def	*sdef = tp->rec_scope->sc_def;
+			struct def	*sdef = tp->rec_scope->sc_def;
 
 			while (sdef) {
 				adds_db_str(sdef->df_idf->id_text);
@@ -189,7 +189,7 @@ static void stb_type(register struct type *tp, int assign_num)
 		addc_db_str('Q');
 		stb_type(tp->next ? tp->next : void_type, 0);
 		{
-			register struct paramlist *p = tp->prc_params;
+			struct paramlist *p = tp->prc_params;
 			int paramcount = 0;
 
 			while (p) {
@@ -237,9 +237,9 @@ void stb_addtp(char *s, struct type *tp)
 		     (arith) 0);
 }
 
-void stb_string(register struct def *df, long kind)
+void stb_string(struct def *df, long kind)
 {
-	register struct type	*tp = df->df_type;
+	struct type	*tp = df->df_type;
 	char buf[64];
 
 	create_db_str();
@@ -258,7 +258,7 @@ void stb_string(register struct def *df, long kind)
 		addc_db_str(';');
 		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->df_idf->id_text);
 		{
-			register struct paramlist *p = tp->prc_params;
+			struct paramlist *p = tp->prc_params;
 			while (p) {
 				stb_string(p->par_def, D_VARIABLE);
 				p = p->next;
@@ -343,7 +343,7 @@ void stb_string(register struct def *df, long kind)
 			addc_db_str(';');
 			break;
 		case T_STRINGCONST: {
-			register char *p = df->con_const->nd_STR;
+			char *p = df->con_const->nd_STR;
 
 			adds_db_str("s'");
 			while (*p) {
@@ -361,7 +361,7 @@ void stb_string(register struct def *df, long kind)
 			adds_db_str(sprint(buf, ",%ld;", (long) df->con_const->nd_INT));
 			break;
 		case T_SET: {
-			register int i;
+			int i;
 
 			addc_db_str('S');
 			stb_type(tp, 0);

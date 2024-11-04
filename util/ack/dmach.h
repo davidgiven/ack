@@ -12,12 +12,12 @@
 #define RCS_DMACH "$Id$"
 #endif
 
+typedef struct
+{
+	char* ma_name; /* The name of the machine */
+	int ma_index;
+} dmach;
 
-typedef struct {
-	char *ma_name ;         /* The name of the machine */
-	int   ma_index ;
-} dmach ;
+extern dmach massoc[];
 
-extern dmach massoc[] ;
-
-extern char  intable[] ;
+extern char intable[];

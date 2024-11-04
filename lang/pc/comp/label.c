@@ -15,7 +15,7 @@
 #include	"error.h"
 #include	"lookup.h"
 
-static void CodeLabel(register struct def *df, int local);
+static void CodeLabel(struct def *df, int local);
 
 
 void DeclLabel(struct node *nd)
@@ -33,8 +33,8 @@ void DeclLabel(struct node *nd)
 
 void chk_labels(int Slevel)
 {
-	register struct node *labnd = BlockScope->sc_lablist;
-	register struct def *df;
+	struct node *labnd = BlockScope->sc_lablist;
+	struct def *df;
 
 	while( labnd )	{
 		df = labnd->nd_def;
@@ -64,9 +64,9 @@ void chk_labels(int Slevel)
 	}
 }
 
-void TstLabel(register struct node *nd, int Slevel)
+void TstLabel(struct node *nd, int Slevel)
 {
-	register struct def *df;
+	struct def *df;
 
 	df = lookfor(nd, CurrVis, 0);
 	if( df->df_kind == D_ERROR )	{
@@ -82,7 +82,7 @@ void TstLabel(register struct node *nd, int Slevel)
 	df->df_flags = D_USED;
 	if( !df->lab_level )	{
 		/* forward jump */
-		register struct lab *labelptr;
+		struct lab *labelptr;
 
 		labelptr = new_lab();
 		labelptr->lb_next = df->lab_next;
@@ -106,9 +106,9 @@ void TstLabel(register struct node *nd, int Slevel)
 		CodeLabel(df, 1);
 }
 
-void DefLabel(register struct node *nd, int Slevel)
+void DefLabel(struct node *nd, int Slevel)
 {
-	register struct def *df;
+	struct def *df;
 
 	if( !(df = lookup(nd->nd_IDF, BlockScope, D_INUSE)) )	{
 		node_error(nd, "label %s must be declared in same block"
@@ -125,7 +125,7 @@ void DefLabel(register struct node *nd, int Slevel)
 	if( df->lab_level)
 		node_error(nd, "label %s already defined", nd->nd_IDF->id_text);
 	else	{
-		register struct lab *labelptr;
+		struct lab *labelptr;
 
 		df->lab_level = Slevel;
 		labelptr = df->lab_next;
@@ -141,7 +141,7 @@ void DefLabel(register struct node *nd, int Slevel)
 	}
 }
 
-static void CodeLabel(register struct def *df, int local)
+static void CodeLabel(struct def *df, int local)
 {
 	if( err_occurred ) return;
 

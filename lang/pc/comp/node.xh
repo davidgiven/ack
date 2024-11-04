@@ -51,7 +51,7 @@ struct node {
 
 struct node *MkNode(int class, struct node *left, struct node *right, struct token *token);
 struct node *MkLeaf(int class, struct token *token);
-void FreeNode(register struct node *nd);
+void FreeNode(struct node *nd);
 int NodeCrash(struct node *expp);
 
 

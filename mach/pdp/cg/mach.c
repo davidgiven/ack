@@ -13,7 +13,7 @@
 
 
 
-void con_part(register int sz, word w)
+void con_part(int sz, word w)
 {
 	while (part_size % sz)
 		part_size++;
@@ -84,7 +84,7 @@ void i_regsave(void) {
 }
 
 void f_regsave(void) {
-	register int i;
+	int i;
 
 	if (n_regvars==0 || lbytes==0) {
 #ifdef REGPATCH

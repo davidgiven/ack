@@ -101,7 +101,7 @@ char *string_token();
 
 int
 GetToken(ptok)
-	register struct token *ptok;
+	struct token *ptok;
 {
 	/*	GetToken() is the actual token recognizer. It calls the
 		control line interpreter if it encounters a "\n#"
@@ -109,7 +109,7 @@ GetToken(ptok)
 		needed.
 	*/
 	char buf[(IDFSIZE > NUMSIZE ? IDFSIZE : NUMSIZE) + 1];
-	register int ch, nch;
+	int ch, nch;
 
 	token_nmb++;
 
@@ -244,10 +244,10 @@ firstline:
 		}
 	case STIDF:
 	{
-		register char *tg = &buf[0];
-		register int pos = -1;
-		register int hash;
-		register struct idf *idef;
+		char *tg = &buf[0];
+		int pos = -1;
+		int hash;
+		struct idf *idef;
 		extern int idfsize;		/* ??? */
 
 		hash = STARTHASH();
@@ -288,7 +288,7 @@ firstline:
 	}
 	case STCHAR:				/* character constant	*/
 	{
-		register arith val = 0;
+		arith val = 0;
 		int size = 0;
 
 		LoadChar(ch);
@@ -327,10 +327,10 @@ firstline:
 			099.5 means 99.5 . This severely limits the tricks
 			we can use to scan a numeric value.
 		*/
-		register char *np = &buf[1];
-		register int base = 10;
-		register int vch;
-		register arith val = 0;
+		char *np = &buf[1];
+		int base = 10;
+		int vch;
+		arith val = 0;
 
 		if (ch == '.') {	/* an embarrassing ambiguity */
 #ifndef NOFLOAT
@@ -449,7 +449,7 @@ skipcomment()
 		EOI is returned by LoadChar only on encountering EOF of the
 		top-level file...
 	*/
-	register int c;
+	int c;
 
 	NoUnstack++;
 	LoadChar(c);
@@ -492,10 +492,10 @@ string_token(nm, stop_char, plen)
 	char *nm;
 	int *plen;
 {
-	register int ch;
-	register int str_size;
-	register char *str = Malloc((unsigned) (str_size = ISTRSIZE));
-	register int pos = 0;
+	int ch;
+	int str_size;
+	char *str = Malloc((unsigned) (str_size = ISTRSIZE));
+	int pos = 0;
 	
 	LoadChar(ch);
 	while (ch != stop_char) {
@@ -529,7 +529,7 @@ string_token(nm, stop_char, plen)
 
 int
 quoted(ch)
-	register int ch;
+	int ch;
 {	
 	/*	quoted() replaces an escaped character sequence by the
 		character meant.
@@ -555,7 +555,7 @@ quoted(ch)
 		}
 	}
 	else {				/* a quoted octal */
-		register int oct = 0, cnt = 0;
+		int oct = 0, cnt = 0;
 
 		do {
 			oct = oct*8 + (ch-'0');
@@ -570,7 +570,7 @@ quoted(ch)
 /* provisional */
 int
 val_in_base(ch, base)
-	register int ch;
+	int ch;
 {
 	return
 		is_dig(ch) ? ch - '0'

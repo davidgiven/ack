@@ -11,8 +11,8 @@ void resumenext()
  */
 {
 	if (group!=nil) {
-		register struct process *proc= *group->active;
-		register wordsize size;
+		struct process *proc= *group->active;
+		wordsize size;
 
 		size=top_size(group->s_brk);
 		proc->stack=alloc((unsigned) size);
@@ -63,14 +63,14 @@ void parend()
  * in the first place.
  */
 {
-	register struct process *junk;
+	struct process *junk;
 
 	junk= *group->active;
 	*group->active=junk->next;
 	free((void *) junk);
 
 	if (group->first==nil) {
-		register struct procgroup *junk;
+		struct procgroup *junk;
 
 		delete_between(group);
 

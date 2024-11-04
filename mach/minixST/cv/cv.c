@@ -84,7 +84,7 @@ long align(a,b)
 
 int
 follows(pa, pb)
-	register struct outsect *pa, *pb;
+	struct outsect *pa, *pb;
 {
 	/* return 1 if pa follows pb */
 
@@ -198,7 +198,7 @@ emits(section) struct outsect *section ; {
 
 int
 compare(a,b)
-	register struct outrelo *a, *b;
+	struct outrelo *a, *b;
 {
 	if (a->or_sect < b->or_sect) return -1;
 	if (a->or_sect > b->or_sect) return 1;
@@ -210,12 +210,12 @@ compare(a,b)
 emit_relo()
 {
 	struct outrelo *ACKrelo;
-	register struct outrelo *ap;
+	struct outrelo *ap;
 	unsigned int cnt = outhead.oh_nrelo;
 	long last, curr, base;
 	int sect;
 	char *bp;
-	register char *b;
+	char *b;
 
 	ACKrelo = ap = (struct outrelo *) calloc(cnt, sizeof(struct outrelo));
 	bp = b = malloc(4 + cnt);
@@ -289,7 +289,7 @@ chmem(str, old)
 char *str;
 long old;
 {
-        register long num, new;
+        long num, new;
         long atol();
 
         num = atol(str+1);

@@ -82,7 +82,7 @@ void branch(L) int *L;
 char *proc_label(L, name) register L; register char *name;
 {
 	static char *lab=nil;
-	register char *n;
+	char *n;
 
 	if (lab!=nil) free(lab);
 
@@ -203,7 +203,7 @@ static int operators[]=	{ '<', '>', '=',  GE,  LE,  NE };
 
 void bxx(pos, op, L) register pos, op, L;
 {
-	register i;
+	i;
 
 	if (op==AFTER) {
 		C_sbi((arith) vz);
@@ -409,8 +409,8 @@ int set_file(f) char *f;
 {
 	char *strcpy();
 	static struct ftree *ftop=nil;
-	register struct ftree *pf, **apf= &ftop;
-	register cmp;
+	struct ftree *pf, **apf= &ftop;
+	cmp;
 
 	while ((pf= *apf)!=nil && (cmp=strcmp(f, pf->file))!=0)
 		apf= cmp<0 ? &pf->left : &pf->right;

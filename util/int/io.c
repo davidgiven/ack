@@ -30,7 +30,7 @@ extern char mess_file[64]; /* from main.c */
 long mess_id; /* Id, to determine unique mess file */
 FILE* mess_fp; /* Filepointer of message file */
 
-PRIVATE void do_fatal(FILE*, char*, va_list);
+static void do_fatal(FILE*, char*, va_list);
 
 void incr_mess_id(void)
 { /* for a new child */
@@ -43,7 +43,7 @@ extern long inr; /* from log.c */
 
 /********  General file handling  ********/
 
-PRIVATE int highestfd(int fd);
+static int highestfd(int fd);
 
 int fd_limit = 100; /* first non-available file descriptor */
 
@@ -52,8 +52,8 @@ int fd_limit = 100; /* first non-available file descriptor */
  */
 FILE* fcreat_high(char* fn)
 {
-	register int fd;
-	register FILE* fp;
+	int fd;
+	FILE* fp;
 
 	if ((fd = creat(fn, 0644)) == -1)
 		return NULL;
@@ -69,10 +69,10 @@ FILE* fcreat_high(char* fn)
  *  position and returns the new "fd".  Does this without knowing
  *  how many fd-s are available.
  */
-PRIVATE int highestfd(int fd)
+static int highestfd(int fd)
 {
 
-	register int newfd, higherfd;
+	int newfd, higherfd;
 
 	/* try to get a better fd */
 	newfd = dup(fd);
@@ -158,7 +158,7 @@ void close_down(int rc)
 	exit(rc);
 }
 
-PRIVATE void do_fatal(FILE* fp, char* fmt, va_list ap)
+static void do_fatal(FILE* fp, char* fmt, va_list ap)
 {
 	fprintf(fp, "(Fatal error) ");
 	if (load_name)
@@ -186,7 +186,7 @@ void message(char* fmt, ...)
 char* position(void) /* transient */
 {
 	static char buff[300];
-	register char* fn = dt_fname(getFIL());
+	char* fn = dt_fname(getFIL());
 
 #ifdef LOGGING
 	sprintf(buff, "\"%s\", line %ld, INR = %ld", fn, getLIN(), inr);

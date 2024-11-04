@@ -115,9 +115,9 @@ np_init()
 
  static char *
 adjust_pointer_in_string(pointer)
- register char *pointer;
+ char *pointer;
 {
-	register char *s, *s1, *se, *s0;
+	char *s, *s1, *se, *s0;
 
 	/* arrange not to break \002 */
 	s1 = string_start ? string_start : output_buf;
@@ -144,7 +144,7 @@ adjust_pointer_in_string(pointer)
 
  static void
 fwd_strcpy(t, s)
- register char *t, *s;
+ char *t, *s;
 { while(*t++ = *s++); }
 
 /* isident -- true iff character could belong to a unit.  C allows
@@ -166,7 +166,7 @@ long b, c, d, e, f, g;
     extern int max_line_len;
     extern FILEP c_file;
     extern char tr_tab[];	/* in output.c */
-    register char *Tr = tr_tab;
+    char *Tr = tr_tab;
     int ch, inc, ind;
     static int extra_indent, last_indent, set_cursor = 1;
 

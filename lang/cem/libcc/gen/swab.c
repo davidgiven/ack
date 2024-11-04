@@ -1,6 +1,6 @@
 /* $Id$ */
 swab(from, to, nbytes)
-	register char *from, *to;
+	char *from, *to;
 {
 	nbytes /= 2;
 	while (nbytes-- > 0) {

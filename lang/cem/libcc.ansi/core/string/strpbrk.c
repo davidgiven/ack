@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-char* strpbrk(register const char* string, register const char* brk)
+char* strpbrk(const char* string, const char* brk)
 {
-	register const char* s1;
+	const char* s1;
 
 	while (*string)
 	{

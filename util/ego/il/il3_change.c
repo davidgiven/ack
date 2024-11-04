@@ -30,7 +30,7 @@
 
 /* chg_callseq */
 
-STATIC line_p par_expr(line_p l, line_p expr)
+static line_p par_expr(line_p l, line_p expr)
 {
 	/* Find the first line of the expression of which
 	 * l is the last line; expr contains a pointer
@@ -48,7 +48,7 @@ STATIC line_p par_expr(line_p l, line_p expr)
 	return l;
 }
 
-STATIC void rem_text(line_p l1, line_p l2)
+static void rem_text(line_p l1, line_p l2)
 {
 	/* Remove the lines from l1 to l2 (inclusive) */
 
@@ -61,7 +61,7 @@ STATIC void rem_text(line_p l1, line_p l2)
 	}
 }
 
-STATIC void store_tmp(proc_p p, line_p l, offset size)
+static void store_tmp(proc_p p, line_p l, offset size)
 {
 	/* Emit code to store a 'size'-byte value in a new
 	 * temporary local variable in the stack frame of p.
@@ -96,7 +96,7 @@ STATIC void store_tmp(proc_p p, line_p l, offset size)
 	appnd_line(lnp, l);
 }
 
-STATIC void chg_actuals(call_p c, line_p cal)
+static void chg_actuals(call_p c, line_p cal)
 {
 	/* Change the actual parameter expressions of the call. */
 
@@ -124,7 +124,7 @@ STATIC void chg_actuals(call_p c, line_p cal)
 	}
 }
 
-STATIC void rm_callpart(call_p c, line_p cal)
+static void rm_callpart(call_p c, line_p cal)
 {
 	/* Remove the call part, consisting of a CAL,
 	 * an optional ASP and an optional LFR.
@@ -185,7 +185,7 @@ line_p make_label(line_p l, proc_p p)
 
 /* modify */
 
-STATIC void act_info(offset off, actual_p acts, offset ab_off, actual_p* act_out, offset* off_out)
+static void act_info(offset off, actual_p acts, offset ab_off, actual_p* act_out, offset* off_out)
 {
 	/* Find the actual parameter that corresponds to
 	 * the formal parameter with the given offset.
@@ -223,7 +223,7 @@ STATIC void act_info(offset off, actual_p acts, offset ab_off, actual_p* act_out
 	assert(FALSE);
 }
 
-STATIC void store_off(offset off, line_p l)
+static void store_off(offset off, line_p l)
 {
 	if (TYPE(l) == OPSHORT)
 	{
@@ -236,7 +236,7 @@ STATIC void store_off(offset off, line_p l)
 	}
 }
 
-STATIC void inl_actual(line_p l, line_p expr)
+static void inl_actual(line_p l, line_p expr)
 {
 	/* Expand an actual parameter in line.
 	 * A LOL or LDL instruction is replaced
@@ -266,7 +266,7 @@ STATIC void inl_actual(line_p l, line_p expr)
 	app_list(e, lnp);
 }
 
-STATIC void localref(line_p l, call_p c, offset ab_off, offset lb_off)
+static void localref(line_p l, call_p c, offset ab_off, offset lb_off)
 {
 	/* Change a reference to a local variable or parameter
 	 * of the called procedure.
@@ -297,7 +297,7 @@ STATIC void localref(line_p l, call_p c, offset ab_off, offset lb_off)
 	}
 }
 
-STATIC void chg_mes(line_p l, call_p c, offset ab_off, offset lb_off)
+static void chg_mes(line_p l, call_p c, offset ab_off, offset lb_off)
 {
 	/* The register messages of the called procedure
 	 * must be changed. If the message applies to a
@@ -344,7 +344,7 @@ STATIC void chg_mes(line_p l, call_p c, offset ab_off, offset lb_off)
 	}
 }
 
-STATIC void chg_ret(line_p l, call_p c, line_p lab)
+static void chg_ret(line_p l, call_p c, line_p lab)
 {
 	/* Change the RET instruction appearing in the
 	 * expanded text of a call. If the called procedure
@@ -365,7 +365,7 @@ STATIC void chg_ret(line_p l, call_p c, line_p lab)
 	}
 }
 
-STATIC void mod_instr(line_p l, call_p c, line_p lab, offset ab_off, offset lb_off, int lab_off)
+static void mod_instr(line_p l, call_p c, line_p lab, offset ab_off, offset lb_off, int lab_off)
 {
 	if (TYPE(l) == OPINSTRLAB)
 	{
@@ -418,7 +418,7 @@ void modify(line_p text, call_p c, line_p lab, offset ab_off, offset lb_off, int
 	 * Note that the first line of the text is a dummy instruction.
 	 */
 
-	register line_p l;
+	line_p l;
 	line_p next;
 
 	for (l = text->l_next; l != (line_p)0; l = next)
@@ -461,7 +461,7 @@ void mod_actuals(call_p nc, call_p c, line_p lab, offset ab_off, offset lb_off, 
 
 /* insert */
 
-STATIC line_p first_nonpseudo(line_p l)
+static line_p first_nonpseudo(line_p l)
 {
 	/* Find the first non-pseudo instruction of
 	 * a list of instructions.

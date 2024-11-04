@@ -119,7 +119,7 @@ bool affected(line_p use, short v, line_p l)
 	return TYPE(use) == OPOBJECT || !IS_REG(v);
 }
 
-STATIC void search_backwards(line_p use, short v, bool* found, line_p* def)
+static void search_backwards(line_p use, short v, bool* found, line_p* def)
 {
 	/* Search backwards in the current basic block,
 	 * starting at 'use', trying to find a definition
@@ -128,7 +128,7 @@ STATIC void search_backwards(line_p use, short v, bool* found, line_p* def)
 	 * implicit one, return 0 as def.
 	 */
 
-	register line_p l;
+	line_p l;
 
 	for (l = PREV(use); l != (line_p)0; l = PREV(l))
 	{
@@ -148,7 +148,7 @@ STATIC void search_backwards(line_p use, short v, bool* found, line_p* def)
 	*found = FALSE;
 }
 
-STATIC short outer_def(cset vdefs, cset in)
+static short outer_def(cset vdefs, cset in)
 {
 	/* See if there is a unique definition of variable
 	 * v reaching the beginning of block b.

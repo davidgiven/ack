@@ -74,7 +74,7 @@ adds_db_str(s)
 
 static
 stb_type(tp)
-	register struct type	*tp;
+	struct type	*tp;
 {
 	char		buf[128];
 	static int	stb_count;
@@ -148,10 +148,10 @@ stb_type(tp)
 		}
 		addc_db_str('e');
 		{
-			register struct stack_entry *se = local_level->sl_entry;
+			struct stack_entry *se = local_level->sl_entry;
 
 			while (se) {
-				register struct def	*edef = se->se_idf->id_def;
+				struct def	*edef = se->se_idf->id_def;
 				while (edef) {
 					if (edef->df_type == tp &&
 					    edef->df_sc == ENUM) {
@@ -182,7 +182,7 @@ stb_type(tp)
 				   tp->tp_fund == STRUCT ? 's' : 'u',
 				   tp->tp_size));
 		{
-			register struct sdef	*sdef = tp->tp_sdef;
+			struct sdef	*sdef = tp->tp_sdef;
 
 			while (sdef) {
 				adds_db_str(sdef->sd_idf->id_text);
@@ -213,7 +213,7 @@ stb_type(tp)
 }
 
 stb_tag(tg, str)
-	register struct tag	*tg;
+	struct tag	*tg;
 	char			*str;
 {
 	create_db_str();
@@ -230,7 +230,7 @@ stb_tag(tg, str)
 }
 
 stb_typedef(tp, str)
-	register struct type	*tp;
+	struct type	*tp;
 	char			*str;
 {
 	create_db_str();
@@ -247,10 +247,10 @@ stb_typedef(tp, str)
 }
 
 stb_string(df, kind, str)
-	register struct def	*df;
+	struct def	*df;
 	char			*str;
 {
-	register struct type	*tp = df->df_type;
+	struct type	*tp = df->df_type;
 
 	create_db_str();
 	adds_db_str(str);

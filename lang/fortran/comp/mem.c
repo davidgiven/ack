@@ -86,7 +86,7 @@ mem(n, round)
  int n, round;
 {
 	memblock *b;
-	register char *rv, *s;
+	char *rv, *s;
 
 	if (round)
 #ifdef CRAY
@@ -124,12 +124,12 @@ mem(n, round)
 
  char *
 tostring(s,n)
- register char *s;
+ char *s;
  int n;
 {
-	register char *s1, *se, **sf;
+	char *s1, *se, **sf;
 	char *rv, *s0;
-	register int k = n + 2, t;
+	int k = n + 2, t;
 
 	sf = str_fmt;
 	sf['%'] = "%";
@@ -155,18 +155,18 @@ tostring(s,n)
 
  char *
 cpstring(s)
- register char *s;
+ char *s;
 {
 	return strcpy(mem(strlen(s)+1,0), s);
 	}
 
  void
 new_iob_data(ios, name)
- register io_setup *ios;
+ io_setup *ios;
  char *name;
 {
-	register iob_data *iod;
-	register char **s, **se;
+	iob_data *iod;
+	char **s, **se;
 
 	iod = (iob_data *)
 		mem(sizeof(iob_data) + ios->nelt*sizeof(char *), 1);

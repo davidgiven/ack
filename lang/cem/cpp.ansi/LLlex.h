@@ -50,7 +50,7 @@ extern int err_occurred;	/* "error.c"	*/
 /* Public function declarations */
 
 extern int LLlex(void);
-extern int GetToken(register struct token* ptok);
+extern int GetToken(struct token* ptok);
 extern void skipcomment(void);
 extern void skiplinecomment(void);
 /* Get next character input, with trigraph parsing and newline	*/
