@@ -7,25 +7,25 @@
 
 /*	The memory allocation routines offered in this file are:
 
-	char *Salloc(str, n)	: allocate n bytes, initialized with the string
-					str
+    char *Salloc(str, n)	: allocate n bytes, initialized with the string
+                    str
 */
 
 #if __STDC__
 #include <stdlib.h>
 #else
-extern char *malloc();
+extern char* malloc();
 #endif
 
-#include	"alloc.h"
+#include "alloc.h"
 
-char *Salloc(char *str, unsigned int sz)
+char* Salloc(char* str, unsigned int sz)
 {
 	/*	Salloc() is not a primitive function: it just allocates a
-		piece of storage and copies a given string into it.
+	    piece of storage and copies a given string into it.
 	*/
-	char *res = malloc(sz);
-	char *m = res;
+	char* res = malloc(sz);
+	char* m = res;
 
 	while (sz--)
 		*m++ = *str++;

@@ -4,18 +4,19 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 /*	clear - clear a block of memory, and try to do it fast.
-*/
+ */
 
 #include "alloc.h"
 
 /* instead of Calloc: */
 
-void clear(char *ptr, unsigned int n)
+void clear(char* ptr, unsigned int n)
 {
-	long *q = (long *) ptr;
+	long* q = (long*)ptr;
 
-	while (n >= 8*sizeof (long))	{
-			/* high-speed clear loop */
+	while (n >= 8 * sizeof(long))
+	{
+		/* high-speed clear loop */
 		*q++ = 0;
 		*q++ = 0;
 		*q++ = 0;
@@ -24,13 +25,15 @@ void clear(char *ptr, unsigned int n)
 		*q++ = 0;
 		*q++ = 0;
 		*q++ = 0;
-		n -= 8*sizeof (long);
+		n -= 8 * sizeof(long);
 	}
-	while (n >= sizeof (long))	{
-			/* high-speed clear loop */
+	while (n >= sizeof(long))
+	{
+		/* high-speed clear loop */
 		*q++ = 0;
-		n -= sizeof (long);
+		n -= sizeof(long);
 	}
-	ptr = (char *) q;
-	while (n--) *ptr++ = '\0';
+	ptr = (char*)q;
+	while (n--)
+		*ptr++ = '\0';
 }
