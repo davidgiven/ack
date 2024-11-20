@@ -3,7 +3,6 @@ clibrary {
 	srcs = {
 		"./botch.c",
 		"./clear.c",
-		"./No_Mem.c",
 		"./Salloc.c",
 		"./st_alloc.c",
 		"./std_alloc.c",

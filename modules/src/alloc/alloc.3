@@ -13,8 +13,6 @@ Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory alloc
 .PP
 .B void clear(char *ptr, unsigned int size)
 .PP
-.void No_Mem()
-.PP
 .SH DESCRIPTION
 This set of routines provides a checking memory allocation mechanism.
 .PP
@@ -45,11 +43,6 @@ These last two routines are best used in a macro.
 .fi
 .SH "SEE ALSO"
 malloc(3)
-.SH DIAGNOSTICS
-\fISalloc\fR, \fISrealloc\fR, and \fIst_alloc\fR
-call a routine \fINo_Mem\fR if there is no memory available. This routine
-is not supposed to return. A default one, that
-gives an error message and stops execution, is provided.
 .SH BUGS
 The
 .I st_alloc

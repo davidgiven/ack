@@ -318,11 +318,6 @@ void Info(void)
 }
 #endif /* DEBUG */
 
-void No_Mem(void)				/* called by alloc package */
-{
-	fatal("out of memory");
-}
-
 void C_failed(void)				/* called by EM_code module */
 {
 	fatal("write failed");

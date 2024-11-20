@@ -27,9 +27,6 @@ char *std_alloc(char **phead, unsigned int size, int count, int *pcnt)
 		while (count >= 1 && (p = malloc(size * count)) == 0) {
 			count >>= 1;
 		}
-		if (p == 0) {
-			No_Mem();
-		}
 		*pcnt += count;
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {

@@ -288,11 +288,6 @@ print("\nNumber of lines read: %d\n", cntlines);
 }
 #endif
 
-void No_Mem(void)
-{
-	fatal("out of memory");
-}
-
 void C_failed(void)
 {
 	fatal("write failed");

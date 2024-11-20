@@ -208,12 +208,6 @@ ProcessArgs()
 	}
 }
 
-void
-No_Mem()
-{
-	fatal("out of memory");
-}
-
 AddToList(name, ext)
 	char *name, *ext;
 {

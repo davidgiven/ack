@@ -233,9 +233,3 @@ rd_fatal()
 {
   fatal("read error in %s", AckObj);
 }
-
-void
-No_Mem()
-{
-  fatal("out of memory");
-}

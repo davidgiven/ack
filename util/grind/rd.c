@@ -286,7 +286,6 @@ get_names(h, sz)
 	long	s_value;
   } xnm;
 
-  if (xnms == 0 || onm == 0) No_Mem();
   if (!readf(xnms, (unsigned) sz, 1)) rd_fatal();
 
   names = onm;

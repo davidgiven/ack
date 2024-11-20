@@ -18,7 +18,6 @@
 char *Salloc(char *, unsigned int);
 char *st_alloc(char **, unsigned int, int);
 char *std_alloc(char **, unsigned int, int, int *);
-void No_Mem(void);
 void clear(char *, unsigned int);
 void botch(char *, unsigned int);
 

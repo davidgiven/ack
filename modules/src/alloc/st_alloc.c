@@ -29,9 +29,6 @@ char *st_alloc(char **phead, unsigned int size, int count)
 		while (count >= 1 && (p = malloc(size * count)) == 0) {
 			count >>= 1;
 		}
-		if (p == NULL) {
-			No_Mem();
-		}
 		((_PALLOC_) p)->_A_next = 0;
 		while (--count) {
 			p += size;

@@ -161,8 +161,3 @@ static void dependency(char *s, char *source)
 	}
 	else	fprint(dep_fd, "%s\n", s);
 }
-
-void No_Mem(void)				/* called by alloc package */
-{
-	fatal("out of memory");
-}

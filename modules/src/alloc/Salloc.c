@@ -27,7 +27,6 @@ char *Salloc(char *str, unsigned int sz)
 	char *res = malloc(sz);
 	char *m = res;
 
-	if (sz && m == 0) No_Mem();
 	while (sz--)
 		*m++ = *str++;
 	return res;
