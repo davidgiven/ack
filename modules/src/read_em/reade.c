@@ -172,7 +172,7 @@ static struct string *getname(void)
 	p = s->str;
 	if (!p) {
 		s->maxlen = 256;
-		s->str = p = Malloc(256);
+		s->str = p = malloc(256);
 	}
 	c = getbyte();
 
@@ -185,7 +185,7 @@ static struct string *getname(void)
 	while (isalnum(c) || c == '_') {
 		if (p >= &(s->str[s->maxlen])) {
 			int df = p - s->str;
-			s->str = Realloc(s->str, (s->maxlen += 256));
+			s->str = realloc(s->str, (s->maxlen += 256));
 			p = s->str + df;
 		}
 		*p++ = c;
@@ -211,7 +211,7 @@ static struct string *getstring(int isident)
 	p = s->str;
 	if (!p) {
 		s->maxlen = 256;
-		s->str = p = Malloc(256);
+		s->str = p = malloc(256);
 	}
 
 	termc = getbyte();
@@ -237,7 +237,7 @@ static struct string *getstring(int isident)
 
 		if (p >= &(s->str[s->maxlen])) {
 			int df = p - s->str;
-			s->str = Realloc(s->str, (s->maxlen += 256));
+			s->str = realloc(s->str, (s->maxlen += 256));
 			p = s->str + df;
 		}
 

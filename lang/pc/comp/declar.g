@@ -659,7 +659,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 	 * We're almost there !!
 	 */
 
-		{ *sel = (struct selector *) Malloc(sizeof(struct selector));
+		{ *sel = (struct selector *) malloc(sizeof(struct selector));
 		  (*sel)->sel_ptrs = 0;
 		}
 	CASE
@@ -687,7 +687,7 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
 			else {
 				/* initialize selector */
 				(*sel)->sel_ptrs = (struct selector **)
-			   	  Malloc((unsigned)ncst * sizeof(struct selector *));
+			   	  malloc((unsigned)ncst * sizeof(struct selector *));
 				(*sel)->sel_ncst = ncst;
 				(*sel)->sel_lb = lb;
 	

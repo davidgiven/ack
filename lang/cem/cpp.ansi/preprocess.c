@@ -52,7 +52,7 @@ static int pragma_nr;
 void do_pragma(void)
 {
 	int size = ITEXTSIZE;
-	char* cur_line = Malloc((unsigned)size);
+	char* cur_line = malloc((unsigned)size);
 	char* c_ptr = cur_line;
 	int c = GetChar();
 	int delim = 0;
@@ -61,7 +61,7 @@ void do_pragma(void)
 	{
 		if (c_ptr + 1 - cur_line == size)
 		{
-			cur_line = Realloc(cur_line, (unsigned)(size + ITEXTSIZE));
+			cur_line = realloc(cur_line, (unsigned)(size + ITEXTSIZE));
 			c_ptr = cur_line + size - 1;
 			size += ITEXTSIZE;
 		}
@@ -107,11 +107,11 @@ void do_pragma(void)
 	*c_ptr = '\0';
 	if (!pragma_nr)
 	{
-		pragma_tab = (struct prag_info*)Malloc(sizeof(struct prag_info));
+		pragma_tab = (struct prag_info*)malloc(sizeof(struct prag_info));
 	}
 	else
 	{
-		pragma_tab = (struct prag_info*)Realloc(
+		pragma_tab = (struct prag_info*)realloc(
 		    (char*)pragma_tab, (unsigned)(sizeof(struct prag_info) * (pragma_nr + 1)));
 	}
 	if (delim)

@@ -187,9 +187,9 @@ char *str;
 char *glob_lbl( lbl)
 char *lbl;
 {
-	char *gl, *Malloc();
+	char *gl, *malloc();
 
-	gl = Malloc( strlen( lbl) + 3);
+	gl = malloc( strlen( lbl) + 3);
 	sprintf( gl, "\"%s\"", lbl);
 	return( gl);
 }

@@ -477,7 +477,7 @@ rd_ohead(h)
 			if (dt->d_size == 0) {
 				fatal("(part of) symbol table is missing");
 			}
-			dbtab = (struct nlist *) Malloc(dt->d_size);
+			dbtab = (struct nlist *) malloc(dt->d_size);
 			memcpy((char *) dbtab, (char *) dt->d_buf, dt->d_size);
 			maxdn = (struct nlist *)((char *)dbtab+dt->d_size);
 			break;

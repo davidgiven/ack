@@ -23,7 +23,7 @@ init_as_block()
 
 	if ( quantum == 0) {
 		quantum = 16;
-		as_instructions = (char **)Malloc( quantum*sizeof( char *));
+		as_instructions = (char **)malloc( quantum*sizeof( char *));
 	}
 }
 
@@ -36,7 +36,7 @@ char *instr;
 {
 	if ( nr_instr == quantum) {
 		quantum *= 2;
-		as_instructions = (char **) Realloc( (char *) as_instructions,
+		as_instructions = (char **) realloc( (char *) as_instructions,
 					   quantum*sizeof( char *));
 	}
 

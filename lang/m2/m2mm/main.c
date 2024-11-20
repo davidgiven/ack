@@ -89,7 +89,7 @@ main(argc, argv)
 	int i;
 
 	ProgName = *argv++;
-	DEFPATH = (char **) Malloc(10 * sizeof(char *));
+	DEFPATH = (char **) malloc(10 * sizeof(char *));
 	DEFPATH[1] = 0;
 	mDEF = 10;
 	nDEF = 2;
@@ -126,7 +126,7 @@ new_file_list()
 	static int cnt;
 
 	if (--cnt < 0) {
-		p = (struct file_list *)Malloc(50*sizeof(struct file_list));
+		p = (struct file_list *)malloc(50*sizeof(struct file_list));
 		cnt = 49;
 	}
 	f = p++;

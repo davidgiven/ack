@@ -7,6 +7,7 @@
 
 #include "parameters.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -304,7 +305,7 @@ again: /* rescan the input after an error or replacement	*/
 				ptok->tk_val = (arith)0;
 				return ptok->tk_symb = INTEGER;
 			}
-			ptok->tk_str = Malloc((unsigned)(tg - buf));
+			ptok->tk_str = malloc((unsigned)(tg - buf));
 			strcpy(ptok->tk_str, buf);
 			return IDENTIFIER;
 		}
@@ -484,7 +485,7 @@ static char* string_token(char* nm, int stop_char)
 {
 	int ch;
 	int str_size;
-	char* str = Malloc((unsigned)(str_size = ISTRSIZE));
+	char* str = malloc((unsigned)(str_size = ISTRSIZE));
 	int pos = 0;
 
 	ch = GetChar();
@@ -505,11 +506,11 @@ static char* string_token(char* nm, int stop_char)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Realloc(str, (unsigned)(str_size <<= 1));
+			str = realloc(str, (unsigned)(str_size <<= 1));
 		ch = GetChar();
 	}
 	str[pos++] = '\0'; /* for filenames etc. */
-	str = Realloc(str, (unsigned)pos);
+	str = realloc(str, (unsigned)pos);
 	return str;
 }
 

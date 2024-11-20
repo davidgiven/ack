@@ -494,7 +494,7 @@ string_token(nm, stop_char, plen)
 {
 	int ch;
 	int str_size;
-	char *str = Malloc((unsigned) (str_size = ISTRSIZE));
+	char *str = malloc((unsigned) (str_size = ISTRSIZE));
 	int pos = 0;
 	
 	LoadChar(ch);
@@ -519,7 +519,7 @@ string_token(nm, stop_char, plen)
 		}
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Srealloc(str, (unsigned) (str_size += RSTRSIZE));
+			str = realloc(str, (unsigned) (str_size += RSTRSIZE));
 		LoadChar(ch);
 	}
 	str[pos++] = '\0'; /* for filenames etc. */

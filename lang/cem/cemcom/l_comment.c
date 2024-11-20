@@ -169,7 +169,7 @@ make_format(argn, oldf)
 	}
 
 	/* there is a new format to be composed */
-	newf = Malloc(strlen(oldf));
+	newf = malloc(strlen(oldf));
 		/* certainly enough and probably not overly too much */
 	formatN = argn;
 	format = newf;

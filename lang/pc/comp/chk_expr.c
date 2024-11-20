@@ -604,7 +604,7 @@ static int ChkElement(struct node *expp, struct type **tp,
 
 		*tp = set_type(expp->nd_type, 0);
 		size = (*tp)->tp_size * (sizeof(arith) / word_size);
-		*set = (arith *) Malloc(size);
+		*set = (arith *) malloc(size);
 		clear((char *) *set, size);
 	}
 	else if (!TstCompat(ElementType(*tp), expp->nd_type))

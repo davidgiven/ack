@@ -94,7 +94,7 @@ void do_option(char *text)
 
 			if (++inc_total > inc_max) {
 				inctable = (char **)
-				  Realloc((char *)inctable,
+				  realloc((char *)inctable,
 					  (unsigned)((inc_max+=10)*sizeof(char *)));
 			}
 

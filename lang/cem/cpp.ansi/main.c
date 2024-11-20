@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 	init_idf();
 
-	inctable = (char **) Malloc(10 * sizeof(char *));
+	inctable = (char **) malloc(10 * sizeof(char *));
 	inc_max = 10;
 	inc_total = 3;
 	inctable[0] = ".";

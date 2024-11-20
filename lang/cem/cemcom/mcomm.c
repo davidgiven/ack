@@ -18,7 +18,7 @@ struct node {
 };
 
 char *
-Malloc(n)
+malloc(n)
 	unsigned n;
 {
 	char *space;
@@ -33,7 +33,7 @@ Malloc(n)
 
 struct node *make_tree();
 
-#define new_node() ((struct node *) Malloc(sizeof (struct node)))
+#define new_node() ((struct node *) malloc(sizeof (struct node)))
 
 main(argc, argv)
 	char *argv[];
@@ -86,7 +86,7 @@ readfile(filename, psiz)
 
 	if (((fd = open(filename, 0)) < 0) || (fstat(fd, &stbuf) != 0))
 		return 0;
-	cbuf = Malloc(stbuf.st_size + 1);
+	cbuf = malloc(stbuf.st_size + 1);
 	if (read(fd, cbuf, stbuf.st_size) != stbuf.st_size)
 		return 0;
 	cbuf[stbuf.st_size] = '\0';

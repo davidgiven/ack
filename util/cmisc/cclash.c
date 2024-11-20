@@ -59,7 +59,7 @@ char* keywords[]
 	    "struct", "switch", "typedef", "union",    "unsigned", "while",    0 };
 
 void InsertId(char*, int);
-char* Malloc(unsigned int);
+char* malloc(unsigned int);
 char* Salloc(char*);
 int EnHash(char*);
 void EndOfProgram(void);
@@ -111,7 +111,7 @@ void DoOption(char* str)
 
 struct idf* hash_tab[HASHSIZE];
 
-char *Malloc(), *Salloc();
+char *malloc(), *Salloc();
 
 void InsertId(char* id, int key)
 {
@@ -127,7 +127,7 @@ void InsertId(char* id, int key)
 
 	if (idp == 0)
 	{
-		idp = (struct idf*)Malloc(sizeof(struct idf));
+		idp = (struct idf*)malloc(sizeof(struct idf));
 		idp->id_next = 0;
 		if (!p)
 			hash_tab[hash_val] = idp;
@@ -147,7 +147,7 @@ void InsertId(char* id, int key)
 
 	if (p == 0)
 	{
-		p = (struct idf*)Malloc(sizeof(struct idf));
+		p = (struct idf*)malloc(sizeof(struct idf));
 		p->id_next = 0;
 		p->id_same = 0;
 		p->id_name = Salloc(id);
@@ -157,7 +157,7 @@ void InsertId(char* id, int key)
 	p->id_key = key;
 }
 
-char* Malloc(unsigned n)
+char* malloc(unsigned n)
 {
 	char* mem;
 
@@ -174,7 +174,7 @@ char* Salloc(char* str)
 	if (str == 0)
 		str = "";
 
-	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
+	return strcpy(malloc((unsigned)strlen(str) + 1), str);
 }
 
 int EnHash(char* id)

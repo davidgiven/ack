@@ -155,7 +155,7 @@ gen_idf()
 	*/
 	static int name_cnt;
 	struct idf *id;
-	char *s = Malloc(strlen(dot.tk_file)+50);
+	char *s = malloc(strlen(dot.tk_file)+50);
 
 	sprint(s, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);

@@ -159,11 +159,11 @@ static struct string *GetString(int delim)
 	*/
 	int ch;
 	struct string *str = (struct string *)
-				Malloc((unsigned) sizeof(struct string));
+				malloc((unsigned) sizeof(struct string));
 	char *p;
 	int len = ISTRSIZE;
 
-	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
+	str->s_str = p = malloc((unsigned int) ISTRSIZE);
 	for( ; ; )	{
 		LoadChar(ch);
 		if( class(ch) == STNL )	{
@@ -185,7 +185,7 @@ static struct string *GetString(int delim)
 		}
 		*p++ = ch;
 		if( p - str->s_str == len )	{
-			str->s_str = Srealloc(str->s_str,
+			str->s_str = realloc(str->s_str,
 					(unsigned int) len + RSTRSIZE);
 			p = str->s_str + len;
 			len += RSTRSIZE;
@@ -534,9 +534,9 @@ again:
 		}
 		/* REAL_MODE */
 		tk->tk_data.tk_real = (struct real *)
-						Malloc(sizeof(struct real));
+						malloc(sizeof(struct real));
 		/* allocate struct for inverse */
-		tk->TOK_RIV = (struct real *) Malloc(sizeof(struct real));
+		tk->TOK_RIV = (struct real *) malloc(sizeof(struct real));
 		tk->TOK_RIV->r_inverse = tk->tk_data.tk_real;
 		tk->TOK_RLA = 0;
 		tk->TOK_RIV->r_lab = 0;

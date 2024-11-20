@@ -7,6 +7,7 @@
 
 {
 #include	<alloc.h>
+#include	<stdlib.h>
 #include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"
@@ -71,7 +72,7 @@ string(struct expr **expp;)
 			 */
 			if (dot.tk_fund != fund)
 				warning("illegal pasting of string literals");
-			str = Realloc(str, (unsigned) (--len + dot.tk_len));
+			str = realloc(str, (unsigned) (--len + dot.tk_len));
 			for (i = 0; i < dot.tk_len; i++)
 				str[len++] = dot.tk_bts[i];
 		}

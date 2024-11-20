@@ -57,7 +57,7 @@ init_lib()
 set_libdir(n)
 {
 	struct liblist *p = 
-		(struct liblist *) Malloc(sizeof(struct liblist));
+		(struct liblist *) malloc(sizeof(struct liblist));
 
 	p->libnext = lblist;
 	p->libno = n;

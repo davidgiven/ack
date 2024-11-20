@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	char **Nargv = &argv[0];
 
 	ProgName = *argv++;
-	DEFPATH = (char **) Malloc((unsigned)mDEF * sizeof(char *));
+	DEFPATH = (char **) malloc((unsigned)mDEF * sizeof(char *));
 	DEFPATH[1] = 0;
 
 	while (--argc > 0) {

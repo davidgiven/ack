@@ -119,13 +119,13 @@ static void fatal(s, a)
 static void allocmem(void)
 {
 	/* Allocate memory for queues on heap */
-	OO_buffer = (p_instr) Malloc(
+	OO_buffer = (p_instr) malloc(
 			(unsigned) (MAXBUFFER * sizeof(struct e_instr)));
 	OO_patternqueue = OO_nxtpatt = OO_buffer;
-	OO_replqueue = (p_instr) Malloc(
+	OO_replqueue = (p_instr) malloc(
 			(unsigned) OO_maxreplacement * sizeof(struct e_instr));
 	OO_nxtrepl = OO_replqueue;
-	nextstr = strqueue = (char *) Malloc(MAXSTRING * sizeof(char));
+	nextstr = strqueue = (char *) malloc(MAXSTRING * sizeof(char));
 	laststr = strqueue + MAXSTRING - 1;
 }
 
@@ -138,7 +138,7 @@ char * OO_freestr(char *str)
 	again: if ((s - str) > (laststr - nextstr))
 	{
 		unsigned newsize = (laststr - strqueue + 1) * 2;
-		res = Realloc(strqueue, newsize);
+		res = realloc(strqueue, newsize);
 		laststr = res + newsize - 1;
 		nextstr = res + (nextstr - strqueue);
 		strqueue = res;

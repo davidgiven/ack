@@ -127,12 +127,12 @@ static struct string *GetString(int upto)
 	*/
 	int ch;
 	struct string *str = (struct string *)
-			Malloc((unsigned) sizeof(struct string));
+			malloc((unsigned) sizeof(struct string));
 	char *p;
 	int len;
 	
 	len = ISTRSIZE;
-	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
+	str->s_str = p = malloc((unsigned int) ISTRSIZE);
 	while (LoadChar(ch), ch != upto)	{
 		if (!(ch & 0200) && class(ch) == STNL)	{
 			lexerror("newline in string");
@@ -148,7 +148,7 @@ static struct string *GetString(int upto)
 		}
 		*p++ = ch;
 		if (p - str->s_str == len)	{
-			str->s_str = Realloc(str->s_str,
+			str->s_str = realloc(str->s_str,
 				(unsigned int) len + RSTRSIZE);
 			p = str->s_str + len;
 			len += RSTRSIZE;
@@ -159,7 +159,7 @@ static struct string *GetString(int upto)
 	while (p - str->s_str < len) {
 		*p++ = '\0';
 	}
-	str->s_str = Realloc(str->s_str, (unsigned) len);
+	str->s_str = realloc(str->s_str, (unsigned) len);
 	if (str->s_length == 0) str->s_length = 1;
 	/* ??? string length at least 1 ??? */
 	return str;

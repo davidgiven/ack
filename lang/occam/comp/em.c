@@ -21,7 +21,7 @@
 int wz = 4, pz = 4, vz = 4;
 int Lflag;
 static Lab=0;
-char *Malloc();
+char *malloc();
 
 void init()
 {
@@ -86,7 +86,7 @@ char *proc_label(L, name) register L; register char *name;
 
 	if (lab!=nil) free(lab);
 
-	lab=Malloc(strlen(name)+(1+sizeof(int)*3+1));
+	lab=malloc(strlen(name)+(1+sizeof(int)*3+1));
 		/* That is: P<L><name>\0 */
 
 	sprint(lab, "P%d", L);
@@ -416,8 +416,8 @@ int set_file(f) char *f;
 		apf= cmp<0 ? &pf->left : &pf->right;
 
 	if (pf==nil) {
-		*apf= pf= (struct ftree *) Malloc(sizeof *pf);
-		pf->file=strcpy(Malloc(strlen(f)+1), f);
+		*apf= pf= (struct ftree *) malloc(sizeof *pf);
+		pf->file=strcpy(malloc(strlen(f)+1), f);
 		pf->lab=0;
 		pf->left=pf->right=nil;
 	}

@@ -62,12 +62,12 @@ void C_flush(void)
 
 	if (C_ontmpfile) {
 		if (C_BASE == 0) {
-			C_BASE = Malloc(BUFFERSIZ);
+			C_BASE = malloc(BUFFERSIZ);
 			bufsiz = BUFFERSIZ;
 			C_current_out = C_BASE;
 		}
 		else {
-			C_BASE = Srealloc(C_BASE, (bufsiz << 1));
+			C_BASE = realloc(C_BASE, (bufsiz << 1));
 			C_current_out = C_BASE + bufsiz;
 			bufsiz <<= 1;
 		}

@@ -184,7 +184,7 @@ macro2buffer(idef, actpars, siztext)
 		the same as strcpy().
 	*/
 	int size = 8;
-	char *text = Malloc(size);
+	char *text = malloc(size);
 	int pos = 0;
 	char *ptr = idef->id_macro->mc_text;
 
@@ -200,13 +200,13 @@ macro2buffer(idef, actpars, siztext)
 			for (p = actpars[n - 1]; *p; p++) {
 				text[pos++] = *p;
 				if (pos == size)
-					text = Srealloc(text, size += RSTRSIZE);
+					text = realloc(text, size += RSTRSIZE);
 			}
 		}
 		else {
 			text[pos++] = *ptr++;
 			if (pos == size)
-				text = Srealloc(text, size += RSTRSIZE);
+				text = realloc(text, size += RSTRSIZE);
 		}
 	}
 	text[pos] = '\0';

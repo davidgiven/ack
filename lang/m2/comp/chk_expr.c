@@ -487,7 +487,7 @@ arith *MkSet(unsigned int size)
 {
 	arith	*s, *t;
 
-	s = t = (arith *) Malloc(size);
+	s = t = (arith *) malloc(size);
 	s++;
 	size /= sizeof(arith);
 	while (size--) *t++ = 0;
@@ -1472,7 +1472,7 @@ void TryToString(struct node *nd, struct type *tp)
 		buf[0] = nd->nd_INT;
 		nd->nd_type = standard_type(T_STRING, 1, (arith) 2);
 		nd->nd_SSTR = 
-			(struct string *) Malloc(sizeof(struct string));
+			(struct string *) malloc(sizeof(struct string));
 		nd->nd_STR = Salloc(buf, (unsigned) word_size);
 		nd->nd_SLE = 1;
 	}

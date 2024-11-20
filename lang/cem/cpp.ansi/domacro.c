@@ -741,7 +741,7 @@ static char* get_text(char* formals[], int* length)
 
 	c = GetChar();
 
-	repl->r_ptr = repl->r_text = Malloc((unsigned)(repl->r_size = ITEXTSIZE));
+	repl->r_ptr = repl->r_text = malloc((unsigned)(repl->r_size = ITEXTSIZE));
 	*repl->r_ptr = '\0';
 	while ((c != EOI) && (class(c) != STNL))
 	{
@@ -876,7 +876,7 @@ static char* get_text(char* formals[], int* length)
 		}
 	}
 	*length = repl->r_ptr - repl->r_text;
-	return Realloc(repl->r_text, (unsigned)(repl->r_ptr - repl->r_text + 1));
+	return realloc(repl->r_text, (unsigned)(repl->r_ptr - repl->r_text + 1));
 }
 
 /*	macroeq() decides whether two macro replacement texts are

@@ -73,7 +73,7 @@ static int GetFile(char *name)
 	char *buf;
 
 	len = strlen(name);
-	buf = Malloc(len + 5);
+	buf = malloc(len + 5);
 	memcpy(buf, name, len);
 	memcpy(buf + len, ".def", 5);
 	DEFPATH[0] = WorkingDir;

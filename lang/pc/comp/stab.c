@@ -42,7 +42,7 @@ static struct db_str {
 static void create_db_str(void)
 {
 	if (! db_str.base) {
-		db_str.base = Malloc(INCR_SIZE);
+		db_str.base = malloc(INCR_SIZE);
 		db_str.sz = INCR_SIZE;
 	}
 	db_str.currpos = db_str.base;
@@ -53,7 +53,7 @@ static void addc_db_str(int c)
 	int df = db_str.currpos - db_str.base;
 	if (df >= db_str.sz-1) {
 		db_str.sz += INCR_SIZE;
-		db_str.base = Realloc(db_str.base, db_str.sz);
+		db_str.base = realloc(db_str.base, db_str.sz);
 		db_str.currpos = db_str.base + df;
 	}
 	*db_str.currpos++ = c;

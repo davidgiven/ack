@@ -108,7 +108,7 @@ action		: if_statement
 
 subroutine
   { char *s; }	: IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
-		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+		  CONDITION		{ s = realloc(s, strlen(s)+yyleng+1);
 					  strcat(s, yytext);
 					  pr_subroutine( s);
 					  free(s);
@@ -118,7 +118,7 @@ subroutine
 call
   { char *s; }	: '@'
 		  IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
-		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+		  CONDITION		{ s = realloc(s, strlen(s)+yyleng+1);
 					  strcat(s, yytext);
 					  pr_call( s);
 					  free(s);

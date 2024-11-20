@@ -1,6 +1,7 @@
 /*	SYMBOL TABLE HANDLING	*/
 
 #include <alloc.h>
+#include <stdlib.h>
 
 #define IDF_HASHSIZE 307 /* size of hashtable, must be odd */
 
@@ -38,7 +39,7 @@ static struct idf* IDF_new(char* tg, int size, int cpy)
 	if (!nidf--)
 	{
 		nidf += NIDS;
-		pidf = (struct idf*)Malloc(NIDS * sizeof(struct idf));
+		pidf = (struct idf*)malloc(NIDS * sizeof(struct idf));
 	}
 
 	id = pidf;
@@ -50,7 +51,7 @@ static struct idf* IDF_new(char* tg, int size, int cpy)
 		if (size > icnt)
 		{
 			icnt = size > IBUFSIZ ? size : IBUFSIZ;
-			p = Malloc(icnt);
+			p = malloc(icnt);
 		}
 		else
 			p = ip;

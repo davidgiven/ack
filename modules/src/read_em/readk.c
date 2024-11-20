@@ -228,9 +228,9 @@ static struct string *getstring(int isident)
 
 	if (n > s->maxlen) {
 		if (! s->maxlen) {
-			s->str = Malloc(s->maxlen = 256);
+			s->str = malloc(s->maxlen = 256);
 		}
-		else	s->str = Realloc(s->str, (s->maxlen = (n+255)&~255));
+		else	s->str = realloc(s->str, (s->maxlen = (n+255)&~255));
 	}
 
 	s->length = n;

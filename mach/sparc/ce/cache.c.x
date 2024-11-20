@@ -829,7 +829,7 @@ char *s;
 	char *p;
 
 enter("push_ext");
-	p = Malloc(strlen(s)+1);
+	p = malloc(strlen(s)+1);
 
 	INC_TOS;
 	tos->reg = reg_g0;
@@ -1286,7 +1286,7 @@ enter("dup_tos");
 			*tos = tos[-n];
 			if (tos->ext)
 			{
-				ext= Malloc(strlen(tos->ext)+1);
+				ext= malloc(strlen(tos->ext)+1);
 				strcpy(ext, tos->ext);
 				tos->ext= ext;
 			}

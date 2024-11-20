@@ -11,7 +11,7 @@
 
 static void rvalue(), assignable(), inputable(), outputable(), subscriptable();
 static void assigned();
-char *Malloc();
+char *malloc();
 
 /* The new_* functions make use of the used() and assinged() functions to
  * make known what is done to a variable.
@@ -91,7 +91,7 @@ struct expr *new_node(op, left, right, byte)
 			subscriptable(left, right, byte, &type, &arr_siz);
 			break;
 		}
-		pe= (struct expr *) Malloc(sizeof *pe);
+		pe= (struct expr *) malloc(sizeof *pe);
 
 		pe->kind=E_NODE;
 		pe->type=type;
@@ -112,7 +112,7 @@ struct expr *new_var(var)
 {
 	struct expr *pe;
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	pe->kind=E_VAR;
 
@@ -135,7 +135,7 @@ struct expr *new_const(cst)
 {
 	struct expr *pe;
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	pe->kind=E_CONST;
 	pe->type=T_VALUE;
@@ -154,7 +154,7 @@ struct expr *new_table(kind, tab)
 {
 	struct expr *pe;
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	pe->kind=kind;
 	pe->type=T_VALUE|T_ARR;
@@ -182,7 +182,7 @@ struct expr *copy_const(e) struct expr *e;
 {
 	struct expr *c;
 
-	c= (struct expr *) Malloc(sizeof *c);
+	c= (struct expr *) malloc(sizeof *c);
 
 	*c= *e;
 	return c;
@@ -193,7 +193,7 @@ struct expr *new_now()
 {
 	struct expr *pe;
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	pe->kind=E_NOW;
 	pe->type=T_VALUE;
@@ -215,7 +215,7 @@ struct expr *new_io(out, chan, args)
 		report("channel variable expected");
 	used(chan);
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	pe->kind=E_IO;
 	pe->type=T_VOID;
@@ -236,7 +236,7 @@ struct expr *new_call(proc, args)
 {
 	struct expr *pe;
 
-	pe= (struct expr *) Malloc(sizeof *pe);
+	pe= (struct expr *) malloc(sizeof *pe);
 
 	used(proc);
 
@@ -255,7 +255,7 @@ void table_add(aapt, val) register struct table ***aapt; long val;
 {
 	struct table *pt;
 
-	pt= (struct table *) Malloc(sizeof *pt);
+	pt= (struct table *) malloc(sizeof *pt);
 
 	pt->val=val;
 	pt->next= **aapt;
@@ -271,7 +271,7 @@ void expr_list_add(aaelp, arg)
 {
 	struct expr_list *elp;
 
-	elp= (struct expr_list *) Malloc(sizeof *elp);
+	elp= (struct expr_list *) malloc(sizeof *elp);
 
 	elp->arg=arg;
 	elp->next= **aaelp;

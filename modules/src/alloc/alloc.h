@@ -10,17 +10,12 @@
 /*	This file serves as the interface between the program and the
 	memory allocating routines.
 	There are 3 memory allocation routines:
-		char *Malloc(n)		allocate n bytes
+		char *malloc(n)		allocate n bytes
 		char *Salloc(str, n)	allocate n bytes and fill them with
 					string str
-		char *Realloc(str, n)	reallocate the block at str to n bytes.
-		char *Srealloc(str, n)	same as Realloc.
 */
 
-char *Malloc(unsigned int);
 char *Salloc(char *, unsigned int);
-char *Srealloc(char *, unsigned int);
-char *Realloc(char *, unsigned int);
 char *st_alloc(char **, unsigned int, int);
 char *std_alloc(char **, unsigned int, int, int *);
 void No_Mem(void);
@@ -44,7 +39,5 @@ typedef struct _ALLOC_ {
 #define	st_free(ptr, phead, size)	(botch((char *)(ptr), size), \
 						_A_st_free(ptr, phead, size))
 #endif	/* BOTCH_FREE */
-
-#define Free(p)	free(p)
 
 #endif /* __ALLOC_INCLUDED__ */

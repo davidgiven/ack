@@ -13,7 +13,7 @@ int min_offset=0;	/* Minimum of all offsets within current level */
 
 static struct symtab *sym_table=nil;
 
-char *Malloc();
+char *malloc();
 
 static struct symbol **search_sym(tree, name)
 	struct symbol **tree;
@@ -46,7 +46,7 @@ struct symbol *insert(name, type, arr_siz, info)
 		return nil;
 	}
 
-	ps= (struct symbol *) Malloc(sizeof *ps);
+	ps= (struct symbol *) malloc(sizeof *ps);
 
 	ps->s_name=name;
 
@@ -89,7 +89,7 @@ void sym_down()
 {
 	struct symtab *ps;
 
-	ps= (struct symtab *) Malloc(sizeof *ps);
+	ps= (struct symtab *) malloc(sizeof *ps);
 
 	ps->local=nil;
 	ps->global=sym_table;
@@ -172,7 +172,7 @@ void pars_add(aapars, type, var)
 {
 	struct par_list *pl;
 
-	pl= (struct par_list *) Malloc(sizeof *pl);
+	pl= (struct par_list *) malloc(sizeof *pl);
 
 	pl->pr_type=type;
 	pl->pr_var=var;

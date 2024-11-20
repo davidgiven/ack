@@ -20,7 +20,7 @@ struct stacks {
 
 	/* Acces to the stacks is through a 'dynamic array' of pointers
 	 * to the heads. We implemented it this way to save on the number
-	 * of Malloc() calls. nr_heads is the number of heads; heads_buf_size
+	 * of malloc() calls. nr_heads is the number of heads; heads_buf_size
 	 * is the current size of heads_buf.
 	 */
 
@@ -118,8 +118,8 @@ static struct nonterminal *nonterminals;
 /* These functions must be called instead of the original functions in
  * 'malloc.h'. They offer a checking allocation mechanism.
 */
-static void *Malloc(size_t);
-static void *Realloc(void *, size_t);
+static void *malloc(size_t);
+static void *realloc(void *, size_t);
 
 
 
@@ -164,7 +164,7 @@ void LLnc_recover(void);
 
 
 
-static void *Malloc(size_t size)
+static void *malloc(size_t size)
 {
 	void *p;
 
@@ -176,7 +176,7 @@ static void *Malloc(size_t size)
 }
 
 
-static void *Realloc(void *ptr, size_t size)
+static void *realloc(void *ptr, size_t size)
 {
 	void *p;
 
@@ -195,13 +195,13 @@ static void init_grammar(void)
 	int i;
 
 	terminals = (struct terminal *)
-		Malloc(LLFIRST_NT * sizeof(struct terminal));
+		malloc(LLFIRST_NT * sizeof(struct terminal));
 	for (i = 0; i < LLFIRST_NT; i++) {
 		(terminals + i)->link = (struct symbol *)0;
 	}
 
 	nonterminals = (struct nonterminal *)
-		Malloc(LLNNONTERMINALS * sizeof(struct nonterminal));
+		malloc(LLNNONTERMINALS * sizeof(struct nonterminal));
 	for (i = 0; i < LLNNONTERMINALS; i++) {
 		(nonterminals + i)->rule = (struct lhs *)0;
 		(nonterminals + i)->link = (struct symbol *)0;
@@ -232,7 +232,7 @@ static struct lhs *build_rule(void)
 	struct lhs *l;
 	int j;
 
-	l = (struct lhs *)Malloc(sizeof(struct lhs));
+	l = (struct lhs *)malloc(sizeof(struct lhs));
 	l->nr = LLgrammar[grammar_index++];
 
 	/* Build first set */
@@ -262,7 +262,7 @@ static struct symbol *build_rhs(struct lhs *l)
 
 	struct symbol *r;
 
-	r = (struct symbol *)Malloc(sizeof(struct symbol));
+	r = (struct symbol *)malloc(sizeof(struct symbol));
 	if (LLgrammar[grammar_index] == LLALT) {
 		grammar_index++;
 		r->x = LLALT;
@@ -422,7 +422,7 @@ static void start_stack(struct stacks *stack, int base, int l_ahead)
 			}
 #endif
 			bottom = (struct stack_elt *)
-					Malloc(sizeof(struct stack_elt));
+					malloc(sizeof(struct stack_elt));
 			bottom->edges = (struct edge *)0;
 			bottom->nr = LLEOSTACK;
 			bottom->flags = 0;
@@ -529,7 +529,7 @@ of the stack.*/
 				}
 #endif
 			bottom = (struct stack_elt *)
-					Malloc(sizeof(struct stack_elt));
+					malloc(sizeof(struct stack_elt));
 			bottom->edges = (struct edge *)0;
 			bottom->nr = LLEOSTACK;
 			bottom->flags = 0;
@@ -597,7 +597,7 @@ static struct stack_elt *push_rule(struct stack_elt *element,
 	}
 #endif
 
-	se = (struct stack_elt *)Malloc(sizeof(struct stack_elt));
+	se = (struct stack_elt *)malloc(sizeof(struct stack_elt));
 	se->flags = 0;
 	se->nr = symb_ptr->nr;
 	se->ref_count = 0;
@@ -612,7 +612,7 @@ static struct stack_elt *push_rule(struct stack_elt *element,
 	}
 #endif
 
-	se->edges = (struct edge *)Malloc(sizeof(struct edge));
+	se->edges = (struct edge *)malloc(sizeof(struct edge));
 	se->edges->ptr = top;
 	se->edges->flags = 0;
 
@@ -631,13 +631,13 @@ static void new_head(struct stacks *stack, struct stack_elt *ptr)
 	if (stack->heads_buf_size == 0) {
 		stack->heads_buf_size = LLHEADS_BUF_INCR;
 		stack->heads_buf = (struct stack_elt **)
-			Malloc(LLHEADS_BUF_INCR * sizeof(struct stack_elt *));
+			malloc(LLHEADS_BUF_INCR * sizeof(struct stack_elt *));
 	}
 	else if (stack->nr_heads == stack->heads_buf_size) {
 		/* buffer full? */
 		stack->heads_buf_size += LLHEADS_BUF_INCR;
 		stack->heads_buf = (struct stack_elt **)
-			Realloc(stack->heads_buf,
+			realloc(stack->heads_buf,
 				stack->heads_buf_size *
 					sizeof(struct stack_elt *)
 			);
@@ -671,12 +671,12 @@ static void to_delete(struct stacks *stack, struct stack_elt *ptr)
 	if (stack->cleanup_buf_size == 0) {
 		stack->cleanup_buf_size = LLCLEANUP_BUF_INCR;
 		stack->cleanup_buf = (struct stack_elt **)
-		Malloc(LLCLEANUP_BUF_INCR * sizeof(struct stack_elt *));
+		malloc(LLCLEANUP_BUF_INCR * sizeof(struct stack_elt *));
 	}
 	else if (stack->nr_cleanups == stack->cleanup_buf_size) {
 		stack->cleanup_buf_size += LLCLEANUP_BUF_INCR;
 		stack->cleanup_buf = (struct stack_elt **)
-			Realloc(stack->cleanup_buf,
+			realloc(stack->cleanup_buf,
 				stack->cleanup_buf_size *
 				sizeof(struct stack_elt *));
 	}
@@ -789,7 +789,7 @@ static int join(struct stacks *stack, struct stack_elt *top, int l_ahead)
 
 		/* Allocate one more pointer to descendants */
 		size = se->nr_nexts * sizeof(struct edge);
-		se->edges = (struct edge *)Realloc(se->edges, size);
+		se->edges = (struct edge *)realloc(se->edges, size);
 
 		/* Link it */
 		(se->edges + se->nr_nexts - 1)->ptr = top->edges->ptr;
@@ -897,12 +897,12 @@ static void generate_heads(struct stacks *stack, struct stack_elt *se,
 			if (stack->visited_buf_size == 0) {
 				stack->visited_buf_size = LL_VIS_INCR;
 				stack->visited_buf = (struct stack_elt **)
-				Malloc(LL_VIS_INCR * sizeof(struct stack_elt *));
+				malloc(LL_VIS_INCR * sizeof(struct stack_elt *));
 			}
 			else if (stack->nr_visited == stack->visited_buf_size) {
 				stack->visited_buf_size += LL_VIS_INCR;
 				stack->visited_buf = (struct stack_elt **)
-					Realloc(stack->visited_buf,
+					realloc(stack->visited_buf,
 					stack->visited_buf_size *
 					sizeof(struct stack_elt *));
 			}
@@ -1071,7 +1071,7 @@ static struct stack_elt *split(struct stack_elt *se)
 	}
 #endif
 
-	new_stack = (struct stack_elt *)Malloc(sizeof(struct stack_elt));
+	new_stack = (struct stack_elt *)malloc(sizeof(struct stack_elt));
 	new_stack->flags = 0;		/* Used by 'clear_gen_flags()' */
 	new_stack->nr = se->nr;
 	new_stack->ref_count = 0;	/* Copy is new top */
@@ -1087,7 +1087,7 @@ static struct stack_elt *split(struct stack_elt *se)
 #endif
 
 	new_stack->edges = (struct edge *)
-		Malloc(se->nr_nexts * sizeof(struct edge));
+		malloc(se->nr_nexts * sizeof(struct edge));
 
 	/* Copy gets the same successors as the original */
 	memcpy((char *) new_stack->edges, (char *) se->edges,
@@ -1240,13 +1240,13 @@ static void match_heads(struct stacks *stack, int symb)
 			if (stack->heads_buf_size == 0) {
 				stack->heads_buf_size = LLHEADS_BUF_INCR;
 				stack->heads_buf = (struct stack_elt **)
-					Malloc(stack->heads_buf_size *
+					malloc(stack->heads_buf_size *
 						sizeof(struct stack_elt *));
 			}
 			else if (stack->nr_heads == stack->heads_buf_size) {
 				stack->heads_buf_size += LLHEADS_BUF_INCR;
 				stack->heads_buf = (struct stack_elt **)
-					Realloc(stack->heads_buf,
+					realloc(stack->heads_buf,
 						stack->heads_buf_size *
 						sizeof(struct stack_elt *));
 			}

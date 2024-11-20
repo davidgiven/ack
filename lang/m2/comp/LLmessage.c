@@ -49,7 +49,7 @@ void LLmessage(int tk)
 			break;
 		case STRING:
 			dotp->tk_data.tk_str = (struct string *)
-						Malloc(sizeof (struct string));
+						malloc(sizeof (struct string));
 			dotp->TOK_SLE = 1;
 			dotp->TOK_STR = Salloc("", 1);
 			break;

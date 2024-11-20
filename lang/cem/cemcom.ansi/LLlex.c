@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <alloc.h>
+#include <stdlib.h>
 #include "parameters.h"
 #include "input.h"
 #include "arith.h"
@@ -426,7 +427,7 @@ static char* string_token(char *nm, int stop_char, int *plen)
 {
 	int ch;
 	int str_size;
-	char* str = Malloc((unsigned)(str_size = ISTRSIZE));
+	char* str = malloc((unsigned)(str_size = ISTRSIZE));
 	int pos = 0;
 
 	ch = GetChar();
@@ -447,7 +448,7 @@ static char* string_token(char *nm, int stop_char, int *plen)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Realloc(str, (unsigned)(str_size += RSTRSIZE));
+			str = realloc(str, (unsigned)(str_size += RSTRSIZE));
 		ch = GetChar();
 	}
 	str[pos++] = '\0'; /* for filenames etc. */

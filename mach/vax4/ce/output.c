@@ -43,7 +43,7 @@ output_back()
 
 	nrelo = relo - reloc_info;
 	u_reloc = (struct relocation_info *)
-			Malloc((unsigned)nrelo*sizeof(struct relocation_info));
+			malloc((unsigned)nrelo*sizeof(struct relocation_info));
 
 	rp = reloc_info;
 	for (i = nrelo; i > 0; i--, rp++) {
@@ -76,7 +76,7 @@ output_back()
 	free(u_reloc);
 	
 	u_name = (struct nlist *)
-			Malloc((unsigned)nname * sizeof(struct nlist));
+			malloc((unsigned)nname * sizeof(struct nlist));
 
 	for (i = 0; i < nname ; i++) { /* The segment names can be omitted */
 		convert_name( &symbol_table[i], u_name++);
@@ -107,7 +107,7 @@ reduce_name_table()
 #define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
 	int *diff_index =
-		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
+		(int *) malloc((unsigned)(nname + 1) * sizeof(int));
 	int i;
 	struct outname *np;
 	char *new_str;
@@ -162,7 +162,7 @@ reduce_name_table()
 	nname -= diff_index[nname - 1];
 	free((char *)(diff_index-1));
 
-	new_str = q = Malloc((unsigned)(string - string_area));
+	new_str = q = malloc((unsigned)(string - string_area));
 	np = symbol_table;
 	for (i = nname; i > 0; i--, np++) {
 		p = np->on_foff + string_area;

@@ -48,7 +48,7 @@ int replace(struct idf *idf)
 	if (idf->id_macro->mc_flag & NOREPLACE)
 		return 0;
 	repl = new_repl();
-	repl->r_ptr = repl->r_text = Malloc((unsigned)(repl->r_size = LAPBUF));
+	repl->r_ptr = repl->r_text = malloc((unsigned)(repl->r_size = LAPBUF));
 	repl->r_args = new_args();
 	repl->r_idf = idf;
 	if (!expand_macro(repl, idf))
@@ -209,8 +209,8 @@ static void expand_defined(struct repl *repl)
 
 static void newarg(struct args *args)
 {
-	args->a_expptr = args->a_expbuf = Malloc((unsigned)(args->a_expsize = ARGBUF));
-	args->a_rawptr = args->a_rawbuf = Malloc((unsigned)(args->a_rawsize = ARGBUF));
+	args->a_expptr = args->a_expbuf = malloc((unsigned)(args->a_expsize = ARGBUF));
+	args->a_rawptr = args->a_rawbuf = malloc((unsigned)(args->a_rawsize = ARGBUF));
 }
 
 static void getactuals(struct repl *repl, struct idf *idf)
@@ -748,7 +748,7 @@ void add2repl(struct repl *repl, int ch)
  
 	assert(index < repl->r_size);
 	if (index + 2 >= repl->r_size) {
-		repl->r_text = Realloc(repl->r_text, (unsigned)(repl->r_size <<= 1));
+		repl->r_text = realloc(repl->r_text, (unsigned)(repl->r_size <<= 1));
 		repl->r_ptr = repl->r_text + index;
 	}
 	*repl->r_ptr++ = ch;
@@ -769,7 +769,7 @@ static void stash(struct repl *repl, int ch, int stashraw)
 	if (stashraw >= 0) {
 		assert(index < args->a_expsize);
 		if (index + 1 >= args->a_expsize) {
-			args->a_expbuf = Realloc(args->a_expbuf,
+			args->a_expbuf = realloc(args->a_expbuf,
 						    (unsigned)(args->a_expsize <<= 1));
 			args->a_expptr = args->a_expbuf + index;
 		}
@@ -780,7 +780,7 @@ static void stash(struct repl *repl, int ch, int stashraw)
 		index = args->a_rawptr - args->a_rawbuf;
 		assert(index < args->a_rawsize);
 		if (index + 1 >= args->a_rawsize) {
-			args->a_rawbuf = Realloc(args->a_rawbuf,
+			args->a_rawbuf = realloc(args->a_rawbuf,
 						    (unsigned)(args->a_rawsize <<= 1));
 			args->a_rawptr = args->a_rawbuf + index;
 		}

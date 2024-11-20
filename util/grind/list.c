@@ -22,7 +22,7 @@ mk_filnm(dir, file, newname)
   char	*file;
   char	**newname;
 {
-  char	*dst = Malloc((unsigned) (strlen(dir) + strlen(file) + 2));
+  char	*dst = malloc((unsigned) (strlen(dir) + strlen(file) + 2));
 
   *newname = dst;
   if (*dir) {
@@ -111,7 +111,7 @@ line_positions(file, f)
   long	cnt = 0;
   int	c;
 
-  file->f_linepos = (long *) Malloc(n_alloc * sizeof(long));
+  file->f_linepos = (long *) malloc(n_alloc * sizeof(long));
   file->f_linepos[0] = 0;
   nl = 1;
   while ((c = getc(f)) != EOF) {
@@ -120,14 +120,14 @@ line_positions(file, f)
 		if (nl == n_alloc) {
 			n_alloc <<= 1;
 			file->f_linepos =
-				(long *) Realloc((char *)(file->f_linepos),
+				(long *) realloc((char *)(file->f_linepos),
 						 n_alloc * sizeof(long));
 		}
 		file->f_linepos[nl++] = cnt;
 	}
   }
   if (cnt == file->f_linepos[nl-1]) nl--;
-  file->f_linepos = (long *) Realloc((char *)(file->f_linepos),
+  file->f_linepos = (long *) realloc((char *)(file->f_linepos),
 					(unsigned)nl * sizeof(long));
   file->f_nlines = nl;
   clearerr(f);

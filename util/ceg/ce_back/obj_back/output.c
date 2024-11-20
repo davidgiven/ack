@@ -98,7 +98,7 @@ reduce_name_table()
 #define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
 	int *diff_index =
-		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
+		(int *) malloc((unsigned)(nname + 1) * sizeof(int));
 	struct outrelo *rp = reloc_info;
 	struct outname *np;
 	int i;
@@ -147,7 +147,7 @@ reduce_name_table()
 
 	free((char *)(diff_index-1));
 
-	new_str = q = Malloc((unsigned)(string - string_area));
+	new_str = q = malloc((unsigned)(string - string_area));
 	for (i = 0, np = symbol_table; i < nname; i++, np++) {
 		p = np->on_foff + string_area;
 		np->on_foff = q - new_str;

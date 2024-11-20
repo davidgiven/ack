@@ -586,7 +586,7 @@ ch_array(tpp, ex)
 		length = dim;
 	}
 	/* throw out the characters of the already prepared string	*/
-	s = Malloc((unsigned) (length));
+	s = malloc((unsigned) (length));
 	clear(s, length);
 	i = length <= ex->SG_LEN ? length : ex->SG_LEN;
 	to = s; from = ex->SG_VALUE;

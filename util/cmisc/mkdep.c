@@ -28,12 +28,12 @@ struct namelist* freelist;
 struct namelist* new_namelist();
 struct namelist* nl = 0;
 
-char* Malloc(unsigned int);
+char* malloc(unsigned int);
 
 char* include_line(char*);
 int dofile(char*);
 
-char* Malloc(u)
+char* malloc(u)
 unsigned u;
 {
 	char* sp;
@@ -56,7 +56,7 @@ struct namelist* new_namelist()
 		return nlp;
 	}
 
-	return (struct namelist*)Malloc(sizeof(struct namelist));
+	return (struct namelist*)malloc(sizeof(struct namelist));
 }
 
 void free_namelist(struct namelist* nlp)
@@ -84,7 +84,7 @@ void add_name(char* nm)
 		nlp = nlp->next;
 	}
 
-	(nnlp = new_namelist())->name = strcpy(Malloc((unsigned)strlen(nm) + 1), nm);
+	(nnlp = new_namelist())->name = strcpy(malloc((unsigned)strlen(nm) + 1), nm);
 
 	if (lnlp)
 	{
