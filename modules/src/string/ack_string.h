@@ -7,7 +7,7 @@
 #ifndef __ACK_STRING_INCLUDED__
 #define __ACK_STRING_INCLUDED__
 
-char *strzero(char *s);
+//char *strzero(char *s);
 char *str2bts(char *s, char *b, int *n);
 char *long2str(long l, int b);
 long str2long(char *s, int b);

@@ -9,10 +9,6 @@ conversions between strings and row of bytes
 .nf
 .B #include <ack_string.h>
 .PP
-.B char *strrindex(char *s, int c)
-.PP
-.B char *strzero(char *s)
-.PP
 .B char *str2bts(char *s, char *b, int *n)
 .PP
 .B char *long2str(long l, int b)
@@ -38,11 +34,6 @@ The
 functions operate on variable-length rows of bytes,
 regardless of null bytes.
 Neither of these functions check for overflow of any receiving area.
-.PP
-.I strzero
-turns
-.I s
-into a null string.
 .PP
 .I bts2str
 turns a row of
