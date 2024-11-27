@@ -11,8 +11,6 @@ conversions between strings and row of bytes
 .PP
 .B char *long2str(long l, int b)
 .PP
-.B long str2long(char *s, int b)
-.PP
 .B char *btscpy(char *b1, char *b2, int n)
 .PP
 .B char *bts2str(char *b, int n, char *s)
@@ -60,11 +58,6 @@ This base may be any of 2..16.
 A negative base (in the range -16..-2) indicates that the long must be
 seen as unsigned.
 A pointer to the string is returned.
-.I str2long
-returns the value that is represented in
-.IR s ,
-according to
-.IR base .
 .PP
 .I btscpy
 copies

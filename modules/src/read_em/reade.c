@@ -353,7 +353,7 @@ static int getnumber(int c, struct e_arg *ap)
 	}
 
 	ungetbyte(c);
-	ap->ema_cst = (arith) str2long(str, 10);
+	ap->ema_cst = (arith) strtol(str, NULL, 10);
 	return sp_cst4;
 }
 

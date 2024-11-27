@@ -8,7 +8,6 @@
 #define __ACK_STRING_INCLUDED__
 
 char *long2str(long l, int b);
-long str2long(char *s, int b);
 char *btscpy(char *b1, char *b2, int n);
 char *bts2str(char *b, int n, char *s);
 

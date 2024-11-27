@@ -522,7 +522,7 @@ again:
 				np = &buf[1];
 				while (*np == '0')	/* skip leading zeros */
 					np++;
-				tk->TOK_INT = str2long(np, 10);
+				tk->TOK_INT = strtol(np, NULL, 10);
 				if( (tk->TOK_INT < 0) ||
 				    (strlen(np) > strlen(maxint_str)) ||
 					(strlen(np) == strlen(maxint_str) &&
