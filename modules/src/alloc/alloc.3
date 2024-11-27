@@ -11,8 +11,6 @@ Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory alloc
 .PP
 .B st_free(char *ptr, char **phead, unsigned int size)
 .PP
-.B void clear(char *ptr, unsigned int size)
-.PP
 .SH DESCRIPTION
 This set of routines provides a checking memory allocation mechanism.
 .PP
@@ -34,8 +32,6 @@ the structure to be freed, \fIphead\fR is again a pointer to a field
 containing the head of the free list, and \fIsize\fR again contains the size
 of the structures.
 These last two routines are best used in a macro.
-.PP
-\fIclear\fR clears \fIsize\fR bytes, starting at \fIptr\fR.
 .SH FILES
 .nf
 ~em/modules/h/alloc.h
