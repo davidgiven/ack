@@ -9,8 +9,6 @@ conversions between strings and row of bytes
 .nf
 .B #include <ack_string.h>
 .PP
-.B char *strindex(char *s, int c)
-.PP
 .B char *strrindex(char *s, int c)
 .PP
 .B char *strzero(char *s)
@@ -40,18 +38,6 @@ The
 functions operate on variable-length rows of bytes,
 regardless of null bytes.
 Neither of these functions check for overflow of any receiving area.
-.PP
-.I strindex
-.RI ( strrindex )
-returns a pointer to the first (last)
-occurrence of character 
-.I c
-in string
-.I s,
-or zero if
-.I c
-does not occur in
-.IR s .
 .PP
 .I strzero
 turns
