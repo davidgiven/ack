@@ -19,7 +19,6 @@ char* Salloc(char*, unsigned int);
 char* st_alloc(char**, unsigned int, int);
 char* std_alloc(char**, unsigned int, int, int*);
 void clear(char*, unsigned int);
-void botch(char*, unsigned int);
 
 /*	S T R U C T U R E - S T O R A G E  D E F I N I T I O N S	*/
 
@@ -30,10 +29,6 @@ typedef struct _ALLOC_
 
 #define _A_st_free(ptr, phead, size)                                                               \
 	(((_PALLOC_)ptr)->_A_next = (_PALLOC_)(*phead), *((_PALLOC_*)phead) = (_PALLOC_)ptr)
-#ifndef BOTCH_FREE
 #define st_free(ptr, phead, size) _A_st_free(ptr, phead, size)
-#else /* def BOTCH_FREE */
-#define st_free(ptr, phead, size) (botch((char*)(ptr), size), _A_st_free(ptr, phead, size))
-#endif /* BOTCH_FREE */
 
 #endif /* __ALLOC_INCLUDED__ */

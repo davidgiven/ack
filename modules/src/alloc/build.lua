@@ -1,7 +1,6 @@
 clibrary {
 	name = "lib",
 	srcs = {
-		"./botch.c",
 		"./clear.c",
 		"./Salloc.c",
 		"./st_alloc.c",
