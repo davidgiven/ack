@@ -9,19 +9,11 @@ conversions between strings and row of bytes
 .nf
 .B #include <ack_string.h>
 .PP
-.B char *str2bts(char *s, char *b, int *n)
-.PP
 .B char *long2str(long l, int b)
 .PP
 .B long str2long(char *s, int b)
 .PP
 .B char *btscpy(char *b1, char *b2, int n)
-.PP
-.B char *btscat(char *b1, int n1, char *b2, int n2)
-.PP
-.B int btscmp(char *b1, int n1, char *b2, int n2)
-.PP
-.B char *btszero(char *b, int n)
 .PP
 .B char *bts2str(char *b, int n, char *s)
 .fi
@@ -58,22 +50,6 @@ is turned into the string consisting of the following characters
 .RE
 The latter string could be represented in C as "\e\e000\e\en".
 .PP
-.I str2bts
-turns string
-.I s
-into a sequence of bytes pointed by
-.IR b .
-It has the inverse effect to
-.IR bts2str .
-The length of the resulting byte sequence is returned in
-.RI *n .
-.br
-Both the functions
-.I bts2str
-and
-.I str2bts
-return a pointer to the result.
-.PP
 .I long2str
 converts a long value
 .I l
@@ -99,42 +75,6 @@ to
 .I b1
 and returns
 .IR b1 .
-.PP
-.I btscat
-appends a copy of
-.I n2
-bytes from
-.I b2
-to the end of
-.IR b1 ,
-consisting of
-.I n1
-bytes.
-.I b1
-is returned.
-.PP
-.I btscmp
-compares row of bytes
-.I b1
-with length 
-.I n1
-and
-.I b2
-with length 
-.I n2
-and returns an integer greater than, equal to, or less than 0, if
-.I b1
-is lexicographically greater then, equal to, or less than
-.IR b2 ,
-respectively.
-.PP
-.I btszero
-places
-.I n
-null bytes in the string
-.IR b .
-.I b
-is returned.
 .SH FILES
 ~em/modules/lib/libstring.a
 .SH "SEE ALSO"

@@ -7,14 +7,9 @@
 #ifndef __ACK_STRING_INCLUDED__
 #define __ACK_STRING_INCLUDED__
 
-//char *strzero(char *s);
-char *str2bts(char *s, char *b, int *n);
 char *long2str(long l, int b);
 long str2long(char *s, int b);
 char *btscpy(char *b1, char *b2, int n);
-char *btscat(char *b1, int n1, char *b2, int n2);
-int btscmp(char *b1, int n1, char *b2, int n2);
-char *btszero(char *b, int n);
 char *bts2str(char *b, int n, char *s);
 
 #endif /* __ACK_STRING_INCLUDED__ */
