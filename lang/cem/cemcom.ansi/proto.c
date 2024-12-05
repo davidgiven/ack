@@ -382,7 +382,7 @@ static void remove_proto_tag(struct type *tp)
 
 #ifdef DEBUG
 	if (options['t'])
-	print("Removing idf %s from list\n",
+	printf("Removing idf %s from list\n",
 			ident->id_text);
 #endif
 
@@ -403,7 +403,7 @@ void remove_proto_idfs(struct proto *pl)
 		{
 #ifdef DEBUG
 			if (options['t'])
-			print("Removing idf %s from list\n",
+			printf("Removing idf %s from list\n",
 					pl->pl_idf->id_text);
 #endif
 			def = pl->pl_idf->id_def;

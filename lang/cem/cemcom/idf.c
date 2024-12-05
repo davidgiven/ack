@@ -104,7 +104,7 @@ hash_stat()
 	if (options['h'])	{
 		int i;
 
-		print("Hash table tally:\n");
+		printf("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
 			struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
@@ -113,9 +113,9 @@ hash_stat()
 				cnt++;
 				notch = notch->next;
 			}
-			print("%d %d\n", i, cnt);
+			printf("%d %d\n", i, cnt);
 		}
-		print("End hash table tally\n");
+		printf("End hash table tally\n");
 	}
 }
 #endif	/* DEBUG */

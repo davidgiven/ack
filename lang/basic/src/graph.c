@@ -78,15 +78,15 @@ void newblock(int nr)
 	Linerecord	*l;
 	List		*frwrd;
 
-	if ( debug) print("newblock at %d\n",nr);
+	if ( debug) printf("newblock at %d\n",nr);
 	if ( nr>0 && currline && currline->linenr>= nr)
 	{
-		if ( debug) print("old line:%d\n",currline->linenr);
+		if ( debug) printf("old line:%d\n",currline->linenr);
 		error("Lines out of sequence");
 	}
 
 	frwrd=srchforward(nr);
-	if ( frwrd && debug) print("forward found %d\n",frwrd->emlabel);
+	if ( frwrd && debug) printf("forward found %d\n",frwrd->emlabel);
 	l= srchline(nr);
 	if ( l)
 	{
@@ -117,7 +117,7 @@ int gotolabel(int nr)
 	Linerecord *l1;
 	List	*ll;
 
-	if (debug) print("goto label %d\n",nr);
+	if (debug) printf("goto label %d\n",nr);
 	/* update currline */
 	ll= newlist();
 	ll-> linenr=nr;
@@ -132,7 +132,7 @@ int gotolabel(int nr)
 		if ( l1==0)
 		{
 			/* declare forward label */
-			if (debug) print("declare forward %d\n",nr);
+			if (debug) printf("declare forward %d\n",nr);
 			ll= newlist();
 			ll->emlabel= genlabel();
 			ll-> linenr=nr;
@@ -278,7 +278,7 @@ void ongotostmt(int type)
 		l= l->nextlist;
 	}
 	jumphead= jumptail=0; jumpcnt=0;
-	if (debug) print("ongotst:%d labels\n", jumpcnt);
+	if (debug) printf("ongotst:%d labels\n", jumpcnt);
 	conversion(type,INTTYPE);
 	C_dup((arith) BEMINTSIZE);
 	C_zlt(err_goto_label);

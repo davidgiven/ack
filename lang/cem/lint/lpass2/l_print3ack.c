@@ -17,7 +17,7 @@
 	%c = int		%s = char *
 	%u = unsigned int
 $ */
-print(format) char *format; { ; }
+printf(format) char *format; { ; }
 
 /* FORMAT1 */
 fprint(filep, format) File *filep; char *format; { ; }

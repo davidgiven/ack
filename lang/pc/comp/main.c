@@ -147,26 +147,26 @@ void LexScan(void)
 
 
 	while( LLlex() > 0 )	{
-		print(">>> %s ", symbol2str(tkp->tk_symb));
+		printf(">>> %s ", symbol2str(tkp->tk_symb));
 		switch( tkp->tk_symb )	{
 			case IDENT:
-				print("%s\n", tkp->TOK_IDF->id_text);
+				printf("%s\n", tkp->TOK_IDF->id_text);
 				break;
 
 			case INTEGER:
-				print("%ld\n", tkp->TOK_INT);
+				printf("%ld\n", tkp->TOK_INT);
 				break;
 
 			case REAL:
-				print("%s\n", tkp->TOK_REL);
+				printf("%s\n", tkp->TOK_REL);
 				break;
 
 			case STRING:
-				print("'%s'\n", tkp->TOK_STR);
+				printf("'%s'\n", tkp->TOK_STR);
 				break;
 
 			default:
-				print("\n");
+				printf("\n");
 		}
 	}
 }
@@ -277,10 +277,10 @@ void Info(void)
 			cnt_scopelist, cnt_tmpvar, cnt_withdesig,
 			cnt_case_hdr, cnt_case_entry;
 
-	print("\
+	printf("\
 %6d def\n%6d node\n%6d paramlist\n%6d type\n%6d scope\n%6d scopelist\n\
 %6d lab\n%6d tmpvar\n%6d withdesig\n%6d casehdr\n%6d caseentry\n",
 cnt_def, cnt_node, cnt_paramlist, cnt_type, cnt_scope, cnt_scopelist, cnt_lab, cnt_tmpvar, cnt_withdesig, cnt_case_hdr, cnt_case_entry);
-print("\nNumber of lines read: %d\n", cntlines);
+printf("\nNumber of lines read: %d\n", cntlines);
 }
 #endif

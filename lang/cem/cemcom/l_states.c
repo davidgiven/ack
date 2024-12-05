@@ -1232,9 +1232,9 @@ print_autos(a)
 		struct idf *idf = a->ad_idf;
 		struct def *def = idf->id_def;
 
-		print("%s", idf->id_text);
-		print("(lvl=%d)", a->ad_def->df_level);
-		print("(u%ds%dm%d U%dS%d) ",
+		printf("%s", idf->id_text);
+		printf("(lvl=%d)", a->ad_def->df_level);
+		printf("(u%ds%dm%d U%dS%d) ",
 			a->ad_used, a->ad_set, a->ad_maybe_set,
 			def->df_used, def->df_set
 		);
@@ -1247,15 +1247,15 @@ pr_lint_state(nm, st)
 	char *nm;
 	struct state *st;
 {
-	print("%s: ", nm);
+	printf("%s: ", nm);
 	if (st) {
-		print("notreached == %d ", st->st_notreached);
+		printf("notreached == %d ", st->st_notreached);
 		print_autos(st->st_auto_list);
 	}
 	else {
-		print("NULL");
+		printf("NULL");
 	}
-	print("\n");
+	printf("\n");
 }
 
 print_lint_stack(msg)
@@ -1263,13 +1263,13 @@ print_lint_stack(msg)
 {
 	struct lint_stack_entry *lse = top_ls;
 
-	print("Lint stack: %s(level=%d)\n", msg, level);
+	printf("Lint stack: %s(level=%d)\n", msg, level);
 	while (lse) {
-		print("  |-------------- level %d ------------\n",
+		printf("  |-------------- level %d ------------\n",
 					lse->ls_level);
 		pr_lint_state("  |current", lse->ls_current);
 
-		print("  |class == %s\n",
+		printf("  |class == %s\n",
 			lse->ls_class ? symbol2str(lse->ls_class) : "{");
 
 		switch (lse->ls_class) {
@@ -1281,7 +1281,7 @@ print_lint_stack(msg)
 		case DO:
 		case WHILE:
 		case FOR:
-			print("   |LS_TEST == %s\n",
+			printf("   |LS_TEST == %s\n",
 				lse->LS_TEST == TEST_VAR ? "TEST_VAR" :
 				lse->LS_TEST == TEST_TRUE ? "TEST_TRUE" :
 				lse->LS_TEST == TEST_FALSE ? "TEST_FALSE" :
@@ -1300,7 +1300,7 @@ print_lint_stack(msg)
 		}
 		lse = lse->ls_previous;
 	}
-	print("  |--------------\n\n");
+	printf("  |--------------\n\n");
 }
 
 #endif	/* DEBUG */

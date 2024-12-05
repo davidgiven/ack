@@ -85,7 +85,7 @@ output_back()
 	putbuf((char *) u_name, sizeof(struct nlist)*nname);
 	free(u_name);
 
-	/* print( "size string_area %d\n", nchar); */
+	/* printf( "size string_area %d\n", nchar); */
 
 	put_stringtablesize( nchar + 4);
 	putbuf((char *) string_area, nchar);
@@ -189,7 +189,7 @@ init_unixheader()
 	u_header.a_entry = 0;
 	u_header.a_trsize = trsize * sizeof(struct relocation_info);
   	u_header.a_drsize = drsize * sizeof(struct relocation_info);
-	/* print( "header %o %d %d %d %d %d %d %d\n",
+	/* printf( "header %o %d %d %d %d %d %d %d\n",
 		u_header.a_magic, u_header.a_text, u_header.a_data,
 		u_header.a_bss, u_header.a_syms, u_header.a_entry,
 		u_header.a_trsize, u_header.a_drsize);
@@ -241,7 +241,7 @@ convert_name( a_name, u_name)
 struct outname *a_name;
 struct nlist *u_name;
 {
-	/* print( "naam is %s\n", a_name->on_foff + string_area);   */
+	/* printf( "naam is %s\n", a_name->on_foff + string_area);   */
 
 	u_name->n_str = a_name->on_foff + 4;
 	if (a_name->on_type & S_STB) u_name->n_type = a_name->on_type >> 8;

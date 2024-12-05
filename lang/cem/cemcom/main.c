@@ -410,12 +410,12 @@ preprocess()
 			if (strcmp(lastfilenm, dot.tk_file) == 0)	{
 				if (dot.tk_line - lastlineno <= 1)	{
 					lastlineno++;
-					print("\n");
+					printf("\n");
 				}
 				else	{
 					lastlineno = dot.tk_line;
 					if (!options['P'])
-						print("\n#line %ld \"%s\"\n",
+						printf("\n#line %ld \"%s\"\n",
 							lastlineno,
 							lastfilenm
 						);
@@ -425,7 +425,7 @@ preprocess()
 				lastfilenm = dot.tk_file;
 				lastlineno = dot.tk_line;
 				if (!options['P'])
-					print("\n#line %ld \"%s\"\n",
+					printf("\n#line %ld \"%s\"\n",
 						lastlineno, lastfilenm);
 			}
 		}
@@ -433,35 +433,35 @@ preprocess()
 		if (strcmp(lastfilenm, dot.tk_file) != 0)	{
 			lastfilenm = dot.tk_file;
 			if (!options['P'])
-				print("\n#line %ld \"%s\"\n",
+				printf("\n#line %ld \"%s\"\n",
 					lastlineno, lastfilenm);
 		}
 		switch (DOT)	{
 		case IDENTIFIER:
 		case TYPE_IDENTIFIER:
-			print("%s ", dot.tk_idf->id_text);
+			printf("%s ", dot.tk_idf->id_text);
 			break;
 		case STRING:
 		{
 			char sbuf[1024];	/* a transient buffer */
 			char *bts2str();
 
-			print("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len, sbuf));
+			printf("\"%s\" ", bts2str(dot.tk_bts, dot.tk_len, sbuf));
 			break;
 		}
 		case INTEGER:
-			print("%ld ", dot.tk_ival);
+			printf("%ld ", dot.tk_ival);
 			break;
 #ifndef NOFLOAT
 		case FLOATING:
-			print("%s ", dot.tk_fval);
+			printf("%s ", dot.tk_fval);
 			break;
 #endif /* NOFLOAT */
 		case EOI:
 		case EOF:
 			return;
 		default:	/* very expensive...	*/
-			print("%s ", symbol2str(DOT));
+			printf("%s ", symbol2str(DOT));
 		}
 	}
 }

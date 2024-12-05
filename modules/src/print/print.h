@@ -9,7 +9,6 @@
 #include <stdarg.h>
 #include <system.h>
 
-void print(const char *fmt, ...);
 void fprint(File *f, const char *fmt, ...);
 void doprnt(File *f, const char *fmt, va_list ap);
 int _format(char *buf, const char *fmt, va_list ap);

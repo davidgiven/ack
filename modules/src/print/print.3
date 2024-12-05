@@ -7,8 +7,6 @@ print, fprint, doprnt -- very simple formatted-output routines
 .B #include <system.h>
 .B #include <print.h>
 .PP
-.B void print(char *format [, arg] ... )
-.PP
 .B void fprint(File *filep, char *format [, arg] ... )
 .PP
 .B void doprnt(File *filep, char *format, va_list args)
@@ -16,8 +14,6 @@ print, fprint, doprnt -- very simple formatted-output routines
 .B int _format(char *buf, char *format, va_lsit args)
 .fi
 .SH DESCRIPTION
-.I print
-writes output on standard output.
 .I fprint
 and
 .I doprnt

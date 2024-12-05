@@ -465,11 +465,11 @@ print_id(name, id)
 	struct inpdef *id;
 {
 	if (!id) {
-		print("%s: <NO_INPDEF>\n", name);
+		printf("%s: <NO_INPDEF>\n", name);
 		return;
 	}
 
-	print("%s: %s, %s, %04d, \"%s\", %d, %s", name,
+	printf("%s: %s, %s, %04d, \"%s\", %d, %s", name,
 		id->id_class == LFDF ? "LFDF" :
 		id->id_class == LVDF ? "LVDF" :
 		id->id_class == PFDF ? "PFDF" :
@@ -489,7 +489,7 @@ print_id(name, id)
 		id->id_type
 	);
 	if (is_class(id, CL_FUNC|CL_DEF) || is_class(id, CL_FUNC|CL_USAGE)) {
-		print(", %d, %s, %s",
+		printf(", %d, %s, %s",
 			id->id_nrargs,
 			(id->id_nrargs == 0 ? "" : id->id_argtps),
 			(	id->id_class == FC
@@ -509,6 +509,6 @@ print_id(name, id)
 			)
 		);
 	}
-	print("\n");
+	printf("\n");
 }
 

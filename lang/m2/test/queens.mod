@@ -37,7 +37,7 @@ FROM InOut IMPORT WriteString, WriteLn;
 			FOR i := 1 TO maxpos DO
 				IF free(k,i) THEN
 					d[k] := i;
-					print();
+					printf();
 				END;
 			END;
 		ELSE

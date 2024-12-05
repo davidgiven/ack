@@ -40,7 +40,7 @@ int pcrel;
 	r->or_addr = cur_value();
 	gen4( (pcrel) ? off - ( r->or_addr + 4) : off);
 
-	/* print( "r %s r %ld s %d in %d adrr %ld off %ld\n",
+	/* printf( "r %s r %ld s %d in %d adrr %ld off %ld\n",
 	         sym, pcrel, cur_seg, r->or_nami, r->or_addr, 
 		(pcrel) ? off-cur_value() : off);
 	 */

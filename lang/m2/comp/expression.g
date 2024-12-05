@@ -83,7 +83,7 @@ ConstExpression(struct node **pnd;)
 	 * Check that the expression is a constant expression and evaluate!
 	 */
 		{
-		  DO_DEBUG(options['C'], print("CONSTANT EXPRESSION\n"));
+		  DO_DEBUG(options['C'], printf("CONSTANT EXPRESSION\n"));
 		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 
 		  if (ChkExpression(pnd) &&
@@ -93,7 +93,7 @@ ConstExpression(struct node **pnd;)
 			error("constant expression expected");
 		  }
 
-		  DO_DEBUG(options['C'], print("RESULTS IN\n"));
+		  DO_DEBUG(options['C'], printf("RESULTS IN\n"));
 		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 		}
 ;

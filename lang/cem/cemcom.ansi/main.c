@@ -296,7 +296,7 @@ void Info(void)
 		    cnt_switch_hdr, cnt_case_entry, cnt_type, cnt_brace,
 		    cnt_lint_stack_entry, cnt_state, cnt_auto_def,
 		    cnt_expr_state, cnt_argument;
-	print("\
+	printf("\
 %6d string_cst\n%6d formal\n\
 %6d decl_unary\n%6d def\n%6d expr\n%6d field\n\
 %6d e_stack\n%6d localvar\n%6d proto\n\

@@ -10,7 +10,7 @@ do_local_relocation()
 {
 	struct outrelo *rp;
 	
-	/* print( "n relocation records %d\n", relo - reloc_info);  */
+	/* printf( "n relocation records %d\n", relo - reloc_info);  */
 
 	B_base_address[SEGTXT] = 0;
 	B_base_address[SEGCON] = text - text_area;

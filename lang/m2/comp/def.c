@@ -118,7 +118,7 @@ struct def *define(struct idf *id, struct scope *scope, int kind)
 	 */
 	struct def *df;
 
-	DO_DEBUG(options['S'], print("define %s, %x\n", id->id_text, kind));
+	DO_DEBUG(options['S'], printf("define %s, %x\n", id->id_text, kind));
 	df = lookup(id, scope, D_IMPORT, 0);
 	if ( /* Already in this scope */
 	df)
@@ -411,6 +411,6 @@ void CheckWithDef(struct def *df, struct type *tp)
 #ifdef DEBUG
 void PrDef(struct def *df)
 {
-	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
+	printf("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }
 #endif /* DEBUG */
