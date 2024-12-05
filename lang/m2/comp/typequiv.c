@@ -193,9 +193,9 @@ int TstParCompat(int parno, struct type *formaltype, int VARflag, struct node **
 	char ebuf[256];
 
 	if (edf) {
-		sprint(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
+		sprintf(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
 	}
-	else sprint(ebuf, "parameter %d: %%s", parno);
+	else sprintf(ebuf, "parameter %d: %%s", parno);
 
 	if (
 		TstTypeEquiv(formaltype, actualtype)

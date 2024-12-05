@@ -24,7 +24,7 @@ align_word()
 save_label( l)
 char *l;
 {
-	sprint( labeltje, "%s", l);
+	sprintf( labeltje, "%s", l);
 	saved = 1;
 }
 
@@ -42,7 +42,7 @@ dump_label()
 char *extnd_pro( prcno)
 int prcno;
 {
-	sprint( name, "pro%d", prcno);
+	sprintf( name, "pro%d", prcno);
 	return( name);
 }
 
@@ -50,7 +50,7 @@ int prcno;
 char *extnd_start( prcno)
 int prcno;
 {
-	sprint( name, "start%d", prcno);
+	sprintf( name, "start%d", prcno);
 	return( name);
 }
 
@@ -58,7 +58,7 @@ int prcno;
 char *extnd_name( s)
 char *s;
 {
-	sprint( name, NAME_FMT, s);
+	sprintf( name, NAME_FMT, s);
         return( name);
 }
 
@@ -66,7 +66,7 @@ char *s;
 char *extnd_dnam( s)
 char *s;
 {
-	sprint( name, DNAM_FMT, s);
+	sprintf( name, DNAM_FMT, s);
         return( name);
 }
 
@@ -74,7 +74,7 @@ char *s;
 char *extnd_dlb( g)
 arith g;
 {
-	sprint( name, DLB_FMT, (long)g);
+	sprintf( name, DLB_FMT, (long)g);
         return( name);
 }
 
@@ -82,7 +82,7 @@ arith g;
 char *extnd_ilb( l, prcno)
 arith l;
 {
-	sprint( name, ILB_FMT, prcno, (long) l);
+	sprintf( name, ILB_FMT, prcno, (long) l);
         return( name);
 }
 
@@ -90,7 +90,7 @@ arith l;
 char *extnd_hol( hol)
 int hol;
 {
-	sprint( name, HOL_FMT, hol);
+	sprintf( name, HOL_FMT, hol);
         return( name);
 }
 
@@ -98,7 +98,7 @@ int hol;
 char *extnd_part( d)
 int d;
 {
-	sprint( name, "part%x", d);
+	sprintf( name, "part%x", d);
 	return( name);
 }
 
@@ -106,7 +106,7 @@ int d;
 char *extnd_cont( d)
 int d;
 {
-	sprint( name, "cont%x", d);
+	sprintf( name, "cont%x", d);
 	return( name);
 }
 
@@ -114,6 +114,6 @@ int d;
 char *extnd_main( d)
 int d;
 {
-	sprint( name, "main%x", d);
+	sprintf( name, "main%x", d);
 	return( name);
 }

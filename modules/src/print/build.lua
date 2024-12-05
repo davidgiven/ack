@@ -2,7 +2,6 @@ clibrary {
 	name = "lib",
 	srcs = {
 		"./doprnt.c", "./format.c", "./fprint.c", "./print.c",
-		"./sprint.c",
 	},
 	hdrs = { "./print.h" },
 	deps = {

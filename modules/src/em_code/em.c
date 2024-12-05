@@ -193,7 +193,7 @@ void C_pt_ilb(label l)
 {
 	char buf[16];
 
-	sprint(buf, "*%ld", (long) l);
+	sprintf(buf, "*%ld", (long) l);
 	wrs(buf);
 }
 
@@ -211,7 +211,7 @@ void C_pt_cst(arith l)
 {
 	char buf[16];
 
-	sprint(buf, "%ld", (long) l);
+	sprintf(buf, "%ld", (long) l);
 	wrs(buf);
 }
 
@@ -242,7 +242,7 @@ void C_pt_dlb(label l)
 {
 	char buf[16];
 
-	sprint(buf, ".%ld", (long) l);
+	sprintf(buf, ".%ld", (long) l);
 	wrs(buf);
 }
 
@@ -252,7 +252,7 @@ void C_pt_doff(label l, arith v)
 
 	C_pt_dlb(l);
 	if (v != 0) {
-		sprint(buf,"+%ld", (long) v);
+		sprintf(buf,"+%ld", (long) v);
 		wrs(buf);
 	}
 }
@@ -263,7 +263,7 @@ void C_pt_noff(char *s, arith v)
 
 	wrs(s);
 	if (v != 0) {
-		sprint(buf,"+%ld", (long) v);
+		sprintf(buf,"+%ld", (long) v);
 		wrs(buf);
 	}
 }
@@ -278,7 +278,7 @@ void C_pt_dfilb(label l)
 {
 	char buf[16];
 
-	sprint(buf, "%ld", (long) l);
+	sprintf(buf, "%ld", (long) l);
 	wrs(buf);
 }
 

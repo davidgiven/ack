@@ -770,7 +770,7 @@ static int ChkVarPar(struct node *nd, struct node *name)
 
 	if (message)
 	{
-		sprint(err_mes, "%s can't be a variable parameter", message);
+		sprintf(err_mes, "%s can't be a variable parameter", message);
 		Xerror(name, err_mes);
 		return 0;
 	}
@@ -891,7 +891,7 @@ static int ChkProcCall(struct node *expp)
 		if (!TstParCompat(TypeOfParam(param), left->nd_type,
 				(int) IsVarParam(param), left, new_par_section))
 		{
-			sprint(ebuf, "type incompatibility in parameter %d", cnt);
+			sprintf(ebuf, "type incompatibility in parameter %d", cnt);
 			Xerror(name, ebuf);
 			retval = 0;
 		}

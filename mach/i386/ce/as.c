@@ -147,7 +147,7 @@ set_label( str, op)
 char *str;
 struct t_operand *op;
 {
-	char *ptr, *strchr(), *sprint();
+	char *ptr, *strchr(), *sprintf();
 	static char buf[256];
 
 	ptr = strchr( str, '+');
@@ -170,7 +170,7 @@ struct t_operand *op;
 		if ( strchr( str, DOLLAR) != 0)
 			op->lab = str;
 		else 
-			op->lab = sprint( buf, "\"%s\"", str);
+			op->lab = sprintf( buf, "\"%s\"", str);
 	}
 }
 

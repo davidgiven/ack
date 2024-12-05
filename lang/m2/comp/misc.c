@@ -47,7 +47,7 @@ struct idf *gen_anon_idf(void)
 	static int name_cnt;
 	char *s = malloc(strlen(FileName)+50);
 
-	sprint(s, "#%d in %s, line %u",
+	sprintf(s, "#%d in %s, line %u",
 			++name_cnt, FileName, LineNumber);
 	s = realloc(s, strlen(s)+1);
 	return str2idf(s, 0);

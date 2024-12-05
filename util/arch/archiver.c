@@ -205,7 +205,7 @@ void error(BOOL quit, char* str1, char* str2)
 {
 	char errbuf[256];
 
-	sprint(errbuf, str1, str2);
+	sprintf(errbuf, str1, str2);
 	fwrite(errbuf, 1, strlen(errbuf), stderr);
 	if (quit)
 	{

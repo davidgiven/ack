@@ -264,7 +264,7 @@ struct t_operand *op;
 			@reloc4( %$(op->lab), %$(op->offset), PC_REL);
 				}
 				else {
-					sprint( my_buf, "\"%s\"", op->lab);
+					sprintf( my_buf, "\"%s\"", op->lab);
 				@reloc4( %$(my_buf), %$(op->offset) , PC_REL);
 				}
 				break;

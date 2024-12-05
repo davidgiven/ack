@@ -184,7 +184,7 @@ set_label( str, op)
 char *str;
 struct t_operand *op;
 {
-	char *ptr, *strchr(), *sprint();
+	char *ptr, *strchr(), *sprintf();
 	static char buf[256];
 
 	ptr = strchr( str, '+');
@@ -208,7 +208,7 @@ struct t_operand *op;
 			op->lab = str;
 		else 
 			/* nood oplossing */
-			op->lab = sprint( buf, "\"%s\"", str);
+			op->lab = sprintf( buf, "\"%s\"", str);
 	}
 }
 

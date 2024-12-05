@@ -279,9 +279,9 @@ char *tokenname(tk, inst) register tk, inst;
 		static char c[7];
 
 		if (' '<tk && tk<='~')
-			sprint(c, "'%c'", tk);
+			sprintf(c, "'%c'", tk);
 		else
-			sprint(c, "'*#%02x'", tk);
+			sprintf(c, "'*#%02x'", tk);
 		return c;
 	} else {
 		switch (tk) {
@@ -292,7 +292,7 @@ char *tokenname(tk, inst) register tk, inst;
 			return keyname(tk);
 		case IDENTIFIER:
 			if (inst) {
-				sprint(fake_id, "_%d", ++fake_cnt);
+				sprintf(fake_id, "_%d", ++fake_cnt);
 				token.t_sval=strcpy(malloc(strlen(fake_id)+1),
 					fake_id);
 				return "IDENTIFIER";
@@ -323,7 +323,7 @@ char *tokenname(tk, inst) register tk, inst;
 			static char qopc[5];
 
 			for (i=0; op[i]!=tk; i++) ;
-			sprint(qopc, "'%s'", opc[i]);
+			sprintf(qopc, "'%s'", opc[i]);
 			return qopc;
 			}
 		}

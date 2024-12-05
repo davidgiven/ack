@@ -69,21 +69,32 @@ static void adds_db_str(char* s)
 		addc_db_str(*s++);
 }
 
-static void stb_type(struct type* tp, int assign_num)
+static void adds_db_strf(char* s, ...)
 {
 	char buf[128];
+	va_list ap;
+
+	va_start(ap, s);
+	vsnprintf(buf, sizeof(buf), s, ap);
+	va_end(ap);
+
+	adds_db_str(buf);
+}
+
+static void stb_type(struct type* tp, int assign_num)
+{
 	static int stb_count;
 
 	if (tp->tp_dbindex > 0)
 	{
-		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
+		adds_db_strf("%d", tp->tp_dbindex);
 		return;
 	}
 	if (tp->tp_dbindex < 0)
 	{
 		if (tp->next == 0)
 		{
-			adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
+			adds_db_strf("%d", -tp->tp_dbindex);
 			return;
 		}
 		tp->tp_dbindex = -tp->tp_dbindex;
@@ -94,11 +105,11 @@ static void stb_type(struct type* tp, int assign_num)
 	}
 	if (tp->tp_dbindex > 0)
 	{
-		adds_db_str(sprint(buf, "%d=", tp->tp_dbindex));
+		adds_db_strf("%d=", tp->tp_dbindex);
 	}
 	if (tp == void_type)
 	{
-		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
+		adds_db_strf("%d", tp->tp_dbindex);
 		return;
 	}
 	switch (tp->tp_fund)
@@ -108,20 +119,19 @@ static void stb_type(struct type* tp, int assign_num)
 		case T_LONG:
 		{
 			arith l = full_mask[(int)tp->tp_size] & ~(1L << (tp->tp_size * 8 - 1));
-			adds_db_str(sprint(buf, "r%d;%ld;%ld", tp->tp_dbindex, (long)-l - 1, (long)l));
+			adds_db_strf("r%d;%ld;%ld", tp->tp_dbindex, (long)-l - 1, (long)l);
 		}
 		break;
 		case T_REAL:
-			adds_db_str(sprint(buf, "r%d;%ld;0", tp->tp_dbindex, (long)tp->tp_size));
+			adds_db_strf("r%d;%ld;0", tp->tp_dbindex, (long)tp->tp_size);
 			break;
 		case T_CHAR:
-			adds_db_str(sprint(buf, "r%d;0;255", tp->tp_dbindex));
+			adds_db_strf("r%d;0;255", tp->tp_dbindex);
 			break;
 
 		/* constructed types ... */
 		case T_SUBRANGE:
-			adds_db_str(sprint(
-			    buf, "r%d;%ld;%ld", tp->next->tp_dbindex, (long)tp->sub_lb, (long)tp->sub_ub));
+			adds_db_strf("r%d;%ld;%ld", tp->next->tp_dbindex, (long)tp->sub_lb, (long)tp->sub_ub);
 			break;
 		case T_POINTER:
 			if (tp->next)
@@ -134,13 +144,13 @@ static void stb_type(struct type* tp, int assign_num)
 			else
 			{
 				tp->tp_dbindex = -++stb_count;
-				adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
+				adds_db_strf("%d", -tp->tp_dbindex);
 			}
 			break;
 		case T_SET:
 			addc_db_str('S');
 			stb_type(tp->next, 0);
-			adds_db_str(sprint(buf, ";%ld;%ld;", (long)tp->tp_size, 0L));
+			adds_db_strf(";%ld;%ld;", (long)tp->tp_size, 0L);
 			break;
 		case T_ARRAY:
 			addc_db_str('a');
@@ -148,8 +158,7 @@ static void stb_type(struct type* tp, int assign_num)
 			{
 				addc_db_str('r');
 				stb_type(tp->next, 0);
-				adds_db_str(
-				    sprint(buf, ";A%ld;Z%ld", (long)tp->arr_cfdescr, (long)tp->arr_cfdescr));
+				adds_db_strf(";A%ld;Z%ld", (long)tp->arr_cfdescr, (long)tp->arr_cfdescr);
 			}
 			else
 			{
@@ -165,14 +174,14 @@ static void stb_type(struct type* tp, int assign_num)
 
 				while (edef)
 				{
-					adds_db_str(sprint(buf, "%s:%ld,", edef->df_idf->id_text, (long)edef->enm_val));
+					adds_db_strf("%s:%ld,", edef->df_idf->id_text, (long)edef->enm_val);
 					edef = edef->enm_next;
 				}
 			}
 			addc_db_str(';');
 			break;
 		case T_RECORD:
-			adds_db_str(sprint(buf, "s%ld", (long)tp->tp_size));
+			adds_db_strf("s%ld", (long)tp->tp_size);
 			{
 				struct def* sdef = tp->rec_scope->sc_def;
 
@@ -181,8 +190,7 @@ static void stb_type(struct type* tp, int assign_num)
 					adds_db_str(sdef->df_idf->id_text);
 					addc_db_str(':');
 					stb_type(sdef->df_type, 0);
-					adds_db_str(
-					    sprint(buf, ",%ld,%ld;", sdef->fld_off * 8L, sdef->df_type->tp_size * 8L));
+					adds_db_strf(",%ld,%ld;", sdef->fld_off * 8L, sdef->df_type->tp_size * 8L);
 					sdef = sdef->df_nextinscope;
 				}
 			}
@@ -201,7 +209,7 @@ static void stb_type(struct type* tp, int assign_num)
 					paramcount++;
 					p = p->next;
 				}
-				adds_db_str(sprint(buf, ",%d;", paramcount));
+				adds_db_strf(",%d;", paramcount);
 				p = tp->prc_params;
 				while (p)
 				{
@@ -252,7 +260,7 @@ void stb_string(struct def* df, long kind)
 	addc_db_str(':');
 	if (kind == D_MODULE)
 	{
-		adds_db_str(sprint(buf, "M%d;", df->prc_vis->sc_count));
+		adds_db_strf("M%d;", df->prc_vis->sc_count);
 		C_ms_stb_pnam(db_str.base, N_FUN, proclevel, "_m_a_i_n");
 		return;
 	}
@@ -260,7 +268,7 @@ void stb_string(struct def* df, long kind)
 	{
 		case D_PROCEDURE:
 		case D_FUNCTION:
-			adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
+			adds_db_strf("Q%d;", df->prc_vis->sc_count);
 			stb_type(tp->next ? tp->next : void_type, 0);
 			addc_db_str(';');
 			C_ms_stb_pnam(db_str.base, N_FUN, proclevel, df->df_idf->id_text);
@@ -282,7 +290,7 @@ void stb_string(struct def* df, long kind)
 			break;
 		case D_END:
 		case D_PEND:
-			adds_db_str(sprint(buf, "E%d;", df->prc_vis->sc_count));
+			adds_db_strf("E%d;", df->prc_vis->sc_count);
 			C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith)0);
 			break;
 		case D_VARIABLE:
@@ -344,10 +352,10 @@ void stb_string(struct def* df, long kind)
 				case T_LONG:
 				case T_POINTER:
 				case T_PROCEDURE:
-					adds_db_str(sprint(buf, "i%ld;", (long)df->con_const->nd_INT));
+					adds_db_strf("i%ld;", (long)df->con_const->nd_INT);
 					break;
 				case T_CHAR:
-					adds_db_str(sprint(buf, "c%ld;", (long)df->con_const->nd_INT));
+					adds_db_strf("c%ld;", (long)df->con_const->nd_INT);
 					break;
 				case T_REAL:
 					addc_db_str('r');
@@ -373,7 +381,7 @@ void stb_string(struct def* df, long kind)
 				case T_ENUMERATION:
 					addc_db_str('e');
 					stb_type(tp, 0);
-					adds_db_str(sprint(buf, ",%ld;", (long)df->con_const->nd_INT));
+					adds_db_strf(",%ld;", (long)df->con_const->nd_INT);
 					break;
 				case T_SET:
 				{
@@ -383,11 +391,11 @@ void stb_string(struct def* df, long kind)
 					stb_type(tp, 0);
 					for (i = 0; i < tp->tp_size; i++)
 					{
-						adds_db_str(sprint(
-						    buf, ",%ld",
+						adds_db_strf(
+						    ",%ld",
 						    (long)(df->con_const->nd_set[i / (int)word_size]
 						           >> (8 * (i % (int)word_size)))
-						        & 0377));
+						        & 0377);
 					}
 					addc_db_str(';');
 				}

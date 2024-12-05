@@ -281,7 +281,7 @@ int2float(expp, tp)
 	if (is_cp_cst(exp)) {
 		*expp = new_expr();
 		**expp = *exp;
-		sprint(buf+1, "%ld", (long)(exp->VL_VALUE));
+		sprintf(buf+1, "%ld", (long)(exp->VL_VALUE));
 		buf[0] = '-';
 		exp = *expp;
 		exp->ex_type = tp;

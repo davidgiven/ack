@@ -157,7 +157,7 @@ void preprocess(char *fn)
 		*/
 		char* p = Xbuf;
 
-		sprint(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
+		sprintf(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
 		while (*p)
 		{
 			echo(*p++);
@@ -172,7 +172,7 @@ void preprocess(char *fn)
 		if (!options['P'])                                                                         \
 		{                                                                                          \
 			char* p = Xbuf;                                                               \
-			sprint(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
+			sprintf(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
 			op--;                                                                                  \
 			while (op >= _obuf && (class(*op) == STSKIP || *op == '\n'))                           \
 				op--;                                                                              \

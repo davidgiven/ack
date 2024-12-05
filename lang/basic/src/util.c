@@ -74,7 +74,7 @@ char *myitoa(int i)
 {
 	static char buf[30];
 
-	sprint(buf,"%d",i);
+	sprintf(buf,"%d",i);
 	return(buf);
 }
 

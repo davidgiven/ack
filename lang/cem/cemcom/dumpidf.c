@@ -249,35 +249,35 @@ type2str(tp)
 
 	buf[0] = '\0';
 	if (!tp)	{
-		sprint(buf, "<NILTYPE>");
+		sprintf(buf, "<NILTYPE>");
 		return buf;
 	}
 
-	sprint(buf, "%s(#%ld, &%d) ", buf, (long)tp->tp_size, tp->tp_align);
+	sprintf(buf, "%s(#%ld, &%d) ", buf, (long)tp->tp_size, tp->tp_align);
 	while (ops)	{
 		switch (tp->tp_fund)	{
 		case POINTER:
-			sprint(buf, "%spointer to ", buf);
+			sprintf(buf, "%spointer to ", buf);
 			break;
 		case ARRAY:
-			sprint(buf, "%sarray [%ld] of ", buf, tp->tp_size);
+			sprintf(buf, "%sarray [%ld] of ", buf, tp->tp_size);
 			break;
 		case FUNCTION:
-			sprint(buf, "%sfunction yielding ", buf);
+			sprintf(buf, "%sfunction yielding ", buf);
 			break;
 		default:
-			sprint(buf, "%s%s%s", buf,
+			sprintf(buf, "%s%s%s", buf,
 					tp->tp_unsigned ? "unsigned " : "",
 					symbol2str(tp->tp_fund)
 			);
 			if (tp->tp_idf)
-				sprint(buf, "%s %s", buf,
+				sprintf(buf, "%s %s", buf,
 					tp->tp_idf->id_text);
 #ifndef NOBITFIELD
 			if (tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
-				sprint(buf, "%s [s=%ld,w=%ld] of ", buf,
+				sprintf(buf, "%s [s=%ld,w=%ld] of ", buf,
 					fd->fd_shift, fd->fd_width);
 			}
 			else

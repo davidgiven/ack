@@ -156,7 +156,7 @@ DefinitionModule
 				error("DEFINITION MODULE name is \"%s\", not \"%s\"",
 					df->df_idf->id_text, DefId->id_text);
 			  }
-			  sprint(buf, "_%s_", df->df_idf->id_text);
+			  sprintf(buf, "_%s_", df->df_idf->id_text);
 			  currscope->sc_name = Salloc(buf, (unsigned) strlen(buf) + 1);
 			  df->mod_vis = CurrVis;
 			  df->df_type = standard_type(T_RECORD, 1, (arith) 1);

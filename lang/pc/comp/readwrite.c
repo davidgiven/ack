@@ -91,7 +91,7 @@ void ChkRead(struct node *arg)
 		}
 		message = ChkAllowedVar(arg->nd_left, 1);
 		if( message ) {
-			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+			sprintf(buff,"\"%%s\": %s can't be a variable parameter",
 							    message);
 			node_error(arg->nd_left, buff, name);
 			return;
@@ -146,7 +146,7 @@ void ChkReadln(struct node *arg)
 		}
 		message = ChkAllowedVar(arg->nd_left, 1);
 		if( message ) {
-			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+			sprintf(buff,"\"%%s\": %s can't be a variable parameter",
 							    message);
 			node_error(arg->nd_left, buff, name);
 			return;

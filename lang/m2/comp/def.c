@@ -287,7 +287,7 @@ struct def * DeclProc(int type, struct idf *id)
 		}
 		else
 		{
-			sprint(buf, "%s_%s", CurrentScope->sc_name, id->id_text);
+			sprintf(buf, "%s_%s", CurrentScope->sc_name, id->id_text);
 			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
 		}
 		if (CurrVis == Defined->mod_vis)
@@ -311,7 +311,7 @@ struct def * DeclProc(int type, struct idf *id)
 		else
 		{
 			df = define(id, CurrentScope, type);
-			sprint(buf, "_%d_%s", ++nmcount, id->id_text);
+			sprintf(buf, "_%d_%s", ++nmcount, id->id_text);
 			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
 			internal(buf);
 			df->df_flags |= D_DEFINED;
@@ -355,7 +355,7 @@ struct def * DefineLocalModule(struct idf *id)
 	char buf[256];
 	extern int proclevel;
 
-	sprint(buf, "_%d%s_", ++modulecount, id->id_text);
+	sprintf(buf, "_%d%s_", ++modulecount, id->id_text);
 
 	if (!df->mod_vis)
 	{

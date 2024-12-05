@@ -89,7 +89,7 @@ char *proc_label(L, name) register L; register char *name;
 	lab=malloc(strlen(name)+(1+sizeof(int)*3+1));
 		/* That is: P<L><name>\0 */
 
-	sprint(lab, "P%d", L);
+	sprintf(lab, "P%d", L);
 
 	n=lab+strlen(lab);
 
@@ -358,7 +358,7 @@ void zne(lab) int lab;		{	C_zne((label) lab); }
 char *myitoa(i) long i;
 {
 	static char a[sizeof(long)*3];
-	sprint(a, "%ld", i);
+	sprintf(a, "%ld", i);
 	return a;
 }
 

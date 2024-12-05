@@ -242,7 +242,7 @@ enter("flush_part_cache");
 		"dec	$i_str, $reg_sp";
 		while (i--)
 		{
-			sprint(i_str, "%d", 4*(j-1-i));
+			sprintf(i_str, "%d", 4*(j-1-i));
 			if (cache[i].ext)
 			{
 				ext= cache[i].ext;
@@ -263,7 +263,7 @@ enter("flush_part_cache");
 				}
 				if (!const13(cache[i].cst))
 				{
-					sprint(n_str, "%d",
+					sprintf(n_str, "%d",
 						cache[i].cst);
 					"sethi	%hi($n_str), $reg_tmp";
 					if (cache[i].reg != reg_g0)
@@ -279,7 +279,7 @@ enter("flush_part_cache");
 				}
 				if (cache[i].cst)
 				{
-					sprint(n_str, "%d", cache[i].cst);
+					sprintf(n_str, "%d", cache[i].cst);
 					"add	$rh, $n_str, $reg_tmp";
 					rh= reg_tmp;
 				}
@@ -672,16 +672,16 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_c13()=...\n"); }
 		assert(tos->reg == reg_g0);
 		S1 = alloc_reg();
 		V1 = tos->ext;
-		sprint(V2, "%d", tos->cst);
+		sprintf(V2, "%d", tos->cst);
 		"sethi	%hi($V1+$V2), $S1";
-		sprint(n, "%%lo(%s+%d)", tos->ext, tos->cst);
+		sprintf(n, "%%lo(%s+%d)", tos->ext, tos->cst);
 		free(V1);
 		POP2;
 	} else {
 		S1 = tos->reg;
 		if (!(const13(tos->cst))) {
 			S3 = alloc_reg();
-			sprint(V2, "%d", tos->cst);
+			sprintf(V2, "%d", tos->cst);
 			"sethi	%hi($V2), $S3";
 			if (tos->reg != reg_g0) {
 				S2 = alloc_reg();
@@ -696,7 +696,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_c13()=...\n"); }
 			}
 			tos->cst &= 0x3FF;
 		}
-		sprint(n, "%d", tos->cst);
+		sprintf(n, "%d", tos->cst);
 		POP2;
 	}
 if (debug) { indent(); fprint(codefile, "\t\t! %s+%s cache:", S1, n); dump_cache(codefile);}
@@ -850,7 +850,7 @@ enter("pop_const");
 	x = top_const();
 	POP2;
 	if (n)
-		sprint(n, "%d", x);
+		sprintf(n, "%d", x);
 if (debug) { indent(); fprint(codefile, "\t\t! %d cache:", x); dump_cache(codefile); }
 leave("pop_const");
 	return x;
@@ -907,7 +907,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 	} else if (tos->ext) {
 		assert(tos->reg == reg_g0);
 		V1 = tos->ext;
-		sprint(V2, "%d", tos->cst);
+		sprintf(V2, "%d", tos->cst);
 		"set	$V1+$V2, $r";
 		free(V1);
 		POP2;
@@ -928,7 +928,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 				soft_alloc_reg(r);
 				tos_reg2= r;
 			}
-			sprint(c_str, "%d", tos_cst);
+			sprintf(c_str, "%d", tos_cst);
 			"sethi	%hi($c_str), $tos_reg2";
 			tos_cst &= 0x3ff;
 			if (tos_reg == reg_g0)
@@ -955,7 +955,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 		}
 		if (tos_cst)
 		{
-			sprint(c_str, "%d", tos_cst);
+			sprintf(c_str, "%d", tos_cst);
 			soft_alloc_reg(r);
 			"add	$tos_reg, $c_str, $r";
 			free_reg(tos_reg);
@@ -1151,7 +1151,7 @@ enter("pop_nop");
 		POP2;
 	}
 	if (i) {
-		sprint(V1, "%d", 4*i);
+		sprintf(V1, "%d", 4*i);
 		if (const13(4*i)) {
 			"inc	$V1, %l0";
 		} else {
@@ -1212,7 +1212,7 @@ if (debug) { indent(); fprintf(stderr,"cache_read(%d, %d)\n", n,i); }
 		S1= alloc_reg();
 		old_c_count = cache_read(n, i+1);
 
-		sprint(V1, "%d", (old_c_count-1-i) * 4);
+		sprintf(V1, "%d", (old_c_count-1-i) * 4);
 		"ld	[%l0+$V1], $S1";
 		cache[i].reg= S1;
 		cache[i].reg2= reg_g0;
@@ -1220,7 +1220,7 @@ if (debug) { indent(); fprintf(stderr,"cache_read(%d, %d)\n", n,i); }
 		cache[i].cst= 0;
 		if (!i)
 		{
-			sprint(V1, "%d", (old_c_count)*4);
+			sprintf(V1, "%d", (old_c_count)*4);
 			"add	$reg_sp, $V1, $reg_sp";
 		}
 	}
@@ -1294,7 +1294,7 @@ enter("dup_tos");
 			soft_alloc_reg(tos->reg2);
 		} else {
 			a= alloc_reg();
-			sprint(i_str, "%d", (n-c_count)*4);
+			sprintf(i_str, "%d", (n-c_count)*4);
 			"ld	[$reg_sp+$i_str], $a";
 			tos->reg = a;
 		}

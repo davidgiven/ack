@@ -1,7 +1,7 @@
 .TH PRINT 3 "$Revision$"
 .ad
 .SH NAME
-print, fprint, sprint, doprnt -- very simple formatted-output routines
+print, fprint, doprnt -- very simple formatted-output routines
 .SH SYNOPSIS
 .nf
 .B #include <system.h>
@@ -10,8 +10,6 @@ print, fprint, sprint, doprnt -- very simple formatted-output routines
 .B void print(char *format [, arg] ... )
 .PP
 .B void fprint(File *filep, char *format [, arg] ... )
-.PP
-.B char *sprint(char *s, char *format [, arg] ... )
 .PP
 .B void doprnt(File *filep, char *format, va_list args)
 .PP
@@ -26,10 +24,6 @@ and
 place output on the open file known by
 .IR filep .
 .I filep could for instance be STDOUT or STDERR.
-.I sprint
-places `output' in the string
-.IR s ,
-followed by the character `\\0'.
 .PP
 Each of these functions converts, formats and prints its arguments, following
 the 

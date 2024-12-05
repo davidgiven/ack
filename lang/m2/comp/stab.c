@@ -30,6 +30,8 @@
 #include "main.h"
 #include "print.h"
 
+#include <stdarg.h>
+
 extern int gdb_flag;
 
 #define INCR_SIZE 64
@@ -72,21 +74,32 @@ static void adds_db_str(char* s)
 		addc_db_str(*s++);
 }
 
-static void stb_type(struct type* tp, int assign_num)
+static void adds_db_strf(char* s, ...)
 {
 	char buf[128];
+	va_list ap;
+
+	va_start(ap, s);
+	vsnprintf(buf, sizeof(buf), s, ap);
+	va_end(ap);
+
+	adds_db_str(buf);
+}
+
+static void stb_type(struct type* tp, int assign_num)
+{
 	static int stb_count;
 
 	if (tp->tp_dbindex > 0)
 	{
-		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
+		adds_db_strf("%d", tp->tp_dbindex);
 		return;
 	}
 	if (tp->tp_dbindex < 0)
 	{
 		if (tp->tp_next == 0)
 		{
-			adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
+			adds_db_strf("%d", -tp->tp_dbindex);
 			return;
 		}
 		tp->tp_dbindex = -tp->tp_dbindex;
@@ -97,45 +110,45 @@ static void stb_type(struct type* tp, int assign_num)
 	}
 	if (tp->tp_dbindex > 0)
 	{
-		adds_db_str(sprint(buf, "%d=", tp->tp_dbindex));
+		adds_db_strf("%d=", tp->tp_dbindex);
 	}
 	if (tp == void_type)
 	{
-		adds_db_str(sprint(buf, "%d", tp->tp_dbindex));
+		adds_db_strf("%d", tp->tp_dbindex);
 		return;
 	}
 	switch (tp->tp_fund)
 	{
 		/* simple types ... */
 		case T_INTEGER:
-			adds_db_str(sprint(
-			    buf, "r%d;%ld;%ld", tp->tp_dbindex, (long)min_int[(int)tp->tp_size],
-			    (long)max_int[(int)tp->tp_size]));
+			adds_db_strf(
+			    "r%d;%ld;%ld", tp->tp_dbindex, (long)min_int[(int)tp->tp_size],
+			    (long)max_int[(int)tp->tp_size]);
 			break;
 		case T_CARDINAL:
-			adds_db_str(sprint(buf, "r%d;0;-1", tp->tp_dbindex));
+			adds_db_strf("r%d;0;-1", tp->tp_dbindex);
 			break;
 		case T_REAL:
-			adds_db_str(sprint(buf, "r%d;%ld;0", tp->tp_dbindex, (long)tp->tp_size));
+			adds_db_strf("r%d;%ld;0", tp->tp_dbindex, (long)tp->tp_size);
 			break;
 		case T_CHAR:
-			adds_db_str(sprint(buf, "r%d;0;255", tp->tp_dbindex));
+			adds_db_strf("r%d;0;255", tp->tp_dbindex);
 			break;
 		case T_WORD:
 			if (tp->tp_size == word_size)
 			{
-				adds_db_str(sprint(buf, "r%d;0;-1", tp->tp_dbindex));
+				adds_db_strf("r%d;0;-1", tp->tp_dbindex);
 			}
 			else
 			{
-				adds_db_str(sprint(buf, "r%d;0;255", tp->tp_dbindex));
+				adds_db_strf("r%d;0;255", tp->tp_dbindex);
 			}
 			break;
 
 		/* constructed types ... */
 		case T_SUBRANGE:
-			adds_db_str(sprint(
-			    buf, "r%d;%ld;%ld", tp->tp_next->tp_dbindex, (long)tp->sub_lb, (long)tp->sub_ub));
+			adds_db_strf(
+			    "r%d;%ld;%ld", tp->tp_next->tp_dbindex, (long)tp->sub_lb, (long)tp->sub_ub);
 			break;
 		case T_EQUAL:
 			stb_type(tp->tp_next, 0);
@@ -146,7 +159,7 @@ static void stb_type(struct type* tp, int assign_num)
 			if (DefinitionModule && CurrVis == Defined->mod_vis)
 			{
 				tp->tp_dbindex = -++stb_count;
-				adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
+				adds_db_strf("%d", -tp->tp_dbindex);
 			}
 			else
 			{
@@ -167,13 +180,13 @@ static void stb_type(struct type* tp, int assign_num)
 			else
 			{
 				tp->tp_dbindex = -++stb_count;
-				adds_db_str(sprint(buf, "%d", -tp->tp_dbindex));
+				adds_db_strf("%d", -tp->tp_dbindex);
 			}
 			break;
 		case T_SET:
 			addc_db_str('S');
 			stb_type(tp->tp_next, 0);
-			adds_db_str(sprint(buf, ";%ld;%ld;", tp->tp_size, tp->set_low));
+			adds_db_strf(";%ld;%ld;", tp->tp_size, tp->set_low);
 			break;
 		case T_ARRAY:
 			addc_db_str('a');
@@ -181,7 +194,7 @@ static void stb_type(struct type* tp, int assign_num)
 			{
 				addc_db_str('r');
 				stb_type(tp->tp_next, 0);
-				adds_db_str(sprint(buf, ";0;A%ld", tp->arr_high));
+				adds_db_strf(";0;A%ld", tp->arr_high);
 			}
 			else
 			{
@@ -197,14 +210,14 @@ static void stb_type(struct type* tp, int assign_num)
 
 				while (edef)
 				{
-					adds_db_str(sprint(buf, "%s:%ld,", edef->df_idf->id_text, edef->enm_val));
+					adds_db_strf("%s:%ld,", edef->df_idf->id_text, edef->enm_val);
 					edef = edef->enm_next;
 				}
 			}
 			addc_db_str(';');
 			break;
 		case T_RECORD:
-			adds_db_str(sprint(buf, "s%ld", tp->tp_size));
+			adds_db_strf("s%ld", tp->tp_size);
 			{
 				struct def* sdef = tp->rec_scope->sc_def;
 
@@ -213,8 +226,7 @@ static void stb_type(struct type* tp, int assign_num)
 					adds_db_str(sdef->df_idf->id_text);
 					addc_db_str(':');
 					stb_type(sdef->df_type, 0);
-					adds_db_str(
-					    sprint(buf, ",%ld,%ld;", sdef->fld_off * 8, sdef->df_type->tp_size * 8));
+					adds_db_strf(",%ld,%ld;", sdef->fld_off * 8, sdef->df_type->tp_size * 8);
 					sdef = sdef->df_nextinscope;
 				}
 			}
@@ -238,7 +250,7 @@ static void stb_type(struct type* tp, int assign_num)
 					paramcount++;
 					p = p->par_next;
 				}
-				adds_db_str(sprint(buf, ",%d;", paramcount));
+				adds_db_strf(",%d;", paramcount);
 				p = tp->prc_params;
 				while (p)
 				{
@@ -285,7 +297,7 @@ void stb_string(struct def* df, int kind)
 			}
 			else
 			{
-				adds_db_str(sprint(buf, "M%d;", df->mod_vis->sc_count));
+				adds_db_strf("M%d;", df->mod_vis->sc_count);
 			}
 			C_ms_stb_pnam(
 			    db_str.base, N_FUN, gdb_flag ? 0 : proclevel, df->mod_vis->sc_scope->sc_name);
@@ -296,7 +308,7 @@ void stb_string(struct def* df, int kind)
 				addc_db_str('f');
 			}
 			else
-				adds_db_str(sprint(buf, "Q%d;", df->prc_vis->sc_count));
+				adds_db_strf("Q%d;", df->prc_vis->sc_count);
 			stb_type(tp->tp_next ? tp->tp_next : void_type, 0);
 			if (gdb_flag)
 			{
@@ -308,7 +320,7 @@ void stb_string(struct def* df, int kind)
 
 					if (d && d->df_kind == D_PROCEDURE)
 					{
-						adds_db_str(sprint(buf, ",%s", d->df_idf->id_text));
+						adds_db_strf(",%s", d->df_idf->id_text);
 						break;
 					}
 					sc = enclosing(sc);
@@ -322,13 +334,13 @@ void stb_string(struct def* df, int kind)
 		case D_END:
 			if (gdb_flag)
 				break;
-			adds_db_str(sprint(buf, "E%d;", df->mod_vis->sc_count));
+			adds_db_strf("E%d;", df->mod_vis->sc_count);
 			C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith)0);
 			break;
 		case D_PEND:
 			if (gdb_flag)
 				break;
-			adds_db_str(sprint(buf, "E%d;", df->prc_vis->sc_count));
+			adds_db_strf("E%d;", df->prc_vis->sc_count);
 			C_ms_stb_cst(db_str.base, N_SCOPE, proclevel, (arith)0);
 			break;
 		case D_VARIABLE:
@@ -401,10 +413,10 @@ void stb_string(struct def* df, int kind)
 				case T_WORD:
 				case T_POINTER:
 				case T_PROCEDURE:
-					adds_db_str(sprint(buf, "i%ld;", df->con_const.TOK_INT));
+					adds_db_strf("i%ld;", df->con_const.TOK_INT);
 					break;
 				case T_CHAR:
-					adds_db_str(sprint(buf, "c%ld;", df->con_const.TOK_INT));
+					adds_db_strf("c%ld;", df->con_const.TOK_INT);
 					break;
 				case T_REAL:
 					addc_db_str('r');
@@ -438,7 +450,7 @@ void stb_string(struct def* df, int kind)
 				case T_ENUMERATION:
 					addc_db_str('e');
 					stb_type(tp, 0);
-					adds_db_str(sprint(buf, ",%ld;", df->con_const.TOK_INT));
+					adds_db_strf(",%ld;", df->con_const.TOK_INT);
 					break;
 				case T_SET:
 				{
@@ -448,11 +460,11 @@ void stb_string(struct def* df, int kind)
 					stb_type(tp, 0);
 					for (i = 0; i < tp->tp_size; i++)
 					{
-						adds_db_str(sprint(
-						    buf, ",%ld",
+						adds_db_strf(
+						    ",%ld",
 						    (df->con_const.tk_data.tk_set[i / (int)word_size]
 						     >> (8 * (i % (int)word_size)))
-						        & 0377));
+						        & 0377);
 					}
 					addc_db_str(';');
 				}

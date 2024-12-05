@@ -256,7 +256,7 @@ void heading(void)
 {
 	char procname[50];
 
-	(void) sprint(procname,"_%s",fcn->symname);
+	(void) sprintf(procname,"_%s",fcn->symname);
         C_pro_narg(procname);
 	if ( fcn->symtype== DEFAULTTYPE)
 		fcn->symtype= DOUBLETYPE;
@@ -348,7 +348,7 @@ int fcnend(int parmcount)
 		error("not enough parameters");
 	if ( parmcount >fcn->dimensions)
 		error("too many parameters");
-	(void) sprint(concatbuf,"_%s",fcn->symname);
+	(void) sprintf(concatbuf,"_%s",fcn->symname);
 	C_cal(concatbuf);
 	C_asp((arith)fcnsize());
         C_lfr((arith) typestring(fcn->symtype));

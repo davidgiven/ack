@@ -23,7 +23,7 @@ struct idf *gen_anon_idf(void)
 	static int name_cnt;
 	char *s = malloc(strlen(FileName) + 50);
 
-	sprint(s, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
+	sprintf(s, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
 	s = realloc(s, strlen(s)+1);
 	return str2idf(s, 0);
 }
@@ -48,7 +48,7 @@ char *gen_proc_name(struct idf *id, int inp)
 
 
 	if( inp )	{
-		sprint(buf, "_%d%s", ++name_cnt, id->id_text);
+		sprintf(buf, "_%d%s", ++name_cnt, id->id_text);
 		C_inp(buf);
 		return Salloc(buf, (unsigned) (strlen(buf) + 1));
 	}
