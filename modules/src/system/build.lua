@@ -3,7 +3,6 @@ clibrary {
 	srcs = {
 		"./access.c",
 		"./basename.c",
-		"./chmode.c",
 		"./close.c",
 		"./create.c",
 		"./filesize.c",
@@ -11,7 +10,6 @@ clibrary {
 		"./modtime.c",
 		"./open.c",
 		"./read.c",
-		"./remove.c",
 		"./rename.c",
 		"./seek.c",
 		"./setbinarymode.c",

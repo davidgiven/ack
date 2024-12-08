@@ -2,7 +2,7 @@
 .ad
 .SH NAME
 sys_open, sys_close, sys_read, sys_write, sys_reset, sys_access,
-sys_modtime, sys_remove, sys_rename, sys_filesize, sys_chmode,
+sys_modtime, sys_rename, sys_filesize,
 sys_lock, sys_unlock, sys_stop \- system call interface
 .SH SYNOPSIS
 .nf
@@ -40,9 +40,6 @@ sys_lock, sys_unlock, sys_stop \- system call interface
 .B int sys_access(path, mode)
 .B char *path;
 .B int mode;
-.PP
-.B int sys_remove(path)
-.B char *path;
 .PP
 .B int sys_rename(path1, path2)
 .B char *path1, *path2;
@@ -203,17 +200,6 @@ returns the last-modified time of the file specified in
 .IR path .
 Any failure is indicated by a return value of \-1L.
 .PP
-.I Sys_remove
-removes file
-.I path
-from the system.
-It is supposed that, if the file is still open, the contents of
-the file are available until the last
-.I sys_close
-is performed on it.
-A non-zero return value indicates successful action whereas 0
-indicates that the given file does not exist or cannot be removed.
-.PP
 .I Sys_rename
 renames file
 .I path1
@@ -292,9 +278,8 @@ The routines
 .IR sys_write ,
 .IR sys_reset ,
 .IR sys_chmode ,
-.IR sys_rename ,
 and
-.I sys_remove
+.IR sys_rename
 return a value of zero upon any failure and a non-zero
 value if the call succeeds.
 .SH BUGS

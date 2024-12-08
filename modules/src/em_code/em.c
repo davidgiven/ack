@@ -143,7 +143,7 @@ void C_close(void)
 		}
 #ifndef INCORE
 		sys_close(C_tfr);
-		sys_remove(C_tmpfile);
+		remove(C_tmpfile);
 		if (C_ibuf) free(C_ibuf);
 #else
 		free(C_BASE);
