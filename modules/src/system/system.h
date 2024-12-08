@@ -11,13 +11,15 @@
 #include <sys/types.h>
 
 struct _sys_fildes {
-	int o_fd;	/* UNIX filedescriptor */
-	int o_flags;	/* flags for open; 0 if not used */
+	FILE* fd;
 };
 
 typedef struct _sys_fildes File;
 
 extern File _sys_ftab[];
+extern File sys_stdin;
+extern File sys_stdout;
+extern File sys_stderr;
 
 /* flags for sys_open() */
 #define OP_READ		01
@@ -34,6 +36,8 @@ extern File _sys_ftab[];
 #define S_END	0
 #define S_EXIT	1
 #define S_ABORT	2
+
+extern FILE* getfd(File* fp);
 
 int sys_open(char *, int, File **);
 void sys_close(File *);
@@ -58,9 +62,9 @@ NORETURN void sys_stop(int);
 time_t sys_modtime(char *);
 
 /* standard file decsriptors */
-#define STDIN	&_sys_ftab[0]
-#define STDOUT	&_sys_ftab[1]
-#define STDERR	&_sys_ftab[2]
+#define STDIN	&sys_stdin
+#define STDOUT	&sys_stdout
+#define STDERR	&sys_stderr
 
 /* maximum number of open files */
 #define SYS_NOPEN	20

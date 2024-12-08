@@ -12,19 +12,11 @@ int sys_read(File* fp, char* bufptr, int bufsiz, int* pnbytes)
 	if (!fp)
 		return 0;
 	
+	FILE* fd = getfd(fp);
 	*pnbytes = 0;
-	while (bufsiz != 0)
-	{
-		int len = read(fp->o_fd, bufptr, bufsiz);
-		if (len < 0)
-			return 0;
-		if (len == 0)
-			return *pnbytes != 0;
-
-		*pnbytes += len;
-		bufptr += len;
-		bufsiz -= len;
-	}
-
+	int len = fread(bufptr, 1, bufsiz, fd);
+	if (len < 0)
+		return 0;
+	*pnbytes = len;
 	return 1;
 }

@@ -7,12 +7,11 @@
 #include <unistd.h>
 #include "system.h"
 
-void
-sys_close(File* fp)
+void sys_close(File* fp)
 {
-	if (fp) {
-		fp->o_flags = 0;
-		close(fp->o_fd);
-		fp->o_fd = -1;
+	if (fp)
+	{
+		fclose(fp->fd);
+		fp->fd = NULL;
 	}
 }

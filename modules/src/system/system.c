@@ -6,18 +6,30 @@
 
 #include "system.h"
 
-File _sys_ftab[SYS_NOPEN] = {
-	{ 0, OP_READ},
-	{ 1, OP_APPEND},
-	{ 2, OP_APPEND}
-};
+File _sys_ftab[SYS_NOPEN];
+File sys_stdin;
+File sys_stdout;
+File sys_stderr;
+
+FILE* getfd(File* fp)
+{
+	if (fp == &sys_stdin)
+		return stdin;
+	if (fp == &sys_stdout)
+		return stdout;
+	if (fp == &sys_stderr)
+		return stderr;
+	return fp->fd;
+}
 
 File * _get_entry(void)
 {
 	File *fp;
 
 	for (fp = &_sys_ftab[0]; fp < &_sys_ftab[SYS_NOPEN]; fp++)
-		if (fp->o_flags == 0)
+	{
+		if (!fp->fd)
 			return fp;
-	return (File *)0;
+	}
+	return NULL;
 }

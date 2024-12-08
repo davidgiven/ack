@@ -7,18 +7,16 @@
 #include <fcntl.h>
 #include "system.h"
 
-int
-sys_create(File** filep, char* path, int mode)
+int sys_create(File** filep, char* path, int mode)
 {
 	int fd;
-	File *fp;
+	File* fp;
 
-	if ((fp = _get_entry()) == (File *)0)
+	if ((fp = _get_entry()) == (File*)0)
 		return 0;
-	if ((fd = creat(path, mode)) < 0)
+	fp->fd = fopen(path, "wb");
+	if (!fp->fd)
 		return 0;
-	fp->o_fd = fd;
-	fp->o_flags = OP_WRITE;
 	*filep = fp;
 	return 1;
 }

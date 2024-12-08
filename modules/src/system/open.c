@@ -9,45 +9,43 @@
 #include <errno.h>
 #include "system.h"
 
-#if !defined WIN32
-#define O_BINARY 0
-#endif
-
-int
-sys_open(char* path, int flag, File** filep)
+int sys_open(char* path, int flag, File** filep)
 {
-	int fd;
-	File *fp;
+	File* fp;
+	FILE* fd;
 
-	if ((fp = _get_entry()) == (File *)0)
+	if ((fp = _get_entry()) == (File*)0)
 		return 0;
-	switch (flag) {
-	case OP_READ:
-		if ((fd = open(path, O_RDONLY|O_BINARY)) < 0)
-			return 0;
-		break;
-	case OP_APPEND:
-		if ((fd = open(path, O_WRONLY|O_BINARY)) < 0) {
-			if (access(path, 0) == 0)
+	switch (flag)
+	{
+		case OP_READ:
+			if (!(fd = fopen(path, "rb")))
 				return 0;
-		}
-		else {
-			if (lseek(fd, 0L, 2) < 0L) {
-				close(fd);
-				return 0;
-			}
 			break;
-		}
-		/* Fall through */
-	case OP_WRITE:
-		if ((fd = open(path, O_CREAT|O_TRUNC|O_WRONLY|O_BINARY, 0666)) < 0)
+		case OP_APPEND:
+			if (!(fd = fopen(path, "a+b")))
+			{
+				if (access(path, 0) == 0)
+					return 0;
+			}
+			else
+			{
+				if (fseek(fd, 0L, SEEK_SET) < 0L)
+				{
+					fclose(fd);
+					return 0;
+				}
+				break;
+			}
+			/* Fall through */
+		case OP_WRITE:
+			if (!(fd = fopen(path, "w+b")))
+				return 0;
+			break;
+		default:
 			return 0;
-		break;
-	default:
-		return 0;
 	}
-	fp->o_flags = flag;
-	fp->o_fd = fd;
+	fp->fd = fd;
 	*filep = fp;
 	return 1;
 }
