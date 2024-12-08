@@ -1,17 +1,13 @@
 .TH STRING 3 "$Revision$"
 .ad
 .SH NAME
-strindex, strrindex, strzero, str2bts,
-long2str, str2long,
-btscpy, btscat, btscmp, btszero, bts2str \- operations on and
-conversions between strings and row of bytes
+long2str,
+bts2str \- operations on and conversions between strings and row of bytes
 .SH SYNOPSIS
 .nf
 .B #include <ack_string.h>
 .PP
 .B char *long2str(long l, int b)
-.PP
-.B char *btscpy(char *b1, char *b2, int n)
 .PP
 .B char *bts2str(char *b, int n, char *s)
 .fi
@@ -58,16 +54,6 @@ This base may be any of 2..16.
 A negative base (in the range -16..-2) indicates that the long must be
 seen as unsigned.
 A pointer to the string is returned.
-.PP
-.I btscpy
-copies
-.I n
-bytes from the string of bytes
-.I b2
-to
-.I b1
-and returns
-.IR b1 .
 .SH FILES
 ~em/modules/lib/libstring.a
 .SH "SEE ALSO"

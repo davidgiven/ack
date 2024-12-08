@@ -575,7 +575,7 @@ static void line_line(void)
 	gettyp(ptyp(sp_cst2), &dummy);
 	EM_lineno = dummy.ema_cst;
 	gettyp(str_ptyp, &dummy);
-	btscpy(filebuf, dummy.ema_string, (int) dummy.ema_szoroff);
+	memcpy(filebuf, dummy.ema_string, (int) dummy.ema_szoroff);
 	EM_filename = filebuf;
 }
 

@@ -41,9 +41,6 @@ int OO_wrstats = 1; /* pattern statistics output */
 #define printstate(s)
 #endif /* DEBUG */
 
-/**** WHICH IS FASTER? ****
- #define BTSCPY(pp,qq,i,p,q,n) btscpy(p,q,(n)*sizeof(struct e_instr))
- **************************/
 #define BTSCPY(pp,qq,i,p,q,n) for(pp=(p),qq=(q),i=(n);i--;*pp++ = *qq++)
 
 static void allocmem(void);
