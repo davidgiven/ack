@@ -9,6 +9,4 @@
 #include <stdarg.h>
 #include <system.h>
 
-int _format(char *buf, const char *fmt, va_list ap);
-
 #endif /* __PRINT_INCLUDED__ */
