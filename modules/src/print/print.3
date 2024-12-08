@@ -7,85 +7,13 @@ print, fprint, doprnt -- very simple formatted-output routines
 .B #include <system.h>
 .B #include <print.h>
 .PP
-.B void fprintf(FILE* filep, char *format [, arg] ... )
-.PP
-.B void doprnt(FILE* filep, char *format, va_list args)
-.PP
 .B int _format(char *buf, char *format, va_lsit args)
 .fi
 .SH DESCRIPTION
-.I fprint
-and
-.I doprnt
-place output on the open file known by
-.IR filep .
-.I filep could for instance be stdout or stderr.
-.PP
-Each of these functions converts, formats and prints its arguments, following
-the 
-.I format
-argument, under control of
-.IR format .
-.I Format
-is a character string which contains two types of objects: plain characters,
-which are simply copied to the output destination, and conversion
-specifications, each of which causes conversion and printing of the next
-successive argument.
-.PP
-A conversion specification is introduced by the character %.
-Following the %, there may be
-.IP \(bu
-an optional row of decimal digits specifying the field width;
-if the converted integral value has fewer characters than
-the field width, it will be blank-padded on the left;
-if the field width begins with a zero, zero-padding will be done;
-.IP \(bu
-the character
-.B l
-specifying that a following 
-.BR b ,
-.BR d ,
-.BR o ,
-.B u
-or
-.B x
-corresponds to a long-integer argument;
-.IP \(bu
-a character which indicates the type of conversion to be applied.
-.LP
-.PP
-The conversion characters and their meanings are
-.IP \fBbdox\fP
-The next argument is an integer and is converted to binary, decimal, octal
-or hexadecimal notation respectively.
-.IP \fBc\fP
-Next argument is a character and is put directly into the resulting string.
-the field width is one character.
-.IP \fBs\fP
-Next argument is taken to be a character pointer and characters from the
-string are taken until a null character is reached; a specified field width
-is not taken into account.
-.IP \fBu\fP
-The unsigned integer argument is converted to decimal.
-.LP
-.PP
-Integral arguments are not truncated, even if their size exceeds the specified
-field width.
-Padding takes place only if the specified field width exceeds the actual width.
-.PP
-The printing routines build the string to be printed internally and use
-.I sys_write
-to print it.
-.PP
 The
 .I _format
 routine builds the string, but does not null-terminate it. It returns the
 length of the string.
-.PP
-.I doprnt
-takes
-.I args
-as the address of the arguments of the format string.
 .SH FILES
 .nf
 ~em/modules/lib/libprint.a

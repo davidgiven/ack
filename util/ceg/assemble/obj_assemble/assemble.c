@@ -239,7 +239,7 @@ error(char *fmt, ...)
 
 	va_start(args, fmt);
 		fprintf( stderr, "ERROR in line %d :	", yylineno);
-		doprnt( stderr, fmt, args);
+		vfprintf( stderr, fmt, args);
 		fprintf( stderr, "\n");
 	va_end(args);
 	nerrors++;
@@ -257,7 +257,7 @@ error(va_alist)
 	va_start(args);
 		fmt = va_arg(args, char *);
 		fprintf( stderr, "ERROR in line %d :	", yylineno);
-		doprnt( stderr, fmt, args);
+		vfprintf( stderr, fmt, args);
 		fprintf( stderr, "\n");
 	va_end(args);
 	nerrors++;

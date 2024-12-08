@@ -492,6 +492,6 @@ _error(class, fn, ln, fmt, ap)
 		fprintf(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
 		fprintf(ERROUT, "%s ", remark);
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
 	fprintf(ERROUT, "\n");
 }

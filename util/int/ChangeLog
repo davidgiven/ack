@@ -134,7 +134,7 @@
 25-Apr-88  Dick Grune (dick) at dick
 	With the advent of the Sun 4 RISC machine, the use of variable length
 	argument lists has become a liability.  The answer is the include file
-	<varargs.h>.  It appears that _doprnt() is sufficiently universal,
+	<varargs.h>.  It appears that _vfprintf() is sufficiently universal,
 	fortunately.
 
 24-Apr-88  Dick Grune (dick) at dick

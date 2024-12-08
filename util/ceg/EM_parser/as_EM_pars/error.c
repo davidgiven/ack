@@ -15,7 +15,7 @@ error(char *fmt, ...)
 
 	va_start(pvar, fmt);
 	fprintf( stderr, "!! ERROR :	");
-	doprnt( stderr, fmt, pvar);
+	vfprintf( stderr, fmt, pvar);
 	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 	nerrors++;
@@ -31,7 +31,7 @@ va_dcl
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
 	fprintf( stderr, "!! ERROR :	");
-	doprnt( stderr, fmt, pvar);
+	vfprintf( stderr, fmt, pvar);
 	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 	nerrors++;

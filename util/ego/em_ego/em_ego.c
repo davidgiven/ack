@@ -116,7 +116,7 @@ static void fatal(const char* s, ...)
 	va_start(ap, s);
 
 	fprintf(stderr, "%s: ", prog_name);
-	doprnt(stderr, s, ap);
+	vfprintf(stderr, s, ap);
 	fprintf(stderr, "\n");
 	cleanup();
 	exit(1);

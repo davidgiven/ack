@@ -132,7 +132,7 @@ panic(char *fmt, ...)				/* fmt, args */
 	va_start(ap, fmt);
 	{
 		fprintf(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
-		doprnt(ERROUT, fmt, ap);
+		vfprintf(ERROUT, fmt, ap);
 		fprintf(ERROUT, "\n");
 	}
 	va_end(ap);
@@ -151,7 +151,7 @@ panic(va_alist)				/* fmt, args */
 		char *fmt = va_arg(ap, char *);
 
 		fprintf(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
-		doprnt(ERROUT, fmt, ap);
+		vfprintf(ERROUT, fmt, ap);
 		fprintf(ERROUT, "\n");
 	}
 	va_end(ap);

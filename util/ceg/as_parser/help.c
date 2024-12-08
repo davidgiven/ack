@@ -224,7 +224,7 @@ out(char *fmt, ...)
 	va_list pvar;
 
 	va_start(pvar, fmt);
-	doprnt( outfile, fmt, pvar);
+	vfprintf( outfile, fmt, pvar);
 	va_end(pvar);
 }
 
@@ -238,7 +238,7 @@ error(char *fmt, ...)
 	nerrors++;
 	va_start(pvar, fmt);
 	fprintf( stderr, "!! ERROR :	");
-	doprnt( stderr, fmt, pvar);
+	vfprintf( stderr, fmt, pvar);
 	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }
@@ -252,7 +252,7 @@ va_dcl
 
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	doprnt( outfile, fmt, pvar);
+	vfprintf( outfile, fmt, pvar);
 	va_end(pvar);
 }
 
@@ -269,7 +269,7 @@ va_dcl
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
 	fprintf( stderr, "!! ERROR :	");
-	doprnt( stderr, fmt, pvar);
+	vfprintf( stderr, fmt, pvar);
 	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }

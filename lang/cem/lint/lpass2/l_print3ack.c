@@ -24,7 +24,7 @@ fprintf(filep, format) FILE* filep; char *format; { ; }
 /* FORMAT1 */
 sprintf(s, format) char *s; char *format; { ; }
 /* FORMAT1 */
-doprnt(filep, format) FILE* filep; char *format; { ; }
+vfprintf(filep, format) FILE* filep; char *format; { ; }
 
 #endif	/* lint */
 

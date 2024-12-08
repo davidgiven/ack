@@ -613,6 +613,6 @@ static void _error(int class, char *fn, unsigned int ln, char* fmt, va_list ap)
 		fprintf(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
 		fprintf(ERROUT, "%s ", remark);
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
 	fprintf(ERROUT, "\n");
 }

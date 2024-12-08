@@ -17,7 +17,7 @@
 
 extern int (*_doprnt_put)(int c);
 
-extern int _doprnt(const char* fmt, va_list ap);
+extern int _vfprintf(const char* fmt, va_list ap);
 extern char* _f_print(va_list* ap, int flags, char* s, char c, int precision);
 
 #if	ACKCONF_WANT_STDIO_FLOAT

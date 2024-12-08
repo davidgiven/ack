@@ -41,7 +41,7 @@ void error(char *fmt, ...)
 	err_occurred = 1;
 	err_hdr("");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -53,7 +53,7 @@ void warning(char *fmt, ...)
 
 	err_hdr("(warning) ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -65,7 +65,7 @@ void strict(char *fmt, ...)
 
 	err_hdr("(strict) ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -77,7 +77,7 @@ NORETURN void crash(char *fmt, ...)
 
 	err_hdr("CRASH\007 ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 	abort();
@@ -90,7 +90,7 @@ NORETURN void fatal(char *fmt, ...)
 
 	err_hdr("fatal error -- ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 	exit(1);
@@ -107,7 +107,7 @@ void error(va_alist)
 	err_hdr("");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -122,7 +122,7 @@ void warning(va_alist)
 	err_hdr("(warning) ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -137,7 +137,7 @@ void strict(va_alist)
 	err_hdr("(strict) ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
@@ -152,7 +152,7 @@ void crash(va_alist)
 	err_hdr("CRASH\007 ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 	abort();
@@ -168,7 +168,7 @@ void fatal(va_alist)
 	err_hdr("fatal error -- ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
+	vfprintf(ERROUT, fmt, ap);
 	fprintf(ERROUT, "\n");
 	va_end(ap);
 	exit(1);

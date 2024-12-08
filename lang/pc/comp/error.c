@@ -403,6 +403,6 @@ static void _error(int class, struct node *node, char *fmt, va_list ap)
 
 	if( remark ) fprintf(ERROUT, "%s ", remark);
 
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
 	fprintf(ERROUT, "\n");
 }

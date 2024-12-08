@@ -90,7 +90,7 @@ void error(const char *s, ...)
 	va_start(ap, s);
 	fprintf(stderr, "%s, line %d: ", filename ? filename : "standard input",
 			EM_lineno);
-	doprnt(stderr, s, ap);
+	vfprintf(stderr, s, ap);
 	fprintf(stderr, "\n");
 	errors++;
 	va_end(ap);

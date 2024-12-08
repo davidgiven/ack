@@ -232,6 +232,6 @@ _error(class, fmt, argv)
 
 	if (remark) fprintf(stderr, "%s ", remark);
 
-	doprnt(stderr, fmt, argv);		/* contents of error */
+	vfprintf(stderr, fmt, argv);		/* contents of error */
 	fprintf(stderr, "\n");
 }

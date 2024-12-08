@@ -111,7 +111,7 @@ out(char *fmt, ...)
         va_list pvar;
  
         va_start(pvar, fmt);
-        doprnt( outfile, fmt, pvar);
+        vfprintf( outfile, fmt, pvar);
         va_end(pvar);
 }
 #else
@@ -124,7 +124,7 @@ va_dcl
  
         va_start(pvar);
         fmt = va_arg(pvar, char *);
-        doprnt( outfile, fmt, pvar);
+        vfprintf( outfile, fmt, pvar);
         va_end(pvar);
 }
 #endif
