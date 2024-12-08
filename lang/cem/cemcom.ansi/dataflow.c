@@ -9,9 +9,9 @@
 	Use the compiler option --d.
 */
 
+#include	<stdio.h>
 #include	"parameters.h"	/* UF */
 #include    "dataflow.h"
-#include    "print.h"
 
 #ifdef	DATAFLOW
 char *CurrentFunction = 0;

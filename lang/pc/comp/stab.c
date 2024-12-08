@@ -9,6 +9,9 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "parameters.h"
 
 #ifdef DBSYMTAB
@@ -27,7 +30,6 @@
 #include "scope.h"
 #include "main.h"
 #include "node.h"
-#include "print.h"
 
 #define INCR_SIZE 64
 

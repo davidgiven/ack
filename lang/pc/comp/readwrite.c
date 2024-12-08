@@ -1,12 +1,12 @@
 /* R E A D ( L N )   &   W R I T E ( L N ) */
 
+#include	<stdio.h>
 #include    "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
 #include	<em.h>
 
-#include	"print.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"

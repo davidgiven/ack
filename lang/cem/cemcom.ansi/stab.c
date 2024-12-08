@@ -9,6 +9,8 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "parameters.h"
 
 #ifdef DBSYMTAB
@@ -30,7 +32,6 @@
 #include "field.h"
 #include "Lpars.h"
 #include "level.h"
-#include "print.h"
 
 #define INCR_SIZE 64
 

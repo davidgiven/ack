@@ -14,7 +14,6 @@
 #include <string.h>
 #include "system.h"
 #include "alloc.h"
-#include "print.h"
 #include "em_arith.h"
 #include "insert.h"
 #include "em_private.h"

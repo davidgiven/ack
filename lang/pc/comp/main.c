@@ -10,7 +10,6 @@
 #include	<system.h>
 #include	<stb.h>
 
-#include	"print.h"
 #include	"LLlex.h"
 #include	"Lpars.h"
 #include	"class.h"

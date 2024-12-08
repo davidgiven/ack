@@ -1,6 +1,7 @@
 /* M I S C E L L A N E O U S    R O U T I N E S */
 
 #include    <stdlib.h>
+#include	<stdio.h>
 #include    <string.h>
 #include	<alloc.h>
 #include	<em.h>
@@ -12,7 +13,6 @@
 #include	"main.h"
 #include	"misc.h"
 #include	"node.h"
-#include	"print.h"
 #include	"error.h"
 
 struct idf *gen_anon_idf(void)

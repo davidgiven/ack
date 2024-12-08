@@ -38,7 +38,6 @@
 #include    "typequiv.h"
 #include	"misc.h"
 #include	"lookup.h"
-#include	"print.h"
 #include	"warning.h"
 #include	"main.h"
 

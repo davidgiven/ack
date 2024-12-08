@@ -19,7 +19,6 @@
 #include	"proto.h"
 #include	"struct.h"
 #include	"field.h"
-#include	"print.h"
 #include	"Lpars.h"
 #include	"label.h"
 #include	"expr.h"

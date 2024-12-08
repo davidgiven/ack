@@ -22,7 +22,6 @@
 #include "error.h"
 #include "bits.h"
 #include "skip.h"
-#include "print.h"
 
 char _obuf[OBUFSIZE];
 #ifdef DOBITS

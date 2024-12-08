@@ -16,9 +16,9 @@ static char rcsid[] = "$Id$";
  linked.
  */
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include "print.h"
 #include "em_pseu.h"
 #include "em_mnem.h"
 #include "em_spec.h"

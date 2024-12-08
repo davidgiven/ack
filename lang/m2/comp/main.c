@@ -18,7 +18,6 @@
 #include	"em_arith.h"
 #include	"em_label.h"
 #include	"em_code.h"
-#include	"print.h"
 #include	"alloc.h"
 
 #include	<stb.h>

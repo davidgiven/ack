@@ -274,7 +274,6 @@ cprogram {
 	name = "em_ego",
 	srcs = { "./em_ego/em_ego.c" },
 	deps = {
-		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
 		"modules/src/data+lib",

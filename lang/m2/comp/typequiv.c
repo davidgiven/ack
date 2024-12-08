@@ -16,6 +16,7 @@
 #include	"debug.h"
 
 #include	<stdlib.h>
+#include	<stdio.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
@@ -32,7 +33,6 @@
 #include	"main.h"
 #include	"stab.h"
 #include	"Lpars.h"
-#include	"print.h"
 #include	"chk_expr.h"
 
 

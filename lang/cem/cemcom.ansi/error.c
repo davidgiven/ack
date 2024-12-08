@@ -26,7 +26,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"def.h"
-#include    "print.h"
 #include	"LLlex.h"
 
 /*	This file contains the error-message and diagnostic

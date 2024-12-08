@@ -13,7 +13,6 @@
 #include	"time.h"
 #include	"class.h"
 #include	"macro.h"
-#include	"print.h"
 #include	"error.h"
 #include	"idf.h"
 #include	"domacro.h"

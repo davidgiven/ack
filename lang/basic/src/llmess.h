@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "tokentab.h"
 #include "system.h"
-#include "print.h"
 
 /* Mod van gertjan */
 extern int LLsymb;

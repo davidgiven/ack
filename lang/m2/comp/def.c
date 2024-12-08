@@ -10,6 +10,7 @@
 /* $Id$ */
 
 #include   <stdlib.h>
+#include   <stdio.h>
 #include   <string.h>
 #include 	"parameters.h"
 #include	"debug.h"
@@ -27,7 +28,6 @@
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"print.h"
 #include	"scope.h"
 #include	"lookup.h"
 #include	"node.h"

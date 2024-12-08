@@ -7,6 +7,7 @@
 
 #include	<assert.h>
 #include	<stdlib.h>
+#include	<stdio.h>
 #include	<string.h>
 #include	"parameters.h"
 #include	<em_reg.h>
@@ -26,7 +27,6 @@
 #include	"declarator.h"
 #include	"decspecs.h"
 #include	"sizes.h"
-#include    "print.h"
 #include    "util.h"
 #include    "stab.h"
 #include    "code.h"

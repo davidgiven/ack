@@ -9,6 +9,8 @@
 
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "parameters.h"
 
 #ifdef DBSYMTAB
@@ -28,7 +30,6 @@
 #include "error.h"
 #include "stab.h"
 #include "main.h"
-#include "print.h"
 
 #include <stdarg.h>
 

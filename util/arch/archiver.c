@@ -35,7 +35,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include "print.h"
 #include "system.h"
 #include "object.h"
 #include "arch.h"

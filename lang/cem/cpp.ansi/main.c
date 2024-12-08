@@ -16,7 +16,6 @@
 #include	"file_info.h"
 #include	"idf.h"
 #include	"init.h"
-#include	"print.h"
 #include	"options.h"
 #include	"error.h"
 #include	"input.h"

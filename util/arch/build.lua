@@ -5,7 +5,6 @@ cprogram {
 		"h+emheaders",
 		"modules/src/data+lib",
 		"modules/src/object+lib",
-		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib"
 	},

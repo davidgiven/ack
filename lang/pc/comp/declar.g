@@ -5,6 +5,8 @@
 /* next line DEBUG */
 #include	"debug.h"
 
+#include	<stdlib.h>
+#include	<stdio.h>
 #include	<stddef.h>
 #include	<alloc.h>
 #include	<assert.h>
@@ -12,7 +14,6 @@
 #include	<em_label.h>
 #include	<pc_file.h>
 
-#include	"print.h"
 #include	"LLlex.h"
 #include	"chk_expr.h"
 #include	"def.h"
