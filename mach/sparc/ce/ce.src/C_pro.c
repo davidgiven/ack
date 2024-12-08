@@ -17,7 +17,7 @@ arith l;
 #ifdef __solaris__
 	fprintf(codefile, "\t.type\t%s,#function\n", s);
 	if (B_procnam) free(B_procnam);
-	B_procnam = Salloc(s, strlen(s)+1);
+	B_procnam = strdup(s);
 #endif
 
 	symbol_definition(  s);

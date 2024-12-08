@@ -43,7 +43,7 @@ getwdir(fn)
 		return "";
 	if (p) {
 		*p = '\0';
-		fn = Salloc(fn, p - &fn[0] + 1);
+		fn = strdup(fn);
 		*p = '/';
 		return fn;
 	}

@@ -73,12 +73,12 @@ void do_option(char *text)
 			++cp;
 		if (!*cp) {			/* -Dname */
 			maclen = 1;
-			mactext = Salloc("1", 2);
+			mactext = strdup("1");
 		} else
 		if (*cp == '=')	{		/* -Dname=text	*/
 			*cp++ = '\0';		/* end of name	*/
 			maclen = strlen(cp);
-			mactext = Salloc(cp, maclen + 1);
+			mactext = strdup(cp);
 		}
 		else	{			/* -Dname?? */
 			error("malformed option -D%s", text);

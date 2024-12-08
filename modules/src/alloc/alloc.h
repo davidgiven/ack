@@ -11,11 +11,8 @@
     memory allocating routines.
     There are 3 memory allocation routines:
         char *malloc(n)		allocate n bytes
-        char *Salloc(str, n)	allocate n bytes and fill them with
-                    string str
 */
 
-char* Salloc(char*, unsigned int);
 char* st_alloc(char**, unsigned int, int);
 char* std_alloc(char**, unsigned int, int, int*);
 

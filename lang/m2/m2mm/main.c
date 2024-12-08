@@ -42,32 +42,34 @@ basename(s)
 	return buf;
 }
 
-char *
-getwdir(fn)
-        char *fn;
+char* getwdir(char* fn)
 {
-        char *p;
+	char* p;
 
-        p = strrchr(fn, '/');
-        while (p && *(p + 1) == '\0') { /* remove trailing /'s */
-                *p = '\0';
-                p = strrchr(fn, '/');
-        }
+	p = strrchr(fn, '/');
+	while (p && *(p + 1) == '\0')
+	{ /* remove trailing /'s */
+		*p = '\0';
+		p = strrchr(fn, '/');
+	}
 
-        if (p) {
-		char **d = DEFPATH;
+	if (p)
+	{
+		char** d = DEFPATH;
 
-                *p = '\0';
-		while (*d && strcmp(*d, fn) != 0) d++;
-                if (*d) {
-                	*p = '/';
+		*p = '\0';
+		while (*d && strcmp(*d, fn) != 0)
+			d++;
+		if (*d)
+		{
+			*p = '/';
 			return *d;
 		}
-                fn = Salloc(fn, (unsigned) (p - &fn[0] + 1));
+		fn = strdup(fn);
 		*p = '/';
 		return fn;
-        }
-        return ".";
+	}
+	return ".";
 }
 
 static struct file_list *arglist;
@@ -153,7 +155,7 @@ Add(parglist, f, d, copy)
 	if (a) return 0;
 	a = new_file_list();
 	if (copy) {
-		a->a_filename = Salloc(f, (unsigned) (strlen(f)+1));
+		a->a_filename = strdup(f);
 	}
 	else {
 		a->a_filename = f;

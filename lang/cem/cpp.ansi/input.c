@@ -36,7 +36,7 @@ char* getwdir(char* fn)
 	if (p)
 	{
 		*p = '\0';
-		fn = Salloc(fn, (unsigned)(p - &fn[0] + 1));
+		fn = strdup(fn);
 		*p = '/';
 		return fn;
 	}

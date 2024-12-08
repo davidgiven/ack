@@ -261,7 +261,7 @@ void CheckForLineDirective(void)
 		 * Remember the filename
 		 */
 		 if( !eofseen && strcmp(FileName, buf) ) {
-			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+			FileName = strdup(buf);
 		}
 	}
 	if( eofseen ) {
@@ -542,12 +542,12 @@ again:
 		tk->TOK_RIV->r_lab = 0;
 
 		if( np > &buf[NUMSIZE+1] )	{
-			tk->TOK_REL = Salloc("0.0", 4);
+			tk->TOK_REL = strdup("0.0");
 			tk->TOK_RIV->r_real = tk->TOK_REL;
 			lexerror("floating constant too long");
 		}
 		else {
-			tk->TOK_RIV->r_real = Salloc(buf,(unsigned) (np - buf));
+			tk->TOK_RIV->r_real = strdup(buf);
 			tk->TOK_REL = tk->TOK_RIV->r_real + 1;
 		}
 

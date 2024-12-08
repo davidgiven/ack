@@ -60,7 +60,6 @@ char* keywords[]
 
 void InsertId(char*, int);
 char* malloc(unsigned int);
-char* Salloc(char*);
 int EnHash(char*);
 void EndOfProgram(void);
 void DoOption(char*);
@@ -111,7 +110,7 @@ void DoOption(char* str)
 
 struct idf* hash_tab[HASHSIZE];
 
-char *malloc(), *Salloc();
+char *malloc();
 
 void InsertId(char* id, int key)
 {
@@ -133,7 +132,7 @@ void InsertId(char* id, int key)
 			hash_tab[hash_val] = idp;
 		else
 			p->id_next = idp;
-		idp->id_name = Salloc(id);
+		idp->id_name = strdup(id);
 		idp->id_same = 0;
 	}
 
@@ -150,7 +149,7 @@ void InsertId(char* id, int key)
 		p = (struct idf*)malloc(sizeof(struct idf));
 		p->id_next = 0;
 		p->id_same = 0;
-		p->id_name = Salloc(id);
+		p->id_name = strdup(id);
 		idp->id_same = p;
 	}
 
@@ -167,14 +166,6 @@ char* malloc(unsigned n)
 		exit(1);
 	}
 	return mem;
-}
-
-char* Salloc(char* str)
-{
-	if (str == 0)
-		str = "";
-
-	return strcpy(malloc((unsigned)strlen(str) + 1), str);
 }
 
 int EnHash(char* id)

@@ -51,7 +51,7 @@ insert_token(tk)
 		dot.tk_idf = str2idf("int");
 		break;
 	case STRING:
-		dot.tk_bts = Salloc("", 1);
+		dot.tk_bts = strdup("");
 		dot.tk_len = 1;
 		break;
 	case INTEGER:
@@ -60,7 +60,7 @@ insert_token(tk)
 		break;
 #ifndef NOFLOAT
 	case FLOATING:
-		dot.tk_fval = Salloc("0.0", 4);
+		dot.tk_fval = strdup("0.0");
 		break;
 #endif /* NOFLOAT */
 	}

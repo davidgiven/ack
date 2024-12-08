@@ -31,21 +31,21 @@ save_instr( instr, len)
 char *instr;
 int len;
 {
-	assem_instr = Salloc( instr, len + 1);
+	assem_instr = strdup( instr);
 }
 
 save_name( name, len)
 char *name;
 int len;
 {
-	op_info[ n_ops].name = Salloc( name, len + 1);
+	op_info[ n_ops].name = strdup( name);
 }
 
 save_type( type, len)
 char *type;
 int len;
 {
-	op_info[ n_ops].type = Salloc( type, len + 1);
+	op_info[ n_ops].type = strdup( type);
 	restriction = TRUE;
 }
 
@@ -293,7 +293,7 @@ char *mnem;
 		error( "too many assembler instructions!! MAX_MNEMONICS = %d",
 			MAX_MNEMONICS);
 	else
-		mnemonic[ n_mnems++] = Salloc( mnem, strlen( mnem) + 1);
+		mnemonic[ n_mnems++] = strdup(mnem);
 }
 
 

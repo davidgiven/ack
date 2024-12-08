@@ -17,6 +17,7 @@
 
 #include	<assert.h>
 #include	"alloc.h"
+#include	"system.h"
 #include	"em_arith.h"
 #include	"em_label.h"
 #include	"em_code.h"
@@ -287,8 +288,7 @@ struct def * DeclProc(int type, struct idf *id)
 		}
 		else
 		{
-			sprintf(buf, "%s_%s", CurrentScope->sc_name, id->id_text);
-			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+			df->prc_name = aprintf("%s_%s", CurrentScope->sc_name, id->id_text);
 		}
 		if (CurrVis == Defined->mod_vis)
 		{
@@ -312,7 +312,7 @@ struct def * DeclProc(int type, struct idf *id)
 		{
 			df = define(id, CurrentScope, type);
 			sprintf(buf, "_%d_%s", ++nmcount, id->id_text);
-			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+			df->prc_name = strdup(buf);
 			internal(buf);
 			df->df_flags |= D_DEFINED;
 		}
@@ -371,7 +371,7 @@ struct def * DefineLocalModule(struct idf *id)
 	sc = CurrentScope;
 	sc->sc_level = proclevel;
 	sc->sc_definedby = df;
-	sc->sc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+	sc->sc_name = strdup(buf);
 
 	/* Create a type for it
 	 */

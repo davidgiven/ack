@@ -164,7 +164,7 @@ void compile(int argc, char *argv[])
 		FileName = source = argv[0];
 	else {
 		source = 0;
-		FileName = Salloc("standard input", (unsigned) 16);
+		FileName = strdup("standard input");
 	}
 
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/

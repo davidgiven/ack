@@ -46,7 +46,7 @@ struct t_operand operand[ MAX_OPERANDS];
 
 
 char *skip_space(), *parse_label(), *parse_mnemonic(), *parse_operand(),
-     *skip_string(), *match_ch(), *Salloc(), *skip_operand();
+     *skip_string(), *match_ch(), *skip_operand();
 int  label();
 
 
@@ -58,7 +58,7 @@ assemble( instr)
 	char *ptr, *copy, *mnem;
 	int  n_ops = 0;
 
-	copy = ptr = Salloc( instr, strlen( instr)+1);
+	copy = ptr = strdup(instr);
 
 	ptr = skip_space( ptr);
 	if  ( label( ptr))  {     /* Look for a label */

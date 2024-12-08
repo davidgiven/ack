@@ -1,7 +1,6 @@
 clibrary {
 	name = "lib",
 	srcs = {
-		"./Salloc.c",
 		"./st_alloc.c",
 		"./std_alloc.c",
 	},

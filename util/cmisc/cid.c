@@ -35,7 +35,6 @@ struct idf
 struct idf* hash_tab[HASHSIZE];
 
 char* malloc(unsigned int);
-char* Salloc(char*);
 int EnHash(char*);
 void EndOfProgram(void);
 void DoOption(char*);
@@ -155,8 +154,8 @@ void InsertMacro(char* id, char* text)
 	}
 
 	idp->id_next = hash_tab[hash_val];
-	idp->id_name = Salloc(id);
-	idp->id_text = Salloc(text);
+	idp->id_name = strdup(id);
+	idp->id_text = strdup(text);
 	hash_tab[hash_val] = idp;
 }
 
@@ -170,15 +169,6 @@ char* malloc(unsigned int n)
 		exit(1);
 	}
 	return mem;
-}
-
-char* Salloc(char* str)
-{
-	if (str == 0)
-	{
-		str = "";
-	}
-	return strcpy(malloc((unsigned)strlen(str) + 1), str);
 }
 
 struct idf* FindId(char* id)

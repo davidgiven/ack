@@ -50,7 +50,7 @@ char *gen_proc_name(struct idf *id, int inp)
 	if( inp )	{
 		sprintf(buf, "_%d%s", ++name_cnt, id->id_text);
 		C_inp(buf);
-		return Salloc(buf, (unsigned) (strlen(buf) + 1));
+		return strdup(buf);
 	}
 	else	{
 		C_exp(id->id_text);

@@ -5,17 +5,12 @@ Malloc, Salloc, Realloc, Srealloc, st_alloc, st_free\ \-\ low level memory alloc
 .SH SYNOPSIS
 .B #include <alloc.h>
 .PP
-.B char *Salloc(char *str, unsigned int size)
-.PP
 .B char *st_alloc(char **phead, unsigned int size, int count)
 .PP
 .B st_free(char *ptr, char **phead, unsigned int size)
 .PP
 .SH DESCRIPTION
 This set of routines provides a checking memory allocation mechanism.
-.PP
-\fISalloc\fR returns a pointer to a block of at least \fIsize\fR
-bytes, initialized with the null-terminated string \fIstr\fR.
 .PP
 All these routines use \fImalloc\fR and \fIrealloc\fR.
 The routine \fIfree\fR can be used on pointers returned by these routines.

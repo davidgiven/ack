@@ -40,7 +40,7 @@ char *instr;
 					   quantum*sizeof( char *));
 	}
 
-	as_instructions[nr_instr++] = Salloc( instr, strlen( instr) + 1);
+	as_instructions[nr_instr++] = strdup(instr);
 }
 
 do_block_assemble()

@@ -91,7 +91,7 @@ idf_hashed(tg, size, hc)
 	notch = new_idf();
 	notch->next = *hook;
 	*hook = notch;		/* hooked in */
-	notch->id_text = Salloc(tg, (unsigned) size);
+	notch->id_text = strdup(tg);
 #ifndef NOPP
 	notch->id_resmac = 0;
 #endif /* NOPP */
