@@ -10,7 +10,6 @@ clibrary {
 		"./modtime.c",
 		"./open.c",
 		"./read.c",
-		"./rename.c",
 		"./seek.c",
 		"./setbinarymode.c",
 		"./stop.c",

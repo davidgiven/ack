@@ -46,7 +46,6 @@ int sys_write(File *, char *, int);
 int sys_seek(File *, long, int, long *);
 int sys_reset(File *);
 int sys_access(char *, int);
-int sys_rename(char *, char *);
 off_t sys_filesize(char *);
 /* Return the temporary directory location */
 char* sys_gettmpdir(void);
