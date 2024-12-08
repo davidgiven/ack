@@ -44,12 +44,6 @@ sys_lock, sys_unlock, sys_stop \- system call interface
 .B long sys_filesize(path)
 .B char *path;
 .PP
-.B int sys_lock(name)
-.B char *name;
-.PP
-.B int sys_unlock(name)
-.B char *name;
-.PP
 .B char *sys_break(incr)
 .B int incr;
 .PP
@@ -213,24 +207,6 @@ file specified by
 .IR path ,
 if possible.
 The value \-1L is returned if the size cannot be retrieved for some reason.
-.PP
-.I Sys_lock
-and
-.I sys_unlock
-provide a mechanism for setting and clearing symbolic locks for external
-objects.
-This is done by creating and removing file
-.IR name .
-.I Sys_lock
-returns zero if the lock is already set and a non-zero value if the lock
-did not exist and has been created.
-.I Sys_unlock
-returns a non-zero value if the lock did not exist or if the lock has been
-removed succesfully.
-Zero is returned otherwise.
-The actions performed by these routines are atomic:
-race conditions cannot
-occur.
 .PP
 .I Sys_break
 adds 

@@ -51,10 +51,6 @@ off_t sys_filesize(char *);
 char* sys_gettmpdir(void);
 /* Call another program. */
 int sys_system(const char* prog, const char* const* argv);
-#if 0
-int sys_lock(char *);
-int sys_unlock(char *);
-#endif
 NORETURN void sys_stop(int);
 time_t sys_modtime(char *);
 

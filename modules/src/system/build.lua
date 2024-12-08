@@ -18,8 +18,6 @@ clibrary {
 		"./system.c",
 		"./tmpdir.c",
 		"./write.c",
-		--"./lock.c",
-		--"./unlock.c”,
 	},
 	hdrs = { "./system.h" },
 	deps = {
