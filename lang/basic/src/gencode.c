@@ -632,8 +632,8 @@ void prolog2(void)
 	C_csa((arith)BEMINTSIZE);
 	C_df_ilb((label)0);
 	C_asp((arith)BEMINTSIZE);
-	result= sys_open(datfname, OP_WRITE, &datfile);
-	if ( result==0 ) fatal("improper file creation permission");
+	datfile = fopen(datfname, "w+b");
+	if (!datfile) fatal("improper file creation permission");
         gendata();
 }
 

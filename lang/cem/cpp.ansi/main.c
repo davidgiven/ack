@@ -30,7 +30,7 @@ extern int do_dependencies;
 extern char *dep_file;
 int idfsize = IDFSIZE;
 extern char options[];
-static File *dep_fd;
+static FILE* dep_fd;
 
 arith ifval;
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 {
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
-	dep_fd = STDOUT;
+	dep_fd = stdout;
 
 	init_idf();
 
@@ -130,8 +130,10 @@ static void list_dependencies(char *source)
 		}
 		else source = 0; 
 	}
-	if (dep_file && !sys_open(dep_file, OP_WRITE, &dep_fd)) {
-		fatal("could not open %s", dep_file);
+	if (dep_file) {
+		dep_fd = fopen(dep_file, "w+");
+		if (!dep_fd)
+			fatal("could not open %s", dep_file);
 	}
 	while (p) {
 		assert(p->id_resmac == K_FILE);

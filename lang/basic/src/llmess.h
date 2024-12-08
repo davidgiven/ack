@@ -18,8 +18,8 @@ void error_char(char *format,char ch)
 	extern int listing,errorcnt;
 	extern int basicline;
 
-	if ( !listing ) fprint(STDERR, "LINE %d:",basicline);
-	fprint(STDERR, format,ch);
+	if ( !listing ) fprint(stderr, "LINE %d:",basicline);
+	fprint(stderr, format,ch);
 	errorcnt++;
 }
 
@@ -30,8 +30,8 @@ void error_string(char* format,char* str)
 	extern int listing,errorcnt;
 	extern int basicline;
 
-	if ( !listing ) fprint(STDERR, "LINE %d:",basicline);
-	fprint(STDERR, format,str);
+	if ( !listing ) fprint(stderr, "LINE %d:",basicline);
+	fprint(stderr, format,str);
 	errorcnt++;
 }
 

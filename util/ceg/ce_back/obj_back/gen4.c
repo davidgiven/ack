@@ -38,7 +38,7 @@ FOUR_BYTES l;
 			return;
 		case SEGBSS  : bss( (arith) 4);
 			       return;
-		default      : fprint( STDERR, "gen4() : bad seg number\n");
+		default      : fprint( stderr, "gen4() : bad seg number\n");
 			       return;
 	}
 }

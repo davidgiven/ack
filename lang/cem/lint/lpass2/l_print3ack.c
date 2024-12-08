@@ -20,11 +20,11 @@ $ */
 printf(format) char *format; { ; }
 
 /* FORMAT1 */
-fprint(filep, format) File *filep; char *format; { ; }
+fprint(filep, format) FILE* filep; char *format; { ; }
 /* FORMAT1 */
 sprintf(s, format) char *s; char *format; { ; }
 /* FORMAT1 */
-doprnt(filep, format) File *filep; char *format; { ; }
+doprnt(filep, format) FILE* filep; char *format; { ; }
 
 #endif	/* lint */
 

@@ -17,8 +17,8 @@ extern panic(char *, ...);
 #include	"class.h"
 #include	"inpdef.h"
 
-#define	MSGOUT		STDERR	/* file descr. on which to write the messages */
-#define	ERROUT		STDERR	/* file descr. on which to write the panics */
+#define	MSGOUT		stderr	/* file descr. on which to write the messages */
+#define	ERROUT		stderr	/* file descr. on which to write the panics */
 
 extern int LineNr;
 

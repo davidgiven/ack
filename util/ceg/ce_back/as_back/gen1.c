@@ -12,6 +12,6 @@ ONE_BYTE w;
 			break;
 	  case SEGBSS : bss( (arith) 1);
 			break;
-	  default : fprint( STDERR, "gen1 unkown seg %d\n", cur_seg);
+	  default : fprint( stderr, "gen1 unkown seg %d\n", cur_seg);
 	}
 }

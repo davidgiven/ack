@@ -7,9 +7,9 @@ print, fprint, doprnt -- very simple formatted-output routines
 .B #include <system.h>
 .B #include <print.h>
 .PP
-.B void fprint(File *filep, char *format [, arg] ... )
+.B void fprint(FILE* filep, char *format [, arg] ... )
 .PP
-.B void doprnt(File *filep, char *format, va_list args)
+.B void doprnt(FILE* filep, char *format, va_list args)
 .PP
 .B int _format(char *buf, char *format, va_lsit args)
 .fi
@@ -19,7 +19,7 @@ and
 .I doprnt
 place output on the open file known by
 .IR filep .
-.I filep could for instance be STDOUT or STDERR.
+.I filep could for instance be stdout or stderr.
 .PP
 Each of these functions converts, formats and prints its arguments, following
 the 

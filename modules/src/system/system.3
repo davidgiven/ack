@@ -1,47 +1,13 @@
 .TH SYSTEM 3 "$Revision$"
 .ad
 .SH NAME
-sys_open, sys_close, sys_read, sys_write, sys_reset,
-sys_filesize,
-sys_lock, sys_unlock, sys_stop \- system call interface
+sys_filesize, sys_lock, sys_unlock, sys_stop \- system call interface
 .SH SYNOPSIS
 .nf
 .B #include <system.h>
 .PP
-.B File *STDIN, *STDOUT, *STDERR;
-.PP
-.B int sys_open(path, flag, filep)
-.B char *path;
-.B int flag;
-.B File **filep;
-.PP
-.B void sys_close(filep)
-.B File *filep;
-.PP
-.B int sys_read(filep, bufptr, bufsiz, pnbytes)
-.B File *filep;
-.B char *bufptr;
-.B int bufsiz, *pnbytes;
-.PP
-.B int sys_write(filep, bufptr, nbytes)
-.B File *filep;
-.B char *bufptr;
-.B int nbytes;
-.PP
-.B int sys_seek(filep, offset, whence, poffset)
-.B File *filep;
-.B long offset;
-.B int whence;
-.B long *poffset;
-.PP
-.B int sys_reset(filep)
-.B File *filep
-.PP
 .B long sys_filesize(path)
 .B char *path;
-.PP
-.B char *sys_break(incr)
-.B int incr;
 .PP
 .B void sys_stop(how)
 .B int how;
@@ -52,109 +18,6 @@ primarily intended for use in compilers.
 The include file contains a defined constant, 
 .IR BUFSIZ ,
 which gives the system-dependent block size.
-Another constant,
-.IR SYS_NOPEN ,
-gives the maximum number of open files in a process.
-.PP
-.I Sys_open
-opens a file called
-.I path
-for sequential reading or writing, as specified by 
-.I flag
-and returns in
-.I filep
-a decsriptor for the opened file.
-The allowed values for 
-.I flag
-are
-.IP OP_READ 15
-open for reading
-.IP OP_WRITE 15
-open for rewriting (create
-.I path
-if it did not exist)
-.IP OP_APPEND 15
-open for writing at the end (create
-.I path
-if it did not exist)
-.LP
-Created files are given read and write permission for its creator and
-read permission for other users.
-.br
-Specifying
-.I path
-as null pointer opens a so-called anonymous file, which has no name and 
-disappears when it is closed or when the program exits.
-It is possible to read the contents of an anonymous file by using
-.I reset .
-.br
-There are three normally open files with the following descriptors:
-.IP STDIN 15
-standard input file; opened as OP_READ
-.IP STDOUT 15
-standard output file; opened as OP_APPEND
-.IP STDERR 15
-standard error file; opened as OP_APPEND
-.LP
-.I Sys_close
-causes the open file known by
-.I filep
-to be closed.
-.PP
-.I Sys_read
-causes up to
-.I bufsiz
-contiguous bytes to be read from the open file known by
-.I filep
-into a piece of memory pointed at by
-.IR bufptr .
-The number of bytes actually read is returned in
-.IR *pnbytes .
-If
-.I *pnbytes
-is set to 0 then the end-of-file is reached.
-.PP
-.I Sys_write
-writes
-.I nbytes
-contiguous bytes from the memory pointed at by
-.I bufptr
-onto the open file known by
-.IR filep .
-A non-zero return value indicates that
-.I nbytes
-are actually written.
-.PP
-.I Sys_seek
-sets the file pointer of
-.I filep
-as follows:
-.IP " "
-If
-.I whence
-is 0, the pointer is set to
-.I offset
-bytes.
-.IP " "
-If
-.I whence
-is 1, the pointer is set to its current location plus
-.IR offset .
-.IP " "
-If
-.I whence
-is 2, the pointer is set to the size of the file plus
-.IR offset .
-.PP
-Upon succesful completion, the resulting pointer location is returned in
-.IR poffset ,
-and 1 is returned. Otherwise, 0 is returned.
-.PP
-.I Sys_reset
-causes the open file known by
-.I filep
-to be re-opened for reading (cf. open flag OP_READ).
-This may be useful in reading anonymous files.
 .PP
 The function 
 .I sys_filesize
@@ -163,16 +26,6 @@ file specified by
 .IR path ,
 if possible.
 The value \-1L is returned if the size cannot be retrieved for some reason.
-.PP
-.I Sys_break
-adds 
-.I incr
-more bytes to the program's data space and returns a pointer to
-the newly allocated area.
-ILL_BREAK is returned in case of some error, due to a lack of space or
-some interrupt.
-It is equivalent to the UNIX version 7 
-.IR sbrk (2).
 .PP
 .I Sys_stop
 should be called when the process is terminated due to
@@ -199,27 +52,7 @@ since 00:00:00 GMT, Jan. 1, 1970, measured in seconds.
 ~em/modules/h/system.h
 ~em/modules/lib/libsystem.a
 .fi
-.SH DIAGNOSTICS
-.PP
-The routines 
-.IR sys_open ,
-.IR sys_read ,
-.IR sys_write ,
-.IR sys_reset ,
-.IR sys_chmode ,
-and
-.IR sys_rename
-return a value of zero upon any failure and a non-zero
-value if the call succeeds.
 .SH BUGS
 The current implementation does not allow the use of anonymous files.
-.br
-.I Sys_reset
-is not implemented.
-A
-.I sys_close
-followed by a
-.I sys_open
-with the proper mode has the same effect on non-anonymous files.
 .SH "SEE ALSO"
 UNIX version 7 manual volume 1, chapter 2

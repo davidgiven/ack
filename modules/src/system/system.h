@@ -10,53 +10,17 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-struct _sys_fildes {
-	FILE* fd;
-};
-
-typedef struct _sys_fildes File;
-
-extern File _sys_ftab[];
-extern File sys_stdin;
-extern File sys_stdout;
-extern File sys_stderr;
-
-/* flags for sys_open() */
-#define OP_READ		01
-#define OP_WRITE	02
-#define OP_APPEND	04
-
 /* flags for sys_stop() */
 #define S_END	0
 #define S_EXIT	1
 #define S_ABORT	2
 
-extern FILE* getfd(File* fp);
-
-int sys_open(char *, int, File **);
-void sys_close(File *);
-int sys_read(File *, char *, int, int *);
-int sys_write(File *, char *, int);
-int sys_seek(File *, long, int, long *);
-int sys_reset(File *);
-off_t sys_filesize(char *);
+extern off_t sys_filesize(char *);
 /* Return the temporary directory location */
-char* sys_gettmpdir(void);
+extern char* sys_gettmpdir(void);
 /* Call another program. */
-int sys_system(const char* prog, const char* const* argv);
-NORETURN void sys_stop(int);
-
-/* standard file decsriptors */
-#define STDIN	&sys_stdin
-#define STDOUT	&sys_stdout
-#define STDERR	&sys_stderr
-
-/* maximum number of open files */
-#define SYS_NOPEN	20
-
-/* return value for sys_break */
-#define ILL_BREAK	((char *)0)
-
+extern int sys_system(const char* prog, const char* const* argv);
+extern NORETURN void sys_stop(int);
 
 /* Extract the base name from a full path specification
  * in "str" and returns it in "dst".
@@ -84,9 +48,5 @@ extern void sys_setbinarymode(FILE* fp);
 /* As system sprintf(), except uses malloc() to allocate a new buffer of the
  * right size for the result. */
 extern char* aprintf(const char* format, ...);
-
-/* Implementation definitions. */
-
-extern File *_get_entry(void);
 
 #endif /* __SYSTEM_INCLUDED__ */

@@ -44,7 +44,7 @@ char **inctable;
 
 extern int do_dependencies;
 extern char *dep_file;
-static File *dep_fd = STDOUT;
+static FILE* dep_fd = stdout;
 
 extern char *getwdir();
 #endif /* NOPP */

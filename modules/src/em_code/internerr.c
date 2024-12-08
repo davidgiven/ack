@@ -9,6 +9,6 @@
 
 void C_internal_error(void)
 {
-	sys_write(STDERR,"internal error\n",15);
+	fputs("internal error\n", stderr);
 	sys_stop(S_EXIT);
 }

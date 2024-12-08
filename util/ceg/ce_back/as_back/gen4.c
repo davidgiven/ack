@@ -12,6 +12,6 @@ FOUR_BYTES w;
 			break;
 	  case SEGBSS : bss( (arith) 4);
 			break;
-	  default : fprint( STDERR, "gen4 unkown seg %d\n", cur_seg);
+	  default : fprint( stderr, "gen4 unkown seg %d\n", cur_seg);
 	}
 }

@@ -242,7 +242,7 @@ struct t_operand *op;
 		  case BX : R233( 0x0, reg, 0x7);
 			    break;
 
-		  default : fprint( STDERR, "Wrong index register %d\n",
+		  default : fprint( stderr, "Wrong index register %d\n",
 				    op->reg);
 		}
 	else {
@@ -260,7 +260,7 @@ struct t_operand *op;
 			  case BX : R233( 0x1, reg, 0x7);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprint( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text1( %$(op->expr));
@@ -278,7 +278,7 @@ struct t_operand *op;
 			  case BX : R233( 0x2, reg, 0x7);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprint( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text2( %$(op->expr));

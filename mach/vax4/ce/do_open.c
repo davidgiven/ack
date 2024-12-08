@@ -1,7 +1,7 @@
 #include <system.h>
 #include <back.h>
 
-File *B_out_file;
+FILE* B_out_file;
 
 open_back( filename)
 char *filename;

@@ -115,9 +115,9 @@ static void fatal(const char* s, ...)
 	va_list ap;
 	va_start(ap, s);
 
-	fprint(STDERR, "%s: ", prog_name);
-	doprnt(STDERR, s, ap);
-	fprint(STDERR, "\n");
+	fprint(stderr, "%s: ", prog_name);
+	doprnt(stderr, s, ap);
+	fprint(stderr, "\n");
 	cleanup();
 	sys_stop(S_EXIT);
 	UNREACHABLE_CODE;
@@ -279,10 +279,10 @@ static void run_phase(int phase)
 
 		while (phargs[i])
 		{
-			fprint(STDERR, "%s ", phargs[i]);
+			fprint(stderr, "%s ", phargs[i]);
 			i++;
 		}
-		fprint(STDERR, "\n");
+		fprint(stderr, "\n");
 	}
 
 	status = sys_system(phargs[0], (const char* const*)phargs);

@@ -28,10 +28,10 @@ Part		*C_curr_part;
 char		*C_BASE;
 #endif
 
-File		*C_ofp;
+FILE		*C_ofp;
 
 #ifndef INCORE
-File		*C_tfr;
+FILE		*C_tfr;
 char		*C_tmpfile;
 char		*C_ibuf = 0;
 long		C_current_out;
@@ -75,7 +75,7 @@ void C_flush(void)
 		return;
 	}
 #endif
-	if (C_opp != obuf && sys_write(C_ofp, obuf, (int)(C_opp - obuf)) == 0) {
+	if (C_opp != obuf && fwrite(obuf, (int)(C_opp - obuf), 1, C_ofp) != 1) {
 		C_ofp = 0;
 		C_failed();
 	}
@@ -109,13 +109,14 @@ int C_open(char* nm)
 
 	if (nm == 0)
 	{
-		C_ofp = STDOUT;	/* standard output	*/
+		C_ofp = stdout;	/* standard output	*/
 		sys_setbinarymode(stdout);
 	}
 	else
 	{
 
-	  if (sys_open(nm, OP_WRITE, &C_ofp) == 0)
+	  C_ofp = fopen(nm, "w+b");
+	  if (!C_ofp)
 		return 0;
 	}
 	return 1;
@@ -150,8 +151,8 @@ void C_close(void)
 #endif
 	}
 	C_flush();
-	if (C_ofp != STDOUT)
-		sys_close(C_ofp);
+	if (C_ofp != stdout)
+		fclose(C_ofp);
 	C_ofp = 0;
 }
 

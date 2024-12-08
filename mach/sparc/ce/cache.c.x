@@ -36,7 +36,7 @@ static int indent_count = 0;
 		push_ext(char *)
 		flush_cache()		after branches and labels
 		cache_read(int)		read-ahead. optimization only
-		dump_cache(File *)	debug info: show current stack
+		dump_cache(FILE* )	debug info: show current stack
 		pop_nop()		remove element from cache
 
 		reg_t alloc_reg()
@@ -108,7 +108,7 @@ static int c_count = 0;
 static const_str_t s;
 
 _PROTOTYPE(static void panic, (char*));
-_PROTOTYPE(static void dump_cache, (File *stream));
+_PROTOTYPE(static void dump_cache, (FILE* stream));
 _PROTOTYPE(static int cache_read, (int n, int i));
 _PROTOTYPE(static void flush_part_cache, (int c, int r, int f, int d));
 _PROTOTYPE(static void subst_reg, (reg_t, reg_t));
@@ -1238,7 +1238,7 @@ leave("cache_read");
 }
 
 static void dump_cache(stream)		/* to codefile! */
-File *stream;
+FILE* stream;
 {
 	int i;
 

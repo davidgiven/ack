@@ -16,9 +16,9 @@
 	%d = int
 $ */
 void
-doprnt(File *fp, const char *fmt, va_list argp)
+doprnt(FILE* fp, const char *fmt, va_list argp)
 {
 	char buf[SSIZE];
 
-	sys_write(fp, buf, _format(buf, fmt, argp));
+	fwrite(buf, 1, _format(buf, fmt, argp), fp);
 }

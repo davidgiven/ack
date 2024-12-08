@@ -149,18 +149,18 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( STDERR, "Sytax error in line %d, ", lineno);
+		fprint( stderr, "Sytax error in line %d, ", lineno);
 		print_token( LLsymb);
-		fprint( STDERR, "  will be deleted!!\n");
+		fprint( stderr, "  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint( STDERR, "Garbage at end, line %d!!\n",
+		fprint( stderr, "Garbage at end, line %d!!\n",
 			 lineno);
 	}
 	else {
-		fprint( STDERR, "Sytax error in line %d, ", lineno);
+		fprint( stderr, "Sytax error in line %d, ", lineno);
 		print_token( inserted_token);
-		fprint( STDERR, "  will be inserted!!\n");
+		fprint( stderr, "  will be inserted!!\n");
 		token = LLsymb;
 		saved = 1;
 	}
@@ -170,25 +170,25 @@ print_token( token)
 int token;
 {
 	switch ( token) {
-	  case IDENTIFIER : fprint( STDERR,  "IDENTIFIER %s", yytext);
+	  case IDENTIFIER : fprint( stderr,  "IDENTIFIER %s", yytext);
 			  break;
-	  case CALL	: fprint( STDERR,  "CALL  %s", yytext);
+	  case CALL	: fprint( stderr,  "CALL  %s", yytext);
 			  break;
-	  case CONDITION: fprint( STDERR,  "CONDITION  %s", yytext);
+	  case CONDITION: fprint( stderr,  "CONDITION  %s", yytext);
 			  break;
-	  case IF	: fprint( STDERR,  "@if ");
+	  case IF	: fprint( stderr,  "@if ");
 			  break;
-	  case ELSIF	: fprint( STDERR,  "@elsif ");
+	  case ELSIF	: fprint( stderr,  "@elsif ");
 			  break;
-	  case ELSE	: fprint( STDERR,  "@else ");
+	  case ELSE	: fprint( stderr,  "@else ");
 			  break;
-	  case FI	: fprint( STDERR,  "@fi ");
+	  case FI	: fprint( stderr,  "@fi ");
 			  break;
-	  case ARROW	: fprint( STDERR,  "==> ");
+	  case ARROW	: fprint( stderr,  "==> ");
 			  break;
-	  case MORE	: fprint( STDERR,  "... ");
+	  case MORE	: fprint( stderr,  "... ");
 			  break;
-	  default	: fprint( STDERR, "%c ", token);
+	  default	: fprint( stderr, "%c ", token);
 			  break;
 	}
 }

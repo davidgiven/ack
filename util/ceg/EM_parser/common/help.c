@@ -13,7 +13,7 @@ extern out(char *, ...);
 #include "decl.h"
 
 extern int library;
-extern File *outfile;
+extern FILE* outfile;
 
 /* This file contains some routines called from the parser in 'pars.g' */
 
@@ -165,7 +165,7 @@ char *name;
 		name = suffix( name, "c");
 		sys_close( outfile);
 		if ( !sys_open( name, OP_WRITE, &outfile))
-			fprint( STDERR, "!! can't create %s !!\n", name);
+			fprint( stderr, "!! can't create %s !!\n", name);
 		file_header();
 	}
 }

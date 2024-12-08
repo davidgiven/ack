@@ -11,7 +11,7 @@ char *filename;
 	assert( !B_busy);
 
 	if ( !open_back( filename)) {
-		fprint( STDERR, "Couldn't open %s\n", filename);
+		fprint( stderr, "Couldn't open %s\n", filename);
 		return( 0);
 	}
 	B_busy = 1;

@@ -17,12 +17,12 @@
 $ */
 /*VARARGS*/
 void
-fprint(File *fp, const char *fmt, ...)
+fprint(FILE* fp, const char *fmt, ...)
 {
 	va_list args;
 	char buf[SSIZE];
 
 	va_start(args, fmt);
-	sys_write(fp, buf, _format(buf, fmt, args));
+	fwrite(buf, 1, _format(buf, fmt, args), fp);
 	va_end(args);
 }

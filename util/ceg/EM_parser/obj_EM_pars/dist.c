@@ -64,8 +64,8 @@ FILE *f;
 
 #include <system.h>
 
-File *oldout;
-extern File *outfile;
+FILE* oldout;
+extern FILE* outfile;
 
 back_patch()
 /* Echo the text on file '.tmp', but replace every occurence of label-
@@ -109,7 +109,7 @@ save_output()
 
 	oldout = outfile;
 	if ( ! sys_open( ".tmp", OP_WRITE, &outfile))
-		fprint( STDERR, "can't open .tmp\n");
+		fprint( stderr, "can't open .tmp\n");
 	cur_pos = 0;
 	n_labs = 0;
 }

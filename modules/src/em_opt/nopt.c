@@ -110,9 +110,9 @@ void OO_dfa(int last)
 static void fatal(s, a)
 	char *s;int a;
 {
-	fprint(STDERR, "%s: ", filename ? filename : "standard input");
-	fprint(STDERR, s, a);
-	fprint(STDERR, "\n");
+	fprint(stderr, "%s: ", filename ? filename : "standard input");
+	fprint(stderr, s, a);
+	fprint(stderr, "\n");
 	sys_stop(S_EXIT);
 }
 

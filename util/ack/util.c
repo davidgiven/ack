@@ -27,9 +27,9 @@ extern int w_flag;
 extern int n_error;
 
 #ifdef DEBUG
-#define STDOUT stdout
+#define stdout stdout
 #else
-#define STDOUT stderr
+#define stdout stderr
 #endif
 
 char* ack_basename(const char* string)
@@ -91,9 +91,9 @@ void fatal(const char* fmt, ...)
 	/* Fatal internal error */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT, "%s: fatal internal error, ", progname);
-	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT, "\n");
+	fprintf(stdout, "%s: fatal internal error, ", progname);
+	vfprintf(stdout, fmt, ap);
+	fprintf(stdout, "\n");
 	quit(-2);
 }
 
@@ -103,7 +103,7 @@ void vprint(const char* fmt, ...)
 	/* Diagnostic print, no auto NL */
 	va_list ap;
 	va_start(ap, fmt);
-	vfprintf(STDOUT, fmt, ap);
+	vfprintf(stdout, fmt, ap);
 	va_end(ap);
 }
 
@@ -113,9 +113,9 @@ void fuerror(const char* fmt, ...)
 	/* Fatal user error */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT, "%s: ", progname);
-	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT, "\n");
+	fprintf(stdout, "%s: ", progname);
+	vfprintf(stdout, fmt, ap);
+	fprintf(stdout, "\n");
 	quit(-1);
 }
 
@@ -127,9 +127,9 @@ void werror(const char* fmt, ...)
 	if (w_flag)
 		return;
 	va_start(ap, fmt);
-	fprintf(STDOUT, "%s: warning, ", progname);
-	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT, "\n");
+	fprintf(stdout, "%s: warning, ", progname);
+	vfprintf(stdout, fmt, ap);
+	fprintf(stdout, "\n");
 	va_end(ap);
 }
 
@@ -139,9 +139,9 @@ void error(const char* fmt, ...)
 	/* User error, it is the callers responsibility to quit */
 	va_list ap;
 	va_start(ap, fmt);
-	fprintf(STDOUT, "%s: ", progname);
-	vfprintf(STDOUT, fmt, ap);
-	fprintf(STDOUT, "\n");
+	fprintf(stdout, "%s: ", progname);
+	vfprintf(stdout, fmt, ap);
+	fprintf(stdout, "\n");
 	n_error++;
 	va_end(ap);
 }

@@ -29,7 +29,7 @@ do_local_relocation()
 					sect = data_area;
 					break;
 				default:
-					fprint( STDERR, 
+					fprint( stderr, 
 					  "do_local_relo(): bad section %d\n",
 				 		rp->or_sect - S_MIN);
 					break;
@@ -39,7 +39,7 @@ do_local_relocation()
 					np->on_valu +
 					B_base_address[(np->on_type&S_TYP)-S_MIN];
 			else
-				fprint( STDERR,
+				fprint( stderr,
 				  "do_relo() : bad relocation size\n");
 		}
 	}

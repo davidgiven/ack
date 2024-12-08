@@ -70,15 +70,9 @@ extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 #define fprint fprintf
 #define sprint sprintf
 #define print printf
-#undef STDOUT
-#define STDOUT stdout
-#undef STDERR
-#define STDERR stderr
-#undef STDIN
-#define STDIN stdin
 #undef File
 #define File FILE
 #define sys_close fclose
 #include <stdio.h>
 
-extern File *codefile;
+extern FILE* codefile;

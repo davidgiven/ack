@@ -25,7 +25,7 @@ static char	*assem_instr = 0;	/* Name of the current assembly instr */
 static Bool	restriction = FALSE;	/* Is there a restriction on the
 					 * current operand?
 					 */
-File *outfile;
+FILE* outfile;
 
 save_instr( instr, len)
 char *instr;
@@ -171,7 +171,7 @@ char *quest;
 
 init_table()
 {
-	outfile = STDOUT;
+	outfile = stdout;
 	out( "#include \"as.h\"\n");
 	out( "#include \"as_parser.h\"\n");
 }
@@ -237,9 +237,9 @@ error(char *fmt, ...)
 
 	nerrors++;
 	va_start(pvar, fmt);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprint( stderr, "!! ERROR :	");
+	doprnt( stderr, fmt, pvar);
+	fprint( stderr, "	!!\n");
 	va_end(pvar);
 }
 #else
@@ -268,9 +268,9 @@ va_dcl
 	nerrors++;
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprint( stderr, "!! ERROR :	");
+	doprnt( stderr, fmt, pvar);
+	fprint( stderr, "	!!\n");
 	va_end(pvar);
 }
 #endif

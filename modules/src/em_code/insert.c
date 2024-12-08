@@ -164,7 +164,7 @@ static int swttmp(void)
 		}
 	}
 	if (! C_ontmpfile) {
-		File *p = C_ofp;
+		FILE* p = C_ofp;
 
 		C_flush();
 		C_ofp = C_old_ofp;
@@ -192,7 +192,7 @@ static int swtout(void)
 {
 #ifndef INCORE
 	if (C_ontmpfile) {
-		File *p = C_ofp;
+		FILE* p = C_ofp;
 
 		C_flush();
 		C_ofp = C_old_ofp;

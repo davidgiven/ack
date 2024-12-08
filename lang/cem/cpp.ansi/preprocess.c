@@ -32,7 +32,7 @@ extern int InputLevel;
 
 void Xflush(void)
 {
-	sys_write(STDOUT, _obuf, OBUFSIZE);
+	fwrite(_obuf, 1, OBUFSIZE, stdout);
 }
 
 static char* SkipComment(char *op, int *lineno);
@@ -135,7 +135,7 @@ void preprocess(char *fn)
 	int lineno = 0;
 	int startline;
 
-#define flush(X) (sys_write(STDOUT, _obuf, X))
+#define flush(X) (fwrite(_obuf, 1, X, stdout))
 #define echo(ch)                                                                                   \
 	if (op == ob)                                                                                  \
 	{                                                                                              \

@@ -266,7 +266,7 @@ unstack_world()
 	list is generated.
 */
 extern char *nmlist;	/* BAH! -- main.c	*/
-static File *nfp = 0;
+static FILE* nfp = 0;
 
 open_name_list()
 {
@@ -278,7 +278,7 @@ namelist(nm)
 	char *nm;
 {
 	if (nmlist)	{
-		sys_write(nfp, nm, strlen(nm));
-		sys_write(nfp, "\n", 1);
+		fwrite(nm, 1, strlen(nm), nfp);
+		fputc('\n', nfp);
 	}
 }

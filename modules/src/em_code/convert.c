@@ -71,12 +71,12 @@ main(argc,argv)
 error(s,a1,a2,a3,a4)
 	char *s;
 {
-	fprint(STDERR,
+	fprint(stderr,
 		"%s, line %d: ",
 		filename ? filename : "standard input",
 		EM_lineno);
-	fprint(STDERR,s,a1,a2,a3,a4);
-	fprint(STDERR, "\n");
+	fprint(stderr,s,a1,a2,a3,a4);
+	fprint(stderr, "\n");
 	errors++;
 }
 

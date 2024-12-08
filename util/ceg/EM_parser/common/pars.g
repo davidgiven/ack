@@ -39,7 +39,7 @@ extern int first_action, last_action, token;
 
 t_token tok, stok;
 int no_conversions = FALSE, library, segment = UNKNOWN;
-File *outfile;
+FILE* outfile;
 char *to_change;
 
 }
@@ -211,20 +211,20 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( STDERR, "EM_table : syntax error in line %d, >>",
+		fprint( stderr, "EM_table : syntax error in line %d, >>",
 			yylineno);
 		print_token( LLsymb);
-		fprint( STDERR, "<<  will be deleted!!\n");
+		fprint( stderr, "<<  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint(STDERR,"EM_table : syntax error in line %d, garbage at end of table\n",
+		fprint(stderr,"EM_table : syntax error in line %d, garbage at end of table\n",
 			 yylineno);
 	}
 	else {
-		fprint( STDERR, "EM_table : syntax error in line %d, >>",
+		fprint( stderr, "EM_table : syntax error in line %d, >>",
 			yylineno);
 		print_token( inserted_token);
-		fprint( STDERR, "<<  will be inserted!!\n");
+		fprint( stderr, "<<  will be inserted!!\n");
 		token = LLsymb;
 		saved = 1;
 	}
@@ -234,21 +234,21 @@ print_token( token)
 int token;
 {
 	switch ( token) {
-	  case C_INSTR 	: fprint( STDERR,  "C_INSTR  %s", yytext);
+	  case C_INSTR 	: fprint( stderr,  "C_INSTR  %s", yytext);
 			  break;
-	  case ASSEM_INSTR : fprint( STDERR,  "STRING  %s", yytext);
+	  case ASSEM_INSTR : fprint( stderr,  "STRING  %s", yytext);
 			  break;
-	  case CALL	: fprint( STDERR,  "CALL  %s", yytext);
+	  case CALL	: fprint( stderr,  "CALL  %s", yytext);
 			  break;
-	  case ARROW	: fprint( STDERR,  "==> ");
+	  case ARROW	: fprint( stderr,  "==> ");
 			  break;
-	  case CONDITION: fprint( STDERR,  "CONDITION  %s", yytext);
+	  case CONDITION: fprint( stderr,  "CONDITION  %s", yytext);
 			  break;
-	  case DEFAULT	: fprint( STDERR,  "default ");
+	  case DEFAULT	: fprint( stderr,  "default ");
 			  break;
-	  case ERROR	: fprint( STDERR,  "unmatched  %s", yytext);
+	  case ERROR	: fprint( stderr,  "unmatched  %s", yytext);
 			  break;
-	  default	: fprint( STDERR, " %c", token);
+	  default	: fprint( stderr, " %c", token);
 			  break;
 	}
 }
@@ -302,7 +302,7 @@ main( argc, argv)
 int argc;
 char **argv;
 {
-	outfile = STDOUT;
+	outfile = stdout;
 	if ( argc > 1) {
 		if ( strcmp( argv[1], "-l") == 0)
 			library = TRUE;
@@ -311,7 +311,7 @@ char **argv;
 			to_change = argv[2];
 			c_table();
 			if (to_change) {
-				fprint( STDERR, "No rule for %s\n", to_change);
+				fprint( stderr, "No rule for %s\n", to_change);
 				exit( 1);
 			}
 			exit(nerrors);

@@ -262,7 +262,7 @@ void unstack_world(void)
 	list is generated.
 */
 extern char *nmlist;	/* BAH! -- main.c	*/
-static File *nfp = 0;
+static FILE* nfp = 0;
 
 void open_name_list(void)
 {

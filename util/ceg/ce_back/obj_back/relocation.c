@@ -39,7 +39,7 @@ do_local_relocation()
 					sect = data_area;
 					break;
 				default:
-					fprint( STDERR, 
+					fprint( stderr, 
 					  "do_local_relo(): bad section %d\n",
 				 		rp->or_sect - S_MIN);
 					break;
@@ -61,7 +61,7 @@ do_local_relocation()
 				put1( sect, rp->or_addr, (char) newval);
 			}
 			else
-				fprint( STDERR, "do_relo() : bad relocation size\n");
+				fprint( stderr, "do_relo() : bad relocation size\n");
 			rp->or_nami = seg_index((np->on_type & S_TYP) - S_MIN);
 	 		/* printf( 
 				"reloc %s adrr=%ld sect=%ld oldval=%ld newval=%ld def = %ld\n",

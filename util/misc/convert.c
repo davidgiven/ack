@@ -88,10 +88,10 @@ void error(const char *s, ...)
 {
 	va_list ap;
 	va_start(ap, s);
-	fprint(STDERR, "%s, line %d: ", filename ? filename : "standard input",
+	fprint(stderr, "%s, line %d: ", filename ? filename : "standard input",
 			EM_lineno);
-	doprnt(STDERR, s, ap);
-	fprint(STDERR, "\n");
+	doprnt(stderr, s, ap);
+	fprint(stderr, "\n");
 	errors++;
 	va_end(ap);
 }

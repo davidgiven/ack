@@ -191,7 +191,7 @@ char fgets_buf[GETSBUFSIZE];
 
 
 
-char *our_fgets(char* buffer, int n_char, File* stream)
+char *our_fgets(char* buffer, int n_char, FILE*  stream)
 {
     /* Read one line or n_char */
     static int characters_left = 0;
@@ -217,10 +217,10 @@ char *our_fgets(char* buffer, int n_char, File* stream)
                 return(buffer);
             }
         } else { /* Read new block */
-            sys_read(stream,fgets_buf,GETSBUFSIZE,&characters_left);
+			characters_left = fread(fgets_buf, 1, GETSBUFSIZE, stream);
             internal_bufp = fgets_buf;
                 /* Move pointer  back to the beginning */
-            if ( characters_left == 0 ) { /* Nothing read */
+            if ( characters_left <= 0 ) { /* Nothing read */
                 if ( external_bufp == buffer ) {
                     *external_bufp = '\0';
                     return(0);  /* EOF */
@@ -244,7 +244,7 @@ int getinputline(void)
 		error("source line too long");
 	inputline[MAXLINELENGTH-1]=0;
 	if ( listing)
-		fprint(STDERR, inputline);
+		fprint(stderr, inputline);
 	cptr= inputline;
 	return(TRUE);
 }

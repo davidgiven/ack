@@ -49,7 +49,7 @@
 #define switchseg		B_switchseg
 #define not_implemented		B_not_implemented
 
-extern File *codefile;
+extern FILE* codefile;
 
 extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),

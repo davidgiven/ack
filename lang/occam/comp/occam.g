@@ -711,7 +711,7 @@ LLmessage(tk) register tk;
 		warning("syntax error: garbage at end of program");
 	}
 	if (++errors==MAXERRORS) {
-		fprint(STDERR, "Too many insert/delete errors. Compiler ends.\n");
+		fprint(stderr, "Too many insert/delete errors. Compiler ends.\n");
 		err=1; trailer(); exit(1);
 	}
 }

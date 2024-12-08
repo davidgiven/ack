@@ -89,7 +89,7 @@ int	def_start,	/* Index in def_info[], start of the expanded C_INSTR */
 	def_end,	/* last expanded C_INSTR index. */
 	save_lineno;
 
-extern File *outfile;
+extern FILE* outfile;
 extern char yytext[];
 extern int yylineno;
 

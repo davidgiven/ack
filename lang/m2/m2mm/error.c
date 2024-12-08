@@ -228,10 +228,10 @@ _error(class, fmt, argv)
 		break;
 	}
 	
-	if (FileName) fprint(STDERR, "\"%s\", line %u: ", FileName, ln);
+	if (FileName) fprint(stderr, "\"%s\", line %u: ", FileName, ln);
 
-	if (remark) fprint(STDERR, "%s ", remark);
+	if (remark) fprint(stderr, "%s ", remark);
 
-	doprnt(STDERR, fmt, argv);		/* contents of error */
-	fprint(STDERR, "\n");
+	doprnt(stderr, fmt, argv);		/* contents of error */
+	fprint(stderr, "\n");
 }

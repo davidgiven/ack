@@ -5,7 +5,7 @@
 int cur_seg = -1, saved = 0;
 char name[256], labeltje[256];
 
-File *codefile;
+FILE* codefile;
 
 
 align_word()

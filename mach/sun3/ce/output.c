@@ -10,7 +10,7 @@
 Read above comment ...
 #endif
 
-extern File *B_out_file;
+extern FILE* B_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
@@ -224,7 +224,7 @@ struct relocation_info *u_relo;
 			case SEGBSS : u_relo->r_symbolnum = N_BSS;
 				      break;
 /*	Shut up; this could actually happen on erroneous input
-			default : fprint( STDERR, 
+			default : fprint( stderr, 
 					   "convert_relo(): bad segment %d\n",
 			    (symbol_table[ a_relo->or_nami].on_type & S_TYP) - S_MIN);
 */
@@ -263,7 +263,7 @@ struct nlist *u_name;
 			break;
 /*	Shut up; this could actually happen on erroneous input
 		default:
-			fprint(STDERR, "convert_name(): bad section %d\n",
+			fprint(stderr, "convert_name(): bad section %d\n",
 				(a_name->on_type & S_TYP) - S_MIN);
 			break;
 */

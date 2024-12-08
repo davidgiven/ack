@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	}
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc < 2) {
-		fprint(STDERR, "%s: Use a file argument\n", ProgName);
+		fprint(stderr, "%s: Use a file argument\n", ProgName);
 		sys_stop(S_EXIT);
 	}
 	sys_stop(Compile(Nargv[1], Nargv[2]) ? S_END : S_EXIT);
@@ -96,7 +96,7 @@ int Compile(char *src, char *dst)
 	extern struct tokenname tkidf[];
 
 	if (! InsertFile(src, (char **) 0, &src)) {
-		fprint(STDERR,"%s: cannot open %s\n", ProgName, src);
+		fprint(stderr,"%s: cannot open %s\n", ProgName, src);
 		return 0;
 	}
 	LineNumber = 1;

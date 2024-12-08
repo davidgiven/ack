@@ -9,8 +9,8 @@
 #include <stdarg.h>
 #include <system.h>
 
-void fprint(File *f, const char *fmt, ...);
-void doprnt(File *f, const char *fmt, va_list ap);
+void fprint(FILE *f, const char *fmt, ...);
+void doprnt(FILE *f, const char *fmt, va_list ap);
 int _format(char *buf, const char *fmt, va_list ap);
 
 #endif /* __PRINT_INCLUDED__ */

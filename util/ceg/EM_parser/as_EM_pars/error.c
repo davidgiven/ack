@@ -14,9 +14,9 @@ error(char *fmt, ...)
 	va_list pvar;
 
 	va_start(pvar, fmt);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprint( stderr, "!! ERROR :	");
+	doprnt( stderr, fmt, pvar);
+	fprint( stderr, "	!!\n");
 	va_end(pvar);
 	nerrors++;
 }
@@ -30,9 +30,9 @@ va_dcl
 
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprint( stderr, "!! ERROR :	");
+	doprnt( stderr, fmt, pvar);
+	fprint( stderr, "	!!\n");
 	va_end(pvar);
 	nerrors++;
 }

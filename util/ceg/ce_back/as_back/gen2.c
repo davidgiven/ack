@@ -12,6 +12,6 @@ TWO_BYTES w;
 			break;
 	  case SEGBSS : bss( (arith) 2);
 			break;
-	  default : fprint( STDERR, "gen2 unkown seg %d\n", cur_seg);
+	  default : fprint( stderr, "gen2 unkown seg %d\n", cur_seg);
 	}
 }

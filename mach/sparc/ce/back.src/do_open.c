@@ -4,7 +4,7 @@ open_back( filename)
 char *filename;
 {
 	if ( filename == (char *) 0) {
-		codefile= STDOUT;
+		codefile= stdout;
 #ifdef __solaris__
 		fprint(codefile, ".section \".text\"\n");
 #endif

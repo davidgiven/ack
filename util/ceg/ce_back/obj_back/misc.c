@@ -22,7 +22,7 @@ align_word()
 		case SEGBSS : while ( nbss % EM_WSIZE != 0) 
 					nbss++;
 			      return;
-		default     : fprint( STDERR, "align_word() : unknown seg\n");
+		default     : fprint( stderr, "align_word() : unknown seg\n");
 			      return;
 	}
 }
@@ -38,7 +38,7 @@ long cur_value()
 		case SEGCON: return data - data_area;
 		case SEGROM: return data - data_area;
 		case SEGBSS: return nbss;
-		default    : fprint( STDERR, "cur_value() : unknown seg\n");
+		default    : fprint( stderr, "cur_value() : unknown seg\n");
 			     return -1L;
 	}
 }
