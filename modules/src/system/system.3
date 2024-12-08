@@ -50,10 +50,6 @@ sys_lock, sys_unlock, sys_stop \- system call interface
 .B long sys_filesize(path)
 .B char *path;
 .PP
-.B int sys_chmode(path, mode)
-.B char *path;
-.B int mode;
-.PP
 .B int sys_lock(name)
 .B char *name;
 .PP
@@ -234,12 +230,6 @@ file specified by
 .IR path ,
 if possible.
 The value \-1L is returned if the size cannot be retrieved for some reason.
-.PP
-.I Sys_chmode
-changes the file-protection mode of file
-.I path
-to 
-.IR mode .
 .PP
 .I Sys_lock
 and

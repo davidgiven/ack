@@ -49,7 +49,6 @@ int sys_access(char *, int);
 int sys_remove(char *);
 int sys_rename(char *, char *);
 off_t sys_filesize(char *);
-int sys_chmode(char *, int);
 /* Return the temporary directory location */
 char* sys_gettmpdir(void);
 /* Call another program. */
