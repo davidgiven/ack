@@ -1,7 +1,7 @@
 .TH SYSTEM 3 "$Revision$"
 .ad
 .SH NAME
-sys_open, sys_close, sys_read, sys_write, sys_reset, sys_access,
+sys_open, sys_close, sys_read, sys_write, sys_reset,
 sys_modtime, sys_filesize,
 sys_lock, sys_unlock, sys_stop \- system call interface
 .SH SYNOPSIS
@@ -36,10 +36,6 @@ sys_lock, sys_unlock, sys_stop \- system call interface
 .PP
 .B int sys_reset(filep)
 .B File *filep
-.PP
-.B int sys_access(path, mode)
-.B char *path;
-.B int mode;
 .PP
 .B long sys_filesize(path)
 .B char *path;
@@ -162,29 +158,6 @@ causes the open file known by
 .I filep
 to be re-opened for reading (cf. open flag OP_READ).
 This may be useful in reading anonymous files.
-.PP
-.I Sys_access
-checks the given file
-.I path
-for accessibility according to
-.I mode
-which is the result of
-.IR or 'ing
-one or more of the following values:
-.IP AC_READ 15
-file exists and is readable
-.IP AC_WRITE 15
-file exists and is writable
-.IP AC_EXEC 15
-file exists and is executable
-.LP
-Specifying 
-.I mode
-as 0 tests whether the directories leading to the file can be searched and the
-file exists.
-The return value is either 0 if the
-file is not reachable, does not exist or if the access is not allowed,
-or 1 if the indicated access is permitted.
 .PP
 .I Sys_modtime
 returns the last-modified time of the file specified in

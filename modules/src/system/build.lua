@@ -1,7 +1,6 @@
 clibrary {
 	name = "lib",
 	srcs = {
-		"./access.c",
 		"./basename.c",
 		"./close.c",
 		"./create.c",

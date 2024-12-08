@@ -26,12 +26,6 @@ extern File sys_stderr;
 #define OP_WRITE	02
 #define OP_APPEND	04
 
-/* flags for sys_access() */
-#define AC_EXIST	00
-#define AC_READ		04
-#define AC_WRITE	02
-#define AC_EXEC		01
-
 /* flags for sys_stop() */
 #define S_END	0
 #define S_EXIT	1
@@ -45,7 +39,6 @@ int sys_read(File *, char *, int, int *);
 int sys_write(File *, char *, int);
 int sys_seek(File *, long, int, long *);
 int sys_reset(File *);
-int sys_access(char *, int);
 off_t sys_filesize(char *);
 /* Return the temporary directory location */
 char* sys_gettmpdir(void);
