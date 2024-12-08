@@ -88,7 +88,7 @@ fatal(char *fmt, ...)
 	va_start(ap, fmt);
 	_error(FATAL, fmt, ap);
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS1*/
@@ -100,9 +100,9 @@ crash(char *fmt, ...)
 	_error(CRASH, fmt, ap);
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #else
@@ -159,7 +159,7 @@ fatal(va_alist)
 	fmt = va_arg(ap, char *);
 	_error(FATAL, fmt, ap);
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS1*/
@@ -174,9 +174,9 @@ crash(va_alist)
 	_error(CRASH, fmt, ap);
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #endif

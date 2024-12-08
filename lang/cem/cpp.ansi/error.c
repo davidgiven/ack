@@ -80,7 +80,7 @@ NORETURN void crash(char *fmt, ...)
 	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_ABORT);
+	abort();
 }
 
 /*VARARGS*/
@@ -93,7 +93,7 @@ NORETURN void fatal(char *fmt, ...)
 	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 #else
 /*VARARGS*/
@@ -155,7 +155,7 @@ void crash(va_alist)
 	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_ABORT);
+	abort();
 }
 
 /*VARARGS*/
@@ -171,6 +171,6 @@ void fatal(va_alist)
 	doprnt(ERROUT, fmt, ap);
 	fprint(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 #endif

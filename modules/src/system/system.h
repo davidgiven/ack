@@ -10,17 +10,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-/* flags for sys_stop() */
-#define S_END	0
-#define S_EXIT	1
-#define S_ABORT	2
-
 extern off_t sys_filesize(char *);
 /* Return the temporary directory location */
 extern char* sys_gettmpdir(void);
 /* Call another program. */
 extern int sys_system(const char* prog, const char* const* argv);
-extern NORETURN void sys_stop(int);
 
 /* Extract the base name from a full path specification
  * in "str" and returns it in "dst".

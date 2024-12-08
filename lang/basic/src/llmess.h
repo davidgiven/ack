@@ -42,7 +42,7 @@ void LLmessage(int insertedtok )
     if ( insertedtok < 0 ) {
 	error("Fatal stack overflow\n");
 	C_close();
-	sys_stop( S_EXIT );
+	exit(1);
     }
 
     if ( insertedtok == 0 ) 

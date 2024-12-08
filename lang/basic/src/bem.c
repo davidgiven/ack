@@ -53,7 +53,7 @@ int main(int argc,char **argv)
 	compileprogram();
 	linewarnings();
 	C_close();
-	if( errorcnt) sys_stop(S_EXIT);
+	if( errorcnt) exit(1);
 	/* process em object files */
-	sys_stop(S_END);   /* This was not done in the old compiler */
+	exit(0);   /* This was not done in the old compiler */
 }

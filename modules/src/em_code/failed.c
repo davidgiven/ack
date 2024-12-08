@@ -8,5 +8,5 @@
 void C_failed(void)
 {
 	fputs("read, write, or open failed\n", stderr);
-	sys_stop(S_EXIT);
+	exit(1);
 }

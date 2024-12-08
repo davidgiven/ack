@@ -406,7 +406,7 @@ int dotransition(
 		p->op=mnem;
 		if(++higheststate>MAXSTATES) {
 			fprintf(stderr,"Parser: More than %d states\n",MAXSTATES);
-			sys_stop(S_EXIT);
+			exit(1);
 		}
 		p->goto_state= higheststate;
 		p->next=states[currentstate];
@@ -501,9 +501,9 @@ int main(int argc, char **argv)
 	parser();
 	if(nerrors) {
 		fprintf(stderr,"%d errors detected\n",nerrors);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 	outputnopt();
-	sys_stop(S_END);
+	exit(0);
 }
 }

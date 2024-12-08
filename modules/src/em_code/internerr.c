@@ -10,5 +10,5 @@
 void C_internal_error(void)
 {
 	fputs("internal error\n", stderr);
-	sys_stop(S_EXIT);
+	exit(1);
 }

@@ -85,9 +85,9 @@ int main(int argc, char **argv)
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if (Nargc < 2) {
 		fprint(stderr, "%s: Use a file argument\n", ProgName);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
-	sys_stop(Compile(Nargv[1], Nargv[2]) ? S_END : S_EXIT);
+	exit(Compile(Nargv[1], Nargv[2]) ? 0 : 1);
 	UNREACHABLE_CODE;
 }
 

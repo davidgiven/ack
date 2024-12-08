@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 	if (options['m']) Info();
 #endif	/* DEBUG */
 
-	sys_stop(err_occurred ? S_EXIT : S_END);
+	exit(err_occurred ? 1 : 0);
 	UNREACHABLE_CODE;
 }
 

@@ -198,9 +198,9 @@ crash(char *fmt, ...)
 
 	C_close();
 #ifdef	DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else	/* DEBUG */
-	sys_stop(S_EXIT);
+	exit(1);
 #endif	/* DEBUG */
 	UNREACHABLE_CODE;
 }
@@ -217,7 +217,7 @@ fatal(char *fmt, ...)
 	va_end(ap);
 
 	if (C_busy()) C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 	UNREACHABLE_CODE;
 }
 #else
@@ -384,9 +384,9 @@ crash(va_alist)				/* fmt, args */
 
 	C_close();
 #ifdef	DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else	/* DEBUG */
-	sys_stop(S_EXIT);
+	exit(1);
 #endif	/* DEBUG */
 	UNREACHABLE_CODE;
 }
@@ -405,7 +405,7 @@ fatal(va_alist)				/* fmt, args */
 	va_end(ap);
 
 	if (C_busy()) C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 	UNREACHABLE_CODE;
 }
 #endif

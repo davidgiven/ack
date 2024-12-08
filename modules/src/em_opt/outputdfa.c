@@ -51,7 +51,7 @@ static void openofile(char *filename)
 	if ((ofile = fopen(ofiletemp, "wb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannot open output file %s\n", ofiletemp);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 }
 
@@ -68,7 +68,7 @@ static void installofile(void)
 	if ((f1 = fopen(ofiletemp, "rb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannont reopen file %s\n", ofiletemp);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 	if ((f2 = fopen(ofilename, "rb")) == NULL)
 	{
@@ -103,7 +103,7 @@ static void RENAME(char *x, char*y)
 	if (rename(x, y) != 0)
 	{
 		fprintf(stderr, "Cannot rename to %s", y);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 }
 

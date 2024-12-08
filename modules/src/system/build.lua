@@ -5,7 +5,6 @@ clibrary {
 		"./filesize.c",
 		"./maketempfile.c",
 		"./setbinarymode.c",
-		"./stop.c",
 		"./strndup.c",
 		"./syssystem.c",
 		"./tmpdir.c",

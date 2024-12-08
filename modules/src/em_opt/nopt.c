@@ -113,7 +113,7 @@ static void fatal(s, a)
 	fprint(stderr, "%s: ", filename ? filename : "standard input");
 	fprint(stderr, s, a);
 	fprint(stderr, "\n");
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 static void allocmem(void)

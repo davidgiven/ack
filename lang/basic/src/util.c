@@ -51,7 +51,7 @@ void fatal(char* str)
 {
 	Xerror("FATAL",str);
 	C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 

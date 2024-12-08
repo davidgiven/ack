@@ -34,7 +34,7 @@ void parseparams(int argc,char **argv)
 	{
 		fprint(stderr,"usage %s <flags> <file> <file> <source>\n", 
 			argv[0]);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 
 	for(i=1;i<argc;i++)

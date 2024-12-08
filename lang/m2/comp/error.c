@@ -162,7 +162,7 @@ NORETURN void fatal(char *fmt, ...)
 		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS*/
@@ -176,9 +176,9 @@ NORETURN void crash(char *fmt, ...)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #else
@@ -299,7 +299,7 @@ void fatal(va_alist)
 		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS*/
@@ -315,9 +315,9 @@ void crash(va_alist)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #endif
