@@ -6,7 +6,6 @@ clibrary {
 		"./create.c",
 		"./filesize.c",
 		"./maketempfile.c",
-		"./modtime.c",
 		"./open.c",
 		"./read.c",
 		"./seek.c",

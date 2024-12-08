@@ -2,7 +2,7 @@
 .ad
 .SH NAME
 sys_open, sys_close, sys_read, sys_write, sys_reset,
-sys_modtime, sys_filesize,
+sys_filesize,
 sys_lock, sys_unlock, sys_stop \- system call interface
 .SH SYNOPSIS
 .nf
@@ -45,9 +45,6 @@ sys_lock, sys_unlock, sys_stop \- system call interface
 .PP
 .B void sys_stop(how)
 .B int how;
-.PP
-.B long sys_modtime(path)
-.B char *path;
 .fi
 .SH DESCRIPTION
 This package provides a rather system-independent set of "system" calls
@@ -158,20 +155,6 @@ causes the open file known by
 .I filep
 to be re-opened for reading (cf. open flag OP_READ).
 This may be useful in reading anonymous files.
-.PP
-.I Sys_modtime
-returns the last-modified time of the file specified in
-.IR path .
-Any failure is indicated by a return value of \-1L.
-.PP
-.I Sys_rename
-renames file
-.I path1
-to
-.IR path2 .
-A non-zero return value indicates successful action. If
-.I path2
-exists, it is removed first.
 .PP
 The function 
 .I sys_filesize

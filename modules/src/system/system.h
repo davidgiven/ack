@@ -45,7 +45,6 @@ char* sys_gettmpdir(void);
 /* Call another program. */
 int sys_system(const char* prog, const char* const* argv);
 NORETURN void sys_stop(int);
-time_t sys_modtime(char *);
 
 /* standard file decsriptors */
 #define STDIN	&sys_stdin
