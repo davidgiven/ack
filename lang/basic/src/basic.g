@@ -231,20 +231,20 @@ filelist { int intv; }
 		]* ;
 
 datastmt:	DATASYM		{ datastmt(); in_data = 1;}
-                datalist	{ fprint(datfile,"\n"); in_data = 0; }
+                datalist	{ fprintf(datfile,"\n"); in_data = 0; }
 	;
 
-dataelm : INTVALUE		{ fprint(datfile,"%d",ival); }
-	| '-' [ INTVALUE	{ fprint(datfile,"%d",-ival); }
-	      | FLTVALUE	{ fprint(datfile,"-%s",dval); }
+dataelm : INTVALUE		{ fprintf(datfile,"%d",ival); }
+	| '-' [ INTVALUE	{ fprintf(datfile,"%d",-ival); }
+	      | FLTVALUE	{ fprintf(datfile,"-%s",dval); }
 	      ]
-	| FLTVALUE		{ fprint(datfile,dval); }
-	| STRVALUE		{ fprint(datfile,"\"%s\"",sval); }
-	| IDENTIFIER		{ fprint(datfile,"\"%s\"",sval); }
+	| FLTVALUE		{ fprintf(datfile,dval); }
+	| STRVALUE		{ fprintf(datfile,"\"%s\"",sval); }
+	| IDENTIFIER		{ fprintf(datfile,"\"%s\"",sval); }
 	;
 
 datalist: dataelm
-	  [ ',' 		{ fprint(datfile,","); } 
+	  [ ',' 		{ fprintf(datfile,","); } 
           dataelm ]*
 	;
 

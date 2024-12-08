@@ -20,7 +20,7 @@ $ */
 printf(format) char *format; { ; }
 
 /* FORMAT1 */
-fprint(filep, format) FILE* filep; char *format; { ; }
+fprintf(filep, format) FILE* filep; char *format; { ; }
 /* FORMAT1 */
 sprintf(s, format) char *s; char *format; { ; }
 /* FORMAT1 */

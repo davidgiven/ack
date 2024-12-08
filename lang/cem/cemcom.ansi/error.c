@@ -610,9 +610,9 @@ static void _error(int class, char *fn, unsigned int ln, char* fmt, va_list ap)
 #endif	/* LINT */
 	
 	if (fn)
-		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
+		fprintf(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
-		fprint(ERROUT, "%s ", remark);
+		fprintf(ERROUT, "%s ", remark);
 	doprnt(ERROUT, fmt, ap);		/* contents of error */
-	fprint(ERROUT, "\n");
+	fprintf(ERROUT, "\n");
 }

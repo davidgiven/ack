@@ -142,30 +142,30 @@ char *str;
 		out( "cur_pos += %d;\n", *(str+5) - '0');
 
 	pr_text_with_conversions( str);
-	out( "fprint( outfile, \";\");");
+	out( "fprintf( outfile, \";\");");
 }
 
 pr_end()
 {
-	out( "fprint( outfile, \"}\\n\");");
+	out( "fprintf( outfile, \"}\\n\");");
 }
 
 pr_els()
 {
-	out( "fprint( outfile, \"else\\n\");");
+	out( "fprintf( outfile, \"else\\n\");");
 }
 
 pr_else()
 {
-	out( "fprint( outfile, \"else {\\n\");");
+	out( "fprintf( outfile, \"else {\\n\");");
 }
 
 pr_question( quest)
 char *quest;
 {
-	out( "fprint( outfile, \"if\");");
+	out( "fprintf( outfile, \"if\");");
         pr_text_with_conversions( quest);
-	out( "fprint( outfile, \"{\\n\");");
+	out( "fprintf( outfile, \"{\\n\");");
 }
 
 
@@ -237,9 +237,9 @@ error(char *fmt, ...)
 
 	nerrors++;
 	va_start(pvar, fmt);
-	fprint( stderr, "!! ERROR :	");
+	fprintf( stderr, "!! ERROR :	");
 	doprnt( stderr, fmt, pvar);
-	fprint( stderr, "	!!\n");
+	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }
 #else
@@ -268,9 +268,9 @@ va_dcl
 	nerrors++;
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	fprint( stderr, "!! ERROR :	");
+	fprintf( stderr, "!! ERROR :	");
 	doprnt( stderr, fmt, pvar);
-	fprint( stderr, "	!!\n");
+	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }
 #endif

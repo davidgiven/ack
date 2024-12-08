@@ -244,7 +244,7 @@ int getinputline(void)
 		error("source line too long");
 	inputline[MAXLINELENGTH-1]=0;
 	if ( listing)
-		fprint(stderr, inputline);
+		fprintf(stderr, inputline);
 	cptr= inputline;
 	return(TRUE);
 }

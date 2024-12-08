@@ -166,7 +166,7 @@ reduce_name_table()
 
 wr_fatal()
 {
-	fprint( stderr, "write failed\n");
+	fprintf( stderr, "write failed\n");
 	abort();
 }
 

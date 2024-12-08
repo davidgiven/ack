@@ -12,7 +12,7 @@ char *str;
 		/* ptr points to '%'-sign */
 	 	*ptr = '\0';
 
-		out( "fprint( outfile, \"");
+		out( "fprintf( outfile, \"");
 		out_string( str);
 		out( "\");");
 
@@ -20,7 +20,7 @@ char *str;
 	        str = pr_conversion( ptr);
 	}
 
-	out( "fprint( outfile, \"");
+	out( "fprintf( outfile, \"");
 	out_string( str);
 	out( "\");");
 }
@@ -132,7 +132,7 @@ char *str;
 	else if ( strncmp( str+1, "dist", 4) == 0)
 		out( "dist( %s);", start);
 	else
-		out( "fprint( outfile, \"%%%s\", %s);", str+1, start);
+		out( "fprintf( outfile, \"%%%s\", %s);", str+1, start);
 
 	return( ptr+1);
 }

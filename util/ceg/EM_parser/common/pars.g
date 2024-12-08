@@ -211,20 +211,20 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( stderr, "EM_table : syntax error in line %d, >>",
+		fprintf( stderr, "EM_table : syntax error in line %d, >>",
 			yylineno);
 		print_token( LLsymb);
-		fprint( stderr, "<<  will be deleted!!\n");
+		fprintf( stderr, "<<  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint(stderr,"EM_table : syntax error in line %d, garbage at end of table\n",
+		fprintf(stderr,"EM_table : syntax error in line %d, garbage at end of table\n",
 			 yylineno);
 	}
 	else {
-		fprint( stderr, "EM_table : syntax error in line %d, >>",
+		fprintf( stderr, "EM_table : syntax error in line %d, >>",
 			yylineno);
 		print_token( inserted_token);
-		fprint( stderr, "<<  will be inserted!!\n");
+		fprintf( stderr, "<<  will be inserted!!\n");
 		token = LLsymb;
 		saved = 1;
 	}
@@ -234,21 +234,21 @@ print_token( token)
 int token;
 {
 	switch ( token) {
-	  case C_INSTR 	: fprint( stderr,  "C_INSTR  %s", yytext);
+	  case C_INSTR 	: fprintf( stderr,  "C_INSTR  %s", yytext);
 			  break;
-	  case ASSEM_INSTR : fprint( stderr,  "STRING  %s", yytext);
+	  case ASSEM_INSTR : fprintf( stderr,  "STRING  %s", yytext);
 			  break;
-	  case CALL	: fprint( stderr,  "CALL  %s", yytext);
+	  case CALL	: fprintf( stderr,  "CALL  %s", yytext);
 			  break;
-	  case ARROW	: fprint( stderr,  "==> ");
+	  case ARROW	: fprintf( stderr,  "==> ");
 			  break;
-	  case CONDITION: fprint( stderr,  "CONDITION  %s", yytext);
+	  case CONDITION: fprintf( stderr,  "CONDITION  %s", yytext);
 			  break;
-	  case DEFAULT	: fprint( stderr,  "default ");
+	  case DEFAULT	: fprintf( stderr,  "default ");
 			  break;
-	  case ERROR	: fprint( stderr,  "unmatched  %s", yytext);
+	  case ERROR	: fprintf( stderr,  "unmatched  %s", yytext);
 			  break;
-	  default	: fprint( stderr, " %c", token);
+	  default	: fprintf( stderr, " %c", token);
 			  break;
 	}
 }
@@ -311,7 +311,7 @@ char **argv;
 			to_change = argv[2];
 			c_table();
 			if (to_change) {
-				fprint( stderr, "No rule for %s\n", to_change);
+				fprintf( stderr, "No rule for %s\n", to_change);
 				exit( 1);
 			}
 			exit(nerrors);

@@ -64,7 +64,7 @@ void linewarnings(void)
 	{
 	 	if ( !srchline(l->linenr))
 		{
-			fprint(stderr, "ERROR: line %d not defined\n",l->linenr);
+			fprintf(stderr, "ERROR: line %d not defined\n",l->linenr);
 			errorcnt++;
 		}
 		l=l->nextlist;

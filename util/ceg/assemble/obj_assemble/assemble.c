@@ -238,9 +238,9 @@ error(char *fmt, ...)
 	extern int nerrors;
 
 	va_start(args, fmt);
-		fprint( stderr, "ERROR in line %d :	", yylineno);
+		fprintf( stderr, "ERROR in line %d :	", yylineno);
 		doprnt( stderr, fmt, args);
-		fprint( stderr, "\n");
+		fprintf( stderr, "\n");
 	va_end(args);
 	nerrors++;
 }
@@ -256,9 +256,9 @@ error(va_alist)
 
 	va_start(args);
 		fmt = va_arg(args, char *);
-		fprint( stderr, "ERROR in line %d :	", yylineno);
+		fprintf( stderr, "ERROR in line %d :	", yylineno);
 		doprnt( stderr, fmt, args);
-		fprint( stderr, "\n");
+		fprintf( stderr, "\n");
 	va_end(args);
 	nerrors++;
 }

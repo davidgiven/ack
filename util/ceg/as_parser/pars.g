@@ -15,19 +15,19 @@
  *	{
  *		if (  REG( dst) && EADDR( src)) {
  *			 cur_pos += 1;
- *			 fprint( outfile, "text1( 0x23)");
- *			 fprint( outfile, ";");
+ *			 fprintf( outfile, "text1( 0x23)");
+ *			 fprintf( outfile, ";");
  *			 mod_RM( dst->reg, src);
  *		}
  *		else if ( ACCU( dst) && DATA( src)) {
  *			cur_pos += 1;
- *			fprint( outfile, "text1( 0x25)");
- *			fprint( outfile, ";");
+ *			fprintf( outfile, "text1( 0x25)");
+ *			fprintf( outfile, ";");
  *			cur_pos += 2;
- *			fprint( outfile, "text2( ");
+ *			fprintf( outfile, "text2( ");
  *			eval( src->expr);
- *			fprint( outfile, ")");
- *			fprint( outfile, ";");
+ *			fprintf( outfile, ")");
+ *			fprintf( outfile, ";");
  *		}
  *		else
  *			error( "No match for and");
@@ -149,18 +149,18 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( stderr, "Sytax error in line %d, ", lineno);
+		fprintf( stderr, "Sytax error in line %d, ", lineno);
 		print_token( LLsymb);
-		fprint( stderr, "  will be deleted!!\n");
+		fprintf( stderr, "  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint( stderr, "Garbage at end, line %d!!\n",
+		fprintf( stderr, "Garbage at end, line %d!!\n",
 			 lineno);
 	}
 	else {
-		fprint( stderr, "Sytax error in line %d, ", lineno);
+		fprintf( stderr, "Sytax error in line %d, ", lineno);
 		print_token( inserted_token);
-		fprint( stderr, "  will be inserted!!\n");
+		fprintf( stderr, "  will be inserted!!\n");
 		token = LLsymb;
 		saved = 1;
 	}
@@ -170,25 +170,25 @@ print_token( token)
 int token;
 {
 	switch ( token) {
-	  case IDENTIFIER : fprint( stderr,  "IDENTIFIER %s", yytext);
+	  case IDENTIFIER : fprintf( stderr,  "IDENTIFIER %s", yytext);
 			  break;
-	  case CALL	: fprint( stderr,  "CALL  %s", yytext);
+	  case CALL	: fprintf( stderr,  "CALL  %s", yytext);
 			  break;
-	  case CONDITION: fprint( stderr,  "CONDITION  %s", yytext);
+	  case CONDITION: fprintf( stderr,  "CONDITION  %s", yytext);
 			  break;
-	  case IF	: fprint( stderr,  "@if ");
+	  case IF	: fprintf( stderr,  "@if ");
 			  break;
-	  case ELSIF	: fprint( stderr,  "@elsif ");
+	  case ELSIF	: fprintf( stderr,  "@elsif ");
 			  break;
-	  case ELSE	: fprint( stderr,  "@else ");
+	  case ELSE	: fprintf( stderr,  "@else ");
 			  break;
-	  case FI	: fprint( stderr,  "@fi ");
+	  case FI	: fprintf( stderr,  "@fi ");
 			  break;
-	  case ARROW	: fprint( stderr,  "==> ");
+	  case ARROW	: fprintf( stderr,  "==> ");
 			  break;
-	  case MORE	: fprint( stderr,  "... ");
+	  case MORE	: fprintf( stderr,  "... ");
 			  break;
-	  default	: fprint( stderr, "%c ", token);
+	  default	: fprintf( stderr, "%c ", token);
 			  break;
 	}
 }

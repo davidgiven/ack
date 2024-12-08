@@ -13,25 +13,25 @@ extern char *curr_file;
 /*VARARGS1*/
 report(fmt, arg1, arg2, arg3) char *fmt;
 {
-	fprint(stderr, "%s (%d) F: ", curr_file, lineno);
-	fprint(stderr, fmt, arg1, arg2, arg3);
-	fprint(stderr,"\n");
+	fprintf(stderr, "%s (%d) F: ", curr_file, lineno);
+	fprintf(stderr, fmt, arg1, arg2, arg3);
+	fprintf(stderr,"\n");
 	err=1;
 }
 
 /*VARARGS1*/
 warning(fmt, arg1, arg2, arg3) char *fmt, *arg1;
 {
-	fprint(stderr, "%s (%d) E: ", curr_file, lineno);
-	fprint(stderr, fmt, arg1, arg2, arg3);
-	fprint(stderr,"\n");
+	fprintf(stderr, "%s (%d) E: ", curr_file, lineno);
+	fprintf(stderr, fmt, arg1, arg2, arg3);
+	fprintf(stderr,"\n");
 }
 
 /*VARARGS1*/
 fatal(fmt, arg1, arg2, arg3) char *fmt, *arg1;
 {
-	fprint(stderr, "%s (%d) X: ", curr_file, lineno);
-	fprint(stderr, fmt, arg1, arg2, arg3);
-	fprint(stderr,"\n");
+	fprintf(stderr, "%s (%d) X: ", curr_file, lineno);
+	fprintf(stderr, fmt, arg1, arg2, arg3);
+	fprintf(stderr,"\n");
 	exit(1);
 }

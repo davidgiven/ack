@@ -32,7 +32,7 @@ void parseparams(int argc,char **argv)
 
 	if(argc< 4)
 	{
-		fprint(stderr,"usage %s <flags> <file> <file> <source>\n", 
+		fprintf(stderr,"usage %s <flags> <file> <file> <source>\n", 
 			argv[0]);
 		exit(1);
 	}
@@ -46,7 +46,7 @@ void parseparams(int argc,char **argv)
 				case 't': traceflag++; 
 					  break;	/* line tracing */
 				case 'h': /* split EM file */
-					  fprint(stderr,
+					  fprintf(stderr,
                                                  "h option not implemented\n");
 					  break;
 				case 'd': debug++; 

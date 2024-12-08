@@ -20,7 +20,7 @@ char *str;
 
 	b_ptr = buf;
 
-	out( "fprint( codefile,\"");
+	out( "fprintf( codefile,\"");
 
 	while ( *str) {
 		switch  ( *str) {
@@ -35,7 +35,7 @@ char *str;
 						   arg_format( nr),
 						   C_instr_info->arg_type[nr] == ARITH ? "(long)" : "",
 						   C_instr_info->arg_conv[nr]);
-				        out( "fprint( codefile,\"");
+				        out( "fprintf( codefile,\"");
 					b_ptr = buf;
 					str = str + 2;
 				}

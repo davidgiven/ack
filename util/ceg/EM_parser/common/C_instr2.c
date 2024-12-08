@@ -436,7 +436,7 @@ char *instr;
 		if ( rel == 0 )
 			break;
 		else if ( high == low) {
-			fprint(stderr, "ERROR : can't find >>%s<< !!\n", instr);
+			fprintf(stderr, "ERROR : can't find >>%s<< !!\n", instr);
 			abort();
 		}
 		else if ( rel < 0)

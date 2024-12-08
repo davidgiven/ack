@@ -168,9 +168,9 @@ pr_ELSE_or_FI( str)
 char *str;
 {
 	if ( strncmp( str, "else", 4) == 0)
-		printf( "fprint( outfile, \"}\else {\");%s", str+4);
+		printf( "fprintf( outfile, \"}\else {\");%s", str+4);
 	else if ( strncmp( str, "fi", 2) == 0)
-		printf( "fprint( outfile, \"}\");%s", str+2);
+		printf( "fprintf( outfile, \"}\");%s", str+2);
 	else
 		fprintf( stderr, "%s  unexpected!!\n", str);
 }
@@ -202,7 +202,7 @@ char *call;
 		printf( "cur_pos += %d;", *(call+5) - '0');
 
 	pr_text_with_conversions( call);
-	printf( "fprint( outfile, \";\");");
+	printf( "fprintf( outfile, \";\");");
 	printf( "}");
 	for (; ( c = getchar()) != ';' ; putchar( c));	/* skip ';' */
 }
@@ -210,16 +210,16 @@ char *call;
 pr_elsif( quest)
 char *quest;
 {
-	printf( "fprint( outfile, \"}\else if\");");
+	printf( "fprintf( outfile, \"}\else if\");");
 	pr_text_with_conversions( quest+5);
-	printf( "fprint( outfile, \"{\");");
+	printf( "fprintf( outfile, \"{\");");
 }
 
 pr_if( quest)
 char *quest;
 {
 	pr_text_with_conversions( quest);
-	printf( "fprint( outfile, \"{\");");
+	printf( "fprintf( outfile, \"{\");");
 }
 
 
@@ -231,13 +231,13 @@ char *str;
         while (  ptr = next_conversion( str)) {
 		/* ptr points to '%'-sign */
 	 	*ptr = '\0';
-		printf( "fprint( outfile, \"");
+		printf( "fprintf( outfile, \"");
 		pr_string( str);
 		printf( "\");");
 	 	*ptr = '%';
 	        str = pr_conversion( ptr);
 	}
-	printf( "fprint( outfile, \"");
+	printf( "fprintf( outfile, \"");
 	pr_string( str);
 	printf( "\");");
 }
@@ -340,7 +340,7 @@ char *str;
 	else if ( strncmp( str+1, "dist", 4) == 0)
 		printf( "dist( %s);", start);
 	else
-		printf( "fprint( outfile, \"%%%s\", %s);", str+1, start);
+		printf( "fprintf( outfile, \"%%%s\", %s);", str+1, start);
 
 	return( ptr+1);
 }

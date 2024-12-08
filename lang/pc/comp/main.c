@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	}
 	Nargv[Nargc] = 0;	/* terminate the arg vector	*/
 	if( Nargc < 2 )	{
-		fprint(stderr, "%s: Use a file argument\n", ProgName);
+		fprintf(stderr, "%s: Use a file argument\n", ProgName);
 		return EXIT_FAILURE;
 	}
 	if(!Compile(Nargv[1], Nargv[2]))
@@ -81,7 +81,7 @@ int Compile(char *src, char *dst)
 	int tk;
 
 	if( !InsertFile(src, (char **) 0, &src) )	{
-		fprint(stderr, "%s: cannot open %s\n", ProgName, src);
+		fprintf(stderr, "%s: cannot open %s\n", ProgName, src);
 		return 0;
 	}
 	LineNumber = 1;

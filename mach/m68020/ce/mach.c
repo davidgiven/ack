@@ -9,7 +9,7 @@ arg_error( s, arg)
 char *s;
 int arg;
 {
-	fprint( stderr, "arg_error %s %d\n", s, arg);
+	fprintf( stderr, "arg_error %s %d\n", s, arg);
 }
 #endif
 
@@ -21,7 +21,7 @@ char *filename;
 	if ( filename == (char *)0 || !sys_open( filename, OP_WRITE, &codefile))
 		return( 0);
 
-	fprint( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");
+	fprintf( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");
 	return( 1);
 }
 */

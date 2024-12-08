@@ -99,7 +99,7 @@ struct t_operand *op;
 			if ( is_reg( arg+1, &(op->num)))
 				op->indx = ind_buf[ n_index];
 			else
-				fprint( stderr, "unknown argtype %s\n", arg);
+				fprintf( stderr, "unknown argtype %s\n", arg);
 		}
 		else {
 			op->type = LABEL;
@@ -270,6 +270,6 @@ struct t_operand *op;
 				break;
 		case L_ILB :	@text1( %dist( op->lab));
 				break;
-		default : fprint( stderr, "error");
+		default : fprintf( stderr, "error");
 	}
 }

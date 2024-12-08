@@ -3,5 +3,5 @@
 set_global_visible( s)
 char *s;
 {
-	fprint( codefile, GLOBAL_FMT, s);
+	fprintf( codefile, GLOBAL_FMT, s);
 }

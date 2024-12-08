@@ -57,7 +57,7 @@ extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 	    *extnd_part(), *extnd_cont(), *extnd_main();
 
 #define 	swtxt() 	switchseg( SEGTXT)
-#define		bss(n)		fprint(codefile, BSS_FMT, (long)(n))
+#define		bss(n)		fprintf(codefile, BSS_FMT, (long)(n))
 
 #define 	SEGTXT		0
 #define 	SEGROM		1

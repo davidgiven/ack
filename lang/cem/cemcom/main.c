@@ -195,9 +195,9 @@ char *s, *source;
 	return;
     }
     if (options['m'] && source) {
-	fprint(dep_fd, "%s: %s\n", source, s);
+	fprintf(dep_fd, "%s: %s\n", source, s);
     }
-    else    fprint(dep_fd, "%s\n", s);
+    else    fprintf(dep_fd, "%s\n", s);
 }
 
 #endif /* NOPP */

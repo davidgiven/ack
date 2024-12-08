@@ -8,7 +8,7 @@ arg_error( s, arg)
 char *s;
 int arg;
 {
-	fprint( stderr, "arg_error %s %d\n", s, arg);
+	fprintf( stderr, "arg_error %s %d\n", s, arg);
 }
 #endif
 
@@ -34,6 +34,6 @@ do_open(filename)
 	if (filename == 0 || ! sys_open(filename, OP_WRITE, &codefile))
 		return FALSE;
 
-	fprint( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");	return TRUE;
+	fprintf( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");	return TRUE;
 }
 */

@@ -165,7 +165,7 @@ char *name;
 		name = suffix( name, "c");
 		sys_close( outfile);
 		if ( !sys_open( name, OP_WRITE, &outfile))
-			fprint( stderr, "!! can't create %s !!\n", name);
+			fprintf( stderr, "!! can't create %s !!\n", name);
 		file_header();
 	}
 }

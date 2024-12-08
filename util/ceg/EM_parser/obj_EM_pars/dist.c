@@ -109,7 +109,7 @@ save_output()
 
 	oldout = outfile;
 	if ( ! sys_open( ".tmp", OP_WRITE, &outfile))
-		fprint( stderr, "can't open .tmp\n");
+		fprintf( stderr, "can't open .tmp\n");
 	cur_pos = 0;
 	n_labs = 0;
 }

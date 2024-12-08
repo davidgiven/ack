@@ -16,7 +16,7 @@ align_word()
 {
 	switch ( cur_seg) {
 	  case SEGTXT : return;
-	  default     : fprint( codefile, ALIGN_FMT);
+	  default     : fprintf( codefile, ALIGN_FMT);
 	}
 }
 

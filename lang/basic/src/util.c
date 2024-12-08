@@ -25,8 +25,8 @@ static void Xerror(char *type, char *str)
 	extern int listing;
 	extern int basicline;
 
-	if( !listing) fprint(stderr, "LINE %d:",basicline);
-	fprint(stderr, "%s:%s\n",type, str);
+	if( !listing) fprintf(stderr, "LINE %d:",basicline);
+	fprintf(stderr, "%s:%s\n",type, str);
 }
 
 

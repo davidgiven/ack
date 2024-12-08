@@ -4,14 +4,14 @@ gen1( w)
 ONE_BYTE w;
 {
 	switch ( cur_seg) {
-	  case SEGTXT : fprint( codefile, BYTE_FMT, (long) w);
+	  case SEGTXT : fprintf( codefile, BYTE_FMT, (long) w);
 			break;
-	  case SEGCON : fprint( codefile, BYTE_FMT, (long) w);
+	  case SEGCON : fprintf( codefile, BYTE_FMT, (long) w);
 			break;
-	  case SEGROM : fprint( codefile, BYTE_FMT, (long) w);
+	  case SEGROM : fprintf( codefile, BYTE_FMT, (long) w);
 			break;
 	  case SEGBSS : bss( (arith) 1);
 			break;
-	  default : fprint( stderr, "gen1 unkown seg %d\n", cur_seg);
+	  default : fprintf( stderr, "gen1 unkown seg %d\n", cur_seg);
 	}
 }
