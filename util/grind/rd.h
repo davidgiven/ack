@@ -1,5 +1,5 @@
 /* $Id$ */
 
-#include	<out.h>
+#include <out.h>
 
-#define O_CONVERTED	0x202
+#define O_CONVERTED 0x202

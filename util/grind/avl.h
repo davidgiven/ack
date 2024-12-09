@@ -11,7 +11,7 @@
    a positive number	if the comparison result is >
 */
 
-typedef struct avl_tree	*AVL_tree;
+typedef struct avl_tree* AVL_tree;
 
 /* extern AVL_tree create_avl_tree(int (*cmp)());
    Returns a fresh avl_tree structure. 'cmp' will be used as comparison
@@ -28,16 +28,16 @@ extern add_to_avl_tree();
    Returns the information in the largest node that still compares <= to 'n',
    or 0 if not present.
 */
-extern char *find_ngt();
+extern char* find_ngt();
 
 /* extern char *find_nlt(AVL_tree tree, char *n);
    Returns the information in the largest node that still compares >= to 'n',
    or 0 if not present.
 */
-extern char *find_nlt();
+extern char* find_nlt();
 
 /* extern char *find_eq(AVL_tree tree, char *n);
    Returns the information in the node that compares equal to 'n',
    or 0 if not present.
 */
-extern char *find_eq();
+extern char* find_eq();
