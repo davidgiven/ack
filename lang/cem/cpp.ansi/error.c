@@ -14,7 +14,8 @@
 
 #include    "parameters.h"
 #include	"arith.h"
-#include    "print.h"
+
+
 #include	"LLlex.h"
 
 /*	This file contains the (non-portable) error-message and diagnostic
@@ -27,9 +28,9 @@ int err_occurred;
 static void err_hdr(char *s)
 {
 	if (FileName) {
-		fprint(ERROUT, "\"%s\", line %d: %s", FileName, (int)LineNumber, s);
+		fprintf(ERROUT, "\"%s\", line %d: %s", FileName, (int)LineNumber, s);
 	}
-	else	fprint(ERROUT, s);
+	else	fprintf(ERROUT, s);
 }
 
 #if __STDC__
@@ -41,8 +42,8 @@ void error(char *fmt, ...)
 	err_occurred = 1;
 	err_hdr("");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -53,8 +54,8 @@ void warning(char *fmt, ...)
 
 	err_hdr("(warning) ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -65,8 +66,8 @@ void strict(char *fmt, ...)
 
 	err_hdr("(strict) ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -77,10 +78,10 @@ NORETURN void crash(char *fmt, ...)
 
 	err_hdr("CRASH\007 ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_ABORT);
+	abort();
 }
 
 /*VARARGS*/
@@ -90,10 +91,10 @@ NORETURN void fatal(char *fmt, ...)
 
 	err_hdr("fatal error -- ");
 	va_start(ap, fmt);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 #else
 /*VARARGS*/
@@ -107,8 +108,8 @@ void error(va_alist)
 	err_hdr("");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -122,8 +123,8 @@ void warning(va_alist)
 	err_hdr("(warning) ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -137,8 +138,8 @@ void strict(va_alist)
 	err_hdr("(strict) ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
 }
 
@@ -152,10 +153,10 @@ void crash(va_alist)
 	err_hdr("CRASH\007 ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_ABORT);
+	abort();
 }
 
 /*VARARGS*/
@@ -168,9 +169,9 @@ void fatal(va_alist)
 	err_hdr("fatal error -- ");
 	va_start(ap);
 	fmt = va_arg(ap, char *);
-	doprnt(ERROUT, fmt, ap);
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);
+	fprintf(ERROUT, "\n");
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 #endif

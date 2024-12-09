@@ -89,7 +89,6 @@ local function build_variant(code, cflags)
 			"modules+headers",
 			"modules/src/alloc+lib",
 			"modules/src/em_data+lib",
-			"modules/src/print+lib",
 			"modules/src/system+lib",
 			"modules/src/string+lib",
 		},

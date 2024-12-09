@@ -173,35 +173,35 @@ static params_to_regs()		/* copy required parameters to registers */
 
   for (i = 0; i < nr_flt_vars; i++)
 	if (flt_dat[i].offset >= 4092) {
-		fprint(codefile, "set	%d, %%l2\n",
+		fprintf(codefile, "set	%d, %%l2\n",
 			flt_dat[i].offset);
-		fprint(codefile, "ld	[%%l1+%%l2], %s\n",
+		fprintf(codefile, "ld	[%%l1+%%l2], %s\n",
 			flt_dat[i].reg);
 		if (flt_dat[i].size == EM_DSIZE) {
-			fprint(codefile, "set	%d, %%l2\n",
+			fprintf(codefile, "set	%d, %%l2\n",
 				flt_dat[i].offset+4);
-			fprint(codefile, "ld	[%%l1+%%l2], %s\n",
+			fprintf(codefile, "ld	[%%l1+%%l2], %s\n",
 				flt_dat[i].reg2);
 		}
 	}
 	else if (flt_dat[i].offset > 0)
 	{
-		fprint(codefile, "ld	[%%l1+%d], %s\n",
+		fprintf(codefile, "ld	[%%l1+%d], %s\n",
 		  flt_dat[i].offset, flt_dat[i].reg);
 		if (flt_dat[i].size == EM_DSIZE)
-			fprint(codefile, "ld	[%%l1+%d], %s\n",
+			fprintf(codefile, "ld	[%%l1+%d], %s\n",
 			  flt_dat[i].offset + 4, flt_dat[i].reg2);
 	}
 
   for (i = 0; i < nr_reg_vars; i++)
 	if (reg_dat[i].offset >= 4096) {
-		fprint(codefile, "set	%d, %s\n",
+		fprintf(codefile, "set	%d, %s\n",
 			reg_dat[i].offset, reg_dat[i].reg);
-		fprint(codefile, "ld	[%%l1+%s], %s\n",
+		fprintf(codefile, "ld	[%%l1+%s], %s\n",
 			reg_dat[i].reg, reg_dat[i].reg);
 	}
 	else if (reg_dat[i].offset > 0)
-		fprint(codefile, "ld	[%%l1+%d], %s\n",
+		fprintf(codefile, "ld	[%%l1+%d], %s\n",
 			reg_dat[i].offset, reg_dat[i].reg);
 }
 
@@ -232,12 +232,12 @@ static save_float_regs()
 		flt_dat[i].size == EM_FSIZE &&
 		flt_dat[i+1].size == EM_FSIZE)
 		|| (flt_dat[i].size == EM_DSIZE)) {
-		fprint(codefile, "std	%s, [%%fp + %d]\n",
+		fprintf(codefile, "std	%s, [%%fp + %d]\n",
 				flt_dat[i].reg, FLTSAV_OFFSET + offset);
 		if (flt_dat[i].size != EM_DSIZE)
 			++i;
 	} else
-		fprint(codefile, "st	%s, [%%fp + %d]\n",
+		fprintf(codefile, "st	%s, [%%fp + %d]\n",
 				flt_dat[i].reg, FLTSAV_OFFSET + offset);
 }
 
@@ -253,12 +253,12 @@ load_float_regs()
 		flt_dat[i].size == EM_FSIZE &&
 		flt_dat[i+1].size == EM_FSIZE)
 		|| (flt_dat[i].size == EM_DSIZE)) {
-		fprint(codefile, "ldd	[%%fp + %d], %s\n",
+		fprintf(codefile, "ldd	[%%fp + %d], %s\n",
 				FLTSAV_OFFSET + offset, flt_dat[i].reg);
 		if (flt_dat[i].size != EM_DSIZE)
 			++i;
 	} else
-		fprint(codefile, "ld	[%%fp + %d], %s\n",
+		fprintf(codefile, "ld	[%%fp + %d], %s\n",
 				FLTSAV_OFFSET + offset, flt_dat[i].reg);
 
 }
@@ -276,14 +276,14 @@ int ms;
 	if (ms == ms_gto) {
 		free_all_reg_vars();
 		nr_reg_vars = 0; nr_flt_vars = 0;
-		fprint(codefile, "ta	3\n");
+		fprintf(codefile, "ta	3\n");
 	}
 	db_mes = (ms == ms_stb || ms == ms_std) ? ms : 0;
 #ifdef __solaris__
 	if (db_mes && ! inits) {
-		fprint(codefile, ".pushsection \".text\"\nBtext.text:\n.popsection\n");
-		fprint(codefile, ".pushsection \".data\"\nBdata.data:\n.popsection\n");
-		fprint(codefile, ".pushsection \".bss\"\nBbss.bss:\n.popsection\n");
+		fprintf(codefile, ".pushsection \".text\"\nBtext.text:\n.popsection\n");
+		fprintf(codefile, ".pushsection \".data\"\nBdata.data:\n.popsection\n");
+		fprintf(codefile, ".pushsection \".bss\"\nBbss.bss:\n.popsection\n");
 		inits = 1;
 	}
 #endif
@@ -306,16 +306,16 @@ C_mes_end()
 #ifdef __solaris__
 		if (db_mes == ms_std) {
 			if (db_str == 2) {
-				fprint(codefile, ",1f\n1:\n");
+				fprintf(codefile, ",1f\n1:\n");
 			}
 			else {
-				fprint(codefile, ",1f-%s\n1:\n", B_procnam);
+				fprintf(codefile, ",1f-%s\n1:\n", B_procnam);
 			}
 		}
 #else
-		if (db_mes == ms_std && db_str == 2) fprint(codefile,",1f\n1:\n");
+		if (db_mes == ms_std && db_str == 2) fprintf(codefile,",1f\n1:\n");
 #endif
-		else fprint(codefile, "\n");
+		else fprintf(codefile, "\n");
 		db_str = 0;
 		db_mes = 0;
 		db_kind = 0;
@@ -334,7 +334,7 @@ C_mes_end()
 	if (current_reg_mes[RM_OFFSET] >= 0)
 		current_reg_mes[RM_OFFSET] += EM_BSIZE;
 	if (debug)
-		fprint(codefile, "\t\t! Got reg_mes: %d %d %d %d\n",
+		fprintf(codefile, "\t\t! Got reg_mes: %d %d %d %d\n",
 			current_reg_mes[0], current_reg_mes[1],
 		current_reg_mes[2], current_reg_mes[3]);
 	if (current_reg_mes[RM_TYPE] == reg_float) {
@@ -383,18 +383,18 @@ arith l;
 			if (l == N_SLINE && ! __gdb_flag) {
 				flush_cache();
 #ifdef __solaris__
-				fprint(codefile, "call $__uX_LiB\nnop\n");
+				fprintf(codefile, "call $__uX_LiB\nnop\n");
 #else
-				fprint(codefile, "call ___uX_LiB\nnop\n");
+				fprintf(codefile, "call ___uX_LiB\nnop\n");
 #endif
 			}
 #ifdef __solaris__
-			fprint(codefile, ".stabn 0x%lx,0", (long) l);
+			fprintf(codefile, ".stabn 0x%lx,0", (long) l);
 #else
 			if (db_mes == ms_std) {
-				fprint(codefile, ".stabd 0x%lx,0", (long) l);
+				fprintf(codefile, ".stabd 0x%lx,0", (long) l);
 			}
-			else	fprint(codefile, ".stabn 0x%lx,0", (long) l);
+			else	fprintf(codefile, ".stabn 0x%lx,0", (long) l);
 #endif
 			db_str = 1;
 			db_nul = 1;
@@ -403,14 +403,14 @@ arith l;
 			if (correct_offset++ == -1) {
 				l += EM_BSIZE;
 			}
-			fprint(codefile, ",0x%lx", (long) l);
+			fprintf(codefile, ",0x%lx", (long) l);
 		}
 		if (! db_nul) {
 			correct_offset = 0;
 			if (l == N_PSYM && __gdb_flag) {
 				correct_offset = -2;
 			}
-			fprint(codefile, ",0");
+			fprintf(codefile, ",0");
 			db_nul = 1;
 		}
 	}
@@ -424,16 +424,16 @@ char *s;
 arith l;
 {
 	if (db_mes) {
-		fprint(codefile, ".stabs \"");
+		fprintf(codefile, ".stabs \"");
 		while (--l) {
 			int c = *s++;
 
 			if (isprint(c) && c != '"' && c != '\\')
-				fprint(codefile, "%c", c);
+				fprintf(codefile, "%c", c);
 			else
-				fprint(codefile, "\\%03o", c);
+				fprintf(codefile, "\\%03o", c);
 		}
-		fprint(codefile, "\"");
+		fprintf(codefile, "\"");
 		db_str = 2;
 	}
 }
@@ -444,16 +444,16 @@ label l;
 arith off;
 {
 	if (db_mes) {
-		fprint(codefile,",");
-		fprint(codefile, DLB_FMT, (long) l);
-		if (off) fprint(codefile,"+%ld", (long) off);
+		fprintf(codefile,",");
+		fprintf(codefile, DLB_FMT, (long) l);
+		if (off) fprintf(codefile,"+%ld", (long) off);
 #ifdef __solaris__
 		switch(db_kind) {
 		case N_LCSYM:
-			fprint(codefile, "-Bbss.bss");
+			fprintf(codefile, "-Bbss.bss");
 			break;
 		case N_STSYM:
-			fprint(codefile, "-Bdata.data");
+			fprintf(codefile, "-Bdata.data");
 			break;
 		}
 #endif
@@ -466,16 +466,16 @@ char *l;
 arith off;
 {
 	if (db_mes) {
-		fprint(codefile,",");
-		fprint(codefile, DNAM_FMT, l);
-		if (off) fprint(codefile,"+%ld", (long) off);
+		fprintf(codefile,",");
+		fprintf(codefile, DNAM_FMT, l);
+		if (off) fprintf(codefile,"+%ld", (long) off);
 #ifdef __solaris__
 		switch(db_kind) {
 		case N_LCSYM:
-			fprint(codefile, "-Bbss.bss");
+			fprintf(codefile, "-Bbss.bss");
 			break;
 		case N_STSYM:
-			fprint(codefile, "-Bdata.data");
+			fprintf(codefile, "-Bdata.data");
 			break;
 		}
 #endif
@@ -489,10 +489,10 @@ C_ilb(l)
 label l;
 {
 	if (db_mes) {
-		fprint(codefile,",");
-		fprint(codefile, ILB_FMT, B_procno, (long)l);
+		fprintf(codefile,",");
+		fprintf(codefile, ILB_FMT, B_procno, (long)l);
 #ifdef __solaris__
-		fprint(codefile, "-Btext.text");
+		fprintf(codefile, "-Btext.text");
 #endif
 	}
 }
@@ -502,10 +502,10 @@ C_pnam(s)
 char *s;
 {
 	if (db_mes) {
-		fprint(codefile,",");
-		fprint(codefile, NAME_FMT, s);
+		fprintf(codefile,",");
+		fprintf(codefile, NAME_FMT, s);
 #ifdef __solaris__
-		fprint(codefile, "-Btext.text");
+		fprintf(codefile, "-Btext.text");
 #endif
 	}
 }
@@ -516,14 +516,14 @@ FILE *stream;
 {
   int i;
 
-  fprint(stream, "!offset\tsize\tname (%d regvars)\n", nr_reg_vars);
+  fprintf(stream, "!offset\tsize\tname (%d regvars)\n", nr_reg_vars);
   for (i = 0; i < nr_reg_vars; i++)
-	fprint(stream, "! %d\t%d\t%s\n", reg_dat[i].offset, reg_dat[i].size,
+	fprintf(stream, "! %d\t%d\t%s\n", reg_dat[i].offset, reg_dat[i].size,
 			reg_dat[i].reg);
 
-  fprint(stream, "!offset\tsize\tname (%d fltvars)\n", nr_flt_vars);
+  fprintf(stream, "!offset\tsize\tname (%d fltvars)\n", nr_flt_vars);
   for (i = 0; i < nr_flt_vars; i++)
-	fprint(stream, "! %d\t%d\t%s\n", flt_dat[i].offset, flt_dat[i].size,
+	fprintf(stream, "! %d\t%d\t%s\n", flt_dat[i].offset, flt_dat[i].size,
 			flt_dat[i].reg);
 }
 

@@ -32,12 +32,10 @@ char *lab;
 /* Record position of this label */
 
 {
-	char *Salloc();
-
 	if ( n_labs >= MAX_LABEL)
 		error( "Too many labels!!\n");
 	else {
-		label_list[ n_labs].lab = Salloc( lab, strlen( lab) + 1);
+		label_list[ n_labs].lab = strdup(lab);
 		label_list[ n_labs++].position = cur_pos;
 	}
 	process_label( lab);
@@ -64,8 +62,8 @@ FILE *f;
 
 #include <system.h>
 
-File *oldout;
-extern File *outfile;
+FILE* oldout;
+extern FILE* outfile;
 
 back_patch()
 /* Echo the text on file '.tmp', but replace every occurence of label-
@@ -109,7 +107,7 @@ save_output()
 
 	oldout = outfile;
 	if ( ! sys_open( ".tmp", OP_WRITE, &outfile))
-		fprint( STDERR, "can't open .tmp\n");
+		fprintf( stderr, "can't open .tmp\n");
 	cur_pos = 0;
 	n_labs = 0;
 }

@@ -217,7 +217,7 @@ const_name(p_symbol cst;)
 	'S' type_index(type_index)
 				{ cst->sy_type = *tp_lookup(type_index);
 				  cst->sy_const.co_setval = p =
-				    Malloc((unsigned) cst->sy_type->ty_size);
+				    malloc((unsigned) cst->sy_type->ty_size);
 				}
 	[ ',' integer_const(&iconst)
 				{ *p++ = iconst; }
@@ -530,7 +530,7 @@ param_list(p_type t;)
   integer_const(&iconst) ';'	/* number of parameters */
 			{ t->ty_nparams = iconst;
 			  t->ty_params = p = (struct param *)
-			    Malloc((unsigned)(t->ty_nparams * sizeof(struct param)));
+			    malloc((unsigned)(t->ty_nparams * sizeof(struct param)));
 			}
   [
   	[	'p'	{ p->par_kind = 'p'; }
@@ -682,7 +682,7 @@ get_field_space(tp, s)
 
   if (! (tp->ty_nfields & 07)) {
 	tp->ty_fields = (struct fields *)
-		  Realloc((char *) tp->ty_fields,
+		  realloc((char *) tp->ty_fields,
 			    (tp->ty_nfields+8)*sizeof(struct fields));
   }
   p = &tp->ty_fields[tp->ty_nfields++];
@@ -698,7 +698,7 @@ end_field(tp)
   p_type tp;
 {
   tp->ty_fields = (struct fields *)
-	Realloc((char *) tp->ty_fields,
+	realloc((char *) tp->ty_fields,
 		tp->ty_nfields * sizeof(struct fields));
 }
 
@@ -708,7 +708,7 @@ get_literal_space(tp)
 {
   if (! (tp->ty_nenums & 07)) {
 	tp->ty_literals = (struct literal *)
-		Realloc((char *) tp->ty_literals,
+		realloc((char *) tp->ty_literals,
 			(tp->ty_nenums+8)*sizeof(struct literal));
   }
   return &tp->ty_literals[tp->ty_nenums++];
@@ -765,8 +765,8 @@ DbRead(f)
 
   /* Allocate space for name table and read it */
   AckNames = (struct outname *) 
-  		Malloc((unsigned)(sizeof(struct outname) * h.oh_nname));
-  AckStrings = Malloc((unsigned) h.oh_nchar);
+  		malloc((unsigned)(sizeof(struct outname) * h.oh_nname));
+  AckStrings = malloc((unsigned) h.oh_nchar);
   rd_name(AckNames, h.oh_nname);
   rd_string(AckStrings, h.oh_nchar);
 

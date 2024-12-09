@@ -40,7 +40,7 @@ int callfcn(int fcnnr,int cnt,int *typetable)
 
 	type= typetable[0];
 	exprlimit=cnt;
-	if(debug) print("fcn=%d\n",fcnnr);
+	if(debug) printf("fcn=%d\n",fcnnr);
 
 	switch(fcnnr)
 	{

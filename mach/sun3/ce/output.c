@@ -10,7 +10,7 @@
 Read above comment ...
 #endif
 
-extern File *B_out_file;
+extern FILE* B_out_file;
 
 #include <a.out.h>
 #include <alloc.h>
@@ -43,7 +43,7 @@ output_back()
 
 	nrelo = relo - reloc_info;
 	u_reloc = (struct relocation_info *)
-			Malloc((unsigned)nrelo*sizeof(struct relocation_info));
+			malloc((unsigned)nrelo*sizeof(struct relocation_info));
 
 	rp = reloc_info;
 	for (i = nrelo; i > 0; i--, rp++) {
@@ -76,7 +76,7 @@ output_back()
 	free(u_reloc);
 	
 	u_name = (struct nlist *)
-			Malloc((unsigned)nname * sizeof(struct nlist));
+			malloc((unsigned)nname * sizeof(struct nlist));
 
 	for (i = 0; i < nname ; i++) { /* The segment names can be omitted */
 		convert_name( &symbol_table[i], u_name++);
@@ -85,7 +85,7 @@ output_back()
 	putbuf((char *) u_name, sizeof(struct nlist)*nname);
 	free(u_name);
 
-	/* print( "size string_area %d\n", nchar); */
+	/* printf( "size string_area %d\n", nchar); */
 
 	put_stringtablesize( nchar + 4);
 	putbuf((char *) string_area, nchar);
@@ -107,7 +107,7 @@ reduce_name_table()
 #define removable(nm)	(!(nm->on_type & (S_NEEDED|S_STB)) && *(nm->on_foff+string_area) == GENLAB)
 
 	int *diff_index =
-		(int *) Malloc((unsigned)(nname + 1) * sizeof(int));
+		(int *) malloc((unsigned)(nname + 1) * sizeof(int));
 	int i;
 	struct outname *np;
 	char *new_str;
@@ -162,7 +162,7 @@ reduce_name_table()
 	nname -= diff_index[nname - 1];
 	free((char *)(diff_index-1));
 
-	new_str = q = Malloc((unsigned)(string - string_area));
+	new_str = q = malloc((unsigned)(string - string_area));
 	np = symbol_table;
 	for (i = nname; i > 0; i--, np++) {
 		p = np->on_foff + string_area;
@@ -190,7 +190,7 @@ init_unixheader()
 	u_header.a_entry = 0;
 	u_header.a_trsize = trsize * sizeof(struct relocation_info);
   	u_header.a_drsize = drsize * sizeof(struct relocation_info);
-	/* print( "header %o %d %d %d %d %d %d %d\n",
+	/* printf( "header %o %d %d %d %d %d %d %d\n",
 		u_header.a_magic, u_header.a_text, u_header.a_data,
 		u_header.a_bss, u_header.a_syms, u_header.a_entry,
 		u_header.a_trsize, u_header.a_drsize);
@@ -224,7 +224,7 @@ struct relocation_info *u_relo;
 			case SEGBSS : u_relo->r_symbolnum = N_BSS;
 				      break;
 /*	Shut up; this could actually happen on erroneous input
-			default : fprint( STDERR, 
+			default : fprintf( stderr, 
 					   "convert_relo(): bad segment %d\n",
 			    (symbol_table[ a_relo->or_nami].on_type & S_TYP) - S_MIN);
 */
@@ -241,7 +241,7 @@ convert_name( a_name, u_name)
 struct outname *a_name;
 struct nlist *u_name;
 {
-	/* print( "naam is %s\n", a_name->on_foff + string_area);   */
+	/* printf( "naam is %s\n", a_name->on_foff + string_area);   */
 
 	u_name->n_str = a_name->on_foff + 4;
 	if (a_name->on_type & S_STB) u_name->n_type = a_name->on_type >> 8;
@@ -263,7 +263,7 @@ struct nlist *u_name;
 			break;
 /*	Shut up; this could actually happen on erroneous input
 		default:
-			fprint(STDERR, "convert_name(): bad section %d\n",
+			fprintf(stderr, "convert_name(): bad section %d\n",
 				(a_name->on_type & S_TYP) - S_MIN);
 			break;
 */

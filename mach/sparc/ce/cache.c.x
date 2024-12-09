@@ -36,7 +36,7 @@ static int indent_count = 0;
 		push_ext(char *)
 		flush_cache()		after branches and labels
 		cache_read(int)		read-ahead. optimization only
-		dump_cache(File *)	debug info: show current stack
+		dump_cache(FILE* )	debug info: show current stack
 		pop_nop()		remove element from cache
 
 		reg_t alloc_reg()
@@ -108,7 +108,7 @@ static int c_count = 0;
 static const_str_t s;
 
 _PROTOTYPE(static void panic, (char*));
-_PROTOTYPE(static void dump_cache, (File *stream));
+_PROTOTYPE(static void dump_cache, (FILE* stream));
 _PROTOTYPE(static int cache_read, (int n, int i));
 _PROTOTYPE(static void flush_part_cache, (int c, int r, int f, int d));
 _PROTOTYPE(static void subst_reg, (reg_t, reg_t));
@@ -242,7 +242,7 @@ enter("flush_part_cache");
 		"dec	$i_str, $reg_sp";
 		while (i--)
 		{
-			sprint(i_str, "%d", 4*(j-1-i));
+			sprintf(i_str, "%d", 4*(j-1-i));
 			if (cache[i].ext)
 			{
 				ext= cache[i].ext;
@@ -263,7 +263,7 @@ enter("flush_part_cache");
 				}
 				if (!const13(cache[i].cst))
 				{
-					sprint(n_str, "%d",
+					sprintf(n_str, "%d",
 						cache[i].cst);
 					"sethi	%hi($n_str), $reg_tmp";
 					if (cache[i].reg != reg_g0)
@@ -279,7 +279,7 @@ enter("flush_part_cache");
 				}
 				if (cache[i].cst)
 				{
-					sprint(n_str, "%d", cache[i].cst);
+					sprintf(n_str, "%d", cache[i].cst);
 					"add	$rh, $n_str, $reg_tmp";
 					rh= reg_tmp;
 				}
@@ -640,7 +640,7 @@ enter("pop_reg_reg");
 	*r = tos->reg2;
 	s = tos->reg;
 	POP2;
-if (debug) { indent(); fprintf(stderr,"pop_reg_reg()=%s\n", s); fprint(codefile,"\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(stderr,"pop_reg_reg()=%s\n", s); fprintf(codefile,"\t\t! "); dump_cache(codefile); }
 leave("pop_reg_reg");
 	return s;
 }
@@ -672,16 +672,16 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_c13()=...\n"); }
 		assert(tos->reg == reg_g0);
 		S1 = alloc_reg();
 		V1 = tos->ext;
-		sprint(V2, "%d", tos->cst);
+		sprintf(V2, "%d", tos->cst);
 		"sethi	%hi($V1+$V2), $S1";
-		sprint(n, "%%lo(%s+%d)", tos->ext, tos->cst);
+		sprintf(n, "%%lo(%s+%d)", tos->ext, tos->cst);
 		free(V1);
 		POP2;
 	} else {
 		S1 = tos->reg;
 		if (!(const13(tos->cst))) {
 			S3 = alloc_reg();
-			sprint(V2, "%d", tos->cst);
+			sprintf(V2, "%d", tos->cst);
 			"sethi	%hi($V2), $S3";
 			if (tos->reg != reg_g0) {
 				S2 = alloc_reg();
@@ -696,10 +696,10 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_c13()=...\n"); }
 			}
 			tos->cst &= 0x3FF;
 		}
-		sprint(n, "%d", tos->cst);
+		sprintf(n, "%d", tos->cst);
 		POP2;
 	}
-if (debug) { indent(); fprint(codefile, "\t\t! %s+%s cache:", S1, n); dump_cache(codefile);}
+if (debug) { indent(); fprintf(codefile, "\t\t! %s+%s cache:", S1, n); dump_cache(codefile);}
 leave("pop_reg_c13");
 	return S1;
 }
@@ -730,7 +730,7 @@ enter("pop_float");
 		POP2;
 	} else
 		POP2;
-if (debug) { indent(); fprint(codefile, "\t\t! %s cache:", S1); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! %s cache:", S1); dump_cache(codefile); }
 leave("pop_float");
 	return S1;
 }
@@ -743,7 +743,7 @@ if (debug) { indent(); fprintf(stderr, "inc_tos_reg(%s)\n", r); }
 	if (type_of_tos() != T_reg)
 		push_reg(pop_reg());
 	tos->reg2 = r;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("inc_tos_reg");
 }
 
@@ -766,7 +766,7 @@ if (debug) { indent(); fprintf(stderr,"inc_tos(%d)\n", n); }
 		push_reg(S1);
 	}
 	tos->cst += n;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("inc_tos");
 }
 
@@ -782,7 +782,7 @@ enter("push_const");
 	tos->reg2 = reg_g0;
 	tos->ext = 0;
 	tos->cst = n;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("push_const");
 }
 
@@ -796,7 +796,7 @@ enter("push_reg");
 	tos->reg2 = reg_g0;
 	tos->ext = 0;
 	tos->cst = 0;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("push_reg");
 }
 
@@ -819,7 +819,7 @@ enter("push_double_reg");
 	tos->cst = 0;
 	tos->reg = i;
 	tos->reg2 = reg_g0;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("push_double_reg");
 }
 
@@ -829,14 +829,14 @@ char *s;
 	char *p;
 
 enter("push_ext");
-	p = Malloc(strlen(s)+1);
+	p = malloc(strlen(s)+1);
 
 	INC_TOS;
 	tos->reg = reg_g0;
 	tos->reg2 = reg_g0;
 	tos->ext = strcpy(p, s);
 	tos->cst = 0;
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("push_ext");
 }
 
@@ -850,8 +850,8 @@ enter("pop_const");
 	x = top_const();
 	POP2;
 	if (n)
-		sprint(n, "%d", x);
-if (debug) { indent(); fprint(codefile, "\t\t! %d cache:", x); dump_cache(codefile); }
+		sprintf(n, "%d", x);
+if (debug) { indent(); fprintf(codefile, "\t\t! %d cache:", x); dump_cache(codefile); }
 leave("pop_const");
 	return x;
 }
@@ -907,7 +907,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 	} else if (tos->ext) {
 		assert(tos->reg == reg_g0);
 		V1 = tos->ext;
-		sprint(V2, "%d", tos->cst);
+		sprintf(V2, "%d", tos->cst);
 		"set	$V1+$V2, $r";
 		free(V1);
 		POP2;
@@ -928,7 +928,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 				soft_alloc_reg(r);
 				tos_reg2= r;
 			}
-			sprint(c_str, "%d", tos_cst);
+			sprintf(c_str, "%d", tos_cst);
 			"sethi	%hi($c_str), $tos_reg2";
 			tos_cst &= 0x3ff;
 			if (tos_reg == reg_g0)
@@ -955,7 +955,7 @@ if (debug) { indent(); fprintf(stderr,"pop_reg_as(%s)=...\n", r); }
 		}
 		if (tos_cst)
 		{
-			sprint(c_str, "%d", tos_cst);
+			sprintf(c_str, "%d", tos_cst);
 			soft_alloc_reg(r);
 			"add	$tos_reg, $c_str, $r";
 			free_reg(tos_reg);
@@ -1079,7 +1079,7 @@ enter("pop_reg");
 		S1 = alloc_reg();
 		pop_reg_as(S1);
 	}
-if (debug) { indent(); fprint(codefile, "\t\t! %s cache:", S1); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! %s cache:", S1); dump_cache(codefile); }
 leave("pop_reg");
 	return S1;
 }
@@ -1151,7 +1151,7 @@ enter("pop_nop");
 		POP2;
 	}
 	if (i) {
-		sprint(V1, "%d", 4*i);
+		sprintf(V1, "%d", 4*i);
 		if (const13(4*i)) {
 			"inc	$V1, %l0";
 		} else {
@@ -1159,7 +1159,7 @@ enter("pop_nop");
 			"add	%l0, $reg_tmp, %l0";
 		}
 	}
-if (debug) { indent(); fprint(codefile, "\t\t! %dw cache:",j); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! %dw cache:",j); dump_cache(codefile); }
 leave("pop_nop");
 }
 
@@ -1212,7 +1212,7 @@ if (debug) { indent(); fprintf(stderr,"cache_read(%d, %d)\n", n,i); }
 		S1= alloc_reg();
 		old_c_count = cache_read(n, i+1);
 
-		sprint(V1, "%d", (old_c_count-1-i) * 4);
+		sprintf(V1, "%d", (old_c_count-1-i) * 4);
 		"ld	[%l0+$V1], $S1";
 		cache[i].reg= S1;
 		cache[i].reg2= reg_g0;
@@ -1220,7 +1220,7 @@ if (debug) { indent(); fprintf(stderr,"cache_read(%d, %d)\n", n,i); }
 		cache[i].cst= 0;
 		if (!i)
 		{
-			sprint(V1, "%d", (old_c_count)*4);
+			sprintf(V1, "%d", (old_c_count)*4);
 			"add	$reg_sp, $V1, $reg_sp";
 		}
 	}
@@ -1238,31 +1238,31 @@ leave("cache_read");
 }
 
 static void dump_cache(stream)		/* to codefile! */
-File *stream;
+FILE* stream;
 {
 	int i;
 
 	assert (c_count >= 0);
 	for (i = c_count -1; i >= 0; i--) {
 		if (cache[i].ext)
-			fprint(stream, "%s", cache[i].ext);
+			fprintf(stream, "%s", cache[i].ext);
 		if (cache[i].reg != reg_g0) {
 			if (cache[i].ext)
-				fprint(stream, "+");
-			fprint(stream, "%s", cache[i].reg);
+				fprintf(stream, "+");
+			fprintf(stream, "%s", cache[i].reg);
 			if (cache[i].reg2 != reg_g0) {
-				fprint(stream, "+");
-				fprint(stream, "%s", cache[i].reg2);
+				fprintf(stream, "+");
+				fprintf(stream, "%s", cache[i].reg2);
 			}
 		}
 		if (cache[i].cst || (!cache[i].ext && cache[i].reg == reg_g0)) {
 			if (cache[i].ext || cache[i].reg != reg_g0)
-				fprint(stream, "+");
-			fprint(stream, "%d", cache[i].cst);
+				fprintf(stream, "+");
+			fprintf(stream, "%d", cache[i].cst);
 		}
-		fprint(stream, " ");
+		fprintf(stream, " ");
 	}
-	fprint(stream, "\n");
+	fprintf(stream, "\n");
 if (debug) check_cache();
 }
 
@@ -1286,7 +1286,7 @@ enter("dup_tos");
 			*tos = tos[-n];
 			if (tos->ext)
 			{
-				ext= Malloc(strlen(tos->ext)+1);
+				ext= malloc(strlen(tos->ext)+1);
 				strcpy(ext, tos->ext);
 				tos->ext= ext;
 			}
@@ -1294,11 +1294,11 @@ enter("dup_tos");
 			soft_alloc_reg(tos->reg2);
 		} else {
 			a= alloc_reg();
-			sprint(i_str, "%d", (n-c_count)*4);
+			sprintf(i_str, "%d", (n-c_count)*4);
 			"ld	[$reg_sp+$i_str], $a";
 			tos->reg = a;
 		}
 	}
-if (debug) { indent(); fprint(codefile, "\t\t! "); dump_cache(codefile); }
+if (debug) { indent(); fprintf(codefile, "\t\t! "); dump_cache(codefile); }
 leave("dup_tos");
 }

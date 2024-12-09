@@ -8,5 +8,5 @@ vprintf(format, arg)
 	char *format;
 	va_list arg;
 {
-	return _doprnt(format, arg, stdout);
+	return _vfprintf(format, arg, stdout);
 }

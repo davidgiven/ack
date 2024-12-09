@@ -184,7 +184,7 @@ set_label( str, op)
 char *str;
 struct t_operand *op;
 {
-	char *ptr, *strchr(), *sprint();
+	char *ptr, *strchr(), *sprintf();
 	static char buf[256];
 
 	ptr = strchr( str, '+');
@@ -208,7 +208,7 @@ struct t_operand *op;
 			op->lab = str;
 		else 
 			/* nood oplossing */
-			op->lab = sprint( buf, "\"%s\"", str);
+			op->lab = sprintf( buf, "\"%s\"", str);
 	}
 }
 
@@ -242,7 +242,7 @@ struct t_operand *op;
 		  case BX : R233( 0x0, reg, 0x7);
 			    break;
 
-		  default : fprint( STDERR, "Wrong index register %d\n",
+		  default : fprintf( stderr, "Wrong index register %d\n",
 				    op->reg);
 		}
 	else {
@@ -260,7 +260,7 @@ struct t_operand *op;
 			  case BX : R233( 0x1, reg, 0x7);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text1( %$(op->expr));
@@ -278,7 +278,7 @@ struct t_operand *op;
 			  case BX : R233( 0x2, reg, 0x7);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text2( %$(op->expr));

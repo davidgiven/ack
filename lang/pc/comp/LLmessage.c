@@ -7,6 +7,9 @@
 */
 
 #include	<alloc.h>
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 
@@ -42,9 +45,9 @@ void LLmessage(int tk)
 			break;
 		case STRING:
 			dotp->tk_data.tk_str = (struct string *)
-						Malloc(sizeof (struct string));
+						malloc(sizeof (struct string));
 			dotp->TOK_SLE = 1;
-			dotp->TOK_STR = Salloc("", 1);
+			dotp->TOK_STR = strdup("");
 			toktype = standard_type(T_STRINGCONST, 1, (arith) 1);
 			break;
 		case INTEGER:
@@ -56,13 +59,13 @@ void LLmessage(int tk)
 			break;
 		case REAL:
 			dotp->tk_data.tk_real = (struct real *)
-						Malloc(sizeof(struct real));
+						malloc(sizeof(struct real));
 			/* inverse struct */
 			dotp->TOK_RIV = (struct real *)
-						Malloc(sizeof(struct real));
+						malloc(sizeof(struct real));
 			dotp->TOK_RIV->r_inverse = dotp->tk_data.tk_real;
 
-			dotp->TOK_REL = Salloc("0.0", 4);
+			dotp->TOK_REL = strdup("0.0");
 			dotp->TOK_RIV->r_real = dotp->TOK_REL;
 			toktype = real_type;
 			break;

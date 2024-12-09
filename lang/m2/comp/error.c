@@ -31,7 +31,6 @@
 
 #include	"input.h"
 #include	"f_info.h"
-#include    "print.h"
 #include	"LLlex.h"
 #include	"main.h"
 #include	"node.h"
@@ -162,7 +161,7 @@ NORETURN void fatal(char *fmt, ...)
 		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS*/
@@ -176,9 +175,9 @@ NORETURN void crash(char *fmt, ...)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #else
@@ -299,7 +298,7 @@ void fatal(va_alist)
 		_error(FATAL, NULLNODE, fmt, ap, 0);
 	}
 	va_end(ap);
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 /*VARARGS*/
@@ -315,9 +314,9 @@ void crash(va_alist)
 	}
 	va_end(ap);
 #ifdef DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else
-	sys_stop(S_EXIT);
+	exit(1);
 #endif
 }
 #endif
@@ -402,10 +401,10 @@ static void _error(int class, struct node *node, char *fmt, va_list ap, int warn
 		break;
 	}
 
-	if (FileName) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
+	if (FileName) fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
 
-	if (remark) fprint(ERROUT, "%s ", remark);
+	if (remark) fprintf(ERROUT, "%s ", remark);
 
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
+	fprintf(ERROUT, "\n");
 }

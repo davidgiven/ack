@@ -5,6 +5,7 @@
 /* $Id$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
+#include	<string.h>
 #include	<alloc.h>
 #include	"idf.h"
 #include	"arith.h"
@@ -57,7 +58,7 @@ static void insert_token(int tk)
 		dot.tk_idf = str2idf("int", 0);
 		break;
 	case STRING:
-		dot.tk_bts = Salloc("", 1);
+		dot.tk_bts = strdup("");
 		dot.tk_len = 1;
 		break;
 	case INTEGER:
@@ -65,7 +66,7 @@ static void insert_token(int tk)
 		dot.tk_ival = 1;
 		break;
 	case FLOATING:
-		dot.tk_fval = Salloc("0.0", 4);
+		dot.tk_fval = strdup("0.0");
 		break;
 	}
 }

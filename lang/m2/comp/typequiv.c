@@ -16,6 +16,7 @@
 #include	"debug.h"
 
 #include	<stdlib.h>
+#include	<stdio.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<assert.h>
@@ -32,7 +33,6 @@
 #include	"main.h"
 #include	"stab.h"
 #include	"Lpars.h"
-#include	"print.h"
 #include	"chk_expr.h"
 
 
@@ -193,9 +193,9 @@ int TstParCompat(int parno, struct type *formaltype, int VARflag, struct node **
 	char ebuf[256];
 
 	if (edf) {
-		sprint(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
+		sprintf(ebuf, "\"%s\", parameter %d: %%s", edf->df_idf->id_text, parno);
 	}
-	else sprint(ebuf, "parameter %d: %%s", parno);
+	else sprintf(ebuf, "parameter %d: %%s", parno);
 
 	if (
 		TstTypeEquiv(formaltype, actualtype)

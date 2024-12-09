@@ -159,11 +159,11 @@ static struct string *GetString(int delim)
 	*/
 	int ch;
 	struct string *str = (struct string *)
-				Malloc((unsigned) sizeof(struct string));
+				malloc((unsigned) sizeof(struct string));
 	char *p;
 	int len = ISTRSIZE;
 
-	str->s_str = p = Malloc((unsigned int) ISTRSIZE);
+	str->s_str = p = malloc((unsigned int) ISTRSIZE);
 	for( ; ; )	{
 		LoadChar(ch);
 		if( class(ch) == STNL )	{
@@ -185,7 +185,7 @@ static struct string *GetString(int delim)
 		}
 		*p++ = ch;
 		if( p - str->s_str == len )	{
-			str->s_str = Srealloc(str->s_str,
+			str->s_str = realloc(str->s_str,
 					(unsigned int) len + RSTRSIZE);
 			p = str->s_str + len;
 			len += RSTRSIZE;
@@ -261,7 +261,7 @@ void CheckForLineDirective(void)
 		 * Remember the filename
 		 */
 		 if( !eofseen && strcmp(FileName, buf) ) {
-			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+			FileName = strdup(buf);
 		}
 	}
 	if( eofseen ) {
@@ -522,7 +522,7 @@ again:
 				np = &buf[1];
 				while (*np == '0')	/* skip leading zeros */
 					np++;
-				tk->TOK_INT = str2long(np, 10);
+				tk->TOK_INT = strtol(np, NULL, 10);
 				if( (tk->TOK_INT < 0) ||
 				    (strlen(np) > strlen(maxint_str)) ||
 					(strlen(np) == strlen(maxint_str) &&
@@ -534,20 +534,20 @@ again:
 		}
 		/* REAL_MODE */
 		tk->tk_data.tk_real = (struct real *)
-						Malloc(sizeof(struct real));
+						malloc(sizeof(struct real));
 		/* allocate struct for inverse */
-		tk->TOK_RIV = (struct real *) Malloc(sizeof(struct real));
+		tk->TOK_RIV = (struct real *) malloc(sizeof(struct real));
 		tk->TOK_RIV->r_inverse = tk->tk_data.tk_real;
 		tk->TOK_RLA = 0;
 		tk->TOK_RIV->r_lab = 0;
 
 		if( np > &buf[NUMSIZE+1] )	{
-			tk->TOK_REL = Salloc("0.0", 4);
+			tk->TOK_REL = strdup("0.0");
 			tk->TOK_RIV->r_real = tk->TOK_REL;
 			lexerror("floating constant too long");
 		}
 		else {
-			tk->TOK_RIV->r_real = Salloc(buf,(unsigned) (np - buf));
+			tk->TOK_RIV->r_real = strdup(buf);
 			tk->TOK_REL = tk->TOK_RIV->r_real + 1;
 		}
 

@@ -13,7 +13,6 @@
 #include	"time.h"
 #include	"class.h"
 #include	"macro.h"
-#include	"print.h"
 #include	"error.h"
 #include	"idf.h"
 #include	"domacro.h"
@@ -74,13 +73,13 @@ void init_pp(void)
 	tp = localtime(&clock);
 
 	/* __DATE__ */
-	sprint(dbuf, "\"%s %2d %d\"", months[tp->tm_mon],
+	sprintf(dbuf, "\"%s %2d %d\"", months[tp->tm_mon],
 			tp->tm_mday, tp->tm_year+1900);
 	/* if (tp->tm_mday < 10) dbuf[5] = ' ';	*/	/* hack */
 	macro_def(str2idf("__DATE__", 0), dbuf, -1, strlen(dbuf), NOUNDEF);
 
 	/* __TIME__ */
-	sprint(tbuf, "\"%02d:%02d:%02d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
+	sprintf(tbuf, "\"%02d:%02d:%02d\"", tp->tm_hour, tp->tm_min, tp->tm_sec);
 	macro_def(str2idf("__TIME__", 0), tbuf, -1, strlen(tbuf), NOUNDEF);
 
 	/* __LINE__	*/

@@ -38,7 +38,6 @@
 #include    "typequiv.h"
 #include	"misc.h"
 #include	"lookup.h"
-#include	"print.h"
 #include	"warning.h"
 #include	"main.h"
 
@@ -388,8 +387,7 @@ static int ChkExSelOrName(struct node **expp, int flags)
 			exp->nd_REAL = new_real();
 			*(exp->nd_REAL) = *p;
 			if (p->r_real) {
-				p->r_real = Salloc(p->r_real,
-					   (unsigned)(strlen(p->r_real)+1));
+				p->r_real = strdup(p->r_real);
 			}
 		}
 		FreeNode(*expp);
@@ -487,7 +485,7 @@ arith *MkSet(unsigned int size)
 {
 	arith	*s, *t;
 
-	s = t = (arith *) Malloc(size);
+	s = t = (arith *) malloc(size);
 	s++;
 	size /= sizeof(arith);
 	while (size--) *t++ = 0;
@@ -1464,16 +1462,15 @@ void TryToString(struct node *nd, struct type *tp)
 {
 	/*	Try a coercion from character constant to string.
 	*/
-	static char buf[8];
-
 	assert(nd->nd_symb == STRING);
 
 	if (tp->tp_fund == T_ARRAY && nd->nd_type == char_type) {
-		buf[0] = nd->nd_INT;
+		char value = nd->nd_INT;
 		nd->nd_type = standard_type(T_STRING, 1, (arith) 2);
 		nd->nd_SSTR = 
-			(struct string *) Malloc(sizeof(struct string));
-		nd->nd_STR = Salloc(buf, (unsigned) word_size);
+			(struct string *) malloc(sizeof(struct string));
+		nd->nd_STR = calloc(1, word_size);
+		nd->nd_STR[0] = value;
 		nd->nd_SLE = 1;
 	}
 }

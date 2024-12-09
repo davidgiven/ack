@@ -6,7 +6,6 @@
 #include "parsepar.h"
 #include "bem.h"
 #include <stdio.h>
-#include "print.h"
 #include "system.h"
 #include "util.h"
 
@@ -32,9 +31,9 @@ void parseparams(int argc,char **argv)
 
 	if(argc< 4)
 	{
-		fprint(STDERR,"usage %s <flags> <file> <file> <source>\n", 
+		fprintf(stderr,"usage %s <flags> <file> <file> <source>\n", 
 			argv[0]);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 
 	for(i=1;i<argc;i++)
@@ -46,7 +45,7 @@ void parseparams(int argc,char **argv)
 				case 't': traceflag++; 
 					  break;	/* line tracing */
 				case 'h': /* split EM file */
-					  fprint(STDERR,
+					  fprintf(stderr,
                                                  "h option not implemented\n");
 					  break;
 				case 'd': debug++; 

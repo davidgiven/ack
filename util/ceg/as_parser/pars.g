@@ -15,19 +15,19 @@
  *	{
  *		if (  REG( dst) && EADDR( src)) {
  *			 cur_pos += 1;
- *			 fprint( outfile, "text1( 0x23)");
- *			 fprint( outfile, ";");
+ *			 fprintf( outfile, "text1( 0x23)");
+ *			 fprintf( outfile, ";");
  *			 mod_RM( dst->reg, src);
  *		}
  *		else if ( ACCU( dst) && DATA( src)) {
  *			cur_pos += 1;
- *			fprint( outfile, "text1( 0x25)");
- *			fprint( outfile, ";");
+ *			fprintf( outfile, "text1( 0x25)");
+ *			fprintf( outfile, ";");
  *			cur_pos += 2;
- *			fprint( outfile, "text2( ");
+ *			fprintf( outfile, "text2( ");
  *			eval( src->expr);
- *			fprint( outfile, ")");
- *			fprint( outfile, ";");
+ *			fprintf( outfile, ")");
+ *			fprintf( outfile, ";");
  *		}
  *		else
  *			error( "No match for and");
@@ -108,7 +108,7 @@ action		: if_statement
 
 subroutine
   { char *s; }	: IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
-		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+		  CONDITION		{ s = realloc(s, strlen(s)+yyleng+1);
 					  strcat(s, yytext);
 					  pr_subroutine( s);
 					  free(s);
@@ -118,7 +118,7 @@ subroutine
 call
   { char *s; }	: '@'
 		  IDENTIFIER		{ s = Salloc(yytext, yyleng+1); }
-		  CONDITION		{ s = Realloc(s, strlen(s)+yyleng+1);
+		  CONDITION		{ s = realloc(s, strlen(s)+yyleng+1);
 					  strcat(s, yytext);
 					  pr_call( s);
 					  free(s);
@@ -149,18 +149,18 @@ int inserted_token;
 {
 	nerrors++;
 	if ( inserted_token == 0) {
-		fprint( STDERR, "Sytax error in line %d, ", lineno);
+		fprintf( stderr, "Sytax error in line %d, ", lineno);
 		print_token( LLsymb);
-		fprint( STDERR, "  will be deleted!!\n");
+		fprintf( stderr, "  will be deleted!!\n");
 	}
 	else if ( inserted_token < 0) {
-		fprint( STDERR, "Garbage at end, line %d!!\n",
+		fprintf( stderr, "Garbage at end, line %d!!\n",
 			 lineno);
 	}
 	else {
-		fprint( STDERR, "Sytax error in line %d, ", lineno);
+		fprintf( stderr, "Sytax error in line %d, ", lineno);
 		print_token( inserted_token);
-		fprint( STDERR, "  will be inserted!!\n");
+		fprintf( stderr, "  will be inserted!!\n");
 		token = LLsymb;
 		saved = 1;
 	}
@@ -170,25 +170,25 @@ print_token( token)
 int token;
 {
 	switch ( token) {
-	  case IDENTIFIER : fprint( STDERR,  "IDENTIFIER %s", yytext);
+	  case IDENTIFIER : fprintf( stderr,  "IDENTIFIER %s", yytext);
 			  break;
-	  case CALL	: fprint( STDERR,  "CALL  %s", yytext);
+	  case CALL	: fprintf( stderr,  "CALL  %s", yytext);
 			  break;
-	  case CONDITION: fprint( STDERR,  "CONDITION  %s", yytext);
+	  case CONDITION: fprintf( stderr,  "CONDITION  %s", yytext);
 			  break;
-	  case IF	: fprint( STDERR,  "@if ");
+	  case IF	: fprintf( stderr,  "@if ");
 			  break;
-	  case ELSIF	: fprint( STDERR,  "@elsif ");
+	  case ELSIF	: fprintf( stderr,  "@elsif ");
 			  break;
-	  case ELSE	: fprint( STDERR,  "@else ");
+	  case ELSE	: fprintf( stderr,  "@else ");
 			  break;
-	  case FI	: fprint( STDERR,  "@fi ");
+	  case FI	: fprintf( stderr,  "@fi ");
 			  break;
-	  case ARROW	: fprint( STDERR,  "==> ");
+	  case ARROW	: fprintf( stderr,  "==> ");
 			  break;
-	  case MORE	: fprint( STDERR,  "... ");
+	  case MORE	: fprintf( stderr,  "... ");
 			  break;
-	  default	: fprint( STDERR, "%c ", token);
+	  default	: fprintf( stderr, "%c ", token);
 			  break;
 	}
 }

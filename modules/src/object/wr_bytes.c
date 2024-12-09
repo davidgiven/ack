@@ -30,8 +30,8 @@ void wr_bytes(FILE* fd, const char *buf, long cnt)
     {
         int n = cnt >= maxchunk ? maxchunk : cnt;
 
-        written_bytes = fwrite(buf, 1, n, fd);
-        if (written_bytes != (size_t)n)
+        written_bytes = fwrite(buf, n, 1, fd);
+        if (written_bytes != 1)
         {
             wr_fatal();
         }

@@ -438,9 +438,9 @@ print_esp(msg, esp)
 	char *msg;
 	struct expr_state *esp;
 {
-	print("%s: <", msg);
+	printf("%s: <", msg);
 	while (esp) {
-		print(" %s[%d]%c%c%c ",
+		printf(" %s[%d]%c%c%c ",
 			esp->es_idf->id_text, esp->es_offset,
 			(esp->es_used ? 'U' : ' '),
 			(esp->es_referred ? 'R' : ' '),
@@ -448,7 +448,7 @@ print_esp(msg, esp)
 		);
 		esp = esp->next;
 	}
-	print(">\n");
+	printf(">\n");
 }
 #endif	/* DEBUG */
 

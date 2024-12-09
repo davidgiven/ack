@@ -41,9 +41,6 @@ int OO_wrstats = 1; /* pattern statistics output */
 #define printstate(s)
 #endif /* DEBUG */
 
-/**** WHICH IS FASTER? ****
- #define BTSCPY(pp,qq,i,p,q,n) btscpy(p,q,(n)*sizeof(struct e_instr))
- **************************/
 #define BTSCPY(pp,qq,i,p,q,n) for(pp=(p),qq=(q),i=(n);i--;*pp++ = *qq++)
 
 static void allocmem(void);
@@ -110,22 +107,22 @@ void OO_dfa(int last)
 static void fatal(s, a)
 	char *s;int a;
 {
-	fprint(STDERR, "%s: ", filename ? filename : "standard input");
-	fprint(STDERR, s, a);
-	fprint(STDERR, "\n");
-	sys_stop(S_EXIT);
+	fprintf(stderr, "%s: ", filename ? filename : "standard input");
+	fprintf(stderr, s, a);
+	fprintf(stderr, "\n");
+	exit(1);
 }
 
 static void allocmem(void)
 {
 	/* Allocate memory for queues on heap */
-	OO_buffer = (p_instr) Malloc(
+	OO_buffer = (p_instr) malloc(
 			(unsigned) (MAXBUFFER * sizeof(struct e_instr)));
 	OO_patternqueue = OO_nxtpatt = OO_buffer;
-	OO_replqueue = (p_instr) Malloc(
+	OO_replqueue = (p_instr) malloc(
 			(unsigned) OO_maxreplacement * sizeof(struct e_instr));
 	OO_nxtrepl = OO_replqueue;
-	nextstr = strqueue = (char *) Malloc(MAXSTRING * sizeof(char));
+	nextstr = strqueue = (char *) malloc(MAXSTRING * sizeof(char));
 	laststr = strqueue + MAXSTRING - 1;
 }
 
@@ -138,7 +135,7 @@ char * OO_freestr(char *str)
 	again: if ((s - str) > (laststr - nextstr))
 	{
 		unsigned newsize = (laststr - strqueue + 1) * 2;
-		res = Realloc(strqueue, newsize);
+		res = realloc(strqueue, newsize);
 		laststr = res + newsize - 1;
 		nextstr = res + (nextstr - strqueue);
 		strqueue = res;

@@ -13,14 +13,14 @@ static char rcs_id[] = "$Id$";
 
 /* generate temporary files etc */
 
-File	*datfile;
+FILE	*datfile;
 
 extern void fillkex(void);
 
 void initialize(void)
 {
 	char *cindex, *cptr;
-        int result1, result2;
+        int result;
 
 	/* Find the basename */
 	/* Strip leading directories */
@@ -40,9 +40,9 @@ void initialize(void)
 	if ( cptr>datfname+3 && cptr[-3]=='.' ) cptr[-3]=0;
 	strcat(datfname,".d");
 	C_init((arith)BEMINTSIZE, (arith)BEMPTRSIZE);
-	result1 = sys_open(inpfile, OP_READ, &yyin);
-	result2 = C_open(outfile);
-	if ( result1==0 || result2== 0 )
+	yyin = fopen(inpfile, "r");
+	result = C_open(outfile);
+	if ( !yyin || result== 0 )
 		fatal("Improper file permissions");
 	C_magic();
 	fillkex();	/* initialize symbol table */

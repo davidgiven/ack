@@ -13,7 +13,7 @@ extern out(char *, ...);
 #include "decl.h"
 
 extern int library;
-extern File *outfile;
+extern FILE* outfile;
 
 /* This file contains some routines called from the parser in 'pars.g' */
 
@@ -111,7 +111,7 @@ out(char *fmt, ...)
         va_list pvar;
  
         va_start(pvar, fmt);
-        doprnt( outfile, fmt, pvar);
+        vfprintf( outfile, fmt, pvar);
         va_end(pvar);
 }
 #else
@@ -124,7 +124,7 @@ va_dcl
  
         va_start(pvar);
         fmt = va_arg(pvar, char *);
-        doprnt( outfile, fmt, pvar);
+        vfprintf( outfile, fmt, pvar);
         va_end(pvar);
 }
 #endif
@@ -165,7 +165,7 @@ char *name;
 		name = suffix( name, "c");
 		sys_close( outfile);
 		if ( !sys_open( name, OP_WRITE, &outfile))
-			fprint( STDERR, "!! can't create %s !!\n", name);
+			fprintf( stderr, "!! can't create %s !!\n", name);
 		file_header();
 	}
 }

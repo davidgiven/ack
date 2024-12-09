@@ -16,7 +16,6 @@
 #include	"file_info.h"
 #include	"idf.h"
 #include	"init.h"
-#include	"print.h"
 #include	"options.h"
 #include	"error.h"
 #include	"input.h"
@@ -30,7 +29,7 @@ extern int do_dependencies;
 extern char *dep_file;
 int idfsize = IDFSIZE;
 extern char options[];
-static File *dep_fd;
+static FILE* dep_fd;
 
 arith ifval;
 
@@ -50,11 +49,11 @@ int main(int argc, char *argv[])
 {
 	/* parse and interpret the command line options	*/
 	prog_name = argv[0];
-	dep_fd = STDOUT;
+	dep_fd = stdout;
 
 	init_idf();
 
-	inctable = (char **) Malloc(10 * sizeof(char *));
+	inctable = (char **) malloc(10 * sizeof(char *));
 	inc_max = 10;
 	inc_total = 3;
 	inctable[0] = ".";
@@ -74,7 +73,7 @@ int main(int argc, char *argv[])
 		argc--, argv++;
 	}
 	compile(argc - 1, &argv[1]);
-	sys_stop(err_occurred ? S_EXIT : S_END);
+	exit(err_occurred ? 1 : 0);
 	UNREACHABLE_CODE;
 }
 
@@ -130,8 +129,10 @@ static void list_dependencies(char *source)
 		}
 		else source = 0; 
 	}
-	if (dep_file && !sys_open(dep_file, OP_WRITE, &dep_fd)) {
-		fatal("could not open %s", dep_file);
+	if (dep_file) {
+		dep_fd = fopen(dep_file, "w+");
+		if (!dep_fd)
+			fatal("could not open %s", dep_file);
 	}
 	while (p) {
 		assert(p->id_resmac == K_FILE);
@@ -157,12 +158,7 @@ static void dependency(char *s, char *source)
 		return;
 	}
 	if (options['m'] && source) {
-		fprint(dep_fd, "%s: %s\n", source, s);
+		fprintf(dep_fd, "%s: %s\n", source, s);
 	}
-	else	fprint(dep_fd, "%s\n", s);
-}
-
-void No_Mem(void)				/* called by alloc package */
-{
-	fatal("out of memory");
+	else	fprintf(dep_fd, "%s\n", s);
 }

@@ -454,7 +454,7 @@ getstring(c)
 	buf[len++] = ch;
   }
   buf[len++] = 0;
-  tok.str = Salloc(buf, (unsigned) len);
+  tok.str = strdup(buf);
   return STRING;
 }
 

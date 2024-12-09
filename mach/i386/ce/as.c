@@ -147,7 +147,7 @@ set_label( str, op)
 char *str;
 struct t_operand *op;
 {
-	char *ptr, *strchr(), *sprint();
+	char *ptr, *strchr(), *sprintf();
 	static char buf[256];
 
 	ptr = strchr( str, '+');
@@ -170,7 +170,7 @@ struct t_operand *op;
 		if ( strchr( str, DOLLAR) != 0)
 			op->lab = str;
 		else 
-			op->lab = sprint( buf, "\"%s\"", str);
+			op->lab = sprintf( buf, "\"%s\"", str);
 	}
 }
 
@@ -203,7 +203,7 @@ struct t_operand *op;
 			    @text1( 0);
 			    break;
 
-		  default : fprint( STDERR, "Wrong index register %d\n",
+		  default : fprintf( stderr, "Wrong index register %d\n",
 				    op->reg);
 		}
 	else {
@@ -222,7 +222,7 @@ struct t_operand *op;
 		  	  case SI : R233( 0x1, reg, op->reg);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text1( %$(op->expr));
@@ -237,7 +237,7 @@ struct t_operand *op;
 		  	  case SI : R233( 0x2, reg, op->reg);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text4( %$(op->expr));
@@ -254,7 +254,7 @@ struct t_operand *op;
 		  	  case SI : R233( 0x1, reg, op->reg);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text1( %$(op->expr));
@@ -269,7 +269,7 @@ struct t_operand *op;
 		  	  case SI : R233( 0x2, reg, op->reg);
 				    break;
 	
-			  default : fprint( STDERR, "Wrong index register %d\n",
+			  default : fprintf( stderr, "Wrong index register %d\n",
 					    op->reg);
 			}
 			@text4( %$(op->expr));

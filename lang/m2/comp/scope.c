@@ -199,7 +199,7 @@ void close_scope(int flag)
 	sc->sc_end = dot2leaf(Link);
 
 	if (flag) {
-		DO_DEBUG(options['S'],(print("List of definitions in currently ended scope:\n"), DumpScope(sc->sc_def)));
+		DO_DEBUG(options['S'],(printf("List of definitions in currently ended scope:\n"), DumpScope(sc->sc_def)));
 		if (flag & SC_CHKPROC) chk_proc(sc->sc_def);
 		if (flag & SC_CHKFORW) chk_forw(&(sc->sc_def));
 		if (flag & SC_REVERSE) Reverse(&(sc->sc_def));

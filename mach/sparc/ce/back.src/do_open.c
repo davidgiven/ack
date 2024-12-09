@@ -4,9 +4,9 @@ open_back( filename)
 char *filename;
 {
 	if ( filename == (char *) 0) {
-		codefile= STDOUT;
+		codefile= stdout;
 #ifdef __solaris__
-		fprint(codefile, ".section \".text\"\n");
+		fprintf(codefile, ".section \".text\"\n");
 #endif
 		return 1;
 	}
@@ -16,7 +16,7 @@ char *filename;
 	if ((codefile = fopen(filename, "wb")) != NULL) {
 #endif
 #ifdef __solaris__
-		fprint(codefile, ".section \".text\"\n");
+		fprintf(codefile, ".section \".text\"\n");
 #endif
 		return 1;
 	}

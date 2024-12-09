@@ -14,7 +14,6 @@
 #include <string.h>
 #include "system.h"
 #include "alloc.h"
-#include "print.h"
 #include "em_arith.h"
 #include "insert.h"
 #include "em_private.h"
@@ -28,10 +27,10 @@ Part		*C_curr_part;
 char		*C_BASE;
 #endif
 
-File		*C_ofp;
+FILE		*C_ofp;
 
 #ifndef INCORE
-File		*C_tfr;
+FILE		*C_tfr;
 char		*C_tmpfile;
 char		*C_ibuf = 0;
 long		C_current_out;
@@ -62,12 +61,12 @@ void C_flush(void)
 
 	if (C_ontmpfile) {
 		if (C_BASE == 0) {
-			C_BASE = Malloc(BUFFERSIZ);
+			C_BASE = malloc(BUFFERSIZ);
 			bufsiz = BUFFERSIZ;
 			C_current_out = C_BASE;
 		}
 		else {
-			C_BASE = Srealloc(C_BASE, (bufsiz << 1));
+			C_BASE = realloc(C_BASE, (bufsiz << 1));
 			C_current_out = C_BASE + bufsiz;
 			bufsiz <<= 1;
 		}
@@ -75,7 +74,7 @@ void C_flush(void)
 		return;
 	}
 #endif
-	if (C_opp != obuf && sys_write(C_ofp, obuf, (int)(C_opp - obuf)) == 0) {
+	if (C_opp != obuf && fwrite(obuf, (int)(C_opp - obuf), 1, C_ofp) != 1) {
 		C_ofp = 0;
 		C_failed();
 	}
@@ -109,13 +108,14 @@ int C_open(char* nm)
 
 	if (nm == 0)
 	{
-		C_ofp = STDOUT;	/* standard output	*/
+		C_ofp = stdout;	/* standard output	*/
 		sys_setbinarymode(stdout);
 	}
 	else
 	{
 
-	  if (sys_open(nm, OP_WRITE, &C_ofp) == 0)
+	  C_ofp = fopen(nm, "w+b");
+	  if (!C_ofp)
 		return 0;
 	}
 	return 1;
@@ -143,15 +143,15 @@ void C_close(void)
 		}
 #ifndef INCORE
 		sys_close(C_tfr);
-		sys_remove(C_tmpfile);
+		remove(C_tmpfile);
 		if (C_ibuf) free(C_ibuf);
 #else
 		free(C_BASE);
 #endif
 	}
 	C_flush();
-	if (C_ofp != STDOUT)
-		sys_close(C_ofp);
+	if (C_ofp != stdout)
+		fclose(C_ofp);
 	C_ofp = 0;
 }
 
@@ -193,7 +193,7 @@ void C_pt_ilb(label l)
 {
 	char buf[16];
 
-	sprint(buf, "*%ld", (long) l);
+	sprintf(buf, "*%ld", (long) l);
 	wrs(buf);
 }
 
@@ -211,7 +211,7 @@ void C_pt_cst(arith l)
 {
 	char buf[16];
 
-	sprint(buf, "%ld", (long) l);
+	sprintf(buf, "%ld", (long) l);
 	wrs(buf);
 }
 
@@ -242,7 +242,7 @@ void C_pt_dlb(label l)
 {
 	char buf[16];
 
-	sprint(buf, ".%ld", (long) l);
+	sprintf(buf, ".%ld", (long) l);
 	wrs(buf);
 }
 
@@ -252,7 +252,7 @@ void C_pt_doff(label l, arith v)
 
 	C_pt_dlb(l);
 	if (v != 0) {
-		sprint(buf,"+%ld", (long) v);
+		sprintf(buf,"+%ld", (long) v);
 		wrs(buf);
 	}
 }
@@ -263,7 +263,7 @@ void C_pt_noff(char *s, arith v)
 
 	wrs(s);
 	if (v != 0) {
-		sprint(buf,"+%ld", (long) v);
+		sprintf(buf,"+%ld", (long) v);
 		wrs(buf);
 	}
 }
@@ -278,7 +278,7 @@ void C_pt_dfilb(label l)
 {
 	char buf[16];
 
-	sprint(buf, "%ld", (long) l);
+	sprintf(buf, "%ld", (long) l);
 	wrs(buf);
 }
 

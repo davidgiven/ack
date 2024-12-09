@@ -77,7 +77,7 @@ struct INP_buffer_header	{
 #ifdef INP_TYPE
 	INP_TYPE bh_i;	/* user defined */
 #endif /* INP_TYPE */
-	File *bh_fd;	/* A file descriptor in case of a file */
+	FILE* bh_fd;	/* A file descriptor in case of a file */
 	char bh_eofreturned;	/* set if we returned eof for this buffer */
 };
 
@@ -104,7 +104,7 @@ INP_PRIVATE struct INP_buffer_header *INP_head, *INP_free;
 
 
 INP_PRIVATE int
-INP_rdfile(File* fd, char* fn, long* size, char** pbuf)
+INP_rdfile(FILE*  fd, char* fn, long* size, char** pbuf)
 {
 	int rsize;
 
@@ -116,8 +116,9 @@ INP_rdfile(File* fd, char* fn, long* size, char** pbuf)
 	     !(*pbuf = malloc((unsigned) (*size + 1)))) {
 		return 0;
 	}
+	rsize = fread(*pbuf, 1, *size, fd);
 	if (
-	     !sys_read(fd, *pbuf, (int) *size, &rsize)
+	     rsize <= 0
 	   ||
 	     *size != rsize
 	   )  {
@@ -205,11 +206,12 @@ INP_PRIVATE int INP_pop_bh(void)
 */
 
 INP_PRIVATE int
-INP_rdblock(File* fd, char* buf, int* n)
+INP_rdblock(FILE*  fd, char* buf, int* n)
 {
 
 
-	if (!sys_read(fd, buf, INP_BUFSIZE, n)) {
+	*n = fread(buf, 1, INP_BUFSIZE, fd);
+	if (*n <= 0) {
 		return 0;
 	}
 
@@ -251,13 +253,14 @@ int InsertFile(char *filnam, char *table[], char **result)
 	char *text;
 	long size;
 #endif /* INP_READ_IN_ONE */
-	File *fd = 0;
+	FILE* fd = 0;
 
-	if (!filnam) fd = STDIN;
+	if (!filnam) fd = stdin;
 	else {
 		if (table == 0 || filnam[0] == '/') {
 				/* don't look in the table! */
-			if (!sys_open(filnam, OP_READ, &fd)) return 0;
+			fd = fopen(filnam, "rb");
+			if (!fd) return 0;
 		}
 		else {
 			while (*table) {
@@ -265,7 +268,8 @@ int InsertFile(char *filnam, char *table[], char **result)
 				if (!INP_mk_filename(*table++, filnam, &newfn)) {
 					return 0;
 				}
-				if (sys_open(newfn, OP_READ, &fd)) {
+				fd = fopen(newfn, "rb");
+				if (fd) {
 					/* free filnam ??? NO we don't know
 					   where it comes from!
 					*/
@@ -282,13 +286,13 @@ int InsertFile(char *filnam, char *table[], char **result)
 		register struct INP_buffer_header *bh = INP_push_bh();
 
 		if (!bh) {
-			if (fd != STDIN) sys_close(fd);
+			if (fd != stdin) fclose(fd);
 			return 0;
 		}
 #ifdef INP_READ_IN_ONE
-		if (fd == STDIN) return 0;	/* illegal */
+		if (fd == stdin) return 0;	/* illegal */
 		if (!INP_rdfile(fd, filnam, &size, &text)) {
-			sys_close(fd);
+			fclose(fd);
 			return 0;
 		}
 		bh->bh_size = size;
@@ -298,7 +302,7 @@ int InsertFile(char *filnam, char *table[], char **result)
 		     !(_ipp = bh->bh_text = INP_pbuf())
 		   ||
 		     !INP_rdblock(fd,_ipp,&(bh->bh_size))) {
-			if (fd != STDIN) sys_close(fd);
+			if (fd != stdin) fclose(fd);
 			return 0;
 		}
 #endif /* INP_READ_IN_ONE */
@@ -394,7 +398,7 @@ int loadbuf(void)
 		}
 
 #endif /* not INP_READ_IN_ONE */
-		if (FromFile && bh->bh_fd != STDIN) sys_close(bh->bh_fd);
+		if (FromFile && bh->bh_fd != stdin) fclose(bh->bh_fd);
 
 #if INP_NPUSHBACK > 1
 		{

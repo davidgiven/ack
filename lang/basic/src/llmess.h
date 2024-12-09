@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "tokentab.h"
 #include "system.h"
-#include "print.h"
 
 /* Mod van gertjan */
 extern int LLsymb;
@@ -18,8 +17,8 @@ void error_char(char *format,char ch)
 	extern int listing,errorcnt;
 	extern int basicline;
 
-	if ( !listing ) fprint(STDERR, "LINE %d:",basicline);
-	fprint(STDERR, format,ch);
+	if ( !listing ) fprintf(stderr, "LINE %d:",basicline);
+	fprintf(stderr, format,ch);
 	errorcnt++;
 }
 
@@ -30,8 +29,8 @@ void error_string(char* format,char* str)
 	extern int listing,errorcnt;
 	extern int basicline;
 
-	if ( !listing ) fprint(STDERR, "LINE %d:",basicline);
-	fprint(STDERR, format,str);
+	if ( !listing ) fprintf(stderr, "LINE %d:",basicline);
+	fprintf(stderr, format,str);
 	errorcnt++;
 }
 
@@ -42,7 +41,7 @@ void LLmessage(int insertedtok )
     if ( insertedtok < 0 ) {
 	error("Fatal stack overflow\n");
 	C_close();
-	sys_stop( S_EXIT );
+	exit(1);
     }
 
     if ( insertedtok == 0 ) 

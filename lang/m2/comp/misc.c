@@ -45,11 +45,11 @@ struct idf *gen_anon_idf(void)
 		anonymous name.
 	*/
 	static int name_cnt;
-	char *s = Malloc(strlen(FileName)+50);
+	char *s = malloc(strlen(FileName)+50);
 
-	sprint(s, "#%d in %s, line %u",
+	sprintf(s, "#%d in %s, line %u",
 			++name_cnt, FileName, LineNumber);
-	s = Realloc(s, strlen(s)+1);
+	s = realloc(s, strlen(s)+1);
 	return str2idf(s, 0);
 }
 

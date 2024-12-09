@@ -155,7 +155,7 @@ o_print(va_list* ap, int flags, char* s, char c, int precision, int is_signed)
 	return s;
 }
 
-int _doprnt(const char* fmt, va_list ap)
+int _vfprintf(const char* fmt, va_list ap)
 {
 	char* s;
 	int j;

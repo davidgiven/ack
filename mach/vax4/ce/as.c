@@ -99,7 +99,7 @@ struct t_operand *op;
 			if ( is_reg( arg+1, &(op->num)))
 				op->indx = ind_buf[ n_index];
 			else
-				fprint( STDERR, "unknown argtype %s\n", arg);
+				fprintf( stderr, "unknown argtype %s\n", arg);
 		}
 		else {
 			op->type = LABEL;
@@ -264,12 +264,12 @@ struct t_operand *op;
 			@reloc4( %$(op->lab), %$(op->offset), PC_REL);
 				}
 				else {
-					sprint( my_buf, "\"%s\"", op->lab);
+					sprintf( my_buf, "\"%s\"", op->lab);
 				@reloc4( %$(my_buf), %$(op->offset) , PC_REL);
 				}
 				break;
 		case L_ILB :	@text1( %dist( op->lab));
 				break;
-		default : fprint( STDERR, "error");
+		default : fprintf( stderr, "error");
 	}
 }

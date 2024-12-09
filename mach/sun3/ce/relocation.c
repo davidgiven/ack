@@ -10,7 +10,7 @@ do_local_relocation()
 {
 	struct outrelo *rp;
 	
-	/* print( "n relocation records %d\n", relo - reloc_info);  */
+	/* printf( "n relocation records %d\n", relo - reloc_info);  */
 
 	B_base_address[SEGTXT] = 0;
 	B_base_address[SEGCON] = text - text_area;
@@ -29,7 +29,7 @@ do_local_relocation()
 					sect = data_area;
 					break;
 				default:
-					fprint( STDERR, 
+					fprintf( stderr, 
 					  "do_local_relo(): bad section %d\n",
 				 		rp->or_sect - S_MIN);
 					break;
@@ -39,7 +39,7 @@ do_local_relocation()
 					np->on_valu +
 					B_base_address[(np->on_type&S_TYP)-S_MIN];
 			else
-				fprint( STDERR,
+				fprintf( stderr,
 				  "do_relo() : bad relocation size\n");
 		}
 	}

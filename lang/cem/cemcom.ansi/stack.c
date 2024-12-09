@@ -208,7 +208,7 @@ void unstack_world(void)
 		if (options['a']) {
 			char *symbol2str();
 
-			print("\"%s\", %s, %s, %s, %s\n",
+			printf("\"%s\", %s, %s, %s, %s\n",
 				idf->id_text,
 				(def->df_alloc == 0) ? "no alloc" :
 				(def->df_alloc == ALLOC_SEEN) ? "alloc seen" :
@@ -262,7 +262,7 @@ void unstack_world(void)
 	list is generated.
 */
 extern char *nmlist;	/* BAH! -- main.c	*/
-static File *nfp = 0;
+static FILE* nfp = 0;
 
 void open_name_list(void)
 {

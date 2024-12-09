@@ -116,26 +116,26 @@ int PNodeCrash(struct node **expp, int flags)
 void indnt(int lvl)
 {
 	while (lvl--) {
-		print("  ");
+		printf("  ");
 	}
 }
 
 void printnode(struct node *nd, int lvl)
 {
 	indnt(lvl);
-	print("Class: %d; Symbol: %s; Flags: %d\n", nd->nd_class, symbol2str(nd->nd_symb), nd->nd_flags);
+	printf("Class: %d; Symbol: %s; Flags: %d\n", nd->nd_class, symbol2str(nd->nd_symb), nd->nd_flags);
 	if (nd->nd_type) {
 		indnt(lvl);
-		print("Type: ");
+		printf("Type: ");
 		DumpType(nd->nd_type);
-		print("\n");
+		printf("\n");
 	}
 }
 
 void PrNode(struct node *nd, int lvl)
 {
 	if (! nd) {
-		indnt(lvl); print("<nilnode>\n");
+		indnt(lvl); printf("<nilnode>\n");
 		return;
 	}
 	printnode(nd, lvl);

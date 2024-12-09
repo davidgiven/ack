@@ -19,7 +19,7 @@ extern void LLparse(void);
 /* compile the next program in the list */
 /* Here we should open the input file. (for the future) */
 
-File *yyin;
+FILE* yyin;
 
 void compileprogram(void)
 {
@@ -34,5 +34,5 @@ void compileprogram(void)
 		LLparse();
 	}
 	epilogcode(); 	
-	sys_close(yyin);
+	fclose(yyin);
 }

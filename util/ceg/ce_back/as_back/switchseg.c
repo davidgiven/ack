@@ -9,13 +9,13 @@ int seg;
 	cur_seg = seg;
 
 	switch ( cur_seg) {
-	   case SEGTXT : fprint( codefile, SEGTXT_FMT);
+	   case SEGTXT : fprintf( codefile, SEGTXT_FMT);
 			 break;
-	   case SEGCON : fprint( codefile, SEGDAT_FMT);
+	   case SEGCON : fprintf( codefile, SEGDAT_FMT);
 			 break;
-	   case SEGROM : fprint( codefile, SEGDAT_FMT);
+	   case SEGROM : fprintf( codefile, SEGDAT_FMT);
 			 break;
-	   case SEGBSS : fprint( codefile, SEGBSS_FMT);
+	   case SEGBSS : fprintf( codefile, SEGBSS_FMT);
 			 break;
 	}
 

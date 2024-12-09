@@ -461,7 +461,7 @@ getstring(c)
 	tok.ival = val;
 	return INTEGER;
   }
-  tok.str = Salloc(buf, (unsigned) len);
+  tok.str = strdup(buf);
   return STRING;
 }
 

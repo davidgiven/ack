@@ -51,7 +51,7 @@ static void openofile(char *filename)
 	if ((ofile = fopen(ofiletemp, "wb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannot open output file %s\n", ofiletemp);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 }
 
@@ -68,7 +68,7 @@ static void installofile(void)
 	if ((f1 = fopen(ofiletemp, "rb")) == NULL)
 	{
 		fprintf(stderr, "Fatal Error: cannont reopen file %s\n", ofiletemp);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 	if ((f2 = fopen(ofilename, "rb")) == NULL)
 	{
@@ -103,7 +103,7 @@ static void RENAME(char *x, char*y)
 	if (rename(x, y) != 0)
 	{
 		fprintf(stderr, "Cannot rename to %s", y);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 }
 
@@ -127,8 +127,8 @@ static void increase_next(unsigned int size)
 	} while (newsize < size);
 	printf("Note: Extending next/check arrays from %d to %d\n", currsize,
 			newsize);
-	next = (int *) Realloc(next, newsize);
-	check = (int *) Realloc(check, newsize);
+	next = (int *) realloc(next, newsize);
+	check = (int *) realloc(check, newsize);
 	/* clear ends of new arrays */
 	for (i = currsize; i < newsize; i++)
 		next[i] = check[i] = EMPTY;
@@ -189,9 +189,9 @@ static void outdfa(void)
 			numentries++;
 	/* start with next and check arrays twice this size */
 	currsize = 2 * numentries;
-	next = (int *) Malloc(currsize * sizeof(int));
-	check = (int *) Malloc(currsize * sizeof(int));
-	base = (int *) Malloc(((unsigned) (higheststate + 1)) * sizeof(int));
+	next = (int *) malloc(currsize * sizeof(int));
+	check = (int *) malloc(currsize * sizeof(int));
+	base = (int *) malloc(((unsigned) (higheststate + 1)) * sizeof(int));
 	/* fill next array with EMPTY */
 	for (i = 0; i < currsize; i++)
 		check[i] = next[i] = EMPTY;
@@ -375,7 +375,7 @@ static void outdotrans(void)
 	int *farray;
 	fprintf(ofile, "#include \"nopt.h\"\n\n");
 	/* keep track of which procedure used for each state */
-	farray = (int *) Malloc((unsigned) (higheststate + 1) * sizeof(int));
+	farray = (int *) malloc((unsigned) (higheststate + 1) * sizeof(int));
 	for (s = 0; s <= higheststate; s++)
 		farray[s] = EMPTY;
 	/* output the functions avoiding duplicates */

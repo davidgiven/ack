@@ -22,7 +22,6 @@
 #include "error.h"
 #include "bits.h"
 #include "skip.h"
-#include "print.h"
 
 char _obuf[OBUFSIZE];
 #ifdef DOBITS
@@ -32,7 +31,7 @@ extern int InputLevel;
 
 void Xflush(void)
 {
-	sys_write(STDOUT, _obuf, OBUFSIZE);
+	fwrite(_obuf, 1, OBUFSIZE, stdout);
 }
 
 static char* SkipComment(char *op, int *lineno);
@@ -52,7 +51,7 @@ static int pragma_nr;
 void do_pragma(void)
 {
 	int size = ITEXTSIZE;
-	char* cur_line = Malloc((unsigned)size);
+	char* cur_line = malloc((unsigned)size);
 	char* c_ptr = cur_line;
 	int c = GetChar();
 	int delim = 0;
@@ -61,7 +60,7 @@ void do_pragma(void)
 	{
 		if (c_ptr + 1 - cur_line == size)
 		{
-			cur_line = Realloc(cur_line, (unsigned)(size + ITEXTSIZE));
+			cur_line = realloc(cur_line, (unsigned)(size + ITEXTSIZE));
 			c_ptr = cur_line + size - 1;
 			size += ITEXTSIZE;
 		}
@@ -107,11 +106,11 @@ void do_pragma(void)
 	*c_ptr = '\0';
 	if (!pragma_nr)
 	{
-		pragma_tab = (struct prag_info*)Malloc(sizeof(struct prag_info));
+		pragma_tab = (struct prag_info*)malloc(sizeof(struct prag_info));
 	}
 	else
 	{
-		pragma_tab = (struct prag_info*)Realloc(
+		pragma_tab = (struct prag_info*)realloc(
 		    (char*)pragma_tab, (unsigned)(sizeof(struct prag_info) * (pragma_nr + 1)));
 	}
 	if (delim)
@@ -135,7 +134,7 @@ void preprocess(char *fn)
 	int lineno = 0;
 	int startline;
 
-#define flush(X) (sys_write(STDOUT, _obuf, X))
+#define flush(X) (fwrite(_obuf, 1, X, stdout))
 #define echo(ch)                                                                                   \
 	if (op == ob)                                                                                  \
 	{                                                                                              \
@@ -157,7 +156,7 @@ void preprocess(char *fn)
 		*/
 		char* p = Xbuf;
 
-		sprint(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
+		sprintf(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
 		while (*p)
 		{
 			echo(*p++);
@@ -172,7 +171,7 @@ void preprocess(char *fn)
 		if (!options['P'])                                                                         \
 		{                                                                                          \
 			char* p = Xbuf;                                                               \
-			sprint(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
+			sprintf(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
 			op--;                                                                                  \
 			while (op >= _obuf && (class(*op) == STSKIP || *op == '\n'))                           \
 				op--;                                                                              \

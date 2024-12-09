@@ -161,7 +161,7 @@ CheckForLineDirective()
 		 * Remember the file name
 		 */
 		if (class(ch) == STNL && strcmp(FileName,buf)) {
-			FileName = Salloc(buf,(unsigned) strlen(buf) + 1);
+			FileName = strdup(buf);
 			WorkingDir = getwdir(FileName);
 		}
 	}

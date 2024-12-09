@@ -345,7 +345,7 @@ void addaction(int startline, int state, struct exp_node *restrictions,
 	struct exp_node *finaltest, struct mnem_list *repllist)
 {
 	struct action *p, *q;
-	p=(struct action *)Malloc(sizeof(struct action));
+	p=(struct action *)malloc(sizeof(struct action));
 	p->next = (struct action *)NULL;
 	p->linenum = startline;
 	p->test = combinetests(restrictions,finaltest);
@@ -365,7 +365,7 @@ struct mnem_elem **constructlist(struct mnem_list *list, int len)
 {
 	struct mnem_elem **p;
 	p = (struct mnem_elem **)
-		Malloc((unsigned)(len*sizeof(struct mnem_elem *)));
+		malloc((unsigned)(len*sizeof(struct mnem_elem *)));
 	while(len--) {
 		p[len] = list->elem;
 		list = list->next;
@@ -379,10 +379,10 @@ struct mnem_list *addelem(struct mnem_list *oldlist,
 {
 	struct mnem_list *reslist;
 	struct mnem_elem *element;
-	element = (struct mnem_elem *)Malloc(sizeof(struct mnem_elem));
+	element = (struct mnem_elem *)malloc(sizeof(struct mnem_elem));
 	element->op_code = mnem;
 	element->arg = test;
-	reslist = (struct mnem_list *)Malloc(sizeof(struct mnem_list));
+	reslist = (struct mnem_list *)malloc(sizeof(struct mnem_list));
 	reslist->elem = element;
 	reslist->next = oldlist;
 	return(reslist);
@@ -402,11 +402,11 @@ int dotransition(
 	   );
 	if(p==(struct state *)NULL) {
 		/* none found so add a new state to dfa */
-		p=(struct state *)Malloc(sizeof(struct state));
+		p=(struct state *)malloc(sizeof(struct state));
 		p->op=mnem;
 		if(++higheststate>MAXSTATES) {
 			fprintf(stderr,"Parser: More than %d states\n",MAXSTATES);
-			sys_stop(S_EXIT);
+			exit(1);
 		}
 		p->goto_state= higheststate;
 		p->next=states[currentstate];
@@ -466,7 +466,7 @@ struct exp_node *mknode(int op, struct exp_node *left,
     struct exp_node *right)
 {
 	struct exp_node *p;
-	p = (struct exp_node *)Malloc(sizeof(struct exp_node));
+	p = (struct exp_node *)malloc(sizeof(struct exp_node));
 	p->node_type = op;
 	p->exp_left = left;
 	p->exp_right = right;
@@ -476,7 +476,7 @@ struct exp_node *mknode(int op, struct exp_node *left,
 struct exp_node *mkleaf(int op, int val)
 {	
 	struct exp_node *p;
-	p = (struct exp_node *)Malloc(sizeof(struct exp_node));
+	p = (struct exp_node *)malloc(sizeof(struct exp_node));
 	p->node_type = op;
 	p->leaf_val = val;
 	return(p);
@@ -501,9 +501,9 @@ int main(int argc, char **argv)
 	parser();
 	if(nerrors) {
 		fprintf(stderr,"%d errors detected\n",nerrors);
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 	outputnopt();
-	sys_stop(S_END);
+	exit(0);
 }
 }

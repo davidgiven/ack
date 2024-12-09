@@ -7,6 +7,7 @@
 
 #include	<assert.h>
 #include	<stdlib.h>
+#include	<stdio.h>
 #include	<string.h>
 #include	"parameters.h"
 #include	<em_reg.h>
@@ -26,7 +27,6 @@
 #include	"declarator.h"
 #include	"decspecs.h"
 #include	"sizes.h"
-#include    "print.h"
 #include    "util.h"
 #include    "stab.h"
 #include    "code.h"
@@ -51,10 +51,10 @@ struct idf *gen_idf(void)
 	 anonymous name.
 	 */
 	static int name_cnt;
-	char *s = Malloc(strlen(dot.tk_file) + 50);
+	char *s = malloc(strlen(dot.tk_file) + 50);
 
-	sprint(s, "#%d in %s, line %u", ++name_cnt, dot.tk_file, dot.tk_line);
-	s = Realloc(s, strlen(s) + 1);
+	sprintf(s, "#%d in %s, line %u", ++name_cnt, dot.tk_file, dot.tk_line);
+	s = realloc(s, strlen(s) + 1);
 	return str2idf(s, 0);
 }
 

@@ -39,7 +39,7 @@ new_lnk()
 	static int cnt;
 
 	if (cnt-- <= 0) {
-		p = (struct lnk *)Malloc(50*sizeof(struct lnk));
+		p = (struct lnk *)malloc(50*sizeof(struct lnk));
 		cnt = 49;
 	}
 	p->lnk_next = 0;

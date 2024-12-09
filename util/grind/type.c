@@ -290,11 +290,11 @@ tp_lookup(type_index)
 
   while (type_index[0] >= list_len) {
 	if (list_len) {
-		list_row = (struct tp_index *) Realloc((char *) list_row,
+		list_row = (struct tp_index *) realloc((char *) list_row,
 				(list_len += NINCR) * sizeof(struct tp_index));
 	}
 	else	list_row = (struct tp_index *)
-			Malloc((list_len = NINCR) * sizeof(struct tp_index));
+			malloc((list_len = NINCR) * sizeof(struct tp_index));
 	for (i = NINCR; i > 0; i--) {
 		list_row[list_len - i].len = 0;
 	}
@@ -303,12 +303,12 @@ tp_lookup(type_index)
   while (type_index[1] >= p->len) {
 	int indx = p->len/NINCR;
 	if (p->len) {
-		p->row = (p_type **) Realloc((char *) p->row,
+		p->row = (p_type **) realloc((char *) p->row,
 				(unsigned) (indx + 1) * sizeof(p_type *));
 	}
-	else	p->row = (p_type **) Malloc(sizeof(p_type *));
+	else	p->row = (p_type **) malloc(sizeof(p_type *));
 	p->len += NINCR;
-	p->row[indx] = (p_type *) Malloc(NINCR * sizeof(p_type));
+	p->row[indx] = (p_type *) malloc(NINCR * sizeof(p_type));
 	for (i = NINCR-1; i >= 0; i--) {
 		p->row[indx][i] = 0;
 	}
@@ -352,7 +352,7 @@ end_literal(tp, maxval)
   long maxval;
 {
   tp->ty_literals = (struct literal *)
-	Realloc((char *) tp->ty_literals,
+	realloc((char *) tp->ty_literals,
 		tp->ty_nenums * sizeof(struct literal));
   if (ufit(maxval, 1)) tp->ty_size = 1;
   else if (ufit(maxval, (int)short_size)) tp->ty_size = short_size;
@@ -396,7 +396,7 @@ add_param_type(v, s)
 	return;
   }
   prc_type->ty_nparams++;
-  prc_type->ty_params = (struct param *) Realloc((char *) prc_type->ty_params, 
+  prc_type->ty_params = (struct param *) realloc((char *) prc_type->ty_params, 
 				(unsigned)prc_type->ty_nparams * sizeof(struct param));
   prc_type->ty_params[prc_type->ty_nparams - 1].par_type = s->sy_type;
   prc_type->ty_params[prc_type->ty_nparams - 1].par_kind = v;

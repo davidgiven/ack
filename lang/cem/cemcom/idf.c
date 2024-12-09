@@ -91,7 +91,7 @@ idf_hashed(tg, size, hc)
 	notch = new_idf();
 	notch->next = *hook;
 	*hook = notch;		/* hooked in */
-	notch->id_text = Salloc(tg, (unsigned) size);
+	notch->id_text = strdup(tg);
 #ifndef NOPP
 	notch->id_resmac = 0;
 #endif /* NOPP */
@@ -104,7 +104,7 @@ hash_stat()
 	if (options['h'])	{
 		int i;
 
-		print("Hash table tally:\n");
+		printf("Hash table tally:\n");
 		for (i = 0; i < HASHSIZE; i++)	{
 			struct idf *notch = idf_hashtable[i];
 			int cnt = 0;
@@ -113,9 +113,9 @@ hash_stat()
 				cnt++;
 				notch = notch->next;
 			}
-			print("%d %d\n", i, cnt);
+			printf("%d %d\n", i, cnt);
 		}
-		print("End hash table tally\n");
+		printf("End hash table tally\n");
 	}
 }
 #endif	/* DEBUG */
@@ -155,9 +155,9 @@ gen_idf()
 	*/
 	static int name_cnt;
 	struct idf *id;
-	char *s = Malloc(strlen(dot.tk_file)+50);
+	char *s = malloc(strlen(dot.tk_file)+50);
 
-	sprint(s, "#%d in %s, line %u",
+	sprintf(s, "#%d in %s, line %u",
 			++name_cnt, dot.tk_file, dot.tk_line);
 	id = str2idf(s);
 	free(s);

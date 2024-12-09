@@ -1,6 +1,7 @@
 /* M I S C E L L A N E O U S    R O U T I N E S */
 
 #include    <stdlib.h>
+#include	<stdio.h>
 #include    <string.h>
 #include	<alloc.h>
 #include	<em.h>
@@ -12,7 +13,6 @@
 #include	"main.h"
 #include	"misc.h"
 #include	"node.h"
-#include	"print.h"
 #include	"error.h"
 
 struct idf *gen_anon_idf(void)
@@ -21,10 +21,10 @@ struct idf *gen_anon_idf(void)
 		anonymous name.
 	*/
 	static int name_cnt;
-	char *s = Malloc(strlen(FileName) + 50);
+	char *s = malloc(strlen(FileName) + 50);
 
-	sprint(s, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
-	s = Realloc(s, strlen(s)+1);
+	sprintf(s, "#%d in %s, line %u", ++name_cnt, FileName, LineNumber);
+	s = realloc(s, strlen(s)+1);
 	return str2idf(s, 0);
 }
 
@@ -48,9 +48,9 @@ char *gen_proc_name(struct idf *id, int inp)
 
 
 	if( inp )	{
-		sprint(buf, "_%d%s", ++name_cnt, id->id_text);
+		sprintf(buf, "_%d%s", ++name_cnt, id->id_text);
 		C_inp(buf);
-		return Salloc(buf, (unsigned) (strlen(buf) + 1));
+		return strdup(buf);
 	}
 	else	{
 		C_exp(id->id_text);

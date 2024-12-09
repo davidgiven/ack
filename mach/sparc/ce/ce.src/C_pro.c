@@ -15,9 +15,9 @@ arith l;
 	swtxt();
 	s = extnd_name(s);
 #ifdef __solaris__
-	fprint(codefile, "\t.type\t%s,#function\n", s);
+	fprintf(codefile, "\t.type\t%s,#function\n", s);
 	if (B_procnam) free(B_procnam);
-	B_procnam = Salloc(s, strlen(s)+1);
+	B_procnam = strdup(s);
 #endif
 
 	symbol_definition(  s);

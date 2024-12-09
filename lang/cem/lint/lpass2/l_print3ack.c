@@ -17,14 +17,14 @@
 	%c = int		%s = char *
 	%u = unsigned int
 $ */
-print(format) char *format; { ; }
+printf(format) char *format; { ; }
 
 /* FORMAT1 */
-fprint(filep, format) File *filep; char *format; { ; }
+fprintf(filep, format) FILE* filep; char *format; { ; }
 /* FORMAT1 */
-sprint(s, format) char *s; char *format; { ; }
+sprintf(s, format) char *s; char *format; { ; }
 /* FORMAT1 */
-doprnt(filep, format) File *filep; char *format; { ; }
+vfprintf(filep, format) FILE* filep; char *format; { ; }
 
 #endif	/* lint */
 

@@ -160,7 +160,7 @@ void DoOption(char *text)
 
 			if (nDEF > mDEF) {
 				DEFPATH = (char **)
-				  Realloc((char *)DEFPATH,(unsigned)(mDEF+=10)*sizeof(char *));
+				  realloc((char *)DEFPATH,(unsigned)(mDEF+=10)*sizeof(char *));
 			}
 
 			for (i = ndirs++; i < nDEF; i++) {

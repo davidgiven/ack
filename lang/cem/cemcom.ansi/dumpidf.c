@@ -19,7 +19,6 @@
 #include	"proto.h"
 #include	"struct.h"
 #include	"field.h"
-#include	"print.h"
 #include	"Lpars.h"
 #include	"label.h"
 #include	"expr.h"
@@ -63,13 +62,13 @@ void newline(void)
 {
 	int dl = dumplevel;
 	
-	print("\n");
+	printf("\n");
 	while (dl >= 2)	{
-		print("\t");
+		printf("\t");
 		dl -= 2;
 	}
 	if (dl)
-		print("    ");
+		printf("    ");
 }
 
 
@@ -83,11 +82,11 @@ void dumpidftab(char msg[], int opt)
 		Unless opt & 4, universal identifiers are not dumped.
 	*/
 
-	print(">>> DUMPIDF, %s (start)", msg);
+	printf(">>> DUMPIDF, %s (start)", msg);
 	dumpstack();
 	idfappfun(dumpidf, opt);
 	newline();
-	print(">>> DUMPIDF, %s (end)\n", msg);
+	printf(">>> DUMPIDF, %s (end)\n", msg);
 }
 
 static void dumpstack(void)
@@ -100,14 +99,14 @@ static void dumpstack(void)
 		struct stack_entry *se = stl->sl_entry;
 		
 		newline();
-		print("%3d: ", stl->sl_level);
+		printf("%3d: ", stl->sl_level);
 		while (se)	{
-			print("%s ", se->se_idf->id_text);
+			printf("%s ", se->se_idf->id_text);
 			se = se->next;
 		}
 		stl = stl->sl_previous;
 	}
-	print("\n");
+	printf("\n");
 }
 
 void dumpidf(struct idf *idf, int opt)
@@ -122,28 +121,28 @@ void dumpidf(struct idf *idf, int opt)
 	if ((opt&2) && idf->id_reserved)	{
 		if (!started++)	{
 			newline();
-			print("%s:", idf->id_text);
+			printf("%s:", idf->id_text);
 		}
-		print(" reserved: %d;", idf->id_reserved);
+		printf(" reserved: %d;", idf->id_reserved);
 	}
 	if (idf->id_def && ((opt&4) || idf->id_def->df_level))	{
 		if (!started++)	{
 			newline();
-			print("%s:", idf->id_text);
+			printf("%s:", idf->id_text);
 		}
 		dumpdefs(idf->id_def, opt);
 	}
 	if (idf->id_sdef)	{
 		if (!started++)	{
 			newline();
-			print("%s:", idf->id_text);
+			printf("%s:", idf->id_text);
 		}
 		dumpsdefs(idf->id_sdef, selector);
 	}
 	if (idf->id_tag)	{
 		if (!started++)	{
 			newline();
-			print("%s:", idf->id_text);
+			printf("%s:", idf->id_text);
 		}
 		dumptags(idf->id_tag);
 	}
@@ -154,7 +153,7 @@ void dumpdefs(struct def *def, int opt)
 	dumplevel++;
 	while (def && ((opt&4) || def->df_level))	{
 		newline();
-		print("L%d: %s %s%stype%s %lo; ",
+		printf("L%d: %s %s%stype%s %lo; ",
 			def->df_level,
 			symbol2str(def->df_sc),
 			def->df_initialized ? "init'd " : "",
@@ -162,7 +161,7 @@ void dumpdefs(struct def *def, int opt)
 			def->df_sc == ENUM ? ", =" : " at",
 			def->df_address
 		);
-		print("%s, line %u",
+		printf("%s, line %u",
 			def->df_file ? def->df_file : "NO_FILE", def->df_line);
 		dumptype(def->df_type);
 		def = def->next;
@@ -178,7 +177,7 @@ void dumptags(struct tag *tag)
 		int fund = tp->tp_fund;
 
 		newline();
-		print("L%d: %s %s",
+		printf("L%d: %s %s",
 			tag->tg_level,
 			fund == STRUCT ? "struct" :
 			fund == UNION ? "union" :
@@ -186,12 +185,12 @@ void dumptags(struct tag *tag)
 			tp->tp_idf->id_text
 		);
 		if (is_struct_or_union(fund))	{
-			print(" {");
+			printf(" {");
 			dumpsdefs(tp->tp_sdef, field);
 			newline();
-			print("}");
+			printf("}");
 		}
-		print(";");
+		printf(";");
 		tag = tag->next;
 	}
 	dumplevel--;
@@ -209,16 +208,16 @@ void dumpsdefs(struct sdef *sdef, enum sdef_kind sdk)
 	dumplevel++;
 	while (sdef)	{
 		newline();
-		print("L%d: ", sdef->sd_level);
+		printf("L%d: ", sdef->sd_level);
 #ifndef NOBITFIELD
 		if (sdk == selector)
 #endif /* NOBITFIELD */
-			print("selector %s at offset %lu in %s;",
+			printf("selector %s at offset %lu in %s;",
 				type2str(sdef->sd_type),
 				sdef->sd_offset, type2str(sdef->sd_stype)
 			);
 #ifndef NOBITFIELD
-		else	print("field %s at offset %lu;",
+		else	printf("field %s at offset %lu;",
 				type2str(sdef->sd_type), sdef->sd_offset
 			);
 #endif /* NOBITFIELD */
@@ -233,10 +232,10 @@ void dumpproto(struct proto *pl)
 	int argcnt = 0;
 
 	newline();
-	print("dump proto type list (start)");
+	printf("dump proto type list (start)");
 	newline();
 	while (pl) {
-		print("%d: %s", argcnt++,
+		printf("%d: %s", argcnt++,
 			pl->pl_flag & PL_FORMAL ?
 			(pl->pl_flag & PL_VOID ? "void" : "formal")
 			: (pl->pl_flag & PL_ELLIPSIS
@@ -248,14 +247,14 @@ void dumpproto(struct proto *pl)
 		}
 		if (pl->pl_idf) {
 			dumplevel++;
-			print("idf:");
+			printf("idf:");
 			dumpidf(pl->pl_idf, 7);
 			dumplevel--;
 		}
 		newline();
 		pl = pl->next;
 	}
-	print("dump proto type list (end)\n");
+	printf("dump proto type list (end)\n");
 }
 
 void dumptype(struct type *tp)
@@ -265,44 +264,44 @@ void dumptype(struct type *tp)
 	dumplevel++;
 	newline();
 	if (!tp) {
-		print("<NILTYPE>");
+		printf("<NILTYPE>");
 		newline();
 		dumplevel--;
 		return;
 	}
 
-	print("(@%lx, #%ld, &%d) ", tp, (long)tp->tp_size, tp->tp_align);
+	printf("(@%lx, #%ld, &%d) ", tp, (long)tp->tp_size, tp->tp_align);
 
 	while (ops)	{
-		print("%s", qual2str(tp->tp_typequal));
+		printf("%s", qual2str(tp->tp_typequal));
 		switch (tp->tp_fund)	{
 		case POINTER:
-			print("pointer to ");
+			printf("pointer to ");
 			break;
 		case ARRAY:
-			print("array [%ld] of ", tp->tp_size);
+			printf("array [%ld] of ", tp->tp_size);
 			break;
 		case FUNCTION:
-			print("function ");
+			printf("function ");
 			if (tp->tp_proto) {
-				print("with prototype");
+				printf("with prototype");
 				dumplevel++;
 				dumpproto(tp->tp_proto);
 				dumplevel--;
 				newline();
 			}
-			print("yielding ");
+			printf("yielding ");
 			break;
 		default:
-			print("%s%s ", tp->tp_unsigned ? "unsigned " : "",
+			printf("%s%s ", tp->tp_unsigned ? "unsigned " : "",
 				       symbol2str(tp->tp_fund));
 			if (tp->tp_idf)
-				print("%s ", tp->tp_idf->id_text);
+				printf("%s ", tp->tp_idf->id_text);
 #ifndef NOBITFIELD
 			if (tp->tp_fund == FIELD && tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
-				print("[s=%ld,w=%ld] of ",
+				printf("[s=%ld,w=%ld] of ",
 					fd->fd_shift, fd->fd_width);
 			}
 			else
@@ -324,37 +323,37 @@ static char *type2str(struct type *tp)
 
 	buf[0] = '\0';
 	if (!tp)	{
-		sprint(buf, "<NILTYPE>");
+		sprintf(buf, "<NILTYPE>");
 		return buf;
 	}
-	sprint(buf, "%s(@%lx, #%ld, &%d) ",
+	sprintf(buf, "%s(@%lx, #%ld, &%d) ",
 			buf, tp, (long)tp->tp_size, tp->tp_align);
 
 	while (ops)	{
-		sprint(buf, "%s%s", buf, qual2str(tp->tp_typequal));
+		sprintf(buf, "%s%s", buf, qual2str(tp->tp_typequal));
 		switch (tp->tp_fund)	{
 		case POINTER:
-			sprint(buf, "%spointer to ", buf);
+			sprintf(buf, "%spointer to ", buf);
 			break;
 		case ARRAY:
-			sprint(buf, "%sarray [%ld] of ", buf, tp->tp_size);
+			sprintf(buf, "%sarray [%ld] of ", buf, tp->tp_size);
 			break;
 		case FUNCTION:
-			sprint(buf, "%sfunction yielding ", buf);
+			sprintf(buf, "%sfunction yielding ", buf);
 			break;
 		default:
-			sprint(buf, "%s%s%s ", buf,
+			sprintf(buf, "%s%s%s ", buf,
 					tp->tp_unsigned ? "unsigned " : "",
 					symbol2str(tp->tp_fund)
 			);
 			if (tp->tp_idf)
-				sprint(buf, "%s %s ", buf,
+				sprintf(buf, "%s %s ", buf,
 					tp->tp_idf->id_text);
 #ifndef NOBITFIELD
 			if (tp->tp_fund == FIELD && tp->tp_field)	{
 				struct field *fd = tp->tp_field;
 				
-				sprint(buf, "%s [s=%ld,w=%ld] of ", buf,
+				sprintf(buf, "%s [s=%ld,w=%ld] of ", buf,
 					fd->fd_shift, fd->fd_width);
 			}
 			else
@@ -373,11 +372,11 @@ static char *qual2str(int qual)
 
 	*buf = '\0';
 	if (qual == 0)
-		sprint(buf, "(none)");
+		sprintf(buf, "(none)");
 	if (qual & TQ_CONST)
-		sprint(buf, "%sconst ", buf);
+		sprintf(buf, "%sconst ", buf);
 	if (qual & TQ_VOLATILE)
-		sprint(buf, "%svolatile ", buf);
+		sprintf(buf, "%svolatile ", buf);
 
 	return qual == 0 ? "" : buf;
 }
@@ -400,8 +399,8 @@ void print_expr(char msg[], struct expr *expr)
 		message msg.
 	*/
 	if (options['x'])	{
-		print("\n%s: ", msg);
-		print("(L=line, T=type, r/lV=r/lvalue, F=flags, D=depth)\n");
+		printf("\n%s: ", msg);
+		printf("(L=line, T=type, r/lV=r/lvalue, F=flags, D=depth)\n");
 		p1_expr(0, expr);
 	}
 }
@@ -410,10 +409,10 @@ static void p1_expr(int lvl, struct expr *expr)
 {
 	p1_indent(lvl);
 	if (!expr)	{
-		print("NILEXPR\n");
+		printf("NILEXPR\n");
 		return;
 	}
-	print("expr: L=%u, T=%s, %cV, F=%03o, D=%d, %s: ",
+	printf("expr: L=%u, T=%s, %cV, F=%03o, D=%d, %s: ",
 		expr->ex_line,
 		type2str(expr->ex_type),
 		expr->ex_lvalue ? 'l' : 'r',
@@ -430,24 +429,24 @@ static void p1_expr(int lvl, struct expr *expr)
 	case Value:
 		switch (expr->VL_CLASS) {
 		case Const:
-			print("(Const) ");
+			printf("(Const) ");
 			break;
 		case Name:
-			print("(Name) %s + ", expr->VL_IDF->id_text);
+			printf("(Name) %s + ", expr->VL_IDF->id_text);
 			break;
 		case Label:
-			print("(Label) .%lu + ", expr->VL_LBL);
+			printf("(Label) .%lu + ", expr->VL_LBL);
 			break;
 		default:
-			print("(Unknown) ");
+			printf("(Unknown) ");
 			break;
 		}
-		print("%s\n", writh2str(expr->VL_VALUE,
+		printf("%s\n", writh2str(expr->VL_VALUE,
 					expr->ex_type->tp_unsigned));
 		break;
 	case String:
 	{
-		print(
+		printf(
 			"\"%s\"\n",
 			bts2str(expr->SG_VALUE, expr->SG_LEN-1,
 							next_transient())
@@ -459,24 +458,24 @@ static void p1_expr(int lvl, struct expr *expr)
 		char buf[FLT_STRLEN];
 
 		flt_flt2str(&(expr->FL_ARITH), buf, FLT_STRLEN);
-		print("%s\n", buf);
+		printf("%s\n", buf);
 		break;
 	}
 	case Oper:
 		o = &expr->ex_object.ex_oper;
-		print("\n");
+		printf("\n");
 		p1_expr(lvl+1, o->op_left);
 		p1_indent(lvl);
-		print("%s <%s>\n", symbol2str(o->op_oper),
+		printf("%s <%s>\n", symbol2str(o->op_oper),
 			type2str(o->op_type)
 		);
 		p1_expr(lvl+1, o->op_right);
 		break;
 	case Type:
-		print("\n");
+		printf("\n");
 		break;
 	default:
-		print("UNKNOWN CLASS\n");
+		printf("UNKNOWN CLASS\n");
 		break;
 	}
 }
@@ -484,6 +483,6 @@ static void p1_expr(int lvl, struct expr *expr)
 static void p1_indent(int lvl)
 {
 	while (lvl--)
-		print("  ");
+		printf("  ");
 }
 #endif	/* DEBUG */

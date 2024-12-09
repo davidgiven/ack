@@ -26,8 +26,7 @@ extern char* ProgName;
 int maxlen = DEF_LENGTH;
 
 void InsertId(char*);
-char* Malloc(unsigned int);
-char* Salloc(char*);
+char* malloc(unsigned int);
 int EnHash(char*);
 void EndOfProgram(void);
 void DoOption(char*);
@@ -88,17 +87,17 @@ void InsertId(char* id)
 
 	if (idp == 0)
 	{
-		idp = (struct idf*)Malloc(sizeof(struct idf));
+		idp = (struct idf*)malloc(sizeof(struct idf));
 		idp->id_next = 0;
 		if (!p)
 			hash_tab[hash_val] = idp;
 		else
 			p->id_next = idp;
-		idp->id_name = Salloc(id);
+		idp->id_name = strdup(id);
 	}
 }
 
-char* Malloc(unsigned int n)
+char* malloc(unsigned int n)
 {
 	char* mem;
 
@@ -108,15 +107,6 @@ char* Malloc(unsigned int n)
 		exit(1);
 	}
 	return mem;
-}
-
-char* Salloc(char* str)
-{
-
-	if (str == 0)
-		str = "";
-
-	return strcpy(Malloc((unsigned)strlen(str) + 1), str);
 }
 
 int EnHash(char* id)

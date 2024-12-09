@@ -49,14 +49,14 @@
 #define switchseg		B_switchseg
 #define not_implemented		B_not_implemented
 
-extern File *codefile;
+extern FILE* codefile;
 
 extern char *extnd_name(), *extnd_dnam(), *extnd_dlb(), *extnd_ilb(),
 	    *extnd_hol(), *extnd_ext(), *extnd_pro(), *extnd_start(),
 	    *extnd_part(), *extnd_cont(), *extnd_main();
 
 #define 	swtxt() 	switchseg( SEGTXT)
-#define		bss(n)		fprint(codefile, BSS_FMT, (long)(n))
+#define		bss(n)		fprintf(codefile, BSS_FMT, (long)(n))
 
 #define 	SEGTXT		0
 #define 	SEGROM		1

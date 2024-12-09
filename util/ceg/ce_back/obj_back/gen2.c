@@ -29,7 +29,7 @@ TWO_BYTES w;
 			       return;
 		case SEGBSS  : bss( (arith) 2);
 			       return;
-		default      : fprint( STDERR, "gen2() : bad seg number\n");
+		default      : fprintf( stderr, "gen2() : bad seg number\n");
 			       return;
 	}
 }

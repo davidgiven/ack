@@ -25,27 +25,27 @@ static char	*assem_instr = 0;	/* Name of the current assembly instr */
 static Bool	restriction = FALSE;	/* Is there a restriction on the
 					 * current operand?
 					 */
-File *outfile;
+FILE* outfile;
 
 save_instr( instr, len)
 char *instr;
 int len;
 {
-	assem_instr = Salloc( instr, len + 1);
+	assem_instr = strdup( instr);
 }
 
 save_name( name, len)
 char *name;
 int len;
 {
-	op_info[ n_ops].name = Salloc( name, len + 1);
+	op_info[ n_ops].name = strdup( name);
 }
 
 save_type( type, len)
 char *type;
 int len;
 {
-	op_info[ n_ops].type = Salloc( type, len + 1);
+	op_info[ n_ops].type = strdup( type);
 	restriction = TRUE;
 }
 
@@ -142,36 +142,36 @@ char *str;
 		out( "cur_pos += %d;\n", *(str+5) - '0');
 
 	pr_text_with_conversions( str);
-	out( "fprint( outfile, \";\");");
+	out( "fprintf( outfile, \";\");");
 }
 
 pr_end()
 {
-	out( "fprint( outfile, \"}\\n\");");
+	out( "fprintf( outfile, \"}\\n\");");
 }
 
 pr_els()
 {
-	out( "fprint( outfile, \"else\\n\");");
+	out( "fprintf( outfile, \"else\\n\");");
 }
 
 pr_else()
 {
-	out( "fprint( outfile, \"else {\\n\");");
+	out( "fprintf( outfile, \"else {\\n\");");
 }
 
 pr_question( quest)
 char *quest;
 {
-	out( "fprint( outfile, \"if\");");
+	out( "fprintf( outfile, \"if\");");
         pr_text_with_conversions( quest);
-	out( "fprint( outfile, \"{\\n\");");
+	out( "fprintf( outfile, \"{\\n\");");
 }
 
 
 init_table()
 {
-	outfile = STDOUT;
+	outfile = stdout;
 	out( "#include \"as.h\"\n");
 	out( "#include \"as_parser.h\"\n");
 }
@@ -224,7 +224,7 @@ out(char *fmt, ...)
 	va_list pvar;
 
 	va_start(pvar, fmt);
-	doprnt( outfile, fmt, pvar);
+	vfprintf( outfile, fmt, pvar);
 	va_end(pvar);
 }
 
@@ -237,9 +237,9 @@ error(char *fmt, ...)
 
 	nerrors++;
 	va_start(pvar, fmt);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprintf( stderr, "!! ERROR :	");
+	vfprintf( stderr, fmt, pvar);
+	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }
 #else
@@ -252,7 +252,7 @@ va_dcl
 
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	doprnt( outfile, fmt, pvar);
+	vfprintf( outfile, fmt, pvar);
 	va_end(pvar);
 }
 
@@ -268,9 +268,9 @@ va_dcl
 	nerrors++;
 	va_start(pvar);
 	fmt = va_arg(pvar, char *);
-	fprint( STDERR, "!! ERROR :	");
-	doprnt( STDERR, fmt, pvar);
-	fprint( STDERR, "	!!\n");
+	fprintf( stderr, "!! ERROR :	");
+	vfprintf( stderr, fmt, pvar);
+	fprintf( stderr, "	!!\n");
 	va_end(pvar);
 }
 #endif
@@ -293,7 +293,7 @@ char *mnem;
 		error( "too many assembler instructions!! MAX_MNEMONICS = %d",
 			MAX_MNEMONICS);
 	else
-		mnemonic[ n_mnems++] = Salloc( mnem, strlen( mnem) + 1);
+		mnemonic[ n_mnems++] = strdup(mnem);
 }
 
 

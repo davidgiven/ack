@@ -25,8 +25,8 @@ static void Xerror(char *type, char *str)
 	extern int listing;
 	extern int basicline;
 
-	if( !listing) fprint(STDERR, "LINE %d:",basicline);
-	fprint(STDERR, "%s:%s\n",type, str);
+	if( !listing) fprintf(stderr, "LINE %d:",basicline);
+	fprintf(stderr, "%s:%s\n",type, str);
 }
 
 
@@ -51,7 +51,7 @@ void fatal(char* str)
 {
 	Xerror("FATAL",str);
 	C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 
@@ -74,7 +74,7 @@ char *myitoa(int i)
 {
 	static char buf[30];
 
-	sprint(buf,"%d",i);
+	sprintf(buf,"%d",i);
 	return(buf);
 }
 

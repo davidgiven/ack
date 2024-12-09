@@ -42,32 +42,34 @@ basename(s)
 	return buf;
 }
 
-char *
-getwdir(fn)
-        char *fn;
+char* getwdir(char* fn)
 {
-        char *p;
+	char* p;
 
-        p = strrchr(fn, '/');
-        while (p && *(p + 1) == '\0') { /* remove trailing /'s */
-                *p = '\0';
-                p = strrchr(fn, '/');
-        }
+	p = strrchr(fn, '/');
+	while (p && *(p + 1) == '\0')
+	{ /* remove trailing /'s */
+		*p = '\0';
+		p = strrchr(fn, '/');
+	}
 
-        if (p) {
-		char **d = DEFPATH;
+	if (p)
+	{
+		char** d = DEFPATH;
 
-                *p = '\0';
-		while (*d && strcmp(*d, fn) != 0) d++;
-                if (*d) {
-                	*p = '/';
+		*p = '\0';
+		while (*d && strcmp(*d, fn) != 0)
+			d++;
+		if (*d)
+		{
+			*p = '/';
 			return *d;
 		}
-                fn = Salloc(fn, (unsigned) (p - &fn[0] + 1));
+		fn = strdup(fn);
 		*p = '/';
 		return fn;
-        }
-        return ".";
+	}
+	return ".";
 }
 
 static struct file_list *arglist;
@@ -89,7 +91,7 @@ main(argc, argv)
 	int i;
 
 	ProgName = *argv++;
-	DEFPATH = (char **) Malloc(10 * sizeof(char *));
+	DEFPATH = (char **) malloc(10 * sizeof(char *));
 	DEFPATH[1] = 0;
 	mDEF = 10;
 	nDEF = 2;
@@ -105,11 +107,11 @@ main(argc, argv)
 
 	init_idf();
 	reserve(tkidf);
-	print("IFLAGS =");
+	printf("IFLAGS =");
 	for (i = 1; i < nDEF; i++) {
-		if (DEFPATH[i]) print(" -I%s", DEFPATH[i]);
+		if (DEFPATH[i]) printf(" -I%s", DEFPATH[i]);
 	}
-	print("\nM2FLAGS = %s\nMOD = %s\nSUFFIX = %s\nLIBS = %s\n", mflags, compiler, suff, llibs ? llibs : "");
+	printf("\nM2FLAGS = %s\nMOD = %s\nSUFFIX = %s\nLIBS = %s\n", mflags, compiler, suff, llibs ? llibs : "");
 	init_lib();
 	ProcessArgs();
 	find_dependencies();
@@ -126,7 +128,7 @@ new_file_list()
 	static int cnt;
 
 	if (--cnt < 0) {
-		p = (struct file_list *)Malloc(50*sizeof(struct file_list));
+		p = (struct file_list *)malloc(50*sizeof(struct file_list));
 		cnt = 49;
 	}
 	f = p++;
@@ -153,7 +155,7 @@ Add(parglist, f, d, copy)
 	if (a) return 0;
 	a = new_file_list();
 	if (copy) {
-		a->a_filename = Salloc(f, (unsigned) (strlen(f)+1));
+		a->a_filename = strdup(f);
 	}
 	else {
 		a->a_filename = f;
@@ -208,12 +210,6 @@ ProcessArgs()
 	}
 }
 
-void
-No_Mem()
-{
-	fatal("out of memory");
-}
-
 AddToList(name, ext)
 	char *name, *ext;
 {
@@ -237,7 +233,7 @@ find_dependencies()
 {
 	struct file_list *arg;
 
-	print("\nall:\t");
+	printf("\nall:\t");
 	f_walk(arglist, arg) {
 		char *fn = f_filename(arg);
 		char *dotspot = strrchr(fn, '.');
@@ -248,15 +244,15 @@ find_dependencies()
 			if (! f_notfound(arg) && id) {
 				if (id->id_type == PROGRAM) {
 					*dotspot = 0;
-					print("%s ", fn);
+					printf("%s ", fn);
 					*dotspot = '.';
 				}
 				file_dep(id);
 			}
 		}
 	}
-	print("\n\n");
-	print("objects:\t");
+	printf("\n\n");
+	printf("objects:\t");
 	f_walk(arglist, arg) {
 		char *fn = f_filename(arg);
 		char *dotspot = strrchr(fn, '.');
@@ -267,13 +263,13 @@ find_dependencies()
 			if (! f_notfound(arg) && id) {
 				if (id->id_type == PROGRAM) {
 					*dotspot = 0;
-					print("%s_o_files ", fn);
+					printf("%s_o_files ", fn);
 					*dotspot = '.';
 				}
 			}
 		}
 	}
-	print("\n\n\n");
+	printf("\n\n\n");
 }
 
 file_dep(id)
@@ -342,9 +338,9 @@ pr_arg(a)
 	char *d = f_dir(a);
 
 	if (strcmp(d, ".") == 0 || *f == '/' || *f == '.') {
-		print(f);
+		printf(f);
 	}
-	else	print("%s/%s", d, f);
+	else	printf("%s/%s", d, f);
 }
 
 print_dep()
@@ -361,17 +357,17 @@ print_dep()
 				char *obj = object(arg);
 				struct file_list *a;
 
-				print("%s: \\\n\t", obj);
+				printf("%s: \\\n\t", obj);
 				pr_arg(arg);
 				f_walk(id->id_mdependson, a) {
 					if (*(f_filename(a))) /* ??? */ {
-						print(" \\\n\t");
+						printf(" \\\n\t");
 						pr_arg(a);
 					}
 				}
-				print("\n\t$(MOD) -c $(M2FLAGS) $(IFLAGS) ");
+				printf("\n\t$(MOD) -c $(M2FLAGS) $(IFLAGS) ");
 				pr_arg(arg);
-				print("\n");
+				printf("\n");
 			}
 		}
 	}
@@ -432,25 +428,25 @@ pr_prog_dep(id, a)
 {
 	struct file_list *p;
 
-	print("\nOBS_%s =", id->id_text);
+	printf("\nOBS_%s =", id->id_text);
 	f_walk(id->id_mdependson, p) {
 		if (module_in_arglist(f_filename(p)) || ! f_dir(p)) {
-			print(" \\\n\t%s", object(p));
+			printf(" \\\n\t%s", object(p));
 		}
 	}
-	print("\n\nOBS2_%s =", id->id_text);
+	printf("\n\nOBS2_%s =", id->id_text);
 	f_walk(id->id_mdependson, p) {
 		if (module_in_arglist(f_filename(p)) || ! f_dir(p)) {
 			/* nothing */
 		}
 		else if (! is_library_dir(f_dir(p))) {
-			print(" \\\n\t%s/%s", f_dir(p), object(p));
+			printf(" \\\n\t%s/%s", f_dir(p), object(p));
 		}
 	}
-	print("\n\n");
-	print("%s_o_files:\t$(OBS_%s)\n\n", basename(f_filename(a)), id->id_text);
-	print("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
-	print("\t$(MOD) -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
+	printf("\n\n");
+	printf("%s_o_files:\t$(OBS_%s)\n\n", basename(f_filename(a)), id->id_text);
+	printf("%s:\t$(OBS_%s) $(OBS2_%s)\n", basename(f_filename(a)), id->id_text, id->id_text);
+	printf("\t$(MOD) -o %s $(M2FLAGS) $(OBS_%s) $(OBS2_%s) $(LIBS)\n", basename(f_filename(a)), id->id_text, id->id_text);
 }
 
 programs()

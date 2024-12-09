@@ -10,13 +10,13 @@ init_back()
 /* Allocate space for the tables and set the default values.
  */
 {
-	text_area = Malloc( MAXTEXT);
-	data_area = Malloc( MAXDATA);
-	reloc_info = (struct outrelo *)Malloc( MAXRELO* sizeof(struct outrelo));
-	symbol_table = (struct outname *)Malloc( MAXNAME* sizeof(struct outname));
-	Hashitems = (struct Hashitem *)Malloc( (MAXNAME + 1)*
+	text_area = malloc( MAXTEXT);
+	data_area = malloc( MAXDATA);
+	reloc_info = (struct outrelo *)malloc( MAXRELO* sizeof(struct outrelo));
+	symbol_table = (struct outname *)malloc( MAXNAME* sizeof(struct outname));
+	Hashitems = (struct Hashitem *)malloc( (MAXNAME + 1)*
 						sizeof( struct Hashitem));
- 	string_area = Malloc( MAXSTRING);
+ 	string_area = malloc( MAXSTRING);
 
 	text = text_area;
 	data = data_area;

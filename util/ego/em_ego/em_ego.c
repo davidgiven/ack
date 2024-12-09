@@ -15,7 +15,6 @@
 #include <limits.h>
 #include "em_path.h"
 #include "system.h"
-#include "print.h"
 
 enum
 {
@@ -115,11 +114,11 @@ static void fatal(const char* s, ...)
 	va_list ap;
 	va_start(ap, s);
 
-	fprint(STDERR, "%s: ", prog_name);
-	doprnt(STDERR, s, ap);
-	fprint(STDERR, "\n");
+	fprintf(stderr, "%s: ", prog_name);
+	vfprintf(stderr, s, ap);
+	fprintf(stderr, "\n");
 	cleanup();
-	sys_stop(S_EXIT);
+	exit(1);
 	UNREACHABLE_CODE;
 }
 
@@ -146,7 +145,7 @@ static void catch (int signum)
 	/*	Catch interrupts and exit gracefully */
 
 	cleanup();
-	sys_stop(S_EXIT);
+	exit(1);
 }
 
 static void old_infiles(void)
@@ -279,10 +278,10 @@ static void run_phase(int phase)
 
 		while (phargs[i])
 		{
-			fprint(STDERR, "%s ", phargs[i]);
+			fprintf(stderr, "%s ", phargs[i]);
 			i++;
 		}
-		fprint(STDERR, "\n");
+		fprintf(stderr, "\n");
 	}
 
 	status = sys_system(phargs[0], (const char* const*)phargs);
@@ -293,7 +292,7 @@ static void run_phase(int phase)
 	if (((status >> 8) & 0377) != 0)
 	{
 		cleanup();
-		sys_stop(S_EXIT);
+		exit(1);
 	}
 }
 
@@ -363,7 +362,7 @@ int main(int argc, char* argv[])
 	if (nfiles == 2 * NTEMPS + 1)
 	{
 		/* 2*NTEMPS+1 was the starting value; nothing to do */
-		sys_stop(S_END);
+		exit(0);
 	}
 
 	if (!opt_dir)
@@ -408,6 +407,6 @@ int main(int argc, char* argv[])
 	}
 	run_phase(CA);
 	cleanup();
-	sys_stop(S_END);
+	exit(0);
 	UNREACHABLE_CODE;
 }

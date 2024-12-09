@@ -25,13 +25,13 @@ DfaStartFunction(nm)
 DfaEndFunction()
 {
 	if (NumberOfCalls == 0)
-		print("DFA: %s: --none--\n", CurrentFunction);
+		printf("DFA: %s: --none--\n", CurrentFunction);
 }
 
 DfaCallFunction(s)
 	char *s;
 {
-	print("DFA: %s: %s\n", CurrentFunction, s);
+	printf("DFA: %s: %s\n", CurrentFunction, s);
 	++NumberOfCalls;
 }
 #endif	/* DATAFLOW */

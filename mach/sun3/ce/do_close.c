@@ -1,7 +1,7 @@
 #include <system.h>
 #include <back.h>
 
-extern File *B_out_file;
+extern FILE* B_out_file;
 
 close_back()
 {

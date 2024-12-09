@@ -63,7 +63,7 @@ static char *l_compute(l1,d,s) long l1; char *s; {
 }
 #endif
 
-_doprnt(fmt,ap,stream)
+_vfprintf(fmt,ap,stream)
 	char *fmt; va_list ap ; FILE *stream;
 {
 	char   *s;

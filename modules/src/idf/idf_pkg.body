@@ -1,6 +1,7 @@
 /*	SYMBOL TABLE HANDLING	*/
 
 #include <alloc.h>
+#include <stdlib.h>
 
 #define IDF_HASHSIZE 307 /* size of hashtable, must be odd */
 
@@ -38,7 +39,7 @@ static struct idf* IDF_new(char* tg, int size, int cpy)
 	if (!nidf--)
 	{
 		nidf += NIDS;
-		pidf = (struct idf*)Malloc(NIDS * sizeof(struct idf));
+		pidf = (struct idf*)malloc(NIDS * sizeof(struct idf));
 	}
 
 	id = pidf;
@@ -50,7 +51,7 @@ static struct idf* IDF_new(char* tg, int size, int cpy)
 		if (size > icnt)
 		{
 			icnt = size > IBUFSIZ ? size : IBUFSIZ;
-			p = Malloc(icnt);
+			p = malloc(icnt);
 		}
 		else
 			p = ip;
@@ -73,24 +74,24 @@ void hash_stat(void)
 	register int i;
 	int total_count = 0;
 
-	print("Hash table tally:\n");
+	printf("Hash table tally:\n");
 	for (i = 0; i < IDF_HASHSIZE; i++)
 	{
 		register struct idf* notch = IDF_hashtable[i];
 		register int cnt = 0;
 
-		print("%d ", i);
+		printf("%d ", i);
 		while (notch)
 		{
 			cnt++;
-			print("'%s' ", notch->id_text);
+			printf("'%s' ", notch->id_text);
 			notch = notch->id_next;
 		}
-		print("%d\n", cnt);
+		printf("%d\n", cnt);
 		total_count += cnt;
 	}
-	print("total = %d\n", total_count);
-	print("End hash table tally\n");
+	printf("total = %d\n", total_count);
+	printf("End hash table tally\n");
 }
 
 void idfappfun(int (*fun)(struct idf *, int), int opt)

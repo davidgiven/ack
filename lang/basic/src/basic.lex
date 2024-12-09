@@ -170,7 +170,7 @@ void fillkex(void)
 	if (debug)
 	{
 		for(i=0;i<27;i++)
-		print("%c:%d\n",'a'+i,kex[i]);
+		printf("%c:%d\n",'a'+i,kex[i]);
 	}
 }
 
@@ -191,7 +191,7 @@ char fgets_buf[GETSBUFSIZE];
 
 
 
-char *our_fgets(char* buffer, int n_char, File* stream)
+char *our_fgets(char* buffer, int n_char, FILE*  stream)
 {
     /* Read one line or n_char */
     static int characters_left = 0;
@@ -217,10 +217,10 @@ char *our_fgets(char* buffer, int n_char, File* stream)
                 return(buffer);
             }
         } else { /* Read new block */
-            sys_read(stream,fgets_buf,GETSBUFSIZE,&characters_left);
+			characters_left = fread(fgets_buf, 1, GETSBUFSIZE, stream);
             internal_bufp = fgets_buf;
                 /* Move pointer  back to the beginning */
-            if ( characters_left == 0 ) { /* Nothing read */
+            if ( characters_left <= 0 ) { /* Nothing read */
                 if ( external_bufp == buffer ) {
                     *external_bufp = '\0';
                     return(0);  /* EOF */
@@ -244,7 +244,7 @@ int getinputline(void)
 		error("source line too long");
 	inputline[MAXLINELENGTH-1]=0;
 	if ( listing)
-		fprint(STDERR, inputline);
+		fprintf(stderr, inputline);
 	cptr= inputline;
 	return(TRUE);
 }
@@ -296,7 +296,7 @@ int lookup(void)
                                 /* keywords door delimiters gescheiden */
 			cptr += k->length;
 			yylval.integer= k->classvalue;
-			if (debug) print("lookup:%d %d\n",
+			if (debug) printf("lookup:%d %d\n",
 					 k->classvalue,k->token);
 			if ( k->token == FUNCTION)
 			{
@@ -329,7 +329,7 @@ int lookup(void)
 	}
 	if ( typech)
 		Sym->symtype=typech;
-	if (debug) print("lookup:%d Identifier\n",Sym);
+	if (debug) printf("lookup:%d Identifier\n",Sym);
 	if ( (name[0]=='f' || name[0]=='F') &&
 	     (name[1]=='n' || name[1]=='N') )
 		return(FUNCTID);
@@ -422,7 +422,7 @@ int number(void)
 		}
 		/*NOSTRICT*/ ival= i1;
 #ifdef YYDEBUG
-		if (yydebug) print("number:INTVALUE %d",i1);
+		if (yydebug) printf("number:INTVALUE %d",i1);
 #endif
 		return(INTVALUE);
 	}
@@ -452,7 +452,7 @@ int number(void)
 	*d = 0;
 	cptr=c;
 #ifdef YYDEBUG
-	if (yydebug) print("number:FLTVALUE %s",dval);
+	if (yydebug) printf("number:FLTVALUE %s",dval);
 #endif
 	return(FLTVALUE);
 }
@@ -481,7 +481,7 @@ int scanstring(void)
 		case 0:
 		case '\n': 
 #ifdef YYDEBUG
-			if (yydebug) print("STRVALUE\n");
+			if (yydebug) printf("STRVALUE\n");
 #endif
 			if ( firstchar == '"')
 				error("non-terminated string");
@@ -521,7 +521,7 @@ int scanstring(void)
 		C_rom_icon(myitoa(length),(arith)BEMINTSIZE);
 	}
 #ifdef YYDEBUG
-	if (yydebug) print("STRVALUE found\n");
+	if (yydebug) printf("STRVALUE found\n");
 #endif
 	return(STRVALUE);
 }
@@ -561,7 +561,7 @@ int yylex(void)
 			return(EOLN);
 		case 0:
 #ifdef YYDEBUG
-			if ( yydebug) print("end of buffer");
+			if ( yydebug) printf("end of buffer");
 #endif
 			return(0);
 		case '"':

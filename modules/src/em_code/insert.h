@@ -59,10 +59,10 @@ extern int (*C_outpart)(int);
 extern int (*C_swtout)(void);
 extern int (*C_swttmp)(void);
 
-extern File	*C_ofp;
+extern FILE	*C_ofp;
 
 #ifndef INCORE
-extern File	*C_tfr;
+extern FILE	*C_tfr;
 extern char	*C_tmpfile;
 #endif
 

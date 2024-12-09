@@ -10,12 +10,14 @@
 /* $Id$ */
 
 #include   <stdlib.h>
+#include   <stdio.h>
 #include   <string.h>
 #include 	"parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
 #include	"alloc.h"
+#include	"system.h"
 #include	"em_arith.h"
 #include	"em_label.h"
 #include	"em_code.h"
@@ -27,7 +29,6 @@
 #include	"def.h"
 #include	"type.h"
 #include	"idf.h"
-#include	"print.h"
 #include	"scope.h"
 #include	"lookup.h"
 #include	"node.h"
@@ -118,7 +119,7 @@ struct def *define(struct idf *id, struct scope *scope, int kind)
 	 */
 	struct def *df;
 
-	DO_DEBUG(options['S'], print("define %s, %x\n", id->id_text, kind));
+	DO_DEBUG(options['S'], printf("define %s, %x\n", id->id_text, kind));
 	df = lookup(id, scope, D_IMPORT, 0);
 	if ( /* Already in this scope */
 	df)
@@ -287,8 +288,7 @@ struct def * DeclProc(int type, struct idf *id)
 		}
 		else
 		{
-			sprint(buf, "%s_%s", CurrentScope->sc_name, id->id_text);
-			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+			df->prc_name = aprintf("%s_%s", CurrentScope->sc_name, id->id_text);
 		}
 		if (CurrVis == Defined->mod_vis)
 		{
@@ -311,8 +311,8 @@ struct def * DeclProc(int type, struct idf *id)
 		else
 		{
 			df = define(id, CurrentScope, type);
-			sprint(buf, "_%d_%s", ++nmcount, id->id_text);
-			df->prc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+			sprintf(buf, "_%d_%s", ++nmcount, id->id_text);
+			df->prc_name = strdup(buf);
 			internal(buf);
 			df->df_flags |= D_DEFINED;
 		}
@@ -355,7 +355,7 @@ struct def * DefineLocalModule(struct idf *id)
 	char buf[256];
 	extern int proclevel;
 
-	sprint(buf, "_%d%s_", ++modulecount, id->id_text);
+	sprintf(buf, "_%d%s_", ++modulecount, id->id_text);
 
 	if (!df->mod_vis)
 	{
@@ -371,7 +371,7 @@ struct def * DefineLocalModule(struct idf *id)
 	sc = CurrentScope;
 	sc->sc_level = proclevel;
 	sc->sc_definedby = df;
-	sc->sc_name = Salloc(buf, (unsigned) (strlen(buf) + 1));
+	sc->sc_name = strdup(buf);
 
 	/* Create a type for it
 	 */
@@ -411,6 +411,6 @@ void CheckWithDef(struct def *df, struct type *tp)
 #ifdef DEBUG
 void PrDef(struct def *df)
 {
-	print("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
+	printf("n: %s, k: %d\n", df->df_idf->id_text, df->df_kind);
 }
 #endif /* DEBUG */

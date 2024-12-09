@@ -68,7 +68,7 @@ struct def *lookup(struct idf *id, struct scope *scope, int import, int flags)
 			assert(df->imp_def != 0);
 			df = df->imp_def;
 		}
-		DO_DEBUG(options['S'], print("lookup %s, %x\n", id->id_text, df->df_kind));
+		DO_DEBUG(options['S'], printf("lookup %s, %x\n", id->id_text, df->df_kind));
 	}
 	return df;
 }

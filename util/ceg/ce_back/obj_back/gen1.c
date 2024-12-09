@@ -14,7 +14,7 @@ ONE_BYTE c;
 			       return;
 		case SEGBSS  : bss( (arith) 1);
 			       return;
-		default      : fprint( STDERR, "gen1() : bad seg number\n");
+		default      : fprintf( stderr, "gen1() : bad seg number\n");
 			       return;
 	}
 }

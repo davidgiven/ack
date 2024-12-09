@@ -9,6 +9,6 @@ char *s;
 	s = extnd_dnam( s);
 	set_global_visible(s);
 #ifdef __solaris__
-	fprint(codefile, "\t.type\t%s,#object\n", s);
+	fprintf(codefile, "\t.type\t%s,#object\n", s);
 #endif
 }

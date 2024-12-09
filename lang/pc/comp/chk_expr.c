@@ -7,11 +7,11 @@
 #include	"debug.h"
 
 #include    <stdlib.h>
+#include    <stdio.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em_arith.h>
 #include	<em_label.h>
-#include	"print.h"
 
 #include	"LLlex.h"
 #include	"Lpars.h"
@@ -604,8 +604,7 @@ static int ChkElement(struct node *expp, struct type **tp,
 
 		*tp = set_type(expp->nd_type, 0);
 		size = (*tp)->tp_size * (sizeof(arith) / word_size);
-		*set = (arith *) Malloc(size);
-		clear((char *) *set, size);
+		*set = (arith *) calloc(size, 1);
 	}
 	else if (!TstCompat(ElementType(*tp), expp->nd_type))
 	{
@@ -771,7 +770,7 @@ static int ChkVarPar(struct node *nd, struct node *name)
 
 	if (message)
 	{
-		sprint(err_mes, "%s can't be a variable parameter", message);
+		sprintf(err_mes, "%s can't be a variable parameter", message);
 		Xerror(name, err_mes);
 		return 0;
 	}
@@ -892,7 +891,7 @@ static int ChkProcCall(struct node *expp)
 		if (!TstParCompat(TypeOfParam(param), left->nd_type,
 				(int) IsVarParam(param), left, new_par_section))
 		{
-			sprint(ebuf, "type incompatibility in parameter %d", cnt);
+			sprintf(ebuf, "type incompatibility in parameter %d", cnt);
 			Xerror(name, ebuf);
 			retval = 0;
 		}

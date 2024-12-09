@@ -19,6 +19,7 @@
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<stdlib.h>
+#include	<string.h>
 
 #include 	"parameters.h"
 #include	"idf.h"
@@ -49,16 +50,16 @@ void LLmessage(int tk)
 			break;
 		case STRING:
 			dotp->tk_data.tk_str = (struct string *)
-						Malloc(sizeof (struct string));
+						malloc(sizeof (struct string));
 			dotp->TOK_SLE = 1;
-			dotp->TOK_STR = Salloc("", 1);
+			dotp->TOK_STR = strdup("");
 			break;
 		case INTEGER:
 			dotp->TOK_INT = 1;
 			break;
 		case REAL:
 			dotp->tk_data.tk_real = new_real();
-			dotp->TOK_RSTR = Salloc("0.0", 4);
+			dotp->TOK_RSTR = strdup("0.0");
 			flt_str2flt(dotp->TOK_RSTR, &dotp->TOK_RVAL);
 			break;
 		}

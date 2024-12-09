@@ -8,7 +8,7 @@ arith n;
 
 	switchseg(SEGBSS);
 	if (saved) {
-		fprint( codefile, COMM_FMT, labeltje, (long) n);
+		fprintf( codefile, COMM_FMT, labeltje, (long) n);
 		saved = 0;
 		return;
 	}

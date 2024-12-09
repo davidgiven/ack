@@ -47,7 +47,7 @@ void conversion(int oldtype,int newtype)
 			C_cif ();
 		} else {
 			if (debug) 
-				print("type n=%d o=%d\n",newtype,oldtype);
+				printf("type n=%d o=%d\n",newtype,oldtype);
 			error("conversion error");
 		}
 		break;
@@ -67,7 +67,7 @@ void conversion(int oldtype,int newtype)
 		break;
 	default:
 		if (debug) 
-			print("type n=%d o=%d\n",newtype,oldtype);
+			printf("type n=%d o=%d\n",newtype,oldtype);
 		error("conversion error");
 	}
 }
@@ -78,7 +78,7 @@ void extraconvert(int oldtype,int newtype,int topstack)
 {
 	/* the value below the top of the stack should be converted */
 	if ( oldtype==newtype ) return;
-	if ( debug) print("extra convert %d %d %d\n",oldtype,newtype,topstack);
+	if ( debug) printf("extra convert %d %d %d\n",oldtype,newtype,topstack);
 	/* save top in dummy */
 
 	switch( topstack)
@@ -188,7 +188,7 @@ int relop(int ltype,int rtype,int operator)
 {
 	int	result;
 
-	if (debug) print("relop %d %d op=%d\n",ltype,rtype,operator);
+	if (debug) printf("relop %d %d op=%d\n",ltype,rtype,operator);
 	result= exprtype(ltype,rtype);
 	extraconvert(ltype,result,rtype);
 	conversion(rtype,result);
@@ -348,7 +348,7 @@ int typesize(int ltype)
 		return(BEMPTRSIZE);
 	default:
 		error("typesize:unexpected");
-		if (debug) print("type received %d\n",ltype);
+		if (debug) printf("type received %d\n",ltype);
 	}
 	return(BEMINTSIZE);
 }
@@ -417,12 +417,12 @@ int loadaddr(Symbol *s)
 	int i,j;
 	arith sum;
 
-	if (debug) print("load %s %d\n",s->symname,s->symtype);
+	if (debug) printf("load %s %d\n",s->symname,s->symtype);
 	if ( s->symalias>0)
 		C_lae_dlb((label)s->symalias,(arith)0);
 	else {	
 		j= -s->symalias;
-		if (debug) print("load parm %d\n",j);
+		if (debug) printf("load parm %d\n",j);
 		/* first count the sizes. */
 		sum = 0;
 		for(i=fcn->dimensions;i>j;i--)

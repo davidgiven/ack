@@ -9,19 +9,19 @@ int n;
 	  case SEGTXT :
 	  case SEGCON :
 	  case SEGROM :
-			fprint( codefile, "%s\"", STR_FMT);
+			fprintf( codefile, "%s\"", STR_FMT);
 			while (n--)
 			{
 				c= *s++;
 				if (isprint(c) && c != '"' && c != '\\')
-					fprint(codefile, "%c", c);
+					fprintf(codefile, "%c", c);
 				else
-					fprint(codefile, "\\%03o", c);
+					fprintf(codefile, "\\%03o", c);
 			}
-			fprint( codefile, "\"\n");
+			fprintf( codefile, "\"\n");
 			break;
 	  case SEGBSS : bss( (arith) 1);
 			break;
-	  default : fprint( STDERR, "gen1 unkown seg %d\n", cur_seg);
+	  default : fprintf( stderr, "gen1 unkown seg %d\n", cur_seg);
 	}
 }

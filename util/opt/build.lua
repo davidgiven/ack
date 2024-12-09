@@ -81,7 +81,6 @@ local function variant(name, cflags)
 			headers,
 			"h+emheaders",
 			"modules/src/alloc+lib",
-			"modules/src/print+lib",
 			"modules/src/string+lib",
 			"modules/src/system+lib",
 			"modules/src/data+lib",

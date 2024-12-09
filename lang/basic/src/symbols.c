@@ -44,7 +44,7 @@ Symbol *srchsymbol(char* str)
 	Symbol *s;
 
 	/* search symbol table entry or create it */
-	if (debug) print("srchsymbol %s\n",str);
+	if (debug) printf("srchsymbol %s\n",str);
 	s=firstsym;
 
 	while (s)
@@ -69,7 +69,7 @@ Symbol *srchsymbol(char* str)
 	s->symname= (char *) salloc((unsigned) strlen(str)+1);
 	strcpy(s->symname,str);
 	firstsym= s;
-	if (debug) print("%s allocated\n",str);
+	if (debug) printf("%s allocated\n",str);
 	return(s);
 }
 
@@ -89,7 +89,7 @@ void dcltype(Symbol *s)
 	if ( s->symalias==0)
 		s->symalias= dclspace(type);
 	s->symtype= type;
-	if (debug) print("symbol set to %d\n",type);
+	if (debug) printf("symbol set to %d\n",type);
 }
 
 
@@ -99,8 +99,8 @@ void dclarray(Symbol *s)
 	int i; int size;
 
 	if ( s->symtype==DEFAULTTYPE) s->symtype= DOUBLETYPE;
-	if (debug) print("generate space and descriptors for %d\n",s->symtype);
-	if (debug) print("dim %d\n",s->dimensions);
+	if (debug) printf("generate space and descriptors for %d\n",s->symtype);
+	if (debug) printf("dim %d\n",s->dimensions);
 	s->symalias= genlabel();
 	/* generate descriptors */
 	size=1;
@@ -118,7 +118,7 @@ void dclarray(Symbol *s)
 		size = size* (s->dimlimit[i]+1-indexbase);
 	}
 
-	if (debug) print("size=%d\n",size);
+	if (debug) printf("size=%d\n",size);
 	/* size of stuff */
 	C_df_dlb((label)s->symalias);
 	get_space(s->symtype,size); /* Van ons. */
@@ -206,7 +206,7 @@ void setdefaulttype(int type)
 	char	first,last,i;
 
 	/* handcrafted parser for letter ranges */
-	if (debug) print("deftype:%s\n",cptr);
+	if (debug) printf("deftype:%s\n",cptr);
 	while ( isspace(*cptr)) cptr++;
 	if ( !isalpha(*cptr))
 		error("letter expected");
@@ -235,7 +235,7 @@ Symbol *fcn;
 
 void newscope(Symbol *s)
 {
-	if (debug) print("new scope for %s\n",s->symname);
+	if (debug) printf("new scope for %s\n",s->symname);
 	alternate= firstsym;
 	firstsym = NIL;
 	fcn=s;
@@ -256,7 +256,7 @@ void heading(void)
 {
 	char procname[50];
 
-	(void) sprint(procname,"_%s",fcn->symname);
+	(void) sprintf(procname,"_%s",fcn->symname);
         C_pro_narg(procname);
 	if ( fcn->symtype== DEFAULTTYPE)
 		fcn->symtype= DOUBLETYPE;
@@ -281,7 +281,7 @@ void endscope(int type)
 {
 	Symbol *s;
 
-	if ( debug) print("endscope");
+	if ( debug) printf("endscope");
 	conversion(type,fcn->symtype);
         C_ret((arith) typestring(fcn->symtype));
 	/* generate portable EM code */
@@ -312,7 +312,7 @@ void dclparm(Symbol *s)
 	fcn->dimlimit[fcn->dimensions]= s->symtype;
 	fcn->dimensions++;
 	s->symalias= -fcn->dimensions;
-	if ( debug) print("parameter %d offset %d\n",fcn->dimensions-1,-size);
+	if ( debug) printf("parameter %d offset %d\n",fcn->dimensions-1,-size);
 }
 
 
@@ -348,7 +348,7 @@ int fcnend(int parmcount)
 		error("not enough parameters");
 	if ( parmcount >fcn->dimensions)
 		error("too many parameters");
-	(void) sprint(concatbuf,"_%s",fcn->symname);
+	(void) sprintf(concatbuf,"_%s",fcn->symname);
 	C_cal(concatbuf);
 	C_asp((arith)fcnsize());
         C_lfr((arith) typestring(fcn->symtype));

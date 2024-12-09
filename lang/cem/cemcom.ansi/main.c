@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 	if (options['m']) Info();
 #endif	/* DEBUG */
 
-	sys_stop(err_occurred ? S_EXIT : S_END);
+	exit(err_occurred ? 1 : 0);
 	UNREACHABLE_CODE;
 }
 
@@ -164,7 +164,7 @@ void compile(int argc, char *argv[])
 		FileName = source = argv[0];
 	else {
 		source = 0;
-		FileName = Salloc("standard input", (unsigned) 16);
+		FileName = strdup("standard input");
 	}
 
 	if (!InsertFile(source, (char **) 0, &result)) /* read the source file	*/
@@ -296,7 +296,7 @@ void Info(void)
 		    cnt_switch_hdr, cnt_case_entry, cnt_type, cnt_brace,
 		    cnt_lint_stack_entry, cnt_state, cnt_auto_def,
 		    cnt_expr_state, cnt_argument;
-	print("\
+	printf("\
 %6d string_cst\n%6d formal\n\
 %6d decl_unary\n%6d def\n%6d expr\n%6d field\n\
 %6d e_stack\n%6d localvar\n%6d proto\n\
@@ -317,11 +317,6 @@ void Info(void)
 
 }
 #endif /* DEBUG */
-
-void No_Mem(void)				/* called by alloc package */
-{
-	fatal("out of memory");
-}
 
 void C_failed(void)				/* called by EM_code module */
 {

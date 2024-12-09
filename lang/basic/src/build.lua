@@ -52,7 +52,6 @@ cprogram {
 		"modules/src/em_code+lib_k",
 		"modules/src/em_data+lib",
 		"modules/src/em_mes+lib",
-		"modules/src/print+lib",
 		"modules/src/string+lib",
 		"modules/src/system+lib",
 	}

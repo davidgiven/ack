@@ -30,16 +30,16 @@
  * The transformations can be expressed in C as:
  *
  * [1]:		for (i = e1; i <= e2; i++)
- *			print(118*i);
+ *			printf(118*i);
  *   becomes:
  *		for (i = e1, t = 118*e1; i <= e2; i++, t += 118)
- *			print(t);
+ *			printf(t);
  *
  * [2]:		for (i = e1; i <= e2; i++)
- *			print(a[i]);
+ *			printf(a[i]);
  *   becomes:
  *		for (i = e1, p = &a[i]; i <= e2; i++, p++)
- *			print(*p);
+ *			printf(*p);
  * The latter optimization is suppressed if array bound checking
  * is required.
  */

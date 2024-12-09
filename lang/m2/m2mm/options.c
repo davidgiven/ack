@@ -51,10 +51,10 @@ DoOption(text)
 			unsigned int len = strlen(text) + 4;
 			
 			if (liblen) {
-				llibs = Realloc(llibs, liblen += len);
+				llibs = realloc(llibs, liblen += len);
 			}
 			else {
-				llibs = Malloc(liblen = len);
+				llibs = malloc(liblen = len);
 				*llibs = '\0';
 			}
 			strcat(llibs,"\\\n\t");
@@ -81,7 +81,7 @@ AddInclDir(text)
 
 	if (++nDEF > mDEF) {
 		mDEF += 10;
-		DEFPATH = (char **) Realloc((char *)DEFPATH,
+		DEFPATH = (char **) realloc((char *)DEFPATH,
 					(unsigned)(mDEF * sizeof(char *)));
 	}
 

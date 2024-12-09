@@ -172,7 +172,7 @@ static struct string *getname(void)
 	p = s->str;
 	if (!p) {
 		s->maxlen = 256;
-		s->str = p = Malloc(256);
+		s->str = p = malloc(256);
 	}
 	c = getbyte();
 
@@ -185,7 +185,7 @@ static struct string *getname(void)
 	while (isalnum(c) || c == '_') {
 		if (p >= &(s->str[s->maxlen])) {
 			int df = p - s->str;
-			s->str = Realloc(s->str, (s->maxlen += 256));
+			s->str = realloc(s->str, (s->maxlen += 256));
 			p = s->str + df;
 		}
 		*p++ = c;
@@ -211,7 +211,7 @@ static struct string *getstring(int isident)
 	p = s->str;
 	if (!p) {
 		s->maxlen = 256;
-		s->str = p = Malloc(256);
+		s->str = p = malloc(256);
 	}
 
 	termc = getbyte();
@@ -237,7 +237,7 @@ static struct string *getstring(int isident)
 
 		if (p >= &(s->str[s->maxlen])) {
 			int df = p - s->str;
-			s->str = Realloc(s->str, (s->maxlen += 256));
+			s->str = realloc(s->str, (s->maxlen += 256));
 			p = s->str + df;
 		}
 
@@ -353,7 +353,7 @@ static int getnumber(int c, struct e_arg *ap)
 	}
 
 	ungetbyte(c);
-	ap->ema_cst = (arith) str2long(str, 10);
+	ap->ema_cst = (arith) strtol(str, NULL, 10);
 	return sp_cst4;
 }
 
@@ -575,7 +575,7 @@ static void line_line(void)
 	gettyp(ptyp(sp_cst2), &dummy);
 	EM_lineno = dummy.ema_cst;
 	gettyp(str_ptyp, &dummy);
-	btscpy(filebuf, dummy.ema_string, (int) dummy.ema_szoroff);
+	memcpy(filebuf, dummy.ema_string, (int) dummy.ema_szoroff);
 	EM_filename = filebuf;
 }
 

@@ -26,7 +26,6 @@
 #include	"label.h"
 #include	"expr.h"
 #include	"def.h"
-#include    "print.h"
 #include	"LLlex.h"
 
 /*	This file contains the error-message and diagnostic
@@ -250,9 +249,9 @@ void crash(char *fmt, ...)
 
 	C_close();
 #ifdef	DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else	/* DEBUG */
-	sys_stop(S_EXIT);
+	exit(1);
 #endif	/* DEBUG */
 	UNREACHABLE_CODE;
 }
@@ -269,7 +268,7 @@ void fatal(char *fmt, ...)
 	va_end(ap);
 
 	if (C_busy()) C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 	UNREACHABLE_CODE;
 }
 #else
@@ -497,9 +496,9 @@ void crash(va_alist)				/* fmt, args */
 
 	C_close();
 #ifdef	DEBUG
-	sys_stop(S_ABORT);
+	abort();
 #else	/* DEBUG */
-	sys_stop(S_EXIT);
+	exit(1);
 #endif	/* DEBUG */
 	UNREACHABLE_CODE;
 }
@@ -518,7 +517,7 @@ void fatal(va_alist)				/* fmt, args */
 	va_end(ap);
 
 	if (C_busy()) C_close();
-	sys_stop(S_EXIT);
+	exit(1);
 	UNREACHABLE_CODE;
 }
 #endif
@@ -610,9 +609,9 @@ static void _error(int class, char *fn, unsigned int ln, char* fmt, va_list ap)
 #endif	/* LINT */
 	
 	if (fn)
-		fprint(ERROUT, "\"%s\", line %u: ", fn, ln);
+		fprintf(ERROUT, "\"%s\", line %u: ", fn, ln);
 	if (remark)
-		fprint(ERROUT, "%s ", remark);
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
-	fprint(ERROUT, "\n");
+		fprintf(ERROUT, "%s ", remark);
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
+	fprintf(ERROUT, "\n");
 }

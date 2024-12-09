@@ -1,12 +1,12 @@
 /* R E A D ( L N )   &   W R I T E ( L N ) */
 
+#include	<stdio.h>
 #include    "parameters.h"
 #include	"debug.h"
 
 #include	<assert.h>
 #include	<em.h>
 
-#include	"print.h"
 #include	"LLlex.h"
 #include	"def.h"
 #include	"main.h"
@@ -91,7 +91,7 @@ void ChkRead(struct node *arg)
 		}
 		message = ChkAllowedVar(arg->nd_left, 1);
 		if( message ) {
-			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+			sprintf(buff,"\"%%s\": %s can't be a variable parameter",
 							    message);
 			node_error(arg->nd_left, buff, name);
 			return;
@@ -146,7 +146,7 @@ void ChkReadln(struct node *arg)
 		}
 		message = ChkAllowedVar(arg->nd_left, 1);
 		if( message ) {
-			sprint(buff,"\"%%s\": %s can't be a variable parameter",
+			sprintf(buff,"\"%%s\": %s can't be a variable parameter",
 							    message);
 			node_error(arg->nd_left, buff, name);
 			return;

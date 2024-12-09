@@ -9,7 +9,6 @@
 #include <string.h>
 #include <signal.h>
 #include "system.h"
-#include "print.h"
 #include "em.h"
 #include "em_mes.h"
 
@@ -51,9 +50,9 @@ extern char	*outfile;		/* output from compiler */
 
 extern char	datfname[MAXFILENAME];	/* data statements file */
 
-extern File	*emfile;		/* EM output file */
-extern File	*datfile;		/* data file */
-extern File	*yyin;			/* Compiler input */
+extern FILE	*emfile;		/* EM output file */
+extern FILE	*datfile;		/* data file */
+extern FILE	*yyin;			/* Compiler input */
 
 extern int	endofinput;
 extern int 	wflag;

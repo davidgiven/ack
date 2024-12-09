@@ -1,5 +1,5 @@
 # dit sed script zet regels van het type "sll $a, $$, $44" om in
-# fprint(codefile, "sll %s, $, $44\n", a);
+# fprintf(codefile, "sll %s, $, $44\n", a);
 # en meer....
 # Usage: sed -f $0 < EM_table.x > EM_table
 # remember to include special thingies in  "mach.h"

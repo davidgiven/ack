@@ -159,10 +159,9 @@ void EnterVarList(struct node *Idlist, struct type *type, int local)
 				df->var_name = df->df_idf->id_text;
 			}
 			else {
-				sprint(buf,"%s_%s", sc->sc_scope->sc_name,
+				sprintf(buf,"%s_%s", sc->sc_scope->sc_name,
 					    df->df_idf->id_text);
-				df->var_name = Salloc(buf,
-						(unsigned)(strlen(buf)+1));
+				df->var_name = strdup(buf);
 			}
 			df->df_flags |= D_NOREG;
 

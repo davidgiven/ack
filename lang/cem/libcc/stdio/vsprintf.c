@@ -17,7 +17,7 @@ vsprintf(s, format, arg)
 	tmp_stream._ptr    = (unsigned char *) s;
 	tmp_stream._count  = 32767;
 
-	_doprnt(format, arg, &tmp_stream);
+	_vfprintf(format, arg, &tmp_stream);
 	putc('\0',&tmp_stream);
 
 	return s;

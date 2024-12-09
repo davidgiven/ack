@@ -642,8 +642,7 @@ void ch_array(struct type **tpp,	/* type tp = array of characters	*/
 		length = dim;
 	}
 	/* throw out the characters of the already prepared string	*/
-	s = Malloc((unsigned) (length));
-	clear(s, (unsigned)length);
+	s = calloc((unsigned) (length), 1);
 	i = length <= ex->SG_LEN ? length : ex->SG_LEN;
 	to = s; from = ex->SG_VALUE;
 	while(--i >= 0) {

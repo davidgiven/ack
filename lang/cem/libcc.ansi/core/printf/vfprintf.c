@@ -21,7 +21,7 @@ int vfprintf(FILE* stream, const char* format, va_list arg)
 {
 	vfprintf_stream = stream;
 	_doprnt_put = vfprintf_putc;
-	return _doprnt(format, arg);
+	return _vfprintf(format, arg);
 }
 
 #endif

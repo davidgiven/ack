@@ -118,7 +118,7 @@ add_file(s)
 	p_symbol sym1;
 
 	*p = 0;
-	s = Salloc(s, (unsigned) strlen(s)+1);
+	s = strdup(s);
 	*p = c;
 	sym1 = NewSymbol(s,
 		  	 PervasiveScope,

@@ -29,7 +29,7 @@ int vsnprintf(char* s, size_t len, const char* format, va_list ap)
 	output_buffer = s;
 	output_buffer_len = len;
 	_doprnt_put = snprintf_putc;
-	retval = _doprnt(format, ap);
+	retval = _vfprintf(format, ap);
 	snprintf_putc('\0');
 
 	return retval;

@@ -21,7 +21,7 @@ char *sprintf(va_alist)
 		_tempfile._ptr    = (unsigned char *) buf;
 		_tempfile._count  = 32767;
 
-		_doprnt(format, ap, &_tempfile);
+		_vfprintf(format, ap, &_tempfile);
 		putc('\0',&_tempfile);
 	}
 	va_end(ap);

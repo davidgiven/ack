@@ -763,7 +763,7 @@ arith_op(p, pbuf, psize, ptp)
 		}
 		l2 = get_int(buf, size, T_UNSIGNED);
 		free(buf);
-		*pbuf = Realloc(*pbuf, (unsigned) long_size);
+		*pbuf = realloc(*pbuf, (unsigned) long_size);
 		put_int(*pbuf, long_size, (l1 - l2)/(*ptp)->ty_ptrto->ty_size);
 		*ptp = long_type;
 		return 1;

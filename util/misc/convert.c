@@ -16,9 +16,9 @@ static char rcsid[] = "$Id$";
  linked.
  */
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include "print.h"
 #include "em_pseu.h"
 #include "em_mnem.h"
 #include "em_spec.h"
@@ -88,10 +88,10 @@ void error(const char *s, ...)
 {
 	va_list ap;
 	va_start(ap, s);
-	fprint(STDERR, "%s, line %d: ", filename ? filename : "standard input",
+	fprintf(stderr, "%s, line %d: ", filename ? filename : "standard input",
 			EM_lineno);
-	doprnt(STDERR, s, ap);
-	fprint(STDERR, "\n");
+	vfprintf(stderr, s, ap);
+	fprintf(stderr, "\n");
 	errors++;
 	va_end(ap);
 }

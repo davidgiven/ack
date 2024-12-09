@@ -5,5 +5,5 @@ void
 not_implemented( instr)
 char *instr;
 {
-	fprint( STDERR, "!!	%s, NOT implemented	!!\n", instr);
+	fprintf( stderr, "!!	%s, NOT implemented	!!\n", instr);
 }

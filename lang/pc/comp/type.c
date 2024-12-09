@@ -616,35 +616,35 @@ void DumpType(struct type *tp)
 {
 	if( !tp ) return;
 
-	print("align:%d; size:%ld;", tp->tp_align, (long) tp->tp_size);
+	printf("align:%d; size:%ld;", tp->tp_align, (long) tp->tp_size);
 
-	print(" fund:");
+	printf(" fund:");
 	switch( tp->tp_fund )	{
 	case T_ENUMERATION:
-		print("ENUMERATION; ncst:%d", tp->enm_ncst); break;
+		printf("ENUMERATION; ncst:%d", tp->enm_ncst); break;
 	case T_INTEGER:
-		print("INTEGER"); break;
+		printf("INTEGER"); break;
 	case T_LONG:
-		print("LONG"); break;
+		printf("LONG"); break;
 	case T_REAL:
-		print("REAL"); break;
+		printf("REAL"); break;
 	case T_CHAR:
-		print("CHAR"); break;
+		printf("CHAR"); break;
 	case T_STRING:
-		print("STRING"); break;
+		printf("STRING"); break;
 	case T_PROCEDURE:
 	case T_FUNCTION:
 		{
 		struct paramlist *par = ParamList(tp);
 
 		if( tp->tp_fund == T_PROCEDURE )
-			print("PROCEDURE");
+			printf("PROCEDURE");
 		else
-			print("FUNCTION");
+			printf("FUNCTION");
 		if( par )	{
-			print("(");
+			printf("(");
 			while( par )	{
-				if( IsVarParam(par) ) print("VAR ");
+				if( IsVarParam(par) ) printf("VAR ");
 				DumpType(TypeOfParam(par));
 				par = par->next;
 			}
@@ -652,36 +652,36 @@ void DumpType(struct type *tp)
 		break;
 		}
 	case T_FILE:
-		print("FILE"); break;
+		printf("FILE"); break;
 	case T_STRINGCONST:
-		print("STRINGCONST"); break;
+		printf("STRINGCONST"); break;
 	case T_SUBRANGE:
-		print("SUBRANGE %ld-%ld", (long) tp->sub_lb, (long) tp->sub_ub);
+		printf("SUBRANGE %ld-%ld", (long) tp->sub_lb, (long) tp->sub_ub);
 		break;
 	case T_SET:
-		print("SET"); break;
+		printf("SET"); break;
 	case T_ARRAY:
-		print("ARRAY");
-		print("; element:");
+		printf("ARRAY");
+		printf("; element:");
 		DumpType(tp->arr_elem);
-		print("; index:");
+		printf("; index:");
 		DumpType(tp->next);
-		print(";");
+		printf(";");
 		return;
 	case T_RECORD:
-		print("RECORD"); break;
+		printf("RECORD"); break;
 	case T_POINTER:
-		print("POINTER"); break;
+		printf("POINTER"); break;
 	default:
 		crash("DumpType");
 	}
 	if( tp->next && tp->tp_fund != T_POINTER )	{
 		/* Avoid printing recursive types!
 		*/
-		print(" next:(");
+		printf(" next:(");
 		DumpType(tp->next);
-		print(")");
+		printf(")");
 	}
-	print(";");
+	printf(";");
 }
 #endif

@@ -7,6 +7,8 @@
 
 #include <assert.h>
 #include <alloc.h>
+#include <stdlib.h>
+#include <string.h>
 #include "parameters.h"
 #include "input.h"
 #include "arith.h"
@@ -362,7 +364,7 @@ go_on: /* rescan, the following character has been read	*/
 				if ((flags & FLG_DOTSEEN)
 				    || (flags & FLG_ESEEN && !(ch == '0' && (*np == 'x' || *np == 'X'))))
 				{
-					ptok->tk_fval = Salloc("0.0", (unsigned)4);
+					ptok->tk_fval = strdup("0.0");
 					ptok->tk_fund = DOUBLE;
 					return ptok->tk_symb = FLOATING;
 				}
@@ -426,7 +428,7 @@ static char* string_token(char *nm, int stop_char, int *plen)
 {
 	int ch;
 	int str_size;
-	char* str = Malloc((unsigned)(str_size = ISTRSIZE));
+	char* str = malloc((unsigned)(str_size = ISTRSIZE));
 	int pos = 0;
 
 	ch = GetChar();
@@ -447,7 +449,7 @@ static char* string_token(char *nm, int stop_char, int *plen)
 			ch = quoted(GetChar());
 		str[pos++] = ch;
 		if (pos == str_size)
-			str = Realloc(str, (unsigned)(str_size += RSTRSIZE));
+			str = realloc(str, (unsigned)(str_size += RSTRSIZE));
 		ch = GetChar();
 	}
 	str[pos++] = '\0'; /* for filenames etc. */
@@ -583,11 +585,11 @@ static void strflt2tok(char fltbuf[], struct token* ptok)
 	if (malformed)
 	{
 		lexerror("malformed floating constant");
-		ptok->tk_fval = Salloc("0.0", (unsigned)4);
+		ptok->tk_fval = strdup("0.0");
 	}
 	else
 	{
-		ptok->tk_fval = Salloc(fltbuf, (unsigned)(cp - fltbuf + 1));
+		ptok->tk_fval = strdup(fltbuf);
 	}
 }
 

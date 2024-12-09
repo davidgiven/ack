@@ -52,7 +52,7 @@ getbyte(b)
 			}
 		}
 		if (! C_ibuf) {
-			C_ibuf = Malloc(BUFSIZ);
+			C_ibuf = malloc(BUFSIZ);
 		}
 		if (sys_read(C_tfr, C_ibuf, BUFSIZ, &n) == 0) {
 			C_failed();
@@ -164,7 +164,7 @@ static int swttmp(void)
 		}
 	}
 	if (! C_ontmpfile) {
-		File *p = C_ofp;
+		FILE* p = C_ofp;
 
 		C_flush();
 		C_ofp = C_old_ofp;
@@ -192,7 +192,7 @@ static int swtout(void)
 {
 #ifndef INCORE
 	if (C_ontmpfile) {
-		File *p = C_ofp;
+		FILE* p = C_ofp;
 
 		C_flush();
 		C_ofp = C_old_ofp;
@@ -263,7 +263,7 @@ static Part *mkpart(int part)
 		C_internal_error();
 	}
 
-	p = (Part *) Malloc(sizeof(Part));
+	p = (Part *) malloc(sizeof(Part));
 	p->p_id = part;
 	p->p_next = C_stable[index];
 	C_stable[index] = p;
@@ -295,7 +295,7 @@ static void resume(Part *p)
 	/*	Resume part "p", by creating a new PartOfPart structure
 		for it.
 	*/
-	PartOfPart *pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
+	PartOfPart *pp = (PartOfPart *) malloc(sizeof(PartOfPart));
 
 	swttmp();
 	C_curr_part = p;
@@ -334,7 +334,7 @@ void C_insertpart(int part)
 	}
 
 	/* Now, add the insertion of "part" to the current part.  */
-	pp = (PartOfPart *) Malloc(sizeof(PartOfPart));
+	pp = (PartOfPart *) malloc(sizeof(PartOfPart));
 	pp->pp_next = p->p_parts;
 	p->p_parts = pp;
 	pp->pp_type = INSERT;

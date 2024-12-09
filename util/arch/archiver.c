@@ -35,7 +35,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include "print.h"
 #include "system.h"
 #include "object.h"
 #include "arch.h"
@@ -205,7 +204,7 @@ void error(BOOL quit, char* str1, char* str2)
 {
 	char errbuf[256];
 
-	sprint(errbuf, str1, str2);
+	sprintf(errbuf, str1, str2);
 	fwrite(errbuf, 1, strlen(errbuf), stderr);
 	if (quit)
 	{
@@ -424,7 +423,7 @@ void get(int argc, char* argv[])
 #ifdef AAL
 					if (i != argc)
 					{
-						print("%s: already in archive\n", argv[i]);
+						printf("%s: already in archive\n", argv[i]);
 						argv[i] = "";
 					}
 #endif
@@ -436,7 +435,7 @@ void get(int argc, char* argv[])
 #ifndef AAL
 					if (app_fl && i != argc)
 					{
-						print("%s: already in archive\n", argv[i]);
+						printf("%s: already in archive\n", argv[i]);
 						argv[i] = "";
 					}
 #endif
@@ -471,13 +470,13 @@ void get(int argc, char* argv[])
 					*(date + 16) = '\0';
 					*(date + 24) = '\0';
 
-					print(
+					printf(
 					    "%s%3u/%u%7ld %s %s %s", mode, (unsigned)(member->ar_uid & 0377),
 					    (unsigned)(member->ar_gid & 0377), member->ar_size, date + 4, date + 20,
 					    buf);
 				}
 				else
-					print(buf);
+					printf(buf);
 			}
 			else if (del_fl)
 			{
@@ -506,7 +505,7 @@ void get(int argc, char* argv[])
 					add(argv[i], ar_f, temp_fd, "a - %s\n");
 				else
 				{
-					print("%s: not found\n", argv[i]);
+					printf("%s: not found\n", argv[i]);
 				}
 			}
 	}
@@ -742,7 +741,7 @@ void show(char* s, char* name)
 	while (q <= &name[sizeof(x.ar_name) - 1] && *q)
 		*p++ = *q++;
 	*p++ = '\0';
-	print(s, buf);
+	printf(s, buf);
 }
 
 #ifdef AAL

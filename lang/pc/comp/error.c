@@ -18,7 +18,6 @@
 #include	<em_code.h>
 #include	<stdlib.h>
 #include	<stdio.h>
-#include	"print.h"
 #include	"system.h"
 
 #include	"LLlex.h"
@@ -399,10 +398,10 @@ static void _error(int class, struct node *node, char *fmt, va_list ap)
 	}
 #endif /* DEBUG */
 
-	if( FileName ) fprint(ERROUT, "\"%s\", line %u: ", FileName, ln);
+	if( FileName ) fprintf(ERROUT, "\"%s\", line %u: ", FileName, ln);
 
-	if( remark ) fprint(ERROUT, "%s ", remark);
+	if( remark ) fprintf(ERROUT, "%s ", remark);
 
-	doprnt(ERROUT, fmt, ap);		/* contents of error */
-	fprint(ERROUT, "\n");
+	vfprintf(ERROUT, fmt, ap);		/* contents of error */
+	fprintf(ERROUT, "\n");
 }

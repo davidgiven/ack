@@ -4,7 +4,7 @@
 #define PATHLENGTH	1024	/* max. length of path to file		*/
 
 
-#define	ERROUT		STDERR	/* file pointer for writing messages	*/
+#define	ERROUT		stderr	/* file pointer for writing messages	*/
 #define	MAXERR_LINE	5	/* maximum number of error messages given
 					on the same input line.		*/
 

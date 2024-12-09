@@ -64,18 +64,6 @@ int main(int argc, char* argv[])
 	UNREACHABLE_CODE;
 }
 
-char* Salloc(char* s)
-{
-	char* ns = strdup(s);
-
-	if (!ns)
-	{
-		fprintf(stderr, "%s: out of memory\n", ProgCall);
-		exit(1);
-	}
-	return ns;
-}
-
 void option(char* str)
 {
 	/*	note that *str indicates the source of the option:
@@ -171,7 +159,7 @@ void InitTable(char* ival)
 	InitialValue = 0;
 	if (ival)
 	{
-		InitialValue = Salloc(ival);
+		InitialValue = strdup(ival);
 	}
 }
 
@@ -234,7 +222,7 @@ int process(char* str, int format)
 int c_proc(char* str, char* Name)
 {
 	int ch, ch2;
-	char* name = Salloc(Name);
+	char* name = strdup(Name);
 
 	while (*str)
 	{

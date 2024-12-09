@@ -17,8 +17,8 @@ extern panic(char *, ...);
 #include	"class.h"
 #include	"inpdef.h"
 
-#define	MSGOUT		STDERR	/* file descr. on which to write the messages */
-#define	ERROUT		STDERR	/* file descr. on which to write the panics */
+#define	MSGOUT		stderr	/* file descr. on which to write the messages */
+#define	ERROUT		stderr	/* file descr. on which to write the panics */
 
 extern int LineNr;
 
@@ -69,7 +69,7 @@ report(va_alist)
 			/*	otherwise, we have used up the argument,
 				so print it here
 			*/
-			fprint(MSGOUT, "\"%s\", line %d",
+			fprintf(MSGOUT, "\"%s\", line %d",
 				fn, id->id_line);
 		}
 		while ((fc = *f++)) {
@@ -84,11 +84,11 @@ report(va_alist)
 					break;
 				case 's':	/* a string item */
 					s = va_arg(ap, char *);
-					fprint(MSGOUT, "%s", s);
+					fprintf(MSGOUT, "%s", s);
 					break;
 				case 'd':	/* an int item */
 					i = va_arg(ap, int);
-					fprint(MSGOUT, "%d", i);
+					fprintf(MSGOUT, "%d", i);
 					break;
 				default:
 					panic("internal error: bad format %s",
@@ -97,10 +97,10 @@ report(va_alist)
 				}
 			}
 			else {
-				fprint(MSGOUT, "%c", fc);
+				fprintf(MSGOUT, "%c", fc);
 			}
 		}
-		fprint(MSGOUT, "\n");
+		fprintf(MSGOUT, "\n");
 	}
 	va_end(ap);
 }
@@ -111,14 +111,14 @@ rep_loc(id)
 {
 	/* a definition can come from a number of places */
 	if (!id) {
-		fprint(MSGOUT, "format");
+		fprintf(MSGOUT, "format");
 	}
 	else
 	if (is_class(id, CL_LIB)) {
-		fprint(MSGOUT, "library");
+		fprintf(MSGOUT, "library");
 	}
 	else {
-		fprint(MSGOUT, "\"%s\", line %d",
+		fprintf(MSGOUT, "\"%s\", line %d",
 			id->id_file, id->id_line);
 	}
 }
@@ -131,9 +131,9 @@ panic(char *fmt, ...)				/* fmt, args */
 
 	va_start(ap, fmt);
 	{
-		fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
-		doprnt(ERROUT, fmt, ap);
-		fprint(ERROUT, "\n");
+		fprintf(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
+		vfprintf(ERROUT, fmt, ap);
+		fprintf(ERROUT, "\n");
 	}
 	va_end(ap);
 
@@ -150,9 +150,9 @@ panic(va_alist)				/* fmt, args */
 	{
 		char *fmt = va_arg(ap, char *);
 
-		fprint(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
-		doprnt(ERROUT, fmt, ap);
-		fprint(ERROUT, "\n");
+		fprintf(ERROUT, "PANIC, lint, pass2: line %d: ", LineNr);
+		vfprintf(ERROUT, fmt, ap);
+		fprintf(ERROUT, "\n");
 	}
 	va_end(ap);
 
