@@ -259,7 +259,7 @@ int InsertFile(char *filnam, char *table[], char **result)
 	else {
 		if (table == 0 || filnam[0] == '/') {
 				/* don't look in the table! */
-			fd = fopen(filnam, "r");
+			fd = fopen(filnam, "rb");
 			if (!fd) return 0;
 		}
 		else {
@@ -268,7 +268,7 @@ int InsertFile(char *filnam, char *table[], char **result)
 				if (!INP_mk_filename(*table++, filnam, &newfn)) {
 					return 0;
 				}
-				fd = fopen(newfn, "r");
+				fd = fopen(newfn, "rb");
 				if (fd) {
 					/* free filnam ??? NO we don't know
 					   where it comes from!
