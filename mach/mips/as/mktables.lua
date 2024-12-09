@@ -3,6 +3,10 @@ local args = {...}
 local words = {}
 local insns = {}
 
+if not math.pow then
+	math.pow = function(x, y) return x^y end
+end
+
 local function addword(word)
 	local w = words[word]
 	if not w then

@@ -1,3 +1,7 @@
+if not math.pow then
+	math.pow = function(x, y) return x^y end
+end
+
 local function decode(line)
 	local _, _, bits = line:find("^([^ ]+) ")
 	if #bits ~= 32 then
