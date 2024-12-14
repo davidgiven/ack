@@ -29,7 +29,7 @@ struct avl_node
 struct avl_tree
 {
 	struct avl_node* root; /* root of the avl tree */
-	int (*cmp)(); /* address of comparison routine */
+	int (*cmp)(AVLtree* x, AVLtree* y); /* address of comparison routine */
 };
 /* create definitions for new_avl_tree() and free_avl_tree() */
 /* STATICALLOCDEF "avl_tree" 2 */

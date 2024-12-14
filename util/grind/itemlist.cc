@@ -8,6 +8,7 @@
 #include "tree.h"
 #include "operator.h"
 #include "misc.h"
+#include "itemlist.h"
 
 extern FILE* db_out;
 extern int db_ss;
@@ -52,10 +53,10 @@ static pr_item(i) p_item i;
 	fputs(i->i_disabled ? " (disabled)\n" : "\n", db_out);
 }
 
-int item_addr_actions(a, mess_type, may_stop)
-t_addr a;
-int mess_type;
-int may_stop;
+int item_addr_actions(
+t_addr a,
+int mess_type,
+int may_stop)
 {
 	/* Perform actions associated with position 'a', and return stop_reason
 	   if we must stop there, and 0 if not.
@@ -119,7 +120,7 @@ int may_stop;
 	return stop_reason;
 }
 
-handle_displays()
+void handle_displays(void)
 {
 	p_item i = item_list.il_first;
 
@@ -157,7 +158,7 @@ add_to_item_list(p) p_tree p;
 	pr_item(i);
 }
 
-remove_from_item_list(n) int n;
+void remove_from_item_list(int n)
 {
 	p_item i = item_list.il_first, prev = 0;
 	p_tree p;
@@ -288,7 +289,7 @@ able_item(n, kind) int n;
 	}
 }
 
-print_items()
+void print_items(void )
 {
 	p_item i = item_list.il_first;
 
@@ -298,7 +299,7 @@ print_items()
 	}
 }
 
-perform_items()
+void perform_items(void )
 {
 	p_item i = item_list.il_first;
 

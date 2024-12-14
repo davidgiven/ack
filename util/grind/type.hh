@@ -1,4 +1,5 @@
-/* $Id$ */
+#ifndef TYPE_H
+#define TYPE_H
 
 /* internal type representation */
 
@@ -119,10 +120,21 @@ typedef struct type
 
 /* ALLOCDEF "type" 50 */
 
-extern p_type subrange_type(), array_type(), *tp_lookup();
-extern long param_size(), compute_size();
+struct symbol;
+extern void init_types(void);
+extern p_type subrange_type(int A, int* base_index, long c1, long c2, int* result_index);
+extern p_type array_type(p_type bound_type, p_type el_type);
+extern p_type* tp_lookup(int* type_index);
+extern long param_size(p_type v, int t);
+extern long compute_size(p_type tp, char* AB);
+extern void clean_tp_tab(void);
+extern void end_literal(p_type tp, long maxval);
+extern void add_param_type(int v, struct symbol* s);
+extern void set_bounds(p_type tp);
 
 extern p_type char_type, uchar_type, bool_type, int_type, long_type, double_type, string_type,
     address_type;
 extern p_type void_type;
 extern long int_size, short_size, pointer_size, long_size, float_size, double_size;
+
+#endif

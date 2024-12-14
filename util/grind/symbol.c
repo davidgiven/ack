@@ -22,10 +22,7 @@ p_symbol currfile, listfile;
 
 extern FILE* db_out;
 
-p_symbol NewSymbol(s, scope, class, nam)
-char* s;
-p_scope scope;
-struct outname* nam;
+p_symbol NewSymbol(char* s, p_scope scope, int class, struct outname* nam)
 {
 	p_symbol sym;
 
@@ -57,9 +54,7 @@ struct outname* nam;
 /* Lookup a definition for 'id' in scope 'scope' with class in the 'class'
    bitset.
 */
-p_symbol Lookup(id, scope, class) struct idf* id;
-p_scope scope;
-int class;
+p_symbol Lookup(struct idf* id, p_scope scope, int class)
 {
 	p_symbol p = id ? id->id_def : 0;
 
@@ -77,10 +72,7 @@ int class;
 /* Lookup a definition for 'id' with class in the 'class' bitset,
    starting in scope 'sc' and also looking in enclosing scopes.
 */
-p_symbol Lookfromscope(id, class, sc)
-struct idf* id;
-int class;
-p_scope sc;
+p_symbol Lookfromscope(struct idf* id, int class, p_scope sc)
 {
 	if (!id)
 		return (p_symbol)0;
@@ -103,8 +95,7 @@ p_scope sc;
 
 extern char* strrchr();
 
-p_symbol add_file(s)
-char* s;
+p_symbol add_file(char* s)
 {
 	p_symbol sym = NewSymbol(s, PervasiveScope, FILESYM, (struct outname*)0);
 	char* p;
@@ -127,8 +118,7 @@ char* s;
 	return sym;
 }
 
-static p_scope def_scope(s)
-p_symbol s;
+static p_scope def_scope(p_symbol s)
 {
 	switch (s->sy_class)
 	{
@@ -152,9 +142,7 @@ p_symbol s;
 
 /* Determine if the OP_SELECT tree indicated by 'p' could lead to scope 'sc'.
  */
-int consistent(p, sc)
-p_tree p;
-p_scope sc;
+int consistent(p_tree p, p_scope sc)
 {
 	p_tree arg;
 	p_symbol sym;
@@ -215,9 +203,7 @@ p_scope sc;
 /* Try to find the name referred to in the node indicated by 'p', and
    try to be just a little bit intelligent about it.
 */
-p_symbol identify(p, class_set)
-p_tree p;
-int class_set;
+p_symbol identify(p_tree p, int class_set)
 {
 	p_symbol sym = 0, sym1 = 0;
 	p_symbol s;
@@ -355,7 +341,7 @@ pr_sym(s) p_symbol s;
 	fprintf(db_out, "%s\n", s->sy_idf->id_text);
 }
 
-resolve_cross(tp) p_type tp;
+void resolve_cross(p_type tp)
 {
 	p_symbol sym = tp->ty_sym->sy_idf->id_def;
 

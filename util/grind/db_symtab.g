@@ -4,37 +4,40 @@
 */
 
 {
-#include	<alloc.h>
-#include	<stb.h>
-#include	<assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <alloc.h>
+#include <assert.h>
 
-#include	"position.h"
-#include	"file.h"
-#include	"type.h"
-#include	"symbol.h"
-#include	"scope.h"
-#include	"class.h"
-#include	"idf.h"
-#include	"rd.h"
-#include	"misc.h"
+#include "ack_string.h"
+#include "stb.h"
+#include "position.h"
+#include "file.h"
+#include "type.h"
+#include "symbol.h"
+#include "scope.h"
+#include "class.h"
+#include "idf.h"
+#include "rd.h"
+#include "misc.h"
+#include "tree.h"
 
-extern char	*strchr();
-extern long	str2long();
-extern double	atof();
+static char* DbPtr; /* current pointer in db string */
+static int AllowName; /* set if NAME legal at this point */
+static long ival;
+static double fval;
+static char* strval;
+static int last_index[2];
+static struct outname* currnam;
+static int saw_code;
 
-static char	*DbPtr;			/* current pointer in db string */
-static int	AllowName;		/* set if NAME legal at this point */
-static long	ival;
-static double	fval;
-static char	*strval;
-static int	last_index[2];
-static struct outname	*currnam;
-static int	saw_code;
+static struct literal* get_literal_space(p_type tp);
+static struct fields * get_field_space(p_type tp, char* s);
+static char* string_val(char* s);
+static void end_field(p_type tp);
 
-static struct literal *get_literal_space();
-static struct fields *get_field_space();
-static end_field();
-static char *string_val();
+extern void DbParser(void);
 }
 
 %start DbParser, debugger_string;
@@ -551,9 +554,7 @@ param_list(p_type t;)
 static char *db_string;
 static char *DbOldPtr;
 
-static struct outname *
-DbString(n)
-  struct outname	*n;
+static struct outname * DbString(struct outname* n)
 {
   currnam = n;
   DbPtr = n->on_mptr;
@@ -564,35 +565,36 @@ DbString(n)
 }
 
 /*ARGSUSED*/
-DBSmessage(n)
+void DBSmessage(int n)
 {
-  fatal("error in symbol table string \"%s\", DbPtr = \"%s\", DbOldPtr = \"%s\"",
-	db_string,
-	DbPtr,
-	DbOldPtr);
-
+	fatal(
+		"error in symbol table string \"%s\", DbPtr = \"%s\", DbOldPtr = \"%s\"", db_string, DbPtr,
+		DbOldPtr);
 }
 
-DBSonerror(tk, p)
-  int	*p;
+void DBSonerror(int tk, int* p)
 {
-  DbPtr = DbOldPtr;
-/* ???  if (DBSsymb < 0) {
-	while (*p && *p != ';') p++;
-	if (*p) DbPtr = ";";
-	return;
-  }
-*/
-  if (! tk) {
-	while (*p && *p != NAME) p++;
-	if (*p) {
-		AllowName = 1;
+	DbPtr = DbOldPtr;
+	/* ???  if (DBSsymb < 0) {
+		while (*p && *p != ';') p++;
+		if (*p) DbPtr = ";";
+		return;
+	  }
+	*/
+	if (!tk)
+	{
+		while (*p && *p != NAME)
+			p++;
+		if (*p)
+		{
+			AllowName = 1;
+		}
 	}
-  }
-  else if (tk == NAME) AllowName = 1;
+	else if (tk == NAME)
+		AllowName = 1;
 }
 
-DBSlex()
+int DBSlex(void)
 {
   char *cp = DbPtr;
   int allow_name = AllowName;
@@ -643,7 +645,7 @@ DBSlex()
 	c = *cp;
 	*cp = 0;
 	if (retval == INTEGER) {
-		ival = str2long(DbOldPtr, 10);
+		ival = strtol(DbOldPtr, NULL, 10);
 	}
 	else {
 		fval = atof(DbOldPtr);
@@ -672,10 +674,7 @@ DBSlex()
   return NAME;
 }
 
-static struct fields *
-get_field_space(tp, s)
-  p_type tp;
-  char	*s;
+static struct fields * get_field_space(p_type tp, char* s)
 {
   struct fields *p;
   p_symbol	sy;
@@ -693,58 +692,53 @@ get_field_space(tp, s)
   return p;
 }
 
-static
-end_field(tp)
-  p_type tp;
+static void end_field(p_type tp)
 {
-  tp->ty_fields = (struct fields *)
-	realloc((char *) tp->ty_fields,
-		tp->ty_nfields * sizeof(struct fields));
+	tp->ty_fields
+		= (struct fields*)realloc((char*)tp->ty_fields, tp->ty_nfields * sizeof(struct fields));
 }
 
-static struct literal *
-get_literal_space(tp)
-  p_type tp;
+static struct literal* get_literal_space(p_type tp)
 {
-  if (! (tp->ty_nenums & 07)) {
-	tp->ty_literals = (struct literal *)
-		realloc((char *) tp->ty_literals,
-			(tp->ty_nenums+8)*sizeof(struct literal));
-  }
-  return &tp->ty_literals[tp->ty_nenums++];
-}
-
-static char *
-string_val(s)
-  char	*s;
-{
-  char *ns = s, *os = s;
-  unsigned int i = 1;
-
-  for (;;) {
-	if (!*os) break;
-	i++;
-	if (*os == '\\') {
-		os++;
-		*ns++ = *os++;
+	if (!(tp->ty_nenums & 07))
+	{
+		tp->ty_literals = (struct literal*)realloc(
+			(char*)tp->ty_literals, (tp->ty_nenums + 8) * sizeof(struct literal));
 	}
-	else *ns++ = *os++;
-  }
-  *ns = '\0';
-  return Salloc(s, i);
+	return &tp->ty_literals[tp->ty_nenums++];
 }
 
-static char		*AckStrings;	/* ACK a.out string table */
-static struct outname	*AckNames;	/* ACK a.out symbol table entries */
-static unsigned int	NAckNames;	/* Number of ACK symbol table entries */
-static struct outname	*EndAckNames;	/* &AckNames[NAckNames] */
+static char* string_val(char* s)
+{
+	char *ns = s, *os = s;
+	unsigned int i = 1;
+
+	for (;;)
+	{
+		if (!*os)
+			break;
+		i++;
+		if (*os == '\\')
+		{
+			os++;
+			*ns++ = *os++;
+		}
+		else
+			*ns++ = *os++;
+	}
+	*ns = '\0';
+	return strdup(s);
+}
+
+static char* AckStrings; /* ACK a.out string table */
+static struct outname* AckNames; /* ACK a.out symbol table entries */
+static unsigned int NAckNames; /* Number of ACK symbol table entries */
+static struct outname* EndAckNames; /* &AckNames[NAckNames] */
 
 /* Read the symbol table from file 'f', which is supposed to be an
    ACK a.out format file. Offer db strings to the db string parser.
 */
-int
-DbRead(f)
-  char	*f;
+int DbRead(char* f)
 {
   struct outhead h;
   struct outname *n;
@@ -801,7 +795,7 @@ DbRead(f)
 			break;
 		case N_EINCL:
 			if (line_file) {
-				line_file = (struct outname *) line_file->on_valu;
+				line_file = (struct outname *)(intptr_t) line_file->on_valu;
 			}
 			break;
 #endif

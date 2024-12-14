@@ -2,7 +2,9 @@
 
 /* Language dependant support; this one is for Pascal */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 #include <assert.h>
 #include <ctype.h>
@@ -20,14 +22,17 @@
 
 extern FILE *db_out, *db_in;
 
-extern double atof();
-
-extern long atol();
-
-static int print_string(), print_char(), get_number(), getname(), get_token(), getstring(),
-    print_op(), binop_prio(), unop_prio(), fix_bin_to_pref();
-
-static long array_elsize();
+static void print_string(FILE* f, char* s, int len);
+static void print_char(int c);
+static long array_elsize(long size);
+static int binop_prio(int op);
+static int unop_prio(int op);
+static int getname(int c);
+static int getstring(int c);
+static int get_number(int c);
+static int get_token(int c);
+static void print_op(FILE* f, p_tree p);
+static void fix_bin_to_pref(p_tree p);
 
 static struct langdep pascal = { 1,
 
@@ -51,7 +56,7 @@ static struct langdep pascal = { 1,
 	                             binop_prio,
 	                             unop_prio,
 	                             getstring,
-	                             getname,
+	                             get_name,
 	                             get_number,
 	                             get_token,
 	                             print_op,
@@ -59,15 +64,15 @@ static struct langdep pascal = { 1,
 
 struct langdep* pascal_dep = &pascal;
 
-static print_char(c) int c;
+static void print_char(int c)
 {
 	c &= 0377;
 	fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "chr(%d)", c);
 }
 
-static print_string(f, s, len) FILE* f;
-char* s;
-int len;
+static void print_string(FILE* f,
+char* s,
+int len)
 {
 	char* str = s;
 
@@ -226,8 +231,7 @@ int ch;
 	return REAL;
 }
 
-static int getname(c)
-int c;
+static int getname(int c)
 {
 	char buf[512 + 1];
 	char* p = &buf[0];
@@ -398,8 +402,7 @@ int c;
 	return STRING;
 }
 
-static print_op(f, p) FILE* f;
-p_tree p;
+static void print_op(FILE* f, p_tree p)
 {
 	switch (p->t_oper)
 	{
@@ -493,7 +496,7 @@ p_tree p;
 	}
 }
 
-static fix_bin_to_pref()
+static void fix_bin_to_pref(p_tree p)
 {
 	/* No problems of this kind in Pascal */
 }

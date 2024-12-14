@@ -3,6 +3,8 @@
 /* Language dependant support; this one is for C */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "position.h"
 #include "class.h"
@@ -17,14 +19,16 @@
 
 extern FILE *db_out, *db_in;
 
-extern int get_name();
-
-extern double atof();
-
-static int print_string(), print_char(), get_number(), getstring(), get_token(), print_op(),
-    unop_prio(), binop_prio(), fix_bin_to_pref();
-
-static long array_elsize();
+static void print_string(FILE* f, char* s, int len);
+static void print_char(int c);
+static long array_elsize(long size);
+static int binop_prio(int op);
+static int unop_prio(int op);
+static int getstring(int c);
+static int get_number(int c);
+static int get_token(int c);
+static void print_op(FILE* f, p_tree p);
+static void fix_bin_to_pref(p_tree p);
 
 static struct langdep c_lang = { 0,
 
@@ -56,8 +60,7 @@ static struct langdep c_lang = { 0,
 
 struct langdep* c_dep = &c_lang;
 
-static void printchar(f, c, esc) FILE* f;
-int c;
+static void printchar(FILE* f, int c, int esc)
 {
 	c &= 0377;
 	switch (c)
@@ -90,16 +93,14 @@ int c;
 	}
 }
 
-static print_char(c) int c;
+static void print_char(int c)
 {
 	putc('\'', db_out);
 	printchar(db_out, c, '\'');
 	putc('\'', db_out);
 }
 
-static print_string(f, s, len) FILE* f;
-char* s;
-int len;
+static void print_string(FILE* f, char* s, int len)
 {
 	char* str = s;
 
@@ -111,8 +112,7 @@ int len;
 
 extern long int_size;
 
-static long array_elsize(size)
-long size;
+static long array_elsize(long size)
 {
 	if (!(int_size % size))
 		return size;
@@ -121,8 +121,7 @@ long size;
 	return ((size + int_size - 1) / int_size) * int_size;
 }
 
-static int unop_prio(op)
-int op;
+static int unop_prio(int op)
 {
 	switch (op)
 	{
@@ -181,14 +180,12 @@ int op;
 	return 1;
 }
 
-static int val_in_base(c, base)
-int c;
+static int val_in_base(int c, int base)
 {
 	return is_dig(c) ? c - '0' : base != 16 ? -1 : is_hex(c) ? (c - 'a' + 10) & 017 : -1;
 }
 
-static int get_number(c)
-int c;
+static int get_number(int c)
 {
 	char buf[512 + 1];
 	int base = 10;
@@ -265,8 +262,7 @@ int c;
 	return REAL;
 }
 
-static int get_token(c)
-int c;
+static int get_token(int c)
 {
 	switch (c)
 	{
@@ -394,8 +390,7 @@ int c;
 	}
 }
 
-static int quoted(ch)
-int ch;
+static int quoted(int ch)
 {
 	/*	quoted() replaces an escaped character sequence by the
 	  character meant.
@@ -437,8 +432,7 @@ int ch;
 	return ch & 0377;
 }
 
-static int getstring(c)
-int c;
+static int getstring(int c)
 {
 	int ch;
 	char buf[512];
@@ -475,8 +469,7 @@ int c;
 	return STRING;
 }
 
-static print_op(f, p) FILE* f;
-p_tree p;
+static void print_op(FILE* f, p_tree p)
 {
 	switch (p->t_oper)
 	{
@@ -603,7 +596,7 @@ p_tree p;
 	}
 }
 
-static fix_bin_to_pref(p) p_tree p;
+static void fix_bin_to_pref(p_tree p)
 {
 	switch (p->t_whichoper)
 	{

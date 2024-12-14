@@ -1,12 +1,11 @@
 /* $Id$ */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
-#if __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+#include <string.h>
+#include <unistd.h>
 
 #include "tokenname.h"
 #include "position.h"
@@ -27,10 +26,6 @@ FILE* db_out;
 FILE* db_in;
 int debug;
 extern struct tokenname tkidf[];
-extern char* strchr();
-extern void signal_child();
-extern void init_del();
-extern void init_run();
 extern int eof_seen;
 extern int interrupted;
 
@@ -38,7 +33,7 @@ static struct tokenname shorts[]
     = { { LIST, "l" },  { CONT, "c" },    { STEP, "s" },  { NEXT, "n" },  { DELETE, "d" },
 	    { PRINT, "p" }, { RESTORE, "r" }, { TRACE, "t" }, { WHERE, "w" }, { 0, 0 } };
 
-main(argc, argv) char* argv[];
+int main(int argc, char* argv[])
 {
 	char* p;
 
@@ -110,7 +105,7 @@ main(argc, argv) char* argv[];
 	exit(0);
 }
 
-prompt()
+void prompt(void)
 {
 	if (isatty(fileno(db_in)))
 	{
@@ -121,7 +116,6 @@ prompt()
 
 extern int errorgiven;
 
-#if __STDC__
 void fatal(char* fmt, ...)
 {
 	va_list ap;
@@ -166,62 +160,7 @@ void warning(char* fmt, ...)
 	va_end(ap);
 }
 
-#else
-/*VARARGS*/
-void fatal(va_alist) va_dcl
-{
-	va_list ap;
-	char* fmt;
-
-	va_start(ap);
-	{
-		fmt = va_arg(ap, char*);
-		fprintf(db_out, "%s: ", progname);
-		vfprintf(db_out, fmt, ap);
-		fprintf(db_out, "\n");
-	}
-	va_end(ap);
-	exit(1);
-}
-
-/*VARARGS*/
-void error(va_alist) va_dcl
-{
-	va_list ap;
-	char* fmt;
-
-	if (!interrupted)
-	{
-		va_start(ap);
-		{
-			fmt = va_arg(ap, char*);
-			fprintf(db_out, "%s: ", progname);
-			vfprintf(db_out, fmt, ap);
-			fprintf(db_out, "\n");
-		}
-		va_end(ap);
-	}
-	errorgiven = 1;
-}
-
-/*VARARGS*/
-void warning(va_alist) va_dcl
-{
-	va_list ap;
-	char* fmt;
-
-	va_start(ap);
-	{
-		fmt = va_arg(ap, char*);
-		fprintf(db_out, "%s: ", progname);
-		vfprintf(db_out, fmt, ap);
-		fprintf(db_out, "\n");
-	}
-	va_end(ap);
-}
-#endif
-
-void rd_fatal()
+void rd_fatal(void)
 {
 	fatal("read error in %s", AckObj);
 }

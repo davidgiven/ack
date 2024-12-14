@@ -2,7 +2,9 @@
 
 /* Language dependant support; this one is for Modula-2 */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 #include <assert.h>
 
@@ -19,12 +21,17 @@
 
 extern FILE *db_out, *db_in;
 
-extern double atof();
-
-static int print_string(), print_char(), get_number(), getname(), get_token(), getstring(),
-    print_op(), binop_prio(), unop_prio(), fix_bin_to_pref();
-
-static long array_elsize();
+static void print_string(FILE* f, char* s, int len);
+static void print_char(int c);
+static long array_elsize(long size);
+static int binop_prio(int op);
+static int unop_prio(int op);
+static int getstring(int c);
+static int getname(int c);
+static int get_number(int c);
+static int get_token(int c);
+static void print_op(FILE* f, p_tree p);
+static void fix_bin_to_pref(p_tree p);
 
 static struct langdep m2 = { 1,
 
@@ -56,15 +63,13 @@ static struct langdep m2 = { 1,
 
 struct langdep* m2_dep = &m2;
 
-static print_char(c) int c;
+static void print_char(int c)
 {
 	c &= 0377;
 	fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "%oC", c);
 }
 
-static print_string(f, s, len) FILE* f;
-char* s;
-int len;
+static void print_string(FILE* f, char* s, int  len) 
 {
 	char* str = s;
 	int delim = '\'';
@@ -79,8 +84,7 @@ int len;
 
 extern long int_size;
 
-static long array_elsize(size)
-long size;
+static long array_elsize(long size)
 {
 	if (!(int_size % size))
 		return size;
@@ -89,8 +93,7 @@ long size;
 	return ((size + int_size - 1) / int_size) * int_size;
 }
 
-static int unop_prio(op)
-int op;
+static int unop_prio(int op)
 {
 	switch (op)
 	{
@@ -103,8 +106,7 @@ int op;
 	return 1;
 }
 
-static int binop_prio(op)
-int op;
+static int binop_prio(int op)
 {
 	switch (op)
 	{
@@ -325,7 +327,7 @@ int ch;
 		error("real constant too long");
 	}
 	else
-		tok.fval = atof(buf);
+		tok.fval = strtod(buf, NULL);
 	return REAL;
 }
 
@@ -501,8 +503,7 @@ int c;
 	return STRING;
 }
 
-static print_op(f, p) FILE* f;
-p_tree p;
+static void print_op(FILE* f, p_tree p)
 {
 	switch (p->t_oper)
 	{
@@ -596,7 +597,7 @@ p_tree p;
 	}
 }
 
-static fix_bin_to_pref()
+static void fix_bin_to_pref(p_tree p)
 {
 	/* No problems of this kind in Modula-2 */
 }

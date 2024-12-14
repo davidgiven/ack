@@ -1,4 +1,5 @@
-/* $Id$ */
+#ifndef TREE_H
+#define TREE_H
 
 #define MAXARGS 3
 
@@ -33,8 +34,12 @@ typedef struct tree
 
 /* ALLOCDEF "tree" 100 */
 
-#if __STDC__
+extern void freenode(p_tree p);
 extern p_tree mknode(int, ...);
-#else
-extern p_tree mknode();
+extern void eval(p_tree p);
+extern int repeatable(p_tree com);
+extern int in_status(p_tree com);
+extern void newfile(struct idf* id);
+extern void print_node(FILE* f, p_tree p, int top_level);
+
 #endif

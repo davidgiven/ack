@@ -4,8 +4,7 @@ cat <<'--EOT--'
 #include "Lpars.h"
 
 char *
-symbol2str(tok)
-	int tok;
+symbol2str(int tok)
 {
 #define SIZBUF	8
 	/* allow for a few invocations in f.i. an argument list */

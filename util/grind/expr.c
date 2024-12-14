@@ -39,7 +39,9 @@
     Stores the value 'value' of size 'size' in 'buf'.
 */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 #include <assert.h>
 
@@ -56,10 +58,7 @@
 
 extern FILE* db_out;
 extern int stack_offset;
-extern char* strcpy();
 extern t_addr* get_EM_regs();
-extern char* memcpy();
-extern char *malloc(), *realloc();
 
 #define malloc_succeeded(p)                                                                        \
 	if (!(p))                                                                                      \
@@ -74,9 +73,7 @@ extern char *malloc(), *realloc();
    For local variables or parameters, the 'stack_offset' variable is
    used to determine from which stack frame the search must start.
 */
-static t_addr get_addr(sym, psize)
-p_symbol sym;
-long* psize;
+static t_addr get_addr(p_symbol sym, long* psize)
 {
 	p_type tp = sym->sy_type;
 	long size = tp->ty_size;
@@ -165,10 +162,7 @@ long* psize;
 	return 0;
 }
 
-static int get_v(a, pbuf, size)
-t_addr a;
-char** pbuf;
-long size;
+static int get_v(t_addr a, char** pbuf, long size)
 {
 	if (a)
 	{
@@ -194,10 +188,7 @@ long size;
    For local variables or parameters, the 'stack_offset' variable is
    used to determine from which stack frame the search must start.
 */
-static int get_value(sym, pbuf, psize)
-p_symbol sym;
-char** pbuf;
-long* psize;
+static int get_value(p_symbol sym, char** pbuf, long* psize)
 {
 	p_type tp = sym->sy_type;
 	int retval = 0;
@@ -277,9 +268,7 @@ long* psize;
 
 /* buffer to integer and vice versa routines */
 
-long get_int(buf, size, class) char* buf;
-long size;
-int class;
+long get_int(char* buf, long size, int class)
 {
 	long l;
 
@@ -305,9 +294,7 @@ int class;
 	return l;
 }
 
-put_int(buf, size, value) char* buf;
-long size;
-long value;
+put_int(char* buf, long size, long value)
 {
 	switch ((int)size)
 	{
@@ -326,9 +313,7 @@ long value;
 
 /* buffer to real and vice versa routines */
 
-double get_real(buf, size)
-char* buf;
-long size;
+double get_real(char* buf, long size)
 {
 	switch ((int)size)
 	{
@@ -340,9 +325,7 @@ long size;
 	UNREACHABLE_CODE;
 }
 
-put_real(buf, size, value) char* buf;
-long size;
-double value;
+put_real(char* buf, long size, double value)
 {
 	switch ((int)size)
 	{
@@ -356,12 +339,12 @@ double value;
 	UNREACHABLE_CODE;
 }
 
-int convert(pbuf, psize, ptp, tp, size)
-char** pbuf;
-long* psize;
-p_type* ptp;
-p_type tp;
-long size;
+int convert(
+char** pbuf,
+long* psize,
+p_type* ptp,
+p_type tp,
+long size
 {
 	/* Convert the value in pbuf, of size psize and type ptp, to type
 	   tp and leave the resulting value in pbuf, the resulting size
@@ -443,8 +426,7 @@ long size;
 	return 0;
 }
 
-int eval_cond(p)
-p_tree p;
+int eval_cond(p_tree p)
 {
 	char* buf;
 	long size;
@@ -467,11 +449,11 @@ p_tree p;
 
 /* one routine for each unary operator */
 
-static int not_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int not_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	p_type target_tp = currlang->has_bool_type ? bool_type : int_type;
 
@@ -484,11 +466,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int bnot_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int bnot_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	if (eval_expr(p->t_args[0], pbuf, psize, ptp))
 	{
@@ -508,11 +490,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int ptr_addr(p, paddr, psize, ptp)
-p_tree p;
-t_addr* paddr;
-long* psize;
-p_type* ptp;
+static int ptr_addr(
+p_tree p,
+t_addr* paddr,
+long* psize,
+p_type* ptp)
 {
 	char* buf;
 
@@ -535,11 +517,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int deref_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int deref_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	t_addr addr;
 
@@ -558,11 +540,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int addr_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int addr_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	t_addr addr;
 
@@ -578,11 +560,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int unmin_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int unmin_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	if (eval_expr(p->t_args[0], pbuf, psize, ptp))
 	{
@@ -605,11 +587,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int unplus_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int unplus_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	if (eval_expr(p->t_args[0], pbuf, psize, ptp))
 	{
@@ -633,10 +615,8 @@ static int (*un_op[])()
     = { 0, not_op, deref_op, 0, 0, 0, 0, 0, 0, 0,       0, unplus_op, unmin_op, 0,      0,
 	    0, 0,      0,        0, 0, 0, 0, 0, 0, bnot_op, 0, 0,         0,        addr_op };
 
-static p_type balance(tp1, tp2)
-p_type tp1, tp2;
+static p_type balance( p_type tp1, p_type tp2)
 {
-
 	if (tp1->ty_class == T_SUBRANGE)
 		tp1 = tp1->ty_base;
 	if (tp2->ty_class == T_SUBRANGE)
@@ -731,11 +711,11 @@ p_type tp1, tp2;
 	return 0;
 }
 
-static int andor_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int andor_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	long l1, l2;
 	char* buf = 0;
@@ -759,11 +739,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int arith_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int arith_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	long l1, l2;
 	double d1, d2;
@@ -950,11 +930,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int sft_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int sft_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	long l1, l2;
 	char* buf = 0;
@@ -1003,11 +983,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int cmp_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int cmp_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	long l1, l2;
 	double d1, d2;
@@ -1134,11 +1114,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int in_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int in_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	long l;
 	char* buf = 0;
@@ -1173,11 +1153,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int array_addr(p, paddr, psize, ptp)
-p_tree p;
-t_addr* paddr;
-long* psize;
-p_type* ptp;
+static int array_addr(
+p_tree p,
+t_addr* paddr,
+long* psize,
+p_type* ptp)
 {
 	long l;
 	char* buf = 0;
@@ -1232,11 +1212,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int array_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int array_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	t_addr a;
 
@@ -1253,11 +1233,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int select_addr(p, paddr, psize, ptp)
-p_tree p;
-t_addr* paddr;
-long* psize;
-p_type* ptp;
+static int select_addr(
+p_tree p,
+t_addr* paddr,
+long* psize,
+p_type* ptp)
 {
 	p_type tp;
 	struct fields* f;
@@ -1296,11 +1276,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int select_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int select_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	t_addr a;
 	if (select_addr(p, &a, psize, ptp))
@@ -1318,11 +1298,11 @@ p_type* ptp;
 	return 0;
 }
 
-static int derselect_op(p, pbuf, psize, ptp)
-p_tree p;
-char** pbuf;
-long* psize;
-p_type* ptp;
+static int derselect_op(
+p_tree p,
+char** pbuf,
+long* psize,
+p_type* ptp)
 {
 	int retval;
 	t_tree t;
@@ -1338,7 +1318,7 @@ p_type* ptp;
 	return retval;
 }
 
-static int (*bin_op[])()
+static int (*bin_op[])(p_tree p, char** pbuf, long* psize, p_type* ptp)
     = { 0,      0,        0,         andor_op, andor_op, arith_op, arith_op, arith_op,     arith_op,
 	    in_op,  array_op, arith_op,  arith_op, arith_op, cmp_op,   cmp_op,   cmp_op,       cmp_op,
 	    cmp_op, cmp_op,   select_op, arith_op, arith_op, arith_op, 0,        derselect_op, sft_op,
@@ -1433,11 +1413,11 @@ p_type* ptp;
 	return retval;
 }
 
-int eval_desig(p, paddr, psize, ptp)
-p_tree p;
-t_addr* paddr;
-long* psize;
-p_type* ptp;
+int eval_desig(
+p_tree p,
+t_addr* paddr,
+long* psize,
+p_type* ptp)
 {
 	p_symbol sym;
 	int retval = 0;

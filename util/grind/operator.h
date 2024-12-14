@@ -2,10 +2,11 @@
 
 #include "ops.h"
 
+struct tree;
 typedef struct operator
 {
 	int op_nargs;
-	int (*op_fun)();
+	void (*op_fun)(struct tree*);
 }
 t_operator, *p_operator;
 

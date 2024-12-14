@@ -87,7 +87,7 @@ p_tree mknode(va_alist) va_dcl
 	return p;
 }
 
-freenode(p) p_tree p;
+void freenode(p_tree p)
 {
 	int na, i;
 
@@ -178,8 +178,7 @@ p_tree p;
 
 static int ommit_commas = 0;
 
-print_node(f, p, top_level) p_tree p;
-FILE* f;
+void print_node(FILE* f, p_tree p, int top_level)
 {
 	if (!p)
 		return;
@@ -434,8 +433,7 @@ FILE* f;
 		fputs("\n", f);
 }
 
-int repeatable(com)
-p_tree com;
+int repeatable(p_tree com)
 {
 	switch (com->t_oper)
 	{
@@ -459,8 +457,7 @@ p_tree com;
 	return 0;
 }
 
-int in_status(com)
-p_tree com;
+int in_status(p_tree com)
 {
 	switch (com->t_oper)
 	{
@@ -476,13 +473,13 @@ p_tree com;
 	return 0;
 }
 
-eval(p) p_tree p;
+void eval(p_tree p)
 {
 	if (p && operators[p->t_oper].op_fun)
 		(*operators[p->t_oper].op_fun)(p);
 }
 
-newfile(id) struct idf* id;
+void newfile(struct idf* id)
 {
 	p_symbol sym = Lookup(id, PervasiveScope, FILESYM);
 
@@ -547,7 +544,7 @@ t_addr a;
 	}
 }
 
-list_position(pos) p_position pos;
+void list_position( p_position pos)
 {
 	newfile(str2idf(pos->filename, 1));
 	currfile = listfile;

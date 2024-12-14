@@ -20,8 +20,7 @@ p_scope PervasiveScope, CurrentScope, FileScope;
 
 static AVL_tree ScopeTree;
 
-static int cmp_starts(s1, s2)
-char *s1, *s2;
+static int cmp_starts(char* s1, char* s2)
 {
 	p_scope c1 = (p_scope)s1, c2 = (p_scope)s2;
 
@@ -29,8 +28,8 @@ char *s1, *s2;
 }
 
 /*ARGSUSED*/
-open_scope(name, has_activation) p_symbol name;
-int has_activation;
+void open_scope( p_symbol name,
+int has_activation)
 {
 	p_scope sc = new_scope();
 
@@ -42,7 +41,7 @@ int has_activation;
 	CurrentScope = sc;
 }
 
-init_scope()
+void init_scope(void)
 {
 	p_scope sc = new_scope();
 
@@ -54,7 +53,7 @@ init_scope()
 	ScopeTree = create_avl_tree(cmp_starts);
 }
 
-close_scope()
+void close_scope(void)
 {
 	p_scope sc = CurrentScope;
 
@@ -62,7 +61,7 @@ close_scope()
 	CurrentScope = sc->sc_static_encl;
 }
 
-add_scope_addr(scope) p_scope scope;
+void add_scope_addr( p_scope scope)
 {
 	add_to_avl_tree(ScopeTree, (char*)scope);
 }
@@ -70,8 +69,7 @@ add_scope_addr(scope) p_scope scope;
 /* extern p_scope	get_scope_from_addr(t_addr a);
    Returns the scope of the code at address 'a', or 0 if it could not be found.
 */
-p_scope get_scope_from_addr(a)
-t_addr a;
+p_scope get_scope_from_addr(t_addr a)
 {
 	t_scope sc;
 
@@ -84,8 +82,7 @@ t_addr a;
    and that has an activation record,
    or 0 if it could not be found.
 */
-p_scope get_next_scope_from_addr(a)
-t_addr a;
+p_scope get_next_scope_from_addr(t_addr a)
 {
 	t_scope sc;
 
@@ -103,8 +100,7 @@ t_addr a;
 /* extern int	has_static_link(p_scope sc);
    Returns 1 if the procedure of this scope takes a static link.
 */
-int has_static_link(sc)
-p_scope sc;
+int has_static_link(p_scope sc)
 {
 	return sc->sc_proclevel > 1;
 }
@@ -112,8 +108,7 @@ p_scope sc;
 /* extern p_scope	base_scope(p_scope sc);
    Returns the closest enclosing scope of 'sc' that has an activation record.
 */
-p_scope base_scope(sc)
-p_scope sc;
+p_scope base_scope(p_scope sc)
 {
 	while (sc && !sc->sc_has_activation_record)
 	{
@@ -125,8 +120,7 @@ p_scope sc;
 /* extern int	scope_encloses(p_scope scope, from_scope);
    Returns 1 if scope encloses from from_scope, 0 otherwise.
 */
-int scope_encloses(scope, from_scope)
-p_scope scope, from_scope;
+int scope_encloses(p_scope scope, p_scope from_scope)
 {
 	p_scope sc = from_scope;
 

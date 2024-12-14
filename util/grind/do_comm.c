@@ -2,6 +2,7 @@
 
 /* Implementation of the do_ routines */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <alloc.h>
@@ -17,6 +18,10 @@
 #include "scope.h"
 #include "file.h"
 #include "misc.h"
+#include "do_comm.h"
+#include "run.h"
+#include "print.h"
+#include "itemlist.h"
 
 extern FILE* db_out;
 extern t_lineno listline, currline;
@@ -28,7 +33,7 @@ p_tree print_command;
 extern void set_bytes();
 
 /*ARGSUSED*/
-do_noop(p) p_tree p;
+void do_noop(p_tree p)
 {
 }
 
@@ -36,7 +41,7 @@ do_noop(p) p_tree p;
 
 /* implementation of the help command */
 
-do_help(p) p_tree p;
+void do_help(p_tree p)
 {
 	p = p->t_args[0];
 	if (p && p->t_idf)
@@ -272,7 +277,7 @@ struct dump
 
 static struct dump* last_dump;
 
-do_dump(p) p_tree p;
+void do_dump(p)
 {
 	struct dump* d = (struct dump*)malloc(sizeof(struct dump));
 
@@ -293,7 +298,7 @@ do_dump(p) p_tree p;
 	last_dump = d;
 }
 
-do_restore(p) p_tree p;
+void do_restore(p)
 {
 	struct dump* d;
 
@@ -323,7 +328,7 @@ do_restore(p) p_tree p;
 	perform_items();
 }
 
-free_dump(p) p_tree p;
+void free_dump(p_tree p)
 {
 	struct dump* d = (struct dump*)p->t_args[0];
 
@@ -346,7 +351,7 @@ free_dump(p) p_tree p;
 
 /* implementation of the find command */
 
-do_find(p) p_tree p;
+void do_find(p_tree p)
 {
 	/* Print all identifications of p->t_args[0]. */
 	p_symbol s;
@@ -387,7 +392,7 @@ do_find(p) p_tree p;
 
 /* implementation of the which command */
 
-do_which(p) p_tree p;
+void do_which(p_tree p)
 {
 	p_symbol sym = identify(p->t_args[0], 0xffff);
 
@@ -401,7 +406,7 @@ do_which(p) p_tree p;
 
 extern t_addr get_addr_from_node();
 
-do_list(p) p_tree p;
+void do_list(p_tree p)
 {
 	int l1, l2;
 	static int wsize = 10;
@@ -480,7 +485,7 @@ do_list(p) p_tree p;
 
 /* implementation of the file command */
 
-do_file(p) p_tree p;
+void do_file(p_tree p)
 {
 	FILE* f;
 
@@ -518,7 +523,7 @@ do_file(p) p_tree p;
 
 /* implementation of stop/when command */
 
-setstop(p, kind) p_tree p;
+setstop(p_tree p, kind)
 int kind;
 {
 	t_addr a = get_addr_from_node(p->t_args[0]);
@@ -537,7 +542,7 @@ int kind;
 	return 1;
 }
 
-do_stop(p) p_tree p;
+void do_stop(p_tree p)
 {
 	if (!setstop(p, 1))
 	{
@@ -550,7 +555,7 @@ do_stop(p) p_tree p;
 
 /* implementation of the trace command */
 
-settrace(p, kind) p_tree p;
+settrace(p_tree p, kind)
 int kind;
 {
 	t_addr a, e;
@@ -577,7 +582,7 @@ int kind;
 	return set_or_clear_trace(a, e, kind);
 }
 
-do_trace(p) p_tree p;
+void do_trace(p_tree p)
 {
 	p->t_address = NO_ADDR;
 	if (!settrace(p, 1))
@@ -591,7 +596,7 @@ do_trace(p) p_tree p;
 
 /* implementation of the enable/disable commands */
 
-static able(p, kind) p_tree p;
+static able(p_tree p, kind)
 int kind;
 {
 	if (!p)
@@ -613,12 +618,12 @@ int kind;
 	}
 }
 
-do_enable(p) p_tree p;
+void do_enable(p_tree p)
 {
 	able(p->t_args[0], 0);
 }
 
-do_disable(p) p_tree p;
+void do_disable(p_tree p)
 {
 	able(p->t_args[0], 1);
 }
@@ -627,7 +632,7 @@ do_disable(p) p_tree p;
 
 /* implementation of the cont command */
 
-do_continue(p) p_tree p;
+void do_continue(p_tree p)
 {
 	int count;
 
@@ -669,7 +674,7 @@ do_continue(p) p_tree p;
 
 /* implementation of the step command */
 
-do_step(p) p_tree p;
+void do_step(p_tree p)
 {
 	p = p->t_args[0];
 	if (!singlestep(0, p ? p->t_ival : 1L))
@@ -681,7 +686,7 @@ do_step(p) p_tree p;
 
 /* implementation of the next command */
 
-do_next(p) p_tree p;
+void do_next(p_tree p)
 {
 	p = p->t_args[0];
 	if (!singlestep(1, p ? p->t_ival : 1L))
@@ -689,13 +694,11 @@ do_next(p) p_tree p;
 	}
 }
 
-extern t_addr* get_EM_regs();
-
 /* ------------------------------------------------------------- */
 
 /* implementation of the regs command (temporarily) */
 
-do_regs(p) p_tree p;
+void do_regs(p_tree p)
 {
 	t_addr* buf;
 	int n = 0;
@@ -720,8 +723,8 @@ do_regs(p) p_tree p;
 
 static t_addr where_PC;
 
-static int where_entry(num)
-int num;
+static int where_entry(
+int num)
 {
 	t_addr* buf;
 	t_addr AB;
@@ -745,7 +748,7 @@ int num;
 }
 
 /*ARGSUSED*/
-do_where(p) p_tree p;
+void do_where(p_tree p)
 {
 	int i = 0;
 	unsigned int cnt;
@@ -790,7 +793,7 @@ do_where(p) p_tree p;
 
 /* implementation of the delete command */
 
-do_delete(p) p_tree p;
+void do_delete(p_tree p)
 {
 	switch (p->t_oper)
 	{
@@ -818,7 +821,7 @@ do_delete(p) p_tree p;
 
 /* implementation of the print command */
 
-do_print(p) p_tree p;
+void do_print(p_tree p)
 {
 	char* buf = 0;
 	char* format = 0;
@@ -871,7 +874,7 @@ do_print(p) p_tree p;
 
 /* implementation of the set command */
 
-do_set(p) p_tree p;
+void do_set(p_tree p)
 {
 	char* buf = 0;
 	long size, size2;
@@ -901,7 +904,7 @@ do_set(p) p_tree p;
 
 extern FILE* db_in;
 
-do_source(p) p_tree p;
+void do_source(p_tree p)
 {
 	FILE* old_db_in = db_in;
 
@@ -919,7 +922,7 @@ do_source(p) p_tree p;
 
 /* ------------------------------------------------------------- */
 
-do_prcomm(p) p_tree p;
+void do_prcomm(p_tree p)
 {
 	print_node(db_out, p->t_args[0], 1);
 }
@@ -930,7 +933,7 @@ do_prcomm(p) p_tree p;
 
 extern int stack_offset;
 
-static frame_pos(diff) int diff;
+static void frame_pos( int diff)
 {
 	if (stack_offset + diff < 0)
 		diff = -stack_offset;
@@ -944,7 +947,7 @@ static frame_pos(diff) int diff;
 	CurrentScope = get_scope_from_addr(where_PC);
 }
 
-do_frame(p) p_tree p;
+void do_frame(p_tree p)
 {
 	if (p->t_args[0])
 	{
@@ -954,7 +957,7 @@ do_frame(p) p_tree p;
 		frame_pos(0);
 }
 
-do_up(p) p_tree p;
+void do_up(p_tree p)
 {
 	if (p->t_args[0])
 	{
@@ -964,7 +967,7 @@ do_up(p) p_tree p;
 		frame_pos(1);
 }
 
-do_down(p) p_tree p;
+void do_down(p_tree p)
 {
 	if (p->t_args[0])
 	{
@@ -981,7 +984,7 @@ do_down(p) p_tree p;
 static char* logfile;
 static FILE* logfd;
 
-do_log(p) p_tree p;
+void do_log(p_tree p)
 {
 	p = p->t_args[0];
 	if (p)
@@ -1019,7 +1022,7 @@ do_log(p) p_tree p;
 extern int item_count;
 extern int in_wheninvoked;
 
-enterlog(p) p_tree p;
+void enterlog(p_tree p)
 {
 	p_tree p1;
 

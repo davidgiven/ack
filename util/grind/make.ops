@@ -1,18 +1,19 @@
+echo "struct tree;" > $3
 awk '
 BEGIN	{ n = 0 }
 	{ print "#define " $1 " " n; n++
-	  if ($3 !~ /0/) print "extern int " $3 "();" ;
+	  if ($3 !~ /0/) print "extern void " $3 "(struct tree*);" ;
 	}
-' < $1 > ops.h
+' < $1 >> $3
 
-cat > ops.c <<'EOF'
+cat > $2 <<'EOF'
 #include "operator.h"
 #include "ops.h"
 
 t_operator operators[] = {
 EOF
-awk '	{ print "{ " $2 ", " $3 "}, /* " $1 " */" }' < $1 >> ops.c
-cat >> ops.c <<'EOF'
+awk '	{ print "{ " $2 ", " $3 "}, /* " $1 " */" }' < $1 >> $2
+cat >> $2 <<'EOF'
 { 0, 0 }
 };
 EOF

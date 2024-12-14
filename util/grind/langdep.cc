@@ -1,5 +1,6 @@
 /* $Id$ */
 
+#include <string.h>
 #include "langdep.h"
 
 struct langlist
@@ -15,8 +16,7 @@ static struct langlist* list;
 
 struct langdep* currlang;
 
-static void add_language(suff, lang) char* suff;
-struct langdep* lang;
+static void add_language(char* suff, struct langdep* lang)
 {
 	struct langlist* p = new_langlist();
 
@@ -26,14 +26,14 @@ struct langdep* lang;
 	list = p;
 }
 
-init_languages()
+void init_languages(void)
 {
 	add_language(".p", pascal_dep);
 	add_language(".mod", m2_dep);
 	add_language(".c", c_dep);
 }
 
-find_language(suff) char* suff;
+void find_language(char* suff)
 {
 	struct langlist* p = list;
 

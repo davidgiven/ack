@@ -36,38 +36,35 @@
 #define E_RSFT 27
 #define E_ADDR 28
 
-/* long get_int(char *buf, long size, int class)
-   Returns the value of size 'size', residing in 'buf', of 'class'
+struct tree;
+struct type;
+
+/* Returns the value of size 'size', residing in 'buf', of 'class'
    T_INTEGER, T_UNSIGNED, or T_ENUM.
 */
-extern long get_int();
+extern long get_int(char* buf, long size, int class);
 
-/* int put_int(char *buf, long size, long value)
-   Stores the value 'value' of size 'size' in 'buf'.
-*/
-extern int put_int();
+/* Stores the value 'value' of size 'size' in 'buf'.
+ */
+extern int put_int(char* buf, long size, long value);
 
-/* double get_real(char *buf, long size)
-   Returns the real value of size 'size', residing in 'buf'.
+/* Returns the real value of size 'size', residing in 'buf'.
    T_INTEGER, T_UNSIGNED, or T_ENUM.
 */
-extern double get_real();
+extern double get_real(char* buf, long size);
 
-/* int put_real(char *buf, long size, double value)
-   Stores the value 'value' of size 'size' in 'buf'.
-*/
-extern int put_real();
+/* Stores the value 'value' of size 'size' in 'buf'.
+ */
+extern int put_real(char* buf, long size, double value);
 
-/* int eval_cond(p_tree p)
-   This routine evaluates the conditional expression indicated by p
+/* This routine evaluates the conditional expression indicated by p
    and returns 1 if it evaluates to TRUE, or 0 if it could not be
    evaluated for some reason or if it evalutes to FALSE.
    If the expression cannot be evaluated, an error message is given.
 */
-extern int eval_cond();
+extern int eval_cond(struct tree* p);
 
-/* int eval_desig(p_tree p, t_addr *pbuf, long **psize, p_type *ptp)
-   This routine evaluates the expression indicated by p, which should
+/* This routine evaluates the expression indicated by p, which should
    result in a designator. The result of the expression is an address
    which is to be found in *pbuf. *psize will contain the size of the
    designated object, and *ptp its type.
@@ -75,22 +72,20 @@ extern int eval_cond();
    designator, 0 is returned and an error message is given.
    Otherwise, 1 is returned.
 */
-extern int eval_desig();
+extern int eval_desig(struct tree* p, t_addr* pbuf, long* psize, struct type** ptp);
 
-/* int eval_expr(p_tree p, char **pbuf, long **psize, p_type *ptp)
-   This routine evaluates the expression indicated by p.
+/* This routine evaluates the expression indicated by p.
    The result of the expression is left in *pbuf.
    *psize will contain the size of the value, and *ptp its type.
    If the expression cannot be evaluated, 0 is returned and an error
    message is given.  Otherwise, 1 is returned.
 */
-extern int eval_expr();
+extern int eval_expr(struct tree* p, char** pbuf, long* psize, struct type** ptp);
 
-/* int convert(char **pbuf, long *psize, p_type *ptp, p_type tp, long size)
-   This routine tries to convert the value in pbuf of size psize
+/* This routine tries to convert the value in pbuf of size psize
    and type ptp to type tp with size size. It returns 0 if this fails,
    while producing an error message. Otherwise, it returns 1 and
    the resulting value, type and size are left in pbuf, ptp, and
    psize, respectively.
 */
-extern int convert();
+extern int convert(char** pbuf, long* psize, struct type** ptp, struct type* tp, long size);

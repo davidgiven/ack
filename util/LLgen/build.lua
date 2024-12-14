@@ -61,6 +61,7 @@ normalrule {
 definerule("llgen",
 	{
 		srcs = { type="targets" },
+		basename = { type="string", default="Lpars" },
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
@@ -71,8 +72,8 @@ definerule("llgen",
 			name = e.name,
 			cwd = e.cwd,
 			outleaves = {
-				"Lpars.c",
-				"Lpars.h",
+				e.basename..".c",
+				e.basename..".h",
 				replace(fs, "$", ".c")
 			},
 			ins = {

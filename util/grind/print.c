@@ -1,25 +1,25 @@
 /* $Id$ */
 
-#include <alloc.h>
-#include <assert.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <assert.h>
 
 #include "type.h"
+#include "position.h"
 #include "langdep.h"
 #include "scope.h"
 #include "symbol.h"
-#include "position.h"
 #include "idf.h"
 #include "expr.h"
 #include "misc.h"
+#include "print.h"
+#include "scope.h"
+#include "run.h"
 
 extern FILE* db_out;
-extern char* strchr();
-extern char* malloc();
 
-static print_unsigned(tp, v, format) p_type tp;
-long v;
-char* format;
+static void print_unsigned(p_type tp, long v, char* format)
 {
 	while (format && *format)
 	{
@@ -55,10 +55,10 @@ char* format;
 	}
 }
 
-static print_literal(tp, v, compressed, format) p_type tp;
-long v;
-int compressed;
-char* format;
+static void print_literal(p_type tp,
+long v,
+int compressed,
+char* format)
 {
 	struct literal* lit = tp->ty_literals;
 	int i;
@@ -82,9 +82,7 @@ char* format;
 	}
 }
 
-static print_integer(tp, v, format) p_type tp;
-long v;
-char* format;
+static void print_integer(p_type tp, long v, char* format)
 {
 	while (format && *format)
 	{
@@ -120,8 +118,7 @@ char* format;
 	}
 }
 
-print_params(tp, AB, static_link) p_type tp;
-t_addr AB;
+void print_params(p_type tp, t_addr AB, int static_link)
 {
 	char* param_bytes;
 	char* p;
@@ -195,12 +192,14 @@ t_addr AB;
 	free(param_bytes);
 }
 
-print_val(tp, tp_sz, addr, compressed, indent, format) p_type tp; /* type of value to be printed */
-long tp_sz; /* size of object to be printed */
-char* addr; /* address to get value from */
-int compressed; /* for parameter lists */
-int indent; /* indentation */
-char* format; /* format given or 0 */
+void print_val(
+    p_type tp, /* type of value to be printed */
+    long tp_sz, /* size of object to be printed */
+    char* addr, /* address to get value from */
+    int compressed, /* for parameter lists */
+    int indent, /* indentation */
+    char* format /* format given or 0 */
+)
 {
 	int i;
 	long elsize;

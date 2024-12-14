@@ -1,4 +1,5 @@
-/* $Id$ */
+#ifndef SCOPE_H
+#define SCOPE_H
 
 /* scope structure */
 
@@ -16,46 +17,44 @@ typedef struct scope
 
 extern p_scope PervasiveScope, CurrentScope, FileScope;
 
-/* extern	init_scope();
-   Initializes the scope routines.
-*/
-extern init_scope();
+/* Initializes the scope routines.
+ */
+extern void init_scope(void);
 
-/* extern	open_scope(struct symbol *name, int has_activation);
-   Opens a new scope and assigns it to CurrentScope; The new scope is defined
+/* Opens a new scope and assigns it to CurrentScope; The new scope is defined
    by 'name' and if 'has_activation' is set, it has an activation record.
 */
-extern open_scope();
+extern void open_scope(struct symbol* name, int has_activation);
 
-/* extern	close_scope();
-   Closes the current scope; CurrentScope becomes the statically enclosing
+/* Closes the current scope; CurrentScope becomes the statically enclosing
    scope.
 */
-extern close_scope();
+extern void close_scope(void);
 
-/* extern	add_scope_addr(p_scope sc);
-   Adds scope 'sc' to the list of scopes that have an address at runtime.
-*/
-extern add_scope_addr();
+/* Adds scope 'sc' to the list of scopes that have an address at runtime.
+ */
+extern void add_scope_addr(p_scope sc);
 
-/* extern p_scope	get_scope_from_addr(t_addr a);
-   Returns the scope of the code at address 'a', or 0 if it could not be found.
-*/
-extern p_scope get_scope_from_addr();
+/* Returns the scope of the code at address 'a', or 0 if it could not be found.
+ */
+extern p_scope get_scope_from_addr(t_addr a);
 
-/* extern p_scope	get_next_scope_from_addr(t_addr a);
-   Returns the scope following the one of the code at address 'a',
+/* Returns the scope following the one of the code at address 'a',
    and that has an activation record,
    or 0 if it could not be found.
 */
-extern p_scope get_next_scope_from_addr();
+extern p_scope get_next_scope_from_addr(t_addr a);
 
-/* extern p_scope	base_scope(p_scope sc);
-   Returns the closest enclosing scope of 'sc' that has an activation record.
-*/
-extern p_scope base_scope();
+/* Returns the closest enclosing scope of 'sc' that has an activation record.
+ */
+extern p_scope base_scope(p_scope sc);
 
-/* extern int	scope_encloses(p_scope scope, from_scope);
-   Returns 1 if scope encloses from from_scope, 0 otherwise.
-*/
-extern int scope_encloses();
+/* Returns 1 if scope encloses from from_scope, 0 otherwise.
+ */
+extern int scope_encloses(p_scope scope, p_scope from_scope);
+
+/* Returns 1 if the procedure of this scope takes a static link.
+ */
+extern int has_static_link(p_scope sc);
+
+#endif

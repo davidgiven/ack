@@ -1,7 +1,9 @@
-/* $Id$ */
+#ifndef LANGDEP_H
+#define LANGDEP_H
 
 /* language-dependent routines and formats, together in one structure: */
 
+struct tree;
 struct langdep
 {
 	/* language info: */
@@ -24,21 +26,27 @@ struct langdep
 	char* close_set_display;
 
 	/* language dependant routines: */
-	int (*printstring)();
-	int (*printchar)();
-	long (*arrayelsize)();
-	int (*binop_prio)();
-	int (*unop_prio)();
-	int (*get_string)();
-	int (*get_name)();
-	int (*get_number)();
-	int (*get_token)();
-	int (*printop)();
-	int (*fix_bin_to_pref)();
+	void (*printstring)(FILE* f, char* s, int len);
+	void (*printchar)(int c);
+	long (*arrayelsize)(long size);
+	int (*binop_prio)(int op);
+	int (*unop_prio)(int op);
+	int (*get_string)(int c);
+	int (*get_name)(int c);
+	int (*get_number)(int c);
+	int (*get_token)(int c);
+	void (*printop)(FILE* f, struct tree* p);
+	void (*fix_bin_to_pref)(struct tree* p);
 };
 
 extern struct langdep *m2_dep, *c_dep, *pascal_dep, *currlang;
 
-extern int find_language();
+extern void find_language(char* suff);
+extern void init_languages(void);
+extern int LLlex(void);
+extern void Commands(void);
 
-extern int init_languages();
+extern int get_string(long size, t_addr from, char* to);
+extern int get_bytes(long size, t_addr from, char* to);
+
+#endif

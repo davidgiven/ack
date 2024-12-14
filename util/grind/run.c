@@ -4,9 +4,13 @@
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <assert.h>
 #include <alloc.h>
 #include <errno.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 
 #include "ops.h"
 #include "message.h"
@@ -19,12 +23,10 @@
 #include "type.h"
 #include "expr.h"
 #include "misc.h"
+#include "itemlist.h"
+#include "run.h"
 
 #define MAXARG 128
-
-extern char* strncpy();
-extern char* malloc();
-extern struct idf* str2idf();
 
 extern char* AObj;
 extern FILE* db_out;
@@ -44,17 +46,18 @@ int disable_intr = 1;
 int db_ss;
 int stack_offset;
 
-void signal_child();
+static void catch_sigpipe(int signum);
+static int stopped(
+    char* s /* stop message */,
+    t_addr a /* address where stopped */,
+    int stop_reason /* status entry causing the stop */);
+static int ugetm(struct message_hdr* message);
+static int uputm(struct message_hdr* message);
 
-static void catch_sigpipe();
-static int stopped();
-static int uputm(), ugetm();
 static t_addr curr_stop;
 p_tree run_command;
 
-static void ITOBUF(p, l, sz) char* p;
-long l;
-int sz;
+static void ITOBUF(char* p, long l, int sz)
 {
 	int i;
 
@@ -66,9 +69,7 @@ int sz;
 	}
 }
 
-static long BUFTOI(p, sz)
-char* p;
-int sz;
+static long BUFTOI(char* p, int sz)
 {
 	long l = 0;
 	int i;
@@ -80,7 +81,7 @@ int sz;
 	return l;
 }
 
-void init_run()
+void init_run(void)
 {
 	/* take file descriptors so that listing cannot take them */
 	int i;
@@ -99,9 +100,7 @@ void init_run()
 	currline = 0;
 }
 
-extern int errno;
-
-start_child(p) p_tree p;
+void start_child(p_tree p)
 {
 	/* start up the process to be debugged and set up communication */
 
@@ -248,7 +247,7 @@ start_child(p) p_tree p;
 	}
 }
 
-void signal_child(sig)
+void signal_child(int sig)
 {
 	if (child_pid)
 	{
@@ -261,14 +260,12 @@ void signal_child(sig)
 	}
 }
 
-static void catch_sigpipe()
+static void catch_sigpipe(int signum)
 {
 	child_pid = 0;
 }
 
-extern int errno;
-static int do_read(f, p, c)
-char* p;
+static int do_read(int f, char* p, int c)
 {
 	int i = read(f, p, c);
 
@@ -277,9 +274,7 @@ char* p;
 	return i;
 }
 
-static int ureceive(p, c)
-char* p;
-long c;
+static int ureceive(char* p, long c)
 {
 	int i;
 	char buf[0x1000];
@@ -328,9 +323,7 @@ long c;
 	return 1;
 }
 
-static int usend(p, c)
-char* p;
-long c;
+static int usend(char* p, long c)
 {
 	int i;
 
@@ -366,8 +359,7 @@ long c;
 	return 1;
 }
 
-static int ugetm(message)
-struct message_hdr* message;
+static int ugetm(struct message_hdr* message)
 {
 	if (!ureceive((char*)message, (long)sizeof(struct message_hdr)))
 	{
@@ -378,8 +370,7 @@ struct message_hdr* message;
 	return 1;
 }
 
-static int uputm(message)
-struct message_hdr* message;
+static int uputm(struct message_hdr* message)
 {
 	if (!usend((char*)message, (long)sizeof(struct message_hdr)))
 	{
@@ -393,10 +384,10 @@ struct message_hdr* message;
 static struct message_hdr answer;
 static int single_stepping;
 
-static int stopped(s, a, stop_reason)
-char* s; /* stop message */
-t_addr a; /* address where stopped */
-int stop_reason; /* status entry causing the stop */
+static int stopped(
+    char* s, /* stop message */
+    t_addr a, /* address where stopped */
+    int stop_reason) /* status entry causing the stop */
 {
 	p_position pos;
 
@@ -417,8 +408,7 @@ int stop_reason; /* status entry causing the stop */
 	return 1;
 }
 
-static int could_send(m, stop_message)
-struct message_hdr* m;
+static int could_send(struct message_hdr* m, int stop_message)
 {
 	int type;
 	t_addr a;
@@ -526,12 +516,7 @@ struct message_hdr* m;
 	UNREACHABLE_CODE;
 }
 
-static int getbytes(size, from, to, kind, errmess)
-long size;
-t_addr from;
-char* to;
-int kind;
-int errmess;
+static int getbytes(long size, t_addr from, char* to, int kind, int errmess)
 {
 	struct message_hdr m;
 
@@ -562,18 +547,12 @@ int errmess;
 	UNREACHABLE_CODE;
 }
 
-int get_bytes(size, from, to)
-long size;
-t_addr from;
-char* to;
+int get_bytes(long size, t_addr from, char* to)
 {
 	return getbytes(size, from, to, M_GETBYTES, 1);
 }
 
-int get_string(size, from, to)
-long size;
-t_addr from;
-char* to;
+int get_string(long size, t_addr from, char* to)
 {
 	int retval = getbytes(size, from, to, M_GETSTR, 0);
 
@@ -581,9 +560,7 @@ char* to;
 	return retval;
 }
 
-void set_bytes(size, from, to) long size;
-char* from;
-t_addr to;
+void set_bytes(long size, char* from, t_addr to)
 {
 	struct message_hdr m;
 
@@ -610,8 +587,7 @@ t_addr to;
 	}
 }
 
-t_addr get_dump(globbuf, stackbuf)
-char **globbuf, **stackbuf;
+t_addr get_dump(char** globbuf, char** stackbuf)
 {
 	struct message_hdr m;
 	struct message_hdr *globm, *stackm;
@@ -667,8 +643,7 @@ char **globbuf, **stackbuf;
 	return BUFTOI(globm->m_buf + PC_OFF, PS);
 }
 
-int put_dump(globbuf, stackbuf)
-char *globbuf, *stackbuf;
+int put_dump(char* globbuf, char* stackbuf)
 {
 	struct message_hdr m;
 	struct message_hdr *globm = (struct message_hdr*)globbuf,
@@ -687,8 +662,7 @@ char *globbuf, *stackbuf;
 	    && stopped("restored", BUFTOI(m.m_buf + 1, PS), 0);
 }
 
-t_addr* get_EM_regs(level)
-int level;
+t_addr* get_EM_regs(int level)
 {
 	struct message_hdr m;
 	static t_addr buf[5];
@@ -722,8 +696,7 @@ int level;
 	return buf;
 }
 
-int set_pc(PC)
-t_addr PC;
+int set_pc(t_addr PC)
 {
 	struct message_hdr m;
 
@@ -747,8 +720,7 @@ t_addr PC;
 	UNREACHABLE_CODE;
 }
 
-int send_cont(stop_message)
-int stop_message;
+int send_cont(int stop_message)
 {
 	struct message_hdr m;
 
@@ -756,9 +728,7 @@ int stop_message;
 	return could_send(&m, stop_message) && child_pid;
 }
 
-int singlestep(type, count)
-int type;
-long count;
+int singlestep(int type, long count)
 {
 	struct message_hdr m;
 
@@ -771,9 +741,7 @@ long count;
 	return 0;
 }
 
-int set_or_clear_breakpoint(a, type)
-t_addr a;
-int type;
+int set_or_clear_breakpoint(t_addr a, int type)
 {
 	struct message_hdr m;
 
@@ -788,9 +756,7 @@ int type;
 	return 1;
 }
 
-int set_or_clear_trace(start, end, type)
-t_addr start, end;
-int type;
+int set_or_clear_trace(t_addr start, t_addr end, int type)
 {
 	struct message_hdr m;
 

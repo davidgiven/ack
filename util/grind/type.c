@@ -49,9 +49,7 @@ static struct integer_types u_types[4];
 #define Xfit(n, nb, b) ((n) >= (b)[(nb) - 1].low && (n) <= (b)[(nb) - 1].high)
 
 /* Create a subrange type, but is it really a subrange? */
-p_type subrange_type(A, base_index, c1, c2, result_index)
-int *base_index, *result_index;
-long c1, c2;
+p_type subrange_type(int A, int* base_index, long c1, long c2, int* result_index)
 {
 	int itself = 0;
 	p_type p;
@@ -185,8 +183,7 @@ p_type tp;
 	return 0;
 }
 
-p_type array_type(bound_type, el_type)
-p_type bound_type, el_type;
+p_type array_type(p_type bound_type, p_type el_type)
 {
 	p_type tp = new_type();
 
@@ -229,7 +226,7 @@ long size;
 	return p;
 }
 
-set_bounds(tp) p_type tp;
+void set_bounds(p_type tp)
 {
 	/* Determine the size and low of a set type */
 	p_type base = tp->ty_setbase;
@@ -252,7 +249,7 @@ set_bounds(tp) p_type tp;
 	}
 }
 
-init_types()
+void init_types(void)
 {
 	int i = 0;
 	long x = 0;
@@ -306,8 +303,7 @@ static unsigned list_len;
 
 #define NINCR 10
 
-p_type* tp_lookup(type_index)
-int* type_index;
+p_type* tp_lookup(int* type_index)
 {
 	int i;
 	struct tp_index* p;
@@ -346,7 +342,7 @@ int* type_index;
 	return &(p->row[type_index[1] / NINCR][type_index[1] % NINCR]);
 }
 
-clean_tp_tab()
+void clean_tp_tab(void)
 {
 	if (list_len)
 	{
@@ -382,8 +378,7 @@ clean_tp_tab()
 	}
 }
 
-end_literal(tp, maxval) p_type tp;
-long maxval;
+void end_literal(p_type tp, long maxval)
 {
 	tp->ty_literals
 	    = (struct literal*)realloc((char*)tp->ty_literals, tp->ty_nenums * sizeof(struct literal));
@@ -397,9 +392,7 @@ long maxval;
 		bool_type = tp;
 }
 
-long param_size(t, v)
-int v;
-p_type t;
+long param_size(p_type v, int t)
 {
 	if (v == 'i' || v == 'v')
 	{
@@ -416,8 +409,7 @@ p_type t;
 	return ((t->ty_size + int_size - 1) / int_size) * int_size;
 }
 
-add_param_type(v, s) int v; /* 'v' or 'i' for address, 'p' for value */
-p_symbol s; /* parameter itself */
+void add_param_type(int v, p_symbol s)
 {
 	p_scope sc = base_scope(s->sy_scope);
 	p_type prc_type;
@@ -444,9 +436,7 @@ p_symbol s; /* parameter itself */
 /* Compute the size of a parameter of dynamic size
  */
 
-long compute_size(tp, AB)
-p_type tp;
-char* AB;
+long compute_size(p_type tp, char* AB)
 {
 	long low, high;
 

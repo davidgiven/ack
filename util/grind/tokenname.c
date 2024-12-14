@@ -31,24 +31,44 @@ struct tokenname tkspec[] =	{	/* the names of the special tokens */
 };
 #endif
 
-struct tokenname tkidf[] = { /* names of the identifier tokens */
-	                         { LIST, "list" },       { XFILE, "file" },
-	                         { RUN, "run" },         { RERUN, "rerun" },
-	                         { STOP, "stop" },       { WHEN, "when" },
-	                         { AT, "at" },           { IN, "in" },
-	                         { ON, "on" },           { IF, "if" },
-	                         { CONT, "cont" },       { STEP, "step" },
-	                         { NEXT, "next" },       { REGS, "regs" },
-	                         { WHERE, "where" },     { STATUS, "status" },
-	                         { DELETE, "delete" },   { PRINT, "print" },
-	                         { DUMP, "dump" },       { RESTORE, "restore" },
-	                         { TRACE, "trace" },     { SET, "set" },
-	                         { TO, "to" },           { FIND, "find" },
-	                         { DISPLAY, "display" }, { WHICH, "which" },
-	                         { HELP, "help" },       { DISABLE, "disable" },
-	                         { ENABLE, "enable" },   { SOURCE, "source" },
-	                         { FRAME, "frame" },     { LOG, "log" },
-	                         { -1, "quit" },         { 0, "" }
+struct tokenname tkidf[] = {
+	/* names of the identifier tokens */
+	// clang-format: off
+	{LIST, "list"},
+	{XFILE, "file"},
+	{RUN, "run"},
+	{RERUN, "rerun"},
+	{STOP, "stop"},
+	{WHEN, "when"},
+	{AT, "at"},
+	{IN, "in"},
+	{ON, "on"},
+	{IF, "if"},
+	{CONT, "cont"},
+	{STEP, "step"},
+	{NEXT, "next"},
+	{REGS, "regs"},
+	{WHERE, "where"},
+	{STATUS, "status"},
+	{DELETE, "delete"},
+	{PRINT, "print"},
+	{DUMP, "dump"},
+	{RESTORE, "restore"},
+	{TRACE, "trace"},
+	{SET, "set"},
+	{TO, "to"},
+	{FIND, "find"},
+	{DISPLAY, "display"},
+	{WHICH, "which"},
+	{HELP, "help"},
+	{DISABLE, "disable"},
+	{ENABLE, "enable"},
+	{SOURCE, "source"},
+	{FRAME, "frame"},
+	{LOG, "log"},
+	{-1, "quit"},
+	{0, ""}
+	// clang-format: on
 };
 
 #if 0
@@ -63,7 +83,7 @@ struct tokenname tkstandard[] =	{	/* standard identifiers */
 
 /* Some routines to handle tokennames */
 
-reserve(resv) struct tokenname* resv;
+void reserve(struct tokenname* resv)
 {
 	/*	The names of the tokens described in resv are entered
 	    as reserved words.

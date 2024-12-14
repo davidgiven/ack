@@ -1,4 +1,5 @@
-/* $Id$ */
+#ifndef POSITION_H
+#define POSITION_H
 
 /* maps from address to filename-lineno pair and reverse,
    maps from filename-lineno pair or address to scope.
@@ -15,26 +16,25 @@ typedef struct pos
 	char* filename;
 } t_position, *p_position;
 
-/* extern p_position	get_position_from_addr(t_addr t);
-   Returns a pointer to a structure containing the source position of the code
-   at address 't'.  0 is returned if no source position could be found.
-*/
-extern p_position get_position_from_addr();
+/* Returns a pointer to a structure containing the source position of the code
+ * at address 't'.  0 is returned if no source position could be found.
+ */
+extern p_position get_position_from_addr(t_addr t);
 
-/* extern t_addr	get_addr_from_position(p_position p);
-   Returns the address of the code at position 'p', or ILL_ADDR if it could
-   not be found. If there is no symbolic information for the filename in
-   position 'p', an error message will be given.
-*/
-extern t_addr get_addr_from_position();
+/* Returns the address of the code at position 'p', or ILL_ADDR if it could
+ * not be found. If there is no symbolic information for the filename in
+ * position 'p', an error message will be given.
+ */
+extern t_addr get_addr_from_position(p_position p);
 
-/* extern	add_position_addr(char *filename, struct outname *n);
-   Adds the ('filename','n'->on_desc),'n'->on_valu pair to the mapping information.
-*/
-extern add_position_addr();
+/* Adds the ('filename','n'->on_desc),'n'->on_valu pair to the mapping information.
+ */
+struct outname;
+extern void add_position_addr(char* filename, struct outname* n);
 
-/* extern p_position print_position(t_addr a, int print_function);
-   Prints position 'a' and returns it. If 'print_function' is set,
-   an attempt is made to print the function name as well.
-*/
-extern p_position print_position();
+/* Prints position 'a' and returns it. If 'print_function' is set,
+ * an attempt is made to print the function name as well.
+ */
+extern p_position print_position(t_addr a, int print_function);
+
+#endif
