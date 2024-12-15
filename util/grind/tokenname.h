@@ -9,7 +9,7 @@ token as identified by its symbol
 	char* tn_name;
 };
 
-extern char *symbol2str(int tok);
+extern char* symbol2str(int tok);
 extern void reserve(struct tokenname* resv);
 
 #endif

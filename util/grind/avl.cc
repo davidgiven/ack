@@ -1,6 +1,8 @@
-/* $Id$ */
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <alloc.h>
+#include "avl.h"
 
 /* Implementation of AVL-trees: trees in which the difference in depth
    of the left branch and the right branch is at most one.
@@ -29,7 +31,7 @@ struct avl_node
 struct avl_tree
 {
 	struct avl_node* root; /* root of the avl tree */
-	int (*cmp)(AVLtree* x, AVLtree* y); /* address of comparison routine */
+	int (*cmp)(char* x, char* y); /* address of comparison routine */
 };
 /* create definitions for new_avl_tree() and free_avl_tree() */
 /* STATICALLOCDEF "avl_tree" 2 */
@@ -37,10 +39,11 @@ struct avl_tree
 /* The next routine adds a node to an avl tree. It returns 1 if the
    tree got deeper.
 */
-static int balance_add(ppsc, n, cmp)
-struct avl_node** ppsc; /* address of root */
-char* n; /* user-supplied information */
-int (*cmp)(); /* user-supplied comparison routine */
+static int balance_add(
+    struct avl_node** ppsc /* address of root */,
+    char* n /* user-supplied information */,
+    int (*cmp)(char* x, char* y) /* user-supplied comparison routine */
+)
 {
 	struct avl_node *psc = *ppsc, *qsc, *ssc;
 
@@ -165,7 +168,7 @@ int (*cmp)(); /* user-supplied comparison routine */
 /* extern struct avl_tree *create_avl_tree(int (*cmp)());
    Returns a fresh avl_tree structure.
 */
-struct avl_tree* create_avl_tree(cmp) int (*cmp)(); /* comparison routine */
+struct avl_tree* create_avl_tree(int (*cmp)(char* x, char* y) /* comparison routine */)
 {
 	struct avl_tree* p = new_avl_tree();
 
@@ -176,8 +179,7 @@ struct avl_tree* create_avl_tree(cmp) int (*cmp)(); /* comparison routine */
 /* extern add_to_avl_tree(struct avl_tree *tree, char *n);
    Adds the information indicated by 'n' to the avl_tree indicated by 'tree'
 */
-add_to_avl_tree(tree, n) struct avl_tree* tree; /* tree to be added to */
-char* n; /* information */
+void add_to_avl_tree(struct avl_tree* tree /* tree to be added to */, char* n /* information */)
 {
 	(void)balance_add(&(tree->root), n, tree->cmp);
 }
@@ -186,9 +188,9 @@ char* n; /* information */
    Returns the information in the largest node that still compares <= to 'n',
    or 0 if not present.
 */
-char* find_ngt(tree, n)
-struct avl_tree* tree; /* tree to be searched in */
-char* n; /* information to be compared with */
+char* find_ngt(
+    struct avl_tree* tree /* tree to be searched in */,
+    char* n /* information to be compared with */)
 {
 	struct avl_node *nd = tree->root, *lastnd = 0;
 
@@ -213,9 +215,9 @@ char* n; /* information to be compared with */
    Returns the information in the largest node that still compares >= to 'n',
    or 0 if not present.
 */
-char* find_nlt(tree, n)
-struct avl_tree* tree; /* tree to be searched in */
-char* n; /* information to be compared with */
+char* find_nlt(
+    struct avl_tree* tree /* tree to be searched in */,
+    char* n /* information to be compared with */)
 {
 	struct avl_node *nd = tree->root, *lastnd = 0;
 
@@ -240,9 +242,9 @@ char* n; /* information to be compared with */
    Returns the information in the node that compares equal to 'n',
    or 0 if not present.
 */
-char* find_eq(tree, n)
-struct avl_tree* tree; /* tree to be searched in */
-char* n; /* information to be compared with */
+char* find_eq(
+    struct avl_tree* tree /* tree to be searched in */,
+    char* n /* information to be compared with */)
 {
 	struct avl_node* nd = tree->root;
 

@@ -1,6 +1,8 @@
 /* $Id$ */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 
 #include "position.h"
@@ -9,16 +11,14 @@
 #include "symbol.h"
 #include "misc.h"
 
-static line_positions();
 extern char* dirs[];
-extern FILE* fopen();
 extern FILE* db_out;
 extern t_lineno currline;
 extern int interrupted;
 
-static void mk_filnm(dir, file, newname) char* dir;
-char* file;
-char** newname;
+static void line_positions(p_file file, FILE* f);
+
+static void mk_filnm(char* dir, char* file, char** newname)
 {
 	char* dst = malloc((unsigned)(strlen(dir) + strlen(file) + 2));
 
@@ -33,10 +33,7 @@ char** newname;
 		;
 }
 
-static FILE* open_file(fn, mode, ffn)
-char* fn;
-char* mode;
-char** ffn;
+static FILE* open_file(char* fn, char* mode, char** ffn)
 {
 	FILE* f;
 	char** p;
@@ -59,8 +56,7 @@ char** ffn;
 	return NULL;
 }
 
-lines(file, l1, l2) p_file file;
-int l1, l2;
+void lines(p_file file, int l1, int l2)
 {
 	static p_file last_file;
 	static FILE* last_f;
@@ -116,8 +112,7 @@ int l1, l2;
 	clearerr(f);
 }
 
-static line_positions(file, f) p_file file;
-FILE* f;
+static void line_positions(p_file file, FILE* f)
 {
 	int nl;
 	unsigned int n_alloc = 256;

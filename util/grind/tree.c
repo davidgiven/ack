@@ -1,14 +1,12 @@
 /* $Id$ */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include <alloc.h>
 #include <out.h>
-#if __STDC__
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #include "operator.h"
 #include "position.h"
@@ -21,15 +19,15 @@
 #include "type.h"
 #include "expr.h"
 #include "misc.h"
+#include "lines.h"
+#include "run.h"
 
 extern FILE* db_out;
 t_lineno currline;
 t_lineno listline;
-extern char* strrchr();
 extern int interrupted;
+p_tree h_tree;
 
-#if __STDC__
-/*VARARGS1*/
 p_tree mknode(int op, ...)
 {
 	va_list ap;
@@ -40,19 +38,6 @@ p_tree mknode(int op, ...)
 		int i, na;
 
 		p->t_oper = op;
-#else
-/*VARARGS1*/
-p_tree mknode(va_alist) va_dcl
-{
-	va_list ap;
-	p_tree p = new_tree();
-
-	va_start(ap);
-	{
-		int i, na;
-
-		p->t_oper = va_arg(ap, int);
-#endif
 		switch (p->t_oper)
 		{
 			case OP_NAME:
@@ -102,8 +87,7 @@ void freenode(p_tree p)
 	free_tree(p);
 }
 
-t_addr get_addr_from_node(p)
-p_tree p;
+t_addr get_addr_from_node(p_tree p)
 {
 	t_addr a = ILL_ADDR;
 	p_symbol sym;
@@ -497,8 +481,7 @@ void newfile(struct idf* id)
 
 int in_wheninvoked;
 
-perform(p, a) p_tree p;
-t_addr a;
+void perform(p_tree p, t_addr a)
 {
 	switch (p->t_oper)
 	{
@@ -544,7 +527,7 @@ t_addr a;
 	}
 }
 
-void list_position( p_position pos)
+void list_position(p_position pos)
 {
 	newfile(str2idf(pos->filename, 1));
 	currfile = listfile;

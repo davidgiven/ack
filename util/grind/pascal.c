@@ -70,9 +70,7 @@ static void print_char(int c)
 	fprintf(db_out, (c >= 040 && c < 0177) ? "'%c'" : "chr(%d)", c);
 }
 
-static void print_string(FILE* f,
-char* s,
-int len)
+static void print_string(FILE* f, char* s, int len)
 {
 	char* str = s;
 

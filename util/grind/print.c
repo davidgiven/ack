@@ -55,10 +55,7 @@ static void print_unsigned(p_type tp, long v, char* format)
 	}
 }
 
-static void print_literal(p_type tp,
-long v,
-int compressed,
-char* format)
+static void print_literal(p_type tp, long v, int compressed, char* format)
 {
 	struct literal* lit = tp->ty_literals;
 	int i;

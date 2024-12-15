@@ -2,7 +2,9 @@
 
 /* Symbol handling */
 
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 #include <out.h>
 #include <stb.h>
@@ -19,6 +21,7 @@
 #include "misc.h"
 
 p_symbol currfile, listfile;
+p_symbol h_symbol;
 
 extern FILE* db_out;
 
@@ -92,8 +95,6 @@ p_symbol Lookfromscope(struct idf* id, int class, p_scope sc)
 	}
 	return (p_symbol)0;
 }
-
-extern char* strrchr();
 
 p_symbol add_file(char* s)
 {
@@ -283,7 +284,7 @@ p_symbol identify(p_tree p, int class_set)
 	return sym;
 }
 
-static pr_scopes(sc) p_scope sc;
+static void pr_scopes(p_scope sc)
 {
 	if (!sc)
 		return;
@@ -299,7 +300,7 @@ static pr_scopes(sc) p_scope sc;
 	}
 }
 
-pr_sym(s) p_symbol s;
+void pr_sym(p_symbol s)
 {
 	switch (s->sy_class)
 	{

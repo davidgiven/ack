@@ -64,12 +64,15 @@ typedef struct symbol
 struct scope;
 struct tree;
 struct type;
+struct outname;
 extern p_symbol NewSymbol(char* s, struct scope* scope, int class, struct outname* nam);
 extern p_symbol Lookup(struct idf* id, struct scope* scope, int class);
 extern p_symbol Lookfromscope(struct idf* id, int class, struct scope* sc);
 extern p_symbol add_file(char* s);
 extern p_symbol identify(struct tree* p, int class_set);
 extern void resolve_cross(struct type* tp);
+extern int consistent(struct tree* p, struct scope* sc);
+extern void pr_sym(p_symbol s);
 
 extern int DbRead(char* f);
 

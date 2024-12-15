@@ -483,7 +483,7 @@ static int could_send(struct message_hdr* m, int stop_message)
 		if (m->m_type & M_DB_RUN)
 		{
 			/* run command */
-			CurrentScope = get_scope_from_addr((t_addr)a);
+			CurrentScope = get_scope_from_addr(a);
 			if (!(stop_reason = item_addr_actions(a, type, stop_message)) && (type == 1))
 			{
 				/* no explicit breakpoints at this position.

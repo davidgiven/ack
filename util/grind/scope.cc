@@ -11,6 +11,7 @@
 #include "idf.h"
 #include "type.h"
 #include "symbol.h"
+#include "position.h"
 #include "scope.h"
 #include "avl.h"
 
@@ -28,8 +29,7 @@ static int cmp_starts(char* s1, char* s2)
 }
 
 /*ARGSUSED*/
-void open_scope( p_symbol name,
-int has_activation)
+void open_scope(p_symbol name, int has_activation)
 {
 	p_scope sc = new_scope();
 
@@ -61,7 +61,7 @@ void close_scope(void)
 	CurrentScope = sc->sc_static_encl;
 }
 
-void add_scope_addr( p_scope scope)
+void add_scope_addr(p_scope scope)
 {
 	add_to_avl_tree(ScopeTree, (char*)scope);
 }

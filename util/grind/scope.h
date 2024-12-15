@@ -1,6 +1,8 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
+struct tree;
+
 /* scope structure */
 
 typedef struct scope

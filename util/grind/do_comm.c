@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <alloc.h>
+#include <string.h>
 
 #include "operator.h"
 #include "position.h"
@@ -22,6 +23,9 @@
 #include "run.h"
 #include "print.h"
 #include "itemlist.h"
+#include "lines.h"
+#include "itemlist.h"
+#include "langdep.h"
 
 extern FILE* db_out;
 extern t_lineno listline, currline;
@@ -29,8 +33,6 @@ extern int interrupted;
 extern int stack_offset;
 
 p_tree print_command;
-
-extern void set_bytes();
 
 /*ARGSUSED*/
 void do_noop(p_tree p)
@@ -266,9 +268,6 @@ void do_help(p_tree p)
 
 /* implementation of dump/restore commands */
 
-extern p_tree get_from_item_list();
-extern t_addr get_dump();
-
 struct dump
 {
 	char *globals, *stack;
@@ -277,7 +276,7 @@ struct dump
 
 static struct dump* last_dump;
 
-void do_dump(p)
+void do_dump(p_tree p)
 {
 	struct dump* d = (struct dump*)malloc(sizeof(struct dump));
 
@@ -298,7 +297,7 @@ void do_dump(p)
 	last_dump = d;
 }
 
-void do_restore(p)
+void do_restore(p_tree p)
 {
 	struct dump* d;
 
@@ -403,8 +402,6 @@ void do_which(p_tree p)
 /* ------------------------------------------------------------- */
 
 /* implementation of the list command */
-
-extern t_addr get_addr_from_node();
 
 void do_list(p_tree p)
 {
@@ -523,8 +520,7 @@ void do_file(p_tree p)
 
 /* implementation of stop/when command */
 
-setstop(p_tree p, kind)
-int kind;
+int setstop(p_tree p, int kind)
 {
 	t_addr a = get_addr_from_node(p->t_args[0]);
 
@@ -555,8 +551,7 @@ void do_stop(p_tree p)
 
 /* implementation of the trace command */
 
-settrace(p_tree p, kind)
-int kind;
+int settrace(p_tree p, int kind)
 {
 	t_addr a, e;
 
@@ -596,8 +591,7 @@ void do_trace(p_tree p)
 
 /* implementation of the enable/disable commands */
 
-static able(p_tree p, kind)
-int kind;
+static void able(p_tree p, int kind)
 {
 	if (!p)
 	{
@@ -723,8 +717,7 @@ void do_regs(p_tree p)
 
 static t_addr where_PC;
 
-static int where_entry(
-int num)
+static int where_entry(int num)
 {
 	t_addr* buf;
 	t_addr AB;
@@ -933,7 +926,7 @@ void do_prcomm(p_tree p)
 
 extern int stack_offset;
 
-static void frame_pos( int diff)
+static void frame_pos(int diff)
 {
 	if (stack_offset + diff < 0)
 		diff = -stack_offset;

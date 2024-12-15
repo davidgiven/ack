@@ -1,4 +1,5 @@
-/* $Id$ */
+#ifndef AVL_H
+#define AVL_H
 
 /* AVL-trees: trees in which the difference in depth
    of the left branch and the right branch is at most one.
@@ -19,20 +20,22 @@ typedef struct avl_tree* AVL_tree;
 extern AVL_tree create_avl_tree(int (*cmp)(char* x, char* y));
 
 /* Adds the information indicated by 'n' to the avl_tree indicated by 'tree'.
-*/
-extern void add_to_avl_tree(AVL_tree tree, char *n);
+ */
+extern void add_to_avl_tree(AVL_tree tree, char* n);
 
 /* Returns the information in the largest node that still compares <= to 'n',
    or 0 if not present.
 */
-extern char *find_ngt(AVL_tree tree, char *n);
+extern char* find_ngt(AVL_tree tree, char* n);
 
 /* Returns the information in the largest node that still compares >= to 'n',
    or 0 if not present.
 */
-extern char *find_nlt(AVL_tree tree, char *n);
+extern char* find_nlt(AVL_tree tree, char* n);
 
 /* Returns the information in the node that compares equal to 'n',
    or 0 if not present.
 */
-extern char *find_eq(AVL_tree tree, char *n);
+extern char* find_eq(AVL_tree tree, char* n);
+
+#endif

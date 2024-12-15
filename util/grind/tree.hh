@@ -41,5 +41,7 @@ extern int repeatable(p_tree com);
 extern int in_status(p_tree com);
 extern void newfile(struct idf* id);
 extern void print_node(FILE* f, p_tree p, int top_level);
+extern t_addr get_addr_from_node(p_tree p);
+extern void perform(p_tree p, t_addr a);
 
 #endif

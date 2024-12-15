@@ -46,7 +46,7 @@ extern long get_int(char* buf, long size, int class);
 
 /* Stores the value 'value' of size 'size' in 'buf'.
  */
-extern int put_int(char* buf, long size, long value);
+extern void put_int(char* buf, long size, long value);
 
 /* Returns the real value of size 'size', residing in 'buf'.
    T_INTEGER, T_UNSIGNED, or T_ENUM.
@@ -55,7 +55,7 @@ extern double get_real(char* buf, long size);
 
 /* Stores the value 'value' of size 'size' in 'buf'.
  */
-extern int put_real(char* buf, long size, double value);
+extern void put_real(char* buf, long size, double value);
 
 /* This routine evaluates the conditional expression indicated by p
    and returns 1 if it evaluates to TRUE, or 0 if it could not be

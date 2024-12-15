@@ -1,3 +1,5 @@
+include("util/cmisc/build.lua")
+
 local hh_files = {
     "./tree.hh",
     "./file.hh",
@@ -31,7 +33,7 @@ end
 local c_targets = {}
 for _, f in ipairs(cc_bases) do
     local bf = f:gsub("%..*$", ""):gsub("^$./", "")
-    c_targets[#h_targets+1] = normalrule {
+    c_targets[#c_targets+1] = normalrule {
         name = "cc_header/"..bf,
         ins = { "./make.allocd", "./"..f },
         outleaves = { bf..".c" },
@@ -86,6 +88,10 @@ llgen {
     }
 }
 
+tabgen {
+    name = "tabgen_c",
+    srcs = { "./char.ct" }
+}
 
 cprogram {
 	name = "grind",
@@ -106,6 +112,7 @@ cprogram {
         "./tree.c",
         "./type.c",
         "+tokenname_c",
+        "+tabgen_c",
         matching(filenamesof("+commands_llgen"), "%.c$"),
         matching(filenamesof("+db_symtab_llgen"), "%.c$"),
         matching(filenamesof("+ops"), "%.c$"),
@@ -113,7 +120,9 @@ cprogram {
 	},
 	deps = {
 		"modules/src/data+lib",
+		"modules/src/em_data+lib",
 		"modules/src/string+lib",
+		"modules/src/object+lib",
 		"modules/src/system+lib",
         "+commands_llgen",
         "+db_symtab_llgen",
@@ -121,22 +130,22 @@ cprogram {
         "./class.h",
         "./expr.h",
         "./idf.h",
+        "./itemlist.h",
         "./langdep.h",
+        "./lines.h",
         "./message.h",
         "./misc.h",
         "./operator.h",
         "./position.h",
+        "./print.h",
         "./rd.h",
         "./scope.h",
         "./token.h",
         "./tokenname.h",
-        "./print.h",
-        "./itemlist.h",
         "h+emheaders",
         "modules+headers",
         "modules/src/alloc+lib",
         "modules/src/idf+lib",
-		"modules/src/em_data+lib",
         h_targets,
 	}
 }

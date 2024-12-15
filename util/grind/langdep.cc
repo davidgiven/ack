@@ -1,6 +1,10 @@
 /* $Id$ */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <alloc.h>
+#include "position.h"
 #include "langdep.h"
 
 struct langlist

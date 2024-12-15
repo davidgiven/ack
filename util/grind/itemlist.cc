@@ -9,6 +9,8 @@
 #include "operator.h"
 #include "misc.h"
 #include "itemlist.h"
+#include "expr.h"
+#include "do_comm.h"
 
 extern FILE* db_out;
 extern int db_ss;
@@ -32,8 +34,7 @@ static struct itemlist item_list;
 static int stop_reason;
 int item_count;
 
-static int in_item_list(p)
-p_tree p;
+static int in_item_list(p_tree p)
 {
 	p_item i = item_list.il_first;
 
@@ -46,17 +47,14 @@ p_tree p;
 	return 0;
 }
 
-static pr_item(i) p_item i;
+static void pr_item(p_item i)
 {
 	fprintf(db_out, "(%d)\t", i->i_itemno);
 	print_node(db_out, i->i_node, 0);
 	fputs(i->i_disabled ? " (disabled)\n" : "\n", db_out);
 }
 
-int item_addr_actions(
-t_addr a,
-int mess_type,
-int may_stop)
+int item_addr_actions(t_addr a, int mess_type, int may_stop)
 {
 	/* Perform actions associated with position 'a', and return stop_reason
 	   if we must stop there, and 0 if not.
@@ -134,7 +132,7 @@ void handle_displays(void)
 	}
 }
 
-add_to_item_list(p) p_tree p;
+void add_to_item_list(p_tree p)
 {
 	p_item i;
 
@@ -217,8 +215,7 @@ void remove_from_item_list(int n)
 	freenode(p);
 }
 
-p_tree get_from_item_list(n)
-int n;
+p_tree get_from_item_list(int n)
 {
 	p_item i = item_list.il_first;
 
@@ -239,7 +236,7 @@ int n;
 	return 0;
 }
 
-able_item(n, kind) int n;
+void able_item(int n, int kind)
 {
 	p_item i = item_list.il_first;
 	p_tree p;
@@ -289,7 +286,7 @@ able_item(n, kind) int n;
 	}
 }
 
-void print_items(void )
+void print_items(p_tree t)
 {
 	p_item i = item_list.il_first;
 
@@ -299,7 +296,7 @@ void print_items(void )
 	}
 }
 
-void perform_items(void )
+void perform_items(void)
 {
 	p_item i = item_list.il_first;
 

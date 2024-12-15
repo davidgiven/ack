@@ -125,7 +125,7 @@ extern void init_types(void);
 extern p_type subrange_type(int A, int* base_index, long c1, long c2, int* result_index);
 extern p_type array_type(p_type bound_type, p_type el_type);
 extern p_type* tp_lookup(int* type_index);
-extern long param_size(p_type v, int t);
+extern long param_size(int v, p_type t);
 extern long compute_size(p_type tp, char* AB);
 extern void clean_tp_tab(void);
 extern void end_literal(p_type tp, long maxval);

@@ -21,8 +21,7 @@ static struct outname *f_start, *f_end;
    Returns a pointer to a structure containing the source position of the code
    at address 't'.  0 is returned if no source position could be found.
 */
-p_position get_position_from_addr(
-t_addr t)
+p_position get_position_from_addr(t_addr t)
 {
 	static t_position retval;
 	struct outname* p;
@@ -90,7 +89,7 @@ p_position p;
 /* extern add_position_addr(char *filename, struct outname *n);
    Adds the ('filename','lineno'),'t' pair to the mapping information.
 */
-void add_position_addr(char* filename, struct outname* n) 
+void add_position_addr(char* filename, struct outname* n)
 {
 	static char* lastfile = 0;
 	static p_file lastmap = 0;

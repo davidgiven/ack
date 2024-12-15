@@ -22,6 +22,7 @@
 #include "rd.h"
 #include "misc.h"
 #include "tree.h"
+#include "scope.h"
 
 static char* DbPtr; /* current pointer in db string */
 static int AllowName; /* set if NAME legal at this point */
@@ -544,7 +545,7 @@ param_list(p_type t;)
   	type(&(p->par_type), (int *) 0, (p_symbol) 0) ';'
 			{ p->par_off = t->ty_nbparams;
 			  t->ty_nbparams += 
-				param_size(p->par_type, p->par_kind);
+				param_size(p->par_kind, p->par_type);
 			  p++;
 			}
   ]*

@@ -2,12 +2,16 @@
 
 /* Routines to create type structures */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <alloc.h>
 #include <assert.h>
 
 #include "idf.h"
 #include "type.h"
 #include "symbol.h"
+#include "position.h"
 #include "scope.h"
 #include "langdep.h"
 #include "expr.h"
@@ -18,6 +22,8 @@ p_type uint_type, uchar_type, ushort_type, ulong_type;
 p_type void_type;
 p_type float_type, double_type;
 p_type string_type, address_type;
+
+p_type h_type;
 
 long int_size = sizeof(int), char_size = 1, short_size = sizeof(short), long_size = sizeof(long),
      pointer_size = sizeof(char*);
@@ -155,8 +161,7 @@ p_type subrange_type(int A, int* base_index, long c1, long c2, int* result_index
 	return p;
 }
 
-static long nel(tp)
-p_type tp;
+static long nel(p_type tp)
 {
 	switch (tp->ty_class)
 	{
@@ -215,9 +220,7 @@ p_type array_type(p_type bound_type, p_type el_type)
 	return tp;
 }
 
-p_type basic_type(fund, size)
-int fund;
-long size;
+p_type basic_type(int fund, long size)
 {
 	p_type p = new_type();
 
@@ -392,7 +395,7 @@ void end_literal(p_type tp, long maxval)
 		bool_type = tp;
 }
 
-long param_size(p_type v, int t)
+long param_size(int v, p_type t)
 {
 	if (v == 'i' || v == 'v')
 	{
@@ -430,7 +433,7 @@ void add_param_type(int v, p_symbol s)
 	prc_type->ty_params[prc_type->ty_nparams - 1].par_type = s->sy_type;
 	prc_type->ty_params[prc_type->ty_nparams - 1].par_kind = v;
 	prc_type->ty_params[prc_type->ty_nparams - 1].par_off = s->sy_name.nm_value;
-	prc_type->ty_nbparams += param_size(s->sy_type, v);
+	prc_type->ty_nbparams += param_size(v, s->sy_type);
 }
 
 /* Compute the size of a parameter of dynamic size

@@ -16,6 +16,7 @@
 #include "type.h"
 #include "langdep.h"
 #include "misc.h"
+#include "run.h"
 
 static char* usage = "Usage: %s [<ack.out>] [<a.out>]";
 char* progname;
@@ -28,6 +29,7 @@ int debug;
 extern struct tokenname tkidf[];
 extern int eof_seen;
 extern int interrupted;
+p_file h_file;
 
 static struct tokenname shorts[]
     = { { LIST, "l" },  { CONT, "c" },    { STEP, "s" },  { NEXT, "n" },  { DELETE, "d" },
