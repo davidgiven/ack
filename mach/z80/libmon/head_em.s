@@ -1,4 +1,4 @@
-.define EARRAY,ERANGE,EILLINS,EILLSIZE,ECASE,EMON,EHEAP
+.define EARRAY,ERANGE,EILLINS,EILLSIZE,ECASE,EBADMON,EHEAP
 .define hol0,trapproc,trpim,argv,hp,.reghp,envp,begbss,ignmask
 .define savebc,savede,savehl,saveix,saveaf,saveiy,ebadmon
 .define WRITE,EXIT
@@ -13,7 +13,7 @@
    EILLINS=18
    EILLSIZE=19
    ECASE=20
-   EMON=25
+   EBADMON=25
    ebadmon=25
 
 

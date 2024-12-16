@@ -14,11 +14,11 @@ unimpld:		! used in dispatch table to
 	ret
 
 e.mon:
-	ld hl,EMON
+	ld hl,EBADMON
 	jr 9b
 e.rck:
 	push af
-	ld a,(ignmask)
+	ld a,(.ignmask)
 	bit 1,a
 	jr nz,8f
 	ld hl,ERANGE

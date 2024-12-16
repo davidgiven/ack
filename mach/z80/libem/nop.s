@@ -1,3 +1,4 @@
+#
 .define .nop
 .sect .text
 .sect .rom
@@ -26,7 +27,7 @@
 	push de
 	ld de,1
 	push de
-	call WRITE
+	call _write
 	pop de
 	pop de
 	pop de

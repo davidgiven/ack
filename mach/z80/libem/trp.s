@@ -19,8 +19,8 @@
 	push hl		! save error no on stack
 	push bc
 	push ix
-	push hl		! test bit "error no" of ignmask
-	ld hl,(ignmask)
+	push hl		! test bit "error no" of .ignmask
+	ld hl,(.ignmask)
 	ex (sp),hl
 	push hl
 	ld hl,2
@@ -43,7 +43,7 @@
 	push iy
 	ld iy,2
 	push iy
-	call WRITE
+	call _write
 	pop iy
 	pop iy
 	pop iy
