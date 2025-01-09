@@ -3,6 +3,7 @@ include("util/ncgg/build.lua")
 definerule("build_ncg",
 	{
 		arch = { type="string" },
+		deps = { type="table", default={} },
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
@@ -22,12 +23,16 @@ definerule("build_ncg",
 				"mach/proto/ncg/types.h",
 				"mach/proto/ncg/xmach.h",
 				"mach/"..e.arch.."/ncg+headers",
-			}
+			},
+			vars = {
+				["+cflags"] = { "-I." },
+			},
 		}
 
 		local tables = ncgg {
 			name = e.name.."/tables",
-			srcs = { "mach/"..e.arch.."/ncg/table" }
+			srcs = { "mach/"..e.arch.."/ncg/table" },
+			deps = e.deps
 		}
 
 		return cprogram {
@@ -50,6 +55,9 @@ definerule("build_ncg",
 				"mach/proto/ncg/subr.c",
 				"mach/proto/ncg/var.c",
 				matching(filenamesof(tables), "%.c$")
+			},
+			vars = {
+				["+cflags"] = { "-I." },
 			},
 			deps = {
 				"h+emheaders",

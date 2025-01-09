@@ -680,7 +680,7 @@ ext_w  "ext.w"	D_REG+LOCAL+D_REG4:rw:cc		cost(2,2).
 jmp		address+control4			cost(2,0).
 jsr		address+control4 kills :cc d0 d1 d2 a0 a1 cost(2,3).
 lea		address+control4:ro, A_REG+areg:wo	cost(2,0).
-lsl_l  "lsl.l"	shconreg:ro,	D_REG4:rw:cc		cost(2,4).
+lsl_l  "lsl.l"	shconreg:ro,	D_REG:rw:cc		cost(2,4).
 /*
 lsl   "lsl #1,"	memalt2:rw:cc				cost(2,4).
 */
@@ -3988,6 +3988,7 @@ pat sli $1==4
 with shconreg DD_REG4
     gen asl_l %1, %2	yields	%2
 
+#if WORD_SIZE==4
 pat sli $1==8
 with DD_REG4 DD_REG4 DD_REG4
     uses AA_REG = %3		/* no 4th DD_REG */
@@ -4024,6 +4025,7 @@ pat loc sli ($1&32)!=0 && $2==8
 with any4 DD_REG4
     uses reusing %1, DD_REG = {bconst, $1&31}
     gen lsl_l %a, %2	yields	{zero_const, 0} %2
+#endif
 
 #if WORD_SIZE==2
 pat sri $1==2
@@ -4035,6 +4037,7 @@ pat sri $1==4
 with shconreg DD_REG4
     gen asr_l %1, %2	yields	%2
 
+#if WORD_SIZE==4
 pat sri $1==8
 with DD_REG4 DD_REG4 DD_REG4
     uses AA_REG = %2		/* no 4th DD_REG */
@@ -4071,6 +4074,7 @@ pat loc sri ($1&32)!=0 && $2==8
 with DD_REG4 any4
     uses reusing %2, DD_REG = {bconst, $1&31}
     gen asr_l %a, %1	yields	%1	leaving loc 4 loc 8 cii
+#endif
 
 /************************************************
  * Group 4: unsigned arithmetic.		*
@@ -4175,6 +4179,7 @@ pat sru $1==4
 with shconreg DD_REG4
     gen lsr_l %1, %2	yields	%2
 
+#if WORD_SIZE==4
 pat sru $1==8
 with DD_REG4 DD_REG4 DD_REG4
     uses AA_REG = %2		/* no 4th DD_REG */
@@ -4211,6 +4216,7 @@ pat loc sru ($1&32)!=0 && $2==8
 with DD_REG4 any4
     uses reusing %2, DD_REG = {bconst, $1&31}
     gen lsr_l %a, %1	yields	%1 {zero_const, 0}
+#endif
 
 /************************************************
  * Group 5: floating point arithmetic		*
@@ -5143,6 +5149,7 @@ pat rol $1==4
 with shconreg DD_REG4
     gen rol_l %1, %2	yields	%2
 
+#if WORD_SIZE==4
 pat rol $1==8
 with DD_REG4 DD_REG4 DD_REG4
     uses AA_REG, AA_REG		/* no 4th DD_REG */
@@ -5186,6 +5193,7 @@ with DD_REG4 DD_REG4
 			yields	%2 %1
 pat loc rol ($1&63)==32 && $2==8	leaving exg 4
 pat loc rol ($1&32)!=0 && $2==8		leaving loc (0-$1)&31 ror 8
+#endif
 
 #if WORD_SIZE==2
 pat ror $1==2
@@ -5197,6 +5205,7 @@ pat ror $1==4
 with shconreg DD_REG4
     gen ror_l %1, %2	yields	%2
 
+#if WORD_SIZE==4
 pat ror $1==8
 with DD_REG4 DD_REG4 DD_REG4
     uses AA_REG, AA_REG		/* no 4th DD_REG */
@@ -5240,7 +5249,7 @@ with DD_REG4 DD_REG4
 			yields	%2 %1
 pat loc ror ($1&63)==32 && $2==8	leaving exg 4
 pat loc ror ($1&32)!=0 && $2==8		leaving loc (0-$1)&31 rol 8
-
+#endif
 
 
 
@@ -6725,6 +6734,7 @@ pat cmu zge $1==WORD_SIZE		call cmuzxx("bcc","bls")
 pat cmu zgt $1==WORD_SIZE		call cmuzxx("bhi","bcs")
 
 
+#if WORD_SIZE==4
 proc cmx8txx example cmi tlt
 with exact DD_REG4 DD_REG4 any4 any4
     uses reusing %3, DD_REG4 = %3
@@ -6772,6 +6782,7 @@ pat cmu zlt $1==8			call cmx8zxx("bcs","bhi")
 pat cmu zle $1==8			call cmx8zxx("bls","bcc")
 pat cmu zge $1==8			call cmx8zxx("bcc","bls")
 pat cmu zgt $1==8			call cmx8zxx("bhi","bcs")
+#endif
 
 
 #if TBL68881
@@ -7013,6 +7024,7 @@ uses reusing %1,DD_REG4
 pat loc loc ciu $1==$2	/* skip this */
 pat loc loc cui $1==$2	/* skip this */
 
+#if WORD_SIZE==4
 pat loc loc cii $1==4 && $2==8
 with exact test_set1+test_set2
 			yields	%1 {zero_const, 0}
@@ -7039,7 +7051,7 @@ pat loc loc cii $1==8 && $2==4		leaving asp 4
 pat loc loc ciu $1==8 && $2==4		leaving asp 4
 pat loc loc cui $1==8 && $2==4		leaving asp 4
 pat loc loc cuu $1==8 && $2==4		leaving asp 4
-
+#endif
 
 /* The following rules should be handled by the peephole optimizer, I think */
 
