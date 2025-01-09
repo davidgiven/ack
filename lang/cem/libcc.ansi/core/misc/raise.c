@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <unistd.h>
 
 #if ACKCONF_WANT_EMULATED_RAISE
 

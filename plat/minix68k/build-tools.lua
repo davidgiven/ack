@@ -2,12 +2,15 @@ include("plat/build.lua")
 
 build_as {
 	name = "as",
-	arch = "m68020",
+	arch = "m68k2",
 }
 
 build_ncg {
 	name = "ncg",
-	arch = "m68020",
+	arch = "m68k2",
+	deps = {
+		"mach/m68020/ncg/table"
+	}
 }
 
 return installable {

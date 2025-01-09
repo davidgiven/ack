@@ -6,6 +6,8 @@
 #ifndef _SIGNAL_H
 #define _SIGNAL_H
 
+#include <sys/types.h>
+
 /* Here are types that are closely associated with signal handling. */
 typedef int sig_atomic_t;
 
@@ -97,6 +99,7 @@ struct sigaction {
 
 /* Function Prototypes. */
 _PROTOTYPE( int raise, (int _sig)					);
+_PROTOTYPE( int kill, (pid_t _pid, int _sig)				);
 
 #ifdef _POSIX_SOURCE
 _PROTOTYPE( int kill, (pid_t _pid, int _sig)				);

@@ -23,6 +23,10 @@
 #define ACKCONF_WANT_STANDARD_SIGNALS 1
 #endif
 
+#ifndef ACKCONF_WANT_SYS_ERRNO_H
+#define ACKCONF_WANT_SYS_ERRNO_H 0
+#endif
+
 #ifndef ACKCONF_WANT_TERMIOS
 /* Don't compile termios-using functions unless the plat explicitly asks for it. */
 #define ACKCONF_WANT_TERMIOS 0

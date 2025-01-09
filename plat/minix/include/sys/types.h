@@ -7,15 +7,7 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-/* The type size_t holds the result of the size_of operator.  This type is
- * 'unsigned int', in order to be compatible with the old library (f.i. the
- * argument of malloc was an unsigned int, and is now a size_t).  This means
- * that a 70K array can not be allocated.
- */
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef unsigned int size_t;	/* type returned by sizeof */
-#endif
+#include <stdint.h>
 
 #ifndef _TIME_T
 #define _TIME_T
@@ -41,7 +33,6 @@ typedef char	       gid_t;	/* group id */
 typedef unsigned short ino_t;	/* i-node number */
 typedef short	      mode_t;	/* mode number within an i-node */
 typedef char	     nlink_t;	/* number-of-links field within an i-node */
-typedef long	       off_t;	/* offsets within a file */
 typedef int	       pid_t;	/* type for pids (must be signed) */
 typedef short	       uid_t;	/* user id */
 typedef long	      zone_t;	/* holds a zone number */

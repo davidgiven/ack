@@ -17,8 +17,8 @@
  * file is included in an ordinary user program, EPERM has the value ( 1).
  */
 
-#ifndef _ERRNO_H		/* check if <errno.h> is already included */
-#define _ERRNO_H		/* it is not included; note that fact */
+#ifndef _SYS_ERRNO_H		/* check if <errno.h> is already included */
+#define _SYS_ERRNO_H		/* it is not included; note that fact */
 
 /* Now define _SIGN as "" or "-" depending on _SYSTEM. */
 #ifdef _SYSTEM

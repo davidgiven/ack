@@ -7,5 +7,6 @@
 #define _ACK_PLAT_H
 
 #define ACKCONF_WANT_EMULATED_TIME 0
+#define ACKCONF_WANT_SYS_ERRNO_H 1
 
 #endif

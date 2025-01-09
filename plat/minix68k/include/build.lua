@@ -1,7 +1,11 @@
 include("plat/build.lua")
 
-headermap = {}
-packagemap = {}
+headermap = {
+	"plat/minix/include+headers",
+}
+packagemap = {
+	"plat/minix/include+pkg",
+}
 
 local function addheader(h)
 	headermap[h] = "./"..h
@@ -9,7 +13,6 @@ local function addheader(h)
 end
 
 addheader("ack/plat.h")
-addheader("sys/types.h")
 addheader("minix/config.h")
 addheader("a.out.h")
 
@@ -22,5 +25,3 @@ installable {
 	name = "pkg",
 	map = packagemap
 }
-
-

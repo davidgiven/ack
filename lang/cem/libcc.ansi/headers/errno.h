@@ -6,6 +6,10 @@
 #ifndef _ERRNO_H
 #define	_ERRNO_H
 
+#if ACKCONF_WANT_SYS_ERRNO_H
+#include <sys/errno.h>
+#else
+
 /* These values are defined by the ANSI standard. */
 
 #define EDOM    33
@@ -49,5 +53,7 @@
 #define	EPIPE		32	/* Broken pipe */
  
 extern int errno;
+
+#endif
 
 #endif

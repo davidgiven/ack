@@ -10,6 +10,8 @@
 #ifndef _FCNTL_H
 #define _FCNTL_H
 
+#include <sys/types.h>
+
 /* These values are used for cmd in fcntl().  POSIX Table 6-1.  */
 #define F_DUPFD            0	/* duplicate file descriptor */
 #define F_GETFD	           1	/* get file descriptor flags */

@@ -9,16 +9,12 @@
 #ifndef _TIME_H
 #define _TIME_H
 
+#include <sys/types.h>
+#include <stddef.h>
+
 #define CLOCKS_PER_SEC	60	/* MINIX always uses 60 Hz, even in Europe */
 #ifdef _POSIX_SOURCE
 #define CLK_TCK    	CLOCKS_PER_SEC
-#endif
-
-#define NULL    ((void *)0)
-
-#ifndef	_SIZE_T
-#define	_SIZE_T
-typedef unsigned int size_t;	/*  type returned by sizeof */
 #endif
 
 #ifndef _TIME_T

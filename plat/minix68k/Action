@@ -1,6 +1,0 @@
-name "Atari ST Minix systemcall library"
-dir libsys
-end
-name "Atari ST Minix conversion program from ack.out --> Minix ST a.out"
-dir cv
-end
