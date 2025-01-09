@@ -5,19 +5,19 @@
 
 #if ACKCONF_WANT_MALLOC
 
-block_t __mem_root = { &__mem_root, 0 };
-block_t* __mem_freelist = &__mem_root;
+memblock_t __mem_root = { &__mem_root, 0 };
+memblock_t* __mem_freelist = &__mem_root;
 
 /* Pulls more memory from the system. */
 
-static block_t* brkmore(size_t nb)
+static memblock_t* brkmore(size_t nb)
 {
 	uintptr_t bytes;
-	block_t* p;
+	memblock_t* p;
 
 	if (nb < BRKSIZE)
 		nb = BRKSIZE;
-	bytes = nb * sizeof(block_t);
+	bytes = nb * sizeof(memblock_t);
 
 	/* Danger, will robinson! sbrk's parameter is *signed*... but malloc() takes a
 	 * size_t. */
@@ -26,7 +26,7 @@ static block_t* brkmore(size_t nb)
 		return NULL;
 
 	p = sbrk(bytes);
-	if (p == (block_t*)-1)
+	if (p == (memblock_t*)-1)
 		return NULL;
 
 	/* Add it to the free list by pretending it's a used block and freeing it. */
@@ -38,8 +38,8 @@ static block_t* brkmore(size_t nb)
 
 void* malloc(size_t size)
 {
-	block_t* p;
-	block_t* prev;
+	memblock_t* p;
+	memblock_t* prev;
 	size_t nblocks;
 
 	/* Add on space for the header; make sure we allocate a round number
@@ -47,7 +47,7 @@ void* malloc(size_t size)
 	nblocks = BLOCKCOUNT(size);
 	if (nblocks < size)
 		return NULL;
-	nblocks /= sizeof(block_t);
+	nblocks /= sizeof(memblock_t);
 
 	prev = __mem_freelist;
 	p = prev->next;
@@ -88,8 +88,8 @@ void* malloc(size_t size)
 
 void free(void* ptr)
 {
-	block_t* h = BLOCKOF(ptr);
-	block_t* p;
+	memblock_t* h = BLOCKOF(ptr);
+	memblock_t* p;
 
 	if (!ptr)
 		return;
