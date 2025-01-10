@@ -1,9 +1,8 @@
-#include <lib.h>
-#define chdir	_chdir
+#include "lib.h"
+#define chdir _chdir
 #include <unistd.h>
 
-PUBLIC int chdir(name)
-char *name;
+PUBLIC int chdir(char* name)
 {
-  return(_callm3(FS, CHDIR, 0, name));
+	return (_callm3(FS, CHDIR, 0, name));
 }

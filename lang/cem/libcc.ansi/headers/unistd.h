@@ -81,10 +81,11 @@ struct timezone
 
 extern char** environ;
 
-/* Implemented system calls */
+/* System calls (not all of which are implemented) */
 
 extern int access(const char* pathname, int mode);
 extern int brk(void* ptr);
+extern int chdir(const char* path);
 extern int close(int d);
 extern int creat(const char* path, mode_t mode);
 extern int dup(int oldfd);
@@ -111,7 +112,7 @@ extern unsigned int alarm(unsigned int seconds);
 extern pid_t wait(int* wstatus);
 extern sighandler_t signal(int signum, sighandler_t handler);
 extern ssize_t read(int fd, void* buffer, size_t count);
-extern ssize_t write(int fd, void* buffer, size_t count);
+extern ssize_t write(int fd, const void* buffer, size_t count);
 extern void _exit(int);
 extern void* sbrk(int increment);
 

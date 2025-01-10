@@ -1,11 +1,11 @@
 /* The <ansi.h> header checks whether the compiler claims conformance to ANSI
- * Standard C. If so, the symbol _ANSI is defined as 1, otherwise it is 
+ * Standard C. If so, the symbol _ANSI is defined as 1, otherwise it is
  * defined as 0.  Based on the result, a macro
  *
  *	_PROTOTYPE(function, params)
  *
  * is defined.  This macro expands in different ways, generating either
- * ANSI Standard C prototypes or old-style K&R (Kernighan & Ritchie) 
+ * ANSI Standard C prototypes or old-style K&R (Kernighan & Ritchie)
  * prototypes, as needed.  Finally, some programs use _CONST, _VOIDSTAR etc
  * in such a way that they are portable over both ANSI and K&R compilers.
  * The appropriate macros are defined here.
@@ -18,12 +18,12 @@
  * Some half-ANSI compilers define it as 0.  Get around this here.
  */
 
-#define _ANSI              0	/* 0 if compiler is not ANSI C, 1 if it is */
+#define _ANSI 0 /* 0 if compiler is not ANSI C, 1 if it is */
 
-#ifdef __STDC__			/* __STDC__ defined for (near) ANSI compilers*/
-#if __STDC__ == 1		/* __STDC__ == 1 for conformant compilers */
-#undef _ANSI			/* get rid of above definition */
-#define _ANSI              1	/* _ANSI = 1 for ANSI C compilers */
+#ifdef __STDC__ /* __STDC__ defined for (near) ANSI compilers*/
+#if __STDC__ == 1 /* __STDC__ == 1 for conformant compilers */
+#undef _ANSI /* get rid of above definition */
+#define _ANSI 1 /* _ANSI = 1 for ANSI C compilers */
 #endif
 #endif
 
@@ -33,21 +33,21 @@
  */
 
 #if _ANSI
-#define	_PROTOTYPE(function, params)	function params
-#define	_VOIDSTAR	void *
-#define	_VOID		void
-#define	_CONST		const
-#define	_VOLATILE	volatile
-#define _SIZET		size_t
+#define _PROTOTYPE(function, params) function params
+#define _VOIDSTAR                    void*
+#define _VOID                        void
+#define _CONST                       const
+#define _VOLATILE                    volatile
+#define _SIZET                       size_t
 
 #else
 
-#define	_PROTOTYPE(function, params)	function()
-#define	_VOIDSTAR	void *
-#define	_VOID		void
-#define	_CONST
-#define	_VOLATILE
-#define _SIZET		int
+#define _PROTOTYPE(function, params) function()
+#define _VOIDSTAR                    void*
+#define _VOID                        void
+#define _CONST
+#define _VOLATILE
+#define _SIZET int
 
 #endif /* _ANSI */
 

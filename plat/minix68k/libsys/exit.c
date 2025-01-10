@@ -1,8 +1,8 @@
-#include <lib.h>
+#include "lib.h"
+#include <unistd.h>
 
-PUBLIC int exit(status)
-int status;
+PUBLIC int exit(int status)
 {
-  _cleanup();
-  _exit(status);
+	_cleanup();
+	_exit(status);
 }

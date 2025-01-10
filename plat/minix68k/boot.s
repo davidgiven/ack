@@ -74,10 +74,12 @@ hol0:
 	.data4	endbss
 .limhp:
 	.data4	endbss
-.trppc:
-	.data4	0
 .trpim:
 	.data2	0
+
+.define .trppc, .ignmask
+.comm .trppc, 4
+.comm .ignmask, 4
 
 
 	.sect .bss

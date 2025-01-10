@@ -1,10 +1,9 @@
-#include <lib.h>
+#include "lib.h"
 #define stime _stime
 #include <unistd.h>
 
-PUBLIC int stime(top)
-long *top;
+PUBLIC int stime(long* top)
 {
-  _M.m2_l1 = *top;
-  return(_callx(FS, STIME));
+	_M.m2_l1 = *top;
+	return (_callx(FS, STIME));
 }

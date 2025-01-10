@@ -17,7 +17,7 @@ void _sys_write_tty(char c)
 	cpm_conout(c);
 }
 
-ssize_t write(int fd, void* buffer, size_t count)
+ssize_t write(int fd, const void* buffer, size_t count)
 {
 	const uint8_t* bbuffer = buffer;
 	struct FCBE* fcbe = &__fd[fd];

@@ -1,12 +1,13 @@
-#include <lib.h>
-#define getppid	_getppid
+#include "lib.h"
+#define getppid _getppid
 #include <unistd.h>
 
-PUBLIC int getppid()
+PUBLIC int getppid(void)
 {
-  int p;
+	int p;
 
-  p = _callm1(MM, GETPID, 0, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);
-  if (p < 0) return(p);
-  return(_M.m2_i1);
+	p = _callm1(MM, GETPID, 0, 0, 0, NIL_PTR, NIL_PTR, NIL_PTR);
+	if (p < 0)
+		return (p);
+	return (_M.m2_i1);
 }

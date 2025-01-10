@@ -1,9 +1,8 @@
-#include <lib.h>
-#define chroot	_chroot
+#include "lib.h"
+#define chroot _chroot
 #include <unistd.h>
 
-PUBLIC int chroot(name)
-_CONST char *name;
+PUBLIC int chroot(const char* name)
 {
-  return(_callm3(FS, CHROOT, 0, name));
+	return (_callm3(FS, CHROOT, 0, name));
 }

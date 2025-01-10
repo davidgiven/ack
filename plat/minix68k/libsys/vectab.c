@@ -3,8 +3,8 @@
  * the function is called within the user address space using _vectab[].
  */
 
-#include <lib.h>
+#include "lib.h"
 #include <signal.h>
 
 /* array of functions to catch signals */
-_PROTOTYPE( void (*_vectab[_NSIG]), (int));
+_PROTOTYPE(void(*_vectab[_NSIG]), (int));

@@ -60,6 +60,7 @@ acklibrary {
 		"./head_em.s",
 		"./_ioctl.c",
 		"./ioctl.s",
+		"./isatty.c",
 		"./_kill.c",
 		"./kill.s",
 		"./_link.c",
@@ -132,6 +133,7 @@ acklibrary {
 	deps = {
 		"lang/cem/libcc.ansi/headers+headers",
 		"plat/minix68k/include+headers",
+		"./lib.h",
 	},
     vars = {
         plat = "minix68k"
