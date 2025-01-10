@@ -34,6 +34,7 @@ linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
 linuxppc      produces ELF executables for PowerPC Linux systems
 linuxmips     produces ELF executables for little-endian MIPS32r2 Linux systems
+minix68k      produces Minix executables for m68000 Minix systems
 cpm           produces i80 CP/M .COM files
 rpi           produces Raspberry Pi GPU binaries
 pdpv7         produces PDP/11 V7 Unix binaries
