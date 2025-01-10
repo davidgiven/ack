@@ -82,7 +82,7 @@ end
 name cv
 	from .out
 	to .cv
-	program {EM}/lib.bin/minixST/cv
+	program {EM}/lib/ack/{PLATFORM}/cv
 	args < >
 	outfile a.out
 end

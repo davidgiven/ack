@@ -18,6 +18,7 @@ return installable {
 	map = {
 		["$(PLATDEP)/minix68k/as"] = "+as",
 		["$(PLATDEP)/minix68k/ncg"] = "+ncg",
+		["$(PLATDEP)/minix68k/cv"] = "plat/minix68k/cv+cv",
 		["$(PLATIND)/descr/minix68k"] = "./descr",
 		"util/opt+pkg",
 	}
