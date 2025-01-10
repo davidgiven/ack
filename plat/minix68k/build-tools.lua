@@ -13,7 +13,6 @@ build_ncg {
 	}
 }
 
-
 return installable {
 	name = "tools",
 	map = {

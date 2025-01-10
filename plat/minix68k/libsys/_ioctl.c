@@ -1,12 +1,10 @@
 #include "lib.h"
+#include <stdint.h>
 #include <minix/com.h>
 #define ioctl _ioctl
 #include <sgtty.h>
 
-PUBLIC int ioctl(fd, request, argp)
-int fd;
-int request;
-struct sgttyb* argp;
+PUBLIC int ioctl(int fd, int request, struct sgttyb* argp)
 {
 	int n;
 	long erase, kill, intr, quit, xon, xoff, eof, brk, speed;
@@ -65,7 +63,7 @@ struct sgttyb* argp;
 			 */
 
 		case TIOCFLUSH:
-			_M.TTY_FLAGS = (int /* kludge */)argp;
+			_M.TTY_FLAGS = (int /* kludge */)(intptr_t)argp;
 			return _callx(FS, IOCTL);
 
 			/* decided to pop argp in the ADDRESS field. Left TIOCFLUSH a special case

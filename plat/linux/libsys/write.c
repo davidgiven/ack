@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "libsys.h"
 
-int write(int fd, void* buffer, size_t count)
+int write(int fd, const void* buffer, size_t count)
 {
 	return _syscall(__NR_write, fd, (quad) buffer, count);
 }

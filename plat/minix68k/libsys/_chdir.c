@@ -2,7 +2,7 @@
 #define chdir _chdir
 #include <unistd.h>
 
-PUBLIC int chdir(char* name)
+PUBLIC int chdir(const char* name)
 {
 	return (_callm3(FS, CHDIR, 0, name));
 }

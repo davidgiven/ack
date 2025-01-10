@@ -91,4 +91,7 @@ struct flock
 #define _POSIX_CHOWN_RESTRICTED
 #define _POSIX_VDISABLE '\t' /* can't set any control char to tab */
 
+extern long fpathconf(int fd, int name);
+extern long pathconf(const char* path, int name);
+
 #endif /* _FCNTL_H */

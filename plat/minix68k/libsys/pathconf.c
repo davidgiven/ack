@@ -1,15 +1,15 @@
 /* POSIX pathconf (Sec. 5.7.1) 		Author: Andy Tanenbaum */
 
 #include "lib.h"
-#include <sys/types.h>
 #define open _open
+#define close _close
+#include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
-#define close _close
+#include <unistd.h>
 
-PUBLIC long pathconf(path, name)
-char* path; /* name of file being interrogated */
-int name; /* property being inspected */
+PUBLIC long pathconf(
+    const char* path /* name of file being interrogated */, int name /* property being inspected */)
 {
 	/* POSIX allows some of the values in <limits.h> to be increased at
 	 * run time.  The pathconf and fpathconf functions allow these values

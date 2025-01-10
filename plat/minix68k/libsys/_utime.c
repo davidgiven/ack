@@ -6,9 +6,7 @@
 #define utime _utime
 #include <utime.h>
 
-long time();
-
-PUBLIC int utime(char* name, struct utimbuf* timp)
+PUBLIC int utime(const char* name, const struct utimbuf* timp)
 {
 	long current_time;
 
@@ -25,6 +23,6 @@ PUBLIC int utime(char* name, struct utimbuf* timp)
 	}
 
 	_M.m2_i1 = _len(name);
-	_M.m2_p1 = name;
+	_M.m2_p1 = (void*) name;
 	return _callx(FS, UTIME);
 }

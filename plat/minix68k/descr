@@ -75,6 +75,7 @@ name led
 		{FLOATS?} \
 		(.e:{TAIL}={PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libsys.a \
+				   {PLATFORMDIR}/libem.a \
 		           {PLATFORMDIR}/libend.a)
 	linker
 end
