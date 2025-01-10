@@ -3,7 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#include <whichone.h>
+
+#if !defined WORD_SIZE
+#error WORD_SIZE not configured
+#endif
 
 #ifndef TBL68020
 #ifndef TBL68000

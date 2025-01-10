@@ -8,6 +8,9 @@ build_as {
 build_ncg {
 	name = "ncg",
 	arch = "m68020",
+	vars = {
+		["+cflags"] = "-DWORD_SIZE=4 -DTBL68020=1 -DTBL68881=1"
+	}
 }
 
 return installable {

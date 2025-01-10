@@ -7,11 +7,12 @@ build_as {
 
 build_ncg {
 	name = "ncg",
-	arch = "m68k2",
-	deps = {
-		"mach/m68020/ncg/table"
+	arch = "m68020",
+	vars = {
+		["+cflags"] = "-DWORD_SIZE=2 -DTBL68000=1"
 	}
 }
+
 
 return installable {
 	name = "tools",

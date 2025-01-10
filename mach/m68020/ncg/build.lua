@@ -3,7 +3,7 @@ bundle {
 	srcs = {
 		"./mach.c",
 		"./mach.h",
-		"./whichone.h"
+		"./instrmacs.h"
 	}
 }
 
