@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "out.h"
 #include "warnings.h"
 #include "object.h"
@@ -116,12 +117,13 @@ int main(int argc, char* argv[])
 	switch (argc)
 	{
 		case 3:
-			if ((output = creat(argv[2], 0644)) < 0)
-				fatal("Can't write %s.\n", argv[2]);
+		 	output = open(argv[2], O_CREAT|O_RDWR|O_BINARY, 0755);
+			if (output < 0)
+				fatal("Can't write %s: %s\n", argv[2], strerror(errno));
 			output_file = argv[2];
 			outputfile_created = 1;
 			if (!rd_open(argv[1]))
-				fatal("Can't read %s.\n", argv[1]);
+				fatal("Can't read %s: %s\n", argv[1], strerror(errno));
 			break;
 		default:
 			fatal("Usage: %s [+-= amount] <ACK object> <ST-MINIX object>.\n", argv[0]);
