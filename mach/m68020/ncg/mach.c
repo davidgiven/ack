@@ -9,7 +9,9 @@
  * machine dependent back end routines for the Motorola 68000, 68010 or 68020
  */
 
-#include <whichone.h>
+#if !defined WORD_SIZE
+#error WORD_SIZE not configured
+#endif
 
 #if TBL68020
 #define SYNTAX_68020    1
@@ -47,7 +49,7 @@ con_part(int sz, word w) {
 void
 con_mult(word sz) {
 
-	if (sz != 8)
+	if ((sz != 4) && (sz != 8))
 		fatal("bad icon/ucon size");
 	fprintf(codefile,".data8\t%s\n", str);
 }

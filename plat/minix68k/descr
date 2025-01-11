@@ -1,0 +1,88 @@
+# $Revision$
+var w=2
+var wa=2
+var p=4
+var pa=2
+var s=2
+var sa=2
+var l=4
+var la=2
+var f=4
+var fa=2
+var d=8
+var da=2
+var x=8
+var xa=2
+var ARCH=m68k2
+var PLATFORM=minix68k
+var SHAREDIR={EM}/share/ack
+var PLATFORMDIR={SHAREDIR}/{PLATFORM}
+var NAME=minixST
+var M=m68k2
+var MLIB=lib/{M}/tail_
+var RT=lib/minixST/head_
+var LIB=lib/minixST/tail_
+var CPP_F=-D__unix -D_ATARI_ST
+var SYSINCLUDES=-I{EM}/lib/minixST/include -I{EM}/lib/minix/include
+var ALIGN=-a0:4 -a1:4 -a2:4 -a3:4
+var C_LIB={EM}/{LIB}cc.1s {EM}/{LIB}cc.2g
+var OLD_C_LIB={C_LIB}
+var MACHOPT_F=-ml10
+
+# Override the setting in fe so that files compiled for this platform can see
+# the platform-specific headers.
+
+var C_INCLUDES=-I{SHAREDIR}/minix/include -I{PLATFORMDIR}/include -I{SHAREDIR}/include/ansi
+
+name be
+	from .m.g
+	to .s
+	program {EM}/lib/ack/{PLATFORM}/ncg
+	mapflag -gdb GF=-gdb
+	args {GF?} <
+	stdout
+	need .e
+end
+name as
+	from .s.so
+	to .o
+	program {EM}/lib/ack/{PLATFORM}/as
+	args - -o > <
+	prep cond
+end
+name led
+	from .o.a
+	to .out
+	program {EM}/lib/ack/em_led
+	mapflag -l* LNAME={EM}/{LIB}*
+#	mapflag -i SEPID=-b1:0
+	mapflag -fp LIBFP={EM}/{NLIB}fp
+	mapflag -ansi C_LIB={EM}/{LIB}ac
+	args {ALIGN} {SEPID?} -c \
+		({RTS}:.b=-u _i_main) \
+	    (.e:{HEAD}={PLATFORMDIR}/boot.o) \
+		({RTS}:.ocm.bas.b={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.c={PLATFORMDIR}/c-ansi.o) \
+		({RTS}:.mod={PLATFORMDIR}/modula2.o) \
+		({RTS}:.p={PLATFORMDIR}/pascal.o) \
+		-o > < \
+		(.p:{TAIL}={PLATFORMDIR}/libpascal.a) \
+		(.b:{TAIL}={PLATFORMDIR}/libb.a) \
+		(.bas:{TAIL}={PLATFORMDIR}/libbasic.a) \
+		(.mod:{TAIL}={PLATFORMDIR}/libmodula2.a) \
+		(.ocm:{TAIL}={PLATFORMDIR}/liboccam.a) \
+		(.ocm.bas.mod.b.c.p:{TAIL}={PLATFORMDIR}/libc.a) \
+		{FLOATS?} \
+		(.e:{TAIL}={PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libsys.a \
+				   {PLATFORMDIR}/libem.a \
+		           {PLATFORMDIR}/libend.a)
+	linker
+end
+name cv
+	from .out
+	to .cv
+	program {EM}/lib/ack/{PLATFORM}/cv
+	args < >
+	outfile a.out
+end

@@ -7,19 +7,19 @@
 
 typedef struct block_s {
 	struct block_s* next;
-	size_t size; /* in sizeof(block_t) units */
-} block_t;
+	size_t size; /* in sizeof(memblock_t) units */
+} memblock_t;
 
-extern block_t __mem_root;
-extern block_t* __mem_first_free;
+extern memblock_t __mem_root;
+extern memblock_t* __mem_first_free;
 
-#define BLOCKOF(p) (((block_t*)(p)) - 1)
+#define BLOCKOF(p) (((memblock_t*)(p)) - 1)
 
 /* Smallest amount to allocate from brk */
-#define BRKSIZE (512 / sizeof(block_t))
+#define BRKSIZE (512 / sizeof(memblock_t))
 
 #define BLOCKCOUNT(bytes) \
-	(bytes + sizeof(block_t) + sizeof(block_t) - 1)
+	(bytes + sizeof(memblock_t) + sizeof(memblock_t) - 1)
 
 #endif
 

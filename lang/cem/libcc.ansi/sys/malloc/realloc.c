@@ -8,7 +8,7 @@
 
 void* realloc(void* ptr, size_t size)
 {
-	block_t* h;
+	memblock_t* h;
 	size_t nblocks;
 	void* newptr;
 
@@ -37,7 +37,7 @@ void* realloc(void* ptr, size_t size)
 	newptr = malloc(size);
 	if (!newptr)
 		return NULL;
-	memcpy(newptr, ptr, h->size * sizeof(block_t));
+	memcpy(newptr, ptr, h->size * sizeof(memblock_t));
 	free(ptr);
 	return newptr;
 }

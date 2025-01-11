@@ -11,6 +11,7 @@ vars.plats = {
 	"linux68k",
 	"linuxppc",
 	"linuxmips",
+	"minix68k",
 	"msdos86",
 	"msdos386",
 	"osx386",

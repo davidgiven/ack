@@ -55,9 +55,9 @@ extern int	curr_instr;
 #define	PUTL		0x80
 
 #ifndef extern
-extern short	eamode[];
+extern int	eamode[];
 #else
-short	eamode[] = {
+int	eamode[] = {
 /* 00A */	DTA        |ALT,
 /* 01A */	            ALT,
 /* 02A */	DTA|MEM|CTR|ALT,

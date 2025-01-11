@@ -3,6 +3,11 @@
 #ifndef _UNISTD_H
 #define _UNISTD_H
 
+#include <stddef.h>
+#include <sys/types.h>
+
+extern char** environ;
+
 /* Values used by access().  POSIX Table 2-6. */
 #define F_OK               0	/* test if file exists */
 #define X_OK               1	/* test if file is executable */
@@ -21,9 +26,6 @@
 #define STDIN_FILENO       0	/* file descriptor for stdin */
 #define STDOUT_FILENO      1	/* file descriptor for stdout */
 #define STDERR_FILENO      2	/* file descriptor for stderr */
-
-/* NULL must be defined in <unistd.h> according to POSIX Sec. 2.8.1. */
-#define NULL    ((void *)0)
 
 /* The following relate to configurable system variables. POSIX Table 4-2. */
 #define _SC_ARG_MAX		1
@@ -112,7 +114,6 @@ _PROTOTYPE( char *ttyname, (int _fd)					);
 _PROTOTYPE( int unlink, (const char *_path)				);
 _PROTOTYPE( int write, (int _fd, char *_buf, unsigned int _n)		);
 
-#ifdef _MINIX
 _PROTOTYPE( char *brk, (char *_addr)					);
 _PROTOTYPE( int mknod, (const char *_name, int _mode, int _addr)	);
 _PROTOTYPE( int mknod4, (const char *_name, int _mode, int _addr,
@@ -125,6 +126,5 @@ _PROTOTYPE( long ptrace, (int _req, int _pid, long _addr, long _data)	);
 _PROTOTYPE( int stime, (long *top)					);
 _PROTOTYPE( int sync, (void)						);
 _PROTOTYPE( int umount, (const char *_name)				);
-#endif
 
 #endif /* _UNISTD_H */

@@ -6,6 +6,8 @@
 #if	!defined(_LIMITS_H)
 #define	_LIMITS_H
 
+#include <ack/config.h>
+
 #define	CHAR_BIT		8
 #define	SCHAR_MIN		-128
 #define	SCHAR_MAX		127
@@ -32,6 +34,10 @@
 #define	INT_MIN			(-2147483647 - 1)
 #define	INT_MAX			2147483647
 #define	UINT_MAX		4294967295U
+#endif
+
+#if !ACKCONF_WANT_STANDARD_LIMITS
+    #include <ack/limits.h>
 #endif
 
 #endif	/* _LIMITS_H */

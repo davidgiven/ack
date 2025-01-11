@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include "libsys.h"
 
-ssize_t write(int fd, void* buffer, size_t count)
+ssize_t write(int fd, const void* buffer, size_t count)
 {
 	static const char crlf[2] = "\r\n";
 	int i;

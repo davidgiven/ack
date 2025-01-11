@@ -18,7 +18,7 @@ alfun(int sig)
 	longjmp(setjmpbuf, 1);
 } /* used with sleep() below */
 
-void sleep(int n)
+unsigned int sleep(int n)
 {
 	/* sleep(n) pauses for 'n' seconds by scheduling an alarm interrupt. */
 	unsigned oldalarm = 0;
@@ -30,7 +30,7 @@ void sleep(int n)
 	{
 		signal(SIGALRM, oldsig);
 		alarm(oldalarm);
-		return;
+		return 0;
 	}
 	oldalarm = alarm(5000); /* Who cares how long, as long
 					 * as it is long enough

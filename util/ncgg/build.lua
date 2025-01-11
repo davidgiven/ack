@@ -57,7 +57,8 @@ cprogram {
 	
 definerule("ncgg",
 	{
-		srcs = { type="targets" }
+		srcs = { type="targets" },
+		deps = { type="table", default={} }
 	},
 	function(e)
 		-- Remember this is executed from the caller's directory; local
@@ -69,7 +70,8 @@ definerule("ncgg",
 		local cpptable = cppfile {
 			name = e.name.."/cpptable",
 			outleaf = "cpptable",
-			srcs = e.srcs
+			srcs = e.srcs,
+			deps = e.deps
 		}
 
 		return normalrule {
