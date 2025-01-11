@@ -17,9 +17,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <string.h>
 #include "out.h"
 #include "warnings.h"
 #include "object.h"
+
+#if !defined O_BINARY
+#define O_BINARY 0
+#endif
 
 struct outhead outhead;
 struct outsect outsect[S_MAX];
@@ -117,7 +122,7 @@ int main(int argc, char* argv[])
 	switch (argc)
 	{
 		case 3:
-		 	output = open(argv[2], O_CREAT|O_RDWR|O_BINARY, 0755);
+		 	output = open(argv[2], O_CREAT|O_RDWR|O_TRUNC|O_BINARY, 0755);
 			if (output < 0)
 				fatal("Can't write %s: %s\n", argv[2], strerror(errno));
 			output_file = argv[2];
