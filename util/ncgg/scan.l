@@ -18,7 +18,7 @@ static char rcsid2[]= "$Id$";
 #include "subr.h"
 #include <cgg_cg.h>
 #include <em_reg.h>
-#include "y.tab.h"
+#include "cggparser.h"
 
 extern int emhere;
 
