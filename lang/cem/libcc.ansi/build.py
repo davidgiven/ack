@@ -212,4 +212,5 @@ for plat in PLATS:
             f"$(PLATIND)/{plat}/libc.a": f".+lib_{plat}",
             f"$(PLATIND)/{plat}/c-ansi.{suffix}": f".+crt_{plat}",
         },
+        deps=["./headers+all"],
     )

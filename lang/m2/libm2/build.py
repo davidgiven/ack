@@ -30,11 +30,12 @@ headers = [
     "XXTermcap.def",
 ]
 
-for plat in PLATS:
-    ackclibrary(
-        name=f"headers_{plat}", plat=plat, hdrs={k: "./" + k for k in headers}
-    )
+export(
+    name="headers",
+    items={f"$(PLATIND)/include/modula2/{k}": f"./{k}" for k in headers},
+)
 
+for plat in PLATS:
     ackclibrary(
         name=f"lib_{plat}",
         plat=plat,
@@ -86,7 +87,7 @@ for plat in PLATS:
             "./par_misc.e",
         ],
         deps=[
-            f".+headers_{plat}",
+            ".+headers",
             "lang/m2/include",
             "h",
             f"lang/cem/libcc.ansi+lib_{plat}",
@@ -102,4 +103,5 @@ for plat in PLATS:
             f"$(PLATIND)/{plat}/libmodula2.a": f".+lib_{plat}",
             f"$(PLATIND)/{plat}/modula2.{suffix}": f".+mrt_{plat}",
         },
+        deps=[".+headers"],
     )

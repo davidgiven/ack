@@ -1,5 +1,8 @@
+from build.ab import targetof, filenamesof, filenameof
 from build.toolchain import Toolchain
 from build.c import cfile, clibrary
+from build.utils import collectattrs
+from os.path import *
 
 
 class AckToolchain(Toolchain):
@@ -40,3 +43,28 @@ def ackclibrary(name, plat=None, **kwargs):
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
     clibrary(name=name, toolchain=AckToolchain, **kwargs)
+
+
+def _combine(list1, list2):
+    r = list(list1)
+    for i in list2:
+        if i not in r:
+            r.append(i)
+    return r
+
+
+def _indirect(deps, name):
+    r = []
+    for d in deps:
+        r = _combine(r, d.args.get(name, [d]))
+    return r
+
+
+def exportheaders(lib, prefix=""):
+    lib = targetof(lib)
+    hh = {}
+    for h in sorted(_indirect([lib], "cheader_files")):
+        for f in h.outs:
+            r = relpath(filenameof(f), h.dir)
+            hh[join(prefix, r)] = f
+    return hh
