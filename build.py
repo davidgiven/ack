@@ -1,6 +1,6 @@
 from build.ab import export
 
-PLATS = ["pc86"]
+PLATS = ["pc86", "cpm"]
 
 # This contains the platform-independent host tooling required to build the plats.
 export(
@@ -22,8 +22,10 @@ export(
 
 export(
     name="all",
-    deps=[
-        "plat/pc86+all",
-        ".+common",
-    ],
+    deps=(
+        [
+            ".+common",
+        ]
+        + [f"plat/{p}+all" for p in PLATS]
+    ),
 )

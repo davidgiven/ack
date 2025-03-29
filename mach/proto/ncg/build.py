@@ -4,7 +4,7 @@ from util.ncgg.build import ncgg
 
 
 @Rule
-def build_ncg(self, name, arch, deps: Targets = []):
+def build_ncg(self, name, arch, cflags=[], deps: Targets = []):
     tables = ncgg(
         name=f"{self.localname}/tables",
         srcs=[f"mach/{arch}/ncg/table"],
@@ -13,6 +13,7 @@ def build_ncg(self, name, arch, deps: Targets = []):
 
     cprogram(
         replaces=self,
+        cflags=cflags,
         srcs=[
             "mach/proto/ncg/codegen.c",
             "mach/proto/ncg/compute.c",

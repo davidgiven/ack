@@ -22,5 +22,5 @@ ackclibrary(
         "./write.c",
         "./libsys.h",
     ],
-    deps=["lang/cem/libcc.ansi/headers","plat/pc86/include"]
+    deps=["lang/cem/libcc.ansi/headers", "plat/pc86/include"],
 )
