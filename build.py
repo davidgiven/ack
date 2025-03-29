@@ -9,6 +9,7 @@ export(
         "lang/cem/cemcom.ansi+all",
         "lang/cem/cpp.ansi+all",
         "lang/basic/src+all",
+        "lang/m2/comp+all",
         "util/ack+all",
         "util/amisc+all",
         "util/arch+all",
