@@ -31,6 +31,7 @@ clibrary(
             "out.h",
             "arch.h",
             "ranlib.h",
+            "em_abs.h",
             "em_flag.h",
             "em_ptyp.h",
             "em_mes.h",

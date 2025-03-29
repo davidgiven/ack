@@ -409,15 +409,16 @@ def _removesuffix(self, suffix):
 
 def loadbuildfile(filename):
     modulename = _removesuffix(filename.replace("/", "."), ".py")
-    spec = importlib.util.spec_from_file_location(
-        name=modulename,
-        location=filename,
-        loader=BuildFileLoaderImpl(fullname=modulename, path=filename),
-        submodule_search_locations=[],
-    )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[modulename] = module
-    spec.loader.exec_module(module)
+    if modulename not in sys.modules:
+        spec = importlib.util.spec_from_file_location(
+            name=modulename,
+            location=filename,
+            loader=BuildFileLoaderImpl(fullname=modulename, path=filename),
+            submodule_search_locations=[],
+        )
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[modulename] = module
+        spec.loader.exec_module(module)
 
 
 def flatten(items):

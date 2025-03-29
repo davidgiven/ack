@@ -18,6 +18,17 @@ simplerule(
     ],
 )
 
+clibrary(
+    name="headers",
+    hdrs={
+        "em_private.h": "./em_private.h",
+        "em_code.h": "./em_code.h",
+        "em_codeCE.h": "./em_codeCE.h",
+        "em_codeO.h": "./em_codeO.h",
+        "em_codeEK.h": ".+em_codeek_h",
+    },
+)
+
 
 def build_variant(name, cflags):
     clibrary(
@@ -76,14 +87,8 @@ def build_variant(name, cflags):
             "./ucon.c",
             "modules/src/read_em/em_comp.h",
         ],
-        hdrs={
-            "em_private.h": "./em_private.h",
-            "em_code.h": "./em_code.h",
-            "em_codeCE.h": "./em_codeCE.h",
-            "em_codeO.h": "./em_codeO.h",
-            "em_codeEK.h": ".+em_codeek_h",
-        },
         deps=[
+            ".+headers",
             "h",
             "modules/h",
             "modules/src/em_data",
