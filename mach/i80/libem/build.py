@@ -13,22 +13,24 @@ def generate(self, name, body, offset):
     )
 
 
+generated = [
+    generate(name=f"{k}{i}", body=f"{k}.h", offset=i)
+    for i in range(1, 128)
+    for k in [
+        "fload",
+        "floadn",
+        "fstore",
+        "fstoren",
+        "faddr",
+        "faddrn",
+    ]
+]
+
 for plat in PLATS:
     ackclibrary(
         name=f"lib_{plat}",
         srcs=(
-            [
-                generate(name=f"{k}{i}", body=f"{k}.h", offset=i)
-                for i in range(1, 128)
-                for k in [
-                    "fload",
-                    "floadn",
-                    "fstore",
-                    "fstoren",
-                    "faddr",
-                    "faddrn",
-                ]
-            ]
+            generated
             + [
                 "./aar2.s",
                 "./adi4.s",
