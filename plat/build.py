@@ -13,5 +13,6 @@ def build_plat_libs(self, name, arch, plat, is_em=False):
             f"lang/cem/libcc.ansi+all_{plat}",
             f"lang/basic/lib+all_{plat}",
             f"lang/m2/libm2+all_{plat}",
+            f"lang/pc/libpc+all_{plat}",
         ],
     )
