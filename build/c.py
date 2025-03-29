@@ -33,6 +33,16 @@ Toolchain.CXXLINK = [
     "$(CXX) -o $[outs[0]] $(STARTGROUP) $[ins] $[ldflags] $(LDFLAGS) $(ENDGROUP)"
 ]
 
+Toolchain.is_source_file = (
+    lambda f: f.endswith(".c")
+    or f.endswith(".cc")
+    or f.endswith(".cpp")
+    or f.endswith(".S")
+    or f.endswith(".s")
+    or f.endswith(".m")
+    or f.endswith(".mm")
+)
+
 
 HostToolchain.CC = [
     "$(HOSTCC) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
@@ -49,18 +59,6 @@ HostToolchain.CLINK = [
 HostToolchain.CXXLINK = [
     "$(HOSTCXX) -o $[outs[0]] $(STARTGROUP) $[ins] $[ldflags] $(HOSTLDFLAGS) $(ENDGROUP)"
 ]
-
-
-def is_source_file(f):
-    return (
-        f.endswith(".c")
-        or f.endswith(".cc")
-        or f.endswith(".cpp")
-        or f.endswith(".S")
-        or f.endswith(".s")
-        or f.endswith(".m")
-        or f.endswith(".mm")
-    )
 
 
 def _combine(list1, list2):
@@ -152,7 +150,7 @@ def _removeprefix(self, prefix):
 
 def findsources(self, srcs, deps, cflags, filerule, toolchain, cwd):
     for f in filenamesof(srcs):
-        if not is_source_file(f):
+        if not toolchain.is_source_file(f):
             cflags = cflags + [f"-I{dirname(f)}"]
             deps = deps + [f]
 
@@ -169,7 +167,7 @@ def findsources(self, srcs, deps, cflags, filerule, toolchain, cwd):
                 args=getattr(self, "explicit_args", {}),
             )
             for f in filenamesof([s])
-            if is_source_file(f)
+            if toolchain.is_source_file(f)
         ]
         if any(f.endswith(".o") for f in filenamesof([s])):
             objs += [s]

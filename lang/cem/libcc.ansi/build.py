@@ -205,7 +205,7 @@ for plat in PLATS:
         deps=["lang/cem/libcc.ansi/headers"],
     )
 
-    suffix = "k"
+    suffix = "m" if plat.startswith("em") else "o"
     export(
         name=f"all_{plat}",
         items={
