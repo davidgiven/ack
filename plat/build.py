@@ -11,5 +11,6 @@ def build_plat_libs(self, name, arch, plat, is_em=False):
         },
         deps=[
             f"lang/cem/libcc.ansi+all_{plat}",
+            f"lang/basic/lib+all_{plat}",
         ],
     )

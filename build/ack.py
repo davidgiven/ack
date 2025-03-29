@@ -14,11 +14,7 @@ def ackcfile(name, plat=None, **kwargs):
     kwargs["deps"] = kwargs.get("deps", []) + [
         f"plat/{plat}+tools",
         f"plat/{plat}/include",
-        "util/ack+all",
-        "util/misc+all",
-        "util/opt+all",
-        "lang/cem/cemcom.ansi+all",
-        "lang/cem/cpp.ansi+all",
+        "+common",
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
     cfile(name=name, toolchain=AckToolchain, **kwargs)
@@ -29,11 +25,7 @@ def ackclibrary(name, plat=None, **kwargs):
     kwargs["deps"] = kwargs.get("deps", []) + [
         f"plat/{plat}+tools",
         f"plat/{plat}/include",
-        "util/ack+all",
-        "util/misc+all",
-        "util/opt+all",
-        "lang/cem/cemcom.ansi+all",
-        "lang/cem/cpp.ansi+all",
+        "+common",
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
     clibrary(name=name, toolchain=AckToolchain, **kwargs)

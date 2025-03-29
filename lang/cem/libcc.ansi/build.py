@@ -209,7 +209,7 @@ for plat in PLATS:
     export(
         name=f"all_{plat}",
         items={
-            f"$(PLATIND)/lib/{plat}/libc.a": f".+lib_{plat}",
+            f"$(PLATIND)/{plat}/libc.a": f".+lib_{plat}",
             f"$(PLATIND)/{plat}/c-ansi.{suffix}": f".+crt_{plat}",
         },
     )

@@ -444,6 +444,7 @@ def filenamesof(items):
     def generate(xs):
         for x in xs:
             if isinstance(x, Target):
+                x.materialise()
                 yield from generate(x.outs)
             else:
                 yield x
