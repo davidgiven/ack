@@ -1,13 +1,20 @@
 from build.ab import export
 
 export(
-    name="all",
+    name="common",
     deps=[
+        "util/ack+all",
+        "lang/cem/cemcom-ansi+all",
         "util/amisc+all",
         "util/arch+all",
         "util/led+all",
-        "util/ncgg",
-        "util/LLgen",
-        "lang/cem/cemcom-ansi+all",
+    ],
+)
+
+export(
+    name="all",
+    deps=[
+        "plat/pc86+all",
+        ".+common",
     ],
 )

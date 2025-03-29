@@ -22,6 +22,7 @@ endif
 )
 
 Toolchain.CC = ["$(CC) -c -o $[outs[0]] $[ins[0]] $(CFLAGS) $[cflags]"]
+Toolchain.CPP = ["$(CC) -E -P -o $[outs] $[cflags] -x c $[ins]"]
 Toolchain.CXX = ["$(CXX) -c -o $[outs[0]] $[ins[0]] $(CFLAGS) $[cflags]"]
 Toolchain.AR = ["$(AR) cqs $[outs[0]] $[ins]"]
 Toolchain.ARXX = ["$(AR) cqs $[outs[0]] $[ins]"]
@@ -36,6 +37,7 @@ Toolchain.CXXLINK = [
 HostToolchain.CC = [
     "$(HOSTCC) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
 ]
+HostToolchain.CPP = ["$(HOSTCC) -E -P -o $[outs] $[cflags] -x c $[ins]"]
 HostToolchain.CXX = [
     "$(HOSTCXX) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
 ]
@@ -519,3 +521,44 @@ def hostcxxprogram(
         toolchain.PREFIX + label,
         cxxfilerule,
     )
+
+
+def _cppfileimpl(self, name, srcs, deps, cflags, toolchain):
+    hdr_deps = _indirect(deps, "cheader_deps")
+    cflags = collectattrs(
+        targets=hdr_deps, name="caller_cflags", initial=cflags
+    )
+
+    simplerule(
+        replaces=self,
+        ins=srcs,
+        outs=[f"={self.localname}"],
+        deps=deps,
+        commands=toolchain.CPP,
+        args={"cflags": cflags},
+        label=toolchain.PREFIX + "CPPFILE",
+    )
+
+
+@Rule
+def cppfile(
+    self,
+    name,
+    srcs: Targets = [],
+    deps: Targets = [],
+    cflags=[],
+    toolchain=Toolchain,
+):
+    _cppfileimpl(self, name, srcs, deps, cflags, toolchain)
+
+
+@Rule
+def hostcppfile(
+    self,
+    name,
+    srcs: Targets = [],
+    deps: Targets = [],
+    cflags=[],
+    toolchain=HostToolchain,
+):
+    _cppfileimpl(self, name, srcs, deps, cflags, toolchain)

@@ -557,6 +557,7 @@ def simplerule(
 def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
     ins = []
     outs = []
+    rules = []
     for dest, src in items.items():
         dest = self.targetof(dest)
         outs += [dest]
@@ -568,7 +569,7 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             len(srcs) == 1
         ), "a dependency of an exported file must have exactly one output file"
 
-        subrule = simplerule(
+        rule = simplerule(
             name=f"{self.localname}/{destf}",
             cwd=self.cwd,
             ins=[srcs[0]],
@@ -576,15 +577,15 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             commands=["$(CP) -H %s %s" % (srcs[0], destf)],
             label="",
         )
-        subrule.materialise()
+        rule.materialise()
+        rules += [rule]
 
-    simplerule(
-        replaces=self,
-        ins=outs + deps,
-        outs=["=sentinel"],
-        commands=["touch $[outs[0]]"],
-        label="EXPORT",
-    )
+    self.ins = []
+    self.outs = rules + deps
+
+    emit("")
+    emit(".PHONY:", name)
+    emit(name, ":", *filenamesof(outs), *filenamesof(deps))
 
 
 def main():

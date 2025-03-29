@@ -1,6 +1,6 @@
 include("first/bison.lua")
 
-definerule("build_as",
+
 	{
 		arch = { type="string" },
 		deps = { type="targets", default={} },

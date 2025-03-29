@@ -2,6 +2,16 @@ from build.ab import simplerule
 from build.c import clibrary
 
 simplerule(
+    name="em_path",
+    ins=[],
+    outs=["=em_path.h"],
+    commands=[
+        "echo '#define EM_DIR \"$(PREFIX)\"' > $[outs]",
+        "echo '#define ACK_PATH \"share/ack/descr\"' >> $[outs]",
+    ],
+)
+
+simplerule(
     name="local",
     ins=[],
     outs=["=local.h"],
@@ -27,7 +37,8 @@ clibrary(
             "cgg_cg.h",
             "em_reg.h",
             "stb.h",
+            "con_float",
         ]
     }
-    | {"local.h": ".+local"},
+    | {"local.h": ".+local", "em_path.h": ".+em_path"},
 )

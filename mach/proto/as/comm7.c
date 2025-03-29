@@ -11,7 +11,7 @@
 #include <errno.h>
 #include "comm0.h"
 #include "comm1.h"
-#include "y.tab.h"
+#include "bison.h"
 #include <stdarg.h>
 #include "object.h"
 
