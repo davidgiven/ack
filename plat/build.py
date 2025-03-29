@@ -1,0 +1,13 @@
+from build.ab import Rule, simplerule, export
+
+
+@Rule
+def build_plat_libs(self, name, arch, plat, is_em=False):
+    export(
+        replaces=self,
+        items={
+            f"$(PLATIND)/{plat}/libc.a": f"lang/cem/libcc.ansi+lib_{plat}",
+            f"$(PLATIND)/{plat}/libend.a": f"mach/{arch}/libend+lib_{plat}",
+            f"$(PLATIND)/{plat}/libem.a": f"mach/{arch}/libem+lib_{plat}",
+        },
+    )

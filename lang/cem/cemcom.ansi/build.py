@@ -95,8 +95,8 @@ tabgen(name="tabgen", src="./char.tab")
 cprogram(
     name="cemcom",
     srcs=(
-        glob("lang/cem/cemcom-ansi/*.c")
-        + glob("lang/cem/cemcom-ansi/*.h")
+        glob("lang/cem/cemcom.ansi/*.c")
+        + glob("lang/cem/cemcom.ansi/*.h")
         + strtargets
         + [".+parameters", ".+llgen", ".+next-c", ".+symbol2str-c", ".+tabgen"]
     ),

@@ -1,12 +1,14 @@
 from build.ab import export
 from build.ack import ackcfile
 from mach.proto.ncg.build import build_ncg
+from plat.build import build_plat_libs
 import importlib
 
-asm = importlib.import_module("mach.proto.as.build")
+build_as = importlib.import_module("mach.proto.as.build").build_as
 
-asm.build_as(name="as", arch="i86")
+build_as(name="as", arch="i86")
 build_ncg(name="ncg", arch="i86")
+build_plat_libs(name="plat_libs", arch="i86", plat="pc86")
 
 ackcfile(name="boot", srcs=["./boot.s"], plat="pc86")
 
@@ -24,5 +26,5 @@ export(
     items={
         "$(PLATIND)/pc86/boot.o": ".+boot",
     },
-    deps=[".+tools", "util/ack+all"],
+    deps=[".+tools", ".+plat_libs", "util/ack+all"],
 )

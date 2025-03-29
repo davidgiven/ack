@@ -150,7 +150,7 @@ def _removeprefix(self, prefix):
         return self[:]
 
 
-def findsources(name, srcs, deps, cflags, filerule, toolchain, cwd):
+def findsources(self, srcs, deps, cflags, filerule, toolchain, cwd):
     for f in filenamesof(srcs):
         if not is_source_file(f):
             cflags = cflags + [f"-I{dirname(f)}"]
@@ -160,12 +160,13 @@ def findsources(name, srcs, deps, cflags, filerule, toolchain, cwd):
     for s in flatten(srcs):
         objs += [
             filerule(
-                name=join(name, _removeprefix(f, "$(OBJ)/")),
+                name=join(self.localname, _removeprefix(f, "$(OBJ)/")),
                 srcs=[f],
                 deps=deps,
                 cflags=sorted(set(cflags)),
                 toolchain=toolchain,
                 cwd=cwd,
+                args=getattr(self, "explicit_args", {}),
             )
             for f in filenamesof([s])
             if is_source_file(f)
@@ -224,7 +225,7 @@ def libraryimpl(
 
     if srcs:
         objs = findsources(
-            self.localname,
+            self,
             srcs,
             deps + ([hr] if hr else []),
             cflags + hf,
@@ -393,7 +394,7 @@ def programimpl(
     filerule,
 ):
     cfiles = findsources(
-        self.localname, srcs, deps, cflags, filerule, toolchain, self.cwd
+        self, srcs, deps, cflags, filerule, toolchain, self.cwd
     )
 
     lib_deps = []

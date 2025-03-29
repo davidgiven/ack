@@ -1,5 +1,5 @@
 from build.toolchain import Toolchain
-from build.c import cfile
+from build.c import cfile, clibrary
 
 
 class AckToolchain(Toolchain):
@@ -8,9 +8,19 @@ class AckToolchain(Toolchain):
 
 
 def ackcfile(name, plat=None, **kwargs):
+    assert plat
     kwargs["deps"] = kwargs.get("deps", []) + [
         f"plat/{plat}+tools",
         "util/ack+all",
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
     cfile(name=name, toolchain=AckToolchain, **kwargs)
+
+def ackclibrary(name, plat=None, **kwargs):
+    assert plat
+    kwargs["deps"] = kwargs.get("deps", []) + [
+        f"plat/{plat}+tools",
+        "util/ack+all",
+    ]
+    kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
+    clibrary(name=name, toolchain=AckToolchain, **kwargs)

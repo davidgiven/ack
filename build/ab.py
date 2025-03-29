@@ -19,6 +19,7 @@ import sys
 import hashlib
 import re
 import ast
+import os
 from collections import namedtuple
 
 verbose = False
@@ -157,7 +158,8 @@ def Rule(func):
         t.callback = func
         t.traits.add(func.__name__)
         if "args" in kwargs:
-            t.args.update(kwargs["args"])
+            t.explicit_args = kwargs["args"]
+            t.args.update(t.explicit_args)
             del kwargs["args"]
         if "traits" in kwargs:
             t.traits |= kwargs["traits"]
@@ -406,8 +408,16 @@ def _removesuffix(self, suffix):
 
 
 def loadbuildfile(filename):
-    filename = _removesuffix(filename.replace("/", "."), ".py")
-    builtins.__import__(filename)
+    modulename = _removesuffix(filename.replace("/", "."), ".py")
+    spec = importlib.util.spec_from_file_location(
+        name=modulename,
+        location=filename,
+        loader=BuildFileLoaderImpl(fullname=modulename, path=filename),
+        submodule_search_locations=[],
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[modulename] = module
+    spec.loader.exec_module(module)
 
 
 def flatten(items):
@@ -557,7 +567,6 @@ def simplerule(
 def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
     ins = []
     outs = []
-    rules = []
     for dest, src in items.items():
         dest = self.targetof(dest)
         outs += [dest]
@@ -569,7 +578,7 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             len(srcs) == 1
         ), "a dependency of an exported file must have exactly one output file"
 
-        rule = simplerule(
+        subrule = simplerule(
             name=f"{self.localname}/{destf}",
             cwd=self.cwd,
             ins=[srcs[0]],
@@ -577,15 +586,14 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
             commands=["$(CP) -H %s %s" % (srcs[0], destf)],
             label="",
         )
-        rule.materialise()
-        rules += [rule]
+        subrule.materialise()
 
     self.ins = []
-    self.outs = rules + deps
+    self.outs = deps + outs
 
     emit("")
     emit(".PHONY:", name)
-    emit(name, ":", *filenamesof(outs), *filenamesof(deps))
+    emit(name, ":", *filenamesof(outs + deps))
 
 
 def main():
