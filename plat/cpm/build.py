@@ -1,6 +1,7 @@
 from build.ab import export
 from build.ack import ackcfile, exportheaders
 from mach.proto.ncg.build import build_ncg
+from mach.proto.top.build import build_top
 from plat.build import build_plat_libs
 import importlib
 
@@ -8,6 +9,7 @@ build_as = importlib.import_module("mach.proto.as.build").build_as
 
 build_as(name="as", arch="i80")
 build_ncg(name="ncg", arch="i80", cflags=["-DUSE_I80_RSTS"])
+build_top(name="top", arch="i80")
 build_plat_libs(name="plat_libs", arch="i80", plat="cpm")
 
 ackcfile(name="boot", srcs=["./boot.s"], plat="cpm")
@@ -17,6 +19,7 @@ export(
     items={
         "$(PLATDEP)/cpm/as": ".+as",
         "$(PLATDEP)/cpm/ncg": ".+ncg",
+        "$(PLATDEP)/cpm/top": ".+top",
         "$(PLATIND)/descr/cpm": "./descr",
     },
 )
