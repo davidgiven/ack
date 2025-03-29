@@ -21,7 +21,7 @@ export(
 )
 
 export(
-    name="all",
+    name="compiler",
     deps=(
         [
             ".+common",
@@ -29,3 +29,5 @@ export(
         + [f"plat/{p}+all" for p in PLATS]
     ),
 )
+
+export(name="all", deps=[".+compiler", "examples+all"])

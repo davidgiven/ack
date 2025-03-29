@@ -1,7 +1,6 @@
-from build.ab import targetof, filenamesof, filenameof
+from build.ab import targetof, filenameof
 from build.toolchain import Toolchain
-from build.c import cfile, clibrary
-from build.utils import collectattrs
+from build.c import cfile, clibrary, cprogram
 from os.path import *
 
 
@@ -9,6 +8,9 @@ class AckToolchain(Toolchain):
     PREFIX = "ACK"
     CC = [
         "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKCFLAGS) $[cflags] -m$[plat] -c -o $[outs[0]] $[ins[0]]"
+    ]
+    CLINK = [
+        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKLDFLAGS) $[ldflags] -m$[plat] -o $[outs[0]] $[ins[0]]"
     ]
 
     def is_source_file(f):
@@ -31,7 +33,7 @@ def ackcfile(name, plat=None, **kwargs):
         "+common",
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
-    cfile(name=name, toolchain=AckToolchain, **kwargs)
+    return cfile(name=name, toolchain=AckToolchain, **kwargs)
 
 
 def ackclibrary(name, plat=None, **kwargs):
@@ -42,7 +44,17 @@ def ackclibrary(name, plat=None, **kwargs):
         "+common",
     ]
     kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
-    clibrary(name=name, toolchain=AckToolchain, **kwargs)
+    return clibrary(name=name, toolchain=AckToolchain, **kwargs)
+
+
+def ackcprogram(name, plat=None, **kwargs):
+    assert plat
+    kwargs["deps"] = kwargs.get("deps", []) + [
+        f"plat/{plat}+all",
+        "+common",
+    ]
+    kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
+    return cprogram(name=name, toolchain=AckToolchain, **kwargs)
 
 
 def _combine(list1, list2):
