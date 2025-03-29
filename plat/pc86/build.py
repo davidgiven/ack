@@ -27,6 +27,6 @@ export(
         "$(PLATIND)/pc86/boot.o": ".+boot",
         "$(PLATIND)/pc86/libsys.a": "./libsys",
     }
-    | exportheaders("./include", prefix="$(PLATIND)/include/ansi"),
+    | exportheaders("./include", prefix="$(PLATIND)/pc86/include"),
     deps=[".+tools", ".+plat_libs", "util/ack+all"],
 )

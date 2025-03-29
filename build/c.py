@@ -236,6 +236,7 @@ def libraryimpl(
             name=f"{self.localname}_lib",
             ins=objs,
             outs=[f"={self.localname}.a"],
+            deps=deps,
             label=label,
             commands=commands,
         )

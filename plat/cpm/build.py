@@ -1,5 +1,5 @@
 from build.ab import export
-from build.ack import ackcfile
+from build.ack import ackcfile, exportheaders
 from mach.proto.ncg.build import build_ncg
 from plat.build import build_plat_libs
 import importlib
@@ -26,6 +26,7 @@ export(
     items={
         "$(PLATIND)/cpm/boot.o": ".+boot",
         "$(PLATIND)/cpm/libsys.a": "./libsys",
-    },
+    }
+    | exportheaders("./include", prefix="$(PLATIND)/cpm/include"),
     deps=[".+tools", ".+plat_libs", "util/ack+all"],
 )

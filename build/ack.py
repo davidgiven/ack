@@ -10,8 +10,9 @@ class AckToolchain(Toolchain):
         "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKCFLAGS) $[cflags] -m$[plat] -c -o $[outs[0]] $[ins[0]]"
     ]
     CLINK = [
-        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKLDFLAGS) $[ldflags] -m$[plat] -o $[outs[0]] $[ins[0]]"
+        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKLDFLAGS) $[ldflags] -m$[plat] -.$[lang] -o $[outs[0]] $[ins[0]]"
     ]
+    AR = ["$(INSDIR)/bin/aal qc $[outs] $[ins]"]
 
     def is_source_file(f):
         return (
@@ -47,13 +48,13 @@ def ackclibrary(name, plat=None, **kwargs):
     return clibrary(name=name, toolchain=AckToolchain, **kwargs)
 
 
-def ackcprogram(name, plat=None, **kwargs):
+def ackcprogram(name, lang, plat=None, **kwargs):
     assert plat
     kwargs["deps"] = kwargs.get("deps", []) + [
         f"plat/{plat}+all",
         "+common",
     ]
-    kwargs["args"] = kwargs.get("args", {}) | {"plat": plat}
+    kwargs["args"] = kwargs.get("args", {}) | {"plat": plat, "lang": lang}
     return cprogram(name=name, toolchain=AckToolchain, **kwargs)
 
 
