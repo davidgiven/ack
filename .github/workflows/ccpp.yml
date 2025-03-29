@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: apt
-      run: sudo apt update && sudo apt install bison flex ninja-build lua5.3
+      run: sudo apt update && sudo apt install bison flex lua5.3
     - name: make
       run: make
 
@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja lua@5.4
+      run: brew install python lua@5.4
     - name: make
       run: |
         make
@@ -41,7 +41,6 @@ jobs:
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
-          ninja
           bison
           flex
           zip
