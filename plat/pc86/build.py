@@ -25,6 +25,7 @@ export(
     name="all",
     items={
         "$(PLATIND)/pc86/boot.o": ".+boot",
+        "$(PLATIND)/pc86/libsys.a": "./libsys",
     },
     deps=[".+tools", ".+plat_libs", "util/ack+all"],
 )
