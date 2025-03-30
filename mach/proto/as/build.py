@@ -5,7 +5,7 @@ from build.yacc import bison
 
 
 @Rule
-def build_as(self, name, arch):
+def build_as(self, name, arch, deps: Targets = []):
     archlib = clibrary(
         name=f"{self.localname}/arch",
         hdrs={
@@ -19,12 +19,16 @@ def build_as(self, name, arch):
                 "mach5.c",
             ]
         },
+        deps=deps,
     )
 
     preprocessedy = cppfile(
         name=f"{self.localname}/bisoninput",
         srcs=["mach/proto/as/comm2.y"],
-        deps=["mach/proto/as/comm0.h", "mach/proto/as/comm1.h", "h", archlib],
+        deps=(
+            ["mach/proto/as/comm0.h", "mach/proto/as/comm1.h", "h", archlib]
+            + deps
+        ),
     )
 
     bisonfiles = bison(name=f"{self.localname}/bison", src=preprocessedy)
@@ -42,5 +46,7 @@ def build_as(self, name, arch):
             "mach/proto/as/comm8.c",
             bisonfiles,
         ],
-        deps=["h", "modules/src/object", "modules/src/flt_arith", archlib],
+        deps=(
+            ["h", "modules/src/object", "modules/src/flt_arith", archlib] + deps
+        ),
     )

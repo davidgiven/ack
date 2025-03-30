@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "iburg.h"
-#include "y.tab.h"
+#include "cggparser.h"
 
 static int braces = 0;
 
