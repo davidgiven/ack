@@ -29,6 +29,8 @@ clibrary(
         k: f"./{k}"
         for k in [
             "arch.h",
+            "as_spec.h",
+            "ip_spec.h",
             "cg_pattern.h",
             "cgg_cg.h",
             "con_float",

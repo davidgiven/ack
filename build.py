@@ -14,6 +14,7 @@ PLATS = [
     "pc86",
     "rpi",
     "pdpv7",
+    "em22",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
