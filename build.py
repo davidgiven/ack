@@ -1,6 +1,6 @@
 from build.ab import export
 
-PLATS = ["pc86", "cpm"]
+PLATS = ["pc86", "cpm", "linux386"]
 
 # This contains the platform-independent host tooling required to build the plats.
 export(
