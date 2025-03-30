@@ -1,17 +1,18 @@
 from build.ab import export
 
 PLATS = [
-    "pc86",
     "cpm",
     "linux386",
     "linux68k",
-    "linuxppc",
     "linuxmips",
+    "linuxppc",
     "minix68k",
-    "msdos86",
     "msdos386",
+    "msdos86",
     "osx386",
     "osxppc",
+    "pc86",
+    "rpi",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
