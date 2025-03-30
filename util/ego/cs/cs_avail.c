@@ -9,11 +9,11 @@
  */
 
 #include <em_mnem.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/utils.h"
-#include "../share/lset.h"
-#include "../share/global.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/utils.h"
+#include "ego/share/lset.h"
+#include "ego/share/global.h"
 #include "cs.h"
 #include "cs_aux.h"
 #include "cs_debug.h"

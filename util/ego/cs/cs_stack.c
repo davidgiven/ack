@@ -6,10 +6,10 @@
 /*
  * S T A C K   M O D U L E
  */
-#include "../share/types.h"
-#include "../share/global.h"
-#include "../share/debug.h"
-#include "../share/utils.h"
+#include "ego/share/types.h"
+#include "ego/share/global.h"
+#include "ego/share/debug.h"
+#include "ego/share/utils.h"
 #include "cs.h"
 #include "cs_aux.h"
 

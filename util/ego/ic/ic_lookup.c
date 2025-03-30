@@ -12,13 +12,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <em_spec.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/map.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/map.h"
 #include "ic.h"
 #include "ic_io.h"
 #include "ic_lookup.h"
-#include "../share/alloc.h"
+#include "ego/share/alloc.h"
 
 sym_p symhash[NSYMHASH];
 prc_p prochash[NPROCHASH];

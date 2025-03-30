@@ -8,10 +8,10 @@
  *  C F _ I D O M . C
  */
 
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/lset.h"
-#include "../share/alloc.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/lset.h"
+#include "ego/share/alloc.h"
 #include "cf.h"
 
 /* The algorithm for finding dominators in a flowgraph

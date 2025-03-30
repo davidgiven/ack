@@ -7,10 +7,10 @@
 /* V A L U E N U M B E R I N G   M E T H O D */
 
 #include <em_mnem.h>
-#include "../share/types.h"
-#include "../share/global.h"
-#include "../share/debug.h"
-#include "../share/utils.h"
+#include "ego/share/types.h"
+#include "ego/share/global.h"
+#include "ego/share/debug.h"
+#include "ego/share/utils.h"
 #include "cs.h"
 #include "cs_alloc.h"
 #include "cs_aux.h"

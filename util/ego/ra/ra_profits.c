@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 #include <em_reg.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/lset.h"
-#include "../share/global.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/lset.h"
+#include "ego/share/global.h"
 #include "ra.h"
 #include "ra_aux.h"
 #include "ra_profits.h"

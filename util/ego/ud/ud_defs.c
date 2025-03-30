@@ -10,17 +10,17 @@
  */
 
 #include <em_mnem.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "ud.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/cset.h"
-#include "../share/map.h"
-#include "../share/locals.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/cset.h"
+#include "ego/share/map.h"
+#include "ego/share/locals.h"
 #include "ud_defs.h"
-#include "../share/alloc.h"
-#include "../share/utils.h"
+#include "ego/share/alloc.h"
+#include "ego/share/utils.h"
 
 short nrdefs; /* total number of definitions */
 short nrexpldefs; /* number of explicit definitions */

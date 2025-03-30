@@ -14,15 +14,15 @@
 #include <em_pseu.h>
 #include <em_mes.h>
 #include "system.h"
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "ca.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/files.h"
-#include "../share/map.h"
-#include "../share/alloc.h"
-#include "../share/get.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/files.h"
+#include "ego/share/map.h"
+#include "ego/share/alloc.h"
+#include "ego/share/get.h"
 #include "ca_put.h"
 
 /* This phase transforms the Intermediate Code of the global optimizer

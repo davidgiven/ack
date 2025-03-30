@@ -12,11 +12,11 @@
 #include <em_pseu.h>
 #include <em_spec.h>
 #include <arch.h>
-#include "../share/types.h"
-#include "../share/debug.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
 #include "ic.h"
 #include "ic_lookup.h"
-#include "../share/alloc.h"
+#include "ego/share/alloc.h"
 #include "ic_io.h"
 
 static short libstate;

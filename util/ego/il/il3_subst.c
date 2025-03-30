@@ -10,13 +10,13 @@
 
 #include <stdio.h>
 #include <em_mnem.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
-#include "../share/debug.h"
-#include "../share/alloc.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/get.h"
+#include "ego/share/debug.h"
+#include "ego/share/alloc.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/get.h"
 #include "il_aux.h"
 #include "il3_aux.h"
 #include "il3_change.h"

@@ -8,10 +8,10 @@
  * O F   E N T I T I E S
  */
 
-#include "../share/types.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/debug.h"
+#include "ego/share/types.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/debug.h"
 #include "cs.h"
 #include "cs_alloc.h"
 #include "cs_aux.h"

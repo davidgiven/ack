@@ -12,7 +12,7 @@ for prog in ["hilo.c", "mandelbrot.c", "paranoia.c", "startrek.c"]:
             plat=plat,
             lang="c",
             srcs=[f"./{prog}"],
-            cflags=["-O"],
+            cflags=["-O2"],
         )
         exports[f"$(PLATIND)/examples/{name}_{plat}.exe"] = f".+{name}_{plat}"
 

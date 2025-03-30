@@ -13,18 +13,18 @@
 #include <string.h>
 #include <em_mnem.h>
 #include <em_spec.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/files.h"
-#include "../share/get.h"
-#include "../share/put.h"
-#include "../share/lset.h"
-#include "../share/map.h"
-#include "../share/alloc.h"
-#include "../share/utils.h"
-#include "../share/go.h"
-#include "../share/stack_chg.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/files.h"
+#include "ego/share/get.h"
+#include "ego/share/put.h"
+#include "ego/share/lset.h"
+#include "ego/share/map.h"
+#include "ego/share/alloc.h"
+#include "ego/share/utils.h"
+#include "ego/share/go.h"
+#include "ego/share/stack_chg.h"
 
 /* Stack pollution throws away the ASP instructions after a procedure call.
  * This saves a lot of code, at the cost of some extra stack space.

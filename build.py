@@ -14,6 +14,7 @@ export(
         "util/ack+all",
         "util/amisc+all",
         "util/arch+all",
+        "util/ego+all",
         "util/led+all",
         "util/misc+all",
         "util/opt+all",

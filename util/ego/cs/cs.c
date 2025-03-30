@@ -8,10 +8,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../share/types.h"
-#include "../share/lset.h"
-#include "../share/debug.h"
-#include "../share/go.h"
+#include "ego/share/types.h"
+#include "ego/share/lset.h"
+#include "ego/share/debug.h"
+#include "ego/share/go.h"
 #include "cs.h"
 #include "cs_aux.h"
 #include "cs_avail.h"

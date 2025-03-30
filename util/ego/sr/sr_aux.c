@@ -11,12 +11,12 @@
 
 #include <em_mnem.h>
 #include <em_pseu.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "sr.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/utils.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/utils.h"
 #include "sr_aux.h"
 #include "sr_xform.h"
 
