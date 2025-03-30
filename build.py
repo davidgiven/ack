@@ -11,6 +11,7 @@ PLATS = [
     "msdos86",
     "msdos386",
     "osx386",
+    "osxppc",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
