@@ -19,7 +19,7 @@
 #define EXTERN extern
 #include "booth.h"
 #undef EXTERN
-#include "y.tab.h"
+#include "cggparser.h"
 
 int lineno = 1;
 extern char *iname;

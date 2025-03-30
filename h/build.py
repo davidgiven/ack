@@ -28,18 +28,19 @@ clibrary(
     hdrs={
         k: f"./{k}"
         for k in [
-            "out.h",
             "arch.h",
-            "ranlib.h",
+            "cg_pattern.h",
+            "cgg_cg.h",
+            "con_float",
             "em_abs.h",
             "em_ego.h",
             "em_flag.h",
-            "em_ptyp.h",
             "em_mes.h",
-            "cgg_cg.h",
+            "em_ptyp.h",
             "em_reg.h",
+            "out.h",
+            "ranlib.h",
             "stb.h",
-            "con_float",
         ]
     }
     | {"local.h": ".+local", "em_path.h": ".+em_path"},

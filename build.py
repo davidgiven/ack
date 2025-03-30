@@ -13,6 +13,7 @@ PLATS = [
     "osxppc",
     "pc86",
     "rpi",
+    "pdpv7",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
