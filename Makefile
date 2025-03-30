@@ -34,7 +34,7 @@ BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
 
 # What build flags do you want to use for native code?
 
-CFLAGS ?= -g \
+CFLAGS ?= -g -Os \
 	-Werror=return-type \
 	-Werror=implicit-function-declaration \
 	-Werror=strict-prototypes \
@@ -42,6 +42,7 @@ CFLAGS ?= -g \
 	-DNORETURN=_Noreturn
 
 HOSTCFLAGS = $(CFLAGS)
+ACKCFLAGS = -O
 
 LDFLAGS ?= -g
 
