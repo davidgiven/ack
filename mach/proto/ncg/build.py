@@ -8,7 +8,8 @@ def build_ncg(self, name, arch, cflags=[], deps: Targets = []):
     tables = ncgg(
         name=f"{self.localname}/tables",
         srcs=[f"mach/{arch}/ncg/table"],
-        deps=deps,
+        cflags=cflags,
+        deps=[f"mach/{arch}/ncg"] + deps,
     )
 
     cprogram(
@@ -44,12 +45,15 @@ def build_ncg(self, name, arch, cflags=[], deps: Targets = []):
             "mach/proto/ncg/xmach.h",
             tables,
         ],
-        deps=[
-            "h",
-            "modules/h",
-            "modules/src/flt_arith",
-            "modules/src/object",
-            "modules/src/em_data",
-            f"mach/{arch}/ncg",
-        ],
+        deps=(
+            [
+                "h",
+                "modules/h",
+                "modules/src/flt_arith",
+                "modules/src/object",
+                "modules/src/em_data",
+                f"mach/{arch}/ncg",
+            ]
+            + deps
+        ),
     )

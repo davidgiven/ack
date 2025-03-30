@@ -29,8 +29,10 @@ cprogram(
 
 
 @Rule
-def ncgg(self, name, srcs: Targets = [], deps: Targets = []):
-    cpptable = cppfile(name=f"{self.localname}/cpptable", srcs=srcs, deps=deps)
+def ncgg(self, name, srcs: Targets = [], deps: Targets = [], cflags=[]):
+    cpptable = cppfile(
+        name=f"{self.localname}/cpptable", srcs=srcs, deps=deps, cflags=cflags
+    )
 
     simplerule(
         replaces=self,
