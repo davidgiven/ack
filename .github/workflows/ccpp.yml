@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install python lua@5.4
+      run: brew install python lua@5.4 md5sha1sum coreutils
     - name: make
       run: |
         make
@@ -42,6 +42,7 @@ jobs:
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
           mingw-w64-ucrt-x86_64-pkg-config
+          python
           bison
           flex
           zip
