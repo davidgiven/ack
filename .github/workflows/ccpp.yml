@@ -41,6 +41,7 @@ jobs:
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
+          mingw-w64-ucrt-x86_64-pkg-config
           bison
           flex
           zip
