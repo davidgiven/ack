@@ -8,6 +8,7 @@ PLATS = [
     "linuxppc",
     "linuxmips",
     "minix68k",
+    "msdos86",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
