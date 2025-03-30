@@ -10,6 +10,7 @@ PLATS = [
     "minix68k",
     "msdos86",
     "msdos386",
+    "osx386",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
