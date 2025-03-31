@@ -21,8 +21,8 @@ class AckToolchain(Toolchain):
             or f.endswith(".s")
             or f.endswith(".e")
             or f.endswith(".mod")
+            or f.endswith(".bas")
             or f.endswith(".p")
-            or f.endswith(".b")
         )
 
 
