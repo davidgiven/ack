@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install python lua@5.4 coreutils
+      run: brew install python lua@5.4 coreutils make
     - name: make
       run: |
         gmake
