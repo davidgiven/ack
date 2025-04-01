@@ -17,13 +17,6 @@ simplerule(
 )
 
 simplerule(
-    name="next-c",
-    ins=["./make.next"],
-    outs=["=next.c"],
-    commands=["sh $[ins] > $[outs]"],
-)
-
-simplerule(
     name="tokenfile-g",
     ins=[
         "./make.tokfile",
@@ -61,7 +54,7 @@ cprogram(
     srcs=(
         glob("lang/m2/comp/*.c")
         + glob("lang/m2/comp/*.h")
-        + [".+parameters", ".+llgen", ".+next-c", ".+symbol2str-c", ".+tabgen"]
+        + [".+parameters", ".+llgen", ".+symbol2str-c", ".+tabgen"]
     ),
     deps=[
         "h",
@@ -80,4 +73,10 @@ cprogram(
     ],
 )
 
-export(name="all", items={"$(PLATDEP)/em_m2": ".+em_m2"})
+export(
+    name="all",
+    items={
+        "$(PLATDEP)/em_m2": ".+em_m2",
+        "$(INSDIR)/share/man/man6/em_m2.6": "./em_m2.6",
+    },
+)
