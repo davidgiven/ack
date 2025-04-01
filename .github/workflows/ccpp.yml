@@ -24,7 +24,7 @@ jobs:
       run: brew install python lua@5.4 coreutils
     - name: make
       run: |
-        make
+        gmake
 
   build-windows:
     runs-on: windows-latest
