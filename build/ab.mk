@@ -38,6 +38,11 @@ else
 	endif
 endif
 
+# If enabled, shows a nice display of how far through the build you are. This
+# doubles Make startup time. Also, on Make 4.3 and above, rebuilds don't show
+# correct progress information.
+AB_ENABLE_PROGRESS_INFO ?= true
+
 WINDOWS := no
 OSX := no
 LINUX := no
@@ -60,13 +65,17 @@ EXT ?=
 
 CWD=$(shell pwd)
 
-ifeq ($(PROGRESSINFO),)
-# The first make invocation here has to have its output discarded or else it
-# produces spurious 'Leaving directory' messages... don't know why.
-rulecount := $(strip $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 > /dev/null \
-	&& $(MAKE) --no-print-directory -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l))
-ruleindex := 1
-PROGRESSINFO = "[$(ruleindex)/$(rulecount)]$(eval ruleindex := $(shell expr $(ruleindex) + 1))"
+ifeq ($(AB_ENABLE_PROGRESS_INFO),true)
+	ifeq ($(PROGRESSINFO),)
+	# The first make invocation here has to have its output discarded or else it
+	# produces spurious 'Leaving directory' messages... don't know why.
+	rulecount := $(strip $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 > /dev/null \
+		&& $(MAKE) --no-print-directory -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l))
+	ruleindex := 1
+	PROGRESSINFO = "[$(ruleindex)/$(rulecount)]$(eval ruleindex := $(shell expr $(ruleindex) + 1)) "
+	endif
+else
+	PROGRESSINFO = ""
 endif
 
 PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/target-$(word 1, $(shell $(PKG_CONFIG) --list-all | md5sum))

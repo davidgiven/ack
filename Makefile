@@ -56,4 +56,5 @@ all: +all
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
 
+AB_ENABLE_PROGRESS_INFO = false
 include build/ab.mk

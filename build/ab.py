@@ -470,7 +470,8 @@ def emit(*args, into=None):
 
 def emit_rule(self, ins, outs, cmds=[], label=None):
     name = self.name
-    fins = set(filenamesof(ins))
+    fins_list = filenamesof(ins)
+    fins = set(fins_list)
     fouts = filenamesof(outs)
     nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
 
@@ -481,21 +482,22 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         emit("clean::", into=lines)
         emit("\t$(hide) rm -f", *nonobjs, into=lines)
 
+    hashable = cmds + fins_list + fouts
+    hash = hashlib.sha1(bytes("\n".join(hashable), "utf-8")).hexdigest()
+    hashfile = join(self.dir, f"hash_{hash}")
+
     emit(".PHONY:", name, into=lines)
     if outs:
-        emit(name, ":", *fouts, into=lines)
-        if len(fouts) == 1:
-            emit(*fouts, ":", *fins, "\x01", into=lines)
-        else:
-            emit("ifeq ($(MAKE4.3),yes)", into=lines)
-            emit(*fouts, "&:", *fins, "\x01", into=lines)
-            emit("else", into=lines)
-            emit(*(fouts[1:]), ":", fouts[0], into=lines)
-            emit(fouts[0], ":", *fins, "\x01", into=lines)
-            emit("endif", into=lines)
+        emit(name, ":", hashfile, *fouts, into=lines)
+        emit("ifeq ($(MAKE4.3),yes)", into=lines)
+        emit(hashfile, *fouts, "&:", *fins, into=lines)
+        emit("else", into=lines)
+        emit(*fouts, ":", hashfile, into=lines)
+        emit(hashfile, ":", *fins, into=lines)
+        emit("endif", into=lines)
 
         if label:
-            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)", label, into=lines)
+            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
 
         sandbox = join(self.dir, "sandbox")
         emit("\t$(hide)", f"rm -rf {sandbox}", into=lines)
@@ -517,16 +519,10 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
         emit(name, ":", *fins, into=lines)
 
-    cmd = "".join(lines)
-    hash = hashlib.sha1(bytes(cmd, "utf-8")).hexdigest()
-
-    outputFp.write(cmd.replace("\x01", f"$(OBJ)/.hashes/{hash}"))
+    outputFp.write("".join(lines))
 
     if outs:
-        emit(f"$(OBJ)/.hashes/{hash}:")
-        emit(
-            f"\t$(hide) mkdir -p $(OBJ)/.hashes && touch $(OBJ)/.hashes/{hash}"
-        )
+        emit(f"\t$(hide) touch {hashfile}")
     emit("")
 
 
