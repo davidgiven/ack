@@ -29,6 +29,8 @@ targets = {}
 unmaterialisedTargets = {}  # dict, not set, to get consistent ordering
 materialisingStack = []
 defaultGlobals = {}
+globalId = 1
+wordCache = {}
 
 RE_FORMAT_SPEC = re.compile(
     r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
@@ -221,13 +223,16 @@ class Target:
                 if not value:
                     return ""
                 if type(value) == str:
-                    return value
+                    return compressf(value)
                 if _isiterable(value):
                     value = list(value)
                 if type(value) != list:
                     value = [value]
                 return " ".join(
-                    [selfi.templateexpand(f) for f in filenamesof(value)]
+                    [
+                        compressf(selfi.templateexpand(f))
+                        for f in filenamesof(value)
+                    ]
                 )
 
         return Formatter().format(s)
@@ -460,6 +465,27 @@ def filenameof(x):
     return xs[0]
 
 
+def compressf(a):
+    global globalId
+    if len(a) > 5:
+        if a not in wordCache:
+            wordCache[a] = globalId
+            outputFp.write(f"f{globalId}={a}\n")
+            globalId = globalId + 1
+        a = f"$(f{wordCache[a]})"
+    return a
+
+
+def compress(args):
+    global globalId
+
+    compressed = []
+    for a in args:
+        compressed += [compressf(a)]
+
+    return compressed
+
+
 def emit(*args, into=None):
     s = " ".join(args) + "\n"
     if into is not None:
@@ -480,49 +506,71 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
     lines = []
     if nonobjs:
         emit("clean::", into=lines)
-        emit("\t$(hide) rm -f", *nonobjs, into=lines)
+        emit("\t$(hide) rm -f", *compress(nonobjs), into=lines)
 
     hashable = cmds + fins_list + fouts
     hash = hashlib.sha1(bytes("\n".join(hashable), "utf-8")).hexdigest()
     hashfile = join(self.dir, f"hash_{hash}")
 
-    emit(".PHONY:", name, into=lines)
+    global globalId
+    emit(".PHONY:", compressf(name), into=lines)
     if outs:
-        emit(name, ":", hashfile, *fouts, into=lines)
+        outsn = globalId
+        globalId = globalId + 1
+        insn = globalId
+        globalId = globalId + 1
+
+        emit(f"OUTS_{outsn}", "=", *compress(fouts), into=lines)
+        emit(f"INS_{insn}", "=", *compress(fins), into=lines)
+        emit(
+            compressf(name),
+            ":",
+            compressf(hashfile),
+            f"$(OUTS_{outsn})",
+            into=lines,
+        )
         emit("ifeq ($(MAKE4.3),yes)", into=lines)
-        emit(hashfile, *fouts, "&:", *fins, into=lines)
+        emit(
+            compressf(hashfile),
+            f"$(OUTS_{outsn})",
+            "&:",
+            f"$(INS_{insn})",
+            into=lines,
+        )
         emit("else", into=lines)
-        emit(*fouts, ":", hashfile, into=lines)
-        emit(hashfile, ":", *fins, into=lines)
+        emit(f"$(OUTS_{outsn})", ":", compressf(hashfile), into=lines)
+        emit(compressf(hashfile), ":", f"$(INS_{insn})", into=lines)
         emit("endif", into=lines)
 
         if label:
             emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
 
         sandbox = join(self.dir, "sandbox")
-        emit("\t$(hide)", f"rm -rf {sandbox}", into=lines)
+        emit("\t$(hide)", f"rm -rf {compressf(sandbox)}", into=lines)
         emit(
             "\t$(hide)",
-            f"$(PYTHON) build/_sandbox.py --link -s {sandbox}",
-            *fins,
+            compressf("$(PYTHON) build/_sandbox.py --link -s"),
+            compressf(sandbox),
+            f"$(INS_{insn})",
             into=lines,
         )
         for c in cmds:
-            emit(f"\t$(hide) cd {sandbox} && (", c, ")", into=lines)
+            emit(f"\t$(hide) cd {compressf(sandbox)} && (", c, ")", into=lines)
         emit(
             "\t$(hide)",
-            f"$(PYTHON) build/_sandbox.py --export -s {sandbox}",
-            *fouts,
+            compressf("$(PYTHON) build/_sandbox.py --export -s"),
+            compressf(sandbox),
+            f"$(OUTS_{outsn})",
             into=lines,
         )
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
-        emit(name, ":", *fins, into=lines)
+        emit(compressf(name), ":", *compress(fins), into=lines)
 
     outputFp.write("".join(lines))
 
     if outs:
-        emit(f"\t$(hide) touch {hashfile}")
+        emit(f"\t$(hide) touch {compressf(hashfile)}")
     emit("")
 
 
@@ -590,8 +638,8 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
     self.outs = deps + outs
 
     emit("")
-    emit(".PHONY:", name)
-    emit(name, ":", *filenamesof(outs + deps))
+    emit(".PHONY:", compressf(name))
+    emit(compressf(name), ":", *compress(filenamesof(outs + deps)))
 
 
 def main():
