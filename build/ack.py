@@ -7,10 +7,10 @@ from os.path import *
 class AckToolchain(Toolchain):
     PREFIX = "ACK"
     CC = [
-        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKCFLAGS) $[cflags] -m$[plat] -c -o $[outs[0]] $[ins[0]]"
+        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKCFLAGS) $[cflags] -m$[plat] -c -o $[outs[0]] $[ins]"
     ]
     CLINK = [
-        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack $(ACKLDFLAGS) $[ldflags] -m$[plat] -.$[lang] -o $[outs[0]] $[ins[0]]"
+        "ACKDIR=$(INSDIR) $(INSDIR)/bin/ack -m$[plat] -.$[lang] -o $[outs[0]] $[ins] $(ACKLDFLAGS) $[ldflags]"
     ]
     AR = ["$(INSDIR)/bin/aal qc $[outs] $[ins]"]
 
