@@ -1,5 +1,6 @@
 from build.ab import Rule, Target, Targets, export, filenamesof
 from build.ack import ackclibrary, ackcprogram
+from build.utils import test
 from glob import glob
 from os.path import *
 
@@ -44,19 +45,28 @@ def plat_testsuite(
         testfiles += allsets[set]
 
     tests = []
-    for test in testfiles:
-        filename, lang, *flags = test.split(",")
+    for t in testfiles:
+        filename, lang, *flags = t.split(",")
         flags = flags[0:-1]
         fs = basename(filename)
 
         tests += [
-            ackcprogram(
-                name=f"{fs}_bin",
-                srcs=[test],
-                lang=lang,
-                plat=plat,
-                cflags=flags,
-                deps=[lib],
+            test(
+                name=f"{fs}_test",
+                ins=[
+                    "tests/plat/testdriver.sh",
+                    method,
+                    "util/build+testrunner",
+                    ackcprogram(
+                        name=f"{fs}_bin",
+                        srcs=[t],
+                        lang=lang,
+                        plat=plat,
+                        cflags=flags,
+                        deps=[lib],
+                    ),
+                ],
+                commands=["$[ins[0]] $[ins[1]] $[ins[3]] 15 $[ins[2]]"],
             )
         ]
 

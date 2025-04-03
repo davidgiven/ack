@@ -7,12 +7,14 @@ import importlib
 
 build_as = importlib.import_module("mach.proto.as.build").build_as
 
+cflags = ["-DUSE_I80_RSTS"]
+
 build_as(name="as", arch="i80")
-build_ncg(name="ncg", arch="i80", cflags=["-DUSE_I80_RSTS"])
+build_ncg(name="ncg", arch="i80", cflags=cflags)
 build_top(name="top", arch="i80")
 build_plat_libs(name="plat_libs", arch="i80", plat="cpm")
 
-ackcfile(name="boot", srcs=["./boot.s"], plat="cpm")
+ackcfile(name="boot", srcs=["./boot.s"], plat="cpm", cflags=cflags)
 
 export(
     name="tools",
