@@ -22,7 +22,7 @@ PLATS = [
 TEST_PLATS = [
     "cpm",
     "linux68k",
-    # "linuxppc",
+    "linuxppc",
     # "pc86",
 ]
 
