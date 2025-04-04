@@ -7,7 +7,7 @@ ALL = [
     "hilo.bas",
     "hilo.c",
     "hilo.mod",
-    # "hilo.p",
+    "hilo.p",
     "mandelbrot.c",
     "paranoia.c",
     "startrek.c",
