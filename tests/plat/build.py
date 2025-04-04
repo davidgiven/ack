@@ -67,7 +67,14 @@ allsets = {
         "tests/plat/long-long/llshift,e,.c",
         "tests/plat/long-long/llswitch,e,.c",
     ],
-    "m2": [],
+    "m2": [
+        "tests/plat/m2/ConvTest,mod,.mod",
+        "tests/plat/m2/NestProc,mod,.mod",
+        "tests/plat/m2/OpenArray,mod,.mod",
+        "tests/plat/m2/SemaTest,mod,.mod",
+        "tests/plat/m2/Set100,mod,.mod",
+        "tests/plat/m2/StringTest,mod,.mod",
+    ],
 }
 
 
