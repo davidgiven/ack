@@ -5,7 +5,6 @@ from glob import glob
 from os.path import *
 
 allsets = {
-    "core": [],
     "bugs": [
         "tests/plat/bugs/bug-157-i80-varargs,c,.c",
         "tests/plat/bugs/bug-164-faddrn,c,.c",
@@ -13,6 +12,8 @@ allsets = {
         "tests/plat/bugs/bug-22-inn,mod,.mod",
         "tests/plat/bugs/bug-62-notvar_var,e,.c",
         "tests/plat/bugs/bug-310-cpp-no-trailing-newline,c,.c",
+    ],
+    "core": [
         "tests/plat/core/aar,e,.e",
         "tests/plat/core/and,e,.e",
         "tests/plat/core/andv,e,.e",
@@ -49,9 +50,15 @@ allsets = {
         "tests/plat/core/xor,e,.e",
         "tests/plat/core/xorv,e,.e",
     ],
-    "m2": [],
-    "floats": [],
+    "floats": [
+        "tests/plat/floats/doublecmp,e,.c",
+        "tests/plat/floats/from_d_to_si,e,.c",
+        "tests/plat/floats/from_d_to_ui,e,.c",
+        "tests/plat/floats/from_si_to_d,e,.c",
+        "tests/plat/floats/from_ui_to_d,e,.c",
+    ],
     "long-long": [],
+    "m2": [],
 }
 
 
@@ -75,34 +82,32 @@ def plat_testsuite(
         plat=plat,
     )
 
+    tests = []
     testfiles = filenamesof(extratests)
     for set in sets:
-        testfiles += allsets[set]
+        for t in allsets[set]:
+            filename, lang, *flags = t.split(",")
+            flags = flags[0:-1]
+            fs = basename(filename)
 
-    tests = []
-    for t in testfiles:
-        filename, lang, *flags = t.split(",")
-        flags = flags[0:-1]
-        fs = basename(filename)
-
-        tests += [
-            test(
-                name=f"{fs}_test",
-                ins=[
-                    "tests/plat/testdriver.sh",
-                    method,
-                    "util/build+testrunner",
-                    ackcprogram(
-                        name=f"{fs}_bin",
-                        srcs=[t],
-                        lang=lang,
-                        plat=plat,
-                        cflags=flags,
-                        deps=[lib],
-                    ),
-                ],
-                commands=["$[ins[0]] $[ins[1]] $[ins[3]] 15 $[ins[2]]"],
-            )
-        ]
+            tests += [
+                test(
+                    name=f"{set}/{fs}_test",
+                    ins=[
+                        "tests/plat/testdriver.sh",
+                        method,
+                        "util/build+testrunner",
+                        ackcprogram(
+                            name=f"{set}/{fs}_bin",
+                            srcs=[t],
+                            lang=lang,
+                            plat=plat,
+                            cflags=flags,
+                            deps=[lib],
+                        ),
+                    ],
+                    commands=["$[ins[0]] $[ins[1]] $[ins[3]] 15 $[ins[2]]"],
+                )
+            ]
 
     export(replaces=self, deps=tests)
