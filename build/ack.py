@@ -1,6 +1,7 @@
-from build.ab import targetof, filenameof
+from build.ab import targetof, filenameof, filenamesof
 from build.toolchain import Toolchain
 from build.c import cfile, clibrary, cprogram
+from build.utils import collectattrs
 from os.path import *
 
 
@@ -75,9 +76,10 @@ def _indirect(deps, name):
 
 def exportheaders(lib, prefix=""):
     lib = targetof(lib)
+    hdrdeps = collectattrs(targets=[lib], name="cheader_deps")
     hh = {}
-    for h in sorted(_indirect([lib], "cheader_files")):
-        for f in h.outs:
-            r = relpath(filenameof(f), h.dir)
+    for h in collectattrs(targets=hdrdeps, name="cheader_files"):
+        for f in filenamesof([h]):
+            r = relpath(f, h.dir)
             hh[join(prefix, r)] = f
     return hh
