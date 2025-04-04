@@ -5,5 +5,5 @@ plat_testsuite(
     plat="cpm",
     method="plat/cpm/emu",
     extratests=["./parsefcb,c,.c"],
-    sets=["core", "bugs", "m2", "long-long"],
+    sets=["core", "bugs", "m2"],
 )

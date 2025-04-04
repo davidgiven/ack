@@ -57,7 +57,16 @@ allsets = {
         "tests/plat/floats/from_si_to_d,e,.c",
         "tests/plat/floats/from_ui_to_d,e,.c",
     ],
-    "long-long": [],
+    "long-long": [
+        "tests/plat/long-long/lladdsub,e,.c",
+        "tests/plat/long-long/llbitset,e,.c",
+        "tests/plat/long-long/llcmp,e,.c",
+        "tests/plat/long-long/llconvert,e,.c",
+        "tests/plat/long-long/lldivrem,e,.c",
+        "tests/plat/long-long/llmul,e,.c",
+        "tests/plat/long-long/llshift,e,.c",
+        "tests/plat/long-long/llswitch,e,.c",
+    ],
     "m2": [],
 }
 
@@ -68,7 +77,7 @@ def plat_testsuite(
     name,
     plat,
     method: Target,
-    sets=["core", "bugs", "m2", "floats", "long-long"],
+    sets=["core", "bugs", "m2", "floats"],
     extratests: Targets = [],
 ):
     lib = ackclibrary(
