@@ -23,7 +23,7 @@ TEST_PLATS = [
     "cpm",
     "linux68k",
     "linuxppc",
-    # "pc86",
+     "pc86",
 ]
 
 # This contains the platform-independent host tooling required to build the plats.
