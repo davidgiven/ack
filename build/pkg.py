@@ -44,8 +44,9 @@ def _package(self, name, package, fallback, pkgconfig):
             self.args["caller_cflags"] = [cflags]
         if ldflags:
             self.args["caller_ldflags"] = [ldflags]
-        self.traits.add("clibrary")
-        self.traits.add("cheaders")
+        self.args["clibrary_deps"] = [self]
+        self.args["cheader_deps"] = [self]
+        self.traits.update({"clibrary", "cxxlibrary"})
         return
 
     assert (

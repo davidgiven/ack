@@ -44,6 +44,32 @@ Toolchain.is_source_file = (
 )
 
 
+# Given a set of dependencies, finds the set of relevant library targets (i.e.
+# contributes *.a files) for compiling C programs.  The actual list of libraries
+# is in dep.clibrary_files.
+def _toolchain_find_library_targets(deps):
+    lib_deps = []
+    for d in deps:
+        lib_deps = _combine(lib_deps, d.args.get("clibrary_deps", []))
+    return lib_deps
+
+
+Toolchain.find_c_library_targets = _toolchain_find_library_targets
+
+
+# Given a set of dependencies, finds the set of relevant header targets (i.e.
+# contributes *.h files) for compiling C programs.  The actual list of libraries
+# is in dep.cheader_files.
+def _toolchain_find_header_targets(deps, initial=[]):
+    hdr_deps = initial
+    for d in deps:
+        hdr_deps = _combine(hdr_deps, d.args.get("cheader_deps", []))
+    return hdr_deps
+
+
+Toolchain.find_c_header_targets = _toolchain_find_header_targets
+
+
 HostToolchain.CC = [
     "$(HOSTCC) -c -o $[outs[0]] $[ins[0]] $(HOSTCFLAGS) $[cflags]"
 ]
@@ -76,10 +102,18 @@ def _indirect(deps, name):
     return r
 
 
-def cfileimpl(self, name, srcs, deps, suffix, commands, label, cflags):
+def cfileimpl(
+    self, name, srcs, deps, suffix, commands, label, toolchain, cflags
+):
     outleaf = "=" + stripext(basename(filenameof(srcs[0]))) + suffix
 
-    hdr_deps = _indirect(deps, "cheader_deps")
+    hdr_deps = toolchain.find_c_header_targets(deps)
+    other_deps = [
+        d
+        for d in deps
+        if ("cheader_deps" not in d.args) and ("clibrary_deps" not in d.args)
+    ]
+    hdr_files = collectattrs(targets=hdr_deps, name="cheader_files")
     cflags = collectattrs(
         targets=hdr_deps, name="caller_cflags", initial=cflags
     )
@@ -87,7 +121,7 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, cflags):
     t = simplerule(
         replaces=self,
         ins=srcs,
-        deps=sorted(_indirect(hdr_deps, "cheader_files")),
+        deps=other_deps + hdr_files,
         outs=[outleaf],
         label=label,
         commands=commands,
@@ -114,6 +148,7 @@ def cfile(
         suffix,
         toolchain.CC,
         toolchain.PREFIX + label,
+        toolchain,
         cflags,
     )
 
@@ -137,6 +172,7 @@ def cxxfile(
         suffix,
         toolchain.CXX,
         toolchain.PREFIX + label,
+        toolchain,
         cflags,
     )
 
@@ -190,8 +226,8 @@ def libraryimpl(
     label,
     filerule,
 ):
-    hdr_deps = _combine(_indirect(deps, "cheader_deps"), [self])
-    lib_deps = _combine(_indirect(deps, "clibrary_deps"), [self])
+    hdr_deps = toolchain.find_c_header_targets(deps) + [self]
+    lib_deps = toolchain.find_c_library_targets(deps) + [self]
 
     hr = None
     hf = []
@@ -218,10 +254,13 @@ def libraryimpl(
             commands=cs,
             label=toolchain.PREFIX + "CHEADERS",
         )
-        hr.materialise()
+        hr.args["cheader_deps"] = [hr]
+        hr.args["cheader_files"] = [hr]
         hf = [f"-I{hr.dir}"]
 
     if srcs:
+        # Can't depend on the current target to get the library headers, because
+        # if we do it'll cause a dependency loop.
         objs = findsources(
             self,
             srcs,
@@ -396,10 +435,8 @@ def programimpl(
         self, srcs, deps, cflags, filerule, toolchain, self.cwd
     )
 
-    lib_deps = []
-    for d in deps:
-        lib_deps = _combine(lib_deps, d.args.get("clibrary_deps", {d}))
-    libs = filenamesmatchingof(lib_deps, "*.a")
+    lib_deps = toolchain.find_c_library_targets(deps)
+    libs = collectattrs(targets=lib_deps, name="clibrary_files")
     ldflags = collectattrs(
         targets=lib_deps, name="caller_ldflags", initial=ldflags
     )
@@ -408,14 +445,10 @@ def programimpl(
         replaces=self,
         ins=cfiles + libs,
         outs=[f"={self.localname}$(EXT)"],
-        deps=_indirect(lib_deps, "clibrary_files"),
+        deps=deps,
         label=label,
         commands=commands,
-        args={
-            "ldflags": collectattrs(
-                targets=lib_deps, name="caller_ldflags", initial=ldflags
-            )
-        },
+        args={"ldflags": ldflags},
     )
 
 

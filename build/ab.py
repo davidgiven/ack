@@ -22,6 +22,8 @@ import ast
 import os
 from collections import namedtuple
 
+COMPRESS_MK_FILE = True
+
 verbose = False
 quiet = False
 cwdStack = [""]
@@ -466,6 +468,8 @@ def filenameof(x):
 
 
 def compressf(a):
+    if not COMPRESS_MK_FILE:
+        return a
     global globalId
     if len(a) > 5:
         if a not in wordCache:
@@ -477,7 +481,8 @@ def compressf(a):
 
 
 def compress(args):
-    global globalId
+    if not COMPRESS_MK_FILE:
+        return args
 
     compressed = []
     for a in args:
@@ -502,6 +507,8 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
     nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
 
     emit("")
+    for k, v in self.args.items():
+        emit(f"# {k} = {v}")
 
     lines = []
     if nonobjs:
