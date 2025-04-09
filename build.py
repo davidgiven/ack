@@ -1,4 +1,5 @@
 from build.ab import export
+from build.config import IS_WINDOWS
 
 # This is the list of which plats to build.
 PLATS = [
@@ -53,6 +54,7 @@ export(
 export(
     name="all",
     deps=(
-        [".+compiler", "examples+all"] + [f"plat/{p}/tests" for p in TEST_PLATS]
+        [".+compiler", "examples+all"] + 
+       ([] if IS_WINDOWS else [f"plat/{p}/tests" for p in TEST_PLATS])
     ),
 )
