@@ -49,6 +49,15 @@ PROGRAMS = {
 exports = {}
 for plat, progs in PROGRAMS.items():
     if plat in PLATS:
+        ackcprogram(
+            name=f"dhrystone_{plat}",
+            plat=plat,
+            lang="c",
+            srcs=["./dhry.h", "./dhry_1.c", "./dhry_2.c"],
+            cflags=["-O3", "-DTIME"],
+        )
+        exports[f"$(PLATIND)/examples/dhrystone_{plat}.exe"] = f".+dhrystone_{plat}"
+
         for prog in progs:
             fullname, *args = prog.split(",")
             name = fullname.replace(".", "_")

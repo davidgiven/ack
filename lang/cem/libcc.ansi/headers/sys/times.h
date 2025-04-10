@@ -1,6 +1,8 @@
 #ifndef _SYS_TIMES_H
 #define _SYS_TIMES_H
 
+#include <time.h>
+
 struct tms {
     clock_t tms_utime;  /* user time */
     clock_t tms_stime;  /* system time */
