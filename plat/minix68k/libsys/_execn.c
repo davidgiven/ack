@@ -1,7 +1,7 @@
 #include "lib.h"
 
 #define PTRSIZE sizeof(char*)
-_PROTOTYPE(int _execn, (char* name));
+int _execn(char* name);
 
 PUBLIC int _execn(name)
 char* name; /* pointer to file to be exec'd */

@@ -7,14 +7,13 @@
 
 /* First come the defines. */
 #define _POSIX_SOURCE 1 /* tell headers to include POSIX stuff */
-#define _MINIX 1 /* tell headers to include MINIX stuff */
+#define _MINIX        1 /* tell headers to include MINIX stuff */
 
 /* The following are so basic, all the lib files get them automatically. */
 #include <minix/config.h> /* must be first */
 #include <sys/types.h>
 #include <limits.h>
 #include <errno.h>
-#include <ansi.h>
 
 #include <minix/const.h>
 #include <minix/type.h>
@@ -25,23 +24,22 @@ extern message _M;
 #define MM 0
 #define FS 1
 
-_PROTOTYPE(int __execve, (char* _path, char** _argv, char** _envp, int _nargs, int _nenvps));
-_PROTOTYPE(
-    int _callm1,
-    (int _proc,
-     int _syscallnr,
-     int _int1,
-     int _int2,
-     int _int3,
-     char* _ptr1,
-     char* _ptr2,
-     char* _ptr3));
-_PROTOTYPE(int _callm3, (int _proc, int _syscallnr, int _int1, const char* _name));
-_PROTOTYPE(int _callx, (int _proc, int _syscallnr));
-_PROTOTYPE(int _len, (const char* _s));
-_PROTOTYPE(void panic, (const char* _message, int _errnum));
-_PROTOTYPE(int _sendrec, (int _src_dest, message* _m_ptr));
-_PROTOTYPE(void _begsig, (int _dummy));
+int __execve(char* _path, char** _argv, char** _envp, int _nargs, int _nenvps);
+int _callm1(
+    int _proc,
+    int _syscallnr,
+    int _int1,
+    int _int2,
+    int _int3,
+    char* _ptr1,
+    char* _ptr2,
+    char* _ptr3);
+int _callm3(int _proc, int _syscallnr, int _int1, const char* _name);
+int _callx(int _proc, int _syscallnr);
+int _len(const char* _s);
+void panic(const char* _message, int _errnum);
+int _sendrec(int _src_dest, message* _m_ptr);
+void _begsig(int _dummy);
 
 extern void _cleanup(void);
 

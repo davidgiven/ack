@@ -5,33 +5,32 @@
         Messages to systask (special calls)
 ----------------------------------------------------------------------------*/
 #if (CHIP == M68000)
-PUBLIC _PROTOTYPE(void sys_xit, (int parent, int proc, phys_clicks* basep, phys_clicks* sizep));
+PUBLIC void sys_xit(int parent, int proc, phys_clicks* basep, phys_clicks* sizep);
 #else
-PUBLIC _PROTOTYPE(void sys_xit, (int parent, int proc));
+PUBLIC void sys_xit(int parent, int proc);
 #endif
-PUBLIC _PROTOTYPE(void sys_getsp, (int proc, vir_bytes* newsp));
-PUBLIC _PROTOTYPE(void sys_sig, (int proc, int sig, void (*sighandler)(int)));
+PUBLIC void sys_getsp(int proc, vir_bytes* newsp);
+PUBLIC void sys_sig(int proc, int sig, void (*sighandler)(int));
 #if (CHIP == M68000)
 #ifdef ALCYON_C_BUG_FIXED
-PUBLIC _PROTOTYPE(void sys_fork, (int prnt, int chld, int pd, phys_clicks shdw));
+PUBLIC void sys_fork(int prnt, int chld, int pd, phys_clicks shdw);
 #else
-PUBLIC _PROTOTYPE(void sys_fork, (int parent, int child, int pid, int shadow));
+PUBLIC void sys_fork(int parent, int child, int pid, int shadow);
 #endif
 #else
-PUBLIC _PROTOTYPE(void sys_fork, (int parent, int child, int pid));
+PUBLIC void sys_fork(int parent, int child, int pid);
 #endif
-PUBLIC _PROTOTYPE(void sys_exec, (int proc, char* ptr, int traced));
-PUBLIC _PROTOTYPE(void sys_newmap, (int proc, char* ptr));
-PUBLIC _PROTOTYPE(void sys_copy, (message * mptr));
-PUBLIC _PROTOTYPE(void sys_times, (int proc, time_t ptr[4]));
-PUBLIC _PROTOTYPE(void sys_abort, (void));
+PUBLIC void sys_exec(int proc, char* ptr, int traced);
+PUBLIC void sys_newmap(int proc, char* ptr);
+PUBLIC void sys_copy(message * mptr);
+PUBLIC void sys_times(int proc, time_t ptr[4]);
+PUBLIC void sys_abort(void);
 #if (CHIP == M68000)
-PUBLIC _PROTOTYPE(
-    void sys_fresh, (int proc, char* ptr, phys_clicks dc, phys_clicks* basep, phys_clicks* sizep));
+PUBLIC void sys_fresh(int proc, char* ptr, phys_clicks dc, phys_clicks* basep, phys_clicks* sizep);
 #endif
-PUBLIC _PROTOTYPE(void sys_kill, (int proc, int sig));
-PUBLIC _PROTOTYPE(int sys_trace, (int req, int procnr, long addr, long* data_p));
-PUBLIC _PROTOTYPE(void tell_fs, (int what, int p1, int p2, int p3));
+PUBLIC void sys_kill(int proc, int sig);
+PUBLIC int sys_trace(int req, int procnr, long addr, long* data_p);
+PUBLIC void tell_fs(int what, int p1, int p2, int p3);
 
 #if (CHIP == M68000)
 PUBLIC void sys_xit(parent, proc, basep, sizep) phys_clicks *basep, *sizep;
@@ -61,7 +60,7 @@ vir_bytes* newsp; /* place to put sp read from kernel */
 
 PUBLIC void sys_sig(proc, sig, sighandler) int proc; /* which proc has exited */
 int sig; /* signal number: 1 - 16 */
-_PROTOTYPE(void(*sighandler), (int)); /* pointer to signal handler in user space */
+void(*sighandler)(int); /* pointer to signal handler in user space */
 {
 	/* A proc has to be signaled.  Tell the kernel. */
 

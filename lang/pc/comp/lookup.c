@@ -1,5 +1,6 @@
 /* L O O K U P   R O U T I N E S */
 
+#include	<stdlib.h>
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>

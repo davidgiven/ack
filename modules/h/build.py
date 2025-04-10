@@ -5,7 +5,6 @@ clibrary(
     hdrs={
         k: f"./{k}"
         for k in [
-            "ansi.h",
             "em_arith.h",
             "em_label.h",
             "em_label.h",

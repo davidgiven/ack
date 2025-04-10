@@ -107,11 +107,11 @@ static struct cache_elt cache[CACHE_SIZE], *tos = 0;
 static int c_count = 0;
 static const_str_t s;
 
-_PROTOTYPE(static void panic, (char*));
-_PROTOTYPE(static void dump_cache, (FILE* stream));
-_PROTOTYPE(static int cache_read, (int n, int i));
-_PROTOTYPE(static void flush_part_cache, (int c, int r, int f, int d));
-_PROTOTYPE(static void subst_reg, (reg_t, reg_t));
+static void panic(char*);
+static void dump_cache(FILE* stream);
+static int cache_read(int n, int i);
+static void flush_part_cache(int c, int r, int f, int d);
+static void subst_reg(reg_t, reg_t);
 
 static void panic(s)
 char *s;

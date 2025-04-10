@@ -8,9 +8,8 @@
 extern char **environ;		/* environment pointer */
 
 #define	PTRSIZE	(sizeof(char *))
-_PROTOTYPE( char *_sbrk, (int _incr)					);
+extern char *_sbrk(int _incr);
 
-#if _ANSI
 #include	<stdarg.h>
 
 PUBLIC int execl(char *name, ...)
@@ -23,16 +22,7 @@ PUBLIC int execl(char *name, ...)
 	va_end(ap);
 	return retval;
 }
-#else
-PUBLIC int execl(name, arg0)
-char *name;
-char *arg0;
-{
-  return(execve(name, &arg0, environ));
-}
-#endif
 
-#if _ANSI
 PUBLIC int execle(char *name, ...)
 {
 	int retval;
@@ -50,17 +40,6 @@ PUBLIC int execle(char *name, ...)
 	va_end(ap);
 	return retval;
 }
-#else
-PUBLIC int execle(name, argv)
-char *name, *argv;
-{
-  char **p;
-  p = (char **) &argv;
-  while (*p++)			/* null statement */
-	;
-  return(execve(name, &argv, (char **) *p));
-}
-#endif
 
 PUBLIC int execv(name, argv)
 char *name, *argv[];

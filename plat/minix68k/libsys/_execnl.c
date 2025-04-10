@@ -10,9 +10,9 @@
 #define MAXSTK  256 /* maximum EXEC stack size */
 #define PTRSIZE sizeof(char*)
 
-_PROTOTYPE(int _execn, (char* name));
-_PROTOTYPE(int _execnl, (char* name, char* arg0));
-static _PROTOTYPE(int _nexec, (char* name, char* argv[]));
+int _execn(char* name);
+int _execnl(char* name, char* arg0);
+static int _nexec(char* name, char* argv[]);
 
 PUBLIC int _execn(name)
 char* name; /* pointer to file to be exec'd */

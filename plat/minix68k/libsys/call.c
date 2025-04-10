@@ -26,7 +26,7 @@ PUBLIC int _callm3(proc, syscallnr, int1, name)
 int proc; /* FS or MM */
 int syscallnr; /* which system call */
 int int1; /* integer parameter */
-_CONST char* name; /* string */
+const char* name; /* string */
 {
 	/* This form of system call is used for those calls that contain at most
 	 * one integer parameter along with a string.  If the string fits in the
@@ -67,7 +67,7 @@ int syscallnr; /* which system call */
 }
 
 PUBLIC int _len(s)
-_CONST register char* s; /* character string whose length is needed */
+const register char* s; /* character string whose length is needed */
 {
 	/* Return the length of a character string, including the 0 at the end. */
 	int k;

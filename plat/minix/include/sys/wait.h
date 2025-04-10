@@ -29,12 +29,7 @@
 #define WIFSTOPPED(s)  (_LOW(s) == 0177) /* stopped */
 #define WSTOPSIG(s)    (_HIGH(s) & 0377) /* stop signal */
 
-/* Function Prototypes. */
-#ifndef _ANSI_H
-#include <ansi.h>
-#endif
-
-_PROTOTYPE(pid_t wait, (int* _stat_loc));
-_PROTOTYPE(pid_t waitpid, (pid_t _pid, int* _stat_loc, int _options));
+pid_t wait(int* _stat_loc);
+pid_t waitpid(pid_t _pid, int* _stat_loc, int _options);
 
 #endif /* _WAIT_H */

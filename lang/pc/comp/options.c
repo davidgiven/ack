@@ -1,5 +1,6 @@
 /* U S E R   O P T I O N - H A N D L I N G */
 
+#include	<stdlib.h>
 #include	<em_arith.h>
 #include	<em_label.h>
 #include	<string.h>

@@ -14,8 +14,6 @@
 #include	"em_mnem.h"
 #include	"em_reg.h"
 
-#include	"ansi.h"
-
 #include	"em_codeEK.h"
 
 #ifdef READABLE_EM

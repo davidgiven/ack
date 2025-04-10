@@ -69,21 +69,12 @@ typedef struct
 	int m5i1, m5i2;
 	long m5l1, m5l2, m5l3;
 } mess_5;
-#if _ANSI
 typedef struct
 {
 	int m6i1, m6i2, m6i3;
 	long m6l1;
 	void (*m6f1)(int);
 } mess_6;
-#else
-typedef struct
-{
-	int m6i1, m6i2, m6i3;
-	long m6l1;
-	void (*m6f1)();
-} mess_6;
-#endif
 
 typedef struct
 {

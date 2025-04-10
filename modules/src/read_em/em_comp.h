@@ -13,7 +13,6 @@
 #ifndef __EMCOMP_INCLUDED__
 #define __EMCOMP_INCLUDED__
 
-#include <ansi.h>
 #include "em_arith.h"
 #include "em_label.h"
 

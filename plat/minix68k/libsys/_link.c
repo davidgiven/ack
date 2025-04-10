@@ -2,7 +2,7 @@
 #define link _link
 #include <unistd.h>
 
-PUBLIC int link(_CONST char* name, _CONST char* name2)
+PUBLIC int link(const char* name, const char* name2)
 {
 	return (_callm1(
 	    FS, LINK, _len(name), _len(name2), 0, (char*)name,

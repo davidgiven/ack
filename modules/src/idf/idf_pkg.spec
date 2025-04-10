@@ -1,8 +1,6 @@
 /* $Id$ */
 /* IDENTIFIER DESCRIPTOR */
 
-#include <ansi.h>
-
 /* This a generic package for maintaining a name list */
 
 /* Instantiation parameters, supplied by #define, are :
