@@ -42,7 +42,7 @@ CFLAGS ?= -g -Os \
 	-DNORETURN=_Noreturn
 
 HOSTCFLAGS = $(CFLAGS)
-ACKCFLAGS = -O
+ACKCFLAGS = -O -v -v -v
 
 LDFLAGS ?= -g
 
