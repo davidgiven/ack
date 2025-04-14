@@ -41,6 +41,10 @@ CFLAGS ?= -g -Os \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn
 
+ifeq ($(OS),Windows_NT)
+CFLAGS += -DWIN32
+endif
+
 HOSTCFLAGS = $(CFLAGS)
 ACKCFLAGS = -O -v -v -v
 
