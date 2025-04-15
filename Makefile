@@ -46,7 +46,7 @@ CFLAGS += -DWIN32
 endif
 
 HOSTCFLAGS = $(CFLAGS)
-ACKCFLAGS = -O -v -v -v
+ACKCFLAGS = -O
 
 LDFLAGS ?= -g
 

@@ -2,7 +2,7 @@ MAKENOT4 := $(if $(findstring 3.9999, $(lastword $(sort 3.9999 $(MAKE_VERSION)))
 MAKE4.3 := $(if $(findstring 4.3, $(firstword $(sort 4.3 $(MAKE_VERSION)))),yes,no)
 MAKE4.1 := $(if $(findstring no_no,$(MAKENOT4)_$(MAKE4.3)),yes,no)
 
-ifeq ($(MAKENOT3),yes)
+ifeq ($(MAKENOT4),yes)
 $(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
 endif
 
@@ -15,14 +15,18 @@ CP ?= cp
 
 HOSTCC ?= gcc
 HOSTCXX ?= g++
+HOSTFPC ?= fpc
 HOSTAR ?= ar
 HOSTCFLAGS ?= -g -Og
+HOSTFPCFLAGS ?= -g -gl -vi- -l-
 HOSTLDFLAGS ?= -g
 
 CC ?= $(HOSTCC)
 CXX ?= $(HOSTCXX)
+FPC ?= $(HOSTFPC)
 AR ?= $(HOSTAR)
 CFLAGS ?= $(HOSTCFLAGS)
+FPCFLAGS ?= $(HOSTFPCFLAGS)
 LDFLAGS ?= $(HOSTLDFLAGS)
 
 export PKG_CONFIG
@@ -91,6 +95,7 @@ include $(OBJ)/build.mk
 
 MAKEFLAGS += -r -j$(shell nproc)
 .DELETE_ON_ERROR:
+.SUFFIXES:
 
 .PHONY: update-ab
 update-ab:
