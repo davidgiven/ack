@@ -3,7 +3,7 @@ BEGIN
 	writeln('dbug value',number)
 END;
 
-PROCEDURE dump (VAR start,finish : INTEGER);  EXTERN;
+PROCEDURE dump (VAR start,finish : INTEGER);  EXTERNAL;
 
 BEGIN
 	reset(A68INIT);

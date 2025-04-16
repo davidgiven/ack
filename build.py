@@ -36,7 +36,7 @@ export(
         "lang/basic/src+all",
         "lang/m2/comp+all",
         "lang/pc/comp+all",
-        "lang/a68s/util+all",
+        "lang/a68s/aem+all",
         "util/ack+all",
         "util/amisc+all",
         "util/arch+all",

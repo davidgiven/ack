@@ -210,7 +210,7 @@
 62050          ICODE(PNEGI-2    ,  NGF , WOP , SZREAL ,0      ,SRE, O ,SRE);
 62060          OCODE(PNEGI-4    , 'CNEGI     '                ,PR1,PR2,PRR);
 62070          ICODE(PNOTB      ,  LOC , WOP , 1 ,QNOTB       ,ST , O ,ST );
-62080          QCODE(QNOTB      ,  XOR , WOP , SZWORD ,0                  );
+62080          QCODE(QNOTB      ,  XOROP , WOP , SZWORD ,0                  );
 62090          ICODE(PNOTB-1    ,  COM , WOP , SZWORD ,0      ,ST , O ,ST );
 62100          ICODE(PNOOP      ,  NOP , NON , 0 ,0           ,ST , O ,ST );
 62110          ICODE(PNOOP-2    ,  NOP , NON , 0 ,0           ,SRE, O ,SRE);

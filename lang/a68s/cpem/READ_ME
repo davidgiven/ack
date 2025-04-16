@@ -78,7 +78,7 @@ Modifacation to 'argident'. (m_a_i_n) is left in lower case for 'ld'.
 ----------------------------
 revision 2.5        
 date: 86/07/17 19:25:10;  author: dw;  state: Exp;  lines added/del: 7/1
-This forces the compiler to take note of where an EXTERN procedure is
+This forces the compiler to take note of where an EXTERNAL procedure is
 declared and make it STATICALLY be there.
 ----------------------------
 revision 2.4        
