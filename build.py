@@ -2,8 +2,7 @@ from build.ab import export
 from build.config import IS_WINDOWS
 
 # This is the list of which plats to build.
-PLATS = [
-    "cpm",
+PLATS = ([
     "linux386",
     "linux68k",
     "linuxmips",
@@ -17,7 +16,10 @@ PLATS = [
     "rpi",
     "pdpv7",
     "em22",
-]
+] + 
+    # The i80 mach doesn't build on Windows because the ludicrous number of
+    # object files blows the Windows command line limit.
+    (["cpm"] if not IS_WINDOWS else []))
 
 # This is the list of which plats to test.
 TEST_PLATS = [
@@ -55,6 +57,6 @@ export(
     name="all",
     deps=(
         [".+compiler", "examples+all"] + 
-       ([] if IS_WINDOWS else [f"plat/{p}/tests" for p in TEST_PLATS])
+       ([] if IS_WINDOWS else [f"plat/{p}/tests" for p in TEST_PLATS if p in PLATS])
     ),
 )
