@@ -50,6 +50,11 @@ ACKCFLAGS = -O
 
 LDFLAGS ?= -g
 
+# Custom rule to build the installer.
+
+ack-setup.exe: etc/windows-installer.nsi
+	makensis -dBUILDDIR=$(BUILDDIR)/staging -dOUTFILE="$$(realpath $@)" $<
+
 # Various commands.
 
 LUA ?= lua
