@@ -36,7 +36,7 @@ jobs:
 
     - name: build
       run: |
-        make LDFLAGS="-s -static" CFLAGS=-Os
+        make LDFLAGS="-s -static"
 
     - name: package
       run: |
