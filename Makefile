@@ -28,10 +28,6 @@ PREFIX ?= /opt/pkg/ack
 #PREFIX = $(INSDIR)
 endif
 
-# Where do you want to put the object files used when building?
-
-BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
-
 # What build flags do you want to use for native code?
 
 CFLAGS ?= -g -Os \
@@ -60,7 +56,7 @@ all: +all
 # Custom rule to build the installer.
 
 ack-setup.exe: etc/windows-installer.nsi all
-	makensis -dBUILDDIR=$(BUILDDIR)/staging -dOUTFILE="$$(realpath $@)" $<
+	makensis -dBUILDDIR=$(INSDIR) -dOUTFILE="$$(realpath $@)" $<
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
