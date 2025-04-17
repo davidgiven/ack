@@ -1,28 +1,19 @@
 from build.ab import export
 from build.config import IS_WINDOWS
+import os
+from os.path import *
+from glob import glob
 
-# This is the list of which plats to build.
-PLATS = (
-    [
-        "linux386",
-        "linux68k",
-        "linuxmips",
-        "linuxppc",
-        "minix68k",
-        "msdos386",
-        "msdos86",
-        "osx386",
-        "osxppc",
-        "pc86",
-        "rpi",
-        "pdpv7",
-        "em22",
-    ]
-    +
-    # The i80 mach doesn't build on Windows because the ludicrous number of
-    # object files blows the Windows command line limit.
-    (["cpm"] if not IS_WINDOWS else [])
-)
+_plats = os.getenv("PLATS")
+if _plats == "all":
+    PLATS = {dirname(p) for p in glob("*/build.py", root_dir="plat")}
+else:
+    PLATS = _plats.split(" ")
+    
+if IS_WINDOWS and ("cpm" in PLATS):
+    print("Warning: the cpm plat can't be built on Windows because of reasons; skipping.")
+    PLATS.discard("cpm")
+print("Building plats: " + (" ".join(PLATS)))
 
 # This is the list of which plats to test.
 TEST_PLATS = [

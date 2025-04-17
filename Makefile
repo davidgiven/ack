@@ -7,6 +7,13 @@
 
 DEFAULT_PLATFORM ?= pc86
 
+# Which architectures should get built?
+
+PLATS = 
+# PLATS = all
+# PLATS = linux386 linuxppc linuxmips
+$(if $(PLATS),, $(error Supply PLATS='something' to specify which architectures to build for. (Use 'all' for all of them.) (Edit the Makefile to set the default.))
+
 # Where should the ACK put its temporary files?
 
 ifeq ($(TMPDIR),)
@@ -60,6 +67,7 @@ ack-setup.exe: etc/windows-installer.nsi all
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
+export PLATS
 
 AB_ENABLE_PROGRESS_INFO = false
 include build/ab.mk
