@@ -15,8 +15,8 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="rpi")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/rpi/as": ".+as",
-        "$(PLATDEP)/rpi/ncg": ".+ncg",
+        "$(PLATDEP)/rpi/as$(EXT)": ".+as",
+        "$(PLATDEP)/rpi/ncg$(EXT)": ".+ncg",
         "$(PLATIND)/descr/rpi": "./descr",
     },
 )

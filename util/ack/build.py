@@ -48,7 +48,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(INSDIR)/bin/ack": ".+ack",
+        "$(INSDIR)/bin/ack$(EXT)": ".+ack",
         "$(INSDIR)/share/man/man1/ack.1": "./ack.1.X",
         "$(PLATIND)/descr/fe": "lib/descr/fe",
     },

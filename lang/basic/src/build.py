@@ -48,4 +48,4 @@ cprogram(
 )
 
 
-export(name="all", items={"$(PLATDEP)/em_bem": ".+em_bem"})
+export(name="all", items={"$(PLATDEP)/em_bem$(EXT)": ".+em_bem"})

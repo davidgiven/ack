@@ -15,8 +15,8 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="msdos86")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/msdos86/as": ".+as",
-        "$(PLATDEP)/msdos86/ncg": ".+ncg",
+        "$(PLATDEP)/msdos86/as$(EXT)": ".+as",
+        "$(PLATDEP)/msdos86/ncg$(EXT)": ".+ncg",
         "$(PLATIND)/descr/msdos86": "./descr",
     },
 )

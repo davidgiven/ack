@@ -116,4 +116,4 @@ cprogram(
     ],
 )
 
-export(name="all", items={"$(PLATDEP)/em_cemcom.ansi": ".+cemcom"})
+export(name="all", items={"$(PLATDEP)/em_cemcom.ansi$(EXT)": ".+cemcom"})

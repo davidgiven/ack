@@ -24,7 +24,7 @@ def build_ego_helper(name, srcs=[], deps=[]):
         + deps,
         cflags=["-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"],
     )
-    exports[f"$(PLATDEP)/ego/{name}"] = f".+{name}"
+    exports[f"$(PLATDEP)/ego/{name}$(EXT)"] = f".+{name}"
 
 
 def build_descr(name):
@@ -78,6 +78,6 @@ cprogram(
 
 export(
     name="all",
-    items={"$(PLATDEP)/em_ego": ".+em_ego", "$(PLATDEP)/ego/ra": "./ra"}
+    items={"$(PLATDEP)/em_ego$(EXT)": ".+em_ego", "$(PLATDEP)/ego/ra$(EXT)": "./ra"}
     | exports,
 )

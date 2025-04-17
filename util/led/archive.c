@@ -45,7 +45,6 @@ static long getsymdeftable(void)
 	struct ranlib* ran;
 	long count;
 	long nran, nchar;
-	extern FILE* infile;
 
 	count = nran = rd_int4(infile);
 	debug("%ld ranlib structs, ", nran, 0, 0, 0);
