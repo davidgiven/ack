@@ -9,10 +9,9 @@ DEFAULT_PLATFORM ?= pc86
 
 # Which architectures should get built?
 
-PLATS = 
-# PLATS = all
+$(if $(PLATS), $(error Don't set PLATS on the command line, because reasons. Edit the Makefile instead.))
+PLATS = all
 # PLATS = linux386 linuxppc linuxmips
-$(if $(PLATS),, $(error Supply PLATS='something' to specify which architectures to build for. (Use 'all' for all of them.) (Edit the Makefile to set the default.))
 
 # Where should the ACK put its temporary files?
 
@@ -43,10 +42,6 @@ CFLAGS ?= -g -Os \
 	-Werror=strict-prototypes \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn
-
-ifeq ($(OS),Windows_NT)
-CFLAGS += -DWIN32
-endif
 
 HOSTCFLAGS = $(CFLAGS)
 ACKCFLAGS = -O
