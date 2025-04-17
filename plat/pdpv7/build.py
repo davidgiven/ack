@@ -20,7 +20,7 @@ export(
         "$(PLATDEP)/pdpv7/as$(EXT)": ".+as",
         "$(PLATDEP)/pdpv7/cg$(EXT)": ".+cg",
         "$(PLATDEP)/pdpv7/top$(EXT)": ".+top",
-        "$(PLATDEP)/pdpv7/cv": "./cv",
+        "$(PLATDEP)/pdpv7/cv$(EXT)": "./cv",
         "$(PLATIND)/descr/pdpv7": "./descr",
     },
 )
