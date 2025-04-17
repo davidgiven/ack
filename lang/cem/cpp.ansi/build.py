@@ -83,4 +83,4 @@ cprogram(
     ],
 )
 
-export(name="all", items={"$(PLATDEP)/cpp.ansi": ".+cpp.ansi"})
+export(name="all", items={"$(PLATDEP)/cpp.ansi$(EXT)": ".+cpp.ansi"})

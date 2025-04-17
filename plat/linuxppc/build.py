@@ -17,9 +17,9 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="linuxppc")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/linuxppc/as": ".+as",
-        "$(PLATDEP)/linuxppc/ncg": ".+ncg",
-        "$(PLATDEP)/linuxppc/top": ".+top",
+        "$(PLATDEP)/linuxppc/as$(EXT)": ".+as",
+        "$(PLATDEP)/linuxppc/ncg$(EXT)": ".+ncg",
+        "$(PLATDEP)/linuxppc/top$(EXT)": ".+top",
         "$(PLATIND)/descr/linuxppc": "./descr",
     },
 )

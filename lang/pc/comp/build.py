@@ -109,4 +109,4 @@ cprogram(
     ],
 )
 
-export(name="all", items={"$(PLATDEP)/em_pc": ".+em_pc"})
+export(name="all", items={"$(PLATDEP)/em_pc$(EXT)": ".+em_pc"})

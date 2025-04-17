@@ -444,7 +444,7 @@ def programimpl(
     simplerule(
         replaces=self,
         ins=cfiles + libs,
-        outs=[f"={self.localname}$(EXT)"],
+        outs=[f"={self.localname}{toolchain.EXE}"],
         deps=deps,
         label=label,
         commands=commands,

@@ -17,9 +17,9 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="linuxmips")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/linuxmips/as": ".+as",
-        "$(PLATDEP)/linuxmips/mcg": ".+mcg",
-        "$(PLATDEP)/linuxmips/top": ".+top",
+        "$(PLATDEP)/linuxmips/as$(EXT)": ".+as",
+        "$(PLATDEP)/linuxmips/mcg$(EXT)": ".+mcg",
+        "$(PLATDEP)/linuxmips/top$(EXT)": ".+top",
         "$(PLATIND)/descr/linuxmips": "./descr",
     },
 )

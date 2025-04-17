@@ -32,8 +32,8 @@ simplerule(
 export(
     name="tools",
     items={
-        "$(PLATDEP)/msdos386/as": ".+as",
-        "$(PLATDEP)/msdos386/ncg": ".+ncg",
+        "$(PLATDEP)/msdos386/as$(EXT)": ".+as",
+        "$(PLATDEP)/msdos386/ncg$(EXT)": ".+ncg",
         "$(PLATIND)/descr/msdos386": "./descr",
     },
 )

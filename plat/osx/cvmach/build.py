@@ -10,4 +10,4 @@ cprogram(
     ],
 )
 
-export(name="all", items={"$(PLATDEP)/cvmach": ".+cvmach"})
+export(name="all", items={"$(PLATDEP)/cvmach$(EXT)": ".+cvmach"})

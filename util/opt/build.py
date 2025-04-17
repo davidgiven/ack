@@ -83,8 +83,8 @@ build_variant("em_opt2", ["-DGLOBAL_OPT"])
 export(
     name="all",
     items={
-        "$(PLATDEP)/em_opt": ".+em_opt",
-        "$(PLATDEP)/em_opt2": ".+em_opt2",
+        "$(PLATDEP)/em_opt$(EXT)": ".+em_opt",
+        "$(PLATDEP)/em_opt2$(EXT)": ".+em_opt2",
         "$(INSDIR)/share/man/man6/em_opt.6": "./em_opt.6",
     },
 )

@@ -22,6 +22,8 @@ import ast
 import os
 from collections import namedtuple
 
+SANDBOX_ARG_COUNT = 500
+
 COMPRESS_MK_FILE = True
 
 verbose = False

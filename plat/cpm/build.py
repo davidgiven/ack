@@ -19,9 +19,9 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="cpm", cflags=cflags)
 export(
     name="tools",
     items={
-        "$(PLATDEP)/cpm/as": ".+as",
-        "$(PLATDEP)/cpm/ncg": ".+ncg",
-        "$(PLATDEP)/cpm/top": ".+top",
+        "$(PLATDEP)/cpm/as$(EXT)": ".+as",
+        "$(PLATDEP)/cpm/ncg$(EXT)": ".+ncg",
+        "$(PLATDEP)/cpm/top$(EXT)": ".+top",
         "$(PLATIND)/descr/cpm": "./descr",
     },
 )
