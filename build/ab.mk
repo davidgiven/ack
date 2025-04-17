@@ -2,7 +2,7 @@ MAKENOT4 := $(if $(findstring 3.9999, $(lastword $(sort 3.9999 $(MAKE_VERSION)))
 MAKE4.3 := $(if $(findstring 4.3, $(firstword $(sort 4.3 $(MAKE_VERSION)))),yes,no)
 MAKE4.1 := $(if $(findstring no_no,$(MAKENOT4)_$(MAKE4.3)),yes,no)
 
-ifeq ($(MAKENOT3),yes)
+ifeq ($(MAKENOT4),yes)
 $(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
 endif
 
