@@ -56,7 +56,7 @@ all: +all
 # Custom rule to build the installer.
 
 ack-setup.exe: etc/windows-installer.nsi all
-	makensis -dBUILDDIR=$(INSDIR) -dOUTFILE="$$(realpath $@)" $<
+	makensis -dBUILDDIR="$$(realpath $(INSDIR))" -dOUTFILE="$$(realpath $@)" $<
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
