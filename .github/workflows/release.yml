@@ -21,15 +21,16 @@ jobs:
         update: true
         msystem: UCRT64
         install: >-
+          bison
+          flex
+          git
           make
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
-          ninja
-          bison
-          flex
+          mingw-w64-ucrt-x86_64-pkg-config
+          mingw-w64-ucrt-x86_64-python
           zip
-          git
 
     - uses: actions/checkout@v3
 
