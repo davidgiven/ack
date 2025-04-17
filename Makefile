@@ -50,17 +50,17 @@ ACKCFLAGS = -O
 
 LDFLAGS ?= -g
 
-# Custom rule to build the installer.
-
-ack-setup.exe: etc/windows-installer.nsi
-	makensis -dBUILDDIR=$(BUILDDIR)/staging -dOUTFILE="$$(realpath $@)" $<
-
 # Various commands.
 
 LUA ?= lua
 
 .PHONY: all
 all: +all
+
+# Custom rule to build the installer.
+
+ack-setup.exe: etc/windows-installer.nsi all
+	makensis -dBUILDDIR=$(BUILDDIR)/staging -dOUTFILE="$$(realpath $@)" $<
 
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
