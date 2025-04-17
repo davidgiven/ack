@@ -13,15 +13,15 @@
 #include <em_pseu.h>
 #include <em_flag.h>
 #include <em_mnem.h>
-#include "../share/types.h"
-#include "../share/def.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/cset.h"
+#include "ego/share/types.h"
+#include "ego/share/def.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/cset.h"
 #include "cf.h"
 #include "cf_succ.h"
-#include "../share/map.h"
+#include "ego/share/map.h"
 
 extern char em_flag[];
 

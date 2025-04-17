@@ -11,20 +11,20 @@
 #include <stdio.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
-#include "../share/debug.h"
-#include "../share/alloc.h"
-#include "../share/cset.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/utils.h"
+#include "ego/share/debug.h"
+#include "ego/share/alloc.h"
+#include "ego/share/cset.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/utils.h"
 #include "il1_aux.h"
 #include "il1_formal.h"
 #include "il1_cal.h"
 #include "il1_anal.h"
 #include "il_aux.h"
-#include "../share/put.h"
+#include "ego/share/put.h"
 
 #define ENVIRON(p) (p->p_flags1 & (byte)PF_ENVIRON)
 #define RETURN_BLOCK(b) (Lnrelems(b->b_succ) == 0)

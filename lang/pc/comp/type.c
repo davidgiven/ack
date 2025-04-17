@@ -3,6 +3,7 @@
 #include    "parameters.h"
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<alloc.h>
 #include	<assert.h>
 #include	<em.h>

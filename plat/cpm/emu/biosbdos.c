@@ -20,6 +20,8 @@
 static uint16_t dma;
 static int exitcode = 0;
 
+#include "bdos.img.h"
+
 struct fcb
 {
 	cpm_filename_t filename; /* includes drive */
@@ -82,7 +84,7 @@ static void set_result(uint16_t result)
 
 void bios_coldboot(void)
 {
-	memcpy(&ram[FBASE], bdos_data, bdos_len);
+	memcpy(&ram[FBASE], bdos_data, bdos_data_len);
 	i8080_write_reg16(PC, COLDSTART);
 }
 

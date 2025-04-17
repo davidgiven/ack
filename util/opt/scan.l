@@ -11,7 +11,7 @@ extern int lino;
 extern int mlookup(char* name);
 extern void yyerror(const char *);
 
-#include "y.tab.h"
+#include "bison.h"
 
 %}
 %%

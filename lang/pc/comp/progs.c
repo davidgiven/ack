@@ -1,6 +1,7 @@
 #include    "parameters.h"
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<em.h>
 #include	<assert.h>
 

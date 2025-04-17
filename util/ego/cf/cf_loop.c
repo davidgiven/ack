@@ -9,11 +9,11 @@
  */
 
 #include <stdlib.h>
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/lset.h"
-#include "../share/alloc.h"
-#include "../share/utils.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/lset.h"
+#include "ego/share/alloc.h"
+#include "ego/share/utils.h"
 #include "cf.h"
 
 #define MARK_STRONG(b) b->b_flags |= BF_STRONG

@@ -2,7 +2,7 @@
 #define chmod _chmod
 #include <sys/stat.h>
 
-PUBLIC int chmod(_CONST char* name, mode_t mode)
+PUBLIC int chmod(const char* name, mode_t mode)
 {
 	return (_callm3(FS, CHMOD, mode, name));
 }

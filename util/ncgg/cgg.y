@@ -7,6 +7,7 @@
 static char rcsid[]= "$Id$";
 #endif
 
+#include <stddef.h>
 #include "param.h"
 #include "varinfo.h"
 #include "lookup.h"

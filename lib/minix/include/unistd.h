@@ -61,11 +61,6 @@ extern char** environ;
 #define _POSIX_VDISABLE '\t'	/* can't set any control char to tab */
 
 
-/* Function Prototypes. */
-#ifndef _ANSI_H
-#include <ansi.h>
-#endif
-
 _PROTOTYPE( void _exit, (int _status)					);
 _PROTOTYPE( int access, (char *_path, int _amode)			);
 _PROTOTYPE( int chdir, (char *_path)					);
@@ -121,7 +116,7 @@ _PROTOTYPE( int mknod4, (const char *_name, int _mode, int _addr,
 _PROTOTYPE( char *mktemp, (char *_template)				);
 _PROTOTYPE( char *sbrk, (int _incr)					);
 _PROTOTYPE( int chroot, (const char *_name)				);
-_PROTOTYPE( int mount, (char *_spec, char *_name, int _flag));
+ int mount(char *_spec, char *_name, int _flag);
 _PROTOTYPE( long ptrace, (int _req, int _pid, long _addr, long _data)	);
 _PROTOTYPE( int stime, (long *top)					);
 _PROTOTYPE( int sync, (void)						);

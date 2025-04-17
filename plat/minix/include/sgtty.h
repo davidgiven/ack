@@ -89,10 +89,8 @@ struct tchars
 #define DC_WBMS200 (DCLOCK | 9)
 #endif
 
-#include <ansi.h>
-
-_PROTOTYPE(int gtty, (int _fd, struct sgttyb* _argp));
-_PROTOTYPE(int ioctl, (int _fd, int _request, struct sgttyb* _argp));
-_PROTOTYPE(int stty, (int _fd, struct sgttyb* _argp));
+int gtty(int _fd, struct sgttyb* _argp);
+int ioctl(int _fd, int _request, struct sgttyb* _argp);
+int stty(int _fd, struct sgttyb* _argp);
 
 #endif /* _SGTTY_H */

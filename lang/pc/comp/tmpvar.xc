@@ -9,6 +9,7 @@
 
 #include	"debug.h"
 
+#include	<stdlib.h>
 #include	<alloc.h>
 #include	<em_arith.h>
 #include	<em_label.h>

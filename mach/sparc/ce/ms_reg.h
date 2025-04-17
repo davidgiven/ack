@@ -11,6 +11,6 @@
 #define load_float_regs B_load_float_regs
 #define find_local B_find_local
 
-_PROTOTYPE(reg_t find_local, (int, reg_t*));
+reg_t find_local(int, reg_t*);
 
 #endif

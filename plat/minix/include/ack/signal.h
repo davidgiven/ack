@@ -59,10 +59,6 @@ typedef unsigned short sigset_t;
 #define SIG_UNBLOCK 1 /* for unblocking signals */
 #define SIG_SETMASK 2 /* for setting the signal mask */
 
-#ifndef _ANSI_H
-#include <ansi.h>
-#endif
-
 /* Macros used as function pointers and one awful prototype. */
 #define SIG_DFL ((void (*)(int))0) /* default signal handling */
 #define SIG_IGN ((void (*)(int))1) /* ignore signal */
@@ -80,13 +76,13 @@ struct sigaction
 #endif
 
 #ifdef _POSIX_SOURCE
-_PROTOTYPE(int sigaddset, (sigset_t * _set));
-_PROTOTYPE(int sigdelset, (sigset_t * _set));
-_PROTOTYPE(int sigemptyset, (sigset_t * _set));
-_PROTOTYPE(int sigfillset, (sigset_t * _set));
-_PROTOTYPE(int sigismember, (sigset_t * _set, int _signo));
-_PROTOTYPE(int sigpending, (sigset_t * set));
-_PROTOTYPE(int sigsuspend, (sigset_t * _sigmask));
+int sigaddset(sigset_t * _set);
+int sigdelset(sigset_t * _set);
+int sigemptyset(sigset_t * _set);
+int sigfillset(sigset_t * _set);
+int sigismember(sigset_t * _set, int _signo);
+int sigpending(sigset_t * set);
+int sigsuspend(sigset_t * _sigmask);
 #endif
 
 #endif /* _SIGNAL_H */

@@ -11,16 +11,16 @@
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
 #include "il_aux.h"
 #include "il1_cal.h"
-#include "../share/debug.h"
-#include "../share/alloc.h"
-#include "../share/global.h"
-#include "../share/lset.h"
+#include "ego/share/debug.h"
+#include "ego/share/alloc.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
 #include "il1_aux.h"
-#include "../share/parser.h"
+#include "ego/share/parser.h"
 
 static actual_p acts, *app;
 

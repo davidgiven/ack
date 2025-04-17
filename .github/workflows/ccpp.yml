@@ -8,11 +8,11 @@ on: [push, pull_request]
 
 jobs:
   build-linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: apt
-      run: sudo apt update && sudo apt install bison flex ninja-build lua5.3
+      run: sudo apt update && sudo apt install bison flex lua5.3
     - name: make
       run: make
 
@@ -21,10 +21,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: brew
-      run: brew install ninja lua@5.4
+      run: brew install python lua@5.4 coreutils make
     - name: make
       run: |
-        make
+        gmake
 
   build-windows:
     runs-on: windows-latest
@@ -41,7 +41,8 @@ jobs:
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
-          ninja
+          mingw-w64-ucrt-x86_64-pkg-config
+          mingw-w64-ucrt-x86_64-python
           bison
           flex
           zip
@@ -49,7 +50,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: build
       run: |
-        make LDFLAGS="-s -static" CFLAGS="-g -Os"
+        make LDFLAGS="-s -static"
     - name: package
       run: |
         make ack-setup.exe

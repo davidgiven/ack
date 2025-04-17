@@ -11,16 +11,16 @@
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include <em_spec.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "ud.h"
-#include "../share/debug.h"
-#include "../share/global.h"
-#include "../share/alloc.h"
-#include "../share/lset.h"
-#include "../share/cset.h"
-#include "../share/def.h"
-#include "../share/locals.h"
-#include "../share/utils.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
+#include "ego/share/alloc.h"
+#include "ego/share/lset.h"
+#include "ego/share/cset.h"
+#include "ego/share/def.h"
+#include "ego/share/locals.h"
+#include "ego/share/utils.h"
 #include "ud_defs.h"
 
 void repl_line(line_p old, line_p new, bblock_p b)

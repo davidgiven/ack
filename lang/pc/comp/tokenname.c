@@ -1,6 +1,7 @@
 /* T O K E N   D E F I N I T I O N S */
 
 #include	"parameters.h"
+#include	<stdlib.h>
 #include	"Lpars.h"
 #include	"LLlex.h"
 #include	"idf.h"

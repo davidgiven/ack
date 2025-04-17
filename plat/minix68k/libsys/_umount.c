@@ -2,7 +2,7 @@
 #define umount _umount
 #include <unistd.h>
 
-PUBLIC int umount(_CONST char* name)
+PUBLIC int umount(const char* name)
 {
 	return (_callm3(FS, UMOUNT, 0, name));
 }

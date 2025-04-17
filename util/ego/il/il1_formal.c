@@ -8,12 +8,12 @@
  *  I L 1 _ F O R M A L . C
  */
 
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
-#include "../share/debug.h"
-#include "../share/alloc.h"
-#include "../share/global.h"
-#include "../share/lset.h"
+#include "ego/share/debug.h"
+#include "ego/share/alloc.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
 #include "il1_aux.h"
 #include "il1_formal.h"
 

@@ -4,8 +4,8 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 #include <stdlib.h>
-#include "../share/types.h"
-#include "../share/alloc.h"
+#include "ego/share/types.h"
+#include "ego/share/alloc.h"
 #include "cs.h"
 
 occur_p newoccur(line_p l1, line_p l2, bblock_p b)

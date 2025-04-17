@@ -6,7 +6,7 @@ print([[
 #include "set.h"
 #include "expr.h"
 #include "iocc.h"
-#include "y.tab.h"
+#include "cggparser.h"
 
 void enterkeyw(void) {
 ]])

@@ -1,8 +1,8 @@
-                     THE AMSTERDAM COMPILER KIT V6.1pre1
-                     ===================================
+                      THE AMSTERDAM COMPILER KIT V6.2+
+                      ================================
 
                   © 1987-2005 Vrije Universiteit, Amsterdam
-                                2022-08-19
+                                2025-04-17
 
 
 INTRODUCTION
@@ -13,11 +13,6 @@ front end compilers for a number of different languages, code generators,
 support libraries, and all the tools necessary to go from source code to
 executable on any of the platforms it supports.
 
-This is an early prerelease of the apocryphal version 6.1 release. Not a
-lot is supported, the build mechanism needs work, and a lot of things are
-probably broken. However, what's there should be sufficient to get things
-done and to evaluate how the full 6.1 release should work. 
-
 
 
 SUPPORT
@@ -25,30 +20,33 @@ SUPPORT
 
 Languages:
 
-ANSI C, B, Pascal, Modula 2, Basic. K&R is supported via the ANSI C compiler.
+ANSI C, Pascal, Modula 2, Basic. K&R is supported via the ANSI C compiler.
 
 Platforms:
 
-pc86          produces bootable floppy disk images for 8086 PCs
+cpm           produces i80 CP/M .COM files
+em22          produces EM22 bytecode files
 linux386      produces ELF executables for PC Linux systems
 linux68k      produces ELF executables for m68020 Linux systems
-linuxppc      produces ELF executables for PowerPC Linux systems
 linuxmips     produces ELF executables for little-endian MIPS32r2 Linux systems
+linuxppc      produces ELF executables for PowerPC Linux systems
 minix68k      produces Minix executables for m68000 Minix systems
-cpm           produces i80 CP/M .COM files
-rpi           produces Raspberry Pi GPU binaries
-pdpv7         produces PDP/11 V7 Unix binaries
-msdos86       produces i86 MS-DOS .COM files
 msdos386      produces i386 MS-DOS 32-bit DPMI .EXE files
+msdos86       produces i86 MS-DOS .COM files
+osx386        produces i386 OSX MachO executables
+osxppc        produces PowerPC OSX MachO executables
+pc86          produces bootable floppy disk images for 8086 PCs
+pdpv7         produces PDP/11 V7 Unix binaries
+rpi           produces Raspberry Pi GPU binaries
 
 
 
 INSTALLATION
 ============
 
-The version 5.0 build mechanism has been completely rewritten. Installation
-ought to be fairly straightforward. It will build on Unixishes including Linux,
-OSX, and Windows using MSYS2 and mingw32.
+The version 5.0 build mechanism has been completely rewritten (twice).
+Installation ought to be fairly straightforward. It will build on Unixishes
+including Linux, OSX, and Windows using MSYS2 and mingw32.
 
 Requirements:
 
@@ -61,18 +59,16 @@ Requirements:
 
 - Lua (any version) with the lua-posix library installed.
 
-- (optionally) ninja; if you've got this, this will be autodetected and give
-  you faster builds.
+- Python 3.4 or above.
 
-- about 115MB free in /tmp (or some other temporary directory).
-
-- about 15MB in the target directory.
+- about 1GB in the target directory.
 
 Instructions:
 
 - edit the Makefile. There's a small section at the top where you can change
   the configuration. Probably the only one you may want to edit is PREFIX,
-  which changes where the ACK installs to.
+  which changes where the ACK installs to, and PLATS, which changes which
+  architectures are built. Look in `plat/*` to see what plats there are.
 
 - Run:
 
@@ -80,13 +76,8 @@ Instructions:
 
   ...from the command line. This will do the build.
 
-  The make system is fully parallelisable. If you have a multicore system,
-  install ninja and it'll use all your cores. If you don't have ninja, you
-  can still use make for parallel builds with:
-
-    make -r -j8   # or however many cores you have
-
-  ...but frankly, I recommend ninja.
+  The make system is fully parallelisable by default, but does take a while
+  to start up.
 
 - Run:
 
@@ -192,4 +183,4 @@ Please enjoy.
 
 David Given (davidgiven on Github)
 dg@cowlark.com
-2018-09-18
+2025-04-17

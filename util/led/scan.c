@@ -35,11 +35,10 @@ static char rcsid[] = "$Id$";
 #define IND_DBUG(x) (IND_RELO(x) + sizeof(ind_t))
 #endif /* SYMDBUG */
 
-extern FILE* infile;
-extern int passnumber;
-
+FILE* infile; /* Current input stream */
 char* archname; /* Name of archive, if reading from archive. */
 char* modulname; /* Name of object module. */
+int passnumber; /* Current pass */
 #ifdef SYMDBUG
 long objectsize;
 #endif /* SYMDBUG */

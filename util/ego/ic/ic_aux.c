@@ -11,15 +11,15 @@
 #include <em_pseu.h>
 #include <em_spec.h>
 #include <em_mnem.h>
-#include "../share/types.h"
-#include "../share/global.h"
-#include "../share/debug.h"
-#include "../share/def.h"
-#include "../share/utils.h"
+#include "ego/share/types.h"
+#include "ego/share/global.h"
+#include "ego/share/debug.h"
+#include "ego/share/def.h"
+#include "ego/share/utils.h"
 #include "ic.h"
 #include "ic_io.h"
 #include "ic_lookup.h"
-#include "../share/alloc.h"
+#include "ego/share/alloc.h"
 #include "ic_aux.h"
 
 /* opr_size */

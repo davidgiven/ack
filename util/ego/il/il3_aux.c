@@ -8,11 +8,11 @@
  *  I L 3 _ A U X . C
  */
 
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
-#include "../share/debug.h"
-#include "../share/alloc.h"
-#include "../share/global.h"
+#include "ego/share/debug.h"
+#include "ego/share/alloc.h"
+#include "ego/share/global.h"
 #include "il3_aux.h"
 
 line_p last_line(line_p lines)

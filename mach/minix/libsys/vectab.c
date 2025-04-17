@@ -7,4 +7,4 @@
 #include <signal.h>
 
 /* array of functions to catch signals */
-_PROTOTYPE( void (*_vectab[_NSIG]), (int));
+ void (*_vectab[_NSIG])(int);

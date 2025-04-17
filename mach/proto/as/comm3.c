@@ -20,7 +20,7 @@ struct outhead	outhead = {
 	O_MAGIC, O_STAMP, 0
 };
 
-#include	"y.tab.h"
+#include	"bison.h"
 
 item_t	keytab[] = {
 	{0,	EXTERN,		0,		".define"},

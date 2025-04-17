@@ -34,42 +34,40 @@ extern reg_t reg_f0;
 extern reg_t reg_sp, reg_lb, reg_gap;
 extern reg_t reg_tmp;
 
-#include "ansi.h"
+int const13(int);
+void init_cache(void);
+void free_reg(reg_t);
+void free_double(reg_t);	/* ..._reg */
+void forced_alloc_reg(reg_t);
+void soft_alloc_reg(reg_t);
+void change_reg(reg_t);
+int type_of_tos(void);
+void inc_tos(arith);
+void inc_tos_reg(reg_t);
+void push_const(arith);
+void push_reg(reg_t);
+void push_ext(char *);
+void flush_cache(void);
+void cache_need(int);
+void pop_nop(int);
 
-_PROTOTYPE(int const13, (int));
-_PROTOTYPE(void init_cache, (void));
-_PROTOTYPE(void free_reg, (reg_t));
-_PROTOTYPE(void free_double, (reg_t));	/* ..._reg */
-_PROTOTYPE(void forced_alloc_reg, (reg_t));
-_PROTOTYPE(void soft_alloc_reg, (reg_t));
-_PROTOTYPE(void change_reg, (reg_t));
-_PROTOTYPE(int type_of_tos, (void));
-_PROTOTYPE(void inc_tos, (arith));
-_PROTOTYPE(void inc_tos_reg, (reg_t));
-_PROTOTYPE(void push_const, (arith));
-_PROTOTYPE(void push_reg, (reg_t));
-_PROTOTYPE(void push_ext, (char *));
-_PROTOTYPE(void flush_cache, (void));
-_PROTOTYPE(void cache_need, (int));
-_PROTOTYPE(void pop_nop, (int));
+reg_t alloc_reg(void);
+reg_t alloc_reg_var(void);
+reg_t alloc_float(void);
+reg_t alloc_float_var(void);
+reg_t alloc_double(reg_t *sub_reg);
+reg_t alloc_double_var(reg_t *sub_reg);
+reg_t pop_reg(void);
+reg_t pop_reg_c13(char*);
+reg_t pop_reg_reg(reg_t*);
+reg_t pop_float(void);
+reg_t pop_double(reg_t *sub_reg);
+void pop_reg_as(reg_t r);
 
-_PROTOTYPE(reg_t alloc_reg, (void));
-_PROTOTYPE(reg_t alloc_reg_var, (void));
-_PROTOTYPE(reg_t alloc_float, (void));
-_PROTOTYPE(reg_t alloc_float_var, (void));
-_PROTOTYPE(reg_t alloc_double, (reg_t *sub_reg));
-_PROTOTYPE(reg_t alloc_double_var, (reg_t *sub_reg));
-_PROTOTYPE(reg_t pop_reg, (void));
-_PROTOTYPE(reg_t pop_reg_c13, (char*));
-_PROTOTYPE(reg_t pop_reg_reg, (reg_t*));
-_PROTOTYPE(reg_t pop_float, (void));
-_PROTOTYPE(reg_t pop_double, (reg_t *sub_reg));
-_PROTOTYPE(void pop_reg_as, (reg_t r));
-
-_PROTOTYPE(arith pop_const, (char *n_str));
-_PROTOTYPE(arith top_const, (void));
-_PROTOTYPE(void dup_tos, (int n));
-_PROTOTYPE(void exg_top, (int n));
+arith pop_const(char *n_str);
+arith top_const(void);
+void dup_tos(int n);
+void exg_top(int n);
 
 #define code_combiner(x) x
 

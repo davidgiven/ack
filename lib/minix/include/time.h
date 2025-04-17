@@ -39,11 +39,6 @@ struct tm {
   int tm_isdst;			/* Daylight Saving Time flag */
 };
 
-/* Function Prototypes. */
-#ifndef _ANSI_H
-#include <ansi.h>
-#endif
-
 _PROTOTYPE( clock_t clock, (void)					);
 _PROTOTYPE( double difftime, (time_t _time1, time_t _time0)		);
 _PROTOTYPE( time_t mktime, (struct tm *_timeptr)			);

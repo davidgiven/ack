@@ -14,7 +14,7 @@
 
 #define DIRECT_SIZE (sizeof(struct direct))
 
-static _PROTOTYPE(void go_back, (char* path));
+static void go_back(char* path);
 
 char* getcwd(char* buffer, int size)
 /* Get current working directory. */

@@ -10,7 +10,7 @@
 
 #include	"comm0.h"
 #include	"comm1.h"
-#include	"y.tab.h"
+#include	"bison.h"
 #include	"object.h"
 
 static void new_common(item_t *);

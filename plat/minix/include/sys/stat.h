@@ -61,16 +61,11 @@ struct stat
 #define S_ISBLK(m)  (((m) & S_IFMT) == S_IFBLK) /* is a block spec */
 #define S_ISFIFO(m) (((m) & S_IFMT) == S_IFIFO) /* is a pipe/FIFO */
 
-/* Function Prototypes. */
-#ifndef _ANSI_H
-#include <ansi.h>
-#endif
-
-_PROTOTYPE(int chmod, (const char* _path, mode_t _mode));
-_PROTOTYPE(int fstat, (int _fildes, struct stat* _buf));
-_PROTOTYPE(int mkdir, (const char* _path, int _mode));
-_PROTOTYPE(int mkfifo, (const char* _path, int _mode));
-_PROTOTYPE(int stat, (const char* _path, struct stat* _buf));
-_PROTOTYPE(mode_t umask, (int _cmask));
+int chmod(const char* _path, mode_t _mode);
+int fstat(int _fildes, struct stat* _buf);
+int mkdir(const char* _path, int _mode);
+int mkfifo(const char* _path, int _mode);
+int stat(const char* _path, struct stat* _buf);
+mode_t umask(int _cmask);
 
 #endif /* _STAT_H */

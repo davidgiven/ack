@@ -1,7 +1,0 @@
-bundle {
-	name = "srcs",
-	srcs = {
-	}
-}
-
-

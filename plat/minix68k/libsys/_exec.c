@@ -9,7 +9,7 @@
 extern char** environ; /* environment pointer */
 
 #define PTRSIZE (sizeof(char*))
-_PROTOTYPE(char* _sbrk, (int _incr));
+char* _sbrk(int _incr);
 
 #if 0 // dtrg --- this is all very wrong and needs rewriting
 PUBLIC int execl(const char* name, const char* arg, ...)

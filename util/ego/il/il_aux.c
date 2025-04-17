@@ -14,15 +14,15 @@
 #include <em_spec.h>
 #include <em_mnem.h>
 #include <em_pseu.h>
-#include "../share/types.h"
+#include "ego/share/types.h"
 #include "il.h"
-#include "../share/debug.h"
-#include "../share/get.h"
-#include "../share/put.h"
-#include "../share/alloc.h"
-#include "../share/global.h"
-#include "../share/lset.h"
-#include "../share/map.h"
+#include "ego/share/debug.h"
+#include "ego/share/get.h"
+#include "ego/share/put.h"
+#include "ego/share/alloc.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
+#include "ego/share/map.h"
 #include "il_aux.h"
 
 int tsize(int type)

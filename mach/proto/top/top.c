@@ -47,7 +47,7 @@ static struct variable ANY;  /* ANY symbol matching any instruction */
 /* Opcode of first instruction not matched by current pattern */
 static char *REST;
 
-#include "gen.c"
+#include "gen.c.h"
 
 
 /* Macros for efficiency: */

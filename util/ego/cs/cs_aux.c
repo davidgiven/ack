@@ -3,11 +3,11 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-#include "../share/types.h"
-#include "../share/debug.h"
-#include "../share/utils.h"
-#include "../share/global.h"
-#include "../share/lset.h"
+#include "ego/share/types.h"
+#include "ego/share/debug.h"
+#include "ego/share/utils.h"
+#include "ego/share/global.h"
+#include "ego/share/lset.h"
 #include "cs.h"
 #include "cs_entity.h"
 

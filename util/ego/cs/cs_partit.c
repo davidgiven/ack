@@ -9,10 +9,10 @@
 #include <em_pseu.h>
 #include <em_reg.h>
 #include <em_spec.h>
-#include "../share/types.h"
-#include "../share/utils.h"
-#include "../share/debug.h"
-#include "../share/global.h"
+#include "ego/share/types.h"
+#include "ego/share/utils.h"
+#include "ego/share/debug.h"
+#include "ego/share/global.h"
 #include "cs.h"
 #include "cs_stack.h"
 

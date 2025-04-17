@@ -3,7 +3,6 @@
 #define open	_open
 #include <fcntl.h>
 
-#if _ANSI
 #include <stdarg.h>
 
 PUBLIC int open(const char *name, int flags, ...)
@@ -21,14 +20,3 @@ PUBLIC int open(const char *name, int flags, ...)
 	}
 	return _callm3(FS, OPEN, flags, name);
 }
-#else
-PUBLIC int open(name, flags, mode)
-_CONST char *name;
-int flags, mode;
-{
-  if (flags & O_CREAT)
-	return _callm1(FS, OPEN, _len(name), flags, mode,
-		      (char *)name, NIL_PTR, NIL_PTR);
-  return(_callm3(FS, OPEN, flags, name));
-}
-#endif
