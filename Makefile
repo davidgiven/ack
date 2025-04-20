@@ -60,6 +60,10 @@ all: +all
 ack-setup.exe: etc/windows-installer.nsi all
 	makensis -dBUILDDIR="$$(realpath $(INSDIR))" -dOUTFILE="$$(realpath $@)" $<
 
+install: all
+	@mkdir -p $(PREFIX)
+	tar cf - -C $(INSDIR) . | tar xvf - -C $(PREFIX)
+
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
 export PLATS
