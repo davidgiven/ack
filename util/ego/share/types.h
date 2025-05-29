@@ -8,6 +8,8 @@
 /* This file contains the definitions of the global data types.
  */
 
+#include <stdint.h>
+
 /* TEMPORARY: */
 #define LONGOFF
 
