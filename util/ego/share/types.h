@@ -9,6 +9,7 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* TEMPORARY: */
 #define LONGOFF
