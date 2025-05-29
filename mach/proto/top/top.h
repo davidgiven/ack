@@ -5,6 +5,8 @@
  */
 /* Tunable constants; may be overruled by machine descriptor table */
 
+#include <stdbool.h>
+
 #ifndef OP_SEPARATOR
 #define OP_SEPARATOR ','
 #endif
@@ -81,8 +83,6 @@ struct instr_descr {
 	char		*opcode;
 	struct templat templates[MAXOP];
 };
-
-typedef int bool;
 
 #define TRUE 	1
 #define FALSE	0
