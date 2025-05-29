@@ -18,7 +18,6 @@
 
 typedef struct argbytes argb_t;
 typedef char byte;
-typedef byte bool;
 typedef long offset;
 typedef short obj_id;
 typedef short proc_id;

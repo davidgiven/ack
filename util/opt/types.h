@@ -6,7 +6,6 @@
 #define TYPES_H_
 
 typedef unsigned char byte;
-typedef char bool;
 typedef struct line line_t;
 typedef struct line *line_p;
 typedef struct sym sym_t;
