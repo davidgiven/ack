@@ -6,7 +6,6 @@ import builtins
 from copy import copy
 import functools
 import importlib
-import importlib.abc
 import importlib.util
 from importlib.machinery import (
     SourceFileLoader,
@@ -19,10 +18,9 @@ import sys
 import hashlib
 import re
 import ast
-import os
 from collections import namedtuple
 
-COMPRESS_MK_FILE = True
+VERBOSE_MK_FILE = False
 
 verbose = False
 quiet = False
@@ -225,16 +223,13 @@ class Target:
                 if not value:
                     return ""
                 if type(value) == str:
-                    return compressf(value)
+                    return value
                 if _isiterable(value):
                     value = list(value)
                 if type(value) != list:
                     value = [value]
                 return " ".join(
-                    [
-                        compressf(selfi.templateexpand(f))
-                        for f in filenamesof(value)
-                    ]
+                    [selfi.templateexpand(f) for f in filenamesof(value)]
                 )
 
         return Formatter().format(s)
@@ -467,30 +462,6 @@ def filenameof(x):
     return xs[0]
 
 
-def compressf(a):
-    if not COMPRESS_MK_FILE:
-        return a
-    global globalId
-    if len(a) > 5:
-        if a not in wordCache:
-            wordCache[a] = globalId
-            outputFp.write(f"f{globalId}={a}\n")
-            globalId = globalId + 1
-        a = f"$(f{wordCache[a]})"
-    return a
-
-
-def compress(args):
-    if not COMPRESS_MK_FILE:
-        return args
-
-    compressed = []
-    for a in args:
-        compressed += [compressf(a)]
-
-    return compressed
-
-
 def emit(*args, into=None):
     s = " ".join(args) + "\n"
     if into is not None:
@@ -507,77 +478,61 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
     nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
 
     emit("")
-    for k, v in self.args.items():
-        emit(f"# {k} = {v}")
+    if VERBOSE_MK_FILE:
+        for k, v in self.args.items():
+            emit(f"# {k} = {v}")
 
     lines = []
     if nonobjs:
         emit("clean::", into=lines)
-        emit("\t$(hide) rm -f", *compress(nonobjs), into=lines)
+        emit("\t$(hide) rm -f", *nonobjs, into=lines)
 
     hashable = cmds + fins_list + fouts
     hash = hashlib.sha1(bytes("\n".join(hashable), "utf-8")).hexdigest()
     hashfile = join(self.dir, f"hash_{hash}")
 
     global globalId
-    emit(".PHONY:", compressf(name), into=lines)
+    emit(".PHONY:", name, into=lines)
     if outs:
         outsn = globalId
         globalId = globalId + 1
         insn = globalId
         globalId = globalId + 1
 
-        emit(f"OUTS_{outsn}", "=", *compress(fouts), into=lines)
-        emit(f"INS_{insn}", "=", *compress(fins), into=lines)
-        emit(
-            compressf(name),
-            ":",
-            compressf(hashfile),
-            f"$(OUTS_{outsn})",
-            into=lines,
-        )
-        emit("ifeq ($(MAKE4.3),yes)", into=lines)
-        emit(
-            compressf(hashfile),
-            f"$(OUTS_{outsn})",
-            "&:",
-            f"$(INS_{insn})",
-            into=lines,
-        )
-        emit("else", into=lines)
-        emit(f"$(OUTS_{outsn})", ":", compressf(hashfile), into=lines)
-        emit(compressf(hashfile), ":", f"$(INS_{insn})", into=lines)
-        emit("endif", into=lines)
+        emit(f"OUTS_{outsn}", "=", *fouts, into=lines)
+        emit(f"INS_{insn}", "=", *fins, into=lines)
+        emit(name, ":", f"$(OUTS_{outsn})")
+        emit(hashfile, ":")
+        emit(f"\t@mkdir -p {self.dir}")
+        emit(f"\t@touch {hashfile}")
+        emit(f"$(OUTS_{outsn})", "&:",f"$(INS_{insn})", hashfile, into=lines)
 
         if label:
             emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
 
         sandbox = join(self.dir, "sandbox")
-        emit("\t$(hide)", f"rm -rf {compressf(sandbox)}", into=lines)
+        emit("\t$(hide)", f"rm -rf {sandbox}", into=lines)
         emit(
             "\t$(hide)",
-            compressf("$(PYTHON) build/_sandbox.py --link -s"),
-            compressf(sandbox),
+            "$(PYTHON) build/_sandbox.py --link -s",
+            sandbox,
             f"$(INS_{insn})",
             into=lines,
         )
         for c in cmds:
-            emit(f"\t$(hide) cd {compressf(sandbox)} && (", c, ")", into=lines)
+            emit(f"\t$(hide) cd {sandbox} && (", c, ")", into=lines)
         emit(
             "\t$(hide)",
-            compressf("$(PYTHON) build/_sandbox.py --export -s"),
-            compressf(sandbox),
+            "$(PYTHON) build/_sandbox.py --export -s",
+            sandbox,
             f"$(OUTS_{outsn})",
             into=lines,
         )
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
-        emit(compressf(name), ":", *compress(fins), into=lines)
+        emit(name, ":", *fins, into=lines)
 
     outputFp.write("".join(lines))
-
-    if outs:
-        emit(f"\t$(hide) touch {compressf(hashfile)}")
     emit("")
 
 
@@ -645,8 +600,8 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
     self.outs = deps + outs
 
     emit("")
-    emit(".PHONY:", compressf(name))
-    emit(compressf(name), ":", *compress(filenamesof(outs + deps)))
+    emit(".PHONY:", name)
+    emit(name, ":", *filenamesof(outs + deps))
 
 
 def main():
