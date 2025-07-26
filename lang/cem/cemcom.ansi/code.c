@@ -412,7 +412,7 @@ void do_return_expr(struct expr *expr)
 		a return statement with an expression.
 	*/
 	ch3cast(&expr, RETURN, func_type);
-	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(expr, RVAL, true, NO_LABEL, NO_LABEL);
 	if (struct_return != 0) {
 		LoadLocal((arith) 0, pointer_size);
 		store_block(func_type->tp_size, func_type->tp_align);
@@ -597,7 +597,7 @@ void loc_init(struct expr *expr, struct idf *id)
 		{
 			struct value vl;
 
-			EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(expr, RVAL, true, NO_LABEL, NO_LABEL);
 			vl.vl_class = Name;
 			vl.vl_data.vl_idf = id;
 			vl.vl_value = 0;

@@ -112,16 +112,16 @@ static bool is_changed(line_p varl, line_p start, line_p stop)
 	var_nr(varl, &v, &found);
 	if (!found)
 	{
-		return TRUE; /* We don't maintain ud-info for this variable */
+		return true; /* We don't maintain ud-info for this variable */
 	}
 	for (l = start; l != (line_p)0 && l != stop; l = l->l_next)
 	{
 		if (does_expl_def(l) && same_var(varl, l))
-			return TRUE;
+			return true;
 		if (does_impl_def(l) && affected(varl, v, l))
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 static void gen_kill_copies(proc_p p)
@@ -249,18 +249,18 @@ static void solve_cin(proc_p p)
 	}
 	newin = Cempty_set(nrcopies);
 	init_cin(p, full_set);
-	change = TRUE;
+	change = true;
 	/* main loop */
 	while (change)
 	{
-		change = FALSE;
+		change = false;
 		for (b = p->p_start->b_next; b != (bblock_p)0; b = b->b_next)
 		{
 			intersect_outs(b->b_pred, &newin, full_set);
 			/* newin = C_OUT(p1) * .. * C_OUT(pn) */
 			if (!Cequal(newin, C_IN(b)))
 			{
-				change = TRUE;
+				change = true;
 				Ccopy_set(newin, &C_IN(b));
 				Ccopy_set(C_IN(b), &C_OUT(b));
 				Csubtract(C_KILL(b), &C_OUT(b));
@@ -295,7 +295,7 @@ bool is_copy(line_p def)
 
 	lhs = PREV(def);
 	if (lhs == (line_p)0)
-		return FALSE;
+		return false;
 	instr = INSTR(def);
 	switch (INSTR(lhs))
 	{
@@ -306,7 +306,7 @@ bool is_copy(line_p def)
 		case op_lde:
 			return instr == op_sdl || instr == op_sde;
 		default:
-			return FALSE;
+			return false;
 	}
 	UNREACHABLE_CODE;
 }
@@ -363,7 +363,7 @@ void fold_var(line_p old, line_p new, bblock_p b)
 			OFFSET(l) = OFFSET(new);
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 }
 

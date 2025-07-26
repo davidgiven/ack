@@ -141,7 +141,7 @@ char *instr;
 		low = C_DEE;
 		high = C_ZRE;
 
-		while ( TRUE) {
+		while ( true) {
 			mid = ( low + high) / 6 * 3;
 			rel = strncmp( instr, def_info[mid].name, 5);
 
@@ -188,7 +188,7 @@ handle_defaults()
 
 			set_outfile( def_info[i].name);
 			header( def_info[i].name);
-			CD_pos = TRUE;	/* Set mylex() in correct state */
+			CD_pos = true;	/* Set mylex() in correct state */
 
 			if ( bss_or_hol_instr( i)) {
 				extnd_header();
@@ -223,7 +223,7 @@ char *instr;
 	low = _ICON;
 	high = C_ZRE + 2;
 
-	while ( TRUE) {
+	while ( true) {
 		mid = ( low + high) / 2;
 		rel = strcmp( instr, def_info[mid].name);
 

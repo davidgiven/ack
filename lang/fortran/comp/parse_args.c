@@ -73,13 +73,7 @@ this software.
 #define arg_result_ptr(x) ((x).result_ptr)
 #define arg_table_size(x) ((x).table_size)
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-typedef int boolean;
+typedef bool boolean;
 
 
 char *lower_string (/* char [], char * */);
@@ -115,7 +109,7 @@ int other_count;
     init_store (table, entries);
 
     if (result) {
-	boolean use_prefix = TRUE;
+	boolean use_prefix = true;
 	char *argv0;
 
 	argc--;
@@ -151,10 +145,10 @@ int other_count;
 		if (length >= strlen (*argv)) {
 		    argc--;
 		    argv0 = *++argv;
-		    use_prefix = TRUE;
+		    use_prefix = true;
 		} else {
 		    (*argv) += length;
-		    use_prefix = FALSE;
+		    use_prefix = false;
 		} /* else */
 
 /* Parse any necessary arguments */
@@ -169,10 +163,10 @@ int other_count;
 		    else if (length >= strlen (*argv)) {
 			argc--;
 			argv0 = *++argv;
-			use_prefix = TRUE;
+			use_prefix = true;
 		    } else {
 			(*argv) += length;
-			use_prefix = FALSE;
+			use_prefix = false;
 		    } /* else */
 		} /* if (argv_count != P_NO_ARGS) */
 		  else
@@ -252,7 +246,7 @@ int entries;
 
     } /* for i = 0 */
 
-    return TRUE;
+    return true;
 } /* arg_verify */
 
 
@@ -317,7 +311,7 @@ boolean use_prefix;
 {
     char *norm_prefix = arg_prefix (*entry);
     char *norm_string = arg_string (*entry);
-    boolean prefix_match = FALSE, string_match = FALSE;
+    boolean prefix_match = false, string_match = false;
     int result = 0;
 
 /* Buffers for the lowercased versions of the strings being compared.

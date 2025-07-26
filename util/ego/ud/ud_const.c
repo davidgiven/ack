@@ -35,9 +35,9 @@ bool is_use(line_p l)
 		case op_ldl:
 		case op_loe:
 		case op_lol:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 	/* NOTREACHED  */
 }
@@ -59,7 +59,7 @@ bool value_known(line_p def, offset* val_out)
 		case op_ine:
 		case op_del:
 		case op_dee:
-			return FALSE;
+			return false;
 		case op_zrl:
 		case op_zre:
 			v = (offset)0;
@@ -72,7 +72,7 @@ bool value_known(line_p def, offset* val_out)
 		case op_ste:
 			l = PREV(def);
 			if (l == (line_p)0)
-				return FALSE;
+				return false;
 			sz2 = ws;
 			switch (INSTR(l))
 			{
@@ -82,7 +82,7 @@ bool value_known(line_p def, offset* val_out)
 						v = (offset)0;
 						break;
 					}
-					return FALSE;
+					return false;
 				case op_ldc:
 					sz2 += ws;
 					/* fall through ...*/
@@ -94,14 +94,14 @@ bool value_known(line_p def, offset* val_out)
 					}
 					/* fall through ... */
 				default:
-					return FALSE;
+					return false;
 			}
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	*val_out = v;
-	return TRUE;
+	return true;
 }
 
 bool affected(line_p use, short v, line_p l)
@@ -134,18 +134,18 @@ static void search_backwards(line_p use, short v, bool* found, line_p* def)
 	{
 		if (does_expl_def(l) && same_var(use, l))
 		{
-			*found = TRUE;
+			*found = true;
 			*def = l;
 			return;
 		}
 		if (does_impl_def(l) && affected(use, v, l))
 		{
-			*found = TRUE;
+			*found = true;
 			*def = (line_p)0;
 			return;
 		}
 	}
-	*found = FALSE;
+	*found = false;
 }
 
 static short outer_def(cset vdefs, cset in)
@@ -222,7 +222,7 @@ void fold_const(line_p l, bblock_p b, offset val)
 			n->l_instr = op_ldc;
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	repl_line(l, n, b);
 }

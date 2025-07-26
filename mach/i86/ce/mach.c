@@ -12,7 +12,7 @@ int arg;
 }
 #endif
 
-int push_waiting = FALSE;
+int push_waiting = false;
 
 int fit_byte( val)
 int val;

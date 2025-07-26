@@ -40,7 +40,7 @@ void error(char *msg, char* a1)
 /*
  *  Read a line into the supplied string of length LZ.  Remove
  *  comments, ignore blank lines. Deal with quoted (\) #, and
- *  quoted newlines.  If EOF return TRUE.
+ *  quoted newlines.  If EOF return true.
  */
 bool mgetline(char* str, FILE* fd)
 {
@@ -52,7 +52,7 @@ bool mgetline(char* str, FILE* fd)
     for (;;)
     {
         if (fgets(str+pos, LZ-pos, fd) == (char *)0)
-            return TRUE;        /*  EOF  */
+            return true;        /*  EOF  */
 
         lineno++;
 
@@ -88,7 +88,7 @@ bool mgetline(char* str, FILE* fd)
             p++;
 
         if (*p != '\0')
-            return FALSE;
+            return false;
         pos = 0;
     }
 }

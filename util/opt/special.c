@@ -12,6 +12,6 @@
 bool special(line_p *lpp,byte *bp,int patlen)
 {
 
-	return(FALSE);
+	return(false);
 }
 #endif

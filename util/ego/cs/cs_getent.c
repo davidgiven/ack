@@ -77,12 +77,12 @@ entity_p getentity(line_p lnp, line_p* l_out)
 	{
 		offset off = off_set(lnp);
 
-		en.en_static = FALSE;
+		en.en_static = false;
 		en.en_size = ps;
 		switch ((int)off == off ? (int)off : 3)
 		{
 			default:
-				assert(FALSE);
+				assert(false);
 				break;
 			case 0:
 				en.en_kind = ENLOCBASE;
@@ -102,21 +102,21 @@ entity_p getentity(line_p lnp, line_p* l_out)
 	/* Lil and sil refer to two entities. */
 	if (INSTR(lnp) == op_lil || INSTR(lnp) == op_sil)
 	{
-		en.en_static = FALSE;
+		en.en_static = false;
 		en.en_kind = ENLOCAL;
 		en.en_size = ps; /* Local must be a pointer. */
 		en.en_loc = off_set(lnp);
 		vn = en_enter(&en)->en_vn;
 	}
 
-	en.en_static = FALSE;
+	en.en_static = false;
 	en.en_kind = ENKIND(ip);
 
 	/* Fill in the size of the entity. */
 	switch (SIZEINF(ip))
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case WS1:
 			en.en_size = ws;
@@ -165,19 +165,19 @@ entity_p getentity(line_p lnp, line_p* l_out)
 	switch (en.en_kind)
 	{
 		case ENFZER:
-			en.en_static = TRUE;
+			en.en_static = true;
 			break;
 		case ENCONST:
-			en.en_static = TRUE;
+			en.en_static = true;
 			en.en_val = off_set(lnp);
 			break;
 		case ENALOCAL:
-			en.en_static = TRUE;
+			en.en_static = true;
 		case ENLOCAL:
 			en.en_loc = off_set(lnp);
 			break;
 		case ENAEXTERNAL:
-			en.en_static = TRUE;
+			en.en_static = true;
 		case ENEXTERNAL:
 			en.en_ext = OBJ(lnp);
 			break;
@@ -191,7 +191,7 @@ entity_p getentity(line_p lnp, line_p* l_out)
 			en.en_ind = vn;
 			break;
 		case ENAOFFSETTED:
-			en.en_static = TRUE;
+			en.en_static = true;
 		case ENOFFSETTED:
 			Pop(&tk, (offset)ps);
 			*l_out = tk.tk_lfirst;
@@ -204,7 +204,7 @@ entity_p getentity(line_p lnp, line_p* l_out)
 			if (en.en_levels == 0)
 			{
 				/* otherwise the program could change it */
-				en.en_static = TRUE;
+				en.en_static = true;
 			}
 			break;
 		case ENPROC:

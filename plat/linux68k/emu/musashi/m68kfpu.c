@@ -1554,7 +1554,7 @@ static void fscc(void)
   if ((REG_IR & 0x38) == 0)
     {
       // If the specified floating-point condition is true, sets the byte integer operand at
-      // the destination to TRUE (all ones); otherwise, sets the byte to FALSE (all zeros).
+      // the destination to true (all ones); otherwise, sets the byte to false (all zeros).
       
       REG_D[REG_IR & 7] = (REG_D[REG_IR & 7] & 0xFFFFFF00) | (cc ? 0xff : 0x00);
     }

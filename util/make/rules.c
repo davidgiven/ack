@@ -22,7 +22,7 @@ char *suffix(char *name)
  *  Dynamic dependency.  This routine applies the suffis rules
  *  to try and find a source and a set of rules for a missing
  *  target.  If found, np is made into a target with the implicit
- *  source name, and rules.  Returns TRUE if np was made into
+ *  source name, and rules.  Returns true if np was made into
  *  a target.
  */
 bool dyndep(struct name *np)
@@ -41,14 +41,14 @@ bool dyndep(struct name *np)
     p = str1;
     q = np->n_name;
     if (!(suff = suffix(q)))
-        return FALSE;       /* No suffix */
+        return false;       /* No suffix */
     while (q < suff)
         *p++ = *q++;
     *p = '\0';
     basename = setmacro("*", str1, 4)->m_val;
 
     if (!((sp = newname(".SUFFIXES"))->n_flag & N_TARG))
-        return FALSE;
+        return false;
 
     for (lp = sp->n_line; lp; lp = lp->l_next)
         for (dp = lp->l_dep; dp; dp = dp->d_next)
@@ -85,11 +85,11 @@ bool dyndep(struct name *np)
                     dp = newdep(op, (struct depend *)0);
                     newline(np, dp, sp->n_line->l_cmd, 0);
                     setmacro("<", op->n_name, 4);
-                    return TRUE;
+                    return true;
                 }
             }
         }
-    return FALSE;
+    return false;
 }
 
 

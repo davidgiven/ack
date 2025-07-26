@@ -56,9 +56,9 @@ static bool contained(occur_p ocp1, occur_p ocp2)
 		next = lnp != ocp2->oc_llast ? lnp->l_next : (line_p)0;
 
 		if (lnp == ocp1->oc_llast)
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 static void delete(occur_p ocp, avail_p start)
@@ -179,11 +179,11 @@ static void replace(occur_p ocp, offset tmp, avail_p avp)
 			break;
 		case op_dvi:
 			if (instr == op_rmi)
-				complete_dv_as_rm(lol, avp, FALSE);
+				complete_dv_as_rm(lol, avp, false);
 			break;
 		case op_dvu:
 			if (instr == op_rmu)
-				complete_dv_as_rm(lol, avp, FALSE);
+				complete_dv_as_rm(lol, avp, false);
 			break;
 	}
 
@@ -255,14 +255,14 @@ static void append(avail_p avp, offset tmp)
 		case op_dvi:
 			if (instr == op_rmi)
 			{
-				complete_dv_as_rm(lol, avp, TRUE);
+				complete_dv_as_rm(lol, avp, true);
 				avp->av_found->l_instr = op_dvi;
 			}
 			break;
 		case op_dvu:
 			if (instr == op_rmu)
 			{
-				complete_dv_as_rm(lol, avp, TRUE);
+				complete_dv_as_rm(lol, avp, true);
 				avp->av_found->l_instr = op_dvu;
 			}
 			break;

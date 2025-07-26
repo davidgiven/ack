@@ -48,13 +48,13 @@ static bool classes(int instr, int* src_out, int* res_out)
 	class_p c;
 
 	if (instr < sp_fmnem || instr > sp_lmnem)
-		return FALSE;
+		return false;
 	c = &classtab[instr];
 	if (c->src_class == NOCLASS)
-		return FALSE;
+		return false;
 	*src_out = c->src_class;
 	*res_out = c->res_class;
-	return TRUE;
+	return true;
 }
 
 static bool uses_arg(int class)
@@ -71,9 +71,9 @@ static bool uses_arg(int class)
 		case CLASS4:
 		case CLASS11:
 		case CLASS12:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 	UNREACHABLE_CODE;
 }
@@ -93,9 +93,9 @@ static bool parse_locs(line_p l, offset* c1_out, offset* c2_out)
 	{
 		*c1_out = off_set(l);
 		*c2_out = off_set(PREV(l));
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 static bool check_args(line_p l, int src_class, int res_class, offset* arg1_out, offset* arg2_out)
@@ -121,7 +121,7 @@ static bool check_args(line_p l, int src_class, int res_class, offset* arg1_out,
 		if (TYPE(l) == OPSHORT)
 		{
 			*arg1_out = (offset)SHORT(l);
-			return TRUE;
+			return true;
 		}
 		else
 		{
@@ -131,11 +131,11 @@ static bool check_args(line_p l, int src_class, int res_class, offset* arg1_out,
 			}
 			else
 			{
-				return FALSE;
+				return false;
 			}
 		}
 	}
-	return TRUE; /* no argument needed */
+	return true; /* no argument needed */
 }
 
 static offset nrbytes(int class, offset arg1, offset arg2)
@@ -171,7 +171,7 @@ static offset nrbytes(int class, offset arg1, offset arg2)
 		case CLASS12:
 			return (arg1 < ws ? ws : arg1);
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	return 0;
 }
@@ -182,7 +182,7 @@ static void attrib(line_p l, offset* expect_out, offset* srcb_out, offset* resb_
 	 * instruction appearing in an expression.
 	 * If it is something we don't
 	 * expect in such expression (e.g. a store)
-	 * expect_out is set to FALSE. Else we
+	 * expect_out is set to false. Else we
 	 * determine the number of bytes popped from
 	 * the stack by the instruction and the
 	 * number of bytes pushed on the stack as
@@ -195,11 +195,11 @@ static void attrib(line_p l, offset* expect_out, offset* srcb_out, offset* resb_
 	if (l == (line_p)0 || !classes(INSTR(l), &src_class, &res_class)
 	    || !check_args(l, src_class, res_class, &arg1, &arg2))
 	{
-		*expect_out = FALSE;
+		*expect_out = false;
 	}
 	else
 	{
-		*expect_out = TRUE;
+		*expect_out = true;
 		*srcb_out = nrbytes(src_class, arg1, arg2);
 		*resb_out = nrbytes(res_class, arg1, arg2);
 	}
@@ -216,7 +216,7 @@ bool parse(
 	 * As EM is essentially postfix, this instruction
 	 * can be regarded as the root node of an expression
 	 * tree. The EM code is traversed from right to left,
-	 * i.e. top down. On success, TRUE is returned and
+	 * i.e. top down. On success, true is returned and
 	 * 'l_out' will point to the first instruction
 	 * of the recognized code. On toplevel, when an
 	 * expression has been recognized, the procedure-parameter
@@ -239,7 +239,7 @@ bool parse(
 		 * (e.g. 'adi 2' pops 4 bytes and pushes 2 bytes).
 		 */
 		if (!expected || (more -= resultbytes) < 0)
-			return FALSE;
+			return false;
 		if (sourcebytes == 0)
 		{
 			/* a leaf of the expression tree */
@@ -249,7 +249,7 @@ bool parse(
 		{
 			if (!parse(PREV(l), sourcebytes, &lnp, level + 1, action0))
 			{
-				return FALSE;
+				return false;
 			}
 		}
 		if (level == 0)
@@ -263,5 +263,5 @@ bool parse(
 	 * together push nbytes on the stack.
 	 */
 	*l_out = lnp;
-	return TRUE;
+	return true;
 }

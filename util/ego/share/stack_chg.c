@@ -42,11 +42,11 @@ static int stack_change(line_p l, char sign)
 			 */
 			arg = ws;
 		}
-		argdef = TRUE;
+		argdef = true;
 	}
 	else
 	{
-		argdef = FALSE;
+		argdef = false;
 	}
 	s = pop_push[i];
 	if (*s == '0')
@@ -94,7 +94,7 @@ static int stack_change(line_p l, char sign)
 				case '?':
 					return -1;
 				default:
-					assert(FALSE);
+					assert(false);
 			}
 		}
 		s++;

@@ -327,7 +327,7 @@ x86emu_single_step(void)
             return;
         case 'P':
             noDecode = (noDecode) ? 0 : 1;
-            printk("Toggled decoding to %s\n", (noDecode) ? "FALSE" : "TRUE");
+            printk("Toggled decoding to %s\n", (noDecode) ? "false" : "TRUE");
             break;
         case 't':
         case 0:

@@ -154,29 +154,29 @@ int *num;
 {
 	if ( ( *str == 'a') && ( *(str+1) == 'p')) {
 		*num = 12;
-		return( TRUE);
+		return( true);
 	}
 	else if ( ( *str == 'f') && ( *(str+1) == 'p')) {
 		*num = 13;
-		return( TRUE);
+		return( true);
 	}
 	else if ( ( *str == 's') && ( *(str+1) == 'p')) {
 		*num = 14;
-		return( TRUE);
+		return( true);
 	}
 	if ( *str == 'r') {
 	        if ( isdigit( *(str+1)) &&  isdigit( *(str+2))) {
 			*num = ( *(str+1) - '0') * 10 + *(str+2) - '0';
-			return( TRUE);
+			return( true);
 		}
 		else if ( isdigit( *(str+1))) {
 			*num = *(str+1) - '0';
-			return( TRUE);
+			return( true);
 		}
 		else 
-		     return( FALSE);
+		     return( false);
 	}	
-	return( FALSE);
+	return( false);
 }
 
 

@@ -37,9 +37,9 @@ static bool commutative(int instr)
 		case op_mlf:
 		case op_mli:
 		case op_mlu:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 }
 
@@ -51,14 +51,14 @@ static bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 	 * does not matter.
 	 */
 	if (avp1->av_instr != avp2->av_instr)
-		return FALSE;
+		return false;
 	if (avp1->av_size != avp2->av_size)
-		return FALSE;
+		return false;
 
 	switch (kind)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case EXPENSIVE_LOAD:
 		case UNAIR_OP:
@@ -127,7 +127,7 @@ static void copy_avail(int kind, avail_p src, avail_p dst)
 	switch (kind)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case EXPENSIVE_LOAD:
 		case UNAIR_OP:

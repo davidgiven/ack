@@ -112,7 +112,7 @@ void garbage_collect(void) {
 		return;
 	qsort(stab,nstab,sizeof (char *),compar);
 	for (i=0;i<nstab;i++)
-		used[i]= FALSE;
+		used[i]= false;
 	for(emlp=emlines;emlp<emlines+nemlines;emlp++)
 		chkstr(emlp->em_soper,used);
 	for (tp= fakestack;tp<&fakestack[stackheight];tp++) {

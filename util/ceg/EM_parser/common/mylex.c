@@ -29,17 +29,14 @@ char yytext[YYTEXT],	/* string-buffer for the token */
      *next;		/* points to the first free posistion in yytext[] */
 extern char scanc();
 
-#define FALSE	0
-#define TRUE	1
-
-int CD_pos = FALSE;	/* 'CD_pos' is used as a flag to signal if it is
+int CD_pos = false;	/* 'CD_pos' is used as a flag to signal if it is
 			 * possible to match a CONDITION or DEFAULT-token at 
 			 * this moment. Thus mylex() knows about the grammar
 			 * of the "EM_table"!!
 			 * This flag is needed because CALL is a subset of
 			 * CONDITION.
 			 */
-int CALL_pos = FALSE;	/* Needed to distinguish between 
+int CALL_pos = false;	/* Needed to distinguish between 
 			 *	C_INSTR CONDITION	and	CALL
 			 */
 
@@ -51,7 +48,7 @@ int mylex()
 {
 	char c;
 
-	static int special = FALSE;	/* rule with conditions + default ? */
+	static int special = false;	/* rule with conditions + default ? */
 
 	next = yytext;
 	c = *next++ = skip_space();
@@ -68,8 +65,8 @@ int mylex()
 					 * '..icon'.
 					 */
 			if ( special)
-				CD_pos = TRUE;
-			CALL_pos = FALSE;
+				CD_pos = true;
+			CALL_pos = false;
 		     	return( '.');
 		     }
 		     break;
@@ -77,15 +74,15 @@ int mylex()
 	  case ';' : return( ';');
 
 	  case '=' : if ( arrow()) {
-			CD_pos = FALSE;
-			CALL_pos = TRUE;
+			CD_pos = false;
+			CALL_pos = true;
 			return( ARROW);
 		     }
 		     break;
 
 	  case 'd' : if ( CD_pos && _default()) {
-			CD_pos = FALSE;
-			special = FALSE;
+			CD_pos = false;
+			special = false;
 			return( DEFAULT);
 		     }
 		     break;
@@ -96,8 +93,8 @@ int mylex()
 
 	if ( CD_pos) {
 		read_condition();
-		CD_pos = FALSE;
-		special = TRUE;
+		CD_pos = false;
+		special = true;
 		return( CONDITION);
 	}
 	if ( isalpha( c)) {
@@ -116,11 +113,11 @@ int mylex()
 		}
 		else {
 			if ( is_DEF_C_INSTR( yytext)) {
-				CD_pos = TRUE;
+				CD_pos = true;
 				return( DEF_C_INSTR);
 			}
 			if ( is_C_INSTR( yytext)) {
-				CD_pos = TRUE;
+				CD_pos = true;
 				return( C_INSTR);
 			}
 			return( ERROR);
@@ -132,7 +129,7 @@ int mylex()
 			*next++ = '.';
 			read_ident();
 			if ( is_DEF_C_INSTR( yytext)) {
-				CD_pos = TRUE;
+				CD_pos = true;
 				return( DEF_C_INSTR);
 			}
 			return( ERROR);
@@ -180,12 +177,12 @@ int arrow() /* '==>' */
 {
 	if ( ( *next++ = scanc()) == '=')
 		if ( ( *next++ = scanc()) == '>')
-			return( TRUE);
+			return( true);
 		else
 			backc( *--next);
 	else
 		backc( *--next);
-	return( FALSE);
+	return( false);
 }
 
 int _default() /* 'default' */
@@ -200,7 +197,7 @@ int _default() /* 'default' */
 			    if ( ( *next++ = scanc()) == 't')
 				if ( !isletter( c = skip_space())) {
 					backc( c);
-					return( TRUE);
+					return( true);
 				}
 				else
 					backc( c);
@@ -216,7 +213,7 @@ int _default() /* 'default' */
 		backc( *--next);
 	else
 	    backc( *--next);
-	return( FALSE);
+	return( false);
 }
 
 read_ident()
@@ -232,7 +229,7 @@ read_call()
 {
 	int n = 1;
 
-	while ( TRUE)
+	while ( true)
 		switch( *next++ = scanc()) {
 		  case EOF : return;
 
@@ -251,7 +248,7 @@ read_condition()
 /* A CONDITION is followed by '==>'
  */
 {
-	while ( TRUE) {
+	while ( true) {
 		switch ( *next++ = scanc()) {
 		  case EOF : return;
 
@@ -271,9 +268,9 @@ is_C_INSTR( str)
 char *str;
 {
 	if ( *str == 'C' && *(str+1) == '_')	/* C_xxx */
-		return( TRUE);
+		return( true);
 	else
-		return( FALSE);
+		return( false);
 }
 
 is_DEF_C_INSTR( str)
@@ -294,5 +291,5 @@ char *str;
 			backc( *--next);
 	else
 		backc( *--next);
-	return( FALSE);
+	return( false);
 }

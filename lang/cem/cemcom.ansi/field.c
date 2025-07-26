@@ -62,7 +62,7 @@ void eval_field(
 	if (op == '=') {
 		/* F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f) */
 		assert(tp == rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		store_field(fd, tp->tp_unsigned, code, leftop, (arith) 0);
 	}
@@ -75,7 +75,7 @@ void eval_field(
 		else	{			/* complex case	*/
 			tmpvar = NewLocal(pointer_size, pointer_align, 
 					  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
 			C_loi(word_size);
@@ -93,10 +93,10 @@ void eval_field(
 			C_loc(sft);
 			C_sri(word_size);
 		}
-		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
+		if (code == true && (op == POSTINCR || op == POSTDECR))
 			C_dup(word_size);
 		conversion(atype, rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		/* the 'op' operation: */
 		if (op == PLUSPLUS || op == POSTINCR)
 			assop(rightop->ex_type, PLUSAB);
@@ -107,10 +107,10 @@ void eval_field(
 			assop(rightop->ex_type, op);
 		conversion(rightop->ex_type, atype);
 		store_field(fd, atype->tp_unsigned, 
-			    code == TRUE && op != POSTINCR && op != POSTDECR,
+			    code == true && op != POSTINCR && op != POSTDECR,
 			    leftop, tmpvar);
 	}
-	if (code == TRUE) {
+	if (code == true) {
 		/*	Take care that the effective value stored in
 			the bit field (i.e. the value that is got on
 			retrieval) is on top of stack.
@@ -138,7 +138,7 @@ void store_field(
 
 	C_loc(fd->fd_mask);
 	C_and(word_size);
-	if (code == TRUE)
+	if (code == true)
 		C_dup(word_size);
 	C_loc((arith)fd->fd_shift);
 	if (uns)
@@ -157,7 +157,7 @@ void store_field(
 		if (! tmpvar) {
 			tmpvar = NewLocal(pointer_size, pointer_align, 
 				  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			StoreLocal(tmpvar, pointer_size);
 		}
 		LoadLocal(tmpvar, pointer_size);

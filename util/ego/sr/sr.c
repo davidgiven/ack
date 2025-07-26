@@ -153,7 +153,7 @@ static void opt_proc(proc_p p)
 		if (!outermost)
 			break;
 		do_loop(outermost);
-		outermost->LP_DONE = TRUE;
+		outermost->LP_DONE = true;
 		OUTTRACE("loop %d processed", outermost->lp_id);
 	}
 }

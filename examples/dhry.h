@@ -348,6 +348,7 @@
 #include <stdlib.h>
                 /* for exit */
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
                 /* for strcpy, strcmp */
 
@@ -419,8 +420,6 @@ typedef float measure;
 
 #define Null 0 
                 /* Value of a Null pointer */
-#define true  1
-#define false 0
 
 typedef int     One_Thirty;
 typedef int     One_Fifty;

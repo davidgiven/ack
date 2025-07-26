@@ -7,10 +7,6 @@
 #define UNKNOWN		(-1)
 
 
-#define TRUE		1
-#define	FALSE		0
-
-
 #define STRING		0
 #define LABEL		1
 #define ARITH		2

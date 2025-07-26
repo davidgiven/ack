@@ -216,11 +216,11 @@ static bool updates_needed(loop_p lp, item_p item)
 			s = (bblock_p)Lelem(si);
 			if (!Lis_elem(s, lp->LP_BLOCKS) && MUST_UPDATE(item, s))
 			{
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static short countuses(lset usage, bblock_p b)
@@ -261,7 +261,7 @@ static void allocs_of_item(
 	whole_lifetime(item, &ini, &lt);
 	wholeproc = cons_alloc(
 	    item, lt, Lnrelems(item->it_usage), Lnrelems(item->it_usage), proc_inits(p, item, ini),
-	    (alloc_p)0, FALSE, TRUE);
+	    (alloc_p)0, false, true);
 	insert_alloc(wholeproc, alloc_list_p);
 	for (li = Lfirst(loops); li != (Lindex)0; li = Lnext(li, loops))
 	{
@@ -290,8 +290,8 @@ static void allocs_of_item(
 			}
 			insert_alloc(
 			    cons_alloc(
-			        item, lt, susecount, dusecount, loop_inits(lp, item, header), wholeproc, TRUE,
-			        FALSE),
+			        item, lt, susecount, dusecount, loop_inits(lp, item, header), wholeproc, true,
+			        false),
 			    alloc_list_p);
 		}
 		else if (sloopcnt[lp->lp_id] != 0)

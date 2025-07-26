@@ -84,7 +84,7 @@ static void stack_pollution(bblock_p b)
 
 	line_p l;
 	line_p asp, next = b->b_start;
-	bool asp_seen = FALSE;
+	bool asp_seen = false;
 	int stack_diff, pop, push;
 	bool ok;
 
@@ -108,7 +108,7 @@ static void stack_pollution(bblock_p b)
 					if (!ok || (stack_diff -= pop) < 0)
 					{
 						/* can't eliminate last ASP */
-						asp_seen = FALSE;
+						asp_seen = false;
 					}
 					else
 					{
@@ -139,7 +139,7 @@ static void stack_pollution(bblock_p b)
 			}
 		}
 		asp = l;
-		asp_seen = TRUE; /* use new ASP for next try! */
+		asp_seen = true; /* use new ASP for next try! */
 	} while (asp != (line_p)0);
 }
 
@@ -162,7 +162,7 @@ static bool block_save(bblock_p b)
 		/* printf("instr %d, pop %d,push %d,ok %d\n",INSTR(l),pop,push,ok);  */
 		if (!ok || (stack_diff -= pop) < 0)
 		{
-			return FALSE;
+			return false;
 		}
 		else
 		{

@@ -112,9 +112,6 @@ typedef union {
 #define PRO_INT         2
 #define PRO_EXT         3
 
-#define TRUE            1
-#define FALSE           0
-
 #define MAXBYTE 255
 
 #define MAXSTRING       200     /* Maximum string length accepted */

@@ -18,7 +18,6 @@
 
 typedef struct argbytes argb_t;
 typedef char byte;
-typedef byte bool;
 typedef long offset;
 typedef short obj_id;
 typedef short proc_id;
@@ -56,9 +55,6 @@ typedef struct formal* formal_p;
 typedef struct local* local_p;
 
 typedef struct cond_tab* cond_p;
-
-#define TRUE 1
-#define FALSE 0
 
 /* DATABLOCKS */
 
@@ -184,7 +180,7 @@ union lpext_t
 	{
 		lset lpx_blocks; /* basic blocks  constituting the loop  */
 		bblock_p lpx_header; /* header block, 0 if no one allocated yet */
-		bool lpx_done; /* TRUE if we've processed this loop	*/
+		bool lpx_done; /* true if we've processed this loop	*/
 		line_p lpx_instr; /* current last instruction in header block*/
 	} lpx_sr;
 	struct lpext_ra

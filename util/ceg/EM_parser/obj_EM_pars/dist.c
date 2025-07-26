@@ -14,7 +14,7 @@ char *lab;
 
 
 #define MAX_LABEL	10
-#define	TRUE		1
+#define	true		1
 #define FALSE		0
 
 

@@ -82,10 +82,3 @@ struct instr_descr {
 	struct templat templates[MAXOP];
 };
 
-typedef int bool;
-
-#define TRUE 	1
-#define FALSE	0
-
-#define NIL (instr_p) 0
-#define NULLSTRING (char *) 0

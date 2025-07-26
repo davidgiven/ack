@@ -79,7 +79,7 @@ item_p item_of(offset off, item_p items[])
 void fill_item(item_p item, line_p l)
 {
 	item->it_type = item_type(l);
-	item->it_desirable = TRUE;
+	item->it_desirable = true;
 	switch (item->it_type)
 	{
 		case GLOBL_ADDR:
@@ -108,10 +108,10 @@ static bool desirable(line_p l)
 			case op_aar:
 			case op_lar:
 			case op_sar:
-				return FALSE;
+				return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 static int cmp_items(item_p a, item_p b)
@@ -184,7 +184,7 @@ static short reg_type(item_p item)
 		case DCONST:
 			return reg_any;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -207,7 +207,7 @@ static short item_size(item_p item)
 		case DCONST:
 			return 2 * ws; /* 2 * word size */
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -248,7 +248,7 @@ static void add_item(item_p item, time_p t, item_p items[])
 			/* found */
 			if (!item->it_desirable)
 			{
-				x->it_desirable = FALSE;
+				x->it_desirable = false;
 			}
 			Ladd(t, &x->it_usage);
 			return; /* done */
@@ -280,7 +280,7 @@ static void add_usage(line_p l, bblock_p b, item_p items[])
 	fill_item(&thisitem, l); /* fill in some fields */
 	if (!desirable(l))
 	{
-		thisitem.it_desirable = FALSE; /* don't put item in reg. */
+		thisitem.it_desirable = false; /* don't put item in reg. */
 	}
 	if (thisitem.it_type == LOCALVAR && !is_regvar(thisitem.i_t.it_off))
 	{

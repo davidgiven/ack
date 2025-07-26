@@ -134,12 +134,12 @@ static void hashpatterns(void)
 
 int peephole(void)
 {
-	static bool phashed = FALSE;
+	static bool phashed = false;
 
 	if (!phashed)
 	{
 		hashpatterns();
-		phashed = TRUE;
+		phashed = true;
 	}
 	return optimize();
 }
@@ -162,7 +162,7 @@ static int optimize(void)
 			if (instr == op_lab || instr == op_bra)
 				np->n_repl = np->n_line->l_next->l_a.la_np;
 			else if (basicblock(&np->n_line->l_next))
-				madeopt = TRUE;
+				madeopt = true;
 		}
 	return madeopt;
 }
@@ -284,7 +284,7 @@ static eval_t compute(expr_p pexp)
 	switch (nparam[pexp->ex_operator])
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 		case 2:
 			leaf2 = compute(&enodes[pexp->ex_rnode]);
 			if (leaf2.e_typ == EV_UNDEF
@@ -306,7 +306,7 @@ static eval_t compute(expr_p pexp)
 	switch (pexp->ex_operator)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case EX_CON:
 			res.e_v.e_con = (offset) pexp->ex_lnode;
@@ -544,7 +544,7 @@ static bool tryrepl(line_p *lpp, byte *bp, int patlen)
 		oldline(lp);
 		lp = tp;
 	}
-	return (TRUE);
+	return (true);
 }
 
 static bool trypat(line_p *lpp, byte *bp, int len)
@@ -563,12 +563,12 @@ static bool trypat(line_p *lpp, byte *bp, int len)
 	if (len == 3)
 	{
 		if (patlen < 3)
-			return (FALSE);
+			return (false);
 	}
 	else
 	{
 		if (patlen != len)
-			return (FALSE);
+			return (false);
 	}
 
 	/*
@@ -577,9 +577,9 @@ static bool trypat(line_p *lpp, byte *bp, int len)
 
 	for (i = 0, lp = *lpp; i < patlen && lp != (line_p) 0; i++, lp = lp->l_next)
 		if (lp->l_instr != *bp++)
-			return (FALSE);
+			return (false);
 	if (i != patlen)
-		return (FALSE);
+		return (false);
 
 	/*
 	 * opcodes are also correct, now comes the hard part
@@ -642,7 +642,7 @@ static bool trypat(line_p *lpp, byte *bp, int len)
 		/* there is a condition */
 		result = compute(&enodes[i]);
 		if (result.e_typ != EV_CONST || result.e_v.e_con == 0)
-			return (FALSE);
+			return (false);
 	}
 	return (tryrepl(lpp, bp, patlen));
 }
@@ -659,7 +659,7 @@ static int basicblock(line_p *alpp)
 	int count = 0;
 
 	lpp = alpp;
-	madeopt = FALSE;
+	madeopt = false;
 	while ((*lpp) != (line_p) 0 && ((*lpp)->l_instr & BMASK) != op_lab)
 	{
 		lp = *lpp;
@@ -694,7 +694,7 @@ static int basicblock(line_p *alpp)
 				if ((bp[PO_HASH] & BMASK) == (hash[i] >> 8))
 					if (trypat(lpp, &bp[PO_MATCH], i + 1))
 					{
-						madeopt = TRUE;
+						madeopt = true;
 						next = lpp;
 						i = 0; /* dirty way of double break */
 						break;
@@ -742,7 +742,7 @@ static int basicblock(line_p *alpp)
 				oldline(lp->l_next);
 				oldline(lp);
 				lpp = &e_repl->l_next;
-				madeopt = TRUE;
+				madeopt = true;
 			}
 			else
 			{

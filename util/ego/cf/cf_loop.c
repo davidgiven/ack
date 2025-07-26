@@ -252,9 +252,9 @@ static bool does_exit(bblock_p b, loop_p lp)
 	for (i = Lfirst(b->b_succ); i != (Lindex)0; i = Lnext(i, b->b_succ))
 	{
 		if (!INSIDE_LOOP(Lelem(i), lp))
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 static void mark_succ(bblock_p b, loop_p lp)
@@ -372,7 +372,7 @@ void loop_detection(proc_p p)
 					 * edges; such a loop is called a messy
 					 * loop.
 					 */
-					org->LP_MESSY = TRUE;
+					org->LP_MESSY = true;
 					Ldeleteset(lp->LP_BLOCKS);
 					oldcflpx(lp->lp_extend);
 					oldloop(lp);

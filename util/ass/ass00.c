@@ -163,9 +163,9 @@ static void argument(char *arg)
 		read_compact();
 	else if (w == ARMAG || w == AALMAG)
 	{
-		archmode = TRUE;
+		archmode = true;
 		archive();
-		archmode = FALSE;
+		archmode = false;
 	}
 	else
 		error("%s: bad format", arg);

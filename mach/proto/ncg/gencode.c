@@ -126,7 +126,7 @@ void prtoken(token_p tp, int leadingchar) {
 			assert(c>0 && c<=TOKENSIZE);
 			switch(tdp->t_type[c-1]) {
 			default:
-				assert(FALSE);
+				assert(false);
 			case EV_INT:
 				fprintf(codefile,WRD_FMT,tp->t_att[c-1].aw);
 				break;

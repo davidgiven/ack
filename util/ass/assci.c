@@ -301,11 +301,11 @@ static int needed(void)
 		default:
 			error("Unexpected byte after ms_ext");
 		case sp_cend:
-			return FALSE;
+			return false;
 		}
 		while (table2() != sp_cend)
 			;
-		return TRUE;
+		return true;
 	}
 }
 

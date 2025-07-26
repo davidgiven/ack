@@ -80,7 +80,7 @@ void code_startswitch(struct expr **expp)
 	/* sh->sh_entries = (struct case_entry *) 0; -- case-entry list	*/
 	sh->sh_expr = *expp;
 #ifdef LINT
-	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(sh->sh_expr, RVAL, true, NO_LABEL, NO_LABEL);
 #endif
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
@@ -101,7 +101,7 @@ void code_endswitch(void)
 	C_bra(sh->sh_break);		/* skip the switch table now	*/
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	/* evaluate the switch expr.	*/
-	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(sh->sh_expr, RVAL, true, NO_LABEL, NO_LABEL);
 	if (sh->sh_nrofentries <= 1) {
 		if (sh->sh_nrofentries) {
 			load_cst(sh->sh_lowerbd, size);

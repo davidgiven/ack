@@ -81,8 +81,8 @@ static void compare(int relop, label lbl);
 
 void EVAL(struct expr *expr, int val, int code, label true_label, label false_label)
 {
-	int vol = (code != TRUE && recurqual(expr->ex_type, TQ_VOLATILE));
-	int gencode = code == TRUE;
+	int vol = (code != true && recurqual(expr->ex_type, TQ_VOLATILE));
+	int gencode = code == true;
 
 	if (err_occurred) return;
 	switch (expr->ex_class) {
@@ -368,16 +368,16 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 			}
 #endif /* NOBITFIELD */
 			if (is_struct_or_union(tp->tp_fund) && ! gencode) {
-				EVAL(right, LVAL, TRUE, NO_LABEL, NO_LABEL);
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(right, LVAL, true, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				copy_block(tp->tp_size, tp->tp_align);
 				break;
 			}
-			EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(right, RVAL, true, NO_LABEL, NO_LABEL);
 			if (gencode && val == RVAL)
 				C_dup(ATW(tp->tp_size));
 			if (left->ex_class != Value) {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				if (gencode && val == LVAL) {
 					arith tmp = LocalPtrVar();
 					C_dup(pointer_size);
@@ -391,7 +391,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 			else {
 				store_val(&(left->EX_VALUE), left->ex_type);
 				if (gencode && val == LVAL) {
-					EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+					EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				}
 			}
 			break;
@@ -438,17 +438,17 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 			    (oper == PLUSAB || oper == TIMESAB ||
 			     oper == ANDAB || oper == XORAB || oper == ORAB)) {
 				right_done = 1;
-				EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, true, NO_LABEL, NO_LABEL);
 			}
 			if (compl == 0) {
 				load_val(left, RVAL);
 			}
 			else
 			if (compl == 1) {
-				EVAL(left, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, RVAL, true, NO_LABEL, NO_LABEL);
 			}
 			else {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				tmp = LocalPtrVar();
 				C_dup(pointer_size);
 				StoreLocal(tmp, pointer_size);
@@ -459,7 +459,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 				C_dup(ATW(left->ex_type->tp_size));
 			conversion(left->ex_type, tp);
 			if (! right_done) {
-				EVAL(right, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(right, RVAL, true, NO_LABEL, NO_LABEL);
 			}
 			dupval = gencode && oper != POSTINCR &&
 					oper != POSTDECR;
@@ -471,10 +471,10 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 				if (dupval) load_val(left, RVAL);
 			}
 			else if (compl == 1) {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				C_sti(left->ex_type->tp_size);
 				if (dupval) {
-					EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+					EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 					C_loi(left->ex_type->tp_size);
 				}
 			}
@@ -513,12 +513,12 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 				while (	ex->ex_class == Oper &&
 					ex->OP_OPER == PARCOMMA
 				) {
-					EVAL(ex->OP_RIGHT, RVAL, TRUE,
+					EVAL(ex->OP_RIGHT, RVAL, true,
 							NO_LABEL, NO_LABEL);
 					ParSize += ATW(ex->OP_RIGHT->ex_type->tp_size);
 					ex = ex->OP_LEFT;
 				}
-				EVAL(ex, RVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(ex, RVAL, true, NO_LABEL, NO_LABEL);
 				ParSize += ATW(ex->ex_type->tp_size);
 			}
 			if (is_struct_or_union(tp->tp_fund)) {
@@ -542,7 +542,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 #endif	/* DATAFLOW */
 			}
 			else {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				C_cai();
 			}
 			/* remove parameters from stack	*/
@@ -578,7 +578,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 			}
 			break;
 		case ',':
-			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, false, NO_LABEL, NO_LABEL);
 			EVAL(right, val, gencode, true_label, false_label);
 			break;
 		case '~':
@@ -592,7 +592,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 			label l_false = text_label();
 			label l_end = text_label();
 
-			EVAL(left, RVAL, TRUE, l_true, l_false);
+			EVAL(left, RVAL, true, l_true, l_false);
 			C_df_ilb(l_true);
 			EVAL(right->OP_LEFT, val, gencode, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
@@ -615,7 +615,7 @@ void EVAL(struct expr *expr, int val, int code, label true_label, label false_la
 				l_true = gencode ? text_label(): l_false;
 			}
 
-			EVAL(left, RVAL, TRUE, oper == AND ? l_maybe : l_true,
+			EVAL(left, RVAL, true, oper == AND ? l_maybe : l_true,
 					       oper == AND ? l_false : l_maybe);
 			C_df_ilb(l_maybe);
 			EVAL(right, RVAL, gencode, l_true, l_false);

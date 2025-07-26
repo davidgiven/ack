@@ -132,10 +132,10 @@ bool may_become_aar(avail_p avp)
 
 	sz = array_elemsize(avp->av_othird);
 	if (sz == UNKNOWN_SIZE)
-		return FALSE;
+		return false;
 	if (time_space_ratio < 50)
 		return sz <= AR_limit;
-	return TRUE;
+	return true;
 }
 
 bool may_become_dv(void)
@@ -162,7 +162,7 @@ static bool gains(avail_p avp)
 	 * heuristics with some user-supplied stuff.
 	 */
 	if (Cis_elem(avp->av_instr & BMASK, forbidden))
-		return FALSE;
+		return false;
 
 	if (avp->av_instr == (byte)op_lxa || avp->av_instr == (byte)op_lxl)
 		return off_set(avp->av_found) >= LX_threshold;
@@ -180,7 +180,7 @@ static bool gains(avail_p avp)
 	if (Cis_elem(avp->av_instr & BMASK, cheaps))
 		return avp->av_saveloc != (entity_p)0;
 
-	return TRUE;
+	return true;
 }
 
 static bool okay_lines(avail_p avp, occur_p ocp)
@@ -195,15 +195,15 @@ static bool okay_lines(avail_p avp, occur_p ocp)
 		next = lnp != ocp->oc_llast ? lnp->l_next : (line_p)0;
 
 		if (INSTR(lnp) < sp_fmnem || INSTR(lnp) > sp_lmnem)
-			return FALSE;
+			return false;
 		if (!stack_group(INSTR(lnp)))
 		{
 			/* Check for SAR-instruction. */
 			if (INSTR(lnp) != op_sar || next != (line_p)0)
-				return FALSE;
+				return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 bool desirable(avail_p avp)
@@ -214,7 +214,7 @@ bool desirable(avail_p avp)
 	{
 		OUTTRACE("no gain", 0);
 		SHOWAVAIL(avp);
-		return FALSE;
+		return false;
 	}
 
 	/* Walk through the occurrences to see whether it is okay to

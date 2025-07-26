@@ -40,7 +40,7 @@ int tsize(int type)
 		case POINTER:
 			return ps;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -75,7 +75,7 @@ line_p duplicate(line_p lnp)
 			PROC(l) = PROC(lnp);
 			break;
 		default:
-			assert(FALSE); /* cannot copy pseudo */
+			assert(false); /* cannot copy pseudo */
 	}
 	return l;
 }
@@ -218,7 +218,7 @@ call_p getcall(FILE* cf)
 		m = getshort();
 		act->ac_size = getoff();
 		act->ac_inl = getbyte();
-		act->ac_exp = getlines(cf, m, &voided, FALSE);
+		act->ac_exp = getlines(cf, m, &voided, false);
 		*app = act;
 		app = &act->ac_next;
 	}

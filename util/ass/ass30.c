@@ -281,7 +281,7 @@ int opfit(int flag, int number, cons_t val, int i_flag)
 	case OP16:
 		return val >= -32768 && val <= 32767;
 	case OP32:
-		return TRUE;
+		return true;
 	default:
 		fatal("illegal OPTYPE value");
 		return -1;
@@ -299,7 +299,7 @@ cons_t parval(line_t *lnp, char *defined)
 	glob_t *gbp;
 	cons_t offs;
 
-	*defined = TRUE;
+	*defined = true;
 	type = lnp->type1;
 	switch (type)
 	{
@@ -326,7 +326,7 @@ cons_t parval(line_t *lnp, char *defined)
 			return (gbp->g_val.g_addr + offs);
 		else
 		{
-			*defined = FALSE;
+			*defined = false;
 			return offs;
 		}
 	case LOCSYM:
@@ -336,7 +336,7 @@ cons_t parval(line_t *lnp, char *defined)
 		default:
 			error("bad pass in parval");
 		case 3:
-			*defined = FALSE;
+			*defined = false;
 			switch (lbp->l_defined)
 			{
 			default:
@@ -361,12 +361,12 @@ cons_t parval(line_t *lnp, char *defined)
 		case 5:
 			if (lbp->l_defined == YES)
 				return lbp->l_min;
-			*defined = FALSE;
+			*defined = false;
 			break;
 		}
 		break;
 	case MISSING:
-		*defined = FALSE;
+		*defined = false;
 		break;
 	case PROCNAME:
 		return (lnp->ad.ad_pp->p_num);
@@ -393,20 +393,20 @@ static int valid(line_t *lnp)
 		return type == MISSING;
 	case PAR_C:
 		if (type != CONST)
-			return FALSE;
+			return false;
 		if (val > maxint && val <= maxunsig)
 		{
 			lnp->ad.ad_i = val - maxunsig - 1;
 		}
-		return TRUE;
+		return true;
 	case PAR_D:
 		if (type != CONST)
-			return FALSE;
+			return false;
 		if (val > maxdint && val <= maxdunsig)
 		{
 			lnp->ad.ad_i = val - maxdunsig - 1;
 		}
-		return TRUE;
+		return true;
 	case PAR_L:
 	case PAR_F:
 		return type == CONST;
@@ -416,7 +416,7 @@ static int valid(line_t *lnp)
 		return type == CONST || type == GLOSYM || type == GLOOFF;
 	case PAR_W:
 		if (type == MISSING)
-			return TRUE;
+			return true;
 	case PAR_S:
 		return type == CONST && val > 0 && val % wordsize == 0;
 	case PAR_Z:

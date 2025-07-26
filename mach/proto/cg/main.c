@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 	in_init(argv[0]);
 	out_init(argv[1]);
 	in_start();
-	codegen(startupcode,maxply,TRUE,MAXINT,0);
+	codegen(startupcode,maxply,true,MAXINT,0);
 	in_finish();
 	if (!endofprog)
 		error("Bombed out of codegen");

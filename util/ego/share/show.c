@@ -157,7 +157,7 @@ showp()
 	short all;
 	printf("total number of procs: %d\n\n", getshort());
 	all = getshort();
-	while (TRUE)
+	while (true)
 	{
 		n = getshort();
 		if (feof(f))
@@ -193,7 +193,7 @@ showd()
 {
 	short n;
 	printf("total number of objects: %d\n\n", getshort());
-	while (TRUE)
+	while (true)
 	{
 		n = getbyte();
 		if (feof(f))
@@ -240,7 +240,7 @@ showinstr()
 
 	instr = (short)getbyte();
 	if (feof(f))
-		return FALSE;
+		return false;
 	if (instr >= sp_fmnem && instr <= sp_lmnem)
 	{
 		s = &(em_mnem[(instr - sp_fmnem) * 4]);
@@ -284,7 +284,7 @@ showinstr()
 			break;
 	}
 	printf("\n");
-	return TRUE;
+	return true;
 }
 
 showl()
@@ -351,7 +351,7 @@ showb()
 
 	short n, m;
 
-	while (TRUE)
+	while (true)
 	{
 		n = getshort();
 		if (feof(f))
@@ -398,7 +398,7 @@ showc()
 	int n, m, cnt, t;
 
 	cnt = 1;
-	while (TRUE)
+	while (true)
 	{
 		t = getshort();
 		if (feof(f))

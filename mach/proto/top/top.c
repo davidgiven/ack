@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "gen.h"
 #include "top.h"
 #include "queue.h"
@@ -125,10 +126,10 @@ static bool try_hashentry(int *list, queue window)
 		    check_operands(p,window) &&
 		    check_constraint(*pp)) {
 			xform(p,window);
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -170,7 +171,7 @@ static void fill_window(queue w, int len)
 	instr_p ip;
 
 	while(qlength(w) < len) {
-		if ((ip = read_instr()) == NIL) break;
+		if ((ip = read_instr()) == NULL) break;
 		ip->rest_line = ip->line;
 		set_opcode(ip);
 		add(w,ip);
@@ -228,16 +229,16 @@ static bool check_pattern(patdescr_p p, queue w)
 	ANY.vstate = UNINSTANTIATED;
 	idlim = &p->pat[p->patlen];
 	for (id_p = p->pat; id_p < idlim; id_p++) {
-		if (ip == NIL || ip->state == JUNK) return FALSE;
+		if (ip == NULL || ip->state == JUNK) return false;
 		if (id_p->opcode == (char *) 0) {
 			unify(ip->opc,&ANY);
 		} else {
-			if (strcmp(ip->opc,id_p->opcode) != 0) return FALSE;
+			if (strcmp(ip->opc,id_p->opcode) != 0) return false;
 		}
 		ip = next(ip);
 	}
 	REST = ip->opc;
-	return TRUE;
+	return true;
 }
 
 
@@ -252,19 +253,19 @@ static bool check_operands(patdescr_p p, queue w)
 	clear_vars();
 	for (id_p = p->pat, ip = qhead(w); id_p < &p->pat[p->patlen];
 					  id_p++, ip = next(ip)) {
-		assert(ip != NIL);
+		assert(ip != NULL);
 		if (ip->state == JUNK ||
 		    (ip->state == ONLY_OPC && !split_operands(ip))) {
-			return FALSE;
+			return false;
 		}
 		for (n = 0; n < MAXOP; n++) {
 			if (!opmatch(&id_p->templates[n],ip->op[n])) {
-				return FALSE;
+				return false;
 			}
 		}
 	}
 	/* fprintf(stderr,"yes\n"); */
-	return TRUE;
+	return true;
 }
 
 
@@ -298,12 +299,12 @@ static bool opmatch(templ_p t, const char *s)
 	}
 	was_instantiated = (var[vno].vstate == INSTANTIATED);
 	strcpy(buf,s);
-	if ( (l=lstrip(buf,t->lctxt)) != NULLSTRING && rstrip(l,t->rctxt)) {
+	if ( (l=lstrip(buf,t->lctxt)) != NULL && rstrip(l,t->rctxt)) {
 		return (vno == 0 && *l == '\0') ||
 		       (vno != 0 && unify(l,&var[vno]) &&
 			(was_instantiated || tok_chk(vno)));
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -367,11 +368,11 @@ static bool operand(instr_p ip, int n)
 		p++;
 	}
 	oplen = p - ip->rest_line;
-	if (oplen == 0 || oplen > MAXOPLEN) return FALSE;
+	if (oplen == 0 || oplen > MAXOPLEN) return false;
 	strncpy(ip->op[n],ip->rest_line,oplen);
 	ip->op[n][oplen] = '\0';
 	ip->rest_line = p;
-	return TRUE;
+	return true;
 #ifdef nesting
 #undef nesting
 #endif
@@ -396,12 +397,12 @@ static bool remainder_empty(instr_p ip)
 
 static char *lstrip(char *str, const char *ctxt)
 {
-	assert(ctxt != NULLSTRING);
+	assert(ctxt != NULL);
 	while (*str != '\0' && *str == *ctxt) {
 		str++;
 		ctxt++;
 	}
-	return (*ctxt == '\0' ? str : NULLSTRING);
+	return (*ctxt == '\0' ? str : NULL);
 }
 
 
@@ -418,10 +419,10 @@ static bool rstrip(char *str, const char *ctxt)
 	for (s = str; *s != '\0'; s++);
 	for (c = ctxt; *c != '\0'; c++);
 	while (c >= ctxt) {
-		if (s < str || *s != *c--) return FALSE;
+		if (s < str || *s != *c--) return false;
 		*s-- = '\0';
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -437,7 +438,7 @@ static bool unify(const char *str, struct variable *v)
 	if (v->vstate == UNINSTANTIATED) {
 		v->vstate = INSTANTIATED;
 		strcpy(v->value,str);
-		return TRUE;
+		return true;
 	} else {
 		return strcmp(v->value,str) == 0;
 	}
@@ -498,13 +499,13 @@ static instr_p gen_instr(idescr_p id_p)
 	opc = id_p->opcode;
 	if (opc == (char *) 0) opc = ANY.value;
 	if (strcmp(opc,"labdef") == 0) {
-		islabdef = TRUE;
+		islabdef = true;
 		s[0] = '\0';
 	} else {
 		strcpy(s,opc);
 		tmp[0] = OPC_TERMINATOR;
 		strcat(s,tmp);
-		islabdef = FALSE;
+		islabdef = false;
 	}
 	for (n = 0; n < MAXOP;) {
 		t = &id_p->templates[n++];
@@ -537,7 +538,7 @@ static instr_p gen_instr(idescr_p id_p)
  * each such struct is set to JUNK (so it will not be optimized).
  */
 
-static bool junk_state = FALSE;  /* TRUE while processing a very long line */
+static bool junk_state = false;  /* true while processing a very long line */
 
 static instr_p read_instr(void)
 {
@@ -548,13 +549,13 @@ static instr_p read_instr(void)
 
 	ip = newinstr();
 	plim = &ip->line[MAXLINELEN];
-	if (( c = getc(inp)) == EOF) return NIL;
+	if (( c = getc(inp)) == EOF) return NULL;
 	for (p = ip->line; p < plim;) {
 		*p++ = c;
 		if (c == '\n') {
 			*p = '\0';
 			if (junk_state) ip->state = JUNK;
-			junk_state = FALSE;
+			junk_state = false;
 			return ip;
 		}
 		c = getc(inp);
@@ -582,16 +583,16 @@ static instr_p newinstr(void)
 	instr_p ip;
 	int i;
 
-	if (instr_pool == NIL) {
+	if (instr_pool == NULL) {
 		instr_pool = (instr_p) malloc(sizeof(struct instruction));
 		instr_pool->fw = 0;
 		nr_mallocs++;
 	}
-	assert(instr_pool != NIL);
+	assert(instr_pool != NULL);
 	ip = instr_pool;
 	instr_pool = instr_pool->fw;
-	ip->fw = ip->bw = NIL;
-	ip->rest_line = NULLSTRING;
+	ip->fw = ip->bw = NULL;
+	ip->rest_line = NULL;
 	ip->line[0] = ip->opc[0] = '\0';
 	ip->state = ONLY_OPC;
 	for (i = 0; i < MAXOP; i++) ip->op[i][0] = '\0';
@@ -613,9 +614,9 @@ static bool op_separator(instr_p ip)
 	skip_white(ip);
 	if (*(ip->rest_line) == OP_SEPARATOR) {
 		ip->rest_line++;
-		return TRUE;
+		return true;
 	} else {
-		return FALSE;
+		return false;
 	}
 }
 

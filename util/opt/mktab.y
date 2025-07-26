@@ -363,8 +363,8 @@ void initio(void)
 	printf("#include \"pattern.h\"\n\n");
 	for(i=0;i<N_EX_OPS;i++) {
 		nparam[i]=2;
-		nonumlab[i]=TRUE;
-		onlyconst[i]=TRUE;
+		nonumlab[i]=true;
+		onlyconst[i]=true;
 	}
 	nparam[EX_POINTERSIZE] = 0;
 	nparam[EX_WORDSIZE] = 0;
@@ -378,16 +378,16 @@ void initio(void)
 	nparam[EX_NOT] = 1;
 	nparam[EX_COMP] = 1;
 	nparam[EX_NOTREG] = 1;
-	nonumlab[EX_CMPEQ] = FALSE;
-	nonumlab[EX_CMPNE] = FALSE;
-	onlyconst[EX_CMPEQ] = FALSE;
-	onlyconst[EX_CMPNE] = FALSE;
-	onlyconst[EX_CMPLE] = FALSE;
-	onlyconst[EX_CMPLT] = FALSE;
-	onlyconst[EX_CMPGE] = FALSE;
-	onlyconst[EX_CMPGT] = FALSE;
-	onlyconst[EX_PLUS] = FALSE;
-	onlyconst[EX_MINUS] = FALSE;
+	nonumlab[EX_CMPEQ] = false;
+	nonumlab[EX_CMPNE] = false;
+	onlyconst[EX_CMPEQ] = false;
+	onlyconst[EX_CMPNE] = false;
+	onlyconst[EX_CMPLE] = false;
+	onlyconst[EX_CMPLT] = false;
+	onlyconst[EX_CMPGE] = false;
+	onlyconst[EX_CMPGT] = false;
+	onlyconst[EX_PLUS] = false;
+	onlyconst[EX_MINUS] = false;
 	printf("byte nparam[] = {");
 	for (i=0;i<N_EX_OPS;i++) printf("%d,",nparam[i]);
 	printf("};\nbool nonumlab[] = {");

@@ -40,7 +40,7 @@ struct perm* tuples(rl_p* regls, int nregneeded)
 	for (i = 0; i < NREGS; i++)
 	{
 		regclass[i] = class ++;
-		if (getrefcount(i, FALSE) == 0)
+		if (getrefcount(i, false) == 0)
 		{
 			for (j = 0; j < i; j++)
 			{

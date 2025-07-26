@@ -31,7 +31,7 @@ line_p arglist(int m); /*
                         * then terminated by a cend symbol.
                         */
 bool is_datalabel(line_p l); /*
-                              * TRUE if l is a data label defining
+                              * true if l is a data label defining
                               * occurrence (i.e. its l_instr
                               * field is ps_sym).
                               */

@@ -108,7 +108,7 @@ static void cleaninstrs(void)
 
 	lpp = &instrs;
 	lastbra = (line_p *) 0;
-	reachable = TRUE;
+	reachable = true;
 	while ((lp = *lpp) != (line_p) 0)
 	{
 		instr = lp->l_instr & BMASK;
@@ -116,7 +116,7 @@ static void cleaninstrs(void)
 		{
 			if ((lp->l_a.la_np->n_flags & NUMREACH) != 0)
 			{
-				reachable = TRUE;
+				reachable = true;
 				if (lastbra != (line_p *) 0 && (*lastbra)->l_next == lp
 						&& (*lastbra)->l_a.la_np->n_repl == lp->l_a.la_np)
 				{
@@ -131,12 +131,12 @@ static void cleaninstrs(void)
 			if (lp->l_a.la_np->n_repl != lp->l_a.la_np
 					|| ((lp->l_a.la_np->n_flags & NUMDATA) == 0
 							&& lp->l_a.la_np->n_jumps == 0))
-				superfluous = TRUE;
+				superfluous = true;
 			else
-				superfluous = FALSE;
+				superfluous = false;
 		}
 		else
-			superfluous = FALSE;
+			superfluous = false;
 		if ((!reachable) || superfluous)
 		{
 			if (instr == op_lab)
@@ -159,7 +159,7 @@ static void cleaninstrs(void)
 			if (instr <= sp_lmnem
 					&& (em_flag[instr - sp_fmnem] & EM_FLO) == FLO_T)
 			{
-				reachable = FALSE;
+				reachable = false;
 				if ((lp->l_instr & BMASK) == op_bra)
 					lastbra = lpp;
 			}

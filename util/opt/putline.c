@@ -210,7 +210,7 @@ static void putargs(arg_p ap)
 		switch (ap->a_typ)
 		{
 			default:
-				assert(FALSE);
+				assert(false);
 				break;
 			case ARGOFF:
 				outoff(ap->a_a.a_offset);

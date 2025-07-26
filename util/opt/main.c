@@ -26,16 +26,16 @@ void flags(char *s)
 		switch (*s)
 		{
 			case 'L':
-				Lflag = TRUE;
+				Lflag = true;
 				break;
 			case 'n':
-				nflag = TRUE;
+				nflag = true;
 				break;
 			case 'm':
 				if (*(s + 1) == 'l')
 				{
 					s++;
-					repl_longmuls = TRUE;
+					repl_longmuls = true;
 				}
 				repl_muls = atoi(s + 1);
 				break;

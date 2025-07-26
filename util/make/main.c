@@ -29,13 +29,13 @@ unsigned        memspace = MEMSPACE;
 #endif
 
 FILE *          ifd;        /*  Input file desciptor  */
-bool            domake = TRUE;  /*  Go through the motions option  */
-bool            ignore = FALSE; /*  Ignore exit status option  */
-bool            silent = FALSE; /*  Silent option  */
-bool            print = FALSE;  /*  Print debuging information  */
-bool            rules = TRUE;   /*  Use inbuilt rules  */
-bool            dotouch = FALSE;/*  Touch files instead of making  */
-bool            quest = FALSE;  /*  Question up-to-dateness of file  */
+bool            domake = true;  /*  Go through the motions option  */
+bool            ignore = false; /*  Ignore exit status option  */
+bool            silent = false; /*  Silent option  */
+bool            print = false;  /*  Print debuging information  */
+bool            rules = true;   /*  Use inbuilt rules  */
+bool            dotouch = false;/*  Touch files instead of making  */
+bool            quest = false;  /*  Question up-to-dateness of file  */
 
 static void usage(void);
 
@@ -66,25 +66,25 @@ int main(int argc, char** argv)
                 fflag = 1;
                 break;
             case 'n':   /*  Pretend mode  */
-                domake = FALSE;
+                domake = false;
                 break;
             case 'i':   /*  Ignore fault mode  */
-                ignore = TRUE;
+                ignore = true;
                 break;
             case 's':   /*  Silent about commands  */
-                silent = TRUE;
+                silent = true;
                 break;
             case 'p':
-                print = TRUE;
+                print = true;
                 break;
             case 'r':
-                rules = FALSE;
+                rules = false;
                 break;
             case 't':
-                dotouch = TRUE;
+                dotouch = true;
                 break;
             case 'q':
-                quest = TRUE;
+                quest = true;
                 break;
             case 'k':
                 break;
@@ -149,11 +149,11 @@ int main(int argc, char** argv)
 
     np = newname(".SILENT");
     if (np->n_flag & N_TARG)
-        silent = TRUE;
+        silent = true;
 
     np = newname(".IGNORE");
     if (np->n_flag & N_TARG)
-        ignore = TRUE;
+        ignore = true;
 
     precious();
 

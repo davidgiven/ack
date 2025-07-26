@@ -62,11 +62,11 @@ eval_field(expr, code)
 	if (op == '=') {
 		/* F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f) */
 		ASSERT(tp == rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
 		C_loc(fd->fd_mask);
 		C_and(asize);
-		if (code == TRUE)
+		if (code == true)
 			C_dup(asize);
 		C_loc((arith)fd->fd_shift);
 		if (atype->tp_unsigned)
@@ -83,7 +83,7 @@ eval_field(expr, code)
 		else	{			/* complex case	*/
 			tmpvar = NewLocal(pointer_size, pointer_align, 
 					  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
 			C_loi(asize);
@@ -103,7 +103,7 @@ eval_field(expr, code)
 		else	{			/* complex case	*/
 			tmpvar = NewLocal(pointer_size, pointer_align, 
 					  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
 			C_loi(asize);
@@ -121,10 +121,10 @@ eval_field(expr, code)
 			C_loc(bits_in_type - fd->fd_width);
 			C_sri(asize);
 		}
-		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
+		if (code == true && (op == POSTINCR || op == POSTDECR))
 			C_dup(asize);
 		conversion(atype, rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		/* the 'op' operation: */
 		if (op == PLUSPLUS || op == POSTINCR)
 			assop(rightop->ex_type, PLUSAB);
@@ -136,7 +136,7 @@ eval_field(expr, code)
 		conversion(rightop->ex_type, atype);
 		C_loc(fd->fd_mask);
 		C_and(asize);
-		if (code == TRUE && op != POSTINCR && op != POSTDECR)
+		if (code == true && op != POSTINCR && op != POSTDECR)
 			C_dup(asize);
 		C_loc((arith)fd->fd_shift);
 		if (atype->tp_unsigned)
@@ -160,7 +160,7 @@ eval_field(expr, code)
 			FreeLocal(tmpvar);
 		}
 	}
-	if (code == TRUE) {
+	if (code == true) {
 		/*	Take care that the effective value stored in
 			the bit field (i.e. the value that is got on
 			retrieval) is on top of stack.

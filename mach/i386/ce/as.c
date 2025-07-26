@@ -118,11 +118,11 @@ struct t_operand *op;
 	while (p->regstr) {
 		if (! strcmp(p->regstr, str)) {
 			op->reg = p->regval;
-			return TRUE;
+			return true;
 		}
 		p++;
 	}
-	return FALSE;
+	return false;
 }
 
 #include <ctype.h>
@@ -134,7 +134,7 @@ char *str;
 	while( !isletter( *str) && *str != '\0')
 		if ( *str == '$')
 			if ( arg_type( str) == STRING)
-				return( TRUE);
+				return( true);
 			else
 				str += 2;
 		else

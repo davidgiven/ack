@@ -104,7 +104,7 @@ static line_p newcode(code_p code, offset tmp)
 			l->l_instr = op_sil;
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	return l;
 }
@@ -211,7 +211,7 @@ static void init_code(code_p code, offset tmp)
 			l->l_next = move_pointer(tmp, STORE);
 			break;
 		default:
-			assert(FALSE); /* non-reducible instruction */
+			assert(false); /* non-reducible instruction */
 	}
 	PREV(l->l_next) = l;
 
@@ -287,7 +287,7 @@ static void incr_code(code_p code, offset tmp)
 			store_tmp = move_pointer(tmp, STORE);
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	/* Now we've got pieces of code to load the temp. local,
 	 * load the constant, add the two and store the result in
@@ -324,7 +324,7 @@ static bool same_address(line_p l1, line_p l2, lset vars)
 	/* See if l1 and l2 load the same address */
 
 	if (INSTR(l1) != INSTR(l2))
-		return FALSE;
+		return false;
 	switch (INSTR(l1))
 	{
 		case op_lae:
@@ -336,7 +336,7 @@ static bool same_address(line_p l1, line_p l2, lset vars)
 		case op_ldl:
 			return ps == 2 * ws && off_set(l1) == off_set(l2) && is_loopconst(l1, vars);
 		default:
-			return FALSE;
+			return false;
 	}
 }
 
@@ -353,26 +353,26 @@ static bool same_expr(line_p lb1, line_p le1, line_p lb2, line_p le2)
 	for (;;)
 	{
 		if (INSTR(l1) != INSTR(l2))
-			return FALSE;
+			return false;
 		switch (TYPE(l1))
 		{
 			case OPSHORT:
 				if (TYPE(l2) != OPSHORT || SHORT(l1) != SHORT(l2))
-					return FALSE;
+					return false;
 				break;
 			case OPOFFSET:
 				if (TYPE(l2) != OPOFFSET || OFFSET(l1) != OFFSET(l2))
-					return FALSE;
+					return false;
 				break;
 			case OPNO:
 				break;
 			default:
-				return FALSE;
+				return false;
 		}
 		if (l1 == le1)
 			return l2 == le2;
 		if (l2 == le2)
-			return FALSE;
+			return false;
 		l1 = l1->l_next;
 		l2 = l2->l_next;
 	}
@@ -402,7 +402,7 @@ static bool same_code(code_p c1, code_p c2, lset vars)
 			    && same_address(c1->c_o.co_desc, c2->c_o.co_desc, vars)
 			    && same_address(c1->co_lfirst, c2->co_lfirst, vars);
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }

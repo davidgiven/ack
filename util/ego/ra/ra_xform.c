@@ -125,7 +125,7 @@ void init_replacements(short psize, short wsize)
 				             */
 					break;
 				default:
-					assert(FALSE);
+					assert(false);
 			}
 		}
 	}
@@ -485,11 +485,11 @@ bool always_in_reg(offset off, alloc_p allocs, short* size_out)
 			if (m->al_iswholeproc && item->it_type == LOCALVAR && item->i_t.it_off == off)
 			{
 				*size_out = item->it_size;
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void rem_locals(proc_p p, alloc_p allocs)

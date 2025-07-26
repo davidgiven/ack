@@ -250,7 +250,7 @@ dblock_p getdtable(const char* dname)
 	/* total number of objects */
 	omap = (obj_p*)newmap(olength); /* allocate omap table */
 
-	while (TRUE)
+	while (true)
 	{
 		n = getmark();
 		if (feof(curinp))
@@ -285,7 +285,7 @@ dblock_p getdtable(const char* dname)
 				arg->a_a.a_offset = getoff();
 				break;
 			default:
-				assert(FALSE);
+				assert(false);
 		}
 	}
 	OUTTRACE("have read data table, %d objects", olength);
@@ -360,7 +360,7 @@ static arg_p readargs(void)
 				argstring(getshort(), &arg->a_a.a_con.ac_con);
 				break;
 			default:
-				assert(FALSE);
+				assert(false);
 		}
 	}
 }
@@ -509,14 +509,14 @@ bool getunit(
 	curinp = gf;
 	blength = getshort(); /* # basic blocks in this procedure */
 	if (feof(curinp))
-		return FALSE;
+		return false;
 	if (blength == 0)
 	{
 		/* data unit */
 		*kind_out = LDATA;
 		n = getshort();
 		*l_out = getlines(lf, n, p_out, collect_mes);
-		return TRUE;
+		return true;
 	}
 	*kind_out = LTEXT;
 	bmap = (bblock_p*)newmap(blength); /* maps block_id on bblock_p */
@@ -552,5 +552,5 @@ bool getunit(
 		Ladd((Lelem_t)lp, &curproc->p_loops);
 	}
 	*g_out = head;
-	return TRUE;
+	return true;
 }

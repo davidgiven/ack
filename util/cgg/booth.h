@@ -45,9 +45,6 @@ EXTERN char *iname;			/* stdin */
 #define BMASK 0377
 #define BSHIFT 8
 
-#define TRUE    1
-#define FALSE   0
-
 #define MAXPATLEN 7             /* Maximum length of tokenpatterns */
 
 typedef char byte;

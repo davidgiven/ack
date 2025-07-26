@@ -106,7 +106,7 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 				arg = SHORT(lnp);
 				if (arg < wordsize)
 					arg = wordsize;
-				argdef = TRUE;
+				argdef = true;
 			}
 			else if (IS_MINI(lnp))
 			{
@@ -115,11 +115,11 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 					arg = wordsize;
 				if (arg < 0 && -arg < wordsize)
 					arg = -wordsize;
-				argdef = TRUE;
+				argdef = true;
 			}
 			else
 			{
-				argdef = FALSE;
+				argdef = false;
 			}
 			switch (*s++)
 			{
@@ -133,7 +133,7 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 					stacktop = pointersize;
 					break;
 				case 'a':
-					if (argdef == FALSE || instr == op_ass)
+					if (argdef == false || instr == op_ass)
 					{
 						stacktop = 0;
 					}
@@ -172,7 +172,7 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 					stacktop = 0;
 					break;
 				default:
-					assert(FALSE);
+					assert(false);
 			}
 		}
 		/*

@@ -22,7 +22,7 @@ static int	n_ops = 0;		/* Number of opertands of current
 					 * assembly instruction.
 					 */
 static char	*assem_instr = 0;	/* Name of the current assembly instr */
-static Bool	restriction = FALSE;	/* Is there a restriction on the
+static Bool	restriction = false;	/* Is there a restriction on the
 					 * current operand?
 					 */
 FILE* outfile;
@@ -46,7 +46,7 @@ char *type;
 int len;
 {
 	op_info[ n_ops].type = strdup( type);
-	restriction = TRUE;
+	restriction = true;
 }
 
 pr_header()
@@ -81,7 +81,7 @@ param_list()
 pr_restriction()
 {
 	int i;
-	Bool more = FALSE;
+	Bool more = false;
 
 	if ( !restriction)
 		return;
@@ -92,7 +92,7 @@ pr_restriction()
 			if ( more)
 				out( " &&");
 			out( " %s( %s)", op_info[i].type, op_info[i].name);
-			more = TRUE;
+			more = true;
 		}
 	out( ") ");
 }
@@ -101,12 +101,12 @@ pr_warning()
 {
 	if ( restriction)
 		out( "else\nerror( \"No match for %s\");\n", assem_instr);
-	restriction = FALSE;
+	restriction = false;
 }
 
 clear_restriction()
 {
-	restriction = FALSE;
+	restriction = false;
 }
 
 char *skip_string( str)

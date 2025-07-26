@@ -6,9 +6,6 @@
 
 #define LONGOFF		/* if defined long offsets are used */
 
-#define TRUE	1
-#define FALSE	0
-
 #define MAXROM	3
 
 #define op_lab	(sp_lmnem+1)

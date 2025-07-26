@@ -270,7 +270,7 @@ static void cputargs(line_p lnp)
 				cputstr(&ap->a_a.a_con.ac_con);
 				break;
 			default:
-				assert(FALSE);
+				assert(false);
 		}
 		ap = ap->a_next;
 		/* Avoid generating extremely long CON or ROM statements */
@@ -344,7 +344,7 @@ static void outoperand(line_p lnp)
 			}
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 }
 

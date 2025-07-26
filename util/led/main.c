@@ -414,7 +414,7 @@ static void norm_commons(void)
 {
 	struct outname* name;
 	int cnt;
-	int und = FALSE;
+	int und = false;
 
 	name = (struct outname*)address(ALLOGLOB, (ind_t)0);
 	cnt = NGlobals;
@@ -424,7 +424,7 @@ static void norm_commons(void)
 		{
 			if (!und)
 			{
-				und = TRUE;
+				und = true;
 				if (!(flagword & RFLAG))
 				{
 					exitstatus = 1;
@@ -554,12 +554,12 @@ bool setbit(int indx, char string[])
 	byte = string[byte_index];
 	byte >>= bit_index;
 	if (byte & BIT)
-		return TRUE;
+		return true;
 
 	byte = BIT;
 	byte <<= bit_index;
 	string[byte_index] |= byte;
-	return FALSE;
+	return false;
 }
 
 /*

@@ -26,7 +26,7 @@ static valnum base_valno(entity_p enp)
 	switch (enp->en_kind)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case ENINDIR:
 			return enp->en_ind;
@@ -108,7 +108,7 @@ static bool addr_local(entity_p enp)
 	/* Is enp the address of a stack item. */
 
 	if (enp == (entity_p)0)
-		return FALSE;
+		return false;
 
 	return enp->en_kind == ENALOCAL || enp->en_kind == ENALOCBASE || enp->en_kind == ENAARGBASE;
 }
@@ -183,7 +183,7 @@ static bool loc_overlap(entity_p enp1, entity_p enp2)
 		enp2 = tmp;
 	}
 	if (enp1->en_loc < 0 && enp2->en_loc >= 0)
-		return FALSE; /* Locals and parameters do not overlap. */
+		return false; /* Locals and parameters do not overlap. */
 	else
 		return enp1->en_size == UNKNOWN_SIZE || enp1->en_loc + enp1->en_size > enp2->en_loc;
 }
@@ -273,13 +273,13 @@ void kill_direct(entity_p enp)
 	switch (enp->en_kind)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case ENEXTERNAL:
-			kill_external(enp->en_ext, FALSE);
+			kill_external(enp->en_ext, false);
 			break;
 		case ENLOCAL:
-			kill_local(enp, FALSE);
+			kill_local(enp, false);
 			break;
 		case ENIGNMASK:
 			kill_sim();
@@ -310,13 +310,13 @@ void kill_indir(entity_p enp)
 		{
 			case ENAEXTERNAL:
 				/* An indirect store into global data. */
-				kill_external(p->en_ext, TRUE);
+				kill_external(p->en_ext, true);
 				break;
 			case ENALOCAL:
 			case ENALOCBASE:
 			case ENAARGBASE:
 				/* An indirect store into stack data.  */
-				kill_local(p, TRUE);
+				kill_local(p, true);
 				break;
 		}
 	}
@@ -363,7 +363,7 @@ static void kill_globset(cset s)
 	OUTTRACE("kill globset", 0);
 	for (i = Cfirst(s); i != (Cindex)0; i = Cnext(i, s))
 	{
-		kill_external(omap[Celem(i)], FALSE);
+		kill_external(omap[Celem(i)], false);
 	}
 }
 

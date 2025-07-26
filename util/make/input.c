@@ -126,7 +126,7 @@ struct cmd *newcmd(char *str, struct cmd *cp)
  */
 void newline(struct name *np, struct depend *dp, struct cmd *cp, int flag)
 {
-	bool hascmds = FALSE; /*  Target has commands  */
+	bool hascmds = false; /*  Target has commands  */
 	struct line * rp;
 	struct line * rrp;
 
@@ -147,7 +147,7 @@ void newline(struct name *np, struct depend *dp, struct cmd *cp, int flag)
 	for (rp = np->n_line, rrp = (struct line *) 0; rp;
 			rrp = rp, rp = rp->l_next)
 		if (rp->l_cmd)
-			hascmds = TRUE;
+			hascmds = true;
 
 	if (hascmds && cp && !(np->n_flag & N_DOUBLE))
 		/* Handle the implicit rules redefinition case */
@@ -274,7 +274,7 @@ void input(FILE *fd)
 		/*  Need two nulls for gettok (Remember separation)  */
 
 		cp = (struct cmd *) 0;
-		if (mgetline(str2, fd) == FALSE) /*  Get commands  */
+		if (mgetline(str2, fd) == false) /*  Get commands  */
 		{
 			while (*str2 == '\t')
 			{

@@ -271,12 +271,12 @@ static bool indirect_alloc(struct outhead* head)
 	for (allopiece = ALLOEMIT; allopiece < ALLOEMIT + nsect; allopiece++)
 	{
 		if (!putemitindex(sectindex, emitoff, allopiece))
-			return FALSE;
+			return false;
 		sectindex += sizeof(struct outsect);
 		emitoff += sizeof(ind_t);
 	}
 	if (nrelo > SIZE_MAX / sizeof(struct outrelo))
-		return FALSE; /* nrelo * size would overflow */
+		return false; /* nrelo * size would overflow */
 #ifdef SYMDBUG
 	return putreloindex(relooff, nrelo * sizeof(struct outrelo)) && putdbugindex(dbugoff, dbugsize);
 #else /* SYMDBUG */
@@ -307,7 +307,7 @@ static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 	if (flen && zero)
 	{
 		if (zero != (size_t)zero)
-			return FALSE;
+			return false;
 		if ((emitindex = alloc(allopiece, zero)) != BADOFF)
 		{
 			char* p = address(allopiece, emitindex);
@@ -317,18 +317,18 @@ static bool putemitindex(ind_t sectindex, ind_t emitoff, int allopiece)
 				*p++ = 0;
 		}
 		else
-			return FALSE;
+			return false;
 		zero = 0;
 	}
 	zeros[allopiece - ALLOEMIT] = zero + ((struct outsect*)modulptr(sectindex))->os_size - flen;
 	if (flen != (size_t)flen)
-		return FALSE;
+		return false;
 	if ((emitindex = alloc(allopiece, flen)) != BADOFF)
 	{
 		*(ind_t*)modulptr(emitoff) = emitindex;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 /*
@@ -342,9 +342,9 @@ static bool putreloindex(ind_t relooff, size_t nrelobytes)
 	if ((reloindex = alloc(ALLORELO, nrelobytes)) != BADOFF)
 	{
 		*(ind_t*)modulptr(relooff) = reloindex;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 #ifdef SYMDBUG
 /*
@@ -357,9 +357,9 @@ static bool putdbugindex(ind_t dbugoff, size_t ndbugbytes)
 	if ((dbugindex = alloc(ALLODBUG, ndbugbytes)) != BADOFF)
 	{
 		*(ind_t*)modulptr(dbugoff) = dbugindex;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 #endif /* SYMDBUG */
 

@@ -28,9 +28,6 @@
 #define MOVS( op)	( op->type & IS_LABEL&&strcmp("\"movs\"", op->lab) == 0)
 #define IMMEDIATE( op)	( op->type & ( IS_DATA | IS_LABEL))
 
-#define TRUE		1
-#define FALSE		0
-
 struct t_operand {
 	unsigned type;
 	int reg;

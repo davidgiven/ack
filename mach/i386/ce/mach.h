@@ -38,10 +38,7 @@
 #define COMM_FMT		".comm %s,%ld\n"
 #define	GENLAB		'I'
 
-#define TRUE	1
-#define FALSE	0
-
-#define clean_push_buf()       if(push_waiting){text1(0x50);push_waiting=FALSE;}
+#define clean_push_buf()       if(push_waiting){text1(0x50);push_waiting=false;}
 #define assign( l, r)          l = r
 extern int push_waiting;
 

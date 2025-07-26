@@ -65,9 +65,9 @@ static bool same_instr(line_p l1, line_p l2)
 	/* See if l1 and l2 are the same instruction */
 
 	if (l1 == 0 || l2 == 0 || TYPE(l1) != TYPE(l2))
-		return FALSE;
+		return false;
 	if (INSTR(l1) != INSTR(l2))
-		return FALSE;
+		return false;
 	switch (TYPE(l1))
 	{
 		case OPSHORT:
@@ -81,9 +81,9 @@ static bool same_instr(line_p l1, line_p l2)
 		case OPINSTRLAB:
 			return INSTRLAB(l1) == INSTRLAB(l2);
 		case OPNO:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 }
 
@@ -125,20 +125,20 @@ static bool is_desirable(line_p text)
 			case op_cal:
 			case op_asp:
 			case op_bra:
-				return TRUE;
+				return true;
 		}
 		line_change(l, &ok, &pop, &push);
 		/* printf("instr %d, pop %d, push %d, ok %d\n",INSTR(l),pop,push,ok); */
 		if (!ok || (stack_diff -= pop) < 0)
 		{
-			return FALSE;
+			return false;
 		}
 		else
 		{
 			stack_diff += push;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 static void cp_loops(bblock_p b1, bblock_p b2)
@@ -240,11 +240,11 @@ static bool try_tail(bblock_p b1, bblock_p b2)
 	/* printf("try block %d and %d\n",b1->b_id,b2->b_id); */
 
 	if (b1->b_start == (line_p)0 || b2->b_start == (line_p)0)
-		return FALSE;
+		return false;
 	l1 = last_mnem(b1);
 	l2 = last_mnem(b2);
 	if (l1 == (line_p)0 || l2 == (line_p)0)
-		return FALSE;
+		return false;
 	/* printf("consider:\n"); showinstr(l1); showinstr(l2); */
 	if (INSTR(l1) == op_bra)
 	{
@@ -280,10 +280,10 @@ static bool try_tail(bblock_p b1, bblock_p b2)
 				jump_cross(l1, l2, b1, b2);
 				Scj++;
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static bool try_pred(bblock_p b)
@@ -307,11 +307,11 @@ static bool try_pred(bblock_p b)
 			if (b1 != b2 && Lnrelems(b2->b_succ) == 1)
 			{
 				if (try_tail(b1, b2))
-					return TRUE;
+					return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void cj_optimize(void* vp)
@@ -325,19 +325,19 @@ void cj_optimize(void* vp)
 
 	proc_p p = vp;
 	bblock_p b;
-	bool changes = TRUE;
+	bool changes = true;
 
 	if (IS_ENTERED_WITH_GTO(p))
 		return;
 	while (changes)
 	{
-		changes = FALSE;
+		changes = false;
 		b = p->p_start;
 		while (b != (bblock_p)0)
 		{
 			if (try_pred(b))
 			{
-				changes = TRUE;
+				changes = true;
 			}
 			else
 			{

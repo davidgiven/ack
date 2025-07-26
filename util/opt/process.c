@@ -117,7 +117,7 @@ static void symvalue(void)
 		switch (lp->l_instr & BMASK)
 		{
 			default:
-				assert(FALSE);
+				assert(false);
 				break;
 			case ps_sym:
 				sp = lp->l_a.la_sp;
@@ -140,7 +140,7 @@ static void symvalue(void)
 					switch (ap->a_typ)
 					{
 						default:
-							assert(FALSE);
+							assert(false);
 						case ARGOFF:
 							count = align(count, wordsize) + wordsize;
 							break;

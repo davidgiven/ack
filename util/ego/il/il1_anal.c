@@ -35,7 +35,7 @@
 /*
 #define CALLS_UNKNOWN(p)	(p->p_flags1 & (byte) PF_CALUNKNOWN)
 */
-#define CALLS_UNKNOWN(p) (FALSE)
+#define CALLS_UNKNOWN(p) (false)
 
 void apriori(proc_p proctab)
 {
@@ -156,14 +156,14 @@ void anal_proc(proc_p p, FILE* cf, FILE* ccf)
 	 */
 
 	bblock_p b;
-	bool fallthrough = TRUE;
+	bool fallthrough = true;
 
 	cchead = (calcnt_p)0;
 	for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 	{
 		if (RETURN_BLOCK(b) && !LAST_BLOCK(b))
 		{
-			fallthrough = FALSE;
+			fallthrough = false;
 			/* p contains a RET instruction somewhere
 			 * in the middle of its code.
 			 */

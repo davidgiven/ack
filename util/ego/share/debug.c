@@ -19,7 +19,7 @@
 #include "global.h"
 
 int linecount; /* # lines in this file */
-bool verbose_flag = FALSE; /* generate verbose output ? */
+bool verbose_flag = false; /* generate verbose output ? */
 
 /* VARARGS1 */
 NORETURN void error(const char* s, ...)
