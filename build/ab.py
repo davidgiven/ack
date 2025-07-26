@@ -505,7 +505,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
         emit(hashfile, ":")
         emit(f"\t@mkdir -p {self.dir}")
         emit(f"\t@touch {hashfile}")
-        emit(f"$(OUTS_{outsn})", "&:",f"$(INS_{insn})", hashfile, into=lines)
+        emit(f"$(OUTS_{outsn})", "&:" if len(fouts)>1 else ":",f"$(INS_{insn})", hashfile, into=lines)
 
         if label:
             emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
