@@ -76,7 +76,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(PLATDEP)/em_m2": ".+em_m2",
+        "$(PLATDEP)/em_m2$(EXT)": ".+em_m2",
         "$(INSDIR)/share/man/man6/em_m2.6": "./em_m2.6",
     },
 )

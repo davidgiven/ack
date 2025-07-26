@@ -19,8 +19,8 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="linux68k")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/linux68k/as": ".+as",
-        "$(PLATDEP)/linux68k/ncg": ".+ncg",
+        "$(PLATDEP)/linux68k/as$(EXT)": ".+as",
+        "$(PLATDEP)/linux68k/ncg$(EXT)": ".+ncg",
         "$(PLATIND)/descr/linux68k": "./descr",
     },
 )

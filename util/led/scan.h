@@ -37,6 +37,9 @@ extern void endemit(char* emit);
  * In case of a plain file, the file pointer is repositioned after the
  * examination. Otherwise it is at the beginning of the table of contents.
  */
-int getfile(char* filename);
+extern int getfile(char* filename);
+
+extern FILE* infile;
+extern int passnumber;
 
 #endif /* __SCAN_H_INCLUDED__ */

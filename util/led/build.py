@@ -17,7 +17,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(PLATDEP)/em_led": ".+led",
+        "$(PLATDEP)/em_led$(EXT)": ".+led",
         "$(INSDIR)/share/man/man6/led.6": "./led.6",
     },
 )

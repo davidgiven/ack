@@ -19,9 +19,9 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="minix68k")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/minix68k/as": ".+as",
-        "$(PLATDEP)/minix68k/ncg": ".+ncg",
-        "$(PLATDEP)/minix68k/cv": "./cv",
+        "$(PLATDEP)/minix68k/as$(EXT)": ".+as",
+        "$(PLATDEP)/minix68k/ncg$(EXT)": ".+ncg",
+        "$(PLATDEP)/minix68k/cv$(EXT)": "./cv",
         "$(PLATIND)/descr/minix68k": "./descr",
     },
 )

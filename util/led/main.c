@@ -93,7 +93,6 @@ static void do_statistics(void)
 #endif
 
 char* progname; /* Name this program was invoked with. */
-int passnumber; /* Pass we are in. */
 struct outhead outhead; /* Header of final output file. */
 struct outsect outsect[MAXSECT]; /* Its section table. */
 

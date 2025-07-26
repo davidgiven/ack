@@ -5,6 +5,8 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#include <stdbool.h>
+
 typedef unsigned char byte;
 typedef struct line line_t;
 typedef struct line *line_p;

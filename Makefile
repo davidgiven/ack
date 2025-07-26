@@ -7,6 +7,12 @@
 
 DEFAULT_PLATFORM ?= pc86
 
+# Which architectures should get built?
+
+$(if $(PLATS), $(error Don't set PLATS on the command line, because reasons. Edit the Makefile instead.))
+PLATS = all
+# PLATS = linux386 linuxppc linuxmips
+
 # Where should the ACK put its temporary files?
 
 ifeq ($(TMPDIR),)
@@ -28,10 +34,6 @@ PREFIX ?= /opt/pkg/ack
 #PREFIX = $(INSDIR)
 endif
 
-# Where do you want to put the object files used when building?
-
-BUILDDIR ?= $(ACK_TEMP_DIR)/ack-build
-
 # What build flags do you want to use for native code?
 
 CFLAGS ?= -g -Os \
@@ -40,10 +42,6 @@ CFLAGS ?= -g -Os \
 	-Werror=strict-prototypes \
 	-DUNREACHABLE_CODE='__builtin_unreachable()' \
 	-DNORETURN=_Noreturn
-
-ifeq ($(OS),Windows_NT)
-CFLAGS += -DWIN32
-endif
 
 HOSTCFLAGS = $(CFLAGS)
 ACKCFLAGS = -O
@@ -57,8 +55,18 @@ LUA ?= lua
 .PHONY: all
 all: +all
 
+# Custom rule to build the installer.
+
+ack-setup.exe: etc/windows-installer.nsi all
+	makensis -dBUILDDIR="$$(realpath $(INSDIR))" -dOUTFILE="$$(realpath $@)" $<
+
+install: all
+	@mkdir -p $(PREFIX)
+	tar cf - -C $(INSDIR) . | tar xvf - -C $(PREFIX)
+
 PLATIND = $(INSDIR)/share/ack
 PLATDEP = $(INSDIR)/lib/ack
+export PLATS
 
 AB_ENABLE_PROGRESS_INFO = false
 include build/ab.mk

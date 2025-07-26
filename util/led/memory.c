@@ -42,6 +42,7 @@ static char rcsid[] = "$Id$";
 #include "sym.h"
 #include "finish.h"
 #include "write.h"
+#include "scan.h"
 
 #ifndef USEMALLOC
 static void copy_down(struct memory* mem, ind_t dist);
@@ -266,8 +267,6 @@ static ind_t move_up(int piece, ind_t incr)
 	return incr;
 #endif /* ndef USEMALLOC */
 }
-
-extern int passnumber;
 
 /*
  * This routine is called if `piece' needs `incr' bytes and the system won't

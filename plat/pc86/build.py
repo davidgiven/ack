@@ -15,8 +15,8 @@ ackcfile(name="boot", srcs=["./boot.s"], plat="pc86")
 export(
     name="tools",
     items={
-        "$(PLATDEP)/pc86/as": ".+as",
-        "$(PLATDEP)/pc86/ncg": ".+ncg",
+        "$(PLATDEP)/pc86/as$(EXT)": ".+as",
+        "$(PLATDEP)/pc86/ncg$(EXT)": ".+ncg",
         "$(PLATIND)/descr/pc86": "./descr",
     },
 )

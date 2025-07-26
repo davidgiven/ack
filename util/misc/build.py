@@ -34,7 +34,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(PLATDEP)/em_encode": ".+em_encode",
-        "$(PLATDEP)/em_decode": ".+em_decode",
+        "$(PLATDEP)/em_encode$(EXT)": ".+em_encode",
+        "$(PLATDEP)/em_decode$(EXT)": ".+em_decode",
     },
 )

@@ -49,7 +49,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(PLATDEP)/em_ass": ".+ass",
+        "$(PLATDEP)/em_ass$(EXT)": ".+ass",
         "$(INSDIR)/share/man/man6/em_ass.6": "./em_ass.6",
     },
 )

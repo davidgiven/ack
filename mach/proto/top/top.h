@@ -81,4 +81,3 @@ struct instr_descr {
 	char		*opcode;
 	struct templat templates[MAXOP];
 };
-

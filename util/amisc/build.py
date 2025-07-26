@@ -11,7 +11,7 @@ def simpleprogram(name):
         deps=["h", "modules/src/object", "modules/src/system"],
     )
 
-    i[f"$(INSDIR)/bin/{name}"] = p
+    i[f"$(INSDIR)/bin/{name}$(EXT)"] = p
     i[f"$(INSDIR)/share/man/man1/{name}.1"] = f"./{name}.1"
 
 

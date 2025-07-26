@@ -17,7 +17,7 @@ cprogram(
 export(
     name="all",
     items={
-        "$(INSDIR)/bin/aal": ".+aal",
+        "$(INSDIR)/bin/aal$(EXT)": ".+aal",
         "$(INSDIR)/share/man/man1/aal.1": "./aal.1",
     },
 )
