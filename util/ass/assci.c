@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "ass00.h"
 #include "assex.h"
 #include "assci.h"

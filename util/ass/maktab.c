@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <em_spec.h>
 #include <em_flag.h>
 
