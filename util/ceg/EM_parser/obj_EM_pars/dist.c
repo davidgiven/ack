@@ -14,8 +14,6 @@ char *lab;
 
 
 #define MAX_LABEL	10
-#define	true		1
-#define FALSE		0
 
 
 struct t_label  {

@@ -15,8 +15,6 @@
 
 # include "FP_types.h"
 # define	UNKNOWN -1
-# define	true	 1
-# define	FALSE	 0
 # define	MAXBIT	0x80000000L
 
 	/*
