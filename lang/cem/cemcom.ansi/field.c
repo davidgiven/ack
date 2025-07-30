@@ -10,6 +10,7 @@
 
 
 #ifndef NOBITFIELD
+#include 	<stdbool.h>
 #include	<assert.h>
 #include	<em.h>
 #include	<em_reg.h>
