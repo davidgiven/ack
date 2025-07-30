@@ -7,7 +7,7 @@ void itoa(long value, char* buffer, int radix)
 		*buffer++ = '-';
 		value = -value;
 	}
-	buffer = _i_compute(value, 10, buffer, 0);
+	buffer = _i_compute(value, radix, buffer, 0);
 	*buffer++ = '\0';
 }
 
