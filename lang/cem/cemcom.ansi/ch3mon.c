@@ -5,6 +5,8 @@
 /* $Id$ */
 /* SEMANTIC ANALYSIS (CHAPTER 3.3) -- MONADIC OPERATORS */
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include    "ch3mon.h"
 #include	"parameters.h"
 #include	<alloc.h>

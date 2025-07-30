@@ -6,6 +6,8 @@
 /* SEMANTIC ANALYSIS (CHAPTER 3.3)  --  BINARY OPERATORS */
 
 #include	"parameters.h"
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include	"arith.h"

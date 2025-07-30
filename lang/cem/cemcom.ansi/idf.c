@@ -6,6 +6,8 @@
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
 #include	<assert.h>
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<string.h>

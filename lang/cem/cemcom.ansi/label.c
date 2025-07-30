@@ -5,6 +5,8 @@
 /* $Id$ */
 /*		L A B E L   H A N D L I N G		*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include    "parameters.h"
 #include    "idf.h"
 #include	"Lpars.h"

@@ -6,6 +6,8 @@
 /*	D E C L A R A T O R   M A N I P U L A T I O N		*/
 
 #include	"parameters.h"
+#include	<stddef.h>
+#include	<stdbool.h>
 #include    "declarator.h"
 #include	<alloc.h>
 #include	<flt_arith.h>

@@ -5,6 +5,8 @@
 /* $Id$ */
 /* EXPRESSION-CODE GENERATOR */
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	"parameters.h"
 #ifndef	LINT
 

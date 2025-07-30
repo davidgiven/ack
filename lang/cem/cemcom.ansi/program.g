@@ -45,6 +45,8 @@
 %start		If_expr, control_if_expression;
 
 {
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"

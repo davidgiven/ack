@@ -8,6 +8,8 @@
 #include	"parameters.h"
 #ifndef	LINT
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include    "conversion.h"
 #include	<em.h>
 #include    "interface.h"

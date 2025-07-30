@@ -5,7 +5,10 @@
 /* $Id$ */
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
+#include	<stdbool.h>
 #include	<alloc.h>
 #include    "idf.h"
 #include	"Lpars.h"

@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	<assert.h>
 #include    "cstoper.h"
 #include    "parameters.h"

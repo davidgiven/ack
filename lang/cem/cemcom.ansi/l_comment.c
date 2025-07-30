@@ -6,6 +6,8 @@
 /*	Lint-specific comment handling	*/
 
 #include	"parameters.h"
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<ctype.h>
 
 #ifdef	LINT

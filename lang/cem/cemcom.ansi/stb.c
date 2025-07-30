@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 
 /* library routine for copying structs */
 void __stb(int n, char *f, char *t)

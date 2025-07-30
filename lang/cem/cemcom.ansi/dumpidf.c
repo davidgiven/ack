@@ -6,6 +6,8 @@
 /*	DUMP ROUTINES	*/
 
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	"parameters.h"
 #ifdef	DEBUG
 #include	<ack_string.h>

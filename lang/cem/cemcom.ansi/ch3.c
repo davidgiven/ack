@@ -6,6 +6,8 @@
 /*	S E M A N T I C   A N A L Y S I S -- C H A P T E R  3.3		*/
 
 #include	<assert.h>
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	"parameters.h"
 #include	<flt_arith.h>
 #include	"arith.h"

@@ -13,6 +13,7 @@
 
 #include	<assert.h>
 #include	<stddef.h>
+#include	<stdbool.h>
 #include    "parameters.h"
 #include	<alloc.h>
 #include	<flt_arith.h>

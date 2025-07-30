@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	S T A C K / U N S T A C K  R O U T I N E S	*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
 #include	<system.h>
 #ifndef	LINT

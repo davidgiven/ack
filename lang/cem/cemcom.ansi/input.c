@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include "parameters.h"
 #include <stdlib.h>
 #include <stdio.h>

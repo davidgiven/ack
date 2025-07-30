@@ -5,6 +5,8 @@
 /* $Id$ */
 /* PREPROCESSOR: INPUT SKIP FUNCTIONS */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include "parameters.h"
 #include "arith.h"
 #include "LLlex.h"

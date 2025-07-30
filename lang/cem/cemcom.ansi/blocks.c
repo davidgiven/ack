@@ -8,6 +8,8 @@
 #include	"parameters.h"
 #ifndef	LINT
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include <em.h>
 #include <em_reg.h>
 #include "arith.h"

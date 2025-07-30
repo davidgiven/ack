@@ -7,6 +7,8 @@
 
 {
 #include	"parameters.h"
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	<alloc.h>
 #include	<flt_arith.h>
 #include    "idf.h"

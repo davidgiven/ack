@@ -6,6 +6,8 @@
 /*	Lint outdef construction	*/
 
 #include	"parameters.h"
+#include	<stddef.h>
+#include 	<stdbool.h>
 
 #ifdef	LINT
 

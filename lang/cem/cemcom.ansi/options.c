@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	U S E R   O P T I O N - H A N D L I N G		*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
 #include	<stdlib.h>
 #include	<string.h>

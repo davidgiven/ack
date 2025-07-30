@@ -5,6 +5,8 @@
 /* $Id$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<string.h>
 #include	<alloc.h>
 #include	"idf.h"

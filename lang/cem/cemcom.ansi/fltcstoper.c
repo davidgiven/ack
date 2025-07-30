@@ -6,6 +6,8 @@
 /*	C O N S T A N T   E X P R E S S I O N   H A N D L I N G		*/
 /*	  F O R   F L O A T I N G   P O I N T   N U M B E R S		*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<assert.h>
 #include	"parameters.h"
 #include	<alloc.h>

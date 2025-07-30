@@ -9,6 +9,8 @@
 	Use the compiler option --d.
 */
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	<stdio.h>
 #include	"parameters.h"	/* UF */
 #include    "dataflow.h"

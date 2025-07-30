@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
+#include	<stddef.h>
+#include	<stdbool.h>
 #include	<assert.h>
 #include	"decspecs.h"
 #include	"Lpars.h"

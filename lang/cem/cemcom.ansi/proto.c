@@ -5,6 +5,8 @@
 /* $Id$ */
 /*  P R O T O T Y P E   F I D D L I N G  */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<assert.h>
 #include	"parameters.h"
 #include	<alloc.h>

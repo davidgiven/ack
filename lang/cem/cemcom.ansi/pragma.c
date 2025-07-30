@@ -5,6 +5,8 @@
 /* $Id$ */
 /* PREPROCESSOR: PRAGMA INTERPRETER */
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
 #include    "pragma.h"
 #include    "skip.h"

@@ -5,6 +5,8 @@
 /* $Id$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include <assert.h>
 #include <alloc.h>
 #include <stdlib.h>

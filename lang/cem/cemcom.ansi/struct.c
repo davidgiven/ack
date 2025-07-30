@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	ADMINISTRATION OF STRUCT AND UNION DECLARATIONS	*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	"parameters.h"
 #include	<alloc.h>
 #include    "idf.h"

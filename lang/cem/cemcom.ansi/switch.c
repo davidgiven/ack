@@ -5,6 +5,8 @@
 /* $Id$ */
 /*	S W I T C H - S T A T E M E N T  A D M I N I S T R A T I O N	*/
 
+#include	<stddef.h>
+#include 	<stdbool.h>
 #include	<stdbool.h>
 #include	<assert.h>
 #include	"parameters.h"

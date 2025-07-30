@@ -6,6 +6,8 @@
 /*	Lint status checking	*/
 
 #include	"parameters.h"
+#include	<stddef.h>
+#include 	<stdbool.h>
 
 #ifdef	LINT
 
