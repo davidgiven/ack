@@ -3,14 +3,15 @@
 
 #include "arith.h"
 
-struct localvar {
-	struct localvar	*next;
-	arith		t_offset;	/* offset from LocalBase */
-	arith		t_size;
-	int		t_align;
-	int		t_regtype;
-	int		t_count;
-	int		t_sc;		/* storage class */
+struct localvar
+{
+	struct localvar* next;
+	arith t_offset; /* offset from LocalBase */
+	arith t_size;
+	int t_align;
+	int t_regtype;
+	int t_count;
+	int t_sc; /* storage class */
 };
 
 /* ALLOCDEF "localvar" 10 */
@@ -24,7 +25,7 @@ void RegisterAccount(arith offset, arith size, int regtype, int sc);
 void LoadLocal(arith off, arith sz);
 void StoreLocal(arith off, arith sz);
 
-#ifndef	LINT
+#ifndef LINT
 void AddrLocal(arith off);
 #endif
 

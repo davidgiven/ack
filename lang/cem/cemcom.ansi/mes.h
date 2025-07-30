@@ -5,4 +5,4 @@
 /* $Id$ */
 /* MESSAGE ADMINISTRATION */
 
-extern int fp_used;	/* code.c	*/
+extern int fp_used; /* code.c	*/

@@ -8,19 +8,20 @@
 /* $Id$ */
 /* PARAMETER TYPE LIST DEFINITION */
 
-struct proto {
-	struct proto *next;
-	struct type *pl_type;	/* parameter type */
-	struct idf *pl_idf;	/* parameter identifier */
-	short pl_flag;		/* see define's */
+struct proto
+{
+	struct proto* next;
+	struct type* pl_type; /* parameter type */
+	struct idf* pl_idf; /* parameter identifier */
+	short pl_flag; /* see define's */
 };
 
-#define	NO_PROTO	((struct proto *)0)
+#define NO_PROTO ((struct proto*)0)
 
-#define	PL_VOID		0x01
-#define	PL_FORMAL	0x02
-#define	PL_ELLIPSIS	0x04
-#define	PL_ERRGIVEN	0x08
+#define PL_VOID     0x01
+#define PL_FORMAL   0x02
+#define PL_ELLIPSIS 0x04
+#define PL_ERRGIVEN 0x08
 
 /* ALLOCDEF "proto" 20 */
 
@@ -30,13 +31,11 @@ struct type;
 struct declarator;
 struct decspecs;
 
-
-void remove_proto_idfs(register struct proto *pl);
-void call_proto(register struct expr **expp);
-void update_proto(register struct type *tp, register struct type *otp);
-void declare_protos(register struct declarator *dc);
-void add_proto(struct proto *pl, struct decspecs *ds, struct declarator *dc,
-		int lvl);
-void check_for_void(register struct proto *pl);
+void remove_proto_idfs(register struct proto* pl);
+void call_proto(register struct expr** expp);
+void update_proto(register struct type* tp, register struct type* otp);
+void declare_protos(register struct declarator* dc);
+void add_proto(struct proto* pl, struct decspecs* ds, struct declarator* dc, int lvl);
+void check_for_void(register struct proto* pl);
 
 #endif

@@ -10,28 +10,28 @@
 /* $Id$ */
 /* FIELD DESCRIPTOR */
 
-struct field	{	/* for field specifiers	*/
+struct field
+{ /* for field specifiers	*/
 	arith fd_mask;
 	int fd_shift;
 	int fd_width;
-	struct sdef *fd_sdef;	/* upward pointer	*/
+	struct sdef* fd_sdef; /* upward pointer	*/
 };
 
 /* ALLOCDEF "field" 10 */
 
-#ifndef	LINT
-
+#ifndef LINT
 
 #ifndef NOBITFIELD
 
 struct expr;
 
-void store_field(register struct field *fd, int uns, int code,
-		register struct expr *leftop, arith tmpvar);
-void eval_field(struct expr *expr, int code);
+void store_field(
+    register struct field* fd, int uns, int code, register struct expr* leftop, arith tmpvar);
+void eval_field(struct expr* expr, int code);
 
 #endif /* NOBITFIELD */
 
-#endif	/* LINT */
+#endif /* LINT */
 
 #endif /* FIELD_H_ */

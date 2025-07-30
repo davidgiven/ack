@@ -8,18 +8,19 @@
 #ifndef FILE_INFO_H
 #define FILE_INFO_H
 
-struct file_info {
-	unsigned int	fil_lino;
-	int		fil_nestlow;
-	char		*fil_name;
-	char		*fil_wdir;
+struct file_info
+{
+	unsigned int fil_lino;
+	int fil_nestlow;
+	char* fil_name;
+	char* fil_wdir;
 };
 
-#define nestlow		finfo.fil_nestlow
-#define LineNumber	finfo.fil_lino
-#define FileName	finfo.fil_name
-#define WorkingDir	finfo.fil_wdir
+#define nestlow    finfo.fil_nestlow
+#define LineNumber finfo.fil_lino
+#define FileName   finfo.fil_name
+#define WorkingDir finfo.fil_wdir
 
-extern struct file_info finfo;	/* input.c */
+extern struct file_info finfo; /* input.c */
 
 #endif
