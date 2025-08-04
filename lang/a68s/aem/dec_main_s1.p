@@ -8,10 +8,10 @@ BEGIN
 	writeln('long dbug value ',number);
 END;
 
-PROCEDURE algol68; EXTERN;
-PROCEDURE encaps(PROCEDURE p;PROCEDURE q(n:integer));EXTERN;
-PROCEDURE trap(err: integer); EXTERN;
-PROCEDURE abort; EXTERN;
+PROCEDURE algol68; EXTERNAL;
+PROCEDURE encaps(PROCEDURE p;PROCEDURE q(n:integer));EXTERNAL;
+PROCEDURE trap(err: integer); EXTERNAL;
+PROCEDURE abort; EXTERNAL;
 
 PROCEDURE traphandler (n:INTEGER);
 BEGIN
