@@ -1,36 +1,32 @@
+from collections import namedtuple
+from copy import copy
+from importlib.machinery import SourceFileLoader, PathFinder, ModuleSpec
 from os.path import *
 from pathlib import Path
 from typing import Iterable
 import argparse
+import ast
 import builtins
-from copy import copy
 import functools
+import hashlib
 import importlib
 import importlib.util
-from importlib.machinery import (
-    SourceFileLoader,
-    PathFinder,
-    ModuleSpec,
-)
 import inspect
+import os
+import re
 import string
 import sys
-import hashlib
-import re
-import ast
-from collections import namedtuple
+import types
 
-VERBOSE_MK_FILE = False
+VERBOSE_NINJA_FILE = False
 
-verbose = False
 quiet = False
 cwdStack = [""]
 targets = {}
 unmaterialisedTargets = {}  # dict, not set, to get consistent ordering
 materialisingStack = []
 defaultGlobals = {}
-globalId = 1
-wordCache = {}
+outputTargets = set()
 
 RE_FORMAT_SPEC = re.compile(
     r"(?:(?P<fill>[\s\S])?(?P<align>[<>=^]))?"
@@ -50,6 +46,15 @@ CommandFormatSpec = namedtuple(
 
 sys.path += ["."]
 old_import = builtins.__import__
+
+
+class Environment(types.SimpleNamespace):
+    def setdefault(self, name, value):
+        if not hasattr(self, name):
+            setattr(self, name, value)
+
+
+G = Environment()
 
 
 class PathFinderImpl(PathFinder):
@@ -102,27 +107,88 @@ def error(message):
     raise ABException(message)
 
 
+def _undo_escaped_dollar(s, op):
+    return s.replace(f"$${op}", f"${op}")
+
+
 class BracketedFormatter(string.Formatter):
     def parse(self, format_string):
         while format_string:
-            left, *right = format_string.split("$[", 1)
-            if not right:
-                yield (left, None, None, None)
+            m = re.search(f"(?:[^$]|^)()\\$\\[()", format_string)
+            if not m:
+                yield (
+                    _undo_escaped_dollar(format_string, "["),
+                    None,
+                    None,
+                    None,
+                )
                 break
-            right = right[0]
+            left = format_string[: m.start(1)]
+            right = format_string[m.end(2) :]
 
             offset = len(right) + 1
             try:
                 ast.parse(right)
             except SyntaxError as e:
-                if not str(e).startswith("unmatched ']'"):
+                if not str(e).startswith(f"unmatched ']'"):
                     raise e
                 offset = e.offset
 
             expr = right[0 : offset - 1]
             format_string = right[offset:]
 
-            yield (left if left else None, expr, None, None)
+            yield (
+                _undo_escaped_dollar(left, "[") if left else None,
+                expr,
+                None,
+                None,
+            )
+
+
+class GlobalFormatter(string.Formatter):
+    def parse(self, format_string):
+        while format_string:
+            m = re.search(f"(?:[^$]|^)()\\$\\(([^)]*)\\)()", format_string)
+            if not m:
+                yield (
+                    format_string,
+                    None,
+                    None,
+                    None,
+                )
+                break
+            left = format_string[: m.start(1)]
+            var = m[2]
+            format_string = format_string[m.end(3) :]
+
+            yield (
+                left if left else None,
+                var,
+                None,
+                None,
+            )
+
+    def get_field(self, name, a1, a2):
+        return (
+            getattr(G, name),
+            False,
+        )
+
+    def format_field(self, value, format_spec):
+        if not value:
+            return ""
+        return str(value)
+
+
+globalFormatter = GlobalFormatter()
+
+
+def substituteGlobalVariables(value):
+    while True:
+        oldValue = value
+        value = globalFormatter.format(value)
+        if value == oldValue:
+            return _undo_escaped_dollar(value, "(")
 
 
 def Rule(func):
@@ -187,12 +253,10 @@ def _isiterable(xs):
 
 class Target:
     def __init__(self, cwd, name):
-        if verbose:
-            print("rule('%s', cwd='%s'" % (name, cwd))
         self.name = name
         self.localname = self.name.rsplit("+")[-1]
         self.traits = set()
-        self.dir = join("$(OBJ)", name)
+        self.dir = join(G.OBJ, name)
         self.ins = []
         self.outs = []
         self.deps = []
@@ -232,7 +296,8 @@ class Target:
                     [selfi.templateexpand(f) for f in filenamesof(value)]
                 )
 
-        return Formatter().format(s)
+        s = Formatter().format(s)
+        return substituteGlobalVariables(s)
 
     def materialise(self, replacing=False):
         if self not in unmaterialisedTargets:
@@ -341,10 +406,10 @@ def targetof(value, cwd=None):
             elif value.startswith("./"):
                 value = normpath(join(cwd, value))
         # Explicit directories are always raw files.
-        elif value.endswith("/"):
+        if value.endswith("/"):
             return _filetarget(value, cwd)
-        # Anything starting with a variable expansion is always a raw file.
-        elif value.startswith("$"):
+        # Anything in .obj is a raw file.
+        elif value.startswith(outputdir) or value.startswith(G.OBJ):
             return _filetarget(value, cwd)
 
         # If this is not a rule lookup...
@@ -467,78 +532,71 @@ def emit(*args, into=None):
     if into is not None:
         into += [s]
     else:
-        outputFp.write(s)
+        ninjaFp.write(s)
+
+
+def shell(*args):
+    s = "".join(args) + "\n"
+    shellFp.write(s)
 
 
 def emit_rule(self, ins, outs, cmds=[], label=None):
     name = self.name
-    fins_list = filenamesof(ins)
-    fins = set(fins_list)
-    fouts = filenamesof(outs)
-    nonobjs = [f for f in fouts if not f.startswith("$(OBJ)")]
+    fins = [self.templateexpand(f) for f in set(filenamesof(ins))]
+    fouts = [self.templateexpand(f) for f in filenamesof(outs)]
+
+    global outputTargets
+    outputTargets.update(fouts)
+    outputTargets.add(name)
 
     emit("")
-    if VERBOSE_MK_FILE:
+    if VERBOSE_NINJA_FILE:
         for k, v in self.args.items():
             emit(f"# {k} = {v}")
 
-    lines = []
-    if nonobjs:
-        emit("clean::", into=lines)
-        emit("\t$(hide) rm -f", *nonobjs, into=lines)
-
-    hashable = cmds + fins_list + fouts
-    hash = hashlib.sha1(bytes("\n".join(hashable), "utf-8")).hexdigest()
-    hashfile = join(self.dir, f"hash_{hash}")
-
-    global globalId
-    emit(".PHONY:", name, into=lines)
     if outs:
-        outsn = globalId
-        globalId = globalId + 1
-        insn = globalId
-        globalId = globalId + 1
-
-        emit(f"OUTS_{outsn}", "=", *fouts, into=lines)
-        emit(f"INS_{insn}", "=", *fins, into=lines)
-        emit(name, ":", f"$(OUTS_{outsn})", into=lines)
-        emit(hashfile, ":", into=lines)
-        emit(f"\t@mkdir -p {self.dir}", into=lines)
-        emit(f"\t@touch {hashfile}", into=lines)
-        emit(
-            f"$(OUTS_{outsn})",
-            "&:" if len(fouts) > 1 else ":",
-            f"$(INS_{insn})",
-            hashfile,
-            into=lines,
-        )
-
-        if label:
-            emit("\t$(hide)", "$(ECHO) $(PROGRESSINFO)" + label, into=lines)
+        os.makedirs(self.dir, exist_ok=True)
+        rule = []
 
         sandbox = join(self.dir, "sandbox")
-        emit("\t$(hide)", f"rm -rf {sandbox}", into=lines)
+        emit(f"rm -rf {sandbox}", into=rule)
         emit(
-            "\t$(hide)",
-            "$(PYTHON) build/_sandbox.py --link -s",
-            sandbox,
-            f"$(INS_{insn})",
-            into=lines,
+            f"{G.PYTHON} build/_sandbox.py --link -s", sandbox, *fins, into=rule
         )
         for c in cmds:
-            emit(f"\t$(hide) cd {sandbox} && (", c, ")", into=lines)
+            emit(f"(cd {sandbox} &&", c, ")", into=rule)
         emit(
-            "\t$(hide)",
-            "$(PYTHON) build/_sandbox.py --export -s",
+            f"{G.PYTHON} build/_sandbox.py --export -s",
             sandbox,
-            f"$(OUTS_{outsn})",
-            into=lines,
+            *fouts,
+            into=rule,
         )
+
+        ruletext = "".join(rule)
+        if len(ruletext) > 7000:
+            rulehash = hashlib.sha1(ruletext.encode()).hexdigest()
+
+            rulef = join(self.dir, f"rule-{rulehash}.sh")
+            with open(rulef, "wt") as fp:
+                fp.write("set -e\n")
+                fp.write(ruletext)
+
+            emit("build", *fouts, ":rule", *fins, rulef)
+            emit(" command=sh", rulef)
+        else:
+            emit("build", *fouts, ":rule", *fins)
+            emit(
+                " command=",
+                "&&".join([s.strip() for s in rule]).replace("$", "$$"),
+            )
+        if label:
+            emit(" description=", label)
+        emit("build", name, ":phony", *fouts)
+
     else:
         assert len(cmds) == 0, "rules with no outputs cannot have commands"
-        emit(name, ":", *fins, into=lines)
+        emit("build", name, ":phony", *fins)
 
-    outputFp.write("".join(lines))
     emit("")
 
 
@@ -585,47 +643,65 @@ def export(self, name=None, items: TargetsMap = {}, deps: Targets = []):
         dest = self.targetof(dest)
         outs += [dest]
 
-        destf = filenameof(dest)
+        destf = self.templateexpand(filenameof(dest))
+        outputTargets.update([destf])
 
         srcs = filenamesof([src])
         assert (
             len(srcs) == 1
         ), "a dependency of an exported file must have exactly one output file"
+        srcf = self.templateexpand(srcs[0])
 
         subrule = simplerule(
             name=f"{self.localname}/{destf}",
             cwd=self.cwd,
             ins=[srcs[0]],
             outs=[destf],
-            commands=["$(CP) -H %s %s" % (srcs[0], destf)],
-            label="",
+            commands=["$(CP) -H %s %s" % (srcf, destf)],
+            label="EXPORT",
         )
         subrule.materialise()
 
     self.ins = []
     self.outs = deps + outs
+    outputTargets.add(name)
 
     emit("")
-    emit(".PHONY:", name)
-    emit(name, ":", *filenamesof(outs + deps))
+    emit(
+        "build",
+        name,
+        ":phony",
+        *[self.templateexpand(f) for f in filenamesof(outs + deps)],
+    )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("-q", "--quiet", action="store_true")
-    parser.add_argument("-o", "--output")
+    parser.add_argument("-v", "--varfile")
+    parser.add_argument("-o", "--outputdir")
+    parser.add_argument("-D", "--define", action="append", default=[])
     parser.add_argument("files", nargs="+")
     args = parser.parse_args()
-
-    global verbose
-    verbose = args.verbose
 
     global quiet
     quiet = args.quiet
 
-    global outputFp
-    outputFp = open(args.output, "wt")
+    vardefs = args.define
+    if args.varfile:
+        with open(args.varfile, "rt") as fp:
+            vardefs = vardefs + list(fp)
+
+    for line in vardefs:
+        if "=" in line:
+            name, value = line.split("=", 1)
+            G.setdefault(name.strip(), value.strip())
+
+    global ninjaFp, shellFp, outputdir
+    outputdir = args.outputdir
+    G.setdefault("OBJ", outputdir)
+    ninjaFp = open(outputdir + "/build.ninja", "wt")
+    ninjaFp.write(f"include build/ab.ninja\n")
 
     for k in ["Rule"]:
         defaultGlobals[k] = globals()[k]
@@ -640,7 +716,10 @@ def main():
     while unmaterialisedTargets:
         t = next(iter(unmaterialisedTargets))
         t.materialise()
-    emit("AB_LOADED = 1\n")
+
+    with open(outputdir + "/build.targets", "wt") as fp:
+        fp.write("ninja-targets =")
+        fp.write(substituteGlobalVariables(" ".join(outputTargets)))
 
 
 main()
