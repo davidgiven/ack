@@ -4,14 +4,16 @@
  *
  */
 
-#include        "ass00.h"
-#include        "assex.h"
-#include		"assci.h"
-#include		"asscm.h"
-#include		"assrl.h"
-#include        <em_mes.h>
-#include        <em_pseu.h>
-#include        <em_ptyp.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "ass00.h"
+#include "assex.h"
+#include "assci.h"
+#include "asscm.h"
+#include "assrl.h"
+#include <em_mes.h>
+#include <em_pseu.h>
+#include <em_ptyp.h>
 
 /*
  * read compact code and fill in tables
@@ -22,14 +24,10 @@ static cons_t argval;
 
 static int oksizes; /* MES EMX,.,. seen */
 
-static enum m_type
-{
-	CON, ROM, HOLBSS
-} memtype;
+static enum m_type { CON, ROM, HOLBSS } memtype;
 static int valtype; /* Transfer of type information between
  valsize, inpseudo and putval
  */
-
 
 /* Forward declarations
  * Yes, there is a better way to reorder to avoid these forward
@@ -37,12 +35,12 @@ static int valtype; /* Transfer of type information between
  */
 static int getarg(int);
 static cons_t getint(void);
-static glob_t *getlab(int);
-static char *getdig(char *, unsigned int);
+static glob_t* getlab(int);
+static char* getdig(char*, unsigned int);
 static void make_string(unsigned int);
 static void getstring(void);
 static void inident(void);
-static char *inproname(void);
+static char* inproname(void);
 static int needed(void);
 static cons_t valsize(void);
 static void setline(void);
@@ -51,82 +49,81 @@ static void compact_line(void);
 static cons_t maxval(int);
 static void setsizes(void);
 static void exchange(int, int);
-static void doinsert(line_t *, int, int);
+static void doinsert(line_t*, int, int);
 static void putval(void);
 static void chkstart(void);
 static void typealign(enum m_type);
 static void sizealign(cons_t);
 static void extconst(cons_t);
 static void extbss(cons_t);
-static void extloc(locl_t *);
-static void extglob(glob_t *, cons_t);
-static void extpro(proc_t *);
+static void extloc(locl_t*);
+static void extglob(glob_t*, cons_t);
+static void extpro(proc_t*);
 static void extstring(void);
 static void extxcon(int);
-static long myatol(char *);
+static long myatol(char*);
 static void extvcon(int);
-
 
 static int table3(int i)
 {
 
 	switch (i)
 	{
-	case sp_ilb1:
-		tabval = get8();
-		break;
-	case sp_dlb1:
-		make_string(get8());
-		i = sp_dnam;
-		break;
-	case sp_dlb2:
-		tabval = get16();
-		if (tabval < 0)
-		{
-			error("illegal data label .%d", tabval);
-			tabval = 0;
-		}
-		make_string(tabval);
-		i = sp_dnam;
-		break;
-	case sp_cst2:
-		argval = get16();
-		break;
-	case sp_ilb2:
-		tabval = get16();
-		if (tabval < 0)
-		{
-			error("illegal instruction label %d", tabval);
-			tabval = 0;
-		}
-		i = sp_ilb1;
-		break;
-	case sp_cst4:
-		i = sp_cst2;
-		argval = get32();
-		break;
-	case sp_dnam:
-	case sp_pnam:
-		inident();
-		break;
-	case sp_scon:
-		getstring();
-		break;
-	case sp_doff:
-		getarg(sym_ptyp);
-		getarg(cst_ptyp);
-		break;
-	case sp_icon:
-	case sp_ucon:
-	case sp_fcon:
-		getarg(cst_ptyp);
-		consiz = argval;
-		if (consiz < wordsize ? wordsize % consiz != 0 : consiz % wordsize != 0)
-		{
-			fatal("illegal object size");
-		}
-		getstring();
-		break;
+		case sp_ilb1:
+			tabval = get8();
+			break;
+		case sp_dlb1:
+			make_string(get8());
+			i = sp_dnam;
+			break;
+		case sp_dlb2:
+			tabval = get16();
+			if (tabval < 0)
+			{
+				error("illegal data label .%d", tabval);
+				tabval = 0;
+			}
+			make_string(tabval);
+			i = sp_dnam;
+			break;
+		case sp_cst2:
+			argval = get16();
+			break;
+		case sp_ilb2:
+			tabval = get16();
+			if (tabval < 0)
+			{
+				error("illegal instruction label %d", tabval);
+				tabval = 0;
+			}
+			i = sp_ilb1;
+			break;
+		case sp_cst4:
+			i = sp_cst2;
+			argval = get32();
+			break;
+		case sp_dnam:
+		case sp_pnam:
+			inident();
+			break;
+		case sp_scon:
+			getstring();
+			break;
+		case sp_doff:
+			getarg(sym_ptyp);
+			getarg(cst_ptyp);
+			break;
+		case sp_icon:
+		case sp_ucon:
+		case sp_fcon:
+			getarg(cst_ptyp);
+			consiz = argval;
+			if (consiz < wordsize ? wordsize % consiz != 0 : consiz % wordsize != 0)
+			{
+				fatal("illegal object size");
+			}
+			getstring();
+			break;
 	}
 	return (i);
 }
@@ -157,7 +154,7 @@ cons_t get32(void)
 	int h_byte;
 
 	l = get8();
-	l |= (unsigned) get8() * 256;
+	l |= (unsigned)get8() * 256;
 	l |= get8() * 256L * 256L;
 	h_byte = get8();
 	if (h_byte >= 128)
@@ -220,13 +217,13 @@ static cons_t getint(void)
 	return (argval);
 }
 
-static glob_t *getlab(int status)
+static glob_t* getlab(int status)
 {
 	getarg(sym_ptyp);
 	return (glo2lookup(string, status));
 }
 
-static char *getdig(char *str, unsigned int number)
+static char* getdig(char* str, unsigned int number)
 {
 	int remain;
 
@@ -246,7 +243,7 @@ static void make_string(unsigned int n)
 
 static void getstring(void)
 {
-	char *p;
+	char* p;
 	int n;
 
 	getarg(cst_ptyp);
@@ -264,7 +261,7 @@ static void inident(void)
 	getstring();
 }
 
-static char *inproname(void)
+static char* inproname(void)
 {
 	getarg(ptyp(sp_pnam));
 	return (string);
@@ -272,40 +269,40 @@ static char *inproname(void)
 
 static int needed(void)
 {
-	glob_t *g;
-	proc_t *p;
+	glob_t* g;
+	proc_t* p;
 
 	for (;;)
 	{
 		switch (table2())
 		{
-		case sp_dnam:
-			if ( (g = xglolookup(string, SEARCHING)) != NULL)
-			{
-				if ((g->g_status & DEF) != 0)
+			case sp_dnam:
+				if ((g = xglolookup(string, SEARCHING)) != NULL)
+				{
+					if ((g->g_status & DEF) != 0)
+						continue;
+				}
+				else
 					continue;
-			}
-			else
-				continue;
-			break;
-		case sp_pnam:
-			p = searchproc(string, xprocs, oursize->n_xproc);
-			if (p->p_name)
-			{
-				if ((p->p_status & DEF) != 0)
+				break;
+			case sp_pnam:
+				p = searchproc(string, xprocs, oursize->n_xproc);
+				if (p->p_name)
+				{
+					if ((p->p_status & DEF) != 0)
+						continue;
+				}
+				else
 					continue;
-			}
-			else
-				continue;
-			break;
-		default:
-			error("Unexpected byte after ms_ext");
-		case sp_cend:
-			return FALSE;
+				break;
+			default:
+				error("Unexpected byte after ms_ext");
+			case sp_cend:
+				return false;
 		}
 		while (table2() != sp_cend)
 			;
-		return TRUE;
+		return true;
 	}
 }
 
@@ -313,35 +310,35 @@ static cons_t valsize(void)
 {
 	switch (valtype = table2())
 	{ /* valtype is used by putval and inpseudo */
-	case sp_cst2:
-		return wordsize;
-	case sp_ilb1:
-	case sp_dnam:
-	case sp_doff:
-	case sp_pnam:
-		return ptrsize;
-	case sp_scon:
-		return strlngth;
-	case sp_fcon:
-	case sp_icon:
-	case sp_ucon:
-		return consiz;
-	case sp_cend:
-		return 0;
-	default:
-		fatal("value expected");
-		return 0;
-		UNREACHABLE_CODE;
+		case sp_cst2:
+			return wordsize;
+		case sp_ilb1:
+		case sp_dnam:
+		case sp_doff:
+		case sp_pnam:
+			return ptrsize;
+		case sp_scon:
+			return strlngth;
+		case sp_fcon:
+		case sp_icon:
+		case sp_ucon:
+			return consiz;
+		case sp_cend:
+			return 0;
+		default:
+			fatal("value expected");
+			return 0;
+			UNREACHABLE_CODE;
 	}
 }
 
 void newline(int type)
 {
-	line_t *n_lnp;
+	line_t* n_lnp;
 
 	if (type > VALLOW)
 		type = VALLOW;
-	n_lnp = lnp_cast getarea((unsigned) linesize[type]);
+	n_lnp = lnp_cast getarea((unsigned)linesize[type]);
 	n_lnp->l_next = pstate.s_fline;
 	pstate.s_fline = n_lnp;
 	n_lnp->type1 = type;
@@ -353,8 +350,7 @@ static void setline(void)
 
 	/* Get line numbers correct */
 
-	if (pstate.s_fline &&
-	ctrunc(pstate.s_fline->instr_num) == sp_fpseu)
+	if (pstate.s_fline && ctrunc(pstate.s_fline->instr_num) == sp_fpseu)
 	{
 		/* Already one present */
 		pstate.s_fline->ad.ad_ln.ln_extra++;
@@ -366,16 +362,15 @@ static void setline(void)
 		pstate.s_fline->ad.ad_ln.ln_extra = 0;
 		pstate.s_fline->ad.ad_ln.ln_first = line_num;
 	}
-
 }
 
 static void inpseudo(int instr_no)
 {
 	cons_t cst;
-	proc_t *prptr;
+	proc_t* prptr;
 	cons_t objsize;
 	cons_t par1, par2;
-	char *pars;
+	char* pars;
 
 	/*
 	 * get operands of pseudo (if needed) and process it.
@@ -383,155 +378,156 @@ static void inpseudo(int instr_no)
 
 	switch (ctrunc(instr_no))
 	{
-	case ps_bss:
-		chkstart();
-		typealign(HOLBSS);
-		cst = getint(); /* number of bytes */
-		extbss(cst);
-		break;
-	case ps_hol:
-		chkstart();
-		typealign(HOLBSS);
-		holsize = getint();
-		holbase = databytes;
-		extbss(holsize);
-		break;
-	case ps_rom:
-	case ps_con:
-		chkstart();
-		typealign( ctrunc(instr_no) == ps_rom ? ROM : CON);
-		while ((objsize = valsize()) != 0)
-		{
-			if (valtype != sp_scon)
-				sizealign(objsize);
-			putval();
-			databytes += objsize;
-		}
-		break;
-	case ps_end:
-		prptr = pstate.s_curpro;
-		if (prptr == prp_cast 0)
-			fatal("unexpected END");
-		proctab[prptr->p_num].pr_off = textbytes;
-		if (procflag)
-		{
-			printf("%6lu\t%6lo\t%5d\t%-12s\t%s", textbytes, textbytes,
-					prptr->p_num, prptr->p_name, curfile);
-			if (archmode)
-				printf("(%.14s)", archhdr.ar_name);
-			printf("\n");
-		}
-		par2 = proctab[prptr->p_num].pr_loc;
-		if (getarg(cst_ptyp | ptyp(sp_cend)) == sp_cend)
-		{
-			if (par2 == -1)
+		case ps_bss:
+			chkstart();
+			typealign(HOLBSS);
+			cst = getint(); /* number of bytes */
+			extbss(cst);
+			break;
+		case ps_hol:
+			chkstart();
+			typealign(HOLBSS);
+			holsize = getint();
+			holbase = databytes;
+			extbss(holsize);
+			break;
+		case ps_rom:
+		case ps_con:
+			chkstart();
+			typealign(ctrunc(instr_no) == ps_rom ? ROM : CON);
+			while ((objsize = valsize()) != 0)
 			{
-				fatal("size of local area unspecified");
+				if (valtype != sp_scon)
+					sizealign(objsize);
+				putval();
+				databytes += objsize;
 			}
-		}
-		else
-		{
-			if (par2 != -1 && argval != par2)
+			break;
+		case ps_end:
+			prptr = pstate.s_curpro;
+			if (prptr == prp_cast 0)
+				fatal("unexpected END");
+			proctab[prptr->p_num].pr_off = textbytes;
+			if (procflag)
 			{
-				fatal("inconsistent local area size");
+				printf(
+				    "%6lu\t%6lo\t%5d\t%-12s\t%s", textbytes, textbytes, prptr->p_num, prptr->p_name,
+				    curfile);
+				if (archmode)
+					printf("(%.14s)", archhdr.ar_name);
+				printf("\n");
 			}
-			proctab[prptr->p_num].pr_loc = argval;
-		}
-		setline();
-		do_proc();
-		break;
-	case ps_mes:
-		switch ( int_cast getint())
-		{
-		case ms_err:
-			error("module with error");
-			ertrap();
-			UNREACHABLE_CODE;
-		case ms_emx:
-			if (oksizes)
+			par2 = proctab[prptr->p_num].pr_loc;
+			if (getarg(cst_ptyp | ptyp(sp_cend)) == sp_cend)
 			{
-				if (wordsize != getint())
+				if (par2 == -1)
 				{
-					fatal("Inconsistent word size");
-				}
-				if (ptrsize != getint())
-				{
-					fatal("Inconsistent pointer size");
+					fatal("size of local area unspecified");
 				}
 			}
 			else
 			{
-				oksizes++;
-				wordsize = getint();
-				ptrsize = getint();
-				if (wordsize != 2 && wordsize != 4)
+				if (par2 != -1 && argval != par2)
 				{
-					fatal("Illegal word size");
+					fatal("inconsistent local area size");
 				}
-				if (ptrsize != 2 && ptrsize != 4)
-				{
-					fatal("Illegal pointer size");
-				}
-				setsizes();
+				proctab[prptr->p_num].pr_loc = argval;
 			}
-			++mod_sizes;
+			setline();
+			do_proc();
 			break;
-		case ms_src:
-			break;
-		case ms_flt:
-			intflags |= 020;
-			break; /*floats used*/
-		case ms_ext:
-			if (!needed())
+		case ps_mes:
+			switch (int_cast getint())
 			{
-				eof_seen++;
+				case ms_err:
+					error("module with error");
+					ertrap();
+					UNREACHABLE_CODE;
+				case ms_emx:
+					if (oksizes)
+					{
+						if (wordsize != getint())
+						{
+							fatal("Inconsistent word size");
+						}
+						if (ptrsize != getint())
+						{
+							fatal("Inconsistent pointer size");
+						}
+					}
+					else
+					{
+						oksizes++;
+						wordsize = getint();
+						ptrsize = getint();
+						if (wordsize != 2 && wordsize != 4)
+						{
+							fatal("Illegal word size");
+						}
+						if (ptrsize != 2 && ptrsize != 4)
+						{
+							fatal("Illegal pointer size");
+						}
+						setsizes();
+					}
+					++mod_sizes;
+					break;
+				case ms_src:
+					break;
+				case ms_flt:
+					intflags |= 020;
+					break; /*floats used*/
+				case ms_ext:
+					if (!needed())
+					{
+						eof_seen++;
+					}
+					if (line_num > 2)
+					{
+						werror("mes ms_ext must be first or second pseudo");
+					}
+					return;
 			}
-			if (line_num > 2)
-			{
-				werror("mes ms_ext must be first or second pseudo");
-			}
-			return;
-		}
-		while (table2() != sp_cend)
-			;
-		break;
-	case ps_exc:
-		par1 = getint();
-		par2 = getint();
-		if (par1 == 0 || par2 == 0)
+			while (table2() != sp_cend)
+				;
 			break;
-		exchange((int) par2, (int) par1);
-		break;
-	case ps_exa:
-		getlab(EXTERNING);
-		break;
-	case ps_ina:
-		getlab(INTERNING);
-		break;
-	case ps_pro:
-		chkstart();
-		initproc();
-		pars = inproname();
-		if (getarg(cst_ptyp | ptyp(sp_cend)) == sp_cend)
-		{
-			par2 = -1;
-		}
-		else
-		{
-			par2 = argval;
-		}
-		prptr = prolookup(pars, PRO_DEF);
-		proctab[prptr->p_num].pr_loc = par2;
-		pstate.s_curpro = prptr;
-		break;
-	case ps_inp:
-		prptr = prolookup(inproname(), PRO_INT);
-		break;
-	case ps_exp:
-		prptr = prolookup(inproname(), PRO_EXT);
-		break;
-	default:
-		fatal("unknown pseudo");
+		case ps_exc:
+			par1 = getint();
+			par2 = getint();
+			if (par1 == 0 || par2 == 0)
+				break;
+			exchange((int)par2, (int)par1);
+			break;
+		case ps_exa:
+			getlab(EXTERNING);
+			break;
+		case ps_ina:
+			getlab(INTERNING);
+			break;
+		case ps_pro:
+			chkstart();
+			initproc();
+			pars = inproname();
+			if (getarg(cst_ptyp | ptyp(sp_cend)) == sp_cend)
+			{
+				par2 = -1;
+			}
+			else
+			{
+				par2 = argval;
+			}
+			prptr = prolookup(pars, PRO_DEF);
+			proctab[prptr->p_num].pr_loc = par2;
+			pstate.s_curpro = prptr;
+			break;
+		case ps_inp:
+			prptr = prolookup(inproname(), PRO_INT);
+			break;
+		case ps_exp:
+			prptr = prolookup(inproname(), PRO_EXT);
+			break;
+		default:
+			fatal("unknown pseudo");
 	}
 	if (!mod_sizes)
 		fatal("Missing size specification");
@@ -546,56 +542,56 @@ static void compact_line(void)
 {
 	int instr_no;
 
-
 	curglosym = 0;
 	switch (table1())
 	{
-	default:
-		fatal("unknown byte at start of \"line\""); UNREACHABLE_CODE;
-	case EOF:
-		eof_seen++;
-		while (pstate.s_prevstat != pst_cast 0)
-		{
-			error("missing end");
-			do_proc();
-		}
-		return;
-	case sp_fmnem:
-		if (pstate.s_curpro == prp_cast 0)
-		{
-			error("instruction outside procedure");
-		}
-		instr_no = tabval;
-		if ((em_flag[instr_no] & EM_PAR) == PAR_NO)
-		{
-			newline(MISSING);
-			pstate.s_fline->instr_num = instr_no;
+		default:
+			fatal("unknown byte at start of \"line\"");
+			UNREACHABLE_CODE;
+		case EOF:
+			eof_seen++;
+			while (pstate.s_prevstat != pst_cast 0)
+			{
+				error("missing end");
+				do_proc();
+			}
 			return;
-		}
-		/*
-		 * This instruction should have an opcode, so read it after
-		 * this switch.
-		 */
-		break;
-	case sp_dnam:
-		chkstart();
-		align(wordsize);
-		curglosym = glo2lookup(string, DEFINING);
-		curglosym->g_val.g_addr = databytes;
-		lastglosym = curglosym;
-		setline();
-		line_num++;
-		if (table1() != sp_fpseu)
-			fatal("no pseudo after data label");
-	case sp_fpseu:
-		inpseudo(tabval);
-		setline();
-		return;
-	case sp_ilb1:
-		newline(LOCSYM);
-		pstate.s_fline->ad.ad_lp = loclookup(tabval, DEFINING);
-		pstate.s_fline->instr_num = sp_ilb1;
-		return;
+		case sp_fmnem:
+			if (pstate.s_curpro == prp_cast 0)
+			{
+				error("instruction outside procedure");
+			}
+			instr_no = tabval;
+			if ((em_flag[instr_no] & EM_PAR) == PAR_NO)
+			{
+				newline(MISSING);
+				pstate.s_fline->instr_num = instr_no;
+				return;
+			}
+			/*
+			 * This instruction should have an opcode, so read it after
+			 * this switch.
+			 */
+			break;
+		case sp_dnam:
+			chkstart();
+			align(wordsize);
+			curglosym = glo2lookup(string, DEFINING);
+			curglosym->g_val.g_addr = databytes;
+			lastglosym = curglosym;
+			setline();
+			line_num++;
+			if (table1() != sp_fpseu)
+				fatal("no pseudo after data label");
+		case sp_fpseu:
+			inpseudo(tabval);
+			setline();
+			return;
+		case sp_ilb1:
+			newline(LOCSYM);
+			pstate.s_fline->ad.ad_lp = loclookup(tabval, DEFINING);
+			pstate.s_fline->instr_num = sp_ilb1;
+			return;
 	}
 
 	/*
@@ -604,59 +600,59 @@ static void compact_line(void)
 
 	switch (table2())
 	{
-	default:
-		fatal("unknown byte at start of argument"); UNREACHABLE_CODE;
-	case sp_cst2:
-		if ((em_flag[instr_no] & EM_PAR) == PAR_B)
-		{
-			/* value indicates a label */
-			newline(LOCSYM);
-			pstate.s_fline->ad.ad_lp = loclookup((int) argval, OCCURRING);
-		}
-		else
-		{
-			if (argval >= VAL1(VALLOW) && argval <= VAL1(VALHIGH))
+		default:
+			fatal("unknown byte at start of argument");
+			UNREACHABLE_CODE;
+		case sp_cst2:
+			if ((em_flag[instr_no] & EM_PAR) == PAR_B)
 			{
-				newline(VALLOW);
-				pstate.s_fline->type1 = argval + VALMID;
+				/* value indicates a label */
+				newline(LOCSYM);
+				pstate.s_fline->ad.ad_lp = loclookup((int)argval, OCCURRING);
 			}
 			else
 			{
-				newline(CONST);
-				pstate.s_fline->ad.ad_i = argval;
-				pstate.s_fline->type1 = CONST;
+				if (argval >= VAL1(VALLOW) && argval <= VAL1(VALHIGH))
+				{
+					newline(VALLOW);
+					pstate.s_fline->type1 = argval + VALMID;
+				}
+				else
+				{
+					newline(CONST);
+					pstate.s_fline->ad.ad_i = argval;
+					pstate.s_fline->type1 = CONST;
+				}
 			}
-		}
-		break;
-	case sp_ilb1:
-		newline(LOCSYM);
-		pstate.s_fline->ad.ad_lp = loclookup(tabval, OCCURRING);
-		break;
-	case sp_dnam:
-		newline(GLOSYM);
-		pstate.s_fline->ad.ad_gp = glo2lookup(string, OCCURRING);
-		break;
-	case sp_pnam:
-		newline(PROCNAME);
-		pstate.s_fline->ad.ad_pp = prolookup(string, PRO_OCC);
-		break;
-	case sp_cend:
-		if ((em_flag[instr_no] & EM_PAR) != PAR_W)
-		{
-			fatal("missing operand");
-		}
-		newline(MISSING);
-		break;
-	case sp_doff:
-		newline(GLOOFF);
-		pstate.s_fline->ad.ad_df.df_i = argval;
-		pstate.s_fline->ad.ad_df.df_gp = glo2lookup(string, OCCURRING);
-		break;
+			break;
+		case sp_ilb1:
+			newline(LOCSYM);
+			pstate.s_fline->ad.ad_lp = loclookup(tabval, OCCURRING);
+			break;
+		case sp_dnam:
+			newline(GLOSYM);
+			pstate.s_fline->ad.ad_gp = glo2lookup(string, OCCURRING);
+			break;
+		case sp_pnam:
+			newline(PROCNAME);
+			pstate.s_fline->ad.ad_pp = prolookup(string, PRO_OCC);
+			break;
+		case sp_cend:
+			if ((em_flag[instr_no] & EM_PAR) != PAR_W)
+			{
+				fatal("missing operand");
+			}
+			newline(MISSING);
+			break;
+		case sp_doff:
+			newline(GLOOFF);
+			pstate.s_fline->ad.ad_df.df_i = argval;
+			pstate.s_fline->ad.ad_df.df_gp = glo2lookup(string, OCCURRING);
+			break;
 	}
 	pstate.s_fline->instr_num = instr_no;
 	return;
 }
-
 
 void read_compact(void)
 {
@@ -673,11 +669,6 @@ void read_compact(void)
 		end_module();
 	/* mod_sizes is only false for rejected library modules */
 }
-
-
-
-
-
 
 static cons_t maxval(int bits)
 {
@@ -730,13 +721,13 @@ static void exchange(int p1, int p2)
 		line--;
 		switch (ctrunc(a_lnp->instr_num))
 		{
-		case sp_fpseu:
-			line = a_lnp->ad.ad_ln.ln_first;
-			size += a_lnp->ad.ad_ln.ln_extra;
-			break;
-		case sp_ilb1:
-			a_lnp->ad.ad_lp->l_min -= p2;
-			break;
+			case sp_fpseu:
+				line = a_lnp->ad.ad_ln.ln_first;
+				size += a_lnp->ad.ad_ln.ln_extra;
+				break;
+			case sp_ilb1:
+				a_lnp->ad.ad_lp->l_min -= p2;
+				break;
 		}
 		size++;
 		if (size >= p1)
@@ -744,7 +735,7 @@ static void exchange(int p1, int p2)
 	}
 	if ((size -= p1) > 0)
 	{
-		if ( ctrunc(a_lnp->instr_num) != sp_fpseu)
+		if (ctrunc(a_lnp->instr_num) != sp_fpseu)
 		{
 			fatal("EXC inconsistency");
 		}
@@ -764,13 +755,13 @@ static void exchange(int p1, int p2)
 		line--;
 		switch (ctrunc(b_lnp->instr_num))
 		{
-		case sp_fpseu:
-			size += b_lnp->ad.ad_ln.ln_extra;
-			line = b_lnp->ad.ad_ln.ln_first;
-			break;
-		case sp_ilb1:
-			b_lnp->ad.ad_lp->l_min += p1;
-			break;
+			case sp_fpseu:
+				size += b_lnp->ad.ad_ln.ln_extra;
+				line = b_lnp->ad.ad_ln.ln_first;
+				break;
+			case sp_ilb1:
+				b_lnp->ad.ad_lp->l_min += p1;
+				break;
 		}
 		size++;
 		if (size >= p2)
@@ -782,7 +773,7 @@ static void exchange(int p1, int p2)
 	}
 	if ((size -= p2) > 0)
 	{
-		if ( ctrunc(b_lnp->instr_num) != sp_fpseu)
+		if (ctrunc(b_lnp->instr_num) != sp_fpseu)
 		{
 			fatal("EXC inconsistency");
 		}
@@ -799,10 +790,10 @@ static void exchange(int p1, int p2)
 	a_lnp->l_next = t_lnp;
 }
 
-static void doinsert(line_t *lnp, int first, int extra)
+static void doinsert(line_t* lnp, int first, int extra)
 {
 	/* Beware : s_fline will be clobbered and restored */
-	line_t *t_lnp;
+	line_t* t_lnp;
 
 	t_lnp = pstate.s_fline;
 	pstate.s_fline = lnp->l_next;
@@ -818,36 +809,36 @@ static void putval(void)
 {
 	switch (valtype)
 	{
-	case sp_cst2:
-		extconst(argval);
-		return;
-	case sp_ilb1:
-		extloc(loclookup(tabval, OCCURRING));
-		return;
-	case sp_dnam:
-		extglob(glo2lookup(string, OCCURRING), (cons_t) 0);
-		return;
-	case sp_doff:
-		extglob(glo2lookup(string, OCCURRING), argval);
-		return;
-	case sp_pnam:
-		extpro(prolookup(string, PRO_OCC));
-		return;
-	case sp_scon:
-		extstring();
-		return;
-	case sp_fcon:
-		extxcon(DATA_FCON);
-		return;
-	case sp_icon:
-		extvcon(DATA_ICON);
-		return;
-	case sp_ucon:
-		extvcon(DATA_UCON);
-		return;
-	default:
-		fatal("putval notreached");
-		UNREACHABLE_CODE;
+		case sp_cst2:
+			extconst(argval);
+			return;
+		case sp_ilb1:
+			extloc(loclookup(tabval, OCCURRING));
+			return;
+		case sp_dnam:
+			extglob(glo2lookup(string, OCCURRING), (cons_t)0);
+			return;
+		case sp_doff:
+			extglob(glo2lookup(string, OCCURRING), argval);
+			return;
+		case sp_pnam:
+			extpro(prolookup(string, PRO_OCC));
+			return;
+		case sp_scon:
+			extstring();
+			return;
+		case sp_fcon:
+			extxcon(DATA_FCON);
+			return;
+		case sp_icon:
+			extvcon(DATA_ICON);
+			return;
+		case sp_ucon:
+			extvcon(DATA_UCON);
+			return;
+		default:
+			fatal("putval notreached");
+			UNREACHABLE_CODE;
 	}
 }
 
@@ -860,13 +851,13 @@ static void chkstart(void)
 	if (!oksizes)
 		fatal("missing size specification");
 	set_mode(DATA_CONST);
-	extconst((cons_t) 0);
+	extconst((cons_t)0);
 	databytes = wordsize;
 	set_mode(DATA_REP);
 	if (wordsize < ABSSIZE)
 	{
 		int factor = ABSSIZE / wordsize - 1;
-		extadr((cons_t) factor);
+		extadr((cons_t)factor);
 		databytes += factor * wordsize;
 	}
 	absout++;
@@ -883,7 +874,7 @@ static void typealign(enum m_type new)
 
 static void sizealign(cons_t size)
 {
-	align(size > wordsize ? wordsize : (int) size);
+	align(size > wordsize ? wordsize : (int)size);
 }
 
 void align(int size)
@@ -955,11 +946,11 @@ static void extbss(cons_t n)
 			n -= MAXBYTE;
 		}
 		set_mode(DATA_BSS);
-		ext8((int) n);
+		ext8((int)n);
 	}
 }
 
-static void extloc(locl_t *lbp)
+static void extloc(locl_t* lbp)
 {
 
 	/*
@@ -967,13 +958,13 @@ static void extloc(locl_t *lbp)
 	 * For example  con *1
 	 */
 	set_mode(DATA_IPTR);
-	data_reloc( chp_cast lbp, dataoff, RELLOC);
-	extadr((cons_t) 0);
+	data_reloc(chp_cast lbp, dataoff, RELLOC);
+	extadr((cons_t)0);
 }
 
-static void extglob(glob_t *agbp, cons_t off)
+static void extglob(glob_t* agbp, cons_t off)
 {
-	glob_t *gbp;
+	glob_t* gbp;
 
 	/*
 	 * generate a word of data that is defined by a global symbol.
@@ -987,24 +978,24 @@ static void extglob(glob_t *agbp, cons_t off)
 	}
 	else
 	{
-		data_reloc( chp_cast gbp, dataoff, RELGLO);
+		data_reloc(chp_cast gbp, dataoff, RELGLO);
 		extadr(off);
 	}
 }
 
-static void extpro(proc_t *aprp)
+static void extpro(proc_t* aprp)
 {
 	/*
 	 * generate a address that is defined by a procedure descriptor.
 	 */
 	consiz = ptrsize;
 	set_mode(DATA_UCON);
-	extarb((int) ptrsize, (long) (aprp->p_num));
+	extarb((int)ptrsize, (long)(aprp->p_num));
 }
 
-static void extstring(void )
+static void extstring(void)
 {
-	char *s;
+	char* s;
 	int n;
 
 	/*
@@ -1020,7 +1011,7 @@ static void extstring(void )
 
 static void extxcon(int header)
 {
-	char *s;
+	char* s;
 	int n;
 
 	/*
@@ -1040,7 +1031,7 @@ static void extxcon(int header)
 }
 
 /* Added atol() that ignores overflow. --Ceriel */
-static long myatol(char *s)
+static long myatol(char* s)
 {
 	long total = 0;
 	unsigned digit;
@@ -1074,6 +1065,6 @@ static void extvcon(int header)
 	{
 		error("Size of initializer exceeds loader capability");
 	}
-	extarb((int) consiz, myatol(string));
+	extarb((int)consiz, myatol(string));
 	return;
 }

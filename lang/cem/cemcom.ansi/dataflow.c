@@ -6,15 +6,17 @@
 /*	DATAFLOW ANALYSIS ON C PROGRAMS	*/
 
 /*	Compile the C compiler with flag DATAFLOW.
-	Use the compiler option --d.
+    Use the compiler option --d.
 */
 
-#include	<stdio.h>
-#include	"parameters.h"	/* UF */
-#include    "dataflow.h"
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include "parameters.h" /* UF */
+#include "dataflow.h"
 
-#ifdef	DATAFLOW
-char *CurrentFunction = 0;
+#ifdef DATAFLOW
+char* CurrentFunction = 0;
 int NumberOfCalls;
 
 void DfaStartFunction(char* nm)
@@ -34,4 +36,4 @@ void DfaCallFunction(char* s)
 	printf("DFA: %s: %s\n", CurrentFunction, s);
 	++NumberOfCalls;
 }
-#endif	/* DATAFLOW */
+#endif /* DATAFLOW */

@@ -1,6 +1,4 @@
 MAKENOT4 := $(if $(findstring 3.9999, $(lastword $(sort 3.9999 $(MAKE_VERSION)))),yes,no)
-MAKE4.3 := $(if $(findstring 4.3, $(firstword $(sort 4.3 $(MAKE_VERSION)))),yes,no)
-MAKE4.1 := $(if $(findstring no_no,$(MAKENOT4)_$(MAKE4.3)),yes,no)
 
 ifeq ($(MAKENOT4),yes)
 $(error You need GNU Make 4.x for this (if you're on OSX, use gmake).)
@@ -17,16 +15,17 @@ HOSTCC ?= gcc
 HOSTCXX ?= g++
 HOSTAR ?= ar
 HOSTCFLAGS ?= -g -Og
+HOSTCXXFLAGS ?= $(HOSTCFLAGS)
 HOSTLDFLAGS ?= -g
 
 CC ?= $(HOSTCC)
 CXX ?= $(HOSTCXX)
 AR ?= $(HOSTAR)
 CFLAGS ?= $(HOSTCFLAGS)
+CXXFLAGS ?= $(CFLAGS)
 LDFLAGS ?= $(HOSTLDFLAGS)
 
-export PKG_CONFIG
-export HOST_PKG_CONFIG
+NINJA ?= ninja
 
 ifdef VERBOSE
 	hide =
@@ -65,32 +64,33 @@ EXT ?=
 
 CWD=$(shell pwd)
 
-ifeq ($(AB_ENABLE_PROGRESS_INFO),true)
-	ifeq ($(PROGRESSINFO),)
-	# The first make invocation here has to have its output discarded or else it
-	# produces spurious 'Leaving directory' messages... don't know why.
-	rulecount := $(strip $(shell $(MAKE) --no-print-directory -q $(OBJ)/build.mk PROGRESSINFO=1 > /dev/null \
-		&& $(MAKE) --no-print-directory -n $(MAKECMDGOALS) PROGRESSINFO=XXXPROGRESSINFOXXX | grep XXXPROGRESSINFOXXX | wc -l))
-	ruleindex := 1
-	PROGRESSINFO = "[$(ruleindex)/$(rulecount)]$(eval ruleindex := $(shell expr $(ruleindex) + 1)) "
-	endif
-else
-	PROGRESSINFO = ""
-endif
+define newline
 
-PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/target-$(word 1, $(shell $(PKG_CONFIG) --list-all | md5sum))
-HOST_PKG_CONFIG_HASHES = $(OBJ)/.pkg-config-hashes/host-$(word 1, $(shell $(HOST_PKG_CONFIG) --list-all | md5sum))
 
-$(OBJ)/build.mk : $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
-$(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES) &:
-	$(hide) rm -rf $(OBJ)/.pkg-config-hashes
-	$(hide) mkdir -p $(OBJ)/.pkg-config-hashes
-	$(hide) touch $(PKG_CONFIG_HASHES) $(HOST_PKG_CONFIG_HASHES)
+endef
 
-include $(OBJ)/build.mk
+define check_for_command
+  $(shell command -v $1 >/dev/null || (echo "Required command '$1' missing" >&2 && kill $$PPID))
+endef
 
-MAKEFLAGS += -r -j$(shell nproc)
-.DELETE_ON_ERROR:
+$(call check_for_command,ninja)
+$(call check_for_command,cmp)
+$(call check_for_command,$(PYTHON))
+
+pkg-config-hash = $(shell ($(PKG_CONFIG) --list-all && $(HOST_PKG_CONFIG) --list-all) | md5sum)
+build-files = $(shell find . -name .obj -prune -o \( -name 'build.py' -a -type f \) -print) $(wildcard build/*.py) $(wildcard config.py)
+build-file-timestamps = $(shell ls -l $(build-files) | md5sum)
+
+# Wipe the build file (forcing a regeneration) if the make environment is different.
+# (Conveniently, this includes the pkg-config hash calculated above.)
+
+ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS
+$(shell mkdir -p $(OBJ))
+$(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
+$(shell touch $(OBJ)/vars.txt)
+#$(shell diff -u $(OBJ)/vars.txt $(OBJ)/newvars.txt >&2)
+$(shell cmp -s $(OBJ)/newvars.txt $(OBJ)/vars.txt || (rm -f $(OBJ)/build.ninja && echo "Environment changed --- regenerating" >&2))
+$(shell mv $(OBJ)/newvars.txt $(OBJ)/vars.txt)
 
 .PHONY: update-ab
 update-ab:
@@ -105,9 +105,15 @@ clean::
 	$(hide) rm -rf $(OBJ)
 
 export PYTHONHASHSEED = 1
-build-files = $(shell find . -name 'build.py') $(wildcard build/*.py) $(wildcard config.py)
-$(OBJ)/build.mk: Makefile $(build-files) build/ab.mk
+$(OBJ)/build.ninja $(OBJ)/build.targets &:
 	@echo "AB"
-	@mkdir -p $(OBJ)
-	$(hide) $(PYTHON) -X pycache_prefix=$(OBJ)/__pycache__ build/ab.py -o $@ build.py \
-		|| rm -f $@
+	$(hide) $(PYTHON) -X pycache_prefix=$(OBJ)/__pycache__ build/ab.py \
+		-o $(OBJ) build.py \
+		-v $(OBJ)/vars.txt \
+		|| (rm -f $@ && false)
+
+include $(OBJ)/build.targets
+.PHONY: $(ninja-targets)
+.NOTPARALLEL:
+$(ninja-targets): $(OBJ)/build.ninja
+	+$(hide) $(NINJA) -f $(OBJ)/build.ninja $@

@@ -75,10 +75,10 @@ static bool is_cand(line_p lnp)
 	{
 		if (same_local(lnp, Lelem(i)))
 		{
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static void make_cand(line_p lnp)
@@ -114,10 +114,10 @@ static bool not_dismissed(line_p lnp)
 	{
 		if (same_local(Lelem(i), lnp))
 		{
-			return FALSE; /* variable was dismissed */
+			return false; /* variable was dismissed */
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 static void try_cand(line_p lnp, bblock_p b)

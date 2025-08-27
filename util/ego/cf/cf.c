@@ -226,11 +226,11 @@ static bool getbblocks(FILE* fp, short* kind_out, short* n_out, bblock_p* g_out,
 					*n_out = (short)lastbid;
 					/* number of basic blocks */
 				}
-				return TRUE;
+				return true;
 			case INIT:
 				lnp = doread_line(&curproc);
 				if (feof(curinp))
-					return FALSE;
+					return false;
 				if (INSTR(lnp) == ps_pro)
 				{
 					state = AFTERPRO;
@@ -391,7 +391,7 @@ static bool add_info(proc_p q, proc_p p)
 
 	change_p chp, chq;
 	use_p usp, usq;
-	bool diff = FALSE;
+	bool diff = false;
 
 	chp = p->p_change;
 	chq = q->p_change;
@@ -405,13 +405,13 @@ static bool add_info(proc_p q, proc_p p)
 		 */
 		if (CALLS_UNKNOWN(p))
 		{
-			return FALSE;
+			return false;
 			/* p already called an unknown procedure */
 		}
 		else
 		{
 			p->p_flags1 |= PF_CALUNKNOWN;
-			return TRUE;
+			return true;
 		}
 	}
 	if (CALLS_UNKNOWN(q))
@@ -422,13 +422,13 @@ static bool add_info(proc_p q, proc_p p)
 		if (!CALLS_UNKNOWN(p))
 		{
 			p->p_flags1 |= PF_CALUNKNOWN;
-			diff = TRUE;
+			diff = true;
 		}
 	}
 	if (IS_CALLED_IN_LOOP(p) && !IS_CALLED_IN_LOOP(q))
 	{
 		CALLED_IN_LOOP(q);
-		diff = TRUE;
+		diff = true;
 	}
 	if (!Cis_subset(chq->c_ext, chp->c_ext))
 	{
@@ -437,7 +437,7 @@ static bool add_info(proc_p q, proc_p p)
 		 * changed by q to the c_ext set of p.
 		 */
 		Cjoin(chq->c_ext, &chp->c_ext);
-		diff = TRUE;
+		diff = true;
 	}
 	if (CH_CHANGE_INDIR(chq) && !CH_CHANGE_INDIR(chp))
 	{
@@ -445,7 +445,7 @@ static bool add_info(proc_p q, proc_p p)
 		 * and p did not (yet).
 		 */
 		chp->c_flags |= CF_INDIR;
-		diff = TRUE;
+		diff = true;
 	}
 	if (USE_INDIR(usq) && !USE_INDIR(usp))
 	{
@@ -453,7 +453,7 @@ static bool add_info(proc_p q, proc_p p)
 		 * and p dis not (yet).
 		 */
 		usp->u_flags |= UF_INDIR;
-		diff = TRUE;
+		diff = true;
 	}
 	if (ENVIRON(q) && !ENVIRON(p))
 	{
@@ -461,7 +461,7 @@ static bool add_info(proc_p q, proc_p p)
 		 * environment while p does not (yet).
 		 */
 		p->p_flags1 |= PF_ENVIRON;
-		diff = TRUE;
+		diff = true;
 	}
 	return diff;
 }
@@ -474,11 +474,11 @@ static void trans_clos(proc_p head)
 
 	proc_p p, q;
 	Cindex i;
-	bool changes = TRUE;
+	bool changes = true;
 
 	while (changes)
 	{
-		changes = FALSE;
+		changes = false;
 		for (p = head; p != (proc_p)0; p = p->p_next)
 		{
 			if (!BODY_KNOWN(p))
@@ -488,7 +488,7 @@ static void trans_clos(proc_p head)
 				q = pmap[Celem(i)];
 				if (add_info(q, p))
 				{
-					changes = TRUE;
+					changes = true;
 				}
 			}
 		}
@@ -600,6 +600,6 @@ int main(int argc, char* argv[])
 	{
 		error("cannot open %s", pname_out);
 	}
-	putptable(fproc, f, TRUE);
+	putptable(fproc, f, true);
 	exit(0);
 }

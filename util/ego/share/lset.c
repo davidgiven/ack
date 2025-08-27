@@ -40,11 +40,11 @@ bool Lis_elem(Lelem_t x, lset s)
 	{
 		if (s->e_elem == x)
 		{
-			return TRUE;
+			return true;
 		}
 		s = s->e_next;
 	}
-	return FALSE;
+	return false;
 }
 
 void Ladd(Lelem_t x, lset* s_p)
@@ -180,9 +180,9 @@ bool Lis_subset(lset s1, lset s2)
 	for (i = Lfirst(s1); i != (Lindex)0; i = Lnext(i, s1))
 	{
 		if (!Lis_elem(Lelem(i), s2))
-			return FALSE;
+			return false;
 	}
-	return TRUE;
+	return true;
 }
 
 short Lnrelems(lset s)

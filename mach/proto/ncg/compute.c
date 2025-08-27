@@ -5,6 +5,7 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include "param.h"
 #include "tables.h"
@@ -143,7 +144,7 @@ void compute(node_p node, result_t *presult) {
 	}
 	presult->e_typ=EV_INT;
 	switch(node->ex_operator) {
-	default:        assert(FALSE);
+	default:        assert(false);
 	case EX_TOKFIELD:
 		if (node->ex_lnode==0)
 			if (curtoken) tp = curtoken;
@@ -151,7 +152,7 @@ void compute(node_p node, result_t *presult) {
 		else	tp = &fakestack[stackheight-node->ex_lnode];
 		switch(presult->e_typ = tokens[tp->t_token].t_type[node->ex_rnode-1]) {
 		default:
-			assert(FALSE);
+			assert(false);
 		case EV_INT:
 			presult->e_v.e_con = tp->t_att[node->ex_rnode-1].aw;
 			break;

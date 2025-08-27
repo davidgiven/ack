@@ -9,7 +9,7 @@ OPC_TERMINATOR '\t';
 
 NUM,NUM1,NUM2	{is_number(VAL)			};
 REG		{VAL[0] == '%'			};
-A,B,X,Y,Z	{TRUE				};
+A,B,X,Y,Z	{true				};
 REG_NO_O7	{VAL[0] == '%' && (VAL[1] != 'o' || VAL[2] != '7')};
 NO_O7		{no_o7(VAL)			};
 
@@ -86,9 +86,9 @@ int is_number(s)
 	register char *s;
 {
 	while (*s != '\0') {
-		if (*s < '0' || *s++ > '9') return FALSE;
+		if (*s < '0' || *s++ > '9') return false;
 	}
-	return TRUE;
+	return true;
 }
 
 int bigger(s,s1,s2)
@@ -98,9 +98,9 @@ int bigger(s,s1,s2)
 
 	if (n >= n1) {
 		sprintf(s2,"%d",n-n1);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int smaller(s,s1,s2)
@@ -110,9 +110,9 @@ int smaller(s,s1,s2)
 
 	if (n < n1) {
 		sprintf(s2,"%d",n1-n);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 int no_delay(s)
@@ -129,10 +129,10 @@ int no_o7(s)
 		while (*s && *s != '%') s++;
 		if (*s) {
 			if (*++s == 'o') {
-				if (*++s == '7') return FALSE;
+				if (*++s == '7') return false;
 			}
 		}
 		else break;
 	}
-	return TRUE;
+	return true;
 }

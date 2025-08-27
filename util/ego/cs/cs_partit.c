@@ -742,9 +742,9 @@ bool stack_group(int instr)
 		case BINAIR_OP:
 		case TERNAIR_OP:
 		case REMAINDER:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 }
 
@@ -782,7 +782,7 @@ offset op11size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -798,7 +798,7 @@ offset op12size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -814,7 +814,7 @@ offset op22size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -886,7 +886,7 @@ offset avsize(line_p lnp)
 			else
 				return UNKNOWN_SIZE;
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 	}
 	UNREACHABLE_CODE;
@@ -903,7 +903,7 @@ int regtype(byte instr)
 		case FLT:
 			return reg_float;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }

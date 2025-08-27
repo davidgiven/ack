@@ -9,13 +9,13 @@ ZERO			{strcmp(VAL,"#0") ==0};
 CONST,C1,C2,C3,C4 	{VAL[0] == '#'};
 REG,REG1,REG2		{is_register(VAL)};
 LAB			{VAL[0] == 'I'};
-LL,X,Y,Z,W,LOG1,LOG2	{TRUE};
+LL,X,Y,Z,W,LOG1,LOG2	{true};
 XX			{no_side_effects(VAL)};
-YY,ZZ,VV,WW		{TRUE};
+YY,ZZ,VV,WW		{true};
 RL11			{is_reglist_11(VAL)};
 RL1,RL2,RL3,RL4		{is_reglist1(VAL)};
 RL13			{is_local(VAL)};
-X1,X2,Y1,Y2,Z1,Z2,V1,V2 {TRUE};
+X1,X2,Y1,Y2,Z1,Z2,V1,V2 {true};
 
 %%;
  
@@ -682,7 +682,7 @@ char *s;
       if (*s++ == '1' && (*s >= '0' && *s <= '5')) s++;
       return *s == '\0';
       }
-      return FALSE;
+      return false;
 }
  
 int is_byte(s,t)
@@ -692,9 +692,9 @@ char *s, *t;
 
 	s++;   /* skip # */
 	arg = atol(s);
-	if (arg<1 || arg>256) return(FALSE);
+	if (arg<1 || arg>256) return(false);
 	sprintf(t,"%d",arg-1);
-	return(TRUE);
+	return(true);
 }
 
 int is_byte2(s,t1,t2)
@@ -704,14 +704,14 @@ char *s,*t1,*t2;
 
 	s++;
 	arg = atol(s);
-	if (arg<1 || arg>255) return(FALSE);
+	if (arg<1 || arg>255) return(false);
 	if (arg & 0x80) {
 		shift = arg << 24;
 		sprintf(t1,"%ld",shift);
 		sprintf(t2,"%d", 24);
-		return(TRUE);
+		return(true);
 	}
-	return(FALSE);
+	return(false);
 }
   
 int no_side_effects(s)
@@ -719,9 +719,9 @@ char *s;
 {
 	for (;;) {
 		switch(*s++) {
-		  case '\0': return(TRUE);
-		  case ']' : return(FALSE);
-		  case '<' : return(FALSE);
+		  case '\0': return(true);
+		  case ']' : return(false);
+		  case '<' : return(false);
 		}
 	}
 }
@@ -737,42 +737,42 @@ char *s1, *s2, *rl;
 	a2 = atol(s2);
 	if (a1 > a2) {
 		sprintf(rl, "{R%d,R%d}", a2, a1);
-		return(TRUE);
+		return(true);
 	}
-	return(FALSE);
+	return(false);
 }
 
 int is_local(s)
 char *s;
 {
-	if (strcmp(s, "[R13") == 0) return(TRUE);
-	return(FALSE);
+	if (strcmp(s, "[R13") == 0) return(true);
+	return(false);
 }
 
 int is_reglist_11(s)
 char *s;
 {
 	if (strcmp(s, "{R11}") == 0){
-		return(TRUE);
+		return(true);
 	}
-	return(FALSE);
+	return(false);
 }
 
 int is_reglist(s)
 char *s;
 {
-	if (*s == '{') return(TRUE);
-	return(FALSE);
+	if (*s == '{') return(true);
+	return(false);
 }
 
 int is_reglist1(s)
 char *s;
 {
-	if (*s != '{') return(FALSE);
+	if (*s != '{') return(false);
 	for (;;) {
 		switch(*s++) {
-			case '\0': return(TRUE);
-			case ',' : return(FALSE);
+			case '\0': return(true);
+			case ',' : return(false);
 		}
 	}
 }
@@ -780,14 +780,14 @@ char *s;
 int is_lams(s)
 char *s;
 {
-/*	if (strcmp(s,"LDR") == 0) return(TRUE);
-	if (strcmp(s,"ADD") == 0) return(TRUE);
-	if (strcmp(s,"ADR") == 0) return(TRUE);
-	if (strcmp(s,"MOV") == 0) return(TRUE);
-	if (strcmp(s,"SUB") == 0) return(TRUE);
-	return(FALSE);
+/*	if (strcmp(s,"LDR") == 0) return(true);
+	if (strcmp(s,"ADD") == 0) return(true);
+	if (strcmp(s,"ADR") == 0) return(true);
+	if (strcmp(s,"MOV") == 0) return(true);
+	if (strcmp(s,"SUB") == 0) return(true);
+	return(false);
 */
-return(TRUE);
+return(true);
 }
 
 int is_unequal(s1, s2)
@@ -798,8 +798,8 @@ char *s1, *s2;
 	s1++; s2++;
 	a1 = atol(s1);
 	a2 = atol(s2);
-	if (a1 == a2) return(FALSE);
-	return(TRUE);
+	if (a1 == a2) return(false);
+	return(true);
 }
 
 int is_unequal3(s1, s2, s3)
@@ -811,31 +811,31 @@ char *s1, *s2, *s3;
 	a1 = atol(s1);
 	a2 = atol(s2);
 	a3 = atol(s3);
-	if (a1 == a2) return(FALSE);
-	if (a3 == a2) return(FALSE);
-	if (a1 == a3) return(FALSE);
-	return(TRUE);
+	if (a1 == a2) return(false);
+	if (a3 == a2) return(false);
+	if (a1 == a3) return(false);
+	return(true);
 }
 
 int list_f_10(s)
 char *s;
 {
 	sprintf(s,"{R10,R11}");
-	return(TRUE);
+	return(true);
 }
 
 int list_f_9(s)
 char *s;
 {
 	sprintf(s,"{R9,R10,R11}");
-	return(TRUE);
+	return(true);
 }
 
 int list_f_8(s)
 char *s;
 {
 	sprintf(s,"{R8,R9,R10,R11}");
-	return(TRUE);
+	return(true);
 }
 
 int ok_regcheck1(r, s1)
@@ -845,11 +845,11 @@ int r;
 	int a1;
 
 	if (*s1 == '[') s1++;
-	if (*s1 != 'R') return(TRUE);
+	if (*s1 != 'R') return(true);
 	s1++;  /* skip R */
 	a1 = atoi(s1);
-	if (a1 >= r && a1 <= 11) return(FALSE);
-	return(TRUE);
+	if (a1 >= r && a1 <= 11) return(false);
+	return(true);
 }
 
 int ok_regcheck2(r, s1, s2)
@@ -858,8 +858,8 @@ int r;
 {
 	if (ok_regcheck1(r,s1))
 		if (ok_regcheck1(r,s2))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck3(r, s1, s2, s3)
@@ -868,8 +868,8 @@ int r;
 {
 	if (ok_regcheck1(r,s1))
 		if (ok_regcheck2(r,s2,s3))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck4(r, s1, s2, s3, s4)
@@ -878,8 +878,8 @@ int r;
 {
 	if (ok_regcheck2(r,s1,s2))
 		if (ok_regcheck2(r,s3,s4))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck5(r, s1, s2, s3, s4, s5)
@@ -888,8 +888,8 @@ int r;
 {
 	if (ok_regcheck2(r,s1,s2))
 		if (ok_regcheck3(r,s3,s4,s5))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck6(r, s1, s2, s3, s4, s5, s6)
@@ -898,8 +898,8 @@ int r;
 {
 	if (ok_regcheck2(r,s1,s2))
 		if (ok_regcheck4(r,s3,s4,s5,s6))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck7(r, s1, s2, s3, s4, s5, s6, s7)
@@ -908,8 +908,8 @@ int r;
 {
 	if (ok_regcheck4(r,s1,s2,s3,s4))
 		if (ok_regcheck3(r,s5,s6,s7))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 int ok_regcheck8(r, s1, s2, s3, s4, s5, s6, s7, s8)
@@ -918,8 +918,8 @@ int r;
 {
 	if (ok_regcheck4(r,s1,s2,s3,s4))
 		if (ok_regcheck4(r,s5,s6,s7,s8))
-			return(TRUE);
-	return(FALSE);
+			return(true);
+	return(false);
 }
 
 

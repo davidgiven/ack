@@ -5,6 +5,7 @@ static char rcsid2[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -263,7 +264,7 @@ dopseudo(void) {
 	case sp_ilb1:
 	case sp_ilb2:
 		swtxt();
-		/* dummy = */stackupto(&fakestack[stackheight-1],maxply,TRUE);
+		/* dummy = */stackupto(&fakestack[stackheight-1],maxply,true);
 		cleanregs();
 		strarg(savetab1);
 		newilb(argstr);
@@ -371,7 +372,7 @@ dopseudo(void) {
 			getarg(ptyp(sp_cend));
 			if (!regallowed)
 				error("mes 3 not allowed here");
-			fixregvars(TRUE);
+			fixregvars(true);
 			regallowed=0;
 		} else if (argval == ms_reg) {
 			long r_off;
@@ -380,7 +381,7 @@ dopseudo(void) {
 			if (!regallowed)
 				error("mes 3 not allowed here");
 			if(getarg(ptyp(sp_cst2)|ptyp(sp_cend)) == sp_cend) {
-				fixregvars(FALSE);
+				fixregvars(false);
 				regallowed=0;
 			} else {
 				r_off = argval;
@@ -686,7 +687,7 @@ static long con(int t) {
 		con_float();
 		return(argval);
 	}
-	assert(FALSE);
+	assert(false);
 	UNREACHABLE_CODE;
 }
 

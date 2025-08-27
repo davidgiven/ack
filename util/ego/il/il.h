@@ -42,7 +42,7 @@ struct actual
 	line_p ac_exp; /* copy of EM text			*/
 	/* 0 for actuals that are not inline	*/
 	offset ac_size; /* number of bytes of parameter		*/
-	bool ac_inl; /* TRUE if it may be expanded in line	*/
+	bool ac_inl; /* true if it may be expanded in line	*/
 	actual_p ac_next; /* link					*/
 };
 

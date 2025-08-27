@@ -80,28 +80,28 @@ int nenvps;			/* number of environment strings */
 #if ARG_MAX > INT_MAX
 #error /* overflow checks and sbrk depend on sizes being ints */
 #endif
-  overflow = FALSE;
+  overflow = false;
   npointers = 1 + nargs + 1 + nenvps + 1;	/* 1's for argc and NULLs */
   stackbytes = 0;	/* changed because _len is used now */
   if (nargs < 0 || nenvps < 0 || nargs+nenvps < 0 || npointers < 0)
-	overflow = TRUE;
+	overflow = true;
   for (i = PTRSIZE; i != 0; i--) {
 	temp = stackbytes + npointers;
-	if (temp < stackbytes) overflow = TRUE;
+	if (temp < stackbytes) overflow = true;
 	stackbytes = temp;
   }
   for (i = 0, ap = argv; i < nargs; i++) {
 	temp = stackbytes + _len(*ap++);
-	if (temp < stackbytes) overflow = TRUE;
+	if (temp < stackbytes) overflow = true;
 	stackbytes = temp;
   }
   for (i = 0, ap = envp; i < nenvps; i++) {
 	temp = stackbytes + _len(*ap++);
-	if (temp < stackbytes) overflow = TRUE;
+	if (temp < stackbytes) overflow = true;
 	stackbytes = temp;
   }
   temp = stackbytes + PTRSIZE - 1;
-  if (temp < stackbytes) overflow = TRUE;
+  if (temp < stackbytes) overflow = true;
   stackbytes = (temp / PTRSIZE) * PTRSIZE;
 
   /* Check for overflow before committing sbrk. */

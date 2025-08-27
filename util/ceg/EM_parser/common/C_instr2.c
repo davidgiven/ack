@@ -429,7 +429,7 @@ char *instr;
 	low = 0;
 	high = N_INSTR - 1;
 
-	while ( TRUE) {
+	while ( true) {
 		mid = ( low + high) / 2;
 		rel = strcmp( instr, EM_instr[mid].name);
 

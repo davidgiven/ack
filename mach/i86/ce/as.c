@@ -108,57 +108,57 @@ struct t_operand *op;
 	  case 'x' :
 	  case 'l' : switch( *str) {
 		       case 'a' : op->reg = 0;
-				  return( TRUE);
+				  return( true);
 
 		       case 'c' : op->reg = 1;
-				  return( TRUE);
+				  return( true);
 
 		       case 'd' : op->reg = 2;
-				  return( TRUE);
+				  return( true);
 
 		       case 'b' : op->reg = 3;
-				  return( TRUE);
+				  return( true);
 
-		       default  : return( FALSE);
+		       default  : return( false);
 		     }
 
 	  case 'h' : switch( *str) {
 		       case 'a' : op->reg = 4;
-				  return( TRUE);
+				  return( true);
 
 		       case 'c' : op->reg = 5;
-				  return( TRUE);
+				  return( true);
 
 		       case 'd' : op->reg = 6;
-				  return( TRUE);
+				  return( true);
 
 		       case 'b' : op->reg = 7;
-				  return( TRUE);
+				  return( true);
 
-		       default  : return( FALSE);
+		       default  : return( false);
 		     }
 
 	  case 'p' : switch ( *str) {
 		       case 's' : op->reg = 4;
-				  return( TRUE);
+				  return( true);
 
 		       case 'b' : op->reg = 5;
-				  return( TRUE);
+				  return( true);
 
-		       default  : return( FALSE);
+		       default  : return( false);
 		     }
 
 	  case 'i' : switch ( *str) {
 		       case 's' : op->reg = 6;
-				  return( TRUE);
+				  return( true);
 
 		       case 'd' : op->reg = 7;
-				  return( TRUE);
+				  return( true);
 
-		       default  : return( FALSE);
+		       default  : return( false);
 		     }
 
-	  default  : return( FALSE);
+	  default  : return( false);
 	}
 }
 
@@ -171,7 +171,7 @@ char *str;
 	while( !isletter( *str) && *str != '\0')
 		if ( *str == '$')
 			if ( arg_type( str) == STRING)
-				return( TRUE);
+				return( true);
 			else
 				str += 2;
 		else

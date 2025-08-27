@@ -385,7 +385,7 @@ do_return_expr(expr)
 		a return statement with an expression.
 	*/
 	ch7cast(&expr, RETURN, func_type);
-	code_expr(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(expr, RVAL, true, NO_LABEL, NO_LABEL);
 	C_bra(return_label);
 	return_expr_occurred = 1;
 }
@@ -540,7 +540,7 @@ loc_init(expr, id)
 		{
 			struct value vl;
 
-			EVAL(expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+			EVAL(expr, RVAL, true, NO_LABEL, NO_LABEL);
 			vl.vl_class = Name;
 			vl.vl_data.vl_idf = id;
 			vl.vl_value = (arith)0;

@@ -50,11 +50,11 @@ static bool is_loadiv(line_p lnp)
 			if (iv->iv_off == off)
 			{
 				last_iv = iv;
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 #define size_ok(l) (TYPE(l) == OPSHORT && SHORT(l) == ws)
@@ -141,9 +141,9 @@ static bool match_expr(line_p l, bool iv_allowed, line_p* lbegin, bool* iv_seen,
 			{
 				*lbegin = l1;
 				*iv_seen = iv_insubexpr;
-				return TRUE;
+				return true;
 			}
-			return FALSE;
+			return false;
 		case ME_BINAIR:
 			/* binairy operator, match two subexpressions */
 			if (match_expr(PREV(l), iv_allowed, &l1, &iv_insubexpr, sign2))
@@ -154,24 +154,24 @@ static bool match_expr(line_p l, bool iv_allowed, line_p* lbegin, bool* iv_seen,
 				{
 					*lbegin = l1;
 					*iv_seen = !iv_allowed || iv_insubexpr;
-					return TRUE;
+					return true;
 				}
 			}
-			return FALSE; /* subexpression not recognized */
+			return false; /* subexpression not recognized */
 		case ME_LOOPCONST:
 			*lbegin = l; /* expression is a loop constant */
-			*iv_seen = FALSE;
-			return TRUE;
+			*iv_seen = false;
+			return true;
 		case ME_IV:
 			if (iv_allowed)
 			{
-				*iv_seen = TRUE;
+				*iv_seen = true;
 				*lbegin = l;
-				return TRUE;
+				return true;
 			}
 			/* fall through ... */
 		default:
-			return FALSE;
+			return false;
 	}
 }
 
@@ -182,7 +182,7 @@ bool is_ivexpr(line_p l, lset ivs, lset vars, line_p* lbegin_out, iv_p* iv_out, 
 
 	loopvars = vars;
 	ivars = ivs;
-	if (match_expr(l, TRUE, &l2, &iv_seen, 1))
+	if (match_expr(l, true, &l2, &iv_seen, 1))
 	{
 		if (iv_seen)
 		{
@@ -190,8 +190,8 @@ bool is_ivexpr(line_p l, lset ivs, lset vars, line_p* lbegin_out, iv_p* iv_out, 
 			*lbegin_out = l2;
 			*iv_out = last_iv;
 			*sign_out = iv_sign;
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }

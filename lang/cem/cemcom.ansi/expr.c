@@ -5,27 +5,28 @@
 /* $Id$ */
 /* EXPRESSION TREE HANDLING */
 
-#include	<assert.h>
-#include    <stdlib.h>
-#include	"parameters.h"
-#include	<alloc.h>
-#include	<flt_arith.h>
-#include    "expr.h"
-#include    "idf.h"
-#include	"arith.h"
-#include	"def.h"
-#include	"type.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"LLlex.h"
-#include	"Lpars.h"
-#include	"decspecs.h"
-#include	"declar.h"
-#include	"sizes.h"
-#include	"level.h"
-#include    "cstoper.h"
-#include    "error.h"
-
+#include <stddef.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <stdlib.h>
+#include "parameters.h"
+#include <alloc.h>
+#include <flt_arith.h>
+#include "expr.h"
+#include "idf.h"
+#include "arith.h"
+#include "def.h"
+#include "type.h"
+#include "label.h"
+#include "expr.h"
+#include "LLlex.h"
+#include "Lpars.h"
+#include "decspecs.h"
+#include "declar.h"
+#include "sizes.h"
+#include "level.h"
+#include "cstoper.h"
+#include "error.h"
 
 extern char options[];
 extern int InSizeof;
@@ -36,106 +37,106 @@ int rank_of(int oper)
 	 */
 	switch (oper)
 	{
-	default:
-		return 0; /* INT2INT etc. */
-	case '[':
-	case '(':
-	case '.':
-	case ARROW:
-	case PARCOMMA:
-		return 1;
-	case '!':
-	case PLUSPLUS:
-	case MINMIN:
-	case CAST:
-	case SIZEOF:
-	case ADDRESSOF:
-		return 2; /* monadic */
-	case '*':
-	case '/':
-	case '%':
-		return 3;
-	case '+':
-	case '-':
-		return 4;
-	case LEFT:
-	case RIGHT:
-		return 5;
-	case '<':
-	case '>':
-	case LESSEQ:
-	case GREATEREQ:
-		return 6;
-	case EQUAL:
-	case NOTEQUAL:
-		return 7;
-	case '&':
-		return 8;
-	case '^':
-		return 9;
-	case '|':
-		return 10;
-	case AND:
-		return 11;
-	case OR:
-		return 12;
-	case '?':
-	case ':':
-		return 13;
-	case '=':
-	case PLUSAB:
-	case MINAB:
-	case TIMESAB:
-	case DIVAB:
-	case MODAB:
-	case RIGHTAB:
-	case LEFTAB:
-	case ANDAB:
-	case XORAB:
-	case ORAB:
-		return 14;
-	case ',':
-		return 15;
+		default:
+			return 0; /* INT2INT etc. */
+		case '[':
+		case '(':
+		case '.':
+		case ARROW:
+		case PARCOMMA:
+			return 1;
+		case '!':
+		case PLUSPLUS:
+		case MINMIN:
+		case CAST:
+		case SIZEOF:
+		case ADDRESSOF:
+			return 2; /* monadic */
+		case '*':
+		case '/':
+		case '%':
+			return 3;
+		case '+':
+		case '-':
+			return 4;
+		case LEFT:
+		case RIGHT:
+			return 5;
+		case '<':
+		case '>':
+		case LESSEQ:
+		case GREATEREQ:
+			return 6;
+		case EQUAL:
+		case NOTEQUAL:
+			return 7;
+		case '&':
+			return 8;
+		case '^':
+			return 9;
+		case '|':
+			return 10;
+		case AND:
+			return 11;
+		case OR:
+			return 12;
+		case '?':
+		case ':':
+			return 13;
+		case '=':
+		case PLUSAB:
+		case MINAB:
+		case TIMESAB:
+		case DIVAB:
+		case MODAB:
+		case RIGHTAB:
+		case LEFTAB:
+		case ANDAB:
+		case XORAB:
+		case ORAB:
+			return 14;
+		case ',':
+			return 15;
 	}
 	UNREACHABLE_CODE;
 }
 
-void dot2expr(struct expr **expp)
+void dot2expr(struct expr** expp)
 {
 	/*	The token in dot is converted into an expression, a
 	 pointer to which is stored in *expp.
 	 */
-	struct expr *ex = new_expr();
+	struct expr* ex = new_expr();
 
 	*expp = ex;
 	ex->ex_file = dot.tk_file;
 	ex->ex_line = dot.tk_line;
 	switch (DOT)
 	{
-	case IDENTIFIER:
-		idf2expr(ex);
-		break;
-	case INTEGER:
-		int2expr(ex);
-		break;
-	case FLOATING:
-		float2expr(ex);
-		break;
-	default:
-		crash("bad conversion to expression");
-		UNREACHABLE_CODE;
+		case IDENTIFIER:
+			idf2expr(ex);
+			break;
+		case INTEGER:
+			int2expr(ex);
+			break;
+		case FLOATING:
+			float2expr(ex);
+			break;
+		default:
+			crash("bad conversion to expression");
+			UNREACHABLE_CODE;
 	}
 }
 
-void idf2expr(struct expr *expr)
+void idf2expr(struct expr* expr)
 {
 	/*	Dot contains an identifier which is turned into an
 	 expression.
 	 Note that this constitutes an applied occurrence of
 	 the identifier.
 	 */
-	struct idf *idf = dot.tk_idf; /* != 0*/
-	struct def *def = idf->id_def;
+	struct idf* idf = dot.tk_idf; /* != 0*/
+	struct def* def = idf->id_def;
 
 	if (def == 0)
 	{
@@ -156,7 +157,7 @@ void idf2expr(struct expr *expr)
 		def = idf->id_def;
 	}
 	/* now def != 0 */
-#ifndef	LINT
+#ifndef LINT
 	if (!InSizeof)
 	{
 		if (!def->df_used)
@@ -167,15 +168,16 @@ void idf2expr(struct expr *expr)
 			def->df_used = 1;
 		}
 	}
-#endif	/* LINT */
+#endif /* LINT */
 	expr->ex_type = def->df_type;
 	if (expr->ex_type == error_type)
 	{
 		expr->ex_flags |= EX_ERROR;
 	}
-	expr->ex_lvalue =
-			(def->df_type->tp_fund == FUNCTION || def->df_type->tp_fund == ARRAY
-					|| def->df_sc == ENUM) ? 0 : 1;
+	expr->ex_lvalue = (def->df_type->tp_fund == FUNCTION || def->df_type->tp_fund == ARRAY
+	                   || def->df_sc == ENUM)
+	    ? 0
+	    : 1;
 	if (def->df_type->tp_typequal & TQ_CONST)
 		expr->ex_flags |= EX_READONLY;
 	if (def->df_type->tp_typequal & TQ_VOLATILE)
@@ -186,14 +188,14 @@ void idf2expr(struct expr *expr)
 		expr->VL_CLASS = Const;
 		expr->VL_VALUE = (writh)def->df_address;
 	}
-#ifndef	LINT
+#ifndef LINT
 	else if (def->df_sc == STATIC && def->df_level >= L_LOCAL)
 	{
 		expr->VL_CLASS = Label;
 		expr->VL_LBL = def->df_address;
 		expr->VL_VALUE = 0;
 	}
-#endif	/* LINT */
+#endif /* LINT */
 	else
 	{
 		expr->VL_CLASS = Name;
@@ -202,13 +204,13 @@ void idf2expr(struct expr *expr)
 	}
 }
 
-void string2expr(struct expr **expp, char *str, int len)
+void string2expr(struct expr** expp, char* str, int len)
 
 {
 	/*	The string in the argument is converted into an expression,
 	 a pointer to which is stored in *expp.
 	 */
-	struct expr *ex = new_expr();
+	struct expr* ex = new_expr();
 
 	*expp = ex;
 	ex->ex_file = dot.tk_file;
@@ -222,7 +224,7 @@ void string2expr(struct expr **expp, char *str, int len)
 	ex->SG_LEN = len;
 }
 
-void int2expr(struct expr *expr)
+void int2expr(struct expr* expr)
 {
 	/*	Dot contains an integer constant which is turned
 	 into an expression.
@@ -230,7 +232,7 @@ void int2expr(struct expr *expr)
 	fill_int_expr(expr, dot.tk_ival, dot.tk_fund);
 }
 
-void float2expr(struct expr *expr)
+void float2expr(struct expr* expr)
 {
 	/*	Dot contains a floating point constant which is turned
 	 into an expression.
@@ -240,17 +242,17 @@ void float2expr(struct expr *expr)
 	fund = dot.tk_fund;
 	switch (fund)
 	{
-	case FLOAT:
-		expr->ex_type = float_type;
-		break;
-	case DOUBLE:
-		expr->ex_type = double_type;
-		break;
-	case LNGDBL:
-		expr->ex_type = lngdbl_type;
-		break;
-	default:
-		crash("(float2expr) bad fund %s\n", symbol2str(fund));
+		case FLOAT:
+			expr->ex_type = float_type;
+			break;
+		case DOUBLE:
+			expr->ex_type = double_type;
+			break;
+		case LNGDBL:
+			expr->ex_type = lngdbl_type;
+			break;
+		default:
+			crash("(float2expr) bad fund %s\n", symbol2str(fund));
 	}
 	expr->ex_class = Float;
 	flt_str2flt(dot.tk_fval, &(expr->FL_ARITH));
@@ -260,13 +262,12 @@ void float2expr(struct expr *expr)
 		expr_warning(expr, "internal floating point overflow");
 }
 
-struct expr*intexpr(
-arith ivalue, int fund)
+struct expr* intexpr(arith ivalue, int fund)
 {
 	/*	The value ivalue is turned into an integer expression of
 	 the size indicated by fund.
 	 */
-	struct expr *expr = new_expr();
+	struct expr* expr = new_expr();
 
 	expr->ex_file = dot.tk_file;
 	expr->ex_line = dot.tk_line;
@@ -274,39 +275,38 @@ arith ivalue, int fund)
 	return expr;
 }
 
-void fill_int_expr(struct expr *ex,
-writh ivalue, int fund)
+void fill_int_expr(struct expr* ex, writh ivalue, int fund)
 {
 	/*	Details derived from ivalue and fund are put into the
 	 constant integer expression ex.
 	 */
 	switch (fund)
 	{
-	case INT:
-		ex->ex_type = int_type;
-		break;
-	case UNSIGNED:
-		ex->ex_type = uint_type;
-		break;
-	case LONG:
-		ex->ex_type = long_type;
-		break;
-	case ULONG:
-		ex->ex_type = ulong_type;
-		break;
-	case LNGLNG:
-		ex->ex_type = lnglng_type;
-		break;
-	case ULNGLNG:
-		ex->ex_type = ulnglng_type;
-		break;
-	case ERRONEOUS:		/* 123LL when no_long_long() */
-		ex->ex_type = error_type;
-		ex->ex_flags |= EX_ERROR;
-		break;
-	default:
-		crash("(fill_int_expr) bad fund %s\n", symbol2str(fund));
-		UNREACHABLE_CODE;
+		case INT:
+			ex->ex_type = int_type;
+			break;
+		case UNSIGNED:
+			ex->ex_type = uint_type;
+			break;
+		case LONG:
+			ex->ex_type = long_type;
+			break;
+		case ULONG:
+			ex->ex_type = ulong_type;
+			break;
+		case LNGLNG:
+			ex->ex_type = lnglng_type;
+			break;
+		case ULNGLNG:
+			ex->ex_type = ulnglng_type;
+			break;
+		case ERRONEOUS: /* 123LL when no_long_long() */
+			ex->ex_type = error_type;
+			ex->ex_flags |= EX_ERROR;
+			break;
+		default:
+			crash("(fill_int_expr) bad fund %s\n", symbol2str(fund));
+			UNREACHABLE_CODE;
 	}
 	ex->ex_class = Value;
 	ex->VL_CLASS = Const;
@@ -314,8 +314,7 @@ writh ivalue, int fund)
 	cut_size(ex);
 }
 
-struct expr *new_oper(struct type *tp, struct expr *e1, int oper,
-		struct expr *e2)
+struct expr* new_oper(struct type* tp, struct expr* e1, int oper, struct expr* e2)
 {
 	/*	A new expression is constructed which consists of the
 	 operator oper which has e1 and e2 as operands; for a
@@ -323,12 +322,12 @@ struct expr *new_oper(struct type *tp, struct expr *e1, int oper,
 	 During the construction of the right recursive initialisation
 	 tree it is possible for e2 to be NILEXPR.
 	 */
-	struct expr *expr = new_expr();
-	struct oper *op;
+	struct expr* expr = new_expr();
+	struct oper* op;
 
 	if (e2)
 	{
-		struct expr *e = e2;
+		struct expr* e = e2;
 
 		while (e->ex_class == Oper && e->OP_LEFT)
 			e = e->OP_LEFT;
@@ -337,7 +336,7 @@ struct expr *new_oper(struct type *tp, struct expr *e1, int oper,
 	}
 	else if (e1)
 	{
-		struct expr *e = e1;
+		struct expr* e = e1;
 
 		while (e->ex_class == Oper && e->OP_RIGHT)
 			e = e->OP_RIGHT;
@@ -358,10 +357,8 @@ struct expr *new_oper(struct type *tp, struct expr *e1, int oper,
 		int e1_depth = e1 ? e1->ex_depth : 0;
 		int e1_flags = e1 ? e1->ex_flags : 0;
 
-		expr->ex_depth = (e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth)
-				+ 1;
-		expr->ex_flags = (e1_flags | e2->ex_flags)
-				& ~(EX_PARENS | EX_READONLY | EX_VOLATILE);
+		expr->ex_depth = (e1_depth > e2->ex_depth ? e1_depth : e2->ex_depth) + 1;
+		expr->ex_flags = (e1_flags | e2->ex_flags) & ~(EX_PARENS | EX_READONLY | EX_VOLATILE);
 	}
 	/*
 	 * A function call should be evaluated first when possible.  Just say
@@ -376,13 +373,13 @@ struct expr *new_oper(struct type *tp, struct expr *e1, int oper,
 	op->op_oper = oper;
 	op->op_left = e1;
 	op->op_right = e2;
-#ifdef	LINT
+#ifdef LINT
 	lint_new_oper(expr);
-#endif	/* LINT */
+#endif /* LINT */
 	return expr;
 }
 
-void chk_cst_expr(struct expr **expp)
+void chk_cst_expr(struct expr** expp)
 {
 	/*	The expression expr is checked for constancy.
 
@@ -404,33 +401,33 @@ void chk_cst_expr(struct expr **expp)
 	 Special problems (of which there is only one, sizeof in
 	 Preprocessor #if) have to be dealt with locally
 	 */
-	struct expr *expr = *expp;
+	struct expr* expr = *expp;
 
-#ifdef	DEBUG
+#ifdef DEBUG
 	print_expr("constant_expression", expr);
-#endif	/* DEBUG */
+#endif /* DEBUG */
 	switch (expr->ex_type->tp_fund)
 	{
-	case CHAR:
-	case SHORT:
-	case INT:
-	case ENUM:
-	case LONG:
-	case LNGLNG:
-		if (is_ld_cst(expr))
-		{
-			return;
-		}
-		expr_error(expr, "expression is not constant");
-		break;
-	default:
-		expr_error(expr, "non-numerical constant expression");
-		break;
+		case CHAR:
+		case SHORT:
+		case INT:
+		case ENUM:
+		case LONG:
+		case LNGLNG:
+			if (is_ld_cst(expr))
+			{
+				return;
+			}
+			expr_error(expr, "expression is not constant");
+			break;
+		default:
+			expr_error(expr, "non-numerical constant expression");
+			break;
 	}
 	erroneous2int(expp);
 }
 
-void init_expression(struct expr ***eppp, struct expr *expr)
+void init_expression(struct expr*** eppp, struct expr* expr)
 {
 	/*	The expression expr is added to the tree designated
 	 indirectly by **eppp.
@@ -448,19 +445,19 @@ void init_expression(struct expr ***eppp, struct expr *expr)
 	*eppp = &(**eppp)->OP_RIGHT;
 }
 
-int is_ld_cst(struct expr *expr)
+int is_ld_cst(struct expr* expr)
 {
 	/*	An expression is a `load-time constant' if it is of the form
 	 <idf> +/- <integral> or <integral>.
 	 */
-#ifdef	LINT
+#ifdef LINT
 	if (expr->ex_class == String)
-	return 1;
-#endif	/* LINT */
+		return 1;
+#endif /* LINT */
 	return expr->ex_lvalue == 0 && expr->ex_class == Value;
 }
 
-int is_cp_cst(struct expr *expr)
+int is_cp_cst(struct expr* expr)
 {
 	/*	An expression is a `compile-time constant' if it is a
 	 load-time constant, and the idf is not there.
@@ -468,7 +465,7 @@ int is_cp_cst(struct expr *expr)
 	return is_ld_cst(expr) && expr->VL_CLASS == Const;
 }
 
-int is_fp_cst(struct expr *expr)
+int is_fp_cst(struct expr* expr)
 {
 	/*	An expression is a `floating-point constant' if it consists
 	 of the float only.
@@ -476,22 +473,22 @@ int is_fp_cst(struct expr *expr)
 	return expr->ex_class == Float;
 }
 
-int is_zero_cst(struct expr *expr)
+int is_zero_cst(struct expr* expr)
 {
 	flt_arith var;
 
 	switch (expr->ex_class)
 	{
-	case Value:
-		return expr->VL_VALUE == 0;
-	case Float:
-		flt_arith2flt((arith) 0, &var, 0);
-		return flt_cmp(&var, &(expr->FL_ARITH)) == 0;
+		case Value:
+			return expr->VL_VALUE == 0;
+		case Float:
+			flt_arith2flt((arith)0, &var, 0);
+			return flt_cmp(&var, &(expr->FL_ARITH)) == 0;
 	}
 	UNREACHABLE_CODE;
 }
 
-void free_expression(struct expr *expr)
+void free_expression(struct expr* expr)
 {
 	/*	The expression expr is freed recursively.
 	 */

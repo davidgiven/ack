@@ -25,13 +25,6 @@ this software.
 #include "names.h"
 #include "output.h"
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 char _assoc_table[] = { 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 };
 
 /* Opcode table -- This array is indexed by the OP_____ macros defined in
@@ -990,12 +983,12 @@ expptr len, name, args;
 /* It should be in place from putcall(), so we won't touch it explicitly */
 
     } /* if ret_val */
-    done_once = ret_val ? TRUE : FALSE;
+    done_once = ret_val ? true : false;
 
 /* Now run through the named arguments */
 
     narg = -1;
-    for (cp = arglist; cp; cp = cp -> nextp, done_once = TRUE) {
+    for (cp = arglist; cp; cp = cp -> nextp, done_once = true) {
 
 	if (done_once)
 	    nice_printf (outfile, ", ");

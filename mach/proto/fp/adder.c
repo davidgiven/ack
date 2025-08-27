@@ -15,8 +15,6 @@
 
 # include "FP_types.h"
 # define	UNKNOWN -1
-# define	TRUE	 1
-# define	FALSE	 0
 # define	MAXBIT	0x80000000L
 
 	/*
@@ -45,6 +43,6 @@ register	B64	*e1,*e2;
 	fflush(stdout);
 # endif
 	if ((carry) && (++e1->h_32 == 0))
-		return(TRUE);		/* had a 64 bit overflow */
+		return(true);		/* had a 64 bit overflow */
 	return(overflow);		/* return status from higher add */
 }

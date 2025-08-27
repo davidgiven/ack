@@ -56,7 +56,7 @@ bool getunit(
 /*
  * Read the control flow graph
  * (from file gf) and the EM text
- * (from lf). If collect_mes is TRUE,
+ * (from lf). If collect_mes is true,
  * all register messages will be
  * collected and put in the global
  * variable 'mesregs'. The proc read

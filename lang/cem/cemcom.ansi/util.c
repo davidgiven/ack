@@ -8,30 +8,32 @@
 /* $Id$ */
 
 /*	Code for the allocation and de-allocation of temporary variables,
-	allowing re-use.
+    allowing re-use.
 */
 
-#include	"parameters.h"
-#ifndef	LINT
-#include	<em.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include "parameters.h"
+#ifndef LINT
+#include <em.h>
 #else
-#include	"l_em.h"
-#endif	/* LINT */
-#include	<em_arith.h>
-#include	<em_reg.h>
-#include	<alloc.h>
-#include	<em_mes.h>
+#include "l_em.h"
+#endif /* LINT */
+#include <em_arith.h>
+#include <em_reg.h>
+#include <alloc.h>
+#include <em_mes.h>
 
-#include	"util.h"
-#include	"sizes.h"
-#include	"align.h"
-#include	"stack.h"
-#include	"Lpars.h"
-#include	"def.h"
+#include "util.h"
+#include "sizes.h"
+#include "align.h"
+#include "stack.h"
+#include "Lpars.h"
+#include "def.h"
 
-static struct localvar	*FreeTmps;
+static struct localvar* FreeTmps;
 #ifdef USE_TMP
-static int	loc_id;
+static int loc_id;
 #endif /* USE_TMP */
 
 #ifdef PEEPHOLE
@@ -50,36 +52,38 @@ void LocalInit(void)
 
 arith LocalSpace(arith sz, int al)
 {
-	struct stack_level *stl = local_level;
+	struct stack_level* stl = local_level;
 
-	stl->sl_max_block = - align(sz - stl->sl_max_block, al);
+	stl->sl_max_block = -align(sz - stl->sl_max_block, al);
 	return stl->sl_max_block;
 }
 
 #define TABSIZ 32
-static struct localvar *regs[TABSIZ];
+static struct localvar* regs[TABSIZ];
 
 arith NewLocal(arith sz, int al, int regtype, int sc)
 {
-	struct localvar *tmp = FreeTmps;
-	struct localvar *prev = 0;
+	struct localvar* tmp = FreeTmps;
+	struct localvar* prev = 0;
 	int index;
 
-	while (tmp) {
-		if (tmp->t_align >= al &&
-		    tmp->t_size >= sz &&
-		    tmp->t_sc == sc &&
-		    tmp->t_regtype == regtype) {
-			if (prev) {
+	while (tmp)
+	{
+		if (tmp->t_align >= al && tmp->t_size >= sz && tmp->t_sc == sc && tmp->t_regtype == regtype)
+		{
+			if (prev)
+			{
 				prev->next = tmp->next;
 			}
-			else	FreeTmps = tmp->next;
+			else
+				FreeTmps = tmp->next;
 			break;
 		}
 		prev = tmp;
 		tmp = tmp->next;
 	}
-	if (! tmp) {
+	if (!tmp)
+	{
 		tmp = new_localvar();
 		tmp->t_offset = LocalSpace(sz, al);
 		tmp->t_align = al;
@@ -88,7 +92,7 @@ arith NewLocal(arith sz, int al, int regtype, int sc)
 		tmp->t_regtype = regtype;
 		tmp->t_count = REG_DEFAULT;
 	}
-	index = (int) (tmp->t_offset >> 2) & (TABSIZ - 1);
+	index = (int)(tmp->t_offset >> 2) & (TABSIZ - 1);
 	tmp->next = regs[index];
 	regs[index] = tmp;
 	return tmp->t_offset;
@@ -96,17 +100,21 @@ arith NewLocal(arith sz, int al, int regtype, int sc)
 
 void FreeLocal(arith off)
 {
-	int index = (int) (off >> 2) & (TABSIZ - 1);
-	struct localvar *tmp = regs[index];
-	struct localvar *prev = 0;
+	int index = (int)(off >> 2) & (TABSIZ - 1);
+	struct localvar* tmp = regs[index];
+	struct localvar* prev = 0;
 
-	while (tmp && tmp->t_offset != off) {
+	while (tmp && tmp->t_offset != off)
+	{
 		prev = tmp;
 		tmp = tmp->next;
 	}
-	if (tmp) {
-		if (prev)	prev->next = tmp->next;
-		else		regs[index] = tmp->next;
+	if (tmp)
+	{
+		if (prev)
+			prev->next = tmp->next;
+		else
+			regs[index] = tmp->next;
 		tmp->next = FreeTmps;
 		FreeTmps = tmp;
 	}
@@ -121,26 +129,30 @@ void LocalFinish(void)
 	C_beginpart(loc_id);
 #endif
 	tmp = FreeTmps;
-	while (tmp) {
+	while (tmp)
+	{
 		tmp1 = tmp;
-		if (tmp->t_sc == REGISTER) tmp->t_count += REG_BONUS;
-		if (! options['n'] && tmp->t_regtype >= 0) {
+		if (tmp->t_sc == REGISTER)
+			tmp->t_count += REG_BONUS;
+		if (!options['n'] && tmp->t_regtype >= 0)
+		{
 			C_ms_reg(tmp->t_offset, tmp->t_size, tmp->t_regtype, tmp->t_count);
 		}
 		tmp = tmp->next;
 		free_localvar(tmp1);
 	}
 	FreeTmps = 0;
-	for (i = 0; i < TABSIZ; i++) {
+	for (i = 0; i < TABSIZ; i++)
+	{
 		tmp = regs[i];
-		while (tmp) {
-			if (tmp->t_sc == REGISTER) tmp->t_count += REG_BONUS;
+		while (tmp)
+		{
+			if (tmp->t_sc == REGISTER)
+				tmp->t_count += REG_BONUS;
 			tmp1 = tmp;
-			if (! options['n'] && tmp->t_regtype >= 0) {
-				C_ms_reg(tmp->t_offset,
-					 tmp->t_size,
-					 tmp->t_regtype,
-					 tmp->t_count);
+			if (!options['n'] && tmp->t_regtype >= 0)
+			{
+				C_ms_reg(tmp->t_offset, tmp->t_size, tmp->t_regtype, tmp->t_count);
 			}
 			tmp = tmp->next;
 			free_localvar(tmp1);
@@ -148,7 +160,8 @@ void LocalFinish(void)
 		regs[i] = 0;
 	}
 #ifdef PEEPHOLE
-	if (! options['n']) {
+	if (!options['n'])
+	{
 		C_mes_begin(ms_reg);
 		C_mes_end();
 	}
@@ -160,13 +173,14 @@ void LocalFinish(void)
 
 void RegisterAccount(arith offset, arith size, int regtype, int sc)
 {
-	struct localvar *p;
+	struct localvar* p;
 	int index;
 
-	if (regtype < 0) return;
+	if (regtype < 0)
+		return;
 
 	p = new_localvar();
-	index = (int) (offset >> 2) & (TABSIZ - 1);
+	index = (int)(offset >> 2) & (TABSIZ - 1);
 	p->t_offset = offset;
 	p->t_regtype = regtype;
 	p->t_count = REG_DEFAULT;
@@ -176,28 +190,35 @@ void RegisterAccount(arith offset, arith size, int regtype, int sc)
 	regs[index] = p;
 }
 
-static struct localvar *find_reg(arith off)
+static struct localvar* find_reg(arith off)
 {
-	struct localvar *p = regs[(int)(off >> 2) & (TABSIZ - 1)];
+	struct localvar* p = regs[(int)(off >> 2) & (TABSIZ - 1)];
 
-	while (p && p->t_offset != off) p = p->next;
+	while (p && p->t_offset != off)
+		p = p->next;
 	return p;
 }
 
 void LoadLocal(arith off, arith sz)
 {
-	struct localvar *p = find_reg(off);
+	struct localvar* p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
-	if (p) p->t_count++;
+	if (p)
+		p->t_count++;
 #endif
 #endif
-	if (p && p->t_size != sz) p->t_regtype = -1;
-	if (sz == word_size) C_lol(off);
-	else if (sz == dword_size) C_ldl(off);
-	else {
-		if (p) p->t_regtype = -1;
+	if (p && p->t_size != sz)
+		p->t_regtype = -1;
+	if (sz == word_size)
+		C_lol(off);
+	else if (sz == dword_size)
+		C_ldl(off);
+	else
+	{
+		if (p)
+			p->t_regtype = -1;
 		C_lal(off);
 		C_loi(sz);
 	}
@@ -205,29 +226,36 @@ void LoadLocal(arith off, arith sz)
 
 void StoreLocal(arith off, arith sz)
 {
-	struct localvar *p = find_reg(off);
+	struct localvar* p = find_reg(off);
 
 #ifdef USE_TMP
 #ifdef REGCOUNT
-	if (p) p->t_count++;
+	if (p)
+		p->t_count++;
 #endif
 #endif
-	if (p && p->t_size != sz) p->t_regtype = -1;
-	if (sz == word_size) C_stl(off);
-	else if (sz == dword_size) C_sdl(off);
-	else {
-		if (p) p->t_regtype = -1;
+	if (p && p->t_size != sz)
+		p->t_regtype = -1;
+	if (sz == word_size)
+		C_stl(off);
+	else if (sz == dword_size)
+		C_sdl(off);
+	else
+	{
+		if (p)
+			p->t_regtype = -1;
 		C_lal(off);
 		C_sti(sz);
 	}
 }
 
-#ifndef	LINT
+#ifndef LINT
 void AddrLocal(arith off)
 {
-	struct localvar *p = find_reg(off);
+	struct localvar* p = find_reg(off);
 
-	if (p) p->t_regtype = -1;
+	if (p)
+		p->t_regtype = -1;
 	C_lal(off);
 }
-#endif	/* LINT */
+#endif /* LINT */

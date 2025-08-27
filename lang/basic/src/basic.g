@@ -89,6 +89,7 @@
 #define YYDEBUG
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "bem.h"
 #include "util.h"
 #include "gencode.h"

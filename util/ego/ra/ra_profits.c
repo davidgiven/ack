@@ -23,7 +23,7 @@ static bool test_cond(short cond, offset val)
 	switch (cond)
 	{
 		case DEFAULT:
-			return TRUE;
+			return true;
 		case FITBYTE:
 			return val >= -128 && val < 128;
 		case IN_0_63:
@@ -96,8 +96,8 @@ static void allocscore(
 				break;
 		}
 	}
-	*time_out = (m == (cond_p)0 ? -1 : map_value(m, off, TRUE));
-	*space_out = (m == (cond_p)0 ? -1 : map_value(m, off, FALSE));
+	*time_out = (m == (cond_p)0 ? -1 : map_value(m, off, true));
+	*space_out = (m == (cond_p)0 ? -1 : map_value(m, off, false));
 	/*
 	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	fprintf(stderr,"ALLOCSCORE = (%d,%d)\n",*time_out,*space_out);
@@ -132,8 +132,8 @@ opening_cost(short itemtyp, short localtyp, offset off, short* time_out, short* 
 			m = oproctab;
 			break;
 	}
-	*time_out = (m == (cond_p)0 ? 1000 : map_value(m, off, TRUE));
-	*space_out = (m == (cond_p)0 ? 1000 : map_value(m, off, FALSE));
+	*time_out = (m == (cond_p)0 ? 1000 : map_value(m, off, true));
+	*space_out = (m == (cond_p)0 ? 1000 : map_value(m, off, false));
 	/*
 	fprintf(stderr,"itemtyp = %d, localtyp = %d off = %ld\n",itemtyp,localtyp,off);
 	fprintf(stderr,"OPEN_COST = (%d,%d)\n",*time_out,*space_out);
@@ -150,8 +150,8 @@ void regsave_cost(short regs[], short* time_out, short* space_out)
 	short n = regs[reg_any] + regs[reg_pointer] + regs[reg_float];
 	/* #registers */
 
-	*time_out = index_value(regsav_cost, n, TRUE);
-	*space_out = index_value(regsav_cost, n, FALSE);
+	*time_out = index_value(regsav_cost, n, true);
+	*space_out = index_value(regsav_cost, n, false);
 	/*
 	fprintf(stderr,"REGSAVE COST, n=%d, (%d,%d)\n",n,*time_out,*space_out);
 	*/

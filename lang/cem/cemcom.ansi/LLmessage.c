@@ -5,17 +5,17 @@
 /* $Id$ */
 /*		PARSER ERROR ADMINISTRATION		*/
 
-#include	<string.h>
-#include	<alloc.h>
-#include	"idf.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"Lpars.h"
-#include    "error.h"
+#include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
+#include <alloc.h>
+#include "idf.h"
+#include "arith.h"
+#include "LLlex.h"
+#include "Lpars.h"
+#include "error.h"
 
-
-
-static void insert_token(int );
+static void insert_token(int);
 
 void LLmessage(int tk)
 {
@@ -50,23 +50,23 @@ static void insert_token(int tk)
 
 	switch (tk)
 	{
-	/* The operands need some body */
-	case IDENTIFIER:
-		dot.tk_idf = gen_idf();
-		break;
-	case TYPE_IDENTIFIER:
-		dot.tk_idf = str2idf("int", 0);
-		break;
-	case STRING:
-		dot.tk_bts = strdup("");
-		dot.tk_len = 1;
-		break;
-	case INTEGER:
-		dot.tk_fund = INT;
-		dot.tk_ival = 1;
-		break;
-	case FLOATING:
-		dot.tk_fval = strdup("0.0");
-		break;
+		/* The operands need some body */
+		case IDENTIFIER:
+			dot.tk_idf = gen_idf();
+			break;
+		case TYPE_IDENTIFIER:
+			dot.tk_idf = str2idf("int", 0);
+			break;
+		case STRING:
+			dot.tk_bts = strdup("");
+			dot.tk_len = 1;
+			break;
+		case INTEGER:
+			dot.tk_fund = INT;
+			dot.tk_ival = 1;
+			break;
+		case FLOATING:
+			dot.tk_fval = strdup("0.0");
+			break;
 	}
 }

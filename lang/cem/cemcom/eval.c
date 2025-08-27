@@ -69,7 +69,7 @@ EVAL(expr, val, code, true_label, false_label)
 	int val, code;
 	label true_label, false_label;
 {
-	int gencode = (code == TRUE && expr->ex_type->tp_size > 0);
+	int gencode = (code == true && expr->ex_type->tp_size > 0);
 
 	switch (expr->ex_class) {
 	case Value:	/* just a simple value	*/
@@ -523,7 +523,7 @@ EVAL(expr, val, code, true_label, false_label)
 #endif	/* DATAFLOW */
 			}
 			else {
-				EVAL(left, LVAL, TRUE, NO_LABEL, NO_LABEL);
+				EVAL(left, LVAL, true, NO_LABEL, NO_LABEL);
 				C_cai();
 			}
 			/* remove parameters from stack	*/
@@ -552,7 +552,7 @@ EVAL(expr, val, code, true_label, false_label)
 				C_adp(right->VL_VALUE);
 			break;
 		case ',':
-			EVAL(left, RVAL, FALSE, NO_LABEL, NO_LABEL);
+			EVAL(left, RVAL, false, NO_LABEL, NO_LABEL);
 			EVAL(right, RVAL, gencode, true_label, false_label);
 			break;
 		case '~':
@@ -566,7 +566,7 @@ EVAL(expr, val, code, true_label, false_label)
 			label l_false = text_label();
 			label l_end = text_label();
 
-			EVAL(left, RVAL, TRUE, l_true, l_false);
+			EVAL(left, RVAL, true, l_true, l_false);
 			C_df_ilb(l_true);
 			EVAL(right->OP_LEFT, RVAL, gencode, NO_LABEL, NO_LABEL);
 			C_bra(l_end);
@@ -589,7 +589,7 @@ EVAL(expr, val, code, true_label, false_label)
 				l_true = gencode ? text_label(): l_false;
 			}
 
-			EVAL(left, RVAL, TRUE, oper == AND ? l_maybe : l_true,
+			EVAL(left, RVAL, true, oper == AND ? l_maybe : l_true,
 					       oper == AND ? l_false : l_maybe);
 			C_df_ilb(l_maybe);
 			EVAL(right, RVAL, gencode, l_true, l_false);

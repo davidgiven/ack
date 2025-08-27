@@ -7,11 +7,12 @@
 #ifndef TOKENNAME_H_
 #define TOKENNAME_H_
 
-struct tokenname	{	/*	Used for defining the name of a
-					token as identified by its symbol
-				*/
+struct tokenname
+{ /*	Used for defining the name of a
+token as identified by its symbol
+*/
 	int tn_symbol;
-	char *tn_name;
+	char* tn_name;
 };
 
 void reserve(struct tokenname resv[]);

@@ -197,10 +197,10 @@ bool not_disjoint(interv_p list1, interv_p list2)
 		}
 		else
 		{
-			return TRUE; /* not disjoint */
+			return true; /* not disjoint */
 		}
 	}
-	return FALSE; /* disjoint */
+	return false; /* disjoint */
 }
 
 bool contains(short t, interv_p timespan)
@@ -212,7 +212,7 @@ bool contains(short t, interv_p timespan)
 		if (t <= iv->i_stop)
 			return (t >= iv->i_start);
 	}
-	return FALSE;
+	return false;
 }
 
 interv_p copy_timespan(interv_p list)

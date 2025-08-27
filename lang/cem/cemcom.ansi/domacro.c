@@ -5,6 +5,8 @@
 /* $Id$ */
 /* PREPROCESSOR: CONTROLLINE INTERPRETER */
 
+#include <stddef.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

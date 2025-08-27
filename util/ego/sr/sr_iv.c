@@ -98,7 +98,7 @@ static int sign(line_p lnp)
 		case op_sbu:
 			return (-1);
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }

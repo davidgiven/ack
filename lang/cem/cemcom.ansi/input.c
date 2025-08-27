@@ -4,6 +4,8 @@
  */
 /* $Id$ */
 
+#include <stddef.h>
+#include <stdbool.h>
 #include "parameters.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,24 +14,25 @@
 #include "input.h"
 #include "error.h"
 
-#define INP_PUSHBACK	3
-#define INP_TYPE	struct file_info
-#define INP_VAR		finfo
-struct file_info	finfo;
+#define INP_PUSHBACK 3
+#define INP_TYPE     struct file_info
+#define INP_VAR      finfo
+struct file_info finfo;
 #include <inp_pkg.body>
 #include <alloc.h>
 
-int	NoUnstack;
+int NoUnstack;
 
 int AtEoIT(void)
 {
 	return 0;
 }
 
-extern char *source;
+extern char* source;
 
 int AtEoIF(void)
 {
-	if (NoUnstack) lexerror("unexpected EOF");
+	if (NoUnstack)
+		lexerror("unexpected EOF");
 	return 0;
 }

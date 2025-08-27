@@ -10,8 +10,8 @@ int plus(const char *, const char *, char *);
 
 %%;
 
-X, Y, Z                      { TRUE };
-R                            { TRUE };
+X, Y, Z                      { true };
+R                            { true };
 
 %%;
 

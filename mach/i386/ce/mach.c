@@ -12,7 +12,7 @@ int arg;
 }
 #endif
 
-int push_waiting = FALSE;
+int push_waiting = false;
 
 int fit_byte( val)
 int val;
@@ -32,8 +32,8 @@ do_open(filename)
 	char *filename;
 {
 	if (filename == 0 || ! sys_open(filename, OP_WRITE, &codefile))
-		return FALSE;
+		return false;
 
-	fprintf( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");	return TRUE;
+	fprintf( codefile, ".sect .text; .sect .rom; .sect .data; .sect .bss\n");	return true;
 }
 */

@@ -70,18 +70,11 @@
 #else
 #include <stdio.h>
 #endif
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
-
-#ifndef FALSE
-#define FALSE        0
-#endif
- 
-#ifndef TRUE
-#define TRUE         ! FALSE
-#endif
 
 /* Standard Line Length */
  
@@ -98,7 +91,6 @@
  
 /* Useful typedefs */
  
-typedef int bool;
 typedef char line[MAXCOL];
 typedef char string[MAXLEN];
 
@@ -222,7 +214,7 @@ string sG2;                 /* Used to pass string results */
 
 #ifndef SMALL
 FILE *stream;
-bool bFlag = FALSE;         /* Prevent multiple file opens */
+bool bFlag = false;         /* Prevent multiple file opens */
 #endif
 
 void
@@ -1944,7 +1936,7 @@ openfile(char * sFilename, char * sMode)
       return 1;
     }
 
-  bFlag = TRUE;
+  bFlag = true;
 
   return 0;
 }
@@ -1955,7 +1947,7 @@ closefile(void)
   if (! bFlag)
     fclose(stream);
 
-  bFlag = FALSE;
+  bFlag = false;
 }
 
 int

@@ -36,11 +36,11 @@ entity_p find_entity(valnum vn)
 static bool same_entity(entity_p enp1, entity_p enp2)
 {
 	if (enp1->en_kind != enp2->en_kind)
-		return FALSE;
+		return false;
 	if (enp1->en_size != enp2->en_size)
-		return FALSE;
+		return false;
 	if (enp1->en_size == UNKNOWN_SIZE)
-		return FALSE;
+		return false;
 
 	switch (enp1->en_kind)
 	{
@@ -66,7 +66,7 @@ static bool same_entity(entity_p enp1, entity_p enp2)
 			return enp1->en_arbase == enp2->en_arbase && enp1->en_index == enp2->en_index
 			    && enp1->en_adesc == enp2->en_adesc;
 		default:
-			return TRUE;
+			return true;
 	}
 }
 

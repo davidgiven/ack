@@ -7,10 +7,13 @@ from build.ab import (
     cwdStack,
     error,
     simplerule,
+    G
 )
 from os.path import relpath, splitext, join, basename, isfile
 from glob import iglob
 import fnmatch
+import subprocess
+import shutil
 
 
 def filenamesmatchingof(xs, pattern):
@@ -49,6 +52,16 @@ def itemsof(pattern, root=None, cwd=None):
         except ValueError:
             error(f"file '{f}' is not in root '{root}'")
     return result
+
+
+def does_command_exist(cmd):
+    basecmd = cmd.strip().split()[0]
+    return shutil.which(basecmd)
+
+
+def shell(cmd):
+    r = subprocess.check_output([G.SHELL, "-c", cmd])
+    return r.decode("utf-8").strip()
 
 
 @Rule

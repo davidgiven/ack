@@ -206,7 +206,7 @@ char *mnem;
 	low = 0;
 	high = n_mnems-1;
 
-	while ( TRUE) {
+	while ( true) {
 		mid = ( low + high) / 2;
 		rel = strcmp(mnem, mnemonic[ mid]);
 

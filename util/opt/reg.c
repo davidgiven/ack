@@ -36,7 +36,7 @@ void regvar(arg_p ap)
 	switch (i)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case 0:
 		case 1:
@@ -59,8 +59,8 @@ int inreg(offset off)
 
 	for (rp = curpro.freg; rp != (reg_p) 0; rp = rp->r_next)
 		if (rp->r_par[0] == off)
-			return (TRUE);
-	return (FALSE);
+			return (true);
+	return (false);
 }
 
 void outregs(void)

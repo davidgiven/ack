@@ -21,7 +21,7 @@ ZERO		{strcmp(VAL,"$00") == 0			};
 ONE		{strcmp(VAL,"$01") == 0			};
 CONST		{VAL[0] == '$'				};	/* constant */
 A,B		{no_side_effects(VAL)			};
-X,Y		{TRUE					};
+X,Y		{true					};
 REG		{is_register(VAL)			};	/* register */
 SREG		{is_scratchreg(VAL)			};	/* scratch reg */
 M_ONE		{strcmp(VAL,"$-1") == 0			};	/* -1	*/
@@ -76,9 +76,9 @@ int no_side_effects(char* s)
 
 	for(;;) {
 		switch(*s++) {
-			case '\0': return TRUE;
-			case '-':  if (*s == '(') return FALSE; break;
-			case ')':  if (*s == '+') return FALSE; break;
+			case '\0': return true;
+			case '-':  if (*s == '(') return false; break;
+			case ')':  if (*s == '+') return false; break;
 		}
 	}
 	/* NOTREACHED */
@@ -105,6 +105,6 @@ int carry_dead(char* s)
 		case 's':	/* sbc and sbcb */
 			return *s++ != 'b' || *s != 'c';
 		default:
-			return TRUE;
+			return true;
 	}
 }

@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <em_spec.h>
 #include <em_flag.h>
 
@@ -17,11 +19,11 @@
  translated by a C-compiler.
  */
 
-#define NOTAB   600    /* The max no of interpreter specs */
-#define ESCAP   256
+#define NOTAB 600 /* The max no of interpreter specs */
+#define ESCAP 256
 
 struct opform intable[NOTAB];
-struct opform *lastform = intable - 1;
+struct opform* lastform = intable - 1;
 
 int nerror = 0;
 int atend = 0;
@@ -30,33 +32,30 @@ int maxinsl = 0;
 
 extern char em_mnem[][4];
 char esca[] = "escape";
-#define ename(no)       ((no)==ESCAP?esca:em_mnem[(no)])
+#define ename(no) ((no) == ESCAP ? esca : em_mnem[(no)])
 
 extern char em_flag[];
-
 
 /* Forward declarations */
 static int readchar(void);
 static void pushback(int);
 static void readin(void);
-static char *ident(void);
-static int getmnem(char *);
+static char* ident(void);
+static int getmnem(char*);
 static void writeout(void);
 static void checkall(void);
 static void chkc(int, int, int);
 static void ckop(int, int, int, int);
-static int oplength(struct opform *);
+static int oplength(struct opform*);
 static void check(int);
-static int decflag(char *);
-int compare(const void *, const void *);
+static int decflag(char*);
+int compare(const void*, const void*);
 
-static void error(char *format, ...);
-static void mess(char *format, ...);
-static void fatal(char *format, ...);
+static void error(char* format, ...);
+static void mess(char* format, ...);
+static void fatal(char* format, ...);
 
-
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	if (argc > 1)
 	{
@@ -89,8 +88,8 @@ int main(int argc, char **argv)
 
 static void readin(void)
 {
-	struct opform *nextform;
-	char *firstid;
+	struct opform* nextform;
+	char* firstid;
 	int maxl;
 
 	maxl = 0;
@@ -104,10 +103,10 @@ static void readin(void)
 		nextform->i_flag = decflag(ident());
 		switch (nextform->i_flag & OPTYPE)
 		{
-		case OPMINI:
-		case OPSHORT:
-			nextform->i_num = atoi(ident());
-			break;
+			case OPMINI:
+			case OPSHORT:
+				nextform->i_num = atoi(ident());
+				break;
 		}
 		nextform->i_low = atoi(ident());
 		if (*ident() != '\n')
@@ -126,7 +125,7 @@ static void readin(void)
 	maxinsl = maxl;
 }
 
-static char *ident(void)
+static char* ident(void)
 {
 	/* skip spaces and tabs, anything up to space,tab or eof is
 	 a identifier.
@@ -136,7 +135,7 @@ static char *ident(void)
 
 	static char array[200];
 	int c;
-	char *cc;
+	char* cc;
 
 	do
 	{
@@ -167,7 +166,7 @@ static char *ident(void)
 	return array;
 }
 
-static int getmnem(char *str)
+static int getmnem(char* str)
 {
 	char (*ptr)[4];
 
@@ -181,44 +180,44 @@ static int getmnem(char *str)
 }
 
 /* VARARGS1 */
-static void error(char *format, ...)
+static void error(char* format, ...)
 {
-    va_list argptr;
+	va_list argptr;
 	if (!atend)
 		fprintf(stderr, "line %d: ", line);
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
-    va_end(argptr);
+	va_start(argptr, format);
+	vfprintf(stderr, format, argptr);
+	va_end(argptr);
 	fprintf(stderr, "\n");
 	nerror++;
 }
 
 /* VARARGS1 */
-static void mess(char *format, ...)
+static void mess(char* format, ...)
 {
-    va_list argptr;
+	va_list argptr;
 	if (!atend)
 		fprintf(stderr, "line %d: ", line);
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
-    va_end(argptr);
+	va_start(argptr, format);
+	vfprintf(stderr, format, argptr);
+	va_end(argptr);
 	fprintf(stderr, "\n");
 }
 
 /* VARARGS1 */
-static void fatal(char *format, ...)
+static void fatal(char* format, ...)
 {
-    va_list argptr;
+	va_list argptr;
 	if (!atend)
 		fprintf(stderr, "line %d: ", line);
-    va_start(argptr, format);
-    vfprintf(stderr, format, argptr);
-    va_end(argptr);
+	va_start(argptr, format);
+	vfprintf(stderr, format, argptr);
+	va_end(argptr);
 	fprintf(stderr, "\n");
 	exit(EXIT_FAILURE);
 }
 
-#define ILLGL   -1
+#define ILLGL -1
 
 static void check(int val)
 {
@@ -226,7 +225,7 @@ static void check(int val)
 		error("Illegal flag combination");
 }
 
-static int decflag(char *str)
+static int decflag(char* str)
 {
 	int type;
 	int escape;
@@ -238,81 +237,81 @@ static int decflag(char *str)
 	while (*str)
 		switch (*str++)
 		{
-		case 'm':
-			check(type);
-			type = OPMINI;
-			break;
-		case 's':
-			check(type);
-			type = OPSHORT;
-			break;
-		case '-':
-			check(type);
-			type = OPNO;
-			break;
-		case '1':
-			check(type);
-			type = OP8;
-			break;
-		case '2':
-			check(type);
-			type = OP16;
-			break;
-		case '4':
-			check(type);
-			type = OP32;
-			break;
-		case '8':
-			check(type);
-			type = OP64;
-			break;
-		case 'u':
-			check(type);
-			type = OP16U;
-			break;
-		case 'e':
-			check(escape);
-			escape = 0;
-			break;
-		case 'N':
-			check(range);
-			range = 2;
-			break;
-		case 'P':
-			check(range);
-			range = 1;
-			break;
-		case 'w':
-			check(wordm);
-			wordm = 0;
-			break;
-		case 'o':
-			check(notzero);
-			notzero = 0;
-			break;
-		default:
-			error("Unknown flag");
+			case 'm':
+				check(type);
+				type = OPMINI;
+				break;
+			case 's':
+				check(type);
+				type = OPSHORT;
+				break;
+			case '-':
+				check(type);
+				type = OPNO;
+				break;
+			case '1':
+				check(type);
+				type = OP8;
+				break;
+			case '2':
+				check(type);
+				type = OP16;
+				break;
+			case '4':
+				check(type);
+				type = OP32;
+				break;
+			case '8':
+				check(type);
+				type = OP64;
+				break;
+			case 'u':
+				check(type);
+				type = OP16U;
+				break;
+			case 'e':
+				check(escape);
+				escape = 0;
+				break;
+			case 'N':
+				check(range);
+				range = 2;
+				break;
+			case 'P':
+				check(range);
+				range = 1;
+				break;
+			case 'w':
+				check(wordm);
+				wordm = 0;
+				break;
+			case 'o':
+				check(notzero);
+				notzero = 0;
+				break;
+			default:
+				error("Unknown flag");
 		}
 	if (type == ILLGL)
 		error("Type must be specified");
 	switch (type)
 	{
-	case OP64:
-	case OP32:
-		if (escape != ILLGL)
-			error("Conflicting escapes");
-		escape = ILLGL;
-	case OP16:
-	case OP16U:
-	case OP8:
-	case OPSHORT:
-	case OPNO:
-		if (notzero != ILLGL)
-			mess("Improbable OPNZ");
-		if (type == OPNO && range != ILLGL)
-		{
-			mess("No operand in range");
-		}
+		case OP64:
+		case OP32:
+			if (escape != ILLGL)
+				error("Conflicting escapes");
+			escape = ILLGL;
+		case OP16:
+		case OP16U:
+		case OP8:
+		case OPSHORT:
+		case OPNO:
+			if (notzero != ILLGL)
+				mess("Improbable OPNZ");
+			if (type == OPNO && range != ILLGL)
+			{
+				mess("No operand in range");
+			}
 	}
 	if (escape != ILLGL)
 		type |= OPESC;
@@ -320,17 +319,17 @@ static int decflag(char *str)
 		type |= OPWORD;
 	switch (range)
 	{
-	case ILLGL:
-		type |= OP_BOTH;
-		if (type == OPMINI || type == OPSHORT)
-			error("Minies and shorties must have P or N");
-		break;
-	case 1:
-		type |= OP_POS;
-		break;
-	case 2:
-		type |= OP_NEG;
-		break;
+		case ILLGL:
+			type |= OP_BOTH;
+			if (type == OPMINI || type == OPSHORT)
+				error("Minies and shorties must have P or N");
+			break;
+		case 1:
+			type |= OP_POS;
+			break;
+		case 2:
+			type |= OP_NEG;
+			break;
 	}
 	if (notzero != ILLGL)
 		type |= OPNZ;
@@ -339,7 +338,7 @@ static int decflag(char *str)
 
 static void writeout(void)
 {
-	struct opform *next;
+	struct opform* next;
 	int elem[sp_lmnem - sp_fmnem + 1 + 1];
 	/* for each op points to first of descr. */
 	int i, currop;
@@ -366,10 +365,10 @@ static void writeout(void)
 		nch += 2;
 		switch (next->i_flag & OPTYPE)
 		{
-		case OPMINI:
-		case OPSHORT:
-			printf("%d,", next->i_num & 0377);
-			nch++;
+			case OPMINI:
+			case OPSHORT:
+				printf("%d,", next->i_num & 0377);
+				nch++;
 		}
 		printf("\n");
 	}
@@ -384,15 +383,16 @@ static void writeout(void)
 	{
 		printf(" &opchoice[%d], /* %d = %s */\n", elem[i], i, em_mnem[i]);
 	}
-	printf(" &opchoice[%d], /* %d = %s */\n", elem[sp_lmnem - sp_fmnem + 1],
-			sp_lmnem - sp_fmnem + 1, "");
+	printf(
+	    " &opchoice[%d], /* %d = %s */\n", elem[sp_lmnem - sp_fmnem + 1], sp_lmnem - sp_fmnem + 1,
+	    "");
 	printf("} ;\n");
 }
 
-int compare(const void *a1, const void *b1)
+int compare(const void* a1, const void* b1)
 {
-	struct opform *a = (struct opform *)(a1);
-	struct opform *b = (struct opform *)(b1);
+	struct opform* a = (struct opform*)(a1);
+	struct opform* b = (struct opform*)(b1);
 
 	if (a->i_opcode != b->i_opcode)
 	{
@@ -401,7 +401,7 @@ int compare(const void *a1, const void *b1)
 	return oplength(a) - oplength(b);
 }
 
-static int oplength(struct opform *a)
+static int oplength(struct opform* a)
 {
 	int cnt;
 
@@ -410,23 +410,23 @@ static int oplength(struct opform *a)
 		cnt++;
 	switch (a->i_flag & OPTYPE)
 	{
-	case OPNO:
-	case OPMINI:
-		break;
-	case OP8:
-	case OPSHORT:
-		cnt++;
-		break;
-	case OP16U:
-	case OP16:
-		cnt += 2;
-		break;
-	case OP32:
-		cnt += 5;
-		break;
-	case OP64:
-		cnt += 9;
-		break;
+		case OPNO:
+		case OPMINI:
+			break;
+		case OP8:
+		case OPSHORT:
+			cnt++;
+			break;
+		case OP16U:
+		case OP16:
+			cnt += 2;
+			break;
+		case OP32:
+			cnt += 5;
+			break;
+		case OP64:
+			cnt += 9;
+			break;
 	}
 	return cnt;
 }
@@ -435,17 +435,17 @@ static int oplength(struct opform *a)
 
 int ecodes[256], codes[256], lcodes[256];
 
-#define NMNEM   (sp_lmnem-sp_fmnem+1)
-#define MUST    1
-#define MAY     2
-#define FORB    3
+#define NMNEM (sp_lmnem - sp_fmnem + 1)
+#define MUST  1
+#define MAY   2
+#define FORB  3
 
 char negc[NMNEM], zc[NMNEM], posc[NMNEM];
 
 static void checkall(void)
 {
 	int i, flag;
-	struct opform *next;
+	struct opform* next;
 	int opc, low;
 
 	for (i = 0; i < NMNEM; i++)
@@ -465,36 +465,36 @@ static void checkall(void)
 		chkc(flag, low, opc);
 		switch (flag & OPTYPE)
 		{
-		case OPNO:
-			zc[opc]++;
-			break;
-		case OPMINI:
-		case OPSHORT:
-			for (i = 1; i < ((next->i_num) & 0377); i++)
-			{
-				chkc(flag, low + i, opc);
-			}
-			if (!(em_flag[opc] & PAR_G) && (flag & OPRANGE) == OP_BOTH)
-			{
-				mess("Mini's and shorties should have P or N");
-			}
-			break;
-		case OP8:
-			error("OP8 is removed");
-			break;
-		case OP16:
-			if (flag & OP_NEG)
-				negc[opc]++;
-			else if (flag & OP_POS)
-				posc[opc]++;
-			break;
-		case OP16U:
-		case OP32:
-		case OP64:
-			break;
-		default:
-			error("Illegal type");
-			break;
+			case OPNO:
+				zc[opc]++;
+				break;
+			case OPMINI:
+			case OPSHORT:
+				for (i = 1; i < ((next->i_num) & 0377); i++)
+				{
+					chkc(flag, low + i, opc);
+				}
+				if (!(em_flag[opc] & PAR_G) && (flag & OPRANGE) == OP_BOTH)
+				{
+					mess("Mini's and shorties should have P or N");
+				}
+				break;
+			case OP8:
+				error("OP8 is removed");
+				break;
+			case OP16:
+				if (flag & OP_NEG)
+					negc[opc]++;
+				else if (flag & OP_POS)
+					posc[opc]++;
+				break;
+			case OP16U:
+			case OP32:
+			case OP64:
+				break;
+			default:
+				error("Illegal type");
+				break;
 		}
 	}
 	atend = 1;
@@ -507,35 +507,35 @@ static void checkall(void)
 	{
 		switch (em_flag[opc] & EM_PAR)
 		{
-		case PAR_NO:
-			ckop(opc, MUST, FORB, FORB);
-			break;
-		case PAR_C:
-		case PAR_D:
-		case PAR_F:
-		case PAR_B:
-			ckop(opc, FORB, MAY, MAY);
-			break;
-		case PAR_N:
-		case PAR_G:
-		case PAR_S:
-		case PAR_Z:
-		case PAR_O:
-		case PAR_P:
-			ckop(opc, FORB, MAY, FORB);
-			break;
-		case PAR_R:
-			ckop(opc, FORB, MAY, FORB);
-			break;
-		case PAR_L:
-			ckop(opc, FORB, MUST, MUST);
-			break;
-		case PAR_W:
-			ckop(opc, MUST, MAY, FORB);
-			break;
-		default:
-			error("Unknown instruction type of %s", ename(opc));
-			break;
+			case PAR_NO:
+				ckop(opc, MUST, FORB, FORB);
+				break;
+			case PAR_C:
+			case PAR_D:
+			case PAR_F:
+			case PAR_B:
+				ckop(opc, FORB, MAY, MAY);
+				break;
+			case PAR_N:
+			case PAR_G:
+			case PAR_S:
+			case PAR_Z:
+			case PAR_O:
+			case PAR_P:
+				ckop(opc, FORB, MAY, FORB);
+				break;
+			case PAR_R:
+				ckop(opc, FORB, MAY, FORB);
+				break;
+			case PAR_L:
+				ckop(opc, FORB, MUST, MUST);
+				break;
+			case PAR_W:
+				ckop(opc, MUST, MAY, FORB);
+				break;
+			default:
+				error("Unknown instruction type of %s", ename(opc));
+				break;
 		}
 	}
 }
@@ -546,31 +546,29 @@ static void chkc(int flag, int icode, int emc)
 	{
 		if (ecodes[icode] != -1)
 		{
-			mess("Escaped opcode %d used by %s and %s", icode, ename(emc),
-					ename(ecodes[icode]));
+			mess("Escaped opcode %d used by %s and %s", icode, ename(emc), ename(ecodes[icode]));
 		}
 		ecodes[icode] = emc;
 	}
 	else
 		switch (flag & OPTYPE)
 		{
-		default:
-			if (codes[icode] != -1)
-			{
-				mess("Opcode %d used by %s and %s", icode, ename(emc),
-						ename(codes[icode]));
-			}
-			codes[icode] = emc;
-			break;
-		case OP32:
-		case OP64:
-			if (lcodes[icode] != -1)
-			{
-				mess("Long opcode %d used by %s and %s", icode, ename(emc),
-						ename(codes[icode]));
-			}
-			lcodes[icode] = emc;
-			break;
+			default:
+				if (codes[icode] != -1)
+				{
+					mess("Opcode %d used by %s and %s", icode, ename(emc), ename(codes[icode]));
+				}
+				codes[icode] = emc;
+				break;
+			case OP32:
+			case OP64:
+				if (lcodes[icode] != -1)
+				{
+					mess(
+					    "Long opcode %d used by %s and %s", icode, ename(emc), ename(codes[icode]));
+				}
+				lcodes[icode] = emc;
+				break;
 		}
 }
 
@@ -584,36 +582,36 @@ static void ckop(int emc, int zf, int pf, int nf)
 		mess("More then one OP16(neg) for %s", ename(emc));
 	switch (zf)
 	{
-	case MUST:
-		if (zc[emc] == 0)
-			mess("No OPNO for %s", ename(emc));
-		break;
-	case FORB:
-		if (zc[emc] == 1)
-			mess("Forbidden OPNO for %s", ename(emc));
-		break;
+		case MUST:
+			if (zc[emc] == 0)
+				mess("No OPNO for %s", ename(emc));
+			break;
+		case FORB:
+			if (zc[emc] == 1)
+				mess("Forbidden OPNO for %s", ename(emc));
+			break;
 	}
 	switch (pf)
 	{
-	case MUST:
-		if (posc[emc] == 0)
-			mess("No OP16(pos) for %s", ename(emc));
-		break;
-	case FORB:
-		if (posc[emc] == 1)
-			mess("Forbidden OP16(pos) for %s", ename(emc));
-		break;
+		case MUST:
+			if (posc[emc] == 0)
+				mess("No OP16(pos) for %s", ename(emc));
+			break;
+		case FORB:
+			if (posc[emc] == 1)
+				mess("Forbidden OP16(pos) for %s", ename(emc));
+			break;
 	}
 	switch (nf)
 	{
-	case MUST:
-		if (negc[emc] == 0)
-			mess("No OP16(neg) for %s", ename(emc));
-		break;
-	case FORB:
-		if (negc[emc] == 1)
-			mess("Forbidden OP16(neg) for %s", ename(emc));
-		break;
+		case MUST:
+			if (negc[emc] == 0)
+				mess("No OP16(neg) for %s", ename(emc));
+			break;
+		case FORB:
+			if (negc[emc] == 1)
+				mess("Forbidden OP16(neg) for %s", ename(emc));
+			break;
 	}
 }
 

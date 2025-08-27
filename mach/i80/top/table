@@ -5,7 +5,7 @@ MAXOP 2;
 
 %%;
 
-X, Y, Z             { TRUE };
+X, Y, Z             { true };
 %%;
 
 mvi X, Y : mov X, Z          -> mov X, Z ;

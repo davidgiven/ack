@@ -13,12 +13,12 @@ CONST		{VAL[0] == '#'			};	/* constant */
 NUM		{is_number(VAL)			};
 A,B		{no_side_effects(VAL)		};
 D		{VAL[0] != '#' && !is_areg(VAL)	};	/* not an addr. reg */
-X,Y		{TRUE				};
+X,Y		{true				};
 DREG,DREG2 	{is_dreg(VAL)			};	 /* data register */
 DSREG		{is_dsreg(VAL)			};	/* data register */
 AREG		{is_areg(VAL)			};	/* addressregister */
 LAB,L1,L2 	{VAL[0] == 'I'			};	/* label */
-BITNO		{TRUE				};
+BITNO		{true				};
 
 %%;
 
@@ -147,9 +147,9 @@ int no_side_effects(s)
 
 	for(;;) {
 		switch(*s++) {
-			case '\0': return TRUE;
-			case '-':  if (*s == '(') return FALSE; break;
-			case ')':  if (*s == '+') return FALSE; break;
+			case '\0': return true;
+			case '-':  if (*s == '(') return false; break;
+			case ')':  if (*s == '+') return false; break;
 		}
 	}
 	/* NOTREACHED */
@@ -182,13 +182,13 @@ int no_part(part,s)
 	while (*s != '\0') {
 		if (*s == *part) {
 			for (tmp1=part,tmp2=s;;  tmp1++,tmp2++) {
-				if (*tmp1== '\0') return FALSE;
+				if (*tmp1== '\0') return false;
 				if (*tmp1 != *tmp2) break;
 			}
 		}
 		s++;
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -204,9 +204,9 @@ int is_number(s)
 	register char *s;
 {
 	while (*s != '\0') {
-		if (*s < '0' || *s++ > '9') return FALSE;
+		if (*s < '0' || *s++ > '9') return false;
 	}
-	return TRUE;
+	return true;
 }
 
 int bitno(s,no)
@@ -215,13 +215,13 @@ int bitno(s,no)
 	int n,i;
 
 	n = atoi(s);
-	if (n < 1 || n > 128) return FALSE;
+	if (n < 1 || n > 128) return false;
 	for (i = 0; i < 8 ; i++) {
 		if (n == 1) {
 			sprintf(no,"%d",i);
-			return TRUE;
+			return true;
 		}
 		n >>= 1;
 	}
-	return FALSE;
+	return false;
 }

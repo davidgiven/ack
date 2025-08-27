@@ -5,6 +5,8 @@
 /* $Id$ */
 /*		    L E X I C A L   A N A L Y Z E R			*/
 
+#include <stddef.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <alloc.h>
 #include <stdlib.h>
@@ -19,7 +21,7 @@
 #include "Lpars.h"
 #include "class.h"
 #include "sizes.h"
-#include "type.h"     /* no_long_long() */
+#include "type.h" /* no_long_long() */
 #include "error.h"
 #include "domacro.h"
 #include "specials.h" /* registration of special identifiers */
@@ -38,21 +40,20 @@ int File_Inserted = 0; /* a file has just been inserted	*/
 int LexSave = 0; /* last character read by GetChar	*/
 #define MAX_LL_DEPTH 2
 
-#define FLG_ESEEN 0x01 /* possibly a floating point number */
+#define FLG_ESEEN   0x01 /* possibly a floating point number */
 #define FLG_DOTSEEN 0x02 /* certainly a floating point number */
 
 #ifdef LINT
 extern int lint_skip_comment;
 #endif
 
-
 /* Internal function declarations */
 static arith char_constant(char*);
-static char* string_token(char *, int , int *);
+static char* string_token(char*, int, int*);
 static int quoted(int);
 static int hex_val(int);
-static void strflt2tok(char [], struct token *);
-static void strint2tok(char [], struct token *);
+static void strflt2tok(char[], struct token*);
+static void strint2tok(char[], struct token*);
 
 int LLlex(void)
 {
@@ -84,7 +85,6 @@ int LLlex(void)
 	}
 	return DOT;
 }
-
 
 int GetToken(struct token* ptok)
 {
@@ -128,8 +128,7 @@ go_on: /* rescan, the following character has been read	*/
 				*/
 				return ptok->tk_symb = EOI;
 
-			while ((ch = GetChar()), (ch == '#'
-			                          || class(ch) == STSKIP))
+			while ((ch = GetChar()), (ch == '#' || class(ch) == STSKIP))
 			{
 				/* blanks are allowed before hashes */
 				if (ch == '#')
@@ -292,8 +291,7 @@ go_on: /* rescan, the following character has been read	*/
 			idef->id_file = ptok->tk_file;
 			idef->id_line = ptok->tk_line;
 			ptok->tk_symb
-			    = (idef->id_reserved
-			           ? idef->id_reserved
+			    = (idef->id_reserved                                    ? idef->id_reserved
 			           : idef->id_def && idef->id_def->df_sc == TYPEDEF ? TYPE_IDENTIFIER
 			                                                            : IDENTIFIER);
 			return IDENTIFIER;
@@ -424,7 +422,7 @@ static arith char_constant(char* nm)
 	return val;
 }
 
-static char* string_token(char *nm, int stop_char, int *plen)
+static char* string_token(char* nm, int stop_char, int* plen)
 {
 	int ch;
 	int str_size;
@@ -686,7 +684,7 @@ static void strint2tok(char intbuf[], struct token* ptok)
 	    and long, then C89 tries unsigned long, but C99 tries
 	    long long (WG14, Rationale for C99, C99RationaleV5.10.pdf,
 	    6.4.4.1 Integer constants).
-		This compiler follows C89 when the literal has no
+	    This compiler follows C89 when the literal has no
 	    long long suffix.
 	*/
 	cut = 0;
@@ -727,8 +725,7 @@ static void strint2tok(char intbuf[], struct token* ptok)
 		fund = ERRONEOUS;
 	else
 	{
-		assert(sizeof(val) > long_size ||
-		       (lnglng_size >= 0 && sizeof(val) > lnglng_size));
+		assert(sizeof(val) > long_size || (lnglng_size >= 0 && sizeof(val) > lnglng_size));
 		lexwarning("constant too large for target machine");
 		cut = 1;
 	}

@@ -4,10 +4,6 @@
 #define UNKNOWN		(-1)
 
 
-#define TRUE		1
-#define	FALSE		0
-
-
 #define MAX_ARGS	4
 
 /* All the different types of C_INSTR's, based on types of the arguments. */

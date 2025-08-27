@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -71,10 +72,6 @@ unsigned int tabsz, strtabsz;
 #define odd(nr) (nr & 01)
 #define even(nr) (odd(nr) ? nr + 1 : nr)
 
-typedef char BOOL;
-#define FALSE 0
-#define TRUE 1
-
 #define READ 0
 #define APPEND 2
 #define CREATE 1
@@ -89,19 +86,19 @@ typedef char BOOL;
 
 #define equal(str1, str2) (!strncmp((str1), (str2), AR_NAME_MAX))
 
-BOOL verbose;
-BOOL app_fl;
-BOOL ex_fl;
-BOOL show_fl;
+bool verbose;
+bool app_fl;
+bool ex_fl;
+bool show_fl;
 /* print files found in archive. */
-BOOL pr_fl;
-BOOL u_fl;
-BOOL rep_fl;
-BOOL del_fl;
-BOOL nocr_fl;
-BOOL local_fl;
+bool pr_fl;
+bool u_fl;
+bool rep_fl;
+bool del_fl;
+bool nocr_fl;
+bool local_fl;
 #ifdef DISTRIBUTION
-BOOL distr_fl;
+bool distr_fl;
 time_t distr_time;
 #endif
 
@@ -125,14 +122,14 @@ void do_names(struct outhead* headp);
 void enter_name(struct outname* namep);
 void write_symdef(FILE* ar);
 
-void error(BOOL quit, char* str1, char* str2);
+void error(bool quit, char* str1, char* str2);
 FILE* open_archive(char* name, int mode);
 void catch (int param);
 MEMBER* get_member(FILE*);
 void get(int argc, char* argv[]);
 void add(char* name, FILE* ar, FILE* dst, char* mess);
 void extract(FILE* ar, MEMBER* member);
-void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting);
+void copy_member(MEMBER* member, FILE* from, FILE* to, bool extracting);
 char* get_mode(int mode);
 void wr_fatal(void);
 void rd_fatal(void);
@@ -196,11 +193,11 @@ static short mode2ar(mode_t mode)
 
 static void usage(void)
 {
-	error(TRUE, "usage: %s [qdprtxl][vc] archive [file] ...\n", progname);
+	error(true, "usage: %s [qdprtxl][vc] archive [file] ...\n", progname);
 }
 
 /*VARARGS2*/
-void error(BOOL quit, char* str1, char* str2)
+void error(bool quit, char* str1, char* str2)
 {
 	char errbuf[256];
 
@@ -223,7 +220,7 @@ FILE* open_archive(char* name, int mode)
 	{
 		file = fopen(name, "wb+");
 		if (file == NULL)
-			error(TRUE, "cannot create %s\n", name);
+			error(true, "cannot create %s\n", name);
 		magic = MAGIC_NUMBER;
 		wr_int2(file, magic);
 		return file;
@@ -237,10 +234,10 @@ FILE* open_archive(char* name, int mode)
 		{
 			fclose(open_archive(name, CREATE));
 			if (!nocr_fl)
-				error(FALSE, "creating %s\n", name);
+				error(false, "creating %s\n", name);
 			return open_archive(name, APPEND);
 		}
-		error(TRUE, "cannot open %s\n", name);
+		error(true, "cannot open %s\n", name);
 	}
 	else
 	/* file already exists, simply open it for appending */
@@ -254,7 +251,7 @@ FILE* open_archive(char* name, int mode)
 	fseek(file, 0, SEEK_SET);
 	magic = rd_unsigned2(file);
 	if (magic != AALMAG && magic != ARMAG)
-		error(TRUE, "%s is not in ar format\n", name);
+		error(true, "%s is not in ar format\n", name);
 
 	return file;
 }
@@ -280,39 +277,39 @@ int main(int argc, char* argv[])
 		switch (*ptr)
 		{
 			case 't':
-				show_fl = TRUE;
+				show_fl = true;
 				break;
 			case 'v':
-				verbose = TRUE;
+				verbose = true;
 				break;
 			case 'x':
-				ex_fl = TRUE;
+				ex_fl = true;
 				break;
 			case 'q':
 				needs_arg = 1;
-				app_fl = TRUE;
+				app_fl = true;
 				break;
 			case 'c':
-				nocr_fl = TRUE;
+				nocr_fl = true;
 				break;
 			case 'u':
-				u_fl = TRUE;
+				u_fl = true;
 				break;
 			case 'p':
 				needs_arg = 1;
-				pr_fl = TRUE;
+				pr_fl = true;
 				break;
 			case 'd':
 				needs_arg = 1;
-				del_fl = TRUE;
+				del_fl = true;
 				break;
 			case 'r':
 				needs_arg = 1;
-				rep_fl = TRUE;
+				rep_fl = true;
 				break;
 #ifdef DISTRIBUTION
 			case 'D':
-				distr_fl = TRUE;
+				distr_fl = true;
 				break;
 #endif
 #ifdef AAL
@@ -355,7 +352,7 @@ int main(int argc, char* argv[])
 	tab = (struct ranlib*)malloc(512 * sizeof(struct ranlib));
 	tstrtab = malloc(4096);
 	if (!tab || !tstrtab)
-		error(TRUE, "Out of core\n", NULL);
+		error(true, "Out of core\n", NULL);
 	tabsz = 512;
 	strtabsz = 4096;
 #endif
@@ -376,7 +373,7 @@ again:
 		return NIL_MEM;
 	if (member.ar_size < 0)
 	{
-		error(TRUE, "archive has member with negative size\n", NULL);
+		error(true, "archive has member with negative size\n", NULL);
 	}
 	if (equal(SYMDEF, member.ar_name))
 	{
@@ -428,7 +425,7 @@ void get(int argc, char* argv[])
 					}
 #endif
 					wr_arhdr(temp_fd, member);
-					copy_member(member, ar_f, temp_fd, FALSE);
+					copy_member(member, ar_f, temp_fd, false);
 				}
 				else
 				{
@@ -549,23 +546,23 @@ void add(char* name, FILE* ar, FILE* dst, char* mess)
 
 	if (stat(name, &status) < 0)
 	{
-		error(FALSE, "cannot find %s\n", name);
+		error(false, "cannot find %s\n", name);
 		return;
 	}
 	else if (S_ISDIR(status.st_mode))
 	{
-		error(FALSE, "%s is a directory (ignored)\n", name);
+		error(false, "%s is a directory (ignored)\n", name);
 		return;
 	}
 	else if (u_fl && status.st_mtime <= member.ar_date)
 	{
 		wr_arhdr(dst, &member);
-		copy_member(&member, ar, dst, FALSE);
+		copy_member(&member, ar, dst, false);
 		return;
 	}
 	else if ((src_fd = fopen(name, "rb")) == NULL)
 	{
-		error(FALSE, "cannot open %s\n", name);
+		error(false, "cannot open %s\n", name);
 		return;
 	}
 
@@ -607,7 +604,7 @@ void add(char* name, FILE* ar, FILE* dst, char* mess)
 			status.st_size -= x;
 		if (fread(io_buffer, 1, read_chars, src_fd) != read_chars)
 		{
-			error(FALSE, "%s seems to shrink\n", name);
+			error(false, "%s seems to shrink\n", name);
 			break;
 		}
 		mwrite(dst, io_buffer, x);
@@ -629,37 +626,37 @@ void extract(FILE* ar, MEMBER* member)
 
 	strncpy(buf, member->ar_name, sizeof(member->ar_name));
 	buf[sizeof(member->ar_name)] = 0;
-	if (pr_fl == FALSE)
+	if (pr_fl == false)
 	{
 		file = fopen(buf, "wb");
 		if (file == NULL)
 		{
-			error(FALSE, "cannot create %s\n", buf);
+			error(false, "cannot create %s\n", buf);
 			file = NULL;
 		}
 	};
 
 	if (verbose)
 	{
-		if (pr_fl == FALSE)
+		if (pr_fl == false)
 			show("x - %s\n", buf);
 		else
 			show("\n<%s>\n\n", buf);
 	}
 
-	copy_member(member, ar, file, TRUE);
+	copy_member(member, ar, file, true);
 
 	if (file != NULL)
 		fclose(file);
-	if (pr_fl == FALSE)
+	if (pr_fl == false)
 		chmod(buf, ar2mode(member->ar_mode));
 }
 
-void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting)
+void copy_member(MEMBER* member, FILE* from, FILE* to, bool extracting)
 {
 	size_t rest;
 	long mem_size = member->ar_size;
-	BOOL is_odd = odd(mem_size) ? TRUE : FALSE;
+	bool is_odd = odd(mem_size) ? true : false;
 
 #ifdef AAL
 	if (!extracting)
@@ -680,7 +677,7 @@ void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting)
 
 			strncpy(buf, member->ar_name, sizeof(member->ar_name));
 			buf[sizeof(member->ar_name)] = 0;
-			error(TRUE, "read error on %s\n", buf);
+			error(true, "read error on %s\n", buf);
 		}
 		if (to != NULL)
 			mwrite(to, io_buffer, rest);
@@ -690,7 +687,7 @@ void copy_member(MEMBER* member, FILE* from, FILE* to, BOOL extracting)
 	if (is_odd)
 	{
 		fseek(from, 1L, SEEK_CUR);
-		if ((to != NULL) && (extracting == FALSE))
+		if ((to != NULL) && (extracting == false))
 			fseek(to, 1L, SEEK_CUR);
 	}
 }
@@ -718,18 +715,18 @@ char* get_mode(int mode)
 
 void wr_fatal(void)
 {
-	error(TRUE, "write error\n", NULL);
+	error(true, "write error\n", NULL);
 }
 
 void rd_fatal(void)
 {
-	error(TRUE, "read error\n", NULL);
+	error(true, "read error\n", NULL);
 }
 
 void mwrite(FILE* f, void* address, size_t bytes)
 {
 	if (fwrite(address, 1, bytes, f) != bytes)
-		error(TRUE, "write error\n", NULL);
+		error(true, "write error\n", NULL);
 }
 
 void show(char* s, char* name)
@@ -846,7 +843,7 @@ void do_names(struct outhead* headp)
 	if ((headp->oh_nchar != (unsigned int)headp->oh_nchar)
 	    || ((strings = malloc((unsigned int)headp->oh_nchar))) == NULL)
 	{
-		error(TRUE, "string table too big\n", NULL);
+		error(true, "string table too big\n", NULL);
 	}
 	rd_string(strings, headp->oh_nchar);
 	while (nnames)
@@ -889,7 +886,7 @@ void enter_name(struct outname* namep)
 	{
 		tab = (struct ranlib*)realloc((char*)tab, (tabsz += 512) * sizeof(struct ranlib));
 		if (!tab)
-			error(TRUE, "Out of core\n", NULL);
+			error(true, "Out of core\n", NULL);
 	}
 	tab[tnum].ran_off = tssiz;
 	tab[tnum].ran_pos = offset;
@@ -900,7 +897,7 @@ void enter_name(struct outname* namep)
 		{
 			tstrtab = realloc(tstrtab, (strtabsz += 4096));
 			if (!tstrtab)
-				error(TRUE, "string table overflow\n", NULL);
+				error(true, "string table overflow\n", NULL);
 		}
 		tstrtab[tssiz++] = *cp;
 		if (!*cp)

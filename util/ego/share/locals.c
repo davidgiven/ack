@@ -78,7 +78,7 @@ static void check_message(line_p l, local_p* locs)
 	arg = ARG(l);
 	if (aoff(arg, 0) == ms_reg && arg->a_next != (arg_p)0)
 	{
-		localvar(aoff(arg, 1), (short)aoff(arg, 2), locs, TRUE, aoff(arg, 4));
+		localvar(aoff(arg, 1), (short)aoff(arg, 2), locs, true, aoff(arg, 4));
 	}
 }
 
@@ -114,7 +114,7 @@ static void check_local_use(line_p l, local_p* locs)
 		/* volatile */
 		return;
 	}
-	localvar(off_set(l), sz, locs, FALSE, (offset)0);
+	localvar(off_set(l), sz, locs, false, (offset)0);
 }
 
 void make_localtab(proc_p p)
@@ -200,12 +200,12 @@ void find_local(offset off, short* nr_out, bool* found_out)
 			break;
 		if (locals[v]->lc_off == off)
 		{
-			*found_out = TRUE;
+			*found_out = true;
 			*nr_out = v;
 			return;
 		}
 	}
-	*found_out = FALSE;
+	*found_out = false;
 }
 
 void var_nr(line_p l, short* nr_out, bool* found_out)
@@ -224,12 +224,12 @@ void var_nr(line_p l, short* nr_out, bool* found_out)
 			if (OBJ(l)->o_globnr == 0)
 			{
 				/* We don't maintain ud-info for this var */
-				*found_out = FALSE;
+				*found_out = false;
 			}
 			else
 			{
 				*nr_out = GLOB_TO_VARNR(OBJ(l)->o_globnr);
-				*found_out = TRUE;
+				*found_out = true;
 			}
 			return;
 		case OPSHORT:
@@ -239,7 +239,7 @@ void var_nr(line_p l, short* nr_out, bool* found_out)
 			off = OFFSET(l);
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	/* Its's a local variable */
 	find_local(off, &nr, found_out);

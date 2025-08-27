@@ -76,11 +76,11 @@ static bool test_cond(short cond, offset val)
 	switch (cond)
 	{
 		case DEFAULT:
-			return TRUE;
+			return true;
 		case FITBYTE:
 			return val >= -128 && val < 128;
 	}
-	assert(FALSE);
+	assert(false);
 	UNREACHABLE_CODE;
 }
 
@@ -169,18 +169,18 @@ static void solve_equations(proc_p p)
 	/* Global variables and parameters have already a value
 	 * at the procedure entry block.
 	 */
-	change = TRUE;
+	change = true;
 	/* main loop */
 	while (change)
 	{
-		change = FALSE;
+		change = false;
 		for (b = p->p_start->b_next; b != (bblock_p)0; b = b->b_next)
 		{
 			unite_outs(b->b_pred, &newin);
 			/* newin = OUT(p1) + .. + OUT(pn) */
 			if (!Cequal(newin, IN(b)))
 			{
-				change = TRUE;
+				change = true;
 				Ccopy_set(newin, &IN(b));
 				Ccopy_set(IN(b), &OUT(b));
 				Csubtract(KILL(b), &OUT(b));
@@ -199,13 +199,13 @@ static void solve_equations(proc_p p)
 short global_addr_cost(void)
 {
 	return add_timespace(
-	    map_value(globl_cond_tab, (offset)0, TRUE), map_value(globl_cond_tab, (offset)0, FALSE));
+	    map_value(globl_cond_tab, (offset)0, true), map_value(globl_cond_tab, (offset)0, false));
 }
 
 short local_addr_cost(offset off)
 {
 	return add_timespace(
-	    map_value(local_cond_tab, off, TRUE), map_value(local_cond_tab, off, FALSE));
+	    map_value(local_cond_tab, off, true), map_value(local_cond_tab, off, false));
 }
 
 static bool fold_is_desirable(line_p old, line_p new)
@@ -309,7 +309,7 @@ pr_defs()
 				fprintf(stderr, "%d\n", OBJ(l)->o_id);
 				break;
 			default:
-				assert(FALSE);
+				assert(false);
 		}
 	}
 }
@@ -439,7 +439,7 @@ static bool try_optim(line_p l, bblock_p b)
 				fold_var(l, PREV(def), b);
 				OUTVERBOSE("vp:variable folded in proc %d", curproc->p_id, 0);
 				Svariable++;
-				return TRUE;
+				return true;
 			}
 		}
 		else
@@ -449,11 +449,11 @@ static bool try_optim(line_p l, bblock_p b)
 				fold_const(l, b, val);
 				OUTVERBOSE("vp:value folded in proc %d", curproc->p_id, 0);
 				Svalue++;
-				return TRUE;
+				return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static void value_propagation(proc_p p)
@@ -464,7 +464,7 @@ static void value_propagation(proc_p p)
 	bblock_p b;
 	line_p l, next;
 
-	changes = TRUE;
+	changes = true;
 	/* If a statement like A := B is folded to A := constant,
 	 * new opportunities for constant folding may arise,
 	 * e.g. the value of A might be statically known too now.
@@ -472,7 +472,7 @@ static void value_propagation(proc_p p)
 
 	while (changes)
 	{
-		changes = FALSE;
+		changes = false;
 		for (b = p->p_start; b != (bblock_p)0; b = b->b_next)
 		{
 			for (l = b->b_start; l != (line_p)0; l = next)
@@ -480,7 +480,7 @@ static void value_propagation(proc_p p)
 				next = l->l_next;
 				if (try_optim(l, b))
 				{
-					changes = TRUE;
+					changes = true;
 				}
 			}
 		}

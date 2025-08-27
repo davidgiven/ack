@@ -1,10 +1,12 @@
-#include		<string.h>
-#include		<stddef.h>
-#include        "ass00.h"
-#include        "assex.h"
-#include		"assci.h"
-#include		"asscm.h"
-#include		"assrl.h"
+#include <string.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "ass00.h"
+#include "assex.h"
+#include "assci.h"
+#include "asscm.h"
+#include "assrl.h"
 
 /*
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
@@ -16,10 +18,10 @@ char oflag;
 static int memflg;
 
 /* Forward declarations. */
-static siz_t* getsizes(char *);
+static siz_t* getsizes(char*);
 static void getcore(void);
-static void argument(char *);
-static void flags(char *);
+static void argument(char*);
+static void flags(char*);
 static void skipentry(void);
 static void enmd_pro(void);
 static void enmd_glo(void);
@@ -28,7 +30,7 @@ static void finish_up(void);
 static void check_def(void);
 
 static void c_print(void);
-static void c_dprint(char *, char*);
+static void c_dprint(char*, char*);
 
 /* External definitions */
 void pass_3(void);
@@ -39,7 +41,7 @@ void pass_5(void);
  ** Main routine of EM1-assembler/loader
  */
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	/*
 	 * Usage: ass [-[d][p][m][u][U]] [-s(s/m/l/x)] [ [file] [flag] ] ...
@@ -47,7 +49,7 @@ int main(int argc, char **argv)
 	 *        debugging information.
 	 */
 	char workspace[6000];
-	char *cp;
+	char* cp;
 	int argno;
 
 	progname = argv[0];
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
 	}
 	/* A piece of the interpreter's stack frame is used as
 	 free area initially */
-	freearea((area_t) workspace, (unsigned) sizeof workspace);
+	freearea((area_t)workspace, (unsigned)sizeof workspace);
 	getcore();
 	init_files();
 	init_vars();
@@ -76,10 +78,10 @@ int main(int argc, char **argv)
 
 static void getcore(void)
 {
-	siz_t *p;
+	siz_t* p;
 	siz_t bytes;
 	unsigned n;
-	char *base;
+	char* base;
 
 	/*
 	 * xglobs[] should be located in front of mglobs[], see upd_reloc()
@@ -106,7 +108,7 @@ static void getcore(void)
 	base += bytes.n_proc;
 }
 
-static siz_t* getsizes(char *str)
+static siz_t* getsizes(char* str)
 {
 	/*
 	 * accepts -ss (small), -sm (medium), -sl (large), -sx (extra large)
@@ -114,20 +116,20 @@ static siz_t* getsizes(char *str)
 
 	switch (LC(*str))
 	{
-	default:
-		error("bad size option %s", str);
-	case 's':
-		return &sizes[0];
-		break;
-	case 'm':
-		return &sizes[1];
-		break;
-	case 'l':
-		return &sizes[2];
-		break;
-	case 'x':
-		return &sizes[3];
-		break;
+		default:
+			error("bad size option %s", str);
+		case 's':
+			return &sizes[0];
+			break;
+		case 'm':
+			return &sizes[1];
+			break;
+		case 'l':
+			return &sizes[2];
+			break;
+		case 'x':
+			return &sizes[3];
+			break;
 	}
 }
 
@@ -137,7 +139,7 @@ static siz_t* getsizes(char *str)
  * Furthermore, it knows a library when it sees it and
  * call archive() to split it apart.
  */
-static void argument(char *arg)
+static void argument(char* arg)
 {
 	int w;
 
@@ -163,9 +165,9 @@ static void argument(char *arg)
 		read_compact();
 	else if (w == ARMAG || w == AALMAG)
 	{
-		archmode = TRUE;
+		archmode = true;
 		archive();
-		archmode = FALSE;
+		archmode = false;
 	}
 	else
 		error("%s: bad format", arg);
@@ -177,9 +179,9 @@ static void argument(char *arg)
 /*
  ** process flag arguments
  */
-static void flags(char *arg)
+static void flags(char* arg)
 {
-	char *argp;
+	char* argp;
 	int on;
 
 	argp = arg;
@@ -187,84 +189,84 @@ static void flags(char *arg)
 	{
 		switch (LC(*argp))
 		{
-		case 'd':
-			d_flag++;
-			break;
-		case 'r':
-			r_flag++;
-			break;
-		case 's':
-			return; /* s-flag is already scanned */
+			case 'd':
+				d_flag++;
+				break;
+			case 'r':
+				r_flag++;
+				break;
+			case 's':
+				return; /* s-flag is already scanned */
 #ifdef MEMUSE
-		case 'm':
-			memflg++;
-			break;
+			case 'm':
+				memflg++;
+				break;
 #endif
-		case 'p':
-			++procflag;
-			break;
+			case 'p':
+				++procflag;
+				break;
 #ifdef DUMP
-		case 'u':
-			++c_flag;
-			break;
+			case 'u':
+				++c_flag;
+				break;
 #endif
-		case 'o':
-			++oflag;
-			break;
-		case 'w':
-			++wflag;
-			break;
+			case 'o':
+				++oflag;
+				break;
+			case 'w':
+				++wflag;
+				break;
 #ifdef JOHAN
-		case 'j':
-			++jflag;
-			break;
+			case 'j':
+				++jflag;
+				break;
 #endif
-		case 'U':
-			++Uflag;
-			break;
-		case '-':
-		case '+':
-			on = (*argp == '+');
-			while (*++argp)
-				switch (LC(*argp))
-				{
-				case 't':
-					if (on)
-						intflags |= 01;
-					else
-						intflags &= ~01;
-					break;
-				case 'p':
-					if (on)
-						intflags |= 02;
-					else
-						intflags &= ~02;
-					break;
-				case 'f':
-					if (on)
-						intflags |= 04;
-					else
-						intflags &= ~04;
-					break;
-				case 'c':
-					if (on)
-						intflags |= 010;
-					else
-						intflags &= ~010;
-				case 'e':
-					if (on)
-						intflags |= 040;
-					else
-						intflags &= ~040;
-					break;
-				default:
-					error("bad interpreter option %s", argp);
-				}
-			--argp;
-			break;
-		default:
-			error("bad flag %s", argp);
-			break;
+			case 'U':
+				++Uflag;
+				break;
+			case '-':
+			case '+':
+				on = (*argp == '+');
+				while (*++argp)
+					switch (LC(*argp))
+					{
+						case 't':
+							if (on)
+								intflags |= 01;
+							else
+								intflags &= ~01;
+							break;
+						case 'p':
+							if (on)
+								intflags |= 02;
+							else
+								intflags &= ~02;
+							break;
+						case 'f':
+							if (on)
+								intflags |= 04;
+							else
+								intflags &= ~04;
+							break;
+						case 'c':
+							if (on)
+								intflags |= 010;
+							else
+								intflags &= ~010;
+						case 'e':
+							if (on)
+								intflags |= 040;
+							else
+								intflags &= ~040;
+							break;
+						default:
+							error("bad interpreter option %s", argp);
+					}
+				--argp;
+				break;
+			default:
+				error("bad flag %s", argp);
+				break;
 		}
 	}
 }
@@ -295,7 +297,7 @@ void do_proc(void)
 static void archive(void)
 {
 	int i;
-	char *p;
+	char* p;
 
 	/*
 	 * Read a library.
@@ -314,7 +316,7 @@ static void archive(void)
 		{ /* no use for this library anymore */
 			return;
 		}
-		p = chp_cast &archhdr;
+		p = chp_cast & archhdr;
 		if ((i = fgetc(ifile)) == EOF)
 		{
 			return;
@@ -324,7 +326,7 @@ static void archive(void)
 			*p++ = get8();
 		for (i = 0; i < 8; i++)
 			get8();
-		archhdr.ar_size = ((long) get16() << 16);
+		archhdr.ar_size = ((long)get16() << 16);
 		archhdr.ar_size += getu16();
 		inpoff = 0;
 		libeof = archhdr.ar_size;
@@ -368,7 +370,6 @@ void init_vars(void)
 	 * This occurs only for those that couldn't be initialized
 	 * at compile-time.
 	 */
-
 }
 
 void init_files(void)
@@ -398,7 +399,7 @@ void initproc(void)
 	 * Called at the start of assembly of every procedure.
 	 */
 
-	stat_t *prevstate;
+	stat_t* prevstate;
 
 	prevstate = pst_cast getarea(sizeof pstate);
 	*prevstate = pstate;
@@ -406,10 +407,8 @@ void initproc(void)
 	pstate.s_curpro = prp_cast 0;
 	pstate.s_fline = lnp_cast 0;
 	pstate.s_fdata = l_data;
-	pstate.s_locl = (locl_t (*)[]) getarea(
-	LOCLABSIZE * sizeof((*(pstate.s_locl))[0]));
-	memset(chp_cast pstate.s_locl, 0,
-			LOCLABSIZE * (unsigned) sizeof((*(pstate.s_locl))[0]));
+	pstate.s_locl = (locl_t(*)[])getarea(LOCLABSIZE * sizeof((*(pstate.s_locl))[0]));
+	memset(chp_cast pstate.s_locl, 0, LOCLABSIZE * (unsigned)sizeof((*(pstate.s_locl))[0]));
 	if (memflg > 2)
 		memuse();
 }
@@ -417,10 +416,10 @@ void initproc(void)
 void endproc(void)
 {
 	/* Throw the contents of the line and local label table away */
-	line_t *lnp1;
+	line_t* lnp1;
 	locl_t *lbhead, *lbp, *lbp_next;
 	int kind;
-	stat_t *prevstate;
+	stat_t* prevstate;
 
 	while ((lnp1 = pstate.s_fline) != NULL)
 	{
@@ -428,24 +427,22 @@ void endproc(void)
 		kind = lnp1->type1;
 		if (kind > VALLOW)
 			kind = VALLOW;
-		freearea((area_t) lnp1, (unsigned) linesize[kind]);
+		freearea((area_t)lnp1, (unsigned)linesize[kind]);
 	}
 	prevstate = pstate.s_prevstat;
 	if (prevstate != pst_cast 0)
 	{
-		for (lbhead = *pstate.s_locl; lbhead < &(*pstate.s_locl)[LOCLABSIZE];
-				lbhead++)
+		for (lbhead = *pstate.s_locl; lbhead < &(*pstate.s_locl)[LOCLABSIZE]; lbhead++)
 		{
 			for (lbp = lbhead->l_chain; lbp != lbp_cast 0; lbp = lbp_next)
 			{
 				lbp_next = lbp->l_chain;
-				freearea((area_t) lbp, (unsigned) sizeof *lbp);
+				freearea((area_t)lbp, (unsigned)sizeof *lbp);
 			}
 		}
-		freearea((area_t) (*pstate.s_locl),
-		LOCLABSIZE * (sizeof((*pstate.s_locl)[0])));
+		freearea((area_t)(*pstate.s_locl), LOCLABSIZE * (sizeof((*pstate.s_locl)[0])));
 		pstate = *prevstate;
-		freearea((area_t) prevstate, (unsigned) sizeof *prevstate);
+		freearea((area_t)prevstate, (unsigned)sizeof *prevstate);
 	}
 }
 
@@ -496,7 +493,7 @@ static void enmd_pro(void)
 		if ((p->p_status & DEF) == 0)
 			error("undefined local procedure '%s'", p->p_name);
 	}
-	memset(chp_cast mprocs, 0, (limit - mprocs) * (unsigned ) sizeof *mprocs);
+	memset(chp_cast mprocs, 0, (limit - mprocs) * (unsigned)sizeof *mprocs);
 
 	/* Clobber all flags indicating that external procedures
 	 * were used in this module.
@@ -538,16 +535,16 @@ static void enmd_glo(void)
 		xg = xglolookup(mg->g_name, ENTERING);
 		switch (xg->g_status & (EXT | DEF))
 		{
-		case 0: /* new symbol */
-			if ((mg->g_status & DEF) == 0)
-				++unresolved;
-			break;
-		case EXT: /* already used but not defined */
-			if (mg->g_status & DEF)
-			{
-				--unresolved;
-			}
-			break;
+			case 0: /* new symbol */
+				if ((mg->g_status & DEF) == 0)
+					++unresolved;
+				break;
+			case EXT: /* already used but not defined */
+				if (mg->g_status & DEF)
+				{
+					--unresolved;
+				}
+				break;
 		}
 		xg->g_status |= mg->g_status;
 		if (mg->g_status & DEF)
@@ -556,7 +553,7 @@ static void enmd_glo(void)
 			mg->g_val.g_gp = xg; /* used by upd_reloc */
 	} /* up to the next symbol */
 	upd_reloc();
-	memset(chp_cast mglobs, 0, (limit - mglobs) * (unsigned ) sizeof *mglobs);
+	memset(chp_cast mglobs, 0, (limit - mglobs) * (unsigned)sizeof *mglobs);
 }
 
 static void finish_up(void)
@@ -584,7 +581,7 @@ static void c_print(void)
 	c_dprint("extra long", opcnt3);
 }
 
-static void c_dprint(char *str, char* cnt)
+static void c_dprint(char* str, char* cnt)
 {
 	int first, curr;
 	printf("unused %s opcodes\n", str);
@@ -616,8 +613,8 @@ static void c_dprint(char *str, char* cnt)
 
 static void check_def(void)
 {
-	proc_t *p;
-	glob_t *g;
+	proc_t* p;
+	glob_t* g;
 	int count;
 
 	/*

@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 	dfile = openfile(dname_out, "wb");
 	putdtable(fdblock, dfile);
 	pfile = openfile(pname_out, "wb");
-	putptable(fproc, pfile, FALSE);
+	putptable(fproc, pfile, false);
 	exit(0);
 }
 
@@ -163,7 +163,7 @@ static void process_lines(FILE* fout)
 	 * when we come accross its defining occurrence.
 	 */
 
-	eof = FALSE;
+	eof = false;
 	firstline = (line_p)0;
 	lastline = (line_p)0;
 	while (!eof)
@@ -186,7 +186,7 @@ static void process_lines(FILE* fout)
 				lastline = lnp;
 				break;
 			case EOFILE:
-				eof = TRUE;
+				eof = true;
 				fragm_type = DUNKNOWN;
 				if (firstline != (line_p)0)
 				{
@@ -391,7 +391,7 @@ static line_p readoperand(short instr)
 			VP(PROC(lnp));
 			break;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	return lnp;
 }
@@ -578,7 +578,7 @@ static line_p inpseudo(short n)
 			}
 			return lnp;
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }

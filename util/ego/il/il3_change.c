@@ -220,7 +220,7 @@ static void act_info(offset off, actual_p acts, offset ab_off, actual_p* act_out
 		}
 		sum += act->ac_size;
 	}
-	assert(FALSE);
+	assert(false);
 }
 
 static void store_off(offset off, line_p l)

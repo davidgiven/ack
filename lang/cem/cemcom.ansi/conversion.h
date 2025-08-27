@@ -1,15 +1,15 @@
 /*  Copyright (c) 2019 ACK Project.
- *  See the copyright notice in the ACK home directory, 
+ *  See the copyright notice in the ACK home directory,
  *  in the file "Copyright".
  *
  *  Created on: 2019-02-06
- *  
+ *
  */
 #ifndef CONVERSION_H_
 #define CONVERSION_H_
 
 struct type;
 
-void conversion(struct type *from_type, struct type *to_type);
+void conversion(struct type* from_type, struct type* to_type);
 
 #endif /* CONVERSION_H_ */

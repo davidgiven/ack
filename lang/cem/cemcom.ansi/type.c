@@ -5,50 +5,49 @@
 /* $Id$ */
 /*	T Y P E   D E F I N I T I O N   M E C H A N I S M	 */
 
-#include	"parameters.h"
-#include	<alloc.h>
-#include    "idf.h"
-#include	"Lpars.h"
-#include	"arith.h"
-#include	"type.h"
-#include	"def.h"
-#include	"proto.h"
-#include	"sizes.h"
-#include	"align.h"
-#include	"decspecs.h"
-#include    "error.h"
-
-
+#include <stddef.h>
+#include <stdbool.h>
+#include "parameters.h"
+#include <stdbool.h>
+#include <alloc.h>
+#include "idf.h"
+#include "Lpars.h"
+#include "arith.h"
+#include "type.h"
+#include "def.h"
+#include "proto.h"
+#include "sizes.h"
+#include "align.h"
+#include "decspecs.h"
+#include "error.h"
 
 /*	To be created dynamically in main() from defaults or from command
  line parameters.
  */
-struct type *schar_type, *uchar_type, *short_type, *ushort_type, *word_type,
-		*uword_type, *int_type, *uint_type, *long_type, *ulong_type,
-		*lnglng_type, *ulnglng_type,
-		*float_type, *double_type, *lngdbl_type, *void_type, *string_type,
-		*funint_type, *error_type;
+struct type *schar_type, *uchar_type, *short_type, *ushort_type, *word_type, *uword_type, *int_type,
+    *uint_type, *long_type, *ulong_type, *lnglng_type, *ulnglng_type, *float_type, *double_type,
+    *lngdbl_type, *void_type, *string_type, *funint_type, *error_type;
 
-struct type *pa_type; /* Pointer-Arithmetic type	*/
+struct type* pa_type; /* Pointer-Arithmetic type	*/
 
-struct type *create_type(int fund)
+struct type* create_type(int fund)
 {
 	/*	A brand new struct type is created, and its tp_fund set
 	 to fund.
 	 */
-	struct type *ntp = new_type();
+	struct type* ntp = new_type();
 
 	ntp->tp_fund = fund;
-	ntp->tp_size = (arith) -1;
+	ntp->tp_size = (arith)-1;
 
 	return ntp;
 }
 
-struct type *promoted_type(struct type *tp)
+struct type* promoted_type(struct type* tp)
 {
 	if (tp->tp_fund == CHAR || tp->tp_fund == SHORT)
 	{
-		if (tp->tp_unsigned && (int) tp->tp_size == (int) int_size)
+		if (tp->tp_unsigned && (int)tp->tp_size == (int)int_size)
 			return uint_type;
 		else
 			return int_type;
@@ -59,62 +58,65 @@ struct type *promoted_type(struct type *tp)
 		return tp;
 }
 
-struct type *construct_type(int fund, struct type *tp, int qual,
-arith count, /* for fund == ARRAY only */
-struct proto *pl)
+struct type* construct_type(
+    int fund,
+    struct type* tp,
+    int qual,
+    arith count, /* for fund == ARRAY only */
+    struct proto* pl)
 {
 	/*	fund must be a type constructor: FIELD, FUNCTION, POINTER or
 	 ARRAY. The pointer to the constructed type is returned.
 	 */
-	struct type *dtp;
+	struct type* dtp;
 
 	switch (fund)
 	{
 #ifndef NOBITFIELD
-	case FIELD:
-		dtp = field_of(tp, qual);
-		break;
+		case FIELD:
+			dtp = field_of(tp, qual);
+			break;
 #endif /* NOBITFIELD */
 
-	case FUNCTION:
-		if (tp->tp_fund == FUNCTION)
-		{
-			error("function cannot yield function");
-			return error_type;
-		}
-		if (tp->tp_fund == ARRAY)
-		{
-			error("function cannot yield array");
-			return error_type;
-		}
+		case FUNCTION:
+			if (tp->tp_fund == FUNCTION)
+			{
+				error("function cannot yield function");
+				return error_type;
+			}
+			if (tp->tp_fund == ARRAY)
+			{
+				error("function cannot yield array");
+				return error_type;
+			}
 
-		dtp = function_of(tp, pl, qual);
-		break;
-	case POINTER:
-		dtp = pointer_to(tp, qual);
-		break;
-	case ARRAY:
-		if (tp->tp_fund == VOID)
-		{
-			error("cannot construct array of void");
-			count = (arith) -1;
-		}
-		dtp = array_of(tp, count, qual);
-		break;
-	default:
-		crash("bad constructor in construct_type");
-		UNREACHABLE_CODE;
+			dtp = function_of(tp, pl, qual);
+			break;
+		case POINTER:
+			dtp = pointer_to(tp, qual);
+			break;
+		case ARRAY:
+			if (tp->tp_fund == VOID)
+			{
+				error("cannot construct array of void");
+				count = (arith)-1;
+			}
+			dtp = array_of(tp, count, qual);
+			break;
+		default:
+			crash("bad constructor in construct_type");
+			UNREACHABLE_CODE;
 	}
 	return dtp;
 }
 
-struct type *function_of(struct type *tp, struct proto *pl, int qual)
+struct type* function_of(struct type* tp, struct proto* pl, int qual)
 {
 #if 0
 	/* See comment below */
 	struct type *dtp = tp->tp_function;
 #else
-	struct type *dtp;
+	struct type* dtp;
 #endif
 
 	/* look for a type with the right qualifier */
@@ -151,9 +153,9 @@ struct type *function_of(struct type *tp, struct proto *pl, int qual)
 	return dtp;
 }
 
-struct type *pointer_to(struct type *tp, int qual)
+struct type* pointer_to(struct type* tp, int qual)
 {
-	struct type *dtp = tp->tp_pointer;
+	struct type* dtp = tp->tp_pointer;
 
 	/* look for a type with the right qualifier */
 	while (dtp && dtp->tp_typequal != qual)
@@ -173,9 +175,9 @@ struct type *pointer_to(struct type *tp, int qual)
 	return dtp;
 }
 
-struct type * array_of(struct type *tp, arith count, int qual)
+struct type* array_of(struct type* tp, arith count, int qual)
 {
-	struct type *dtp = tp->tp_array;
+	struct type* dtp = tp->tp_array;
 
 	/* look for a type with the right size */
 	while (dtp && (dtp->tp_nel != count || dtp->tp_typequal != qual))
@@ -201,9 +203,9 @@ struct type * array_of(struct type *tp, arith count, int qual)
 }
 
 #ifndef NOBITFIELD
-struct type * field_of(struct type *tp, int qual)
+struct type* field_of(struct type* tp, int qual)
 {
-	struct type *dtp = create_type(FIELD);
+	struct type* dtp = create_type(FIELD);
 
 	dtp->tp_up = tp;
 	dtp->tp_align = tp->tp_align;
@@ -213,30 +215,30 @@ struct type * field_of(struct type *tp, int qual)
 }
 #endif /* NOBITFIELD */
 
-arith size_of_type(struct type *tp, char nm[])
+arith size_of_type(struct type* tp, char nm[])
 {
 	arith sz = tp->tp_size;
 
 	if (sz < 0)
 	{
 		error("size of %s unknown", nm);
-		sz = (arith) 1;
+		sz = (arith)1;
 	}
 	return sz;
 }
 
-void idf2type(struct idf *idf, struct type **tpp)
+void idf2type(struct idf* idf, struct type** tpp)
 {
 	/*	Decoding  a typedef-ed identifier or basic type: if the
 	 size is yet unknown we have to make copy of the type
 	 descriptor to prevent garbage at the initialisation of
 	 arrays with unknown size.
 	 */
-	struct type *tp = idf->id_def->df_type;
+	struct type* tp = idf->id_def->df_type;
 
 	if (*tpp)
 		error("multiple types in declaration");
-	if (tp->tp_size < (arith) 0 && tp->tp_fund == ARRAY)
+	if (tp->tp_size < (arith)0 && tp->tp_fund == ARRAY)
 	{
 		*tpp = new_type();
 		**tpp = *tp;
@@ -253,9 +255,9 @@ arith align(arith pos, int al)
 	return ((pos + al - 1) / al) * al;
 }
 
-struct type * standard_type(int fund, int sgn, int algn, arith sz)
+struct type* standard_type(int fund, int sgn, int algn, arith sz)
 {
-	struct type *tp = create_type(fund);
+	struct type* tp = create_type(fund);
 
 	tp->tp_unsigned = sgn != 0;
 	tp->tp_align = algn;
@@ -264,24 +266,24 @@ struct type * standard_type(int fund, int sgn, int algn, arith sz)
 	return tp;
 }
 
-void completed(struct type *tp)
+void completed(struct type* tp)
 {
-	struct type *atp = tp->tp_array;
-	struct type *etp = tp;
+	struct type* atp = tp->tp_array;
+	struct type* etp = tp;
 
 	switch (etp->tp_fund)
 	{
-	case STRUCT:
-	case UNION:
-	case ENUM:
-		while ( (etp = etp->next) !=0)
-		{
-			if (!etp->tp_sdef)
-				etp->tp_sdef = tp->tp_sdef;
-			etp->tp_size = tp->tp_size;
-			etp->tp_align = tp->tp_align;
-		}
-		break;
+		case STRUCT:
+		case UNION:
+		case ENUM:
+			while ((etp = etp->next) != 0)
+			{
+				if (!etp->tp_sdef)
+					etp->tp_sdef = tp->tp_sdef;
+				etp->tp_size = tp->tp_size;
+				etp->tp_align = tp->tp_align;
+			}
+			break;
 	}
 	while (atp)
 	{

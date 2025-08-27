@@ -52,7 +52,7 @@ static line_p get_ca_lines(FILE* lf, proc_p* p_out)
 	pp = &head;
 	mp = &headm;
 	headm = (line_p)0;
-	while (TRUE)
+	while (true)
 	{
 		l = read_line(p_out);
 		if (feof(curinp))

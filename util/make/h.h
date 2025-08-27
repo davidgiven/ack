@@ -11,10 +11,6 @@
 
 #include <time.h>
 
-#define bool        int
-#define TRUE        (1)
-#define FALSE       (0)
-
 #define DEFN1       "makefile"      /*  Default names  */
 #define DEFN2       "Makefile"
 

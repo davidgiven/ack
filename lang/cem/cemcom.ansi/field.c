@@ -5,117 +5,118 @@
 /* $Id$ */
 /*	BITFIELD EXPRESSION EVALUATOR	*/
 
-#include	"parameters.h"
-#ifndef	LINT
-
+#include "parameters.h"
+#ifndef LINT
 
 #ifndef NOBITFIELD
-#include	<assert.h>
-#include	<em.h>
-#include	<em_reg.h>
-#include	<flt_arith.h>
-#include	"arith.h"
-#include	"type.h"
-#include	"label.h"
-#include	"code.h"
-#include	"expr.h"
-#include	"sizes.h"
-#include	"align.h"
-#include	"Lpars.h"
-#include	"field.h"
-#include    "util.h"
-#include    "conversion.h"
-#include    "eval.h"
-
+#include <stddef.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <em.h>
+#include <em_reg.h>
+#include <flt_arith.h>
+#include "arith.h"
+#include "type.h"
+#include "label.h"
+#include "code.h"
+#include "expr.h"
+#include "sizes.h"
+#include "align.h"
+#include "Lpars.h"
+#include "field.h"
+#include "util.h"
+#include "conversion.h"
+#include "eval.h"
 
 /*	Eval_field() evaluates expressions involving bit fields.
-	The various instructions are not yet optimised in the expression
-	tree and are therefore dealt with in this function.
-	The actions taken at any operation are described clearly by the
-	code for this actions.
-	Notes
-	[1]	the bitfields are packed in target machine integers!
-	[2]	op is either an assignment operator or an increment/
-		decrement operator
-	[3]	atype: the type in which the bitfield arithmetic is done;
-		and in which bitfields are stored!
+    The various instructions are not yet optimised in the expression
+    tree and are therefore dealt with in this function.
+    The actions taken at any operation are described clearly by the
+    code for this actions.
+    Notes
+    [1]	the bitfields are packed in target machine integers!
+    [2]	op is either an assignment operator or an increment/
+        decrement operator
+    [3]	atype: the type in which the bitfield arithmetic is done;
+        and in which bitfields are stored!
 */
-void eval_field(
-	struct expr *expr,
-	int code)
+void eval_field(struct expr* expr, int code)
 {
 	int op = expr->OP_OPER;
-	struct expr *leftop = expr->OP_LEFT;
-	struct expr *rightop = expr->OP_RIGHT;
-	struct field *fd = leftop->ex_type->tp_field;
-	struct type *tp = leftop->ex_type->tp_up;
+	struct expr* leftop = expr->OP_LEFT;
+	struct expr* rightop = expr->OP_RIGHT;
+	struct field* fd = leftop->ex_type->tp_field;
+	struct type* tp = leftop->ex_type->tp_up;
 	arith tmpvar = 0;
-	struct type *atype = ( tp->tp_unsigned
-				&& fd->fd_width >= 8 * (int)word_size)
-				    ? uword_type
-				    : word_type;
+	struct type* atype
+	    = (tp->tp_unsigned && fd->fd_width >= 8 * (int)word_size) ? uword_type : word_type;
 
 	/* First some assertions to be sure that the rest is legal */
-	assert(atype->tp_size == word_size);	/* make sure that C_loc() is legal */
+	assert(atype->tp_size == word_size); /* make sure that C_loc() is legal */
 	assert(leftop->ex_type->tp_fund == FIELD);
-	leftop->ex_type = atype;	/* this is cheating but it works... */
-	if (op == '=') {
+	leftop->ex_type = atype; /* this is cheating but it works... */
+	if (op == '=')
+	{
 		/* F = E: f = ((E & mask)<<shift) | (~(mask<<shift) & f) */
 		assert(tp == rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		conversion(tp, atype);
-		store_field(fd, tp->tp_unsigned, code, leftop, (arith) 0);
+		store_field(fd, tp->tp_unsigned, code, leftop, (arith)0);
 	}
-	else {		/* treat ++F as F += 1 and --F as F -= 1	*/
+	else
+	{ /* treat ++F as F += 1 and --F as F -= 1	*/
 		/*	F op= e: f = (((((f>>shift)&mask) op e)&mask)<<shift)|
-					(f&~(mask<<shift))
+		            (f&~(mask<<shift))
 		*/
-		if (leftop->ex_depth == 0)	/* simple case	*/
+		if (leftop->ex_depth == 0) /* simple case	*/
 			load_val(leftop, RVAL);
-		else	{			/* complex case	*/
-			tmpvar = NewLocal(pointer_size, pointer_align, 
-					  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+		else
+		{ /* complex case	*/
+			tmpvar = NewLocal(pointer_size, pointer_align, reg_pointer, 0);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			C_dup(pointer_size);
 			StoreLocal(tmpvar, pointer_size);
 			C_loi(word_size);
 		}
-		if (tp->tp_unsigned) {
+		if (tp->tp_unsigned)
+		{
 			C_loc((arith)fd->fd_shift);
 			C_sru(word_size);
 			C_loc(fd->fd_mask);
 			C_and(word_size);
 		}
-		else {
+		else
+		{
 			arith sft = (int)word_size * 8 - fd->fd_width;
 			C_loc(sft - fd->fd_shift);
 			C_sli(word_size);
 			C_loc(sft);
 			C_sri(word_size);
 		}
-		if (code == TRUE && (op == POSTINCR || op == POSTDECR))
+		if (code == true && (op == POSTINCR || op == POSTDECR))
 			C_dup(word_size);
 		conversion(atype, rightop->ex_type);
-		EVAL(rightop, RVAL, TRUE, NO_LABEL, NO_LABEL);
+		EVAL(rightop, RVAL, true, NO_LABEL, NO_LABEL);
 		/* the 'op' operation: */
 		if (op == PLUSPLUS || op == POSTINCR)
 			assop(rightop->ex_type, PLUSAB);
-		else
-		if (op == MINMIN || op == POSTDECR)
+		else if (op == MINMIN || op == POSTDECR)
 			assop(rightop->ex_type, MINAB);
 		else
 			assop(rightop->ex_type, op);
 		conversion(rightop->ex_type, atype);
-		store_field(fd, atype->tp_unsigned, 
-			    code == TRUE && op != POSTINCR && op != POSTDECR,
-			    leftop, tmpvar);
+		store_field(
+		    fd, atype->tp_unsigned, code == true && op != POSTINCR && op != POSTDECR, leftop,
+		    tmpvar);
 	}
-	if (code == TRUE) {
+	if (code == true)
+	{
 		/*	Take care that the effective value stored in
-			the bit field (i.e. the value that is got on
-			retrieval) is on top of stack.
+		    the bit field (i.e. the value that is got on
+		    retrieval) is on top of stack.
 		*/
-		if (tp->tp_unsigned == 0) {	/* sign extension */
+		if (tp->tp_unsigned == 0)
+		{ /* sign extension */
 			arith shift = (int)word_size * 8 - fd->fd_width;
 
 			C_loc(shift);
@@ -127,18 +128,13 @@ void eval_field(
 	}
 }
 
-void store_field(
-	struct field *fd,
-	int uns,
-	int code,
-	struct expr *leftop,
-	arith tmpvar)
+void store_field(struct field* fd, int uns, int code, struct expr* leftop, arith tmpvar)
 {
 	arith high_mask;
 
 	C_loc(fd->fd_mask);
 	C_and(word_size);
-	if (code == TRUE)
+	if (code == true)
 		C_dup(word_size);
 	C_loc((arith)fd->fd_shift);
 	if (uns)
@@ -147,17 +143,19 @@ void store_field(
 		C_sli(word_size);
 	high_mask = (arith)~full_mask[(int)word_size];
 	C_loc(~((fd->fd_mask << fd->fd_shift) | high_mask));
-	if (leftop->ex_depth == 0)	{	/* simple case	*/
+	if (leftop->ex_depth == 0)
+	{ /* simple case	*/
 		load_val(leftop, RVAL);
 		C_and(word_size);
 		C_ior(word_size);
 		store_val(&(leftop->EX_VALUE), uns ? uword_type : word_type);
 	}
-	else	{			/* complex case	*/
-		if (! tmpvar) {
-			tmpvar = NewLocal(pointer_size, pointer_align, 
-				  reg_pointer, 0);
-			EVAL(leftop, LVAL, TRUE, NO_LABEL, NO_LABEL);
+	else
+	{ /* complex case	*/
+		if (!tmpvar)
+		{
+			tmpvar = NewLocal(pointer_size, pointer_align, reg_pointer, 0);
+			EVAL(leftop, LVAL, true, NO_LABEL, NO_LABEL);
 			StoreLocal(tmpvar, pointer_size);
 		}
 		LoadLocal(tmpvar, pointer_size);
@@ -171,5 +169,4 @@ void store_field(
 }
 #endif /* NOBITFIELD */
 
-#endif	/* LINT */
-
+#endif /* LINT */

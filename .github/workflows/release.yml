@@ -31,16 +31,14 @@ jobs:
           mingw-w64-ucrt-x86_64-pkg-config
           mingw-w64-ucrt-x86_64-python
           zip
+          ninja
+          diffutils
 
     - uses: actions/checkout@v3
 
     - name: build
       run: |
-        make LDFLAGS="-s -static"
-
-    - name: package
-      run: |
-        make ack-setup.exe
+        make LDFLAGS="-s -static" ack-setup.exe
 
     - name: date
       run: |

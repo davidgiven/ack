@@ -28,8 +28,8 @@
 
 #define OFTEN_USED(f) ((f->f_flags & FF_OFTENUSED) == FF_OFTENUSED)
 #define CHANGE_EXT(p) (Cnrelems(p->p_change->c_ext) > 0)
-#define NOT_INLINE(a) (a->ac_inl = FALSE)
-#define INLINE(a) (a->ac_inl = TRUE)
+#define NOT_INLINE(a) (a->ac_inl = false)
+#define INLINE(a) (a->ac_inl = true)
 
 #define CHANGED(p) p->p_flags2 |= PF_CHANGED
 #define IS_CHANGED(p) (p->p_flags2 & PF_CHANGED)
@@ -49,12 +49,12 @@ static bool match_pars(formal_p fm, actual_p act)
 	{
 		if (fm == (formal_p)0 || tsize(fm->f_type) != act->ac_size)
 		{
-			return FALSE;
+			return false;
 		}
 		act = act->ac_next;
 		fm = fm->f_next;
 	}
-	return (fm == (formal_p)0 ? TRUE : FALSE);
+	return (fm == (formal_p)0 ? true : false);
 }
 
 static bool change_act(proc_p p, actual_p act)
@@ -78,25 +78,25 @@ static bool change_act(proc_p p, actual_p act)
 			case op_loi:
 			case op_los:
 			case op_ldf:
-				return TRUE;
+				return true;
 				/* assume worst case */
 			case op_lol:
 			case op_ldl:
 				if (CHANGE_INDIR(p))
 				{
-					return TRUE;
+					return true;
 				}
 				break;
 			case op_loe:
 			case op_lde:
 				if (CHANGE_INDIR(p) || CHANGE_EXT(p))
 				{
-					return TRUE;
+					return true;
 				}
 				break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static bool is_simple(line_p expr)
@@ -116,10 +116,10 @@ static bool is_simple(line_p expr)
 			case op_ldl:
 			case op_loe:
 			case op_lde:
-				return TRUE;
+				return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 static bool too_expensive(formal_p fm, actual_p act)
@@ -146,14 +146,14 @@ bool anal_params(call_p c)
 
 	p = c->cl_proc; /* the called procedure */
 	if (!match_pars(p->P_FORMALS, c->cl_actuals))
-		return FALSE;
+		return false;
 	if (!INLINE_PARS(p))
 	{
 		for (act = c->cl_actuals; act != (actual_p)0; act = act->ac_next)
 		{
 			NOT_INLINE(act);
 		}
-		return TRUE; /* "# of inline pars." field in cl_flags remains 0 */
+		return true; /* "# of inline pars." field in cl_flags remains 0 */
 	}
 	for (act = c->cl_actuals, form = p->P_FORMALS; act != (actual_p)0;
 	     act = act->ac_next, form = form->f_next)
@@ -171,7 +171,7 @@ bool anal_params(call_p c)
 	if (inlpars > 15)
 		inlpars = 15; /* We've only got 4 bits! */
 	c->cl_flags |= inlpars; /* number of inline parameters */
-	return TRUE;
+	return true;
 }
 
 static short space_saved(call_p c)
@@ -325,12 +325,12 @@ static bool is_dispensable(proc_p callee, FILE* ccf)
 #ifdef VERBOSE
 		Spremoved++;
 #endif
-		return TRUE;
+		return true;
 	}
 	else
 	{
 		adjust_counts(callee, ccf);
-		return FALSE;
+		return false;
 	}
 }
 
@@ -376,7 +376,7 @@ static call_p find_origin(call_p c)
 		if (x->cl_id == c->cl_id)
 			return x;
 	}
-	assert(FALSE);
+	assert(false);
 	UNREACHABLE_CODE;
 }
 
@@ -729,7 +729,7 @@ static void Sstatist(call_p list, long space)
 			else if (c->cl_ratio == 0)
 				Szeroratio++;
 			else
-				assert(FALSE);
+				assert(false);
 		}
 	}
 }

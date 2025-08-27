@@ -70,11 +70,11 @@ static bool proc_wanted(const char* name)
 
 	if ((p = proclookup(name, IMPORTING)) != (proc_p)0 && !(p->p_flags1 & PF_BODYSEEN))
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -89,11 +89,11 @@ static bool data_wanted(const char* name)
 
 	if ((db = symlookup(name, IMPORTING)) != (dblock_p)0 && db->d_pseudo == DUNKNOWN)
 	{
-		return TRUE;
+		return true;
 	}
 	else
 	{
-		return FALSE;
+		return false;
 	}
 }
 
@@ -103,7 +103,7 @@ static bool wanted_names(void)
 	 * appearing in a 'MES ms_ext' pseudo. Those are
 	 * the names of entities that are imported by
 	 * a library module.
-	 * If any of them is wanted, return TRUE.
+	 * If any of them is wanted, return true.
 	 * A name is wanted if it is the name of a procedure
 	 * or data block for which applied occurrences but
 	 * no defining occurrence has been met.
@@ -116,7 +116,7 @@ static bool wanted_names(void)
 			case DLBX:
 				if (data_wanted(string))
 				{
-					return TRUE;
+					return true;
 				}
 				/* A data entity with the name
 				 * string is available.
@@ -125,11 +125,11 @@ static bool wanted_names(void)
 			case sp_pnam:
 				if (proc_wanted(string))
 				{
-					return TRUE;
+					return true;
 				}
 				break;
 			case sp_cend:
-				return FALSE;
+				return false;
 			default:
 				error("wrong argument of MES %d", ms_ext);
 		}

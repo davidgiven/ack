@@ -5,37 +5,38 @@
 /* $Id$ */
 /*	IDENTIFIER  FIDDLING & SYMBOL TABLE HANDLING	*/
 
-#include	<assert.h>
-#include	<stdlib.h>
-#include	<stdio.h>
-#include	<string.h>
-#include	"parameters.h"
-#include	<em_reg.h>
-#include	<alloc.h>
-#include    "idf.h"
-#include	"arith.h"
-#include	"align.h"
-#include	"LLlex.h"
-#include	"level.h"
-#include	"stack.h"
-#include	"label.h"
-#include	"def.h"
-#include	"type.h"
-#include	"proto.h"
-#include	"struct.h"
-#include	"declar.h"
-#include	"declarator.h"
-#include	"decspecs.h"
-#include	"sizes.h"
-#include    "util.h"
-#include    "stab.h"
-#include    "code.h"
-#include    "error.h"
-#include    "ch3.h"
-#include	"Lpars.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "parameters.h"
+#include <em_reg.h>
+#include <alloc.h>
+#include "idf.h"
+#include "arith.h"
+#include "align.h"
+#include "LLlex.h"
+#include "level.h"
+#include "stack.h"
+#include "label.h"
+#include "def.h"
+#include "type.h"
+#include "proto.h"
+#include "struct.h"
+#include "declar.h"
+#include "declarator.h"
+#include "decspecs.h"
+#include "sizes.h"
+#include "util.h"
+#include "stab.h"
+#include "code.h"
+#include "error.h"
+#include "ch3.h"
+#include "Lpars.h"
 
 extern char options[];
-
 
 #ifdef DEBUG
 #define IDF_DEBUG
@@ -43,27 +44,25 @@ extern char options[];
 
 #include <idf_pkg.body>
 
-
-
-struct idf *gen_idf(void)
+struct idf* gen_idf(void)
 {
 	/*	A new idf is created out of nowhere, to serve as an
 	 anonymous name.
 	 */
 	static int name_cnt;
-	char *s = malloc(strlen(dot.tk_file) + 50);
+	char* s = malloc(strlen(dot.tk_file) + 50);
 
 	sprintf(s, "#%d in %s, line %u", ++name_cnt, dot.tk_file, dot.tk_line);
 	s = realloc(s, strlen(s) + 1);
 	return str2idf(s, 0);
 }
 
-int is_anon_idf(struct idf *idf)
+int is_anon_idf(struct idf* idf)
 {
 	return idf->id_text[0] == '#';
 }
 
-void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
+void declare_idf(struct decspecs* ds, struct declarator* dc, int lvl)
 {
 	/*	The identifier inside dc is declared on the level lvl, with
 	 properties deduced from the decspecs ds and the declarator
@@ -73,15 +72,15 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 	 This routine implements the rich semantics of C
 	 declarations.
 	 */
-	struct idf *idf = dc->dc_idf;
+	struct idf* idf = dc->dc_idf;
 	int sc = ds->ds_sc;
 	/*	This local copy is essential:
 	 char b(), c;
 	 makes b GLOBAL and c AUTO.
 	 */
-	struct def *def = idf->id_def; /* may be NULL */
-	struct type *type;
-	struct stack_level *stl = stack_level_of(lvl);
+	struct def* def = idf->id_def; /* may be NULL */
+	struct type* type;
+	struct stack_level* stl = stack_level_of(lvl);
 	char formal_array = 0;
 
 	/* determine the present type */
@@ -96,9 +95,9 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 	{
 		/* combine the decspecs and the declarator into one type */
 		type = declare_type(ds->ds_type, dc);
-		if (type->tp_size <= (arith) 0 && actual_declaration(sc, type))
+		if (type->tp_size <= (arith)0 && actual_declaration(sc, type))
 		{
-			if (type->tp_size == (arith) -1)
+			if (type->tp_size == (arith)-1)
 			{
 				/* the type is not yet known,
 				 but it has to be:
@@ -121,24 +120,22 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 	{
 		switch (type->tp_fund)
 		{
-		case FUNCTION:
-			warning("%s is a function; cannot be formal", idf->id_text);
-			type = construct_type(POINTER, type, 0, (arith) 0,
-			NO_PROTO);
-			break;
-		case ARRAY: /* 3.7.1 */
-			type = construct_type(POINTER, type->tp_up, 0, (arith) 0,
-			NO_PROTO);
-			formal_array = 1;
-			break;
-		case FLOAT:
-		case CHAR:
-		case SHORT:
-			/* The conversion is done in formal_cvt(). It is
-			 * not done when the type is float and there is a
-			 * prototype.
-			 */
-			break;
+			case FUNCTION:
+				warning("%s is a function; cannot be formal", idf->id_text);
+				type = construct_type(POINTER, type, 0, (arith)0, NO_PROTO);
+				break;
+			case ARRAY: /* 3.7.1 */
+				type = construct_type(POINTER, type->tp_up, 0, (arith)0, NO_PROTO);
+				formal_array = 1;
+				break;
+			case FLOAT:
+			case CHAR:
+			case SHORT:
+				/* The conversion is done in formal_cvt(). It is
+				 * not done when the type is float and there is a
+				 * prototype.
+				 */
+				break;
 		}
 	}
 	/*	The tests on types, postponed from do_decspecs(), can now
@@ -153,8 +150,7 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 				sc = GLOBAL;
 			else if (sc != EXTERN && sc != TYPEDEF)
 			{
-				error("illegal storage class %s for function with block-scope",
-						symbol2str(sc));
+				error("illegal storage class %s for function with block-scope", symbol2str(sc));
 				ds->ds_sc = sc = EXTERN;
 			}
 		}
@@ -162,22 +158,21 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 			sc = GLOBAL;
 	}
 	else /* non-FUNCTION */
-	if (sc == 0)
-		sc = lvl == L_GLOBAL ? GLOBAL :
-				lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL : AUTO;
+		if (sc == 0)
+			sc = lvl == L_GLOBAL ? GLOBAL : lvl == L_FORMAL1 || lvl == L_FORMAL2 ? FORMAL : AUTO;
 
-#ifdef	LINT
+#ifdef LINT
 	check_hiding(idf, lvl, sc); /* of some idf by this idf */
-#endif	/* LINT */
+#endif /* LINT */
 	if (def && lvl == L_LOCAL && def->df_level == L_FORMAL2)
 	{
 		error("%s redeclared", idf->id_text);
 	}
 
 	if (def
-			&& (def->df_level == lvl || (lvl != L_GLOBAL && def->df_level > lvl)
-					|| (lvl == L_GLOBAL && def->df_level == L_PROTO && def->next
-							&& def->next->df_level == L_GLOBAL)))
+	    && (def->df_level == lvl || (lvl != L_GLOBAL && def->df_level > lvl)
+	        || (lvl == L_GLOBAL && def->df_level == L_PROTO && def->next
+	            && def->next->df_level == L_GLOBAL)))
 	{
 		/*	There is already a declaration for idf on this
 		 level, or even more inside.
@@ -185,83 +180,83 @@ void declare_idf(struct decspecs *ds, struct declarator *dc, int lvl)
 		 */
 		switch (lvl)
 		{
-		case L_GLOBAL:
-			global_redecl(idf, sc, type);
-			def->df_file = idf->id_file;
-			def->df_line = idf->id_line;
-			break;
-		case L_FORMAL1: /* formal declaration */
-			error("formal %s redeclared", idf->id_text);
-			break;
-		case L_FORMAL2: /* formal definition */
-		default: /* local */
-			if (sc != EXTERN)
-				error("%s redeclared", idf->id_text);
-			break;
+			case L_GLOBAL:
+				global_redecl(idf, sc, type);
+				def->df_file = idf->id_file;
+				def->df_line = idf->id_line;
+				break;
+			case L_FORMAL1: /* formal declaration */
+				error("formal %s redeclared", idf->id_text);
+				break;
+			case L_FORMAL2: /* formal definition */
+			default: /* local */
+				if (sc != EXTERN)
+					error("%s redeclared", idf->id_text);
+				break;
 		}
 	}
 	else /* the idf is unknown on this level */
-	if (lvl == L_FORMAL2 && sc != ENUM && good_formal(def, idf))
-	{
-		/* formal declaration, update only */
-		def->df_type = type;
-		def->df_formal_array = formal_array;
-		def->df_sc = sc;
-		def->df_level = L_FORMAL2; /* CJ */
-		def->df_file = idf->id_file;
-		def->df_line = idf->id_line;
-	}
-	else
-	{ /* fill in the def block */
-		struct def *newdef = new_def();
-
-		newdef->next = def;
-		newdef->df_level = lvl;
-		newdef->df_type = type;
-		newdef->df_sc = sc;
-		newdef->df_file = idf->id_file;
-		newdef->df_line = idf->id_line;
-#ifdef	LINT
-		newdef->df_set = 0;
-		newdef->df_firstbrace = 0;
-#endif	/* LINT */
-		/* link it into the name list in the proper place */
-		idf->id_def = newdef;
-		update_ahead(idf);
-		stack_idf(idf, stl);
-		/*	We now calculate the address.
-		 Globals have names and don't get addresses, they
-		 get numbers instead (through data_label()).
-		 Formals are handled by declare_formals().
-		 So here we hand out local addresses only.
-		 */
-		if (lvl >= L_LOCAL)
+		if (lvl == L_FORMAL2 && sc != ENUM && good_formal(def, idf))
 		{
-			assert(sc);
-			switch (sc)
+			/* formal declaration, update only */
+			def->df_type = type;
+			def->df_formal_array = formal_array;
+			def->df_sc = sc;
+			def->df_level = L_FORMAL2; /* CJ */
+			def->df_file = idf->id_file;
+			def->df_line = idf->id_line;
+		}
+		else
+		{ /* fill in the def block */
+			struct def* newdef = new_def();
+
+			newdef->next = def;
+			newdef->df_level = lvl;
+			newdef->df_type = type;
+			newdef->df_sc = sc;
+			newdef->df_file = idf->id_file;
+			newdef->df_line = idf->id_line;
+#ifdef LINT
+			newdef->df_set = 0;
+			newdef->df_firstbrace = 0;
+#endif /* LINT */
+			/* link it into the name list in the proper place */
+			idf->id_def = newdef;
+			update_ahead(idf);
+			stack_idf(idf, stl);
+			/*	We now calculate the address.
+			 Globals have names and don't get addresses, they
+			 get numbers instead (through data_label()).
+			 Formals are handled by declare_formals().
+			 So here we hand out local addresses only.
+			 */
+			if (lvl >= L_LOCAL)
 			{
-			case REGISTER:
-			case AUTO:
-				if (type->tp_size == (arith) -1 && type->tp_fund != ARRAY)
+				assert(sc);
+				switch (sc)
 				{
-					error("size of local %s unknown", idf->id_text);
-					/** type = idf->id_def->df_type = int_type; **/
+					case REGISTER:
+					case AUTO:
+						if (type->tp_size == (arith)-1 && type->tp_fund != ARRAY)
+						{
+							error("size of local %s unknown", idf->id_text);
+							/** type = idf->id_def->df_type = int_type; **/
+						}
+						if (type->tp_size != (arith)-1)
+						{
+							newdef->df_address
+							    = NewLocal(type->tp_size, type->tp_align, regtype(type), sc);
+						}
+						break;
+					case STATIC:
+						newdef->df_address = (arith)data_label();
+						break;
 				}
-				if (type->tp_size != (arith) -1)
-				{
-					newdef->df_address = NewLocal(type->tp_size, type->tp_align,
-							regtype(type), sc);
-				}
-				break;
-			case STATIC:
-				newdef->df_address = (arith) data_label();
-				break;
 			}
 		}
-	}
 }
 
-int actual_declaration(int sc, struct type *tp)
+int actual_declaration(int sc, struct type* tp)
 {
 	/*	An actual_declaration needs space, right here and now.
 	 */
@@ -281,7 +276,7 @@ int actual_declaration(int sc, struct type *tp)
 	return 1;
 }
 
-void global_redecl(struct idf *idf, int new_sc, struct type *tp)
+void global_redecl(struct idf* idf, int new_sc, struct type* tp)
 {
 	/*	A global identifier may be declared several times,
 	 provided the declarations do not conflict; they might
@@ -289,7 +284,7 @@ void global_redecl(struct idf *idf, int new_sc, struct type *tp)
 	 an array) or they might conflict or supplement each other
 	 in storage class.
 	 */
-	struct def *def = idf->id_def;
+	struct def* def = idf->id_def;
 
 	while (def->df_level != L_GLOBAL)
 		def = def->next;
@@ -331,62 +326,62 @@ void global_redecl(struct idf *idf, int new_sc, struct type *tp)
 
 	switch (def->df_sc)
 	{ /* the old storage class */
-	case EXTERN:
-		switch (new_sc)
-		{ /* the new storage class */
-		case STATIC:
-			warning("%s redeclared static", idf->id_text);
-			/* fallthrough */
+		case EXTERN:
+			switch (new_sc)
+			{ /* the new storage class */
+				case STATIC:
+					warning("%s redeclared static", idf->id_text);
+					/* fallthrough */
+				case GLOBAL:
+					def->df_sc = new_sc;
+					/* fallthrough */
+				case EXTERN:
+					break;
+				default:
+					crash("bad storage class");
+					UNREACHABLE_CODE;
+			}
+			break;
 		case GLOBAL:
-			def->df_sc = new_sc;
-			/* fallthrough */
-		case EXTERN:
+			switch (new_sc)
+			{ /* the new storage class */
+				case STATIC: /* linkage disagreement */
+					warning("%s redeclared static", idf->id_text);
+					def->df_sc = new_sc;
+					/* fallthrough */
+				case GLOBAL:
+				case EXTERN:
+					break;
+				default:
+					crash("bad storage class");
+					UNREACHABLE_CODE;
+			}
 			break;
-		default:
-			crash("bad storage class");
-			UNREACHABLE_CODE;
-		}
-		break;
-	case GLOBAL:
-		switch (new_sc)
-		{ /* the new storage class */
-		case STATIC: /* linkage disagreement */
-			warning("%s redeclared static", idf->id_text);
-			def->df_sc = new_sc;
-			/* fallthrough */
-		case GLOBAL:
-		case EXTERN:
-			break;
-		default:
-			crash("bad storage class");
-			UNREACHABLE_CODE;
-		}
-		break;
-	case STATIC:
-		switch (new_sc)
-		{ /* the new storage class */
-		case GLOBAL: /* linkage disagreement */
-		case EXTERN:
-			warning("%s is already declared static", idf->id_text);
-			/* fallthrough */
 		case STATIC:
+			switch (new_sc)
+			{ /* the new storage class */
+				case GLOBAL: /* linkage disagreement */
+				case EXTERN:
+					warning("%s is already declared static", idf->id_text);
+					/* fallthrough */
+				case STATIC:
+					break;
+				default:
+					crash("bad storage class");
+					UNREACHABLE_CODE;
+			}
+			break;
+		case ENUM:
+		case TYPEDEF:
+			error("illegal redeclaration of %s", idf->id_text);
 			break;
 		default:
 			crash("bad storage class");
 			UNREACHABLE_CODE;
-		}
-		break;
-	case ENUM:
-	case TYPEDEF:
-		error("illegal redeclaration of %s", idf->id_text);
-		break;
-	default:
-		crash("bad storage class");
-		UNREACHABLE_CODE;
 	}
 }
 
-int good_formal(struct def *def, struct idf *idf)
+int good_formal(struct def* def, struct idf* idf)
 {
 	/*	Succeeds if def is a proper L_FORMAL1 definition and
 	 gives an error message otherwise.
@@ -401,11 +396,11 @@ int good_formal(struct def *def, struct idf *idf)
 	return 1;
 }
 
-void declare_params(struct declarator *dc)
+void declare_params(struct declarator* dc)
 {
 	/*	Declares the formal parameters if they exist.
 	 */
-	struct formal *fm = dc->dc_formal;
+	struct formal* fm = dc->dc_formal;
 
 	while (fm)
 	{
@@ -414,11 +409,11 @@ void declare_params(struct declarator *dc)
 	}
 }
 
-void idf_initialized(struct idf *idf)
+void idf_initialized(struct idf* idf)
 {
 	/*	The topmost definition of idf is set to initialized.
 	 */
-	struct def *def = idf->id_def; /* the topmost */
+	struct def* def = idf->id_def; /* the topmost */
 
 	while (def->df_level <= L_PROTO)
 		def = def->next;
@@ -432,14 +427,14 @@ void idf_initialized(struct idf *idf)
 	def->df_initialized = 1;
 }
 
-void declare_parameter(struct idf *idf)
+void declare_parameter(struct idf* idf)
 {
 	/*	idf is declared as a formal.
 	 */
 	add_def(idf, FORMAL, int_type, level);
 }
 
-void declare_enum(struct type *tp, struct idf *idf, arith l)
+void declare_enum(struct type* tp, struct idf* idf, arith l)
 {
 	/*	idf is declared as an enum constant with value l.
 	 */
@@ -447,11 +442,11 @@ void declare_enum(struct type *tp, struct idf *idf, arith l)
 	idf->id_def->df_address = l;
 }
 
-void check_formals(struct idf *idf, struct declarator *dc)
+void check_formals(struct idf* idf, struct declarator* dc)
 {
-	struct formal *fm = dc->dc_formal;
-	struct proto *pl = idf->id_def->df_type->tp_proto;
-	struct decl_unary *du = dc->dc_decl_unary;
+	struct formal* fm = dc->dc_formal;
+	struct proto* pl = idf->id_def->df_type->tp_proto;
+	struct decl_unary* du = dc->dc_decl_unary;
 
 	if (!du)
 	{ /* error or typdef'ed function */
@@ -459,8 +454,7 @@ void check_formals(struct idf *idf, struct declarator *dc)
 		return;
 	}
 
-	while (du
-			&& (du->du_fund != FUNCTION || du->next != (struct decl_unary *) 0))
+	while (du && (du->du_fund != FUNCTION || du->next != (struct decl_unary*)0))
 	{
 		du = du->next;
 	}
@@ -487,12 +481,10 @@ void check_formals(struct idf *idf, struct declarator *dc)
 		}
 		while (fm && pl)
 		{
-			if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type),
-					pl->pl_type, -1, 1))
+			if (!equal_type(promoted_type(fm->fm_idf->id_def->df_type), pl->pl_type, -1, 1))
 			{
 				if (!(pl->pl_flag & PL_ERRGIVEN))
-					error("incorrect type for parameter %s",
-							fm->fm_idf->id_text);
+					error("incorrect type for parameter %s", fm->fm_idf->id_text);
 				pl->pl_flag |= PL_ERRGIVEN;
 			}
 			fm = fm->next;
@@ -505,11 +497,10 @@ void check_formals(struct idf *idf, struct declarator *dc)
 	}
 	else
 	{ /* make a pseudo-prototype */
-		struct proto *lpl = new_proto();
+		struct proto* lpl = new_proto();
 
 		if (!options['o'])
-			warning("'%s' old-fashioned function definition",
-					dc->dc_idf->id_text);
+			warning("'%s' old-fashioned function definition", dc->dc_idf->id_text);
 
 		while (fm)
 		{
@@ -537,20 +528,20 @@ void check_formals(struct idf *idf, struct declarator *dc)
 	dc->dc_formal = 0;
 }
 
-void declare_formals(struct idf *idf, arith *fp)
+void declare_formals(struct idf* idf, arith* fp)
 {
 	/*	Declares those formals as int that haven't been declared
 	 by the user.
 	 An address is assigned to each formal parameter.
 	 The total size of the formals is returned in *fp;
 	 */
-	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
-	arith f_offset = (arith) 0;
+	struct stack_entry* se = stack_level_of(L_FORMAL1)->sl_entry;
+	arith f_offset = (arith)0;
 	int nparams = 0;
 	int hasproto;
-	struct def *df = idf->id_def;
+	struct def* df = idf->id_def;
 
-	/* When one of the formals has the same name as the function, 
+	/* When one of the formals has the same name as the function,
 	 it hides the function def. Get it.
 	 */
 	while (se)
@@ -567,10 +558,10 @@ void declare_formals(struct idf *idf, arith *fp)
 
 	hasproto = df->df_type->tp_proto != 0;
 
-#ifdef	DEBUG
+#ifdef DEBUG
 	if (options['t'])
-	dumpidftab("start declare_formals", 0);
-#endif	/* DEBUG */
+		dumpidftab("start declare_formals", 0);
+#endif /* DEBUG */
 	if (is_struct_or_union(df->df_type->tp_up->tp_fund))
 	{
 		/* create space for address of return value */
@@ -592,15 +583,13 @@ void declare_formals(struct idf *idf, arith *fp)
 		 word boundaries, i.e. take care that the following
 		 parameter starts on a new word boundary.
 		 */
-		if (!hasproto && df->df_type->tp_fund == FLOAT
-				&& df->df_type->tp_size != double_size)
+		if (!hasproto && df->df_type->tp_fund == FLOAT && df->df_type->tp_size != double_size)
 		{
-			f_offset = align(f_offset + double_size, (int) word_size);
+			f_offset = align(f_offset + double_size, (int)word_size);
 		}
 		else
-			f_offset = align(f_offset + df->df_type->tp_size, (int) word_size);
-		RegisterAccount(df->df_address, df->df_type->tp_size,
-				regtype(df->df_type), df->df_sc);
+			f_offset = align(f_offset + df->df_type->tp_size, (int)word_size);
+		RegisterAccount(df->df_address, df->df_type->tp_size, regtype(df->df_type), df->df_sc);
 		/* cvt int to char or short and double to float, if necessary
 		 */
 		formal_cvt(hasproto, df);
@@ -619,24 +608,24 @@ void declare_formals(struct idf *idf, arith *fp)
 	*fp = f_offset;
 }
 
-int regtype(struct type *tp)
+int regtype(struct type* tp)
 {
 	switch (tp->tp_fund)
 	{
-	case INT:
-	case LONG:
-		return reg_any;
-	case FLOAT:
-	case DOUBLE:
-	case LNGDBL:
-		return reg_float;
-	case POINTER:
-		return reg_pointer;
+		case INT:
+		case LONG:
+			return reg_any;
+		case FLOAT:
+		case DOUBLE:
+		case LNGDBL:
+			return reg_float;
+		case POINTER:
+			return reg_pointer;
 	}
 	return -1;
 }
 
-void add_def(struct idf *idf, int sc, struct type *tp, int lvl)
+void add_def(struct idf* idf, int sc, struct type* tp, int lvl)
 {
 	/*	The identifier idf is declared on level lvl with storage
 	 class sc and type tp, through a faked C declaration.
@@ -654,25 +643,22 @@ void add_def(struct idf *idf, int sc, struct type *tp, int lvl)
 	declare_idf(&Ds, &Dc, lvl);
 }
 
-void update_ahead(struct idf *idf)
+void update_ahead(struct idf* idf)
 {
 	/*	The tk_symb of the token ahead is updated in the light of new
 	 information about the identifier idf.
 	 */
 	int tk_symb = AHEAD;
 
-	if ((tk_symb == IDENTIFIER || tk_symb == TYPE_IDENTIFIER)
-			&& ahead.tk_idf == idf)
-		AHEAD = idf->id_def && idf->id_def->df_sc == TYPEDEF ?
-		TYPE_IDENTIFIER :
-																IDENTIFIER;
+	if ((tk_symb == IDENTIFIER || tk_symb == TYPE_IDENTIFIER) && ahead.tk_idf == idf)
+		AHEAD = idf->id_def && idf->id_def->df_sc == TYPEDEF ? TYPE_IDENTIFIER : IDENTIFIER;
 }
 
-void free_formals(struct formal *fm)
+void free_formals(struct formal* fm)
 {
 	while (fm)
 	{
-		struct formal *tmp = fm->next;
+		struct formal* tmp = fm->next;
 
 		free_formal(fm);
 		fm = tmp;

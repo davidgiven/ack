@@ -87,7 +87,7 @@ code_startswitch(expp)
 	sh->sh_entries = (struct case_entry *) 0; /* case-entry list	*/
 	sh->sh_expr = *expp;
 #ifdef LINT
-	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(sh->sh_expr, RVAL, true, NO_LABEL, NO_LABEL);
 #endif
 	sh->next = switch_stack;	/* push onto switch-stack	*/
 	switch_stack = sh;
@@ -106,7 +106,7 @@ code_endswitch()
 	C_df_ilb(sh->sh_table);		/* switch table entry		*/
 	/* evaluate the switch expr.	*/
 #ifndef LINT
-	code_expr(sh->sh_expr, RVAL, TRUE, NO_LABEL, NO_LABEL);
+	code_expr(sh->sh_expr, RVAL, true, NO_LABEL, NO_LABEL);
 #endif
 	tablabel = data_label();	/* the rom must have a label	*/
 	C_df_dlb(tablabel);

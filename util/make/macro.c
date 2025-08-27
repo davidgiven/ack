@@ -60,7 +60,7 @@ struct macro * setmacro(char* name, char* val, int prio)
 
         rp->m_next = macrohead;
         macrohead = rp;
-        rp->m_flag = FALSE;
+        rp->m_flag = false;
 
         if ((cp = malloc((unsigned)(strlen(name)+1))) == (char *)0)
             fatal("No memory for macro",NULL);
@@ -124,11 +124,11 @@ static void doexp(char **to, char* from, int* len, char* buf)
                 mp = setmacro(buf, "", 2);
             if (mp->m_flag)
                 fatal("Infinitely recursive macro %s", mp->m_name);
-            mp->m_flag = TRUE;
+            mp->m_flag = true;
             *to = p;
             doexp(to, mp->m_val, len, buf);
             p = *to;
-            mp->m_flag = FALSE;
+            mp->m_flag = false;
         }
         if (*len <= 0)
             error("Expanded line too line", NULL);

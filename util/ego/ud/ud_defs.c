@@ -46,9 +46,9 @@ bool does_expl_def(line_p l)
 		case op_dee:
 		case op_zrl:
 		case op_zre:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 	UNREACHABLE_CODE;
 }
@@ -70,9 +70,9 @@ bool does_impl_def(line_p l)
 		case op_blm:
 		case op_bls:
 		case op_zrf:
-			return TRUE;
+			return true;
 		default:
-			return FALSE;
+			return false;
 	}
 }
 

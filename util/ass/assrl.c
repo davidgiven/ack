@@ -4,26 +4,25 @@
  *
  */
 
-#include		<stdio.h>
-#include        "ass00.h"
-#include        "assex.h"
-#include		"asscm.h"
-#include		"assrl.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "ass00.h"
+#include "assex.h"
+#include "asscm.h"
+#include "assrl.h"
 
-
-
-#define COPYFINAL       1
-#define COPYTEMP        0
+#define COPYFINAL 1
+#define COPYTEMP  0
 
 /*
  * collection of routines to deal with relocation business
  */
 
+static void dataprocess(FILE*, FILE*);
+static void textprocess(FILE*, FILE*);
 
-static void dataprocess(FILE *, FILE *);
-static void textprocess(FILE *, FILE *);
-
-relc_t * text_reloc(glob_t *glosym, FOFFSET off, int typ)
+relc_t* text_reloc(glob_t* glosym, FOFFSET off, int typ)
 {
 
 	/*
@@ -36,7 +35,7 @@ relc_t * text_reloc(glob_t *glosym, FOFFSET off, int typ)
 	 *       into the one in xglobs[] later.
 	 */
 
-	relc_t *nxtextreloc;
+	relc_t* nxtextreloc;
 
 	nxtextreloc = rlp_cast getarea(sizeof *nxtextreloc);
 	if (!f_text)
@@ -55,14 +54,14 @@ relc_t * text_reloc(glob_t *glosym, FOFFSET off, int typ)
 	return (nxtextreloc);
 }
 
-relc_t * data_reloc(char *arg ,FOFFSET off, int typ)
+relc_t* data_reloc(char* arg, FOFFSET off, int typ)
 {
 
 	/*
 	 * Same as above.
 	 */
 
-	relc_t *nxdatareloc;
+	relc_t* nxdatareloc;
 
 	nxdatareloc = rlp_cast getarea(sizeof *nxdatareloc);
 	if (!f_data)
@@ -142,13 +141,13 @@ void copyout(void)
 	xput16(0, ifile);
 	xput16(0, ifile);
 	xputa(textbytes + remtext, ifile);
-	xputa((cons_t) datablocks, ifile);
-	xputa((cons_t) procnum, ifile);
-	xputa((cons_t) searchproc(MAIN, xprocs, oursize->n_xproc)->p_num, ifile);
-	xputa((cons_t) sourcelines, ifile);
-	xputa((cons_t) databytes, ifile);
-	xputa((cons_t) 0, ifile);
-	xputa((cons_t) 0, ifile);
+	xputa((cons_t)datablocks, ifile);
+	xputa((cons_t)procnum, ifile);
+	xputa((cons_t)searchproc(MAIN, xprocs, oursize->n_xproc)->p_num, ifile);
+	xputa((cons_t)sourcelines, ifile);
+	xputa((cons_t)databytes, ifile);
+	xputa((cons_t)0, ifile);
+	xputa((cons_t)0, ifile);
 
 	textprocess(tfile, ifile);
 	while (remtext--)
@@ -164,61 +163,60 @@ void copyout(void)
 		;
 }
 
-static void dataprocess(FILE *f1, FILE *outf)
+static void dataprocess(FILE* f1, FILE* outf)
 {
 	relc_t datareloc;
 	FOFFSET i;
 	int ieof;
 
 	rewind(rdfile);
-	ieof = getblk(rdfile, (char *) (&datareloc.r_off),
-			sizeof datareloc - sizeof datareloc.r_next);
+	ieof = getblk(rdfile, (char*)(&datareloc.r_off), sizeof datareloc - sizeof datareloc.r_next);
 	for (i = 0; i < dataoff && !ieof; i++)
 	{
 		if (i == datareloc.r_off)
 		{
 			switch (datareloc.r_typ)
 			{
-			case RELADR:
-				xputa(xgeta(f1) + datareloc.r_val.rel_i, outf);
-				i += ptrsize - 1;
-				break;
-			case RELGLO:
-				if (datareloc.r_val.rel_gp->g_status & DEF)
-				{
-					xputa(xgeta(f1) + datareloc.r_val.rel_gp->g_val.g_addr, outf);
+				case RELADR:
+					xputa(xgeta(f1) + datareloc.r_val.rel_i, outf);
 					i += ptrsize - 1;
 					break;
-				}
-				if (unresolved == 0)
-					fatal("Definition botch");
-			case RELHEAD:
-				xputc((int) (xgetc(f1) + datareloc.r_val.rel_i), outf);
-				break;
-			default:
-				fatal("Bad r_typ in dataprocess");
+				case RELGLO:
+					if (datareloc.r_val.rel_gp->g_status & DEF)
+					{
+						xputa(xgeta(f1) + datareloc.r_val.rel_gp->g_val.g_addr, outf);
+						i += ptrsize - 1;
+						break;
+					}
+					if (unresolved == 0)
+						fatal("Definition botch");
+				case RELHEAD:
+					xputc((int)(xgetc(f1) + datareloc.r_val.rel_i), outf);
+					break;
+				default:
+					fatal("Bad r_typ in dataprocess");
 			}
-			ieof = getblk(rdfile, (char *) (&datareloc.r_off),
-					sizeof datareloc - sizeof datareloc.r_next);
+			ieof = getblk(
+			    rdfile, (char*)(&datareloc.r_off), sizeof datareloc - sizeof datareloc.r_next);
 		}
 		else
 			xputc(xgetc(f1), outf);
 	}
 	for (; i < dataoff; i++)
 		xputc(xgetc(f1), outf);
-	if (!ieof && !getblk(rdfile, (char *) &datareloc, 1))
+	if (!ieof && !getblk(rdfile, (char*)&datareloc, 1))
 		fatal("data relocation botch");
 }
 
-static void textprocess(FILE *f1, FILE *outf)
+static void textprocess(FILE* f1, FILE* outf)
 {
 	relc_t textreloc;
 	cons_t n;
 	FOFFSET i;
-	FILE *otfile;
+	FILE* otfile;
 	int insl;
 	int ieof;
-	char *op_curr;
+	char* op_curr;
 	FOFFSET keep;
 
 	rewind(rtfile);
@@ -227,8 +225,7 @@ static void textprocess(FILE *f1, FILE *outf)
 	otfile = tfile;
 	tfile = outf;
 	/* This redirects the output of genop */
-	ieof = getblk(rtfile, (char *) (&textreloc.r_off),
-			sizeof textreloc - sizeof textreloc.r_next);
+	ieof = getblk(rtfile, (char*)(&textreloc.r_off), sizeof textreloc - sizeof textreloc.r_next);
 	for (i = 0; i < keep && !ieof; i++)
 	{
 		if (i == textreloc.r_off)
@@ -248,8 +245,9 @@ static void textprocess(FILE *f1, FILE *outf)
 					if (unresolved == 0)
 						fatal("Definition botch");
 					xputc(xgetc(f1), outf);
-					ieof = getblk(rtfile, (char *) (&textreloc.r_off),
-							sizeof textreloc - sizeof textreloc.r_next);
+					ieof = getblk(
+					    rtfile, (char*)(&textreloc.r_off),
+					    sizeof textreloc - sizeof textreloc.r_next);
 					continue;
 				}
 			}
@@ -257,8 +255,8 @@ static void textprocess(FILE *f1, FILE *outf)
 			insl = oplength(*op_curr);
 			genop(op_curr, n + xgetarb(insl, f1), PAR_G);
 			i += insl - 1;
-			ieof = getblk(rtfile, (char *) (&textreloc.r_off),
-					sizeof textreloc - sizeof textreloc.r_next);
+			ieof = getblk(
+			    rtfile, (char*)(&textreloc.r_off), sizeof textreloc - sizeof textreloc.r_next);
 		}
 		else
 		{
@@ -267,7 +265,7 @@ static void textprocess(FILE *f1, FILE *outf)
 	}
 	for (; i < keep; i++)
 		xputc(xgetc(f1), outf);
-	if (!ieof && !getblk(rtfile, (char *) &textreloc, 1))
+	if (!ieof && !getblk(rtfile, (char*)&textreloc, 1))
 		fatal("text relocation botch");
 	textoff = keep;
 	tfile = otfile;
@@ -275,8 +273,8 @@ static void textprocess(FILE *f1, FILE *outf)
 
 void upd_reloc(void)
 {
-	relc_t *p;
-	glob_t *gbp;
+	relc_t* p;
+	glob_t* gbp;
 
 	/*
 	 * Change reloc-tables such that for every pointer into mglobs
@@ -287,7 +285,7 @@ void upd_reloc(void)
 	 * see also getcore()
 	 */
 
-	while ( (p = f_text) != NULL)
+	while ((p = f_text) != NULL)
 	{
 		gbp = p->r_val.rel_gp;
 		if (gbp->g_status & DEF)
@@ -297,12 +295,12 @@ void upd_reloc(void)
 		}
 		else
 			p->r_val.rel_gp = gbp->g_val.g_gp;
-		putblk(rtfile, (char *) (&(p->r_off)), sizeof *p - sizeof p);
+		putblk(rtfile, (char*)(&(p->r_off)), sizeof *p - sizeof p);
 		f_text = p->r_next;
-		freearea((area_t) p, sizeof *p);
+		freearea((area_t)p, sizeof *p);
 	}
 
-	while ( (p = f_data) != NULL)
+	while ((p = f_data) != NULL)
 	{
 		if (p->r_typ == RELGLO)
 		{
@@ -315,9 +313,9 @@ void upd_reloc(void)
 			else
 				p->r_val.rel_gp = gbp->g_val.g_gp;
 		}
-		putblk(rdfile, (char *) (&(p->r_off)), sizeof *p - sizeof p);
+		putblk(rdfile, (char*)(&(p->r_off)), sizeof *p - sizeof p);
 		f_data = p->r_next;
-		freearea((area_t) p, sizeof *p);
+		freearea((area_t)p, sizeof *p);
 	}
 	l_data = rlp_cast 0;
 }

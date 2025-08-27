@@ -8,8 +8,7 @@
 #include <inp_pkg.spec>
 
 /*	Note: The following macro only garuantees one PushBack.
-*/
-#define UnGetChar()	((LexSave != EOI) ? ChPushBack(LexSave) : 0)
+ */
+#define UnGetChar() ((LexSave != EOI) ? ChPushBack(LexSave) : 0)
 
-extern	int LexSave;	/* last character read by GetChar		*/
-
+extern int LexSave; /* last character read by GetChar		*/

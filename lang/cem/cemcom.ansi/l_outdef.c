@@ -5,40 +5,40 @@
 /* $Id$ */
 /*	Lint outdef construction	*/
 
-#include	"parameters.h"
+#include "parameters.h"
+#include <stddef.h>
+#include <stdbool.h>
 
-#ifdef	LINT
+#ifdef LINT
 
-#include	<assert.h>
-#include	<ack_string.h>
-#include	<alloc.h>
-#include	"interface.h"
+#include <assert.h>
+#include <ack_string.h>
+#include <alloc.h>
+#include "interface.h"
 #ifdef ANSI
-#include	<flt_arith.h>
+#include <flt_arith.h>
 #endif /* ANSI */
-#include	"arith.h"
-#include	"type.h"
-#include	"proto.h"
-#include	"declar.h"
-#include	"decspecs.h"
-#include	"LLlex.h"
-#include	"Lpars.h"
-#include	"stack.h"
-#include	"def.h"
-#include	"struct.h"
-#include	"field.h"
-#include	"level.h"
-#include	"label.h"
-#include	"code.h"
-#include	"expr.h"
-#include	"l_lint.h"
-#include	"l_comment.h"
-#include	"l_outdef.h"
-#include	"l_class.h"
+#include "arith.h"
+#include "type.h"
+#include "proto.h"
+#include "declar.h"
+#include "decspecs.h"
+#include "LLlex.h"
+#include "Lpars.h"
+#include "stack.h"
+#include "def.h"
+#include "struct.h"
+#include "field.h"
+#include "level.h"
+#include "label.h"
+#include "code.h"
+#include "expr.h"
+#include "l_lint.h"
+#include "l_comment.h"
+#include "l_outdef.h"
+#include "l_class.h"
 
-
-
-int stat_number = 9999;			/* static scope number */
+int stat_number = 9999; /* static scope number */
 struct outdef OutDef;
 
 static struct outdef OutCall;
@@ -52,31 +52,30 @@ static outargtype();
 static add_expr_arg();
 static def2decl();
 
-lint_declare_idf(idf, sc)
-	struct idf *idf;
-	int sc;
+lint_declare_idf(idf, sc) struct idf* idf;
+int sc;
 {
-	struct def *def = idf->id_def;
+	struct def* def = idf->id_def;
 	int is_function = def->df_type->tp_fund == FUNCTION;
 
-	if (level == L_GLOBAL) {
+	if (level == L_GLOBAL)
+	{
 		lint_ext_def(idf, sc);
 		if (is_function)
 			def2decl(sc);
 		if (sc != TYPEDEF)
 			outdef();
 	}
-	else
-	if (level >= L_LOCAL && sc != STATIC && is_function) {
+	else if (level >= L_LOCAL && sc != STATIC && is_function)
+	{
 		local_EFDC(idf);
 	}
 }
 
-lint_non_function_decl(ds, dc)
-	struct decspecs *ds;
-	struct declarator *dc;
+lint_non_function_decl(ds, dc) struct decspecs* ds;
+struct declarator* dc;
 {
-	struct def *def = dc->dc_idf->id_def;
+	struct def* def = dc->dc_idf->id_def;
 	int is_function = def->df_type->tp_fund == FUNCTION;
 
 	if (is_function)
@@ -85,40 +84,38 @@ lint_non_function_decl(ds, dc)
 		outdef();
 }
 
-lint_ext_def(idf, sc)
-	struct idf *idf;
+lint_ext_def(idf, sc) struct idf* idf;
 {
-/* At this place the following fields of the output definition can be
- * filled:
- *		od_name, od_statnr, od_class, od_file, od_line, od_type.
- * For variable definitions and declarations this will be all.
- * For functions the fields od_nrargs and od_arg are filled after parsing
- * the arguments.
- * The od_valreturned field is known at the end of the function definition.
- * sc indicates the storage class defined by the declaration specifier.
- */
-	struct def *def = idf->id_def;
-	struct type *type = def->df_type;
+	/* At this place the following fields of the output definition can be
+	 * filled:
+	 *		od_name, od_statnr, od_class, od_file, od_line, od_type.
+	 * For variable definitions and declarations this will be all.
+	 * For functions the fields od_nrargs and od_arg are filled after parsing
+	 * the arguments.
+	 * The od_valreturned field is known at the end of the function definition.
+	 * sc indicates the storage class defined by the declaration specifier.
+	 */
+	struct def* def = idf->id_def;
+	struct type* type = def->df_type;
 
 	OutDef.od_name = idf->id_text;
 	OutDef.od_statnr = (sc == STATIC ? stat_number : 0);
 
-	switch (type->tp_fund) {
-	case ERRONEOUS:
-		OutDef.od_class = XXDF;
-		break;
-	case FUNCTION:
-		/* For the moment assume it will be a definition.
-		 * If no compound_statement follows, it is a declaration,
-		 * in which case the class will be adjusted by def2decl().
-		 */
-		OutDef.od_class = (sc == STATIC ? SFDF : EFDF);
-		break;
-	default:	/* a variable */
-		OutDef.od_class =
-			sc == EXTERN ? EVDC :
-			sc == STATIC ? SVDF : EVDF;
-		break;
+	switch (type->tp_fund)
+	{
+		case ERRONEOUS:
+			OutDef.od_class = XXDF;
+			break;
+		case FUNCTION:
+			/* For the moment assume it will be a definition.
+			 * If no compound_statement follows, it is a declaration,
+			 * in which case the class will be adjusted by def2decl().
+			 */
+			OutDef.od_class = (sc == STATIC ? SFDF : EFDF);
+			break;
+		default: /* a variable */
+			OutDef.od_class = sc == EXTERN ? EVDC : sc == STATIC ? SVDF : EVDF;
+			break;
 	}
 	OutDef.od_file = def->df_file;
 	OutDef.od_line = def->df_line;
@@ -126,14 +123,12 @@ lint_ext_def(idf, sc)
 	OutDef.od_valreturned = NORETURN;
 }
 
-static
-def2decl(sc)
-	int sc;
+static def2decl(sc) int sc;
 {
-/* It was assumed we were parsing a function definition.
- * There was no compound statement following, so actually it was a
- * declaration. This function updates the class.
- */
+	/* It was assumed we were parsing a function definition.
+	 * There was no compound statement following, so actually it was a
+	 * declaration. This function updates the class.
+	 */
 	OutDef.od_class = (sc == STATIC ? XXDF : EFDC);
 }
 
@@ -142,9 +137,7 @@ set_od_valreturned(n)
 	OutDef.od_valreturned = n;
 }
 
-static
-local_EFDC(idf)
-	struct idf *idf;
+static local_EFDC(idf) struct idf* idf;
 {
 	struct outdef od;
 
@@ -160,25 +153,23 @@ local_EFDC(idf)
 
 lint_formals()
 {
-/* Make a list of 'struct argument's containing the types of the formal
- * parameters of the function definition just parsed.
- */
-	struct stack_entry *se = stack_level_of(L_FORMAL1)->sl_entry;
-	struct argument **hook = &OutDef.od_arg;
+	/* Make a list of 'struct argument's containing the types of the formal
+	 * parameters of the function definition just parsed.
+	 */
+	struct stack_entry* se = stack_level_of(L_FORMAL1)->sl_entry;
+	struct argument** hook = &OutDef.od_arg;
 	int nrargs = 0;
 
-	while (se) {
-		struct type *type = se->se_idf->id_def->df_type;
-		struct argument *arg = new_argument();
+	while (se)
+	{
+		struct type* type = se->se_idf->id_def->df_type;
+		struct argument* arg = new_argument();
 
-		if (f_FORMAT && nrargs == f_FORMATn) {
-			if (	!f_FORMATvar
-			&&	(	type->tp_fund != POINTER
-				||	type->tp_up->tp_fund != CHAR
-				)
-			) {
-				warning("format parameter %d is not pointer to char",
-					nrargs);
+		if (f_FORMAT && nrargs == f_FORMATn)
+		{
+			if (!f_FORMATvar && (type->tp_fund != POINTER || type->tp_up->tp_fund != CHAR))
+			{
+				warning("format parameter %d is not pointer to char", nrargs);
 			}
 			arg->ar_type = string_type;
 			arg->ar_class = ArgString;
@@ -186,7 +177,8 @@ lint_formals()
 			arg->CAS_LEN = strlen(f_FORMAT);
 			f_FORMAT = 0;
 		}
-		else {
+		else
+		{
 			arg->ar_type = type;
 			arg->ar_class = ArgFormal;
 		}
@@ -197,29 +189,33 @@ lint_formals()
 		se = se->next;
 	}
 
-	if (f_FORMAT) {
+	if (f_FORMAT)
+	{
 		/*	f_FORMAT has not been consumed, perhaps due to
-			a varargs-like construction; add erroneous ArgFormals
-			until f_FORMATn, then an ArgString, if necessary.
+		    a varargs-like construction; add erroneous ArgFormals
+		    until f_FORMATn, then an ArgString, if necessary.
 		*/
-		if (!f_FORMATvar) {
-			warning("FORMAT%d function has only %d argument%s",
-				f_FORMATn, nrargs, nrargs == 1 ? "" : "s"
-			);
+		if (!f_FORMATvar)
+		{
+			warning(
+			    "FORMAT%d function has only %d argument%s", f_FORMATn, nrargs,
+			    nrargs == 1 ? "" : "s");
 		}
 
-		while (nrargs < f_FORMATn) {
-			struct argument *arg = new_argument();
-			
+		while (nrargs < f_FORMATn)
+		{
+			struct argument* arg = new_argument();
+
 			arg->ar_type = error_type;
 			arg->ar_class = ArgFormal;
 			*hook = arg;
 			hook = &arg->next;
 			nrargs++;
 		}
-		if (nrargs == f_FORMATn) {
-			struct argument *arg = new_argument();
-			
+		if (nrargs == f_FORMATn)
+		{
+			struct argument* arg = new_argument();
+
 			arg->ar_type = string_type;
 			arg->ar_class = ArgString;
 			arg->CAS_VALUE = f_FORMAT;
@@ -232,24 +228,25 @@ lint_formals()
 		/* life is full of duplicated code; this is no good */
 	}
 
-	if (f_VARARGSn > nrargs) {
-		warning("VARARGS%d function has only %d argument%s",
-			f_VARARGSn, nrargs, nrargs == 1 ? "" : "s"
-		);
+	if (f_VARARGSn > nrargs)
+	{
+		warning(
+		    "VARARGS%d function has only %d argument%s", f_VARARGSn, nrargs,
+		    nrargs == 1 ? "" : "s");
 		f_VARARGSn = nrargs;
 	}
 	OutDef.od_nrargs = nrargs;
 }
 
-output_proto(idf, def)
-	struct idf *idf;
-	struct def *def;
+output_proto(idf, def) struct idf* idf;
+struct def* def;
 {
 	/* fund == FUNCTION && sc != STATIC */
-	struct proto *pl = def->df_type->tp_proto;
+	struct proto* pl = def->df_type->tp_proto;
 	int nrargs = 0;
 
-	if (!pl) return;
+	if (!pl)
+		return;
 
 	OutDef.od_name = idf->id_text;
 	OutDef.od_statnr = 0;
@@ -257,17 +254,20 @@ output_proto(idf, def)
 	OutDef.od_file = def->df_file;
 	OutDef.od_line = def->df_line;
 	OutDef.od_type = def->df_type->tp_up;
-	OutDef.od_valreturned = NORETURN;/*???*/
+	OutDef.od_valreturned = NORETURN; /*???*/
 
-	while (pl) {
-		struct type *type = pl->pl_type;
-		struct argument *arg = new_argument();
+	while (pl)
+	{
+		struct type* type = pl->pl_type;
+		struct argument* arg = new_argument();
 
-		if (type) {
+		if (type)
+		{
 			arg->ar_type = type;
 			arg->ar_class = ArgFormal;
 		}
-		else {
+		else
+		{
 			arg->ar_class = ArgEllipsis;
 		}
 		arg->next = OutDef.od_arg;
@@ -281,11 +281,10 @@ output_proto(idf, def)
 	outdef();
 }
 
-output_use(idf)
-	struct idf *idf;
+output_use(idf) struct idf* idf;
 {
-/* Output the usage-definition of the variable described by idf.
- */
+	/* Output the usage-definition of the variable described by idf.
+	 */
 	OutDef.od_name = idf->id_text;
 	OutDef.od_statnr = (idf->id_def->df_sc == STATIC ? stat_number : 0);
 	OutDef.od_class = VU;
@@ -305,85 +304,88 @@ outcall()
 	output_def(&OutCall);
 }
 
-static
-output_def(od)
-	struct outdef *od;
+static output_def(od) struct outdef* od;
 {
-/* As the types are output the 'struct argument's are freed, because they
- * are then not needed anymore.
- */
+	/* As the types are output the 'struct argument's are freed, because they
+	 * are then not needed anymore.
+	 */
 	if (od->od_class == XXDF || !od->od_name || od->od_name[0] == '#')
 		return;
 
-	if (LINTLIB) {
-		switch (od->od_class) {
-		case EFDF:
-			od->od_class = LFDF;
-			break;
-		case EVDF:
-			od->od_class = LVDF;
-			break;
-		case SFDF:
-			/* free the 'struct argument's */
-			while (od->od_arg) {
-				struct argument *tmp = od->od_arg;
-				od->od_arg = od->od_arg->next;
-				free_argument(tmp);
-			}
-			return;
-		default:
-			return;
+	if (LINTLIB)
+	{
+		switch (od->od_class)
+		{
+			case EFDF:
+				od->od_class = LFDF;
+				break;
+			case EVDF:
+				od->od_class = LVDF;
+				break;
+			case SFDF:
+				/* free the 'struct argument's */
+				while (od->od_arg)
+				{
+					struct argument* tmp = od->od_arg;
+					od->od_arg = od->od_arg->next;
+					free_argument(tmp);
+				}
+				return;
+			default:
+				return;
 		}
 	}
 	printf("%s:%d:%c", od->od_name, od->od_statnr, od->od_class);
-	switch (od->od_class) {
-	case LFDF:
-	case PFDF:
-	case EFDF:
-	case SFDF:
-		if (f_VARARGSn != -1) {
-			printf(":%d", -1 - f_VARARGSn);
-			outargs(od->od_arg, f_VARARGSn);
-		}
-		else {
+	switch (od->od_class)
+	{
+		case LFDF:
+		case PFDF:
+		case EFDF:
+		case SFDF:
+			if (f_VARARGSn != -1)
+			{
+				printf(":%d", -1 - f_VARARGSn);
+				outargs(od->od_arg, f_VARARGSn);
+			}
+			else
+			{
+				printf(":%d", od->od_nrargs);
+				outargs(od->od_arg, od->od_nrargs);
+			}
+			od->od_arg = 0;
+			printf(":%d", od->od_valreturned);
+			break;
+		case FC:
 			printf(":%d", od->od_nrargs);
 			outargs(od->od_arg, od->od_nrargs);
-		}
-		od->od_arg = 0;
-		printf(":%d", od->od_valreturned);
-		break;
-	case FC:
-		printf(":%d", od->od_nrargs);
-		outargs(od->od_arg, od->od_nrargs);
-		od->od_arg = 0;
-		printf(":%d", od->od_valused);
-		break;
-	case EVDF:
-	case SVDF:
-	case LVDF:
-	case EFDC:
-	case EVDC:
-	case IFDC:
-	case VU:
-		break;
-	default:
-		NOTREACHED();
-		UNREACHABLE_CODE;
+			od->od_arg = 0;
+			printf(":%d", od->od_valused);
+			break;
+		case EVDF:
+		case SVDF:
+		case LVDF:
+		case EFDC:
+		case EVDC:
+		case IFDC:
+		case VU:
+			break;
+		default:
+			NOTREACHED();
+			UNREACHABLE_CODE;
 	}
 	printf(":");
 	outargtype(od->od_type);
 	printf(":%u:%s\n", od->od_line, od->od_file);
 }
 
-static
-outargs(arg, n)
-	struct argument *arg;
+static outargs(arg, n) struct argument* arg;
 {
-/* Output the n arguments in the argument list and remove them */
+	/* Output the n arguments in the argument list and remove them */
 
-	struct argument *tmp;
+	struct argument* tmp;
 
-	while (n--) {
+	while (n--)
+	{
 		assert(arg);
 		outarg(arg);
 		tmp = arg;
@@ -391,139 +393,138 @@ outargs(arg, n)
 		free_argument(tmp);
 	}
 	/* remove the remaining entries */
-	while (arg) {
+	while (arg)
+	{
 		tmp = arg;
 		arg = arg->next;
 		free_argument(tmp);
 	}
 }
 
-static
-outarg(arg)
-	struct argument *arg;
+static outarg(arg) struct argument* arg;
 {
 	printf(":");
-	switch (arg->ar_class) {
-	case ArgConst:
-		if (arg->CAA_VALUE >= 0) {
-			/* constant non-negative actual parameter */
-			printf("+");
-		}
-		outargtype(arg->ar_type);
-		break;
+	switch (arg->ar_class)
+	{
+		case ArgConst:
+			if (arg->CAA_VALUE >= 0)
+			{
+				/* constant non-negative actual parameter */
+				printf("+");
+			}
+			outargtype(arg->ar_type);
+			break;
 
-	case ArgString:
-		outargstring(arg);
-		break;
+		case ArgString:
+			outargstring(arg);
+			break;
 
-	case ArgFormal:
-	case ArgExpr:
-		outargtype(arg->ar_type);
-		if (arg->ar_type->tp_fund == FUNCTION) {
-			/* UGLY PATCH !!! ??? */
-			/*	function names as operands are sometimes
-				FUNCTION and sometimes POINTER to FUNCTION,
-				depending on opaque circumstances.  E.g., in
-					f(main, main);
-				the first main is PtF and the second is F.
-			*/
-			printf("*");
-		}
-		break;
+		case ArgFormal:
+		case ArgExpr:
+			outargtype(arg->ar_type);
+			if (arg->ar_type->tp_fund == FUNCTION)
+			{
+				/* UGLY PATCH !!! ??? */
+				/*	function names as operands are sometimes
+				    FUNCTION and sometimes POINTER to FUNCTION,
+				    depending on opaque circumstances.  E.g., in
+				        f(main, main);
+				    the first main is PtF and the second is F.
+				*/
+				printf("*");
+			}
+			break;
 
-	case ArgEllipsis:
-		printf(".");	/* one is enough for computers */
-		break;
+		case ArgEllipsis:
+			printf("."); /* one is enough for computers */
+			break;
 
-	default:
-		NOTREACHED();
-		UNREACHABLE_CODE;
+		default:
+			NOTREACHED();
+			UNREACHABLE_CODE;
 	}
 }
 
-static
-outargstring(arg)
-	struct argument *arg;
+static outargstring(arg) struct argument* arg;
 {
 	char buff[1000];
-	char *p;
+	char* p;
 
 	bts2str(arg->CAS_VALUE, arg->CAS_LEN, buff);
-	for (p = &buff[0]; *p; p++) {
+	for (p = &buff[0]; *p; p++)
+	{
 		if (*p == '"' || *p == ':')
 			*p = ' ';
 	}
 	printf("\"%s\"", buff);
 }
 
-static
-outargtype(tp)
-	struct type *tp;
+static outargtype(tp) struct type* tp;
 {
-	switch (tp->tp_fund) {
-	case POINTER:
-		outargtype(tp->tp_up);
-		printf("*");
-		break;
+	switch (tp->tp_fund)
+	{
+		case POINTER:
+			outargtype(tp->tp_up);
+			printf("*");
+			break;
 
-	case ARRAY:
-		outargtype(tp->tp_up);
-		printf("*");	/* compatible with [] */
-		break;
+		case ARRAY:
+			outargtype(tp->tp_up);
+			printf("*"); /* compatible with [] */
+			break;
 
-	case FUNCTION:
-		outargtype(tp->tp_up);
-		printf("()");
-		break;
+		case FUNCTION:
+			outargtype(tp->tp_up);
+			printf("()");
+			break;
 
-	case STRUCT:
-	case UNION:
-	case ENUM:
-		/* watch out for anonymous identifiers; the count field does
-		   not have to be the same for all compilation units.
-		   Remove it, so that pass 2 does not see it. The only
-		   problem with this is that pass2 will not see a difference
-		   between two non-tagged types declared on the same line.
-		*/
-		printf("%s ", symbol2str(tp->tp_fund));
-		if (is_anon_idf(tp->tp_idf)) {
-			/* skip the #<num>, replace it by '#anonymous id' */
-			printf("#anonymous id%s",
-				strchr(tp->tp_idf->id_text, ' ')
-			);
-		}
-		else {
-			printf(tp->tp_idf->id_text);
-		}
-		break;
+		case STRUCT:
+		case UNION:
+		case ENUM:
+			/* watch out for anonymous identifiers; the count field does
+			   not have to be the same for all compilation units.
+			   Remove it, so that pass 2 does not see it. The only
+			   problem with this is that pass2 will not see a difference
+			   between two non-tagged types declared on the same line.
+			*/
+			printf("%s ", symbol2str(tp->tp_fund));
+			if (is_anon_idf(tp->tp_idf))
+			{
+				/* skip the #<num>, replace it by '#anonymous id' */
+				printf("#anonymous id%s", strchr(tp->tp_idf->id_text, ' '));
+			}
+			else
+			{
+				printf(tp->tp_idf->id_text);
+			}
+			break;
 
-	case CHAR:
-	case INT:
-	case SHORT:
-	case LONG:
-	case ULONG:
-	case FLOAT:
-	case DOUBLE:
-	case LNGDBL:
-	case VOID:
-	case ERRONEOUS:
-		if (tp->tp_unsigned) {
-			printf("unsigned ");
-		}
-		printf("%s", symbol2str(tp->tp_fund));
-		break;
-	default:
-		NOTREACHED();
-		UNREACHABLE_CODE;
+		case CHAR:
+		case INT:
+		case SHORT:
+		case LONG:
+		case ULONG:
+		case FLOAT:
+		case DOUBLE:
+		case LNGDBL:
+		case VOID:
+		case ERRONEOUS:
+			if (tp->tp_unsigned)
+			{
+				printf("unsigned ");
+			}
+			printf("%s", symbol2str(tp->tp_fund));
+			break;
+		default:
+			NOTREACHED();
+			UNREACHABLE_CODE;
 	}
 }
 
-#ifdef	IMPLICIT
-static
-implicit_func_decl(idf, file, line)
-	struct idf *idf;
-	char *file;
-	unsigned int line;
+#ifdef IMPLICIT
+static implicit_func_decl(idf, file, line) struct idf* idf;
+char* file;
+unsigned int line;
 {
 	struct outdef od;
 
@@ -536,21 +537,21 @@ implicit_func_decl(idf, file, line)
 	output_def(&od);
 	/* The other fields are not used for this class. */
 }
-#endif	/* IMPLICIT */
+#endif /* IMPLICIT */
 
-fill_outcall(ex, used)
-	struct expr *ex;
-	int used;
+fill_outcall(ex, used) struct expr* ex;
+int used;
 {
-	struct idf *idf = ex->OP_LEFT->VL_IDF;
-	struct def *def = idf->id_def;
+	struct idf* idf = ex->OP_LEFT->VL_IDF;
+	struct def* def = idf->id_def;
 
-#ifdef	IMPLICIT
-	if (def->df_sc == IMPLICIT && !idf->id_def->df_used) {
+#ifdef IMPLICIT
+	if (def->df_sc == IMPLICIT && !idf->id_def->df_used)
+	{
 		/* IFDC, first time */
 		implicit_func_decl(idf, ex->ex_file, ex->ex_line);
 	}
-#endif	/* IMPLICIT */
+#endif /* IMPLICIT */
 
 	OutCall.od_type = def->df_type->tp_up;
 	OutCall.od_statnr = (def->df_sc == STATIC ? stat_number : 0);
@@ -558,56 +559,59 @@ fill_outcall(ex, used)
 	OutCall.od_name = idf->id_text;
 	OutCall.od_file = ex->ex_file;
 	OutCall.od_line = ex->ex_line;
-	OutCall.od_arg = (struct argument *)0;
+	OutCall.od_arg = (struct argument*)0;
 	OutCall.od_nrargs = 0;
 
-	if ((ex = ex->OP_RIGHT) != 0) {
+	if ((ex = ex->OP_RIGHT) != 0)
+	{
 		/* function call with arguments: */
 		/* store types of argument expressions in 'struct argument's */
-		while (ex->ex_class == Oper && ex->OP_OPER == PARCOMMA) {
+		while (ex->ex_class == Oper && ex->OP_OPER == PARCOMMA)
+		{
 			add_expr_arg(ex->OP_RIGHT);
 			ex = ex->OP_LEFT;
 		}
 		add_expr_arg(ex);
 	}
-	OutCall.od_valused = used;	/* USED, IGNORED or VOIDED */
+	OutCall.od_valused = used; /* USED, IGNORED or VOIDED */
 }
 
-static
-add_expr_arg(e)
-	struct expr *e;
+static add_expr_arg(e) struct expr* e;
 {
-	struct argument *arg;
+	struct argument* arg;
 
 	arg = new_argument();
 	arg->ar_type = e->ex_type;
-	if (is_cp_cst(e)) {
+	if (is_cp_cst(e))
+	{
 		arg->ar_class = ArgConst;
 		arg->CAA_VALUE = e->VL_VALUE;
 	}
-	else if (	e->ex_type == string_type
-		&&	e->ex_class == Value
-		&&	e->VL_CLASS == Label
-		) {
+	else if (e->ex_type == string_type && e->ex_class == Value && e->VL_CLASS == Label)
+	{
 		/* it may be a string; let's look it up */
-		struct string_cst *sc = str_list;
+		struct string_cst* sc = str_list;
 
-		while (sc) {
+		while (sc)
+		{
 			if (sc->sc_dlb == e->VL_LBL)
 				break;
 			sc = sc->next;
 		}
-		if (sc) {
+		if (sc)
+		{
 			/* it was a string */
 			arg->ar_class = ArgString;
 			arg->CAS_VALUE = sc->sc_value;
-			arg->CAS_LEN = sc->sc_len - 1;	/* included the \0 */
+			arg->CAS_LEN = sc->sc_len - 1; /* included the \0 */
 		}
-		else {
+		else
+		{
 			arg->ar_class = ArgExpr;
 		}
 	}
-	else {
+	else
+	{
 		arg->ar_class = ArgExpr;
 	}
 	arg->next = OutCall.od_arg;
@@ -615,4 +619,4 @@ add_expr_arg(e)
 	OutCall.od_nrargs++;
 }
 
-#endif	/* LINT */
+#endif /* LINT */

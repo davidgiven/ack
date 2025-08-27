@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "tables.h"
 #ifdef USE_TES
 #include "types.h"
@@ -11,7 +12,7 @@ void add_label(int num, int height, int flth)
 	label_p lbl = (label_p)0;
 
 	if (height <= 0) return;
-	if (flth != TRUE && flth != FALSE)
+	if (flth != true && flth != false)
 	    fatal("incorrect value for fallthrough");
 
 	lbl = (label_p) myalloc(sizeof(struct label));

@@ -7,7 +7,7 @@ bool anal_params(call_p c); /*
                              * See which parameters of the call
                              * may be expanded in line.
                              * If the formals and actuals do not
-                             * match, return FALSE
+                             * match, return false
                              */
 void assign_ratio(call_p c); /*
                               * Assigna ratio number to the call,

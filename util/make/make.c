@@ -79,9 +79,9 @@ static void docmds1(struct name *np, struct line *lp)
         while ((*q == '@') || (*q == '-'))
         {
             if (*q == '@')     /*  Specific silent  */
-                ssilent = TRUE;
+                ssilent = true;
             else           /*  Specific ignore  */
-                signore = TRUE;
+                signore = true;
             q++;           /*  Not part of the command  */
         }
 

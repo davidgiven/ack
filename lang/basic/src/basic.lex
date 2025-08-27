@@ -238,7 +238,7 @@ int getinputline(void)
 	/* get next input line */
 
 	if ( our_fgets(inputline,MAXLINELENGTH,yyin) == 0)
-		return(FALSE);
+		return(false);
 	yylineno ++;
 	if ( strchr(inputline,'\n') == 0)
 		error("source line too long");
@@ -246,7 +246,7 @@ int getinputline(void)
 	if ( listing)
 		fprintf(stderr, inputline);
 	cptr= inputline;
-	return(TRUE);
+	return(true);
 }
 
 

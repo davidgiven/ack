@@ -50,11 +50,11 @@ bool Cis_elem(Celem_t x, cset s)
 	mask = (1 << MODWL(x - 1));
 	if ((s->v_bits[n] & mask) == 0)
 	{
-		return FALSE;
+		return false;
 	}
 	else
 	{
-		return TRUE;
+		return true;
 	}
 }
 
@@ -176,15 +176,15 @@ bool Cis_subset(cset s1, cset s2)
 
 	assert(s1->v_size == s2->v_size);
 	if (s1->v_size == 0)
-		return TRUE;
+		return true;
 	for (i = 0; i <= DIVWL(s1->v_size - 1); i++)
 	{
 		if ((s1->v_bits[i] & ~(s2->v_bits[i])) != 0)
 		{
-			return FALSE;
+			return false;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 void Cclear_set(cset* s_p)
@@ -234,9 +234,9 @@ bool Cequal(cset s1, cset s2)
 	for (i = 0; i <= DIVWL(s1->v_size - 1); i++)
 	{
 		if (s1->v_bits[i] != s2->v_bits[i])
-			return FALSE;
+			return false;
 	}
-	return TRUE;
+	return true;
 }
 
 short Cnrelems(cset s)

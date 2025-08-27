@@ -5,6 +5,7 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -89,7 +90,7 @@ void garbage_collect(void) {
 		return;
 	qsort((char *)stab,nstab,sizeof (char *),compar);
 	for (i=0;i<nstab;i++)
-		used[i]= FALSE;
+		used[i]= false;
 	for (emlp=emlines;emlp<emlines+nemlines;emlp++)
 		chkstr(emlp->em_soper,used);
 	for (tp= fakestack;tp<&fakestack[stackheight];tp++) {

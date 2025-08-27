@@ -28,7 +28,7 @@ offset off_set(line_p lnp)
 		case OPOFFSET:
 			return OFFSET(lnp);
 		default:
-			assert(FALSE);
+			assert(false);
 	}
 	UNREACHABLE_CODE;
 }
@@ -114,9 +114,9 @@ bool dom(bblock_p b1, bblock_p b2)
 		 * of b2 in the immediate dominator tree.
 		 */
 		if (b == b1)
-			return TRUE;
+			return true;
 	}
-	return FALSE;
+	return false;
 }
 
 bblock_p common_dom(bblock_p a, bblock_p b)

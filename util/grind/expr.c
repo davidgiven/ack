@@ -4,8 +4,8 @@
    routines:
    - int eval_cond(p_tree p)
 	This routine evaluates the conditional expression indicated by p
-	and returns 1 if it evaluates to TRUE, or 0 if it could not be
-	evaluated for some reason or if it evalutes to FALSE.
+	and returns 1 if it evaluates to true, or 0 if it could not be
+	evaluated for some reason or if it evalutes to false.
 	If the expression cannot be evaluated, an error message is given.
    - int eval_desig(p_tree p, t_addr *paddr, long **psize, p_type *ptp)
 	This routine evaluates the expression indicated by p, which should

@@ -47,6 +47,7 @@ HOSTCFLAGS = $(CFLAGS)
 ACKCFLAGS = -O
 
 LDFLAGS ?= -g
+ACKLDFLAGS =
 
 # Various commands.
 

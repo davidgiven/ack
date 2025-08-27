@@ -16,7 +16,7 @@ int plus(const char *, const char *, char *);
 L1, L2, L3, L4, L5  { not_using_sp(VAL) };
 RNZ                 { strcmp(VAL, "r0") };  /* not r0 */
 UP                  { positive(VAL) };
-X, Y, Z             { TRUE };
+X, Y, Z             { true };
 
 %%;
 

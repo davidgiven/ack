@@ -6,6 +6,7 @@
  */
 #include "assert.h"
 #include <stdio.h>
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -83,7 +84,7 @@ void gencode(char *code)
 		assert(tp->t_token != -1);
 		switch(tokens[tp->t_token].t_type[fldno-1]) {
 		default:
-			assert(FALSE);
+			assert(false);
 		case EV_INT:
 			fprintf(codefile,WRD_FMT,tp->t_att[fldno-1].aw);
 			break;
@@ -136,7 +137,7 @@ void genexpr(int nodeno)
 
 	result= compute(&enodes[nodeno]);
 	switch(result.e_typ) {
-	default: assert(FALSE);
+	default: assert(false);
 	case EV_INT:
 		fprintf(codefile,WRD_FMT,result.e_v.e_con);
 		break;
@@ -170,7 +171,7 @@ void prtoken(token_p tp)
 			assert(c>0 && c<=TOKENSIZE);
 			switch(tdp->t_type[c-1]) {
 			default:
-				assert(FALSE);
+				assert(false);
 			case EV_INT:
 				fprintf(codefile,WRD_FMT,tp->t_att[c-1].aw);
 				break;

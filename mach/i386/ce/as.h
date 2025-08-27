@@ -27,9 +27,6 @@
 #define ADDR( op)	( op->type & IS_ADDR)
 #define EADDR( op)	( op->type & ( IS_ADDR | IS_MEM | IS_REG))
 
-#define TRUE		1
-#define FALSE		0
-
 struct t_operand {
 	unsigned type;
 	int reg;

@@ -45,10 +45,10 @@ static bool is_reg(offset off, int s)
 		arg = ((line_p)Lelem(i))->l_a.la_arg->a_next;
 		if (arg->a_a.a_offset == off && arg->a_next->a_a.a_offset == s)
 		{
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 void rem_actuals(actual_p acts)
@@ -130,7 +130,7 @@ bool par_overlap(offset off1, int t1, offset off2, int t2)
 		}
 		else
 		{
-			return TRUE;
+			return true;
 		}
 	}
 }

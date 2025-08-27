@@ -7,9 +7,6 @@
 #ifndef __CONST_H_INCLUDED__
 #define __CONST_H_INCLUDED__
 
-#define FALSE 0
-#define TRUE 1
-
 #define WIDTH 8 /* Number of bits in a byte.	*/
 #define BYTEMASK 0xFF /* Mask to get low order byte.	*/
 

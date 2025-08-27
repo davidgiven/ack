@@ -1,4 +1,4 @@
-from build.ab import Rule, Target
+from build.ab import Rule, Target, G
 import os
 import subprocess
 
@@ -31,8 +31,8 @@ class _PkgConfig:
         return self.package_properties[p]
 
 
-TargetPkgConfig = _PkgConfig(os.getenv("PKG_CONFIG"))
-HostPkgConfig = _PkgConfig(os.getenv("HOST_PKG_CONFIG"))
+TargetPkgConfig = _PkgConfig(G.PKG_CONFIG)
+HostPkgConfig = _PkgConfig(G.HOST_PKG_CONFIG)
 
 
 def _package(self, name, package, fallback, pkgconfig):
@@ -49,9 +49,7 @@ def _package(self, name, package, fallback, pkgconfig):
         self.traits.update({"clibrary", "cxxlibrary"})
         return
 
-    assert (
-        fallback
-    ), f"Required package '{package}' not installed when materialising target '$[name]'"
+    assert fallback, f"Required package '{package}' not installed"
 
     if "cheader_deps" in fallback.args:
         self.args["cheader_deps"] = fallback.args["cheader_deps"]

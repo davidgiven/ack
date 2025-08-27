@@ -6,6 +6,7 @@ static char rcsid[] = "$Id$";
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h> /* strcmp */
 #include "param.h"
 #include "tables.h"
@@ -38,7 +39,7 @@ int match(token_p tp, set_p tep, int optexp) {
 	if (tp->t_token == -1) {        /* register frame */
 		bitno = tp->t_att[0].ar;
 		if (tep->set_val[bitno>>4]&(1<<(bitno&017)))
-			if (tep->set_val[0]&1 || getrefcount(bitno, FALSE)<=1)
+			if (tep->set_val[0]&1 || getrefcount(bitno, false)<=1)
 				goto oklabel;
 		return(0);
 	} else {                /* token frame */
@@ -75,7 +76,7 @@ void instance(int instno, token_p token) {
 	inp= &tokeninstances[instno];
 	switch (inp->in_which) {
 	default:
-		assert(FALSE);
+		assert(false);
 	case IN_COPY:
 		if (inp->in_info[0] == 0)
 			if (curtoken) tp = curtoken;
@@ -90,7 +91,7 @@ void instance(int instno, token_p token) {
 			rp = &machregs[tp->t_att[0].ar];
 			token->t_att[0].ar=rp->r_members[inp->in_info[1]-1];
 #else
-			assert(FALSE);
+			assert(false);
 #endif
 		}
 		return;
@@ -167,7 +168,7 @@ static void cinstance(int instno, token_p token, token_p tp, int regno) {
 	inp= &tokeninstances[instno];
 	switch (inp->in_which) {
 	default:
-		assert(FALSE);
+		assert(false);
 	case IN_COPY:
 		assert(inp->in_info[0] <= 1);
 		if (inp->in_info[1]==0) {
@@ -179,7 +180,7 @@ static void cinstance(int instno, token_p token, token_p tp, int regno) {
 			rp = &machregs[tp->t_att[0].ar];
 			token->t_att[0].ar=rp->r_members[inp->in_info[1]-1];
 #else
-			assert(FALSE);
+			assert(false);
 #endif
 		}
 		return;
@@ -401,7 +402,7 @@ static int instsize(int tinstno, token_p tp) {
 	inp = &tokeninstances[tinstno];
 	switch (inp->in_which) {
 	default:
-		assert(FALSE);
+		assert(false);
 	case IN_COPY:
 		assert(inp->in_info[0]<=1);
 #if MAXMEMBERS!=0
@@ -418,7 +419,7 @@ static int instsize(int tinstno, token_p tp) {
 	case IN_RIDENT:
 		return(machregs[inp->in_info[0]].r_size);
 	case IN_ALLOC:
-		assert(FALSE);  /* cannot occur in splitting coercion */
+		assert(false);  /* cannot occur in splitting coercion */
 	case IN_DESCR:
 	case IN_S_DESCR:
 	case IN_D_DESCR:
@@ -432,12 +433,12 @@ void tref(token_p tp, int amount) {
 	byte *tdpb;
 
 	if (tp->t_token==-1)
-		chrefcount(tp->t_att[0].ar,amount,FALSE);
+		chrefcount(tp->t_att[0].ar,amount,false);
 	else {
 		tdpb= &tokens[tp->t_token].t_type[0];
 		for(i=0;i<TOKENSIZE;i++)
 			if (*tdpb++==EV_REG)
-				chrefcount(tp->t_att[i].ar,amount,FALSE);
+				chrefcount(tp->t_att[i].ar,amount,false);
 	}
 }
 
@@ -574,7 +575,7 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 				if (cp->c1_prop>=0) {
 					for (rpp=reglist[cp->c1_prop];
 					       (rp = *rpp)!=0 &&
-					       getrefcount((int)(rp-machregs), TRUE)!=0;
+					       getrefcount((int)(rp-machregs), true)!=0;
 						  rpp++)
 						;
 					if (rp==0)
@@ -594,7 +595,7 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 					areg[i] = allreg[i];
 				if (cp->c1_prop>=0) {
 					nallreg=1; allreg[0] = rp-machregs;
-					chrefcount(allreg[0],1,FALSE);
+					chrefcount(allreg[0],1,false);
 				} else 
 					nallreg=0;
 				totalcost+= codegen(&coderules[cp->c1_codep],ply,toplevel,MAXINT,0);
@@ -614,7 +615,7 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 				goto contin;
 			}
 		}
-		assert(FALSE);
+		assert(false);
 	contin: ;
 	}
 	return(totalcost);

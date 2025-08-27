@@ -22,9 +22,9 @@
 #include "go.h"
 #include "files.h"
 
-static bool report_flag = FALSE; /* report #optimizations found? */
+static bool report_flag = false; /* report #optimizations found? */
 #ifdef DEBUG
-static bool core_flag = FALSE; /* report core usage? */
+static bool core_flag = false; /* report core usage? */
 #endif
 
 static void mach_init(char* machfile, void (*phase_machinit)(void*))
@@ -59,7 +59,7 @@ void go(
 	short kind;
 	int i;
 	char* p;
-	bool time_opt = TRUE;
+	bool time_opt = true;
 
 	linecount = 0;
 	opterr = 0;
@@ -72,11 +72,11 @@ void go(
 		switch (opt)
 		{
 			case 'S':
-				time_opt = FALSE;
+				time_opt = false;
 				break;
 
 			case 'T':
-				time_opt = TRUE;
+				time_opt = true;
 				break;
 
 			case 'M':
@@ -85,16 +85,16 @@ void go(
 
 			case 'C':
 #ifdef DEBUG
-				core_flag = TRUE;
+				core_flag = true;
 #endif
 				break;
 
 			case 'Q':
-				report_flag = TRUE;
+				report_flag = true;
 				break;
 
 			case 'V':
-				verbose_flag = TRUE;
+				verbose_flag = true;
 				break;
 
 			case '?':
@@ -113,7 +113,7 @@ void go(
 	f2 = openfile(files->lname_out, "wb");
 	gf2 = openfile(files->bname_out, "wb");
 	mesregs = Lempty_set();
-	while (getunit(gf, f, &kind, &g, &l, &curproc, TRUE))
+	while (getunit(gf, f, &kind, &g, &l, &curproc, true))
 	{
 		/* Read the control flow graph and EM text of
 		 * one procedure and optimize it.
@@ -143,7 +143,7 @@ void go(
 	putdtable(fdblock, f);
 	/* fclose(f); done by putdtable */
 	f = openfile(files->pname_out, "wb");
-	putptable(fproc, f, TRUE);
+	putptable(fproc, f, true);
 	/* fclose(f); done by putptable */
 	core_usage();
 }

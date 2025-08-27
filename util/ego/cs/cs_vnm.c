@@ -175,7 +175,7 @@ static void fiddle_stack(line_p lnp)
 	switch (INSTR(lnp))
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case op_lor:
 			dummy.tk_vn = newvalnum();
@@ -293,7 +293,7 @@ static void hopeless(int instr)
 	switch (instr)
 	{
 		default:
-			assert(FALSE);
+			assert(false);
 			break;
 		case op_mon:
 		case op_str:
@@ -385,7 +385,7 @@ void vnm(bblock_p bp)
 				fiddle_stack(lnp);
 				break;
 			default:
-				assert(FALSE);
+				assert(false);
 				break;
 		}
 	}

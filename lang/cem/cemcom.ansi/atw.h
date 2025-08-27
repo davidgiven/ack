@@ -7,4 +7,4 @@
 
 #include "sizes.h"
 
-#define	ATW(arg)	((((arg) + ((int)word_size - 1)) / word_size) * word_size)
+#define ATW(arg) ((((arg) + ((int)word_size - 1)) / word_size) * word_size)

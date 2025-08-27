@@ -262,7 +262,7 @@ static line_p arglist(int n)
 
 	lnp = newline(OPLIST);
 	app = &lnp->l_a.la_arg;
-	moretocome = TRUE;
+	moretocome = true;
 	do
 	{
 		switch (table2())
@@ -321,10 +321,10 @@ static line_p arglist(int n)
 				app = &ap->a_next;
 				break;
 			case sp_cend:
-				moretocome = FALSE;
+				moretocome = false;
 		}
 		if (n && (--n) == 0)
-			moretocome = FALSE;
+			moretocome = false;
 	} while (moretocome);
 	return (lnp);
 }
@@ -405,7 +405,7 @@ static int inpseudo(short n)
 					draininput();
 					exit(-1);
 				case ms_opt:
-					nflag = TRUE;
+					nflag = true;
 					break;
 				case ms_emx:
 					wordsize = aoff(lnp->l_a.la_arg, 1);

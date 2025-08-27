@@ -14,9 +14,6 @@
 #define		LABEL		6
 #define		L_ILB		7
 
-#define		TRUE		1
-#define		FALSE		0
-
 #define		PC_REL		1
 
 struct t_operand {

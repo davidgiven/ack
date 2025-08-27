@@ -5,6 +5,7 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -40,7 +41,7 @@ struct perm *tuples(rl_p *regls, int nregneeded) {
 
 	for (i=NREGS, rp = &machregs[NREGS-1];--i>=0;rp--) {
 		regclass[i] = class++;
-		if (getrefcount(i, FALSE) == 0) {
+		if (getrefcount(i, false) == 0) {
 			for (j=NREGS;--j>i;) {
 				if (eqregclass(i,j) &&
 				    eqtoken(&rp->r_contents,

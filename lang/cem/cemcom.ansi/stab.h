@@ -1,20 +1,19 @@
 /*  Copyright (c) 2019 ACK Project.
- *  See the copyright notice in the ACK home directory, 
+ *  See the copyright notice in the ACK home directory,
  *  in the file "Copyright".
  *
  *  Created on: 2019-02-07
- *  
+ *
  */
 #ifndef STAB_H_
 #define STAB_H_
-
 
 struct def;
 struct type;
 struct tag;
 
-void stb_tag(struct tag *tg, char *str);
-void stb_typedef(struct type *tp, char *str);
-void stb_string(struct def *df, int kind, char* str);
+void stb_tag(struct tag* tg, char* str);
+void stb_typedef(struct type* tp, char* str);
+void stb_string(struct def* df, int kind, char* str);
 
 #endif /* STAB_H_ */

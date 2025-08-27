@@ -6,6 +6,7 @@ static char rcsid[] = "$Id$";
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"
@@ -96,7 +97,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 		switch ((*codep++) & 037)
 		{
 			default:
-				assert(FALSE);
+				assert(false);
 				UNREACHABLE_CODE;
 #ifdef TABLEDEBUG
 			case DO_DLINE:
@@ -243,7 +244,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 							assert(mincost <= INFINITY);
 							for (i = 0; i < npos; i++)
 							{
-								t = codegen(&coderules[pos[i]], ply, FALSE,
+								t = codegen(&coderules[pos[i]], ply, false,
 								    costlimit < MAXINT ? mincost : MAXINT, 0);
 #ifndef NDEBUG
 								if (Debug)
@@ -486,7 +487,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 #endif
 					ntup = tup->p_next;
 					for (i = 0, t = 0; i < nregneeded && t < mincost; i++)
-						t += docoerc(regtp[i], regcp[i], ply, FALSE, tup->p_rar[i]);
+						t += docoerc(regtp[i], regcp[i], ply, false, tup->p_rar[i]);
 #ifndef NDEBUG
 					if (Debug > 1)
 						fprintf(stderr, "cost after coercions: %u\n", t);
@@ -497,7 +498,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						if (Debug > 2)
 							fprintf(stderr, "Continuing match after coercions\n");
 #endif
-						t += codegen(codep, ply, FALSE, mincost < MAXINT ? mincost - t : MAXINT, 0);
+						t += codegen(codep, ply, false, mincost < MAXINT ? mincost - t : MAXINT, 0);
 					}
 					if (t < mincost && tokpatlen <= stackheight)
 					{
@@ -653,13 +654,13 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				getint(tinstno, codep);
 				instance(tinstno, &token);
 				if (token.t_token == -1)
-					chrefcount(token.t_att[0].ar, -1, TRUE);
+					chrefcount(token.t_att[0].ar, -1, true);
 				else
 				{
 					tdp = &tokens[token.t_token];
 					for (i = 0; i < TOKENSIZE; i++)
 						if (tdp->t_type[i] == EV_REG)
-							chrefcount(token.t_att[i].ar, -1, TRUE);
+							chrefcount(token.t_att[i].ar, -1, true);
 				}
 				break;
 			}
@@ -707,7 +708,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					{
 						npos = exactmatch = 0;
 						for (rpp = reglist[propno]; (rp = *rpp) != NULL; rpp++)
-							if (getrefcount((int)(rp - machregs), FALSE) == 0)
+							if (getrefcount((int)(rp - machregs), false) == 0)
 							{
 								pos[npos++] = rp - machregs;
 								if (eqtoken(&rp->r_contents, &token))
@@ -792,18 +793,18 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 						mincost = costlimit - totalcost + 1;
 						for (j = 0; j < npos2; j++)
 						{
-							chrefcount(pos2[j], 1, FALSE);
+							chrefcount(pos2[j], 1, false);
 							token2.t_att[0].ar = pos2[j];
 							allreg[nallreg++] = pos2[j];
 							if (token.t_token != 0)
-								t = move(&token, &token2, ply, FALSE, mincost);
+								t = move(&token, &token2, ply, false, mincost);
 							else
 							{
 								t = 0;
 								erasereg(pos2[j]);
 							}
 							if (t < mincost)
-								t += codegen(codep, ply, FALSE, mincost < MAXINT ? mincost - t : MAXINT, 0);
+								t += codegen(codep, ply, false, mincost < MAXINT ? mincost - t : MAXINT, 0);
 							if (t < mincost)
 							{
 								mincost = t;
@@ -819,11 +820,11 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 				else
 				{
 					decision = forced;
-					if (getrefcount(decision, FALSE) != 0)
+					if (getrefcount(decision, false) != 0)
 						BROKE();
 					token2.t_token = -1;
 				}
-				chrefcount(decision, 1, FALSE);
+				chrefcount(decision, 1, false);
 				token2.t_att[0].ar = decision;
 				if (token.t_token != 0)
 				{
@@ -956,7 +957,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					fakestack[stackheight++] = reptoken[i];
 				}
 				for (i = 0; i < nallreg; i++)
-					chrefcount(allreg[i], -1, FALSE);
+					chrefcount(allreg[i], -1, false);
 				break;
 			}
 			case DO_EMREPLACE:
@@ -990,7 +991,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					switch (result[i].e_typ)
 					{
 						default:
-							assert(FALSE);
+							assert(false);
 						case 0:
 							emp[i].em_optyp = OPNO;
 							emp[i].em_soper = 0;

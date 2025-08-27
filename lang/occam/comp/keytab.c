@@ -27,7 +27,7 @@ KTAB keytab[] = {
 	{ PLACED,	"PLACED"   }, { PORT,		"PORT"	   },
 	{ PRI,		"PRI"	   }, { PROC,		"PROC"	   },
 	{ SEQ,		"SEQ"	   }, { SKIP,		"SKIP"	   },
-	{ TABLE,	"TABLE"	   }, { TRUE,		"TRUE"	   },
+	{ TABLE,	"TABLE"	   }, { true,		"true"	   },
 	{ VALUE,	"VALUE"	   }, { VAR,		"VAR"	   },
 	{ WAIT,		"WAIT"	   }, { WHILE,		"WHILE"	   },
 };

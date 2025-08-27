@@ -5,27 +5,29 @@
 /* $Id$ */
 /*	D E C L A R A T I O N   S P E C I F I E R   C H E C K I N G	*/
 
-#include	<assert.h>
-#include	"decspecs.h"
-#include	"Lpars.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"type.h"
-#include	"level.h"
-#include	"def.h"
-#include    "error.h"
+#include <stddef.h>
+#include <stdbool.h>
+#include <assert.h>
+#include "decspecs.h"
+#include "Lpars.h"
+#include "arith.h"
+#include "LLlex.h"
+#include "type.h"
+#include "level.h"
+#include "def.h"
+#include "error.h"
 
 extern char options[];
 extern int level;
 
 struct decspecs null_decspecs;
 
-void do_decspecs(struct decspecs *ds)
+void do_decspecs(struct decspecs* ds)
 {
 	/*	The provisional decspecs ds as obtained from the program
 	 is turned into a legal consistent decspecs.
 	 */
-	struct type *tp = ds->ds_type;
+	struct type* tp = ds->ds_type;
 
 	assert(level != L_FORMAL1);
 
@@ -47,7 +49,7 @@ void do_decspecs(struct decspecs *ds)
 	/*	Since type qualifiers may be associated with types by means
 	 of typedefs, we have to perform same basic tests down here.
 	 */
-	if (tp != (struct type *) 0)
+	if (tp != (struct type*)0)
 	{
 		if ((ds->ds_typequal & TQ_VOLATILE) && (tp->tp_typequal & TQ_VOLATILE))
 			error("indirect repeated type qualifier");
@@ -95,7 +97,8 @@ void do_decspecs(struct decspecs *ds)
 		}
 		else
 		{
-			SIZE_ERROR: error("%s with illegal type", symbol2str(ds->ds_size));
+		SIZE_ERROR:
+			error("%s with illegal type", symbol2str(ds->ds_size));
 		}
 		ds->ds_notypegiven = 0;
 	}
@@ -137,8 +140,8 @@ void do_decspecs(struct decspecs *ds)
 		}
 		else
 		{
-			SIGN_ERROR: error("%s with illegal type",
-					symbol2str(ds->ds_unsigned));
+		SIGN_ERROR:
+			error("%s with illegal type", symbol2str(ds->ds_unsigned));
 		}
 		ds->ds_notypegiven = 0;
 	}
@@ -151,9 +154,9 @@ void do_decspecs(struct decspecs *ds)
  In case of a complex type the top of the type list will be
  replaced by a qualified version.
  */
-struct type *qualifier_type(struct type *tp, int typequal)
+struct type* qualifier_type(struct type* tp, int typequal)
 {
-	struct type *dtp = tp;
+	struct type* dtp = tp;
 	int fund = tp->tp_fund;
 
 	while (dtp && dtp->tp_typequal != typequal)
@@ -174,32 +177,32 @@ struct type *qualifier_type(struct type *tp, int typequal)
 #endif
 		switch (fund)
 		{
-		case ARRAY:
-			if (typequal)
-			{
-				tp->tp_up = qualifier_type(tp->tp_up, typequal);
-				dtp->tp_typequal = typequal = 0;
-			}
-			goto nottagged;
-		case FIELD:
-			dtp->tp_field = tp->tp_field;
-			/* fallthrough */
-		case POINTER:
-		case FUNCTION: /* dont't assign tp_proto */
-			nottagged: dtp->tp_up = tp->tp_up;
-			break;
-		case STRUCT:
-		case UNION:
-		case ENUM:
-			dtp->tp_idf = tp->tp_idf;
-			dtp->tp_sdef = tp->tp_sdef;
-			break;
-		default:
-			break;
+			case ARRAY:
+				if (typequal)
+				{
+					tp->tp_up = qualifier_type(tp->tp_up, typequal);
+					dtp->tp_typequal = typequal = 0;
+				}
+				goto nottagged;
+			case FIELD:
+				dtp->tp_field = tp->tp_field;
+				/* fallthrough */
+			case POINTER:
+			case FUNCTION: /* dont't assign tp_proto */
+			nottagged:
+				dtp->tp_up = tp->tp_up;
+				break;
+			case STRUCT:
+			case UNION:
+			case ENUM:
+				dtp->tp_idf = tp->tp_idf;
+				dtp->tp_sdef = tp->tp_sdef;
+				break;
+			default:
+				break;
 		}
 		dtp->next = tp->next; /* don't know head or tail */
 		tp->next = dtp;
 	}
 	return (dtp);
 }
-

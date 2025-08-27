@@ -5,13 +5,14 @@
 /* $Id$ */
 /* PREPROCESSOR: INPUT SKIP FUNCTIONS */
 
+#include <stddef.h>
+#include <stdbool.h>
 #include "parameters.h"
 #include "arith.h"
 #include "LLlex.h"
 #include "class.h"
 #include "input.h"
 #include "skip.h"
-
 
 int SkipToNewLine(void)
 {
