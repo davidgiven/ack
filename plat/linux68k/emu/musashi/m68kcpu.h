@@ -41,6 +41,7 @@ extern "C" {
 
 #include <limits.h>
 
+#include <stdbool.h>
 #include <setjmp.h>
 
 /* ======================================================================== */
