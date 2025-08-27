@@ -70,7 +70,7 @@ define newline
 endef
 
 define check_for_command
-  $(shell command -v $1 >/dev/null || (echo "Required command '$1' missing" >/dev/stderr && kill $$PPID))
+  $(shell command -v $1 >/dev/null || (echo "Required command '$1' missing" >&2 && kill $$PPID))
 endef
 
 $(call check_for_command,ninja)
@@ -88,8 +88,8 @@ ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS
 $(shell mkdir -p $(OBJ))
 $(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
 $(shell touch $(OBJ)/vars.txt)
-#$(shell diff -u $(OBJ)/vars.txt $(OBJ)/newvars.txt > /dev/stderr)
-$(shell cmp -s $(OBJ)/newvars.txt $(OBJ)/vars.txt || (rm -f $(OBJ)/build.ninja && echo "Environment changed --- regenerating" > /dev/stderr))
+#$(shell diff -u $(OBJ)/vars.txt $(OBJ)/newvars.txt >&2)
+$(shell cmp -s $(OBJ)/newvars.txt $(OBJ)/vars.txt || (rm -f $(OBJ)/build.ninja && echo "Environment changed --- regenerating" >&2))
 $(shell mv $(OBJ)/newvars.txt $(OBJ)/vars.txt)
 
 .PHONY: update-ab
