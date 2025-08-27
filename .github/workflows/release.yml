@@ -32,6 +32,7 @@ jobs:
           mingw-w64-ucrt-x86_64-python
           zip
           ninja
+          diffutils
 
     - uses: actions/checkout@v3
 
