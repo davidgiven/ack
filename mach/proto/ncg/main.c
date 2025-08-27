@@ -3,6 +3,7 @@ static char rcsid[] = "$Id$";
 #endif
 
 #include <stdlib.h> /* atoi */
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"

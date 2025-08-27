@@ -6,6 +6,7 @@
  */
 #include "assert.h"
 #include <stdio.h>
+#include <stdbool.h>
 #include "param.h"
 #include "tables.h"
 #include "types.h"

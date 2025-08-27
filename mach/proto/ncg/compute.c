@@ -5,6 +5,7 @@ static char rcsid[] = "$Id$";
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include "param.h"
 #include "tables.h"

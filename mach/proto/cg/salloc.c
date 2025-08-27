@@ -5,6 +5,7 @@
  * Author: Hans van Staveren
  */
 #include <stdlib.h>
+#include <stdbool.h>
 #include "assert.h"
 #include "param.h"
 #include "tables.h"

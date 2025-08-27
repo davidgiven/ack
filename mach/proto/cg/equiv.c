@@ -4,6 +4,7 @@
  *
  * Author: Hans van Staveren
  */
+#include <stdbool.h>
 #include "assert.h"
 #include "equiv.h"
 #include "param.h"

@@ -5,6 +5,7 @@
  * Author: Hans van Staveren
  */
 #include <stdlib.h>
+#include <stdbool.h>
 #include "tables.h"
 #include "types.h"
 #include <cg_pattern.h>

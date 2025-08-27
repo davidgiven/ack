@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "tables.h"
 #ifdef USE_TES
 #include "types.h"
