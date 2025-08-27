@@ -38,11 +38,7 @@ jobs:
 
     - name: build
       run: |
-        make LDFLAGS="-s -static"
-
-    - name: package
-      run: |
-        make ack-setup.exe
+        make LDFLAGS="-s -static" ack-setup.exe
 
     - name: date
       run: |
