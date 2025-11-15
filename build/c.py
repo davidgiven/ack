@@ -6,7 +6,7 @@ from build.ab import (
     filenamesof,
     flatten,
     simplerule,
-    emit,
+    add_commanddb_entry,
     G,
 )
 from build.utils import stripext, collectattrs
@@ -116,6 +116,7 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, toolchain, cflags
         outs=[outleaf],
         label=label,
         commands=commands,
+        add_to_commanddb=True,
         args={"cflags": cflags},
     )
 
