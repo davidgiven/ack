@@ -13,7 +13,7 @@ int tabledebug = 0; /* do not generate code for table debugging */
 int verbose = 0; /* print all statistics */
 int use_tes; /* use top element size information */
 char *c_file = "tables.c";
-char *h_file = "tables.H";
+char *h_file = "tables.h";
 char *cd_file = "code";
 
 #ifndef NORCSID
