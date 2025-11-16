@@ -38,7 +38,7 @@ jobs:
 
     - name: build
       run: |
-        make LDFLAGS="-s -static" ack-setup.exe
+        make LDFLAGS="-s -static" ack-setup.exe AB_SANDBOX=no
 
     - name: date
       run: |
