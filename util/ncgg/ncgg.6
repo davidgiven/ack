@@ -5,7 +5,7 @@
 cgg \- Code table translating utility
 .SH SYNOPSIS
 .B ~em/lib.bin/cgg
-[-c] [-d] [-v] table
+[-c] [-d] [-v] [-o outputdir] table
 .SH DESCRIPTION
 cgg translates a machine description table into the internal
 structures needed by em_cg.
@@ -25,6 +25,8 @@ bittable described under the -u option of em_ncg(6).
 Give statistics about table usage at end of program.
 Normally only the tables that have been used more than 75%
 are reported.
+.IP -o outputdir
+Write the output files to the specified directory.
 .SH FILES
 tables.h, tables.c
 .br

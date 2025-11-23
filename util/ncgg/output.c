@@ -2,27 +2,14 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* #define CODEDEBUG 	*//* print readable code */
-#ifdef CODEDEBUG
-int code_in_c=0; /* put readable code in "code" */
-int tabledebug=1; /* generate code for table debugging */
-#else
-int code_in_c = 1; /* put code in "tables.c" */
-int tabledebug = 0; /* do not generate code for table debugging */
-#endif
-int verbose = 0; /* print all statistics */
-int use_tes; /* use top element size information */
-char *c_file = "tables.c";
-char *h_file = "tables.h";
-char *cd_file = "code";
+/* #define CODEDEBUG 	*/ /* print readable code */
 
-#ifndef NORCSID
-static char rcsid[] = "$Id$";
-#endif
-
+#include <errno.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "varinfo.h"
 #include "param.h"
 #include "reg.h"
@@ -36,7 +23,21 @@ static char rcsid[] = "$Id$";
 #include "pseudo.h"
 #include "regvar.h"
 #include "extern.h"
+#include "subr.h"
 
+#ifdef CODEDEBUG
+int code_in_c=0; /* put readable code in "code" */
+int tabledebug=1; /* generate code for table debugging */
+#else
+int code_in_c = 1; /* put code in "tables.c" */
+int tabledebug = 0; /* do not generate code for table debugging */
+#endif
+int verbose = 0; /* print all statistics */
+int use_tes; /* use top element size information */
+char *c_file = "tables.c";
+char *h_file = "tables.h";
+char *cd_file = "code";
+const char* outputdir = ".";
 #define BMASK 0xFF
 #define BSHIFT 8
 
@@ -105,6 +106,12 @@ void unlfile(FILE *f, char *s)
 
 void initio(void)
 {
+	char* oldcwd = mygetcwd();
+
+	errno = 0;
+	chdir(outputdir);
+	if (errno)
+		perror("output directory inaccessible");
 
 	opnfile(&ctable, c_file);
 	opnfile(&htable, h_file);
@@ -114,7 +121,10 @@ void initio(void)
 		opnfile(&code, cd_file);
 	patbyte(0);
 	if (tabledebug)
-		lineset = (short *) myalloc(SZOFSET(MAXSOURCELINES) * sizeof(short));
+		lineset = (short*)myalloc(SZOFSET(MAXSOURCELINES) * sizeof(short));
+
+	chdir(oldcwd);
+	free(oldcwd);
 }
 
 void finishcode(void)
