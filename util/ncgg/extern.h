@@ -2,7 +2,6 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-/* $Id$ */
 
 extern int wordsize;
 extern int pointersize;
@@ -31,7 +30,7 @@ extern int allsetno;
 extern int inproc;
 extern int callproc;
 extern int procarg[];
-extern int fc1,fc2,fc3,fc4;
+extern int fc1, fc2, fc3, fc4;
 extern int maxmembers;
 extern int regclass;
 extern int maxtokensize;
@@ -48,7 +47,7 @@ extern void initemhash(void);
 /* error.c */
 extern void fatal(const char* s, ...);
 extern void error(const char* s, ...);
-extern int tabovf(char *string);
+extern int tabovf(char* string);
 
 /* output.c */
 extern void errorexit(void);
@@ -57,4 +56,11 @@ extern void finishio(void);
 extern void statistics(void);
 
 /* strlookup.c */
-extern int strlookup(char *str);
+extern int strlookup(char* str);
+
+/* Global parameters */
+extern int nerrors;
+extern int code_in_c;
+extern int tabledebug;
+extern int verbose;
+extern const char* outputdir;

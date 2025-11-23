@@ -39,9 +39,7 @@ def ncgg(self, name, srcs: Targets = [], deps: Targets = [], cflags=[]):
         ins=["util/ncgg", cpptable],
         outs=["=tables.c", "=tables.h"],
         commands=[
-            "$[ins]",
-            "mv tables.H $[dir]/tables.h",
-            "mv tables.c $[dir]/tables.c",
+            "$[ins[0]] -o $[dir] $[ins[1:]]"
         ],
         label="NCGG",
     )

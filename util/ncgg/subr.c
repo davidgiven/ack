@@ -2,6 +2,8 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include <errno.h>
+#include <unistd.h>
 #ifndef NORCSID
 static char rcsid[] = "$Id$";
 #endif
@@ -515,3 +517,20 @@ int vilength(struct varinfo *vip)
 	}
 	return (l);
 }
+
+char* mygetcwd(void)
+{
+	size_t size = 100;
+
+	while (1)
+	{
+		char* buffer = malloc(size);
+		if (getcwd(buffer, size) == buffer)
+			return buffer;
+		free(buffer);
+		if (errno != ERANGE)
+			return NULL;
+		size *= 2;
+	}
+}
+

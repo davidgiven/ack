@@ -84,7 +84,10 @@ build-file-timestamps = $(shell ls -l $(build-files) | md5sum)
 # Wipe the build file (forcing a regeneration) if the make environment is different.
 # (Conveniently, this includes the pkg-config hash calculated above.)
 
-ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS
+ignored-variables = MAKE_RESTARTS .VARIABLES MAKECMDGOALS MAKEFLAGS MFLAGS PAGER _ \
+	DESKTOP_STARTUP_ID XAUTHORITY ICEAUTHORITY SSH_AUTH_SOCK SESSION_MANAGER \
+	INVOCATION_ID SYSTEMD_EXEC_PID MANAGER_PID SSH_AGENT_PID JOURNAL_STREAM \
+	GPG_TTY WINDOWID MANAGERPID MAKE_TERMOUT MAKE_TERMERR OLDPWD
 $(shell mkdir -p $(OBJ))
 $(file >$(OBJ)/newvars.txt,$(foreach v,$(filter-out $(ignored-variables),$(.VARIABLES)),$(v)=$($(v))$(newline)))
 $(shell touch $(OBJ)/vars.txt)
@@ -104,6 +107,9 @@ clean::
 	@echo CLEAN
 	$(hide) rm -rf $(OBJ)
 
+compile_commands.json: $(OBJ)/build.ninja
+	+$(hide) $(NINJA) -f $(OBJ)/build.ninja -t compdb > $@
+
 export PYTHONHASHSEED = 1
 $(OBJ)/build.ninja $(OBJ)/build.targets &:
 	@echo "AB"
@@ -111,6 +117,7 @@ $(OBJ)/build.ninja $(OBJ)/build.targets &:
 		-o $(OBJ) build.py \
 		-v $(OBJ)/vars.txt \
 		|| (rm -f $@ && false)
+	$(hide) cp $(OBJ)/compile_commands.json compile_commands.json
 
 include $(OBJ)/build.targets
 .PHONY: $(ninja-targets)
