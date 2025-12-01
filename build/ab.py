@@ -388,6 +388,10 @@ def _filetarget(value, cwd):
     return t
 
 
+def getcwd():
+    return cwdStack[-1]
+
+
 def targetof(value, cwd=None):
     if not cwd:
         cwd = cwdStack[-1]
@@ -544,12 +548,14 @@ def shell(*args):
 
 def add_commanddb_entry(commands, file):
     global commandsDb
-    commandsDb += [{
-        "directory": os.getcwd(),
-                "command": (" && ".join(commands)),
-                "file": file
-    }
-        ]
+    commandsDb += [
+        {
+            "directory": os.getcwd(),
+            "command": (" && ".join(commands)),
+            "file": file,
+        }
+    ]
+
 
 def emit_rule(self, ins, outs, cmds=[], label=None):
     name = self.name
