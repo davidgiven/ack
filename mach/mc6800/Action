@@ -1,0 +1,21 @@
+name "Motorola 6800 assembler"
+dir as
+end
+name "Motorola 6800 backend"
+dir cg
+end
+#name "Motorola 6800 download program(s)"
+#dir dl
+#end
+name "Motorola 6800 EM library"
+dir libem
+end
+name "Motorola 6800 etext,edata,end library"
+dir libend
+end
+name "Motorola 6800 MON library"
+dir libmon
+end
+name "Motorola 6800 system call library"
+dir libsys
+end
