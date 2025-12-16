@@ -1,0 +1,31 @@
+The emu6800 platform
+====================
+
+This port targets the emu6800 emulator and generates code for the Motorola 6800 architecture. It is intended to run within the emu6800 environment.
+
+This implementation is currently **under development and does not work yet**. Many features are incomplete or missing.
+
+**File I/O is not implemented and will not be supported in the future,** because the emu6800 environment does not provide any file input/output functionality.
+
+**Floating point support is not available yet.** Any attempt to use floating-point numbers will result in a build error or undefined behavior. Floating-point functionality may be added in the future.
+
+The code generator is designed specifically for the MC6800, which has a simple architecture and a limited register set. The compiler translates source code to EM (stack-based intermediate code), and then to MC6800 assembly. Arguments and local variables are accessed relative to the frame pointer (Local Base, LB), **which resides in zero page**.
+
+**Temporary results are kept either on the stack or in AccAB (the stack top).** See the source for details on stack frame layout and accumulator usage.
+
+This port is intended to be tested using the emu6800 emulator.
+
+Example command line
+====================
+
+ack -mm6800 -O -o hello.bin examples/hello.c
+
+The file hello.bin can then be run using emu6800.
+
+(Please note that this port is experimental and most programs will not yet function as expected.)
+
+----
+
+Work in progress. Contributions and bug reports are welcome.
+
+@zu2
