@@ -95,6 +95,7 @@ def build_variant(name, cflags):
             "modules/src/system",
             "modules/src/alloc",
         ],
+        cflags=cflags
     )
 
 
