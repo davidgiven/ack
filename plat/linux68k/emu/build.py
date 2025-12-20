@@ -31,7 +31,7 @@ simplerule(
         "=m68kdasm.c",
         "=m68k.h",
     ],
-    commands=["cp -R $[ins] $[dir]", "cd $[dir] && ./m68kmake"],
+    commands=["cp $[ins] $[dir]", "cd $[dir] && ./m68kmake"],
 )
 
 hostclibrary(
