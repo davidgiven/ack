@@ -526,6 +526,7 @@ def filenamesof(items):
 
 
 def filenameof(x):
+    x = targetof(x)
     xs = filenamesof(x.outs)
     assert (
         len(xs) == 1
@@ -611,7 +612,7 @@ def emit_rule(self, ins, outs, cmds=[], label=None):
             emit("build", *fouts, ":rule", *fins)
             emit(
                 " command=",
-                "&&".join([s.strip() for s in rule]).replace("$", "$$"),
+                " && ".join([s.strip() for s in rule]).replace("$", "$$"),
             )
         if label:
             emit(" description=", label)
