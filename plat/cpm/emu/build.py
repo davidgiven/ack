@@ -21,7 +21,7 @@ simplerule(
         "util/amisc+aslod",
         ".+bdos_out",
     ],
-    outs=["bdos.img"],
+    outs=["=bdos.img"],
     commands=["$[ins] $[outs]"],
 )
 
