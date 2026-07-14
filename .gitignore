@@ -1,3 +1,4 @@
 .obj/
 compile_commands.json
+.ninja_log
 
