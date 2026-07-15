@@ -77,6 +77,8 @@ ssize_t read(int fd, void* buffer, size_t count)
 				--left;
 			}
 		}
+		else
+			return r;
 	} while (tot < count && !eof && _sys_isreadyr(fd));
 
 	return tot;
