@@ -1,7 +1,7 @@
 #
-! $Source: /cvsroot/tack/Ack/plat/linux386/boot.s,v $
+! $Source: /cvsroot/tack/Ack/plat/linux68k/boot.s,v $
 ! $State: Exp $
-! $Revision: 1.3 $
+! $Revision: 1.4 $
 
 ! Declare segments (the order is important).
 
@@ -18,30 +18,31 @@ begtext:
 	!
 	! On entry, the stack looks like this:
 	!
-	! sp+..            NULL
-	! sp+8+(4*argc)   env (X quads)
+	! sp+8+(4*argc)   envp[0] ...
 	! sp+4+(4*argc)   NULL
-	! sp+4            argv (argc quads)
+	! sp+4            argv[0] ... argv[argc-1]
 	! sp              argc
 	!
-	! The ACK actually expects:
-	!
-	! sp+8            argc
-	! sp+4            argv
-	! sp              env
+	! _main parameters are:
+	!   argc (word), argv (pointer), envp (pointer)
+	! sp+12           envp
+	! sp+8            argv
+	! sp+4            argc
+	! sp              return
 
-	move.l (0, sp), d0 ! d0 = argc
-	move.l (4, sp), d1 ! d1 = argv
-	move.l d0, d2
-	asl.l #2, d2
-	move.l (sp, d2), d2
-	add.l #12, d2      ! d2 = environ
-	
-	move.l d2, -(sp)   ! environ
-	move.l d0, -(sp)   ! argc
-	move.l d1, -(sp)   ! argv
-	pea (0)            ! dummy, representing the return address
-	
+	move.l (0, sp), d0      ! d0 = argc
+	lea (4, sp), a0         ! a0 = argv
+
+	move.l d0, d1
+	asl.l #2, d1            ! d1 = argc*4
+	add.l a0, d1            ! d1 = &argv[argc]
+	add.l #4, d1            ! d1 = envp
+
+	move.l d1, -(sp)        ! envp
+	move.l a0, -(sp)        ! argv
+	move.l d0, -(sp)        ! argc
+	pea (0)                 ! return
+
 	jmp (__m_a_i_n)
 	 	
 	! This provides an emergency exit routine used by EM.
