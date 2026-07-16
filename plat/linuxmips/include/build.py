@@ -1,6 +1,13 @@
 from build.ab import export
-from build.ack import clibrary
+from build.ack import exportheaders, clibrary
+from glob import glob
 
-clibrary(name="include", deps=["plat/linux/include"])
+headers = glob("**/*.h", root_dir="plat/linuxmips/include", recursive=True)
 
-export(name="all", deps=["plat/linux/include+all"])
+clibrary(name="include", hdrs={k: f"./{k}" for k in headers}, deps=["plat/linux/include"])
+
+export(
+    name="all",
+    items=exportheaders(".+include", prefix="$(PLATIND)/linuxmips/include"),
+    deps=["plat/linux/include+all"],
+)
