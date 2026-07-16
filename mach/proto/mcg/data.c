@@ -32,6 +32,11 @@ static const char* section_to_str(int section)
 	}
 }
 
+static void align_to_word(void)
+{
+	fprintf(outputfile, "\t.align %d\n", (int)EM_wordsize);
+}
+
 static void emit_header(int desired_section)
 {
 	if (pending)
@@ -42,6 +47,7 @@ static void emit_header(int desired_section)
 			fatal("label '%s' can't change sections", pending->name);
 
 		fprintf(outputfile, "\n.sect %s\n", section_to_str(pending->section));
+		align_to_word();
         fprintf(outputfile, "%s:\n", platform_label(pending->name));
         pending = NULL;
     }
@@ -57,8 +63,12 @@ static void writehex(arith data, int size)
 
 void data_int(arith data, size_t size, bool is_ro)
 {
+	bool had_pending = (pending != NULL);
+
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 1) || (size == 2) || (size == 4) || (size == 8));
+	if (!had_pending && size >= EM_wordsize)
+		align_to_word();
     fprintf(outputfile, "\t.data%ld ", size);
     writehex(data, size);
     fprintf(outputfile, "\n");
@@ -69,9 +79,12 @@ void data_float(const char* data, size_t size, bool is_ro)
 {
     unsigned char buffer[8];
     int i;
+	bool had_pending = (pending != NULL);
 
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
     assert((size == 4) || (size == 8));
+	if (!had_pending)
+		align_to_word();
 
     fprintf(outputfile, "\t.dataf%ld %s\n", size, data);
 }
@@ -134,7 +147,11 @@ void data_block(const uint8_t* data, size_t datalen, size_t size, bool is_ro)
 
 void data_offset(const char* label, arith offset, bool is_ro)
 {
+	bool had_pending = (pending != NULL);
+
 	emit_header(is_ro ? SECTION_ROM : SECTION_DATA);
+	if (!had_pending)
+		align_to_word();
     fprintf(outputfile, "\t.data%d %s+%ld\n",
         EM_pointersize, platform_label(label), offset);
 }

@@ -686,14 +686,15 @@ static int insert_moves(struct basicblock* bb, int index,
                 hop = platform_swap(bb, src, dest);
                 pmap_remove(&copies, src, dest);
 
-                /* Now src and dest are swapped. We know that the old src is in the right place
-                * and now contains dest. Any copies from the old dest (now containing src) must
-                * be patched to point at the old src. */
+                /* After swap(src, dest), dest holds the value that was in src (so src->dest
+                 * is done). The value that was in dest is now in src. Any remaining copy
+                 * that still reads from dest must be rewritten to read from src instead.
+                 * Rewriting destinations is wrong for cycles longer than 2. */
 
                 for (i=0; i<copies.count; i++)
                 {
-                    if (copies.item[i].right == src)
-                        copies.item[i].right = dest;
+                    if (copies.item[i].left == dest)
+                        copies.item[i].left = src;
                 }
             }
         }

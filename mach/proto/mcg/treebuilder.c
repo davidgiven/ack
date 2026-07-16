@@ -407,9 +407,10 @@ static void simple_test_neg(int size, int irop)
     simple_test(size, irop);
 
     push(
-        new_ir1(
-            IR_NOT, EM_wordsize,
-            pop(EM_wordsize)
+        new_ir2(
+            IR_EOR, EM_wordsize,
+            pop(EM_wordsize),
+            new_wordir(1)
         )
     );
 }
