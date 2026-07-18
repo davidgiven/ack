@@ -19,22 +19,18 @@ extabsexp
 	: absexp
 	| LO16 ASC_LPAR expr ASC_RPAR
 	{
-		newrelo($3.typ, RELO2 | FIXUPFLAGS);
-		$$ = $3.val;
+		if (!mips_small_relo(&$3, RELO2, &$$))
+			fatal("relocation offset in lo16[] too big");
 	}
 	| HI16 ASC_LPAR expr ASC_RPAR
 	{
-		newrelo($3.typ, RELO2HI | FIXUPFLAGS);
-		if ($3.val & 0xffff0000)
+		if (!mips_small_relo(&$3, RELO2HI, &$$))
 			fatal("relocation offset in hi16[] too big");
-		$$ = $3.val;
 	}
 	| HA16 ASC_LPAR expr ASC_RPAR
 	{
-		newrelo($3.typ, RELO2HISAD | FIXUPFLAGS);
-		if ($3.val & 0xffff0000)
+		if (!mips_small_relo(&$3, RELO2HISAD, &$$))
 			fatal("relocation offset in ha16[] too big");
-		$$ = $3.val;
 	}
 	;
 

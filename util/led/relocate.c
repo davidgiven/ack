@@ -517,6 +517,20 @@ static unsigned addrelo(
 	{
 		struct outname* name;
 		extern struct outhead outhead;
+		int local_typ = local->on_type & S_TYP;
+
+		if (!(local->on_type & S_EXT) && local_typ != S_UND
+		    && local_typ != S_ABS && !(local->on_type & S_COM))
+		{
+			int sectindex = local_typ - S_MIN;
+
+			valu += local->on_valu;
+			valu += relorig[sectindex].org_size;
+			valu += outsect[sectindex].os_base;
+			index += NGlobals + sectindex;
+			*valu_out = valu;
+			return index;
+		}
 
 		name = searchname(local->on_mptr, hash(local->on_mptr));
 		if (name == (struct outname*)0)

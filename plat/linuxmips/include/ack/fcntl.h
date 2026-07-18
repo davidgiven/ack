@@ -9,17 +9,11 @@ enum
 	O_WRONLY = 1,
 	O_RDWR = 2,
 
-#ifdef __mips
 	O_APPEND = 0x0008,
 	O_CREAT  = 0x0100,
 	O_TRUNC  = 0x0200,
 	O_EXCL   = 0x0400,
 	O_NOCTTY = 0x0800
-#else
-	O_CREAT  = 00000100,
-	O_TRUNC  = 00001000,
-	O_APPEND = 00002000
-#endif
 };
 
 #endif
