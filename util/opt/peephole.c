@@ -263,11 +263,12 @@ static offset rotate(offset w, offset amount)
 #ifndef LONGOFF
 	assert(wordsize<=4);
 #endif
-	highmask = (offset) (-1) << amount;
+	/* shift unsigned: a left shift of a negative value is undefined */
+	highmask = (offset)(~(unsigned long)0 << amount);
 	lowmask = ~highmask;
 	if (wordsize != 4)
 		highmask &= wordsize == 2 ? 0xFFFF : 0xFF;
-	return (((w << amount) & highmask)
+	return (((offset)((unsigned long)w << amount) & highmask)
 			| ((w >> (8 * wordsize - amount)) & lowmask));
 }
 
