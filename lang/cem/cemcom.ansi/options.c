@@ -72,7 +72,7 @@ next_option: /* to allow combined one-char options */
 		case 'w': /* no warnings will be given */
 		case 's': /* no stricts will be given */
 		case 'o': /* no complaints about old-style */
-			options[opt] = 1;
+			options[(unsigned char)opt] = 1;
 			goto next_option;
 		case 'a': /* suppress all but errors diagnostics */
 			options['w'] = 1; /* implies -a */
