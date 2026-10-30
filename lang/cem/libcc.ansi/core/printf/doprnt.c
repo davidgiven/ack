@@ -11,6 +11,19 @@
 
 #if ACKCONF_WANT_STDIO
 
+/*
+ * Numbers are rendered in buf: room for %f of the largest long double
+ * (its digits, a sign, the point) with MAXPREC digits after the point.
+ * A larger precision is cut to MAXPREC, for integers too.
+ */
+#define MAXPREC 128
+#if ACKCONF_WANT_STDIO_FLOAT
+#include <float.h>
+#define BUFSIZE (LDBL_MAX_10_EXP + 4 + MAXPREC)
+#else
+#define BUFSIZE (MAXPREC + 8)
+#endif
+
 /* gnum() is used to get the width and precision fields of a format. */
 static const char*
 gnum(const char* f, int* ip, va_list* app)
@@ -62,6 +75,8 @@ o_print(va_list* ap, int flags, char* s, char c, int precision, int is_signed)
 	char* old_s = s;
 	int base;
 
+	if (precision > MAXPREC)
+		precision = MAXPREC;
 	switch (flags & (FL_SHORT | FL_LONG))
 	{
 		case FL_SHORT:
@@ -163,7 +178,7 @@ int _vfprintf(const char* fmt, va_list ap)
 	int nrchars = 0;
 	const char* oldfmt;
 	char *s1;
-	static char buf[16]; /* used to store rendered numbers */
+	static char buf[BUFSIZE]; /* used to store rendered numbers */
 
 	while (c = *fmt++)
 	{
@@ -323,8 +338,8 @@ int _vfprintf(const char* fmt, va_list ap)
 				if (!(flags & FL_PRECSPEC))
 					precision = 6;
 
-				if (precision >= sizeof(buf))
-					precision = sizeof(buf) - 1;
+				if (precision > MAXPREC)
+					precision = MAXPREC;
 
 				flags |= FL_SIGNEDCONV;
 				s = _f_print(&ap, flags, s, c, precision);
