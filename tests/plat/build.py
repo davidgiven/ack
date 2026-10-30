@@ -51,6 +51,7 @@ allsets = {
         "tests/plat/core/xorv,e,.e",
     ],
     "floats": [
+        "tests/plat/floats/constfold,e,.c",
         "tests/plat/floats/doublecmp,e,.c",
         "tests/plat/floats/from_d_to_si,e,.c",
         "tests/plat/floats/from_d_to_ui,e,.c",
