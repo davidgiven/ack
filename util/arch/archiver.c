@@ -473,7 +473,7 @@ void get(int argc, char* argv[])
 					    buf);
 				}
 				else
-					printf(buf);
+					printf("%s", buf);
 			}
 			else if (del_fl)
 			{

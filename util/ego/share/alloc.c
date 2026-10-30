@@ -35,7 +35,7 @@ void oldcore(void* p, size_t size)
 
 void coreusage(void)
 {
-	fprintf(stderr, "Maximal core usage (excl. buffers):%u\n", maxuse);
+	fprintf(stderr, "Maximal core usage (excl. buffers):%lu\n", (unsigned long)maxuse);
 }
 
 #endif
@@ -116,7 +116,7 @@ arg_p newarg(byte kind)
 {
 	arg_p ap;
 
-	ap = (arg_p)newcore(asizetab[kind]);
+	ap = (arg_p)newcore(asizetab[(unsigned char)kind]);
 	ap->a_type = kind;
 	return (ap);
 }

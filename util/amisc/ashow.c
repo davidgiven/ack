@@ -133,11 +133,11 @@ static void showsect(void)
 	struct outsect section;
 
 	rd_sect(&section, 1);
-	printf("\tstartaddress in machine\t0x%lX\n", section.os_base);
-	printf("\tsection size in machine\t0x%lX\n", section.os_size);
-	printf("\tstartaddress in file\t0x%lX\n", section.os_foff);
-	printf("\tsection size in file\t0x%lX\n", section.os_flen);
-	printf("\tsection alignment\t%ld\n", section.os_lign);
+	printf("\tstartaddress in machine\t0x%lX\n", (unsigned long)section.os_base);
+	printf("\tsection size in machine\t0x%lX\n", (unsigned long)section.os_size);
+	printf("\tstartaddress in file\t0x%lX\n", (unsigned long)section.os_foff);
+	printf("\tsection size in file\t0x%lX\n", (unsigned long)section.os_flen);
+	printf("\tsection alignment\t%lu\n", (unsigned long)section.os_lign);
 }
 
 /*
@@ -189,7 +189,7 @@ static void showrelo(void)
 		printf("\twords reversed\n");
 	printf("\treferencing section\t%d\n", (relrec.or_sect & BMASK) - S_MIN);
 	printf("\treferenced symbol index\t%d\n", relrec.or_nami);
-	printf("\treferencing address\t%ld\n", relrec.or_addr);
+	printf("\treferencing address\t%lu\n", (unsigned long)relrec.or_addr);
 }
 
 /*
@@ -246,7 +246,7 @@ static void showname(struct outname* namep)
 				printf("\tstab 0x%x\n", namep->on_type >> 8);
 				printf("\tdesc 0x%x\n", namep->on_desc);
 		}
-	printf("\tvalue 0x%lX\n", namep->on_valu);
+	printf("\tvalue 0x%lX\n", (unsigned long)namep->on_valu);
 }
 
 /*

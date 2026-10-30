@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 		while (nrsect-- > 0)
 		{
 			rd_sect(&sbuf, 1);
-			printf("%ld", sbuf.os_size);
+			printf("%lu", (unsigned long)sbuf.os_size);
 			sum += sbuf.os_size;
 			if (nrsect > 0)
 				putchar('+');
