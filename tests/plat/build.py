@@ -47,6 +47,7 @@ allsets = {
         "tests/plat/core/set,e,.e",
         "tests/plat/core/setjmp,c,.c",
         "tests/plat/core/structcopy,e,.c",
+        "tests/plat/core/volatile,e,.c",
         "tests/plat/core/xor,e,.e",
         "tests/plat/core/xorv,e,.e",
     ],
