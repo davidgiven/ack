@@ -274,12 +274,11 @@ void _rdline(String** s)
 	char buffer[1024];
 	if (fgets(buffer, 1024, _chanrd) == 0)
 	{
+		/* At the end of the terminal input, or with stdin closed, asking
+		 * again cannot help (it recursed until the stack ran out): the
+		 * same errors as INPUT. */
 		if (_chann == -1)
-		{
-			printf("?Redo ");
-			_rdline(s);
-			return;
-		}
+			error(ferror(_chanrd) ? 29 : 2);
 		error(40);
 	}
 	_decstr(*s);
