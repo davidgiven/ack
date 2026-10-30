@@ -649,11 +649,12 @@ void prolog2(void)
 	C_rom_ilb(l);
 	C_lae_dlb(l2, (arith) 0);
 	C_loi((arith) BEMPTRSIZE);
+	C_loc((arith)0); /* __setjmp(env, savemask): savemask 0 */
 	C_exa_dnam("trpbuf");
 	C_lae_dnam("trpbuf",(arith)0);
 	C_cal("__setjmp");
 	C_df_ilb(l);
-	C_asp((arith)(BEMPTRSIZE+BEMPTRSIZE));
+	C_asp((arith)(BEMPTRSIZE+BEMINTSIZE+BEMPTRSIZE));
 	C_lfr((arith)BEMINTSIZE);
 	C_dup((arith)BEMINTSIZE);
 	C_zeq((label)0);
