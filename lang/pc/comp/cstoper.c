@@ -473,13 +473,13 @@ void InitCst(void)
 	arith bt = (arith)0;
 
 	while( !(bt < 0) )	{
-		bt = (bt << 8) + 0377;
+		bt = (arith) (((unsigned long) bt << 8) + 0377);
 		i++;
 		if( i == MAXSIZE + 1 )
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
 	}
-	mach_long_sign = 1L << (sizeof(long) * 8 - 1);
+	mach_long_sign = (long) (1UL << (sizeof(long) * 8 - 1));
 	if( int_size > sizeof(long) )
 		fatal("sizeof (long) insufficient on this machine");
 
