@@ -3,6 +3,9 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "bem.h"
 #include "graph.h"
 #include "eval.h"
@@ -66,7 +69,6 @@ void datastmt(void)
 
 	/* NOSTRICT */ l= (List *) salloc(sizeof(List));
 	l->linenr= currline->linenr;
-        l->emlabel =  sys_filesize(datfname);
 	if ( datalist==0) 
 	{
 		datalist=l;
@@ -80,12 +82,39 @@ void datastmt(void)
 
 
 
+/* The text of the DATA statements, one line per statement; emitted as
+ * _datatext by datatable(), the runtime reads it (lib/read.c). */
+static char	*dattext;
+static size_t	datlen, datsize;
+
+void datprintf(const char* fmt, ...)
+{
+	va_list ap;
+	int n;
+
+	va_start(ap, fmt);
+	n = vsnprintf((char *)0, 0, fmt, ap);
+	va_end(ap);
+	if (datlen + n + 1 > datsize) {
+		datsize = (datlen + n + 1) * 2;
+		dattext = realloc(dattext, datsize);
+		if (!dattext) fatal("out of memory");
+	}
+	va_start(ap, fmt);
+	vsnprintf(dattext + datlen, n + 1, fmt, ap);
+	va_end(ap);
+	datlen += n;
+}
+
 void datatable(void)
 {
 	List *l;
 	int line=0;
 
-	/* called at end to generate the data seek table */
+	/* called at end to generate the DATA text and its seek table */
+	C_exa_dnam("_datatext");
+	C_df_dnam("_datatext");
+	C_rom_scon(dattext ? dattext : "", (arith)(datlen + 1));
 	C_exa_dnam("_seektab");
 	C_df_dnam("_seektab");       /* VRAAGTEKEN */
 	l= datalist;
@@ -632,36 +661,6 @@ void prolog2(void)
 	C_csa((arith)BEMINTSIZE);
 	C_df_ilb((label)0);
 	C_asp((arith)BEMINTSIZE);
-	datfile = fopen(datfname, "w+b");
-	if (!datfile) fatal("improper file creation permission");
-        gendata();
-}
-
-
-
-/* NEW */
-void gendata(void)
-{
-	C_loc((arith)0);
-	C_cal("_setchan");
-	C_asp((arith)BEMINTSIZE);
-	C_df_dnam("datfname");
-	C_rom_scon(datfname,(arith)strlen(datfname) + 1);	/* EHB */
-	C_df_dnam("dattyp");
-	C_rom_scon("i\\0",(arith)4);
-	C_df_dnam("datfdes");
-	C_rom_dnam("datfname",(arith)0);
-	C_rom_cst((arith)1);
-	C_rom_cst((arith)strlen(datfname));
-	C_df_dnam("dattdes");
-	C_rom_dnam("dattyp",(arith)0);
-	C_rom_cst((arith)1);
-	C_rom_cst((arith)1);
-	C_lae_dnam("dattdes",(arith)0);
-	C_lae_dnam("datfdes",(arith)0);
-	C_loc((arith)0);
-	C_cal("_opnchn");
-	C_asp((arith)(2*BEMPTRSIZE+BEMINTSIZE));
 }
 
 

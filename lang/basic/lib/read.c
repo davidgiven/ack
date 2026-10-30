@@ -1,6 +1,95 @@
 #include "bc_io.h"
 #include <ctype.h>
+#include <stdlib.h>
 #include "lib.h"
+
+/*
+ * DATA statements are in the program: the compiler emits their text as
+ * _datatext, one line per DATA statement ("1,2,\"abc\"\n"), and _seektab,
+ * pairs of (BASIC line number, line index) ending with 0. READ (channel 0)
+ * reads it through _datptr with the same rules as reading a file: skip
+ * white space, read the item, skip to after the next ',' or newline.
+ */
+extern char _datatext[];
+extern int _seektab[];
+static char* _datptr;
+
+static void datskip(void)
+{
+	char* p = _datptr;
+
+	while (*p && *p != ',' && *p != '\n')
+		p++;
+	if (*p)
+		p++;
+	_datptr = p;
+}
+
+/* The start of the next item; "Out of data" if there is none. */
+static char* datitem(void)
+{
+	char* p = _datptr ? _datptr : _datatext;
+
+	while (isspace((unsigned char)*p))
+		p++;
+	if (!*p)
+		error(2);
+	return p;
+}
+
+static void _datint(int* addr)
+{
+	char* p = datitem();
+	char* end;
+	long l = strtol(p, &end, 10);
+
+	if (end == p)
+		error(40);
+	_datptr = end;
+	datskip();
+	*addr = (int)l;
+}
+
+static void _datflt(double* addr)
+{
+	char* p = datitem();
+	char* end;
+	double d = strtod(p, &end);
+
+	if (end == p)
+		error(40);
+	_datptr = end;
+	datskip();
+	*addr = d;
+}
+
+static void _datstr(String** s)
+{
+	char buffer[MAXSTRING];
+	char* c = buffer;
+	char* p = datitem();
+
+	if (*p == '"')
+	{
+		/* quoted: up to the closing quote */
+		p++;
+		while (*p && *p != '"' && c < buffer + MAXSTRING - 1)
+			*c++ = *p++;
+	}
+	else if (isalpha((unsigned char)*p))
+	{
+		/* unquoted: up to a ',' or white space */
+		while (*p && *p != ',' && !isspace((unsigned char)*p) && c < buffer + MAXSTRING - 1)
+			*c++ = *p++;
+	}
+	else
+		error(40);
+	*c = 0;
+	_datptr = p;
+	datskip();
+	_decstr(*s);
+	*s = (String*)_newstr(buffer);
+}
 
 void _readln(void)
 {
@@ -26,6 +115,11 @@ void _readint(int* addr)
 #ifdef DEBUG
 	printf("read int from %d\n", _chann);
 #endif
+	if (_chann == 0)
+	{
+		_datint(addr);
+		return;
+	}
 	_asschn();
 	if (fscanf(_chanrd, "%d", &i) != 1)
 	{
@@ -57,6 +151,11 @@ void _readflt(double* addr)
 #ifdef DEBUG
 	printf("read flt from %d\n", _chann);
 #endif
+	if (_chann == 0)
+	{
+		_datflt(addr);
+		return;
+	}
 	_asschn();
 	if (fscanf(_chanrd, "%lf", &f) != 1)
 	{
@@ -88,6 +187,11 @@ void _readstr(String** s)
 #ifdef DEBUG
 	printf("read str from %d\n", _chann);
 #endif
+	if (_chann == 0)
+	{
+		_datstr(s);
+		return;
+	}
 	_asschn();
 	c = buffer;
 	kar = fgetc(_chanrd);
@@ -141,32 +245,29 @@ void _readstr(String** s)
 	*s = (String*)_newstr(buffer);
 }
 
-extern int _seektab[];
-
 void _restore(int line)
 {
 	int nr;
-	char buffer[1024];
+	char* p = _datatext;
 
 #ifdef DEBUG
 	printf("seek to %d", line);
 #endif
-	fseek(_chanrd, 0l, 0);
 	if (line)
 	{
-		/* search number of lines to skip */
+		/* the number of DATA lines before line */
 		for (nr = 0; _seektab[nr] && _seektab[nr] < line; nr += 2)
-#ifdef DEBUG
-			printf("test %d %d\n", _seektab[nr], _seektab[nr + 1]);
-#endif
-		;
+			;
 		nr /= 2;
-#ifdef DEBUG
-		printf(" %d lines to skip\n", nr);
-#endif
 		while (nr-- > 0)
-			fgets(buffer, 1024, _chanrd);
+		{
+			while (*p && *p != '\n')
+				p++;
+			if (*p)
+				p++;
+		}
 	}
+	_datptr = p;
 }
 void _rdline(String** s)
 {
