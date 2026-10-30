@@ -18,6 +18,7 @@
 #include "arith.h"
 #include "sizes.h"
 #include "align.h"
+#include "fltcstoper.h"
 #include "error.h"
 
 char options[128]; /* one for every char	*/
@@ -194,6 +195,9 @@ next_option: /* to allow combined one-char options */
 							pointer_size = sz;
 						if (algn != 0)
 							pointer_align = algn;
+						break;
+					case 'm': /* mantissa bits of a non-IEEE double */
+						flt_dbl_bits = sz;
 						break;
 					case 'r': /* adjust bitfields right	*/
 #ifndef NOBITFIELD

@@ -28,6 +28,7 @@
 #include "field.h"
 #include "mes.h"
 #include "cstoper.h"
+#include "fltcstoper.h"
 #include "ch3bin.h"
 #include "ch3.h"
 #include "error.h"
@@ -440,6 +441,7 @@ void int2float(struct expr** expp, struct type* tp)
 		exp->ex_type = tp;
 		exp->ex_class = Float;
 		flt_arith2flt((arith)exp->VL_VALUE, &(exp->FL_ARITH), uns);
+		fltcstround(exp);
 	}
 	else
 	{
@@ -491,11 +493,14 @@ void float2float(struct expr** expp, struct type* tp)
 	/*	The expression *expp, which is of some floating type, is
 	    converted to the floating type tp.
 	    There is no need for an explicit conversion operator
-	    if the expression is a constant.
+	    if the expression is a constant: it is rounded to tp.
 	*/
 
 	if (is_fp_cst(*expp))
+	{
 		(*expp)->ex_type = tp;
+		fltcstround(*expp);
+	}
 	else
 	{
 		fp_used = 1;

@@ -21,6 +21,8 @@ var CPP_F=-D__unix
 var ALIGN=-a0:2 -a1:2 -a2:2 -a3:2
 
 var C_INCLUDES=-I{PLATFORMDIR}/include -I{EM}/share/ack/include/ansi
+# PDP-11 floating point: double has 56 mantissa bits, no subnormal numbers
+var CC_ALIGN=-Vm56
 
 name be
 	from .m.g

@@ -24,6 +24,33 @@
 
 extern int ResultKnown;
 
+int flt_dbl_bits; /* 0: IEEE */
+
+void fltcstround(struct expr* expr)
+{
+	/*	The constant expr is rounded to the precision of its type, as
+	    the target would have it: 4-byte and 8-byte types are IEEE
+	    single and double (with their subnormal numbers), unless -Vm
+	    gave the mantissa bits of a non-IEEE 8-byte type (no subnormal
+	    numbers then). Other sizes are left alone.
+	*/
+	switch ((int)expr->ex_type->tp_size)
+	{
+		case 4:
+			if (flt_dbl_bits)
+				flt_rnd(&expr->FL_ARITH, 24, -16384);
+			else
+				flt_rnd(&expr->FL_ARITH, 24, -126);
+			break;
+		case 8:
+			if (flt_dbl_bits)
+				flt_rnd(&expr->FL_ARITH, flt_dbl_bits, -16384);
+			else
+				flt_rnd(&expr->FL_ARITH, 53, -1022);
+			break;
+	}
+}
+
 void fltcstbin(struct expr** expp, int oper, struct expr* expr)
 {
 	/*	The operation oper is performed on the constant
@@ -113,6 +140,7 @@ void fltcstbin(struct expr** expp, int oper, struct expr* expr)
 	else
 	{
 		(*expp)->FL_ARITH = o1;
+		fltcstround(*expp);
 	}
 	(*expp)->ex_flags |= expr->ex_flags;
 	(*expp)->ex_flags &= ~EX_PARENS;
