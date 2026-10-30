@@ -135,14 +135,20 @@ void putlines(line_p lnp)
 				curlin = -2;
 				break;
 			default:
-				if ((em_flag[instr - sp_fmnem] & EM_FLO) == FLO_P)
+				/* em_flag only covers instructions, not pseudos */
+				if (instr <= sp_lmnem
+				    && (em_flag[instr - sp_fmnem] & EM_FLO) == FLO_P)
 					curlin = -2;
 				outinst(instr);
 		}
 		processoperand: switch (lnp->l_optyp)
 		{
 			case OPNO:
-				if ((em_flag[instr - sp_fmnem] & EM_PAR) != PAR_NO)
+				/* A missing optional argument is written as sp_cend:
+				 * for an instruction that can have one, and for a
+				 * pseudo (as em_code's C_end_narg; an empty mes). */
+				if (instr > sp_lmnem
+				    || (em_flag[instr - sp_fmnem] & EM_PAR) != PAR_NO)
 					outbyte((byte) sp_cend);
 				break;
 			default:
