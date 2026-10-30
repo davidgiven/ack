@@ -38,6 +38,8 @@ extern int	flt_status;
 .PP
 .B void flt_umin(flt_arith *e)
 .PP
+.B void flt_rnd(flt_arith *e, int bits, int emin)
+.PP
 .B void flt_modf(flt_arith *e, flt_arith *ipart, flt_arith *fpart)
 .PP
 .B int flt_cmp(flt_arith *e1, flt_arith *e2)
@@ -98,6 +100,27 @@ negates the number indicated by
 .I e
 and stores the result indirectly through
 .IR e .
+.PP
+.B flt_rnd
+rounds the number indicated by
+.I e
+to
+.I bits
+bits of mantissa, to nearest and ties to even; below 2 to the power
+.I emin
+fewer bits are kept, as in a subnormal number.
+.BR flt_add ,
+.BR flt_sub ,
+.B flt_mul
+and
+.B flt_div
+keep the bits that do not fit in their 64-bit mantissa as a sticky lowest
+bit: with operands rounded by
+.B flt_rnd
+(at most 62 bits), the result rounded by
+.B flt_rnd
+to the same precision is the correctly rounded result, as the target
+computes it (53 and \-1022 for an IEEE double, 24 and \-126 for a float).
 .PP
 .B flt_modf
 splits the number indicated by

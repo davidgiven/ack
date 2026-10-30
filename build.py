@@ -51,6 +51,7 @@ export(
     name="all",
     deps=(
         [".+compiler", "examples+all"]
+        + ([] if IS_WINDOWS else ["modules/src/flt_arith+test"])
         + (
             []
             if IS_WINDOWS
