@@ -1,5 +1,6 @@
 from build.ab import export, simplerule
 from build.c import cprogram
+from build.utils import test
 from glob import glob
 from util.LLgen.build import llgen
 from util.cmisc.build import tabgen
@@ -84,3 +85,10 @@ cprogram(
 )
 
 export(name="all", items={"$(PLATDEP)/cpp.ansi$(EXT)": ".+cpp.ansi"})
+
+# Line directives and __FILE__ with file names longer than any buffer.
+test(
+    name="test",
+    ins=["./longpath.sh", ".+cpp.ansi"],
+    commands=["sh $[ins[0]] $[ins[1]]"],
+)
