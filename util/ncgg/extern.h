@@ -45,7 +45,7 @@ extern int yyparse(void);
 extern void initemhash(void);
 
 /* error.c */
-extern void fatal(const char* s, ...);
+extern NORETURN void fatal(const char* s, ...);
 extern void error(const char* s, ...);
 extern int tabovf(char* string);
 

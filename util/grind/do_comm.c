@@ -334,7 +334,7 @@ do_find(p)
 	break;
 
   default:
-	assert(0);
+	fatal("invalid debugger command");
   }
 }
 
@@ -534,7 +534,7 @@ able(p, kind)
 	able_item((int)p->t_ival, kind);
 	break;
   default:
-	assert(0);
+	fatal("invalid enable or disable operand");
   }
 }
 
@@ -720,7 +720,7 @@ do_delete(p)
   	remove_from_item_list((int) p->t_ival);
 	break;
   default:
-	assert(0);
+	fatal("invalid delete operand");
   }
 }
 

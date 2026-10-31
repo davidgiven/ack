@@ -9,6 +9,7 @@
  *  I L _ A U X . C
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
@@ -40,7 +41,7 @@ int tsize(int type)
 		case POINTER:
 			return ps;
 		default:
-			assert(false);
+			fatal("invalid inline argument size class");
 	}
 	UNREACHABLE_CODE;
 }
@@ -75,7 +76,7 @@ line_p duplicate(line_p lnp)
 			PROC(l) = PROC(lnp);
 			break;
 		default:
-			assert(false); /* cannot copy pseudo */
+			fatal("cannot copy pseudo-instruction"); /* cannot copy pseudo */
 	}
 	return l;
 }

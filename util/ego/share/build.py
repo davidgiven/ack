@@ -91,6 +91,7 @@ clibrary(
     deps=[
         "h",
         "modules/src/em_data",
+        "modules/src/data",
     ],
     cflags=["-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"],
 )

@@ -5,6 +5,7 @@
  */
 /*  U S E  -  D E F I N I T I O N   A N A L Y S I S */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -80,7 +81,7 @@ static bool test_cond(short cond, offset val)
 		case FITBYTE:
 			return val >= -128 && val < 128;
 	}
-	assert(false);
+	fatal("invalid constant substitution constraint");
 	UNREACHABLE_CODE;
 }
 
@@ -309,7 +310,7 @@ pr_defs()
 				fprintf(stderr, "%d\n", OBJ(l)->o_id);
 				break;
 			default:
-				assert(false);
+				fatal("invalid operand type in use-definition analysis");
 		}
 	}
 }

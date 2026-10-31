@@ -1742,7 +1742,7 @@ static void generate_tree(struct basicblock* bb)
                 break;
 
             default:
-                assert(0);
+                fatal("invalid EM instruction parameter type");
         }
 
         if (tracing('E'))

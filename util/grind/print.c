@@ -363,7 +363,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 				print_literal(base, val+i, compressed, format);
 				break;
 			default:
-				assert(0);
+				fatal("invalid array element type for printing");
 			}
 		} 
 	}
@@ -387,7 +387,7 @@ print_val(tp, tp_sz, addr, compressed, indent, format)
 	(*currlang->printstring)(db_out, addr, (int) tp_sz);
 	break;
   default:
-	assert(0);
+	fatal("invalid value type for printing");
 	break;
   }
 }

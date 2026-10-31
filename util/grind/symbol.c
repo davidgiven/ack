@@ -202,7 +202,7 @@ consistent(p, sc)
 	return 0;
 
   default:
-	assert(0);
+	fatal("invalid symbol lookup context");
   }
   return 0;	/* notreached? */
 }
@@ -277,7 +277,7 @@ identify(p, class_set)
 	break;
 
   default:
-	assert(0);
+	fatal("invalid symbol expression");
   }
   return sym;
 }
@@ -333,7 +333,7 @@ pr_sym(s)
 	fprintf(db_out, "File:\t\t");
 	break;
   default:
-	assert(0);
+	fatal("invalid symbol kind");
   }
   pr_scopes(s->sy_scope);
   fprintf(db_out, "%s\n", s->sy_idf->id_text);

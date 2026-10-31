@@ -5,6 +5,7 @@
  */
 /* C O P Y   P R O P A G A T I O N */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include <em_spec.h>
@@ -363,7 +364,7 @@ void fold_var(line_p old, line_p new, bblock_p b)
 			OFFSET(l) = OFFSET(new);
 			break;
 		default:
-			assert(false);
+			fatal("invalid operand type when replacing a constant");
 	}
 }
 

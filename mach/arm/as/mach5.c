@@ -483,7 +483,7 @@ int oursmall(int fitsmall, int gain)
 		}
 		return(*p & bit);
      default:
-            assert(0);
+            fatal("invalid assembler pass");
             
 	}
 	UNREACHABLE_CODE;

@@ -5,6 +5,7 @@
  */
 /* Functions to partition the huge set of EM-instructions. */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include <em_reg.h>
@@ -782,7 +783,7 @@ offset op11size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(false);
+			fatal("invalid instruction size class");
 	}
 	UNREACHABLE_CODE;
 }
@@ -798,7 +799,7 @@ offset op12size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(false);
+			fatal("invalid instruction size class");
 	}
 	UNREACHABLE_CODE;
 }
@@ -814,7 +815,7 @@ offset op22size(line_p lnp)
 		case PS:
 			return ps;
 		default:
-			assert(false);
+			fatal("invalid instruction size class");
 	}
 	UNREACHABLE_CODE;
 }
@@ -886,7 +887,7 @@ offset avsize(line_p lnp)
 			else
 				return UNKNOWN_SIZE;
 		default:
-			assert(false);
+			fatal("invalid instruction size class");
 			break;
 	}
 	UNREACHABLE_CODE;
@@ -903,7 +904,7 @@ int regtype(byte instr)
 		case FLT:
 			return reg_float;
 		default:
-			assert(false);
+			fatal("invalid register type class");
 	}
 	UNREACHABLE_CODE;
 }

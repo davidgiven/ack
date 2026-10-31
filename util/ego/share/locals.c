@@ -7,6 +7,7 @@
  *  L O C A L S . C
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_mnem.h>
@@ -239,7 +240,7 @@ void var_nr(line_p l, short* nr_out, bool* found_out)
 			off = OFFSET(l);
 			break;
 		default:
-			assert(false);
+			fatal("invalid local variable operand type");
 	}
 	/* Its's a local variable */
 	find_local(off, &nr, found_out);

@@ -9,6 +9,7 @@
  *
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <em_pseu.h>
 #include <em_reg.h>
@@ -104,7 +105,7 @@ static line_p newcode(code_p code, offset tmp)
 			l->l_instr = op_sil;
 			break;
 		default:
-			assert(false);
+			fatal("invalid instruction for indirect reduction");
 	}
 	return l;
 }
@@ -211,7 +212,7 @@ static void init_code(code_p code, offset tmp)
 			l->l_next = move_pointer(tmp, STORE);
 			break;
 		default:
-			assert(false); /* non-reducible instruction */
+			fatal("non-reducible instruction"); /* non-reducible instruction */
 	}
 	PREV(l->l_next) = l;
 
@@ -287,7 +288,7 @@ static void incr_code(code_p code, offset tmp)
 			store_tmp = move_pointer(tmp, STORE);
 			break;
 		default:
-			assert(false);
+			fatal("invalid instruction for strength reduction");
 	}
 	/* Now we've got pieces of code to load the temp. local,
 	 * load the constant, add the two and store the result in
@@ -402,7 +403,7 @@ static bool same_code(code_p c1, code_p c2, lset vars)
 			    && same_address(c1->c_o.co_desc, c2->c_o.co_desc, vars)
 			    && same_address(c1->co_lfirst, c2->co_lfirst, vars);
 		default:
-			assert(false);
+			fatal("invalid instruction when comparing strength reductions");
 	}
 	UNREACHABLE_CODE;
 }

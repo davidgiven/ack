@@ -8,6 +8,7 @@
  *  R A _ X F O R M . C
  */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -125,7 +126,7 @@ void init_replacements(short psize, short wsize)
 				             */
 					break;
 				default:
-					assert(false);
+					fatal("invalid register message parameter kind");
 			}
 		}
 	}

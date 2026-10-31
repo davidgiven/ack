@@ -9,7 +9,7 @@ flex(name="cgglexer", src="./bootlex.l")
 cprogram(
     name="cgg",
     srcs=(["./main.c", "./booth.h", ".+cggparser", ".+cgglexer"]),
-    deps=["h", "modules/src/em_data"],
+    deps=["modules/src/data", "h", "modules/src/em_data"],
 )
 
 

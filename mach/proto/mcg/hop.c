@@ -291,13 +291,13 @@ char* hop_render(struct hop* hop)
 						break;
 
                     default:
-                        assert(false);
+                        fatal("invalid IR opcode in instruction template");
 				}
 				break;
 			}
 
             default:
-                assert(false);
+                fatal("invalid instruction selector opcode");
 		}
 	}
 

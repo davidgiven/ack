@@ -110,7 +110,7 @@ extern int	curr_token;
 /* comm2.y */
 int	 yyparse(void);
 /* comm4.c */
-void	 stop(void);
+NORETURN void	 stop(void);
 void	 newmodule(char *);
 /* comm5.c */
 int	 yylex(void);
@@ -161,7 +161,7 @@ void	 emitstr(int);
 void	 emitf(int size, int negative);
 void	 yyerror(const char *);
 void	 nosect(void);
-void	 fatal(const char *, ...);
+NORETURN void	 fatal(const char *, ...);
 void	 serror(const char *, ...);
 void	 warning(const char *, ...);
 void	 nofit(void);

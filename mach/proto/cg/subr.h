@@ -35,7 +35,7 @@ unsigned docoerc(token_p tp,c3_p cp,int ply,int toplevel,int forced);
 unsigned stackupto(token_p limit,int ply,int toplevel);
 c3_p findcoerc(token_p tp,set_p tep);
 void error(char *s, ...);
-void fatal(char *s, ...);
+NORETURN void fatal(char *s, ...);
 
 #ifndef NDEBUG
 void badassertion(char* asstr,char *file,int line);

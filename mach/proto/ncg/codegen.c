@@ -97,7 +97,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 		switch ((*codep++) & 037)
 		{
 			default:
-				assert(false);
+				fatal("invalid code generator opcode");
 				UNREACHABLE_CODE;
 #ifdef TABLEDEBUG
 			case DO_DLINE:
@@ -991,7 +991,7 @@ unsigned codegen(byte* codep, int ply, int toplevel, unsigned costlimit, int for
 					switch (result[i].e_typ)
 					{
 						default:
-							assert(false);
+							fatal("invalid EM replacement value type");
 						case 0:
 							emp[i].em_optyp = OPNO;
 							emp[i].em_soper = 0;

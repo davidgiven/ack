@@ -8,6 +8,7 @@
  * O F   A V A I L A B L E   E X P R E S S I O N S
  */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include "ego/share/types.h"
 #include "ego/share/debug.h"
@@ -58,7 +59,7 @@ static bool same_avail(byte kind, avail_p avp1, avail_p avp2)
 	switch (kind)
 	{
 		default:
-			assert(false);
+			fatal("invalid available expression kind");
 			break;
 		case EXPENSIVE_LOAD:
 		case UNAIR_OP:
@@ -127,7 +128,7 @@ static void copy_avail(int kind, avail_p src, avail_p dst)
 	switch (kind)
 	{
 		default:
-			assert(false);
+			fatal("invalid available expression kind");
 			break;
 		case EXPENSIVE_LOAD:
 		case UNAIR_OP:

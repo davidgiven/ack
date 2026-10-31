@@ -93,7 +93,7 @@ static struct hreg* allocate_phi_hreg(register_assignment_t* regs,
     }
 
     /* We'll need to allocate a new stack slot for it. */
-    assert(false);
+    fatal("no register available for phi value");
 }
 
 static struct hreg* evict(struct vreg* vreg)
@@ -148,7 +148,7 @@ static struct hreg* evict(struct vreg* vreg)
     }
 
     /* Couldn't find anything to evict */
-    assert(false);
+    fatal("cannot find a register to evict");
 }
 
 static bool constraints_match(struct hreg* hreg, struct vreg* vreg)
