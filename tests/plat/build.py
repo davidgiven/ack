@@ -16,9 +16,11 @@ allsets = {
     "core": [
         "tests/plat/core/aar,e,.e",
         "tests/plat/core/and,e,.e",
+        "tests/plat/core/andbool,e,.c",
         "tests/plat/core/andv,e,.e",
         "tests/plat/core/brk,c,.c",
         "tests/plat/core/bss,e,.c",
+        "tests/plat/core/bytediv,e,.c",
         "tests/plat/core/calloc,c,.c",
         "tests/plat/core/cii,e,.e",
         "tests/plat/core/cmi,e,.e",
