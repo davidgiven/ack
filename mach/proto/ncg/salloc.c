@@ -101,9 +101,13 @@ void garbage_collect(void) {
 			if (tdp->t_type[i] == EV_ADDR)
 				chkstr(tp->t_att[i].aa.ea_str,used);
 	}
-	for (rp= machregs+1; rp<machregs+NREGS; rp++) {
+	/* machregs[0] holds the condition codes (setcc()); it can be a register. */
+	for (rp= machregs; rp<machregs+NREGS; rp++) {
 		tp = &rp->r_contents;
-		assert(tp->t_token != -1);
+		if (tp->t_token == -1) {
+			assert(rp == machregs);
+			continue;
+		}
 		tdp= &tokens[tp->t_token];
 		for (i=0;i<TOKENSIZE;i++)
 			if (tdp->t_type[i] == EV_ADDR)
