@@ -814,6 +814,10 @@ static int repl_mul(line_p lp, line_p *b, line_p *e)
 			break;
 	}
 
+	/* Only the sz bytes of the operand count: n is wider on 64-bit hosts. */
+	if (sz < (int) sizeof(n))
+		n &= (1UL << (8 * sz)) - 1;
+
 #define newinstr(res, opcode, val)	(*(res) = newline((short)(val)+Z_OPMINI), (*(res))->l_instr = (opcode))
 
 	while (n)
