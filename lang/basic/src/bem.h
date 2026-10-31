@@ -48,10 +48,8 @@ extern char	*program;		/* name of source program */
 extern char	*inpfile;		/* input tko compiler */
 extern char	*outfile;		/* output from compiler */
 
-extern char	datfname[MAXFILENAME];	/* data statements file */
 
 extern FILE	*emfile;		/* EM output file */
-extern FILE	*datfile;		/* data file */
 extern FILE	*yyin;			/* Compiler input */
 
 extern int	endofinput;
