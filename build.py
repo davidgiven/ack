@@ -51,6 +51,7 @@ export(
     name="all",
     deps=(
         [".+compiler", "examples+all"]
+        + ([] if IS_WINDOWS else ["lang/cem/cpp.ansi+test"])
         + (
             []
             if IS_WINDOWS

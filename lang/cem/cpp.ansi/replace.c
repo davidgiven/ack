@@ -500,10 +500,11 @@ static void macro_func(struct idf *idef)
 		used.
 	*/
 	struct macro *mac = idef->id_macro;
-	static char FilNamBuf[PATHLENGTH];
+	static char *FilNamBuf;
 
 	switch (idef->id_text[2]) {
 	case 'F':			/* __FILE__	*/
+		FilNamBuf = realloc(FilNamBuf, strlen(FileName) + 3);
 		FilNamBuf[0] = '"';
 		strcpy(&FilNamBuf[1], FileName);
 		strcat(FilNamBuf, "\"");
