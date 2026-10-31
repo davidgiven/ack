@@ -39,6 +39,7 @@ allsets = {
         "tests/plat/core/ior,e,.e",
         "tests/plat/core/iorv,e,.e",
         "tests/plat/core/lar,e,.e",
+        "tests/plat/core/negunsigned,e,.c",
         "tests/plat/core/newdispose,p,.p",
         "tests/plat/core/pascalsets,p,.p",
         "tests/plat/core/rck,e,.e",
