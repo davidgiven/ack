@@ -1,7 +1,8 @@
 #!/bin/sh
-# Long file names in the preprocessor: the line directives and __FILE__ must
+# File names in the preprocessor: the line directives and __FILE__ must
 # carry the whole name (they were formatted into fixed buffers of 256 and
-# 1024 bytes, and a longer name overran them).
+# 1024 bytes, and a longer name overran them), as a string literal with
+# " and \ escaped (N11).
 #
 #	longpath.sh <cpp.ansi>
 
@@ -54,6 +55,39 @@ if [ $status -eq 0 ]; then
 else
 	cat err2
 	fail "#line: exit status $status"
+fi
+
+# Names with " and \ (N11): written as string literals, escaped, in the
+# line directives and __FILE__, and read back unchanged from #line.
+qdir=$work/q\"b\\c
+mkdir -p "$qdir" || exit 1
+printf 'char *f = __FILE__;\n#include "h.h"\nint y;\n' > "$qdir/t.c"
+echo 'int z;' > "$qdir/h.h"
+qesc=$work/q\\\"b\\\\c
+
+"$cpp" "$qdir/t.c" > out3 2> err3
+status=$?
+if [ $status -eq 0 ]; then
+	grep -q "^int z;" out3 || fail "quotes: included file missing"
+	grep "^char \*f = " out3 | grep -F -q "\"$qesc/t.c\"" || fail "quotes: __FILE__ not escaped"
+	grep -F -q "# 1 \"$qesc/h.h\"" out3 || fail "quotes: line directive for h.h not escaped"
+	# Read back: preprocessing the output again gives the same.
+	"$cpp" out3 > out4 2> err4 || { cat err4; fail "quotes: output does not preprocess"; }
+	grep "^char \*f = " out4 | grep -F -q "\"$qesc/t.c\"" || fail "quotes: __FILE__ changed when read back"
+else
+	cat err3
+	fail "quotes: exit status $status"
+fi
+
+printf '#line 5 "a\\"b\\\\c\\tt"\nchar *f = __FILE__;\n' > l2.c
+"$cpp" l2.c > out5 2> err5
+status=$?
+if [ $status -eq 0 ]; then
+	grep -F -q '# 5 "a\"b\\c\011t"' out5 || fail "#line: name not escaped in the line directive"
+	grep "^char \*f = " out5 | grep -F -q '"a\"b\\c\011t"' || fail "#line: __FILE__ not escaped"
+else
+	cat err5
+	fail "#line with escapes: exit status $status"
 fi
 
 exit $failed

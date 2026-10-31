@@ -148,21 +148,21 @@ void preprocess(char *fn)
 	op++;                                                                                          \
 	echo('\n')
 /* A line directive; the file name has no length limit (it can come from
-   #line), so it is echoed, not formatted into a buffer. */
+   #line), so it is echoed, not formatted into a buffer, and it is quoted
+   as a string literal (quoted_name()). */
 #define line_dir(n)                                                                                \
 	{                                                                                              \
 		char* p = lbuf;                                                                            \
-		sprintf(lbuf, "%s %d \"", LINE_PREFIX, (int)(n));                                          \
+		sprintf(lbuf, "%s %d ", LINE_PREFIX, (int)(n));                                            \
 		while (*p)                                                                                 \
 		{                                                                                          \
 			echo(*p++);                                                                            \
 		}                                                                                          \
-		p = FileName;                                                                              \
+		p = quoted_name(FileName);                                                                 \
 		while (*p)                                                                                 \
 		{                                                                                          \
 			echo(*p++);                                                                            \
 		}                                                                                          \
-		echo('"');                                                                                 \
 		echo('\n');                                                                                \
 	}
 
