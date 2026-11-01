@@ -3,6 +3,7 @@
  *
  * Author: Hans van Eck. 
  */
+#include "warnings.h"
 #include <assert.h>
 #include <stdio.h>
 #include <em_spec.h>
@@ -172,7 +173,7 @@ void tes_instr(line_p lnp, line_p x, line_p y)
 					stacktop = 0;
 					break;
 				default:
-					assert(false);
+					fatal("invalid stack effect descriptor");
 			}
 		}
 		/*

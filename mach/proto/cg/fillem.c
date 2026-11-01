@@ -648,7 +648,7 @@ static long con(int t) {
 		con_float();
 		return(argval);
 	}
-	assert(false);
+	fatal("invalid EM argument type");
 	UNREACHABLE_CODE;
 }
 

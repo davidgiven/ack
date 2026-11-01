@@ -73,7 +73,7 @@ void instance(int instno, token_p token)
 	inp= &tokeninstances[instno];
 	switch(inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		tp= &fakestack[stackheight-inp->in_info[0]];
 		if (inp->in_info[1]==0) {
@@ -148,7 +148,7 @@ void cinstance(int instno, token_p token,
 	inp= &tokeninstances[instno];
 	switch(inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		assert(inp->in_info[0] == 1);
 		if (inp->in_info[1]==0) {
@@ -321,7 +321,7 @@ int instsize(int tinstno,token_p tp) {
 	inp = &tokeninstances[tinstno];
 	switch(inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		assert(inp->in_info[0]==1);
 #if MAXMEMBERS!=0
@@ -338,7 +338,7 @@ int instsize(int tinstno,token_p tp) {
 	case IN_RIDENT:
 		return(machregs[inp->in_info[0]].r_size);
 	case IN_ALLOC:
-		assert(false);  /* cannot occur in splitting coercion */
+		fatal("register allocation in splitting coercion");  /* cannot occur in splitting coercion */
 	case IN_DESCR:
 		return(tokens[inp->in_info[0]].t_size);
 	}
@@ -480,7 +480,7 @@ unsigned stackupto(token_p limit,int ply,int toplevel)
 				goto contin;
 			}
 		}
-		assert(false);
+		fatal("no matching register coercion");
 	contin: ;
 	}
 	return(totalcost);
@@ -522,7 +522,7 @@ c3_p findcoerc(token_p tp,set_p tep)
 	return(0);      /* nothing found */
 }
 
-static void error_str(char *s, va_list argptr)
+static NORETURN void error_str(char *s, va_list argptr)
 {
 	fprintf(stderr,"Error: ");
 	vfprintf(stderr, s, argptr);

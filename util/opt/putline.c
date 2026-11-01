@@ -4,6 +4,7 @@
  *
  * Author: Hans van Staveren
  */
+#include "warnings.h"
 #include <assert.h>
 #include <stdlib.h>
 #include "param.h"
@@ -210,7 +211,7 @@ static void putargs(arg_p ap)
 		switch (ap->a_typ)
 		{
 			default:
-				assert(false);
+				fatal("invalid EM argument type when writing output");
 				break;
 			case ARGOFF:
 				outoff(ap->a_a.a_offset);

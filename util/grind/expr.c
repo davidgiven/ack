@@ -1006,7 +1006,7 @@ cmp_op(p, pbuf, psize, ptp)
 			break;
 		default:
 			l1 = 0;
-			assert(0);
+			fatal("invalid integer comparison operator");
 			break;
 		}
 		break;
@@ -1036,7 +1036,7 @@ cmp_op(p, pbuf, psize, ptp)
 			break;
 		default:
 			l1 = 0;
-			assert(0);
+			fatal("invalid floating-point comparison operator");
 			break;
 		}
 		break;
@@ -1348,7 +1348,7 @@ eval_expr(p, pbuf, psize, ptp)
 	retval = (*bin_op[p->t_whichoper])(p, pbuf, psize, ptp);
 	break;
   default:
-	assert(0);
+	fatal("invalid expression operator");
 	break;
   }
   if (! retval) {

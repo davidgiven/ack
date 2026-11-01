@@ -3,6 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include "warnings.h"
 #include <em_mnem.h>
 #include "ego/share/types.h"
 #include "ego/share/debug.h"
@@ -26,7 +27,7 @@ static valnum base_valno(entity_p enp)
 	switch (enp->en_kind)
 	{
 		default:
-			assert(false);
+			fatal("invalid entity kind when finding base address");
 			break;
 		case ENINDIR:
 			return enp->en_ind;
@@ -273,7 +274,7 @@ void kill_direct(entity_p enp)
 	switch (enp->en_kind)
 	{
 		default:
-			assert(false);
+			fatal("invalid entity kind when invalidating values");
 			break;
 		case ENEXTERNAL:
 			kill_external(enp->en_ext, false);

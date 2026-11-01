@@ -31,7 +31,7 @@ static string rcsid6 = "$Id$";
 /* In this file the following routines are defined: */
 static void readgrammar(int, char *[]);
 static void doparse(p_file);
-static void comfatal(void);
+static NORETURN void comfatal(void);
 
 int main(int argc, string argv[])
 {
@@ -318,7 +318,7 @@ void fatal(int lineno, string s, string t)
 	comfatal();
 }
 
-static void comfatal(void)
+static NORETURN void comfatal(void)
 {
 	/*
 	 * Some common code for exit on errors

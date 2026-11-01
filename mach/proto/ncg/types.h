@@ -66,4 +66,4 @@ void garbage_collect(void);
 /* subr.c */
 void itokcost(void);
 void error(const char *s, ...);
-void fatal(const char *s, ...);
+NORETURN void fatal(const char *s, ...);

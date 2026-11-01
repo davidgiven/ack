@@ -422,7 +422,7 @@ patch(ap, an, mp)
 		setsymbolnum(mp->relodata,N_BSS);
 		break;
 	default:
-		assert(0);
+		fatal("invalid relocation target section\n");
 	}
 
 	switch(ap->or_sect - S_MIN) {
@@ -433,7 +433,7 @@ patch(ap, an, mp)
 	case TEXTSG:
 		break;
 	default:
-		assert(0);
+		fatal("invalid relocation source section\n");
 	}
 	here = lseek(output, 0L, 1);
 	lseek(output, where, 0);

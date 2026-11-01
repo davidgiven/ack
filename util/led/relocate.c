@@ -10,7 +10,6 @@ static char rcsid[] = "$Id$";
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <assert.h>
 #include "out.h"
 #include "const.h"
 #include "debug.h"
@@ -107,7 +106,7 @@ static uint32_t get_vc4_valu(char* addr)
 		return read4(addr + 2, 0);
 	}
 
-	assert(0 && "unrecognised VC4 instruction");
+	fatal("unrecognised VC4 instruction 0x%04x", (unsigned int)opcode);
 }
 
 static bool is_powerpc_memory_op(uint32_t opcode)
@@ -333,7 +332,7 @@ static void put_vc4_valu(char* addr, uint32_t value)
 		write4(value, addr + 2, 0);
 	}
 	else
-		assert(0 && "unrecognised VC4 instruction");
+		fatal("unrecognised VC4 instruction 0x%04x", (unsigned int)opcode);
 }
 
 /* PowerPC fixups are complex as we need to patch up to the next two

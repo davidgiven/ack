@@ -8,6 +8,7 @@
  *  R A _ I T E M S . C
  */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -184,7 +185,7 @@ static short reg_type(item_p item)
 		case DCONST:
 			return reg_any;
 		default:
-			assert(false);
+			fatal("invalid register allocation item kind");
 	}
 	UNREACHABLE_CODE;
 }
@@ -207,7 +208,7 @@ static short item_size(item_p item)
 		case DCONST:
 			return 2 * ws; /* 2 * word size */
 		default:
-			assert(false);
+			fatal("invalid register allocation item kind");
 	}
 	UNREACHABLE_CODE;
 }
