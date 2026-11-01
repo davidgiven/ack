@@ -1,5 +1,8 @@
 name: Autorelease
 
+env:
+  PYTHONPATH: ${{ github.workspace }}/.obj/python-deps
+
 concurrency: 
   group: environment-release-${{ github.head_ref }}
   cancel-in-progress: true
@@ -26,10 +29,12 @@ jobs:
           git
           make
           mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-libconfig
           mingw-w64-ucrt-x86_64-lua
           mingw-w64-ucrt-x86_64-nsis
           mingw-w64-ucrt-x86_64-pkg-config
           mingw-w64-ucrt-x86_64-python
+          mingw-w64-ucrt-x86_64-python-pip
           zip
           ninja
           diffutils
@@ -38,6 +43,7 @@ jobs:
 
     - name: build
       run: |
+        python3 -m pip install --target .obj/python-deps libconf==2.0.1
         make LDFLAGS="-s -static" ack-setup.exe AB_SANDBOX=no
 
     - name: date

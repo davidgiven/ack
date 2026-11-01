@@ -3,9 +3,10 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
-void cs_machinit(void* vp); /* (FILE *f)
-                             * Read phase-specific information from f.
-                             */
+#include <libconfig.h>
+
+/* Copy phase-specific information from config. */
+void cs_machinit(config_t* config);
 
 bool may_become_aar(avail_p avp);
 /*

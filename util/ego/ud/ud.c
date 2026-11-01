@@ -11,6 +11,7 @@
 #include <string.h>
 #include <em_spec.h>
 #include "ego/share/types.h"
+#include "ego/share/mach.h"
 #include "ud.h"
 #include "ego/share/debug.h"
 #include "ego/share/global.h"
@@ -31,7 +32,7 @@
 #include "ud_copy.h"
 
 /* core allocation macros */
-#define newudbx() (bext_p) newstruct(bext_ud)
+#define newudbx()  (bext_p) newstruct(bext_ud)
 #define oldudbx(x) oldstruct(bext_ud, x)
 
 short nrvars;
@@ -40,36 +41,10 @@ int Svalue, Svariable;
 
 cond_p globl_cond_tab, local_cond_tab;
 
-static cond_p getcondtab(FILE* f)
+static void ud_machinit(config_t* config)
 {
-	int l, i;
-	cond_p tab;
-
-	fscanf(f, "%d", &l);
-	tab = newcondtab(l);
-	for (i = 0; i < l; i++)
-	{
-		fscanf(f, "%hd %hd %hd", &tab[i].mc_cond, &tab[i].mc_tval, &tab[i].mc_sval);
-	}
-	assert(tab[l - 1].mc_cond == DEFAULT);
-	return tab;
-}
-
-static void ud_machinit(void* vp)
-{
-	FILE* f = vp;
-	char s[100];
-
-	for (;;)
-	{
-		while (getc(f) != '\n')
-			;
-		fscanf(f, "%99s", s);
-		if (strcmp(s, "%%UD") == 0)
-			break;
-	}
-	globl_cond_tab = getcondtab(f);
-	local_cond_tab = getcondtab(f);
+	globl_cond_tab = mach_condtab(mach_setting(config, "constant_propagation.global_access"));
+	local_cond_tab = mach_condtab(mach_setting(config, "constant_propagation.local_access"));
 }
 
 static bool test_cond(short cond, offset val)

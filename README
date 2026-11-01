@@ -61,6 +61,10 @@ Requirements:
 
 - Python 3.4 or above.
 
+- optionally, the Python libconf package for build-time description schema
+  validation (python3 -m pip install libconf). When using a virtual environment,
+  set the PYTHON make variable to its Python executable.
+
 - about 1GB in the target directory.
 
 Instructions:

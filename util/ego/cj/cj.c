@@ -349,7 +349,7 @@ void cj_optimize(void* vp)
 
 int main(int argc, char* argv[])
 {
-	go(argc, argv, no_action, cj_optimize, no_action, no_action);
+	go(argc, argv, no_action, cj_optimize, no_machinit, no_action);
 	report("cross jumps", Scj);
 	exit(0);
 }

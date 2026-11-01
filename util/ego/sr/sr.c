@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ego/share/types.h"
+#include "ego/share/mach.h"
 #include "sr.h"
 #include "ego/share/debug.h"
 #include "ego/share/global.h"
@@ -52,23 +53,12 @@ int sli_threshold;
 
 int Ssr; /* #optimizations found */
 
-void sr_machinit(void* vp)
+void sr_machinit(config_t* config)
 {
-	/* Read target machine dependent information */
-	FILE* f = vp;
-	char s[100];
-
-	for (;;)
-	{
-		while (getc(f) != '\n')
-			;
-		fscanf(f, "%99s", s);
-		if (strcmp(s, "%%SR") == 0)
-			break;
-	}
-	fscanf(f, "%d", &ovfl_harmful);
-	fscanf(f, "%d", &arrbound_harmful);
-	fscanf(f, "%d", &sli_threshold);
+	config_setting_t* settings = mach_setting(config, "strength_reduction");
+	ovfl_harmful = mach_bool(settings, "overflow_harmful");
+	arrbound_harmful = mach_bool(settings, "array_bounds_harmful");
+	sli_threshold = mach_int(settings, "shift_threshold");
 }
 
 static void del_ivs(lset ivs)
