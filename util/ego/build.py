@@ -1,4 +1,4 @@
-from build.ab import export, simplerule, filenamesof, targetof, filenameof
+from build.ab import export, simplerule, filenamesof, targetof, filenameof, G
 from build.c import cprogram
 from build.pkg import package
 from glob import glob
@@ -6,6 +6,9 @@ from fnmatch import filter
 
 
 package(name="libconfig", package="libconfig")
+if G.WINDOWS == "yes":
+    # Windows builds link libconfig statically; its headers default to DLL imports.
+    targetof(".+libconfig").args.setdefault("caller_cflags", []).append("-DLIBCONFIG_STATIC")
 
 em_mnem = filter(filenamesof([targetof("modules/src/em_data")]), "*/em_mnem.h")[
     0
