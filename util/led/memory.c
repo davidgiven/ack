@@ -8,32 +8,16 @@ static char rcsid[] = "$Id$";
 
 /*
  * Memory manager. Memory is divided into NMEMS pieces. There is a struct
- * for each piece telling where it is, how many bytes are used, and how may
- * are left. If a request for core doesn't fit in the left bytes, an sbrk()
- * is done and pieces after the one that requested the growth are moved up.
- *
- * Unfortunately, we cannot use sbrk to request more memory, because its
- * result cannot be trusted. More specifically, it does not work properly
- * on 2.9 BSD, and probably does not work properly on 2.8 BSD and V7 either.
- * The problem is that "sbrk" adds the increment to the current "break"
- * WITHOUT testing the carry bit. So, if your break is at 40000, and
- * you "sbrk(30000)", it will succeed, but your break will be at 4464
- * (70000 - 65536).
+ * for each piece telling where it is, how many bytes are used, and how many
+ * are left. Each piece is its own malloc() block; if a request for core
+ * doesn't fit in the left bytes, the piece is grown with realloc().
  */
-
-/*
- * USEMALLOC tells the allocator to use malloc() and realloc(), not brk().
- * This might help systems where brk() doesn't work, or where malloc() can
- * allocate outside the brk area.
- */
-#define USEMALLOC
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 #include <out.h>
 #include "const.h"
 #include "debug.h"
@@ -44,10 +28,6 @@ static char rcsid[] = "$Id$";
 #include "write.h"
 #include "scan.h"
 
-#ifndef USEMALLOC
-static void copy_down(struct memory* mem, ind_t dist);
-static void copy_up(struct memory* mem, ind_t dist);
-#endif
 static void free_saved_moduls(void);
 
 struct memory mems[NMEMS];
@@ -55,30 +35,8 @@ struct memory mems[NMEMS];
 bool incore = true; /* true while everything can be kept in core. */
 ind_t core_position = (ind_t)0; /* Index of current module. */
 
-#ifdef USEMALLOC
 static size_t modl_initial_size;
 static bool frozen = false; /* true after freeze_core(). */
-
-#else /* ifndef USEMALLOC */
-#define GRANULE 64 /* power of 2 */
-
-static char* BASE;
-static ind_t refused;
-
-static int sbreak(ind_t incr)
-{
-	incr = (incr + (GRANULE - 1)) & ~(GRANULE - 1);
-
-	if ((refused && refused < incr) || BASE + incr < BASE || brk(BASE + incr) == -1)
-	{
-		if (!refused || refused > incr)
-			refused = incr;
-		return -1;
-	}
-	BASE += incr;
-	return 0;
-}
-#endif /* ndef USEMALLOC */
 
 /*
  * Initialize some pieces of core. We hope that this will be our last
@@ -86,7 +44,6 @@ static int sbreak(ind_t incr)
  */
 void init_core(void)
 {
-#ifdef USEMALLOC
 	struct memory* failed_mem = NULL;
 	struct memory* mem;
 	bool string_area;
@@ -141,85 +98,14 @@ void init_core(void)
 			}
 		}
 	}
-#else /* ifndef USEMALLOC */
-	char* base;
-	ind_t total_size;
-	struct memory* mem;
-
-#include "mach.h"
-#define ALIGN 8 /* minimum alignment for pieces */
-#define AT_LEAST (ind_t)2 * ALIGN /* See comment about string areas. */
-
-	total_size = (ind_t)0; /* Will accumulate the sizes. */
-	BASE = base = sbrk(0); /* First free. */
-	if ((int)base % ALIGN)
-	{
-		base = sbrk(ALIGN - (int)base % ALIGN);
-		BASE = base = sbrk(0);
-	}
-	/*
-	 * String areas are special-cased. The first byte is unused as a way to
-	 * distinguish a name without string from a name which has the first
-	 * string in the string area.
-	 */
-	for (mem = mems; mem < &mems[NMEMS]; mem++)
-	{
-		mem->mem_base = base;
-		mem->mem_full = (ind_t)0;
-		if (mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR])
-		{
-			if (mem->mem_left == 0)
-			{
-				mem->mem_left = ALIGN;
-				total_size += ALIGN;
-				base += ALIGN;
-			}
-			base += mem->mem_left;
-			total_size += mem->mem_left;
-			mem->mem_left--;
-			mem->mem_full++;
-		}
-		else
-		{
-			base += mem->mem_left; /* Each piece will start after prev. */
-			total_size += mem->mem_left;
-		}
-	}
-
-	if (sbreak(total_size) == -1)
-	{
-		incore = false; /* In core strategy failed. */
-		if (sbreak(AT_LEAST) == -1)
-			fatal("no core at all");
-
-		base = BASE;
-		for (mem = mems; mem < &mems[NMEMS]; mem++)
-		{
-			mem->mem_base = base;
-			if (mem == &mems[ALLOLCHR] || mem == &mems[ALLOGCHR])
-			{
-				base += ALIGN;
-				mem->mem_left = ALIGN - 1;
-				mem->mem_full = 1;
-			}
-			else
-			{
-				mem->mem_full = (ind_t)0;
-				mem->mem_left = 0;
-			}
-		}
-	}
-#endif /* ndef USEMALLOC */
 }
 
 /*
- * Allocate an extra block of `incr' bytes and move all pieces with index
- * higher than `piece' up with the size of the block.
- * Move up as much as possible, if "incr" fails.
+ * Grow `piece' by `incr' bytes with realloc(); the other pieces stay where
+ * they are. Grow by as much as possible, if "incr" fails.
  */
 static ind_t move_up(int piece, ind_t incr)
 {
-#ifdef USEMALLOC
 	size_t oldsize = mems[piece].mem_full + mems[piece].mem_left;
 	size_t newsize;
 	char* newbase;
@@ -244,43 +130,18 @@ static ind_t move_up(int piece, ind_t incr)
 		incr -= INCRSIZE < incr ? INCRSIZE : incr;
 	}
 	return 0;
-#else /* ifndef USEMALLOC */
-	struct memory* mem;
-#ifndef NOSTATISTICS
-	extern int statistics;
-#endif
-
-	debug("move_up(%d, %d)\n", piece, (int)incr, 0, 0);
-	while (incr > 0 && sbreak(incr) == -1)
-		incr -= INCRSIZE < incr ? INCRSIZE : incr;
-
-	if (incr == 0)
-		return (ind_t)0;
-#ifndef NOSTATISTICS
-	if (statistics)
-		fprintf(stderr, "moving up %lx\n", (long)incr);
-#endif
-	for (mem = &mems[NMEMS - 1]; mem > &mems[piece]; mem--)
-		copy_up(mem, incr);
-
-	mems[piece].mem_left += incr;
-	return incr;
-#endif /* ndef USEMALLOC */
 }
 
 /*
  * This routine is called if `piece' needs `incr' bytes and the system won't
- * give them. We first steal the free bytes of all lower pieces and move them
- * and `piece' down. If that doesn't give us enough bytes, we steal the free
- * bytes of all higher pieces and move them up. We return whether we have
- * enough bytes, the first or the second time.
+ * give them. We shrink all other pieces to what they use, then try to grow
+ * `piece' again, and return whether we have enough bytes.
  */
 static bool compact(int piece, ind_t incr, int flag)
 #define NORMAL 0
 #define FREEZE 1
 #define FORCED 2
 {
-#ifdef USEMALLOC
 	struct memory* mem;
 	size_t newsize, oldsize;
 	char* newbase;
@@ -354,210 +215,8 @@ static bool compact(int piece, ind_t incr, int flag)
 	mem->mem_left += incr;
 	return true;
 
-#else /* ifndef USEMALLOC */
-	ind_t gain, size;
-	struct memory* mem;
-	int min = piece, max = piece;
-#define SHIFT_COUNT                                                                                \
-	2 /* let pieces only contribute if their free                                                  \
-memory is more than 1/2**SHIFT_COUNT * 100 %                                                       \
-of its occupied memory                                                                             \
-*/
-
-	debug("compact(%d, %d, %d)\n", piece, (int)incr, flag, 0);
-	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++)
-	{
-		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem + 1)->mem_base);
-	}
-
-	mem = &mems[piece];
-	if (flag == NORMAL)
-	{
-		/* try and gain a bit more than needed */
-		gain = (mem->mem_full + incr) >> SHIFT_COUNT;
-		if (incr < gain)
-			incr = gain;
-	}
-
-	/*
-	 * First, check that moving will result in enough space
-	 */
-	if (flag != FREEZE)
-	{
-		gain = mem->mem_left;
-		for (mem = &mems[piece - 1]; mem >= &mems[0]; mem--)
-		{
-			/*
-			 * Don't give it all away!
-			 * If this does not give us enough, bad luck
-			 */
-			if (flag == FORCED)
-				size = 0;
-			else
-			{
-				size = mem->mem_full >> SHIFT_COUNT;
-				if (size == 0)
-					size = mem->mem_left >> 1;
-			}
-			if (mem->mem_left >= size)
-				gain += (mem->mem_left - size) & ~(ALIGN - 1);
-			if (gain >= incr)
-			{
-				min = mem - &mems[0];
-				break;
-			}
-		}
-		if (min == piece)
-			for (mem = &mems[piece + 1]; mem <= &mems[NMEMS - 1]; mem++)
-			{
-				/*
-				 * Don't give it all away!
-				 * If this does not give us enough, bad luck
-				 */
-				if (flag == FORCED)
-					size = 0;
-				else
-				{
-					size = mem->mem_full >> SHIFT_COUNT;
-					if (size == 0)
-						size = mem->mem_left >> 1;
-				}
-				if (mem->mem_left >= size)
-					gain += (mem->mem_left - size) & ~(ALIGN - 1);
-				if (gain >= incr)
-				{
-					max = mem - &mems[0];
-					break;
-				}
-			}
-		if (min == piece)
-		{
-			min = 0;
-			if (max == piece)
-				max = 0;
-		}
-		if (gain < incr)
-			return 0;
-	}
-	else
-	{
-		min = 0;
-		max = NMEMS - 1;
-	}
-
-	gain = 0;
-	for (mem = &mems[min]; mem != &mems[piece]; mem++)
-	{
-		/* Here memory is inserted before a piece. */
-		assert(passnumber == FIRST || gain == (ind_t)0);
-		if (gain)
-			copy_down(mem, gain);
-		if (flag == FREEZE || gain < incr)
-		{
-			if (flag != NORMAL)
-				size = 0;
-			else
-			{
-				size = mem->mem_full >> SHIFT_COUNT;
-				if (size == 0)
-					size = mem->mem_left >> 1;
-			}
-			if (mem->mem_left >= size)
-			{
-				size = (mem->mem_left - size) & ~(ALIGN - 1);
-				gain += size;
-				mem->mem_left -= size;
-			}
-		}
-	}
-	/*
-	 * Now mems[piece]:
-	 */
-	if (gain)
-		copy_down(mem, gain);
-	gain += mem->mem_left;
-	mem->mem_left = 0;
-
-	if (gain < incr)
-	{
-		ind_t up = (ind_t)0;
-
-		for (mem = &mems[max]; mem > &mems[piece]; mem--)
-		{
-			/* Here memory is appended after a piece. */
-			if (flag == FREEZE || gain + up < incr)
-			{
-				if (flag != NORMAL)
-					size = 0;
-				else
-				{
-					size = mem->mem_full >> SHIFT_COUNT;
-					if (size == 0)
-						size = mem->mem_left >> 1;
-				}
-				if (mem->mem_left >= size)
-				{
-					size = (mem->mem_left - size) & ~(ALIGN - 1);
-					up += size;
-					mem->mem_left -= size;
-				}
-			}
-			if (up)
-				copy_up(mem, up);
-		}
-		gain += up;
-	}
-	mems[piece].mem_left += gain;
-	assert(flag == FREEZE || gain >= incr);
-	for (mem = &mems[0]; mem < &mems[NMEMS - 1]; mem++)
-	{
-		assert(mem->mem_base + mem->mem_full + mem->mem_left == (mem + 1)->mem_base);
-	}
-	return gain >= incr;
-#endif /* ndef USEMALLOC */
 }
 
-#ifndef USEMALLOC
-/*
- * The bytes of `mem' must be moved `dist' down in the address space.
- * We copy the bytes from low to high, because the tail of the new area may
- * overlap with the old area, but we do not want to overwrite them before they
- * are copied.
- */
-static void copy_down(struct memory* mem, ind_t dist)
-{
-	char* old;
-	char* new;
-	ind_t size;
-
-	size = mem->mem_full;
-	old = mem->mem_base;
-	new = old - dist;
-	mem->mem_base = new;
-	while (size--)
-		*new ++ = *old++;
-}
-
-/*
- * The bytes of `mem' must be moved `dist' up in the address space.
- * We copy the bytes from high to low, because the tail of the new area may
- * overlap with the old area, but we do not want to overwrite them before they
- * are copied.
- */
-static void copy_up(struct memory* mem, ind_t dist)
-{
-	char* old;
-	char* new;
-	ind_t size;
-
-	size = mem->mem_full;
-	old = mem->mem_base + size;
-	new = old + dist;
-	while (size--)
-		*--new = *--old;
-	mem->mem_base = new;
-}
-#endif /* ndef USEMALLOC */
 
 static int alloctype = NORMAL;
 
