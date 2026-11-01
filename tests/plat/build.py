@@ -5,6 +5,9 @@ from glob import glob
 from os.path import *
 
 allsets = {
+    "basic": [
+        "tests/plat/basic/data,bas,.bas",
+    ],
     "bugs": [
         "tests/plat/bugs/bug-157-i80-varargs,c,.c",
         "tests/plat/bugs/bug-164-faddrn,c,.c",
