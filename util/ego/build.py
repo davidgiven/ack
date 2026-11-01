@@ -1,7 +1,11 @@
 from build.ab import export, simplerule, filenamesof, targetof, filenameof
 from build.c import cprogram
+from build.pkg import package
 from glob import glob
 from fnmatch import filter
+
+
+package(name="libconfig", package="libconfig")
 
 em_mnem = filter(filenamesof([targetof("modules/src/em_data")]), "*/em_mnem.h")[
     0
@@ -16,10 +20,11 @@ def build_ego_helper(name, srcs=[], deps=[]):
             glob(f"util/ego/{name}/*.c") + glob(f"util/ego/{name}/*.h") + srcs
         ),
         deps=[
-            "util/ego/share",
+            "h",
             "modules/src/em_data",
             "modules/src/system",
-            "h",
+            "util/ego+libconfig",
+            "util/ego/share",
         ]
         + deps,
         cflags=["-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"],
