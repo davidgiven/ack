@@ -50,6 +50,7 @@ def build_descr(name):
             "$(PYTHON) $[ins[3]] $[dir]/temp $[ins[2]]",
             "cp $[dir]/temp $[outs]",
         ],
+        label="DESCR"
     )
 
     exports[f"$(PLATIND)/ego/{name}.descr"] = f".+{name}_descr"
