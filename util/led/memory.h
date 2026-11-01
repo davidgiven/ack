@@ -44,7 +44,12 @@ struct outname;
 #define address(piece, offset) (mems[(piece)].mem_base + (offset))
 #define modulptr(offset) (mems[ALLOMODL].mem_base + core_position + (offset))
 
-#define int_align(sz) (((sz) + (sizeof(int) - 1)) & ~(sizeof(int) - 1))
+/*
+ * Round a size or offset in a piece up so that whatever follows it is
+ * aligned for any type: modules in ALLOMODL hold structs with pointers and
+ * longs (struct outname, struct ar_hdr, ind_t), 8 bytes on a 64-bit host.
+ */
+#define int_align(sz) (((sz) + (_Alignof(max_align_t) - 1)) & ~(_Alignof(max_align_t) - 1))
 
 extern bool incore;
 extern ind_t core_position;
