@@ -1,5 +1,8 @@
 name: C/C++ CI
 
+env:
+  PYTHONPATH: ${{ github.workspace }}/.obj/python-deps
+
 concurrency: 
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -12,9 +15,21 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: apt
-      run: sudo apt update && sudo apt install bison flex lua5.3 libconfig-dev pkg-config
+      run: sudo apt update && sudo apt install bison flex lua5.3 libconfig-dev pkg-config python3-pip
+    - name: Python build dependencies
+      run: python3 -m pip install --target .obj/python-deps libconf==2.0.1
     - name: make
       run: make
+    - name: Description schema tests
+      run: >-
+        python3 util/ego/descr/test_schemachecker.py
+        util/ego/descr/schemachecker.py
+        .obj/util/ego/+i386_descr/i386.descr
+        .obj/modules/src/em_data/+em_data_hdr/em_mnem.h
+    - name: Description reader tests
+      run: >-
+        python3 util/ego/descr/test_readers.py
+        .obj/staging/lib/ack/ego .obj/staging/share/ack/ego/*.descr
 
   build-macos:
     runs-on: macos-latest
@@ -22,6 +37,8 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: brew
       run: brew install python lua@5.4 coreutils make libconfig pkg-config
+    - name: Python build dependencies
+      run: python3 -m pip install --target .obj/python-deps libconf==2.0.1
     - name: make
       run: |
         gmake
@@ -44,6 +61,7 @@ jobs:
           mingw-w64-ucrt-x86_64-nsis
           mingw-w64-ucrt-x86_64-pkg-config
           mingw-w64-ucrt-x86_64-python
+          mingw-w64-ucrt-x86_64-python-pip
           bison
           flex
           zip
@@ -53,6 +71,7 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: build
       run: |
+        python3 -m pip install --target .obj/python-deps libconf==2.0.1
         make LDFLAGS="-s -static" ack-setup.exe AB_SANDBOX=no
     - name: upload setup
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

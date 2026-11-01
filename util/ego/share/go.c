@@ -21,25 +21,31 @@
 #include "alloc.h"
 #include "go.h"
 #include "files.h"
+#include "mach.h"
 
 static bool report_flag = false; /* report #optimizations found? */
 #ifdef DEBUG
 static bool core_flag = false; /* report core usage? */
 #endif
 
-static void mach_init(char* machfile, void (*phase_machinit)(void*))
+static void mach_init(char* machfile, void (*phase_machinit)(config_t*))
 {
 	/* Read target machine dependent information */
 
-	FILE* f;
+	config_t config;
 
-	f = openfile(machfile, "rb");
-	fscanf(f, "%d", &ws);
-	fscanf(f, "%d", &ps);
-	if (ws != ps && ps != 2 * ws)
+	config_init(&config);
+	if (!config_read_file(&config, machfile))
+	{
+		/* Keep the diagnostic valid until error() terminates the process. */
+		error("%s:%d: %s", machfile, config_error_line(&config), config_error_text(&config));
+	}
+	ws = mach_int(config_root_setting(&config), "word_size");
+	ps = mach_int(config_root_setting(&config), "pointer_size");
+	if (ws <= 0 || (ws != ps && ps != 2 * ws))
 		error("illegal pointer size");
-	(*phase_machinit)(f);
-	fclose(f);
+	(*phase_machinit)(&config);
+	config_destroy(&config);
 }
 
 void go(
@@ -47,7 +53,7 @@ void go(
     char* const* argv,
     void (*initialize)(void*),
     void (*optimize)(void*),
-    void (*phase_machinit)(void*),
+    void (*phase_machinit)(config_t*),
     void (*proc_flag)(void*))
 {
 	struct files* files = findfiles(argc, argv);
@@ -60,6 +66,7 @@ void go(
 	int i;
 	char* p;
 	bool time_opt = true;
+	char* machfile = NULL;
 
 	linecount = 0;
 	opterr = 0;
@@ -80,7 +87,7 @@ void go(
 				break;
 
 			case 'M':
-				mach_init(optarg, phase_machinit);
+				machfile = optarg;
 				break;
 
 			case 'C':
@@ -103,6 +110,8 @@ void go(
 		}
 	}
 	time_space_ratio = (time_opt ? 100 : 0);
+	if (machfile)
+		mach_init(machfile, phase_machinit);
 	fproc = getptable(files->pname_in); /* proc table */
 	fdblock = getdtable(files->dname_in); /* data block table */
 	(*initialize)(NULL);
@@ -171,4 +180,8 @@ void report(char* s, int n)
 	{
 		fprintf(stderr, "%s:  %d\n", s, n);
 	}
+}
+
+void no_machinit(config_t* config)
+{
 }

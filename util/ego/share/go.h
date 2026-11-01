@@ -9,15 +9,17 @@
  *
  */
 
+#include <libconfig.h>
+
 /* This is the main driving routine of the optimizer.
  * It first processes the flags given as argument;
  * for every flag it does not recognize itself, it
- * calls 'proc_flag'; as soon as the -M flag is seen,
- * it opens the machine descriptor file and
- * reads phase-independend information (notably the
- * wordsize and pointersize of the target machine);
- * next it calls 'phase_machinit' with this file as
- * parameter. Subsequently it calls 'initialize'.
+ * calls 'proc_flag'. After processing the flags, it
+ * parses the -M machine description with libconfig and
+ * reads the target word and pointer sizes. It then calls
+ * 'phase_machinit' with a config_t pointer, which is valid
+ * only for the duration of that callback. The configuration
+ * is destroyed before calling 'initialize'.
  * Finally, all procedures are read, one at a time,
  * and 'optimize' is called with the current procedure
  * as parameter.
@@ -27,7 +29,7 @@ void go(
     char* const* argv,
     void (*initialize)(void* null),
     void (*optimize)(void*), /* (proc_p *p) */
-    void (*phase_machinit)(void*), /* (FILE *f) */
+    void (*phase_machinit)(config_t*),
     void (*proc_flag)(void*)); /* (char *flag) */
 
 /*
@@ -35,6 +37,9 @@ void go(
  * no action is required.
  */
 void no_action(void*);
+
+/* Machine initialization callback for phases with no machine settings. */
+void no_machinit(config_t*);
 
 /* Report core usage, if core_flag is set. */
 void core_usage(void);

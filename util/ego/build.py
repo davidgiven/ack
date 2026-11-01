@@ -38,13 +38,14 @@ def build_descr(name):
         ins=[
             "lang/cem/cpp.ansi",
             f"./descr/{name}.descr",
-            "./descr/descr.sed",
             em_mnem,
+            "./descr/schemachecker.py",
         ],
         outs=[f"={name}.descr"],
         commands=[
-            "$[ins[0]] -P -I$[dirname(filenameof(ins[3]))] $[ins[1]] > $[dir]/temp",
-            "sed -f $[ins[2]] < $[dir]/temp > $[outs]",
+            "$[ins[0]] -P -I$[dirname(filenameof(ins[2]))] $[ins[1]] > $[dir]/temp",
+            "$(PYTHON) $[ins[3]] $[dir]/temp $[ins[2]]",
+            "cp $[dir]/temp $[outs]",
         ],
     )
 

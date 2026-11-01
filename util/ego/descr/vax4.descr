@@ -1,121 +1,154 @@
-wordsize: 4
-pointersize: 4
-%%RA
-general registers: 8
-address registers: 0
-floating point registers: 0
-use general as pointer: yes
-
-register score parameters:
-	local variable:
-		(2 cases)
-		pointer,general
-			(2 sizes)
-			fitbyte ->	(5,2)
-			default ->	(4,3)
-		general,general
-			(2 sizes)
-			fitbyte ->	(3,1)
-			default ->	(2,2)
-	address of local variable:
-		(2 cases)
-		pointer,general
-			(2 sizes)
-			fitbyte ->	(0,1)
-			default ->	(0,2)
-		general,general
-			(2 sizes)
-			fitbyte ->	(0,1)
-			default ->	(0,2)
-	constant:
-		(3 sizes)
-		in_0_63 ->	(0,0)
-		fitbyte ->	(0,1)
-		default ->	(1,2)
-	double constant:
-		(1 size)
-		default ->	(-1,-1)
-	address of global variable:
-		(1 size)
-		default ->	(2,4)
-	address of procedure:
-		(1 size)
-		default ->	(2,4)
-
-opening cost parameters:
-	local variable:
-		(2 cases)
-		pointer
-			(2 sizes)
-			fitbyte ->	(10,4)
-			default ->	(9,5)
-		general
-			(2 sizes)
-			fitbyte ->	(8,4)
-			default ->	(7,5)
-	address of local variable:
-		(2 cases)
-		pointer
-			(2 sizes)
-			fitbyte ->	(0,4)
-			default ->	(0,5)
-		general
-			(2 sizes)
-			fitbyte ->	(0,4)
-			general ->	(0,5)
-	constant:
-		(3 sizes)
-		in_0_63 ->	(4,2)
-		fitbyte ->	(5,3)
-		default ->	(6,4)
-	double constant:
-		(1 size)
-		default ->	(1000,1000)
-	address of global variable:
-		(1 size)
-		default ->	(6,7)
-	address of procedure:
-		(1 size)
-		default ->	(6,7)
-
-register save costs:
-	(10 cases)
-	0 -> (0,0)
-	1 -> (1,0)
-	2 -> (2,0)
-	3 -> (3,0)
-	4 -> (4,0)
-	5 -> (5,0)
-	6 -> (6,0)
-	7 -> (7,0)
-	8 -> (8,0)
-	0 -> (0,0)
-%%UD
-access costs of global variables:
-	(1 size)
-	default ->	(7,4)
-access costs of local variables:
-	(2 sizes)
-	fitbyte ->	(3,1)
-	default ->	(2,2)
-%%SR
-overflow harmful?:  no
-array bound harmful?:  no
-reduce sli if shift count larger than:  3
-%%CS
 #include "em_mnem.h"
-first time then space:
-addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-		  op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif
-		  op_cmi op_cmu op_cmf op_cms op_cmp -1
-		  op_cii op_cui op_cfi op_ciu op_cff op_cuu op_cif
-		  op_cmi op_cmu op_cmf op_cms op_cmp -1
-lexical thresholds: 1 1
-indirection limit: 8
-convert remainder to division?: no no
-do not eliminate sli if index on shiftcounts:	1 2 3 -1
-						1 2 3 -1
-forbidden operators: -1 -1
-%%SP
-global stack pollution allowed?: yes
+
+word_size = 4;
+pointer_size = 4;
+
+register_allocation = {
+    registers = {
+        general = 8;
+        pointer = 0;
+        float = 0;
+        general_as_pointer = true;
+    };
+    /* Rules are tested in order; the final rule must be "default".
+     * Each cost has separate time and space estimates. */
+    scores = {
+        local_variable = (
+            {
+                from = "pointer";
+                to = "general";
+                rules = (
+                    { when = "fitbyte"; time = 5; space = 2; },
+                    { when = "default"; time = 4; space = 3; }
+                );
+            },
+            {
+                from = "general";
+                to = "general";
+                rules = (
+                    { when = "fitbyte"; time = 3; space = 1; },
+                    { when = "default"; time = 2; space = 2; }
+                );
+            }
+        );
+        local_address = (
+            {
+                from = "pointer";
+                to = "general";
+                rules = (
+                    { when = "fitbyte"; time = 0; space = 1; },
+                    { when = "default"; time = 0; space = 2; }
+                );
+            },
+            {
+                from = "general";
+                to = "general";
+                rules = (
+                    { when = "fitbyte"; time = 0; space = 1; },
+                    { when = "default"; time = 0; space = 2; }
+                );
+            }
+        );
+        constant = (
+            { when = "in_0_63"; time = 0; space = 0; },
+            { when = "fitbyte"; time = 0; space = 1; },
+            { when = "default"; time = 1; space = 2; }
+        );
+        double_constant = ( { when = "default"; time = -1; space = -1; } );
+        global_address = ( { when = "default"; time = 2; space = 4; } );
+        procedure_address = ( { when = "default"; time = 2; space = 4; } );
+    };
+    opening_costs = {
+        local_variable = (
+            {
+                register_class = "pointer";
+                rules = (
+                    { when = "fitbyte"; time = 10; space = 4; },
+                    { when = "default"; time = 9; space = 5; }
+                );
+            },
+            {
+                register_class = "general";
+                rules = (
+                    { when = "fitbyte"; time = 8; space = 4; },
+                    { when = "default"; time = 7; space = 5; }
+                );
+            }
+        );
+        local_address = (
+            {
+                register_class = "pointer";
+                rules = (
+                    { when = "fitbyte"; time = 0; space = 4; },
+                    { when = "default"; time = 0; space = 5; }
+                );
+            },
+            {
+                register_class = "general";
+                rules = (
+                    { when = "fitbyte"; time = 0; space = 4; },
+                    { when = "default"; time = 0; space = 5; }
+                );
+            }
+        );
+        constant = (
+            { when = "in_0_63"; time = 4; space = 2; },
+            { when = "fitbyte"; time = 5; space = 3; },
+            { when = "default"; time = 6; space = 4; }
+        );
+        double_constant = ( { when = "default"; time = 1000; space = 1000; } );
+        global_address = ( { when = "default"; time = 6; space = 7; } );
+        procedure_address = ( { when = "default"; time = 6; space = 7; } );
+    };
+    /* Indexed by total registers saved, starting at zero. */
+    save_costs = (
+        { time = 0; space = 0; },
+        { time = 1; space = 0; },
+        { time = 2; space = 0; },
+        { time = 3; space = 0; },
+        { time = 4; space = 0; },
+        { time = 5; space = 0; },
+        { time = 6; space = 0; },
+        { time = 7; space = 0; },
+        { time = 8; space = 0; },
+        { time = 0; space = 0; }
+    );
+};
+
+constant_propagation = {
+    global_access = ( { when = "default"; time = 7; space = 4; } );
+    local_access = (
+        { when = "fitbyte"; time = 3; space = 1; },
+        { when = "default"; time = 2; space = 2; }
+    );
+};
+
+strength_reduction = {
+    overflow_harmful = false;
+    array_bounds_harmful = false;
+    shift_threshold = 3;
+};
+
+common_subexpressions = {
+    time = {
+        addressing_modes = [ op_adp, op_lof, op_ldf, op_loi, op_dch, op_lpb ];
+        cheap_operations = [ op_cii, op_cui, op_cfi, op_ciu, op_cff, op_cuu, op_cif, op_cmi, op_cmu, op_cmf, op_cms, op_cmp ];
+        lexical_threshold = 1;
+        convert_remainder_to_division = false;
+        excluded_index_shift_counts = [ 1, 2, 3 ];
+        forbidden_operations = [];
+    };
+    space = {
+        addressing_modes = [ op_adp, op_lof, op_ldf, op_loi, op_dch, op_lpb ];
+        cheap_operations = [ op_cii, op_cui, op_cfi, op_ciu, op_cff, op_cuu, op_cif, op_cmi, op_cmu, op_cmf, op_cms, op_cmp ];
+        lexical_threshold = 1;
+        convert_remainder_to_division = false;
+        excluded_index_shift_counts = [ 1, 2, 3 ];
+        forbidden_operations = [];
+    };
+    indirection_limit = 8;
+};
+
+stack_pollution = {
+    global_allowed = true;
+};
