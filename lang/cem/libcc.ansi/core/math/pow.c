@@ -25,14 +25,14 @@ pow(double x, double y)
 	if (x == 1.0)
 		return x;
 
-	if (x == 0 && y <= 0)
+	if (y == 0)
+		return 1.0; /* also 0 ^ 0 (C99 and IEEE 754) */
+
+	if (x == 0 && y < 0)
 	{
 		errno = EDOM;
 		return 0;
 	}
-
-	if (y == 0)
-		return 1.0;
 
 	if (y < 0)
 	{
