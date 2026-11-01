@@ -615,6 +615,12 @@ static void insn_simple(int opcode)
             );
             break;
 
+        case op_nop:
+        {
+            /* Emitted after a volatile access --- ignore. */
+            break;
+        }
+
         case op_lni:
         {
             /* Increment line number --- ignore. */
