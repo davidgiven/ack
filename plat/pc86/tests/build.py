@@ -4,5 +4,5 @@ plat_testsuite(
     name="tests",
     plat="pc86",
     method="plat/pc86/emu",
-    sets=["core", "bugs", "m2"],
+    sets=["core", "bugs", "m2", "basic"],
 )
