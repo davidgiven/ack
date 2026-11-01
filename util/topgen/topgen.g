@@ -134,7 +134,7 @@ mode_definitions
 	    LINE_TERMINATOR
 	    SPACE*
 	]*
-			{   fputs("\tdefault :\n\t\tassert(0);\n",genc);
+			{   fputs("\tdefault :\n\t\tfatal(\"invalid optimizer variable number\");\n",genc);
 			    fputs("\t}\n\treturn r;\n}\n\n",genc);
 			}
 ;

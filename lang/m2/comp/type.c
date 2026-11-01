@@ -305,7 +305,7 @@ int in_range(arith i, struct type *tp)
 		return	chk_bounds(i, tp->sub_ub, SubBaseType(tp)->tp_fund) &&
 			chk_bounds(tp->sub_lb, i, SubBaseType(tp)->tp_fund);
 	}
-	assert(0);
+	fatal("invalid type for bounds check");
 	UNREACHABLE_CODE;
 }
 

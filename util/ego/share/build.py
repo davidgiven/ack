@@ -37,6 +37,7 @@ clibrary(
         "./global.c",
         "./files.c",
         "./go.c",
+        "./mach.c",
         "./map.c",
         "./utils.c",
         "./get.c",
@@ -56,6 +57,7 @@ clibrary(
         "./get.h",
         "./global.h",
         "./go.h",
+        "./mach.h",
         "./init_glob.h",
         "./locals.h",
         "./lset.h",
@@ -77,6 +79,7 @@ clibrary(
             "get.h",
             "global.h",
             "go.h",
+            "mach.h",
             "init_glob.h",
             "locals.h",
             "lset.h",
@@ -90,7 +93,9 @@ clibrary(
     },
     deps=[
         "h",
+        "util/ego+libconfig",
         "modules/src/em_data",
+        "modules/src/data",
     ],
     cflags=["-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"],
 )

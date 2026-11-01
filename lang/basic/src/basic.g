@@ -232,20 +232,20 @@ filelist { int intv; }
 		]* ;
 
 datastmt:	DATASYM		{ datastmt(); in_data = 1;}
-                datalist	{ fprintf(datfile,"\n"); in_data = 0; }
+                datalist	{ datprintf("\n"); in_data = 0; }
 	;
 
-dataelm : INTVALUE		{ fprintf(datfile,"%d",ival); }
-	| '-' [ INTVALUE	{ fprintf(datfile,"%d",-ival); }
-	      | FLTVALUE	{ fprintf(datfile,"-%s",dval); }
+dataelm : INTVALUE		{ datprintf("%d",ival); }
+	| '-' [ INTVALUE	{ datprintf("%d",-ival); }
+	      | FLTVALUE	{ datprintf("-%s",dval); }
 	      ]
-	| FLTVALUE		{ fprintf(datfile,dval); }
-	| STRVALUE		{ fprintf(datfile,"\"%s\"",sval); }
-	| IDENTIFIER		{ fprintf(datfile,"\"%s\"",sval); }
+	| FLTVALUE		{ datprintf("%s",dval); }
+	| STRVALUE		{ datprintf("\"%s\"",sval); }
+	| IDENTIFIER		{ datprintf("\"%s\"",sval); }
 	;
 
 datalist: dataelm
-	  [ ',' 		{ fprintf(datfile,","); } 
+	  [ ',' 		{ datprintf(","); } 
           dataelm ]*
 	;
 

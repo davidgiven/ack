@@ -4,6 +4,7 @@
  *
  * Author: Hans van Staveren
  */
+#include "warnings.h"
 #include <assert.h>
 #include "param.h"
 #include "types.h"
@@ -284,7 +285,7 @@ static eval_t compute(expr_p pexp)
 	switch (nparam[pexp->ex_operator])
 	{
 		default:
-			assert(false);
+			fatal("invalid expression operator arity");
 		case 2:
 			leaf2 = compute(&enodes[pexp->ex_rnode]);
 			if (leaf2.e_typ == EV_UNDEF
@@ -306,7 +307,7 @@ static eval_t compute(expr_p pexp)
 	switch (pexp->ex_operator)
 	{
 		default:
-			assert(false);
+			fatal("invalid peephole expression operator");
 			break;
 		case EX_CON:
 			res.e_v.e_con = (offset) pexp->ex_lnode;
@@ -813,6 +814,10 @@ static int repl_mul(line_p lp, line_p *b, line_p *e)
 			n = (long) ((lp->l_optyp & BMASK) - Z_OPMINI);
 			break;
 	}
+
+	/* Only the sz bytes of the operand count: n is wider on 64-bit hosts. */
+	if (sz < (int) sizeof(n))
+		n &= (1UL << (8 * sz)) - 1;
 
 #define newinstr(res, opcode, val)	(*(res) = newline((short)(val)+Z_OPMINI), (*(res))->l_instr = (opcode))
 

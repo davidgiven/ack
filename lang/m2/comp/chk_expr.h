@@ -21,10 +21,11 @@ extern int	(*DesigChkTable[])(struct node **, int);	/* table of designator check
 #define	ChkExpression(expp)	((*ExprChkTable[(unsigned int)((*expp)->nd_class)])(expp,D_USED))
 #define ChkDesig(expp, flags)	((*DesigChkTable[(unsigned int)((*expp)->nd_class)])(expp,flags))
 
-/* handle reference counts for sets */
-#define inc_refcount(s)		(*((int *)(s) - 1) += 1)
-#define dec_refcount(s)		(*((int *)(s) - 1) -= 1)
-#define refcount(s)		(*((int *)(s) - 1))
+/* MkSet reserves one arith before the set for its reference count.
+ * Access it with the same type used to initialize the allocation. */
+#define inc_refcount(s)		((s)[-1] += 1)
+#define dec_refcount(s)		((s)[-1] -= 1)
+#define refcount(s)		((s)[-1])
 
 void MkCoercion(struct node **pnd, struct type *tp);
 int ChkVariable(struct node **expp, int flags);

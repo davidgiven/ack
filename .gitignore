@@ -1,0 +1,5 @@
+.obj/
+.ninja_log
+compile_commands.json
+bdos.img
+

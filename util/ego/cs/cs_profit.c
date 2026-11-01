@@ -8,6 +8,7 @@
 #include <em_mnem.h>
 #include <em_spec.h>
 #include "ego/share/types.h"
+#include "ego/share/mach.h"
 #include "ego/share/debug.h"
 #include "ego/share/global.h"
 #include "ego/share/utils.h"
@@ -28,91 +29,55 @@ static short LX_threshold;
 static short AR_limit;
 static bool RM_to_DV;
 
-static void get_instrs(FILE* f, cset* s_p)
+static cset get_cset(config_setting_t* policy, const char* name, int max)
 {
-	/* Read a set of integers from inputfile f into *s_p.
-	 * Such a set must be delimited by a negative number.
-	 */
-	int instr;
-
-	fscanf(f, "%d", &instr);
-	while (instr >= 0)
-	{
-		Cadd((Celem_t)instr, s_p);
-		fscanf(f, "%d", &instr);
-	}
+	/* Copy the named integer array into an optimizer-owned compact set. */
+	config_setting_t* values = config_setting_get_member(policy, name);
+	cset result = Cempty_set((short)max);
+	int i;
+	for (i = 0; i < config_setting_length(values); i++)
+		Cadd((Celem_t)config_setting_get_int_elem(values, i), &result);
+	return result;
 }
 
-static void choose_cset(FILE* f, cset* s_p, int max)
+void cs_machinit(config_t* config)
 {
-	/* Read two compact sets of integers from inputfile f.
-	 * Choose the first if we optimize with respect to time,
-	 * the second if we optimize with respect to space, as
-	 * indicated by time_space_ratio.
-	 */
-	cset cs1, cs2; /* Two dummy sets. */
-
-	*s_p = Cempty_set((short)max);
-
-	cs1 = Cempty_set((short)max);
-	get_instrs(f, &cs1);
-	cs2 = Cempty_set((short)max);
-	get_instrs(f, &cs2);
-
-	Ccopy_set(time_space_ratio >= 50 ? cs1 : cs2, s_p);
-
-	Cdeleteset(cs1);
-	Cdeleteset(cs2);
-}
-
-void cs_machinit(void* vp)
-{
-	FILE* f = vp;
-	char s[100];
-	int time, space;
-
-	/* Find piece that is relevant for this phase. */
-	do
-	{
-		while (getc(f) != '\n')
-			;
-		fscanf(f, "%99s", s);
-	} while (strcmp(s, "%%CS"));
+	/* Choose the time or space policy according to time_space_ratio. */
+	config_setting_t* policy = mach_setting(
+	    config,
+	    time_space_ratio >= 50 ? "common_subexpressions.time" : "common_subexpressions.space");
 
 	/* Choose a set of instructions which must only be eliminated
 	 * if they are at the root of another expression.
 	 */
-	choose_cset(f, &addr_modes, sp_lmnem);
+	addr_modes = get_cset(policy, "addressing_modes", sp_lmnem);
 
 	/* Choose a set of cheap instructions; i.e. instructions that
 	 * are cheaper than a move to save the result of such an
 	 * instruction.
 	 */
-	choose_cset(f, &cheaps, sp_lmnem);
+	cheaps = get_cset(policy, "cheap_operations", sp_lmnem);
 
 	/* Read how many lexical levels back an LXL/LXA instruction
 	 * must at least look before it will be eliminated.
 	 */
-	fscanf(f, "%d %d", &time, &space);
-	LX_threshold = time_space_ratio >= 50 ? time : space;
+	LX_threshold = mach_int(policy, "lexical_threshold");
 
 	/* Read what the size of an array-element may be,
-	 * before we think that it is to big to replace
+	 * before we think that it is too big to replace
 	 * a LAR/SAR of it by AAR LOI/STI <size>.
 	 */
-	fscanf(f, "%d", &space);
-	AR_limit = space;
+	AR_limit = mach_int(mach_setting(config, "common_subexpressions"), "indirection_limit");
 
 	/* Read whether to convert a remainder RMI/RMU to a division
 	 * DVI/DVU using the formula a % b = a - b * (a / b).
 	 */
-	fscanf(f, "%d %d", &time, &space);
-	RM_to_DV = time_space_ratio >= 50 ? time : space;
+	RM_to_DV = mach_bool(policy, "convert_remainder_to_division");
 
 	/* Read for what counts we must not eliminate an SLI instruction
 	 * when it is part of an array-index computation.
 	 */
-	choose_cset(f, &sli_counts, 8 * ws);
+	sli_counts = get_cset(policy, "excluded_index_shift_counts", 8 * ws);
 
 	/* Read a set of instructions which we do not want to eliminate.
 	 * Note: only instructions need be given that may in principle
@@ -120,7 +85,7 @@ void cs_machinit(void* vp)
 	 * when they stay, and with which is not dealt in the common
 	 * decision routines.
 	 */
-	choose_cset(f, &forbidden, sp_lmnem);
+	forbidden = get_cset(policy, "forbidden_operations", sp_lmnem);
 }
 
 bool may_become_aar(avail_p avp)
@@ -175,7 +140,10 @@ static bool gains(avail_p avp)
 		return !sli_no_eliminate(avp->av_found->l_prev);
 
 	if (Cis_elem(avp->av_instr & BMASK, addr_modes))
-		return instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
+		/* If it is the first instruction of its basic block, its
+		 * operand comes from before the block: do not eliminate. */
+		return avp->av_found->l_prev != (line_p)0
+		    && instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
 
 	if (Cis_elem(avp->av_instr & BMASK, cheaps))
 		return avp->av_saveloc != (entity_p)0;

@@ -324,7 +324,7 @@ void bo_optimize(void* vp)
 
 int main(int argc, char* argv[])
 {
-	go(argc, argv, no_action, bo_optimize, no_action, no_action);
+	go(argc, argv, no_action, bo_optimize, no_machinit, no_action);
 	report("branch optimizations", Sbo);
 	exit(0);
 }

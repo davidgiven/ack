@@ -615,6 +615,12 @@ static void insn_simple(int opcode)
             );
             break;
 
+        case op_nop:
+        {
+            /* Emitted after a volatile access --- ignore. */
+            break;
+        }
+
         case op_lni:
         {
             /* Increment line number --- ignore. */
@@ -1742,7 +1748,7 @@ static void generate_tree(struct basicblock* bb)
                 break;
 
             default:
-                assert(0);
+                fatal("invalid EM instruction parameter type");
         }
 
         if (tracing('E'))

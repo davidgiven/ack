@@ -59,5 +59,6 @@ void unstackrepl(void);
 int replace(register struct idf *idf);
 void EnableMacros(void);
 void add2repl(register struct repl *repl, int ch);
+char *quoted_name(const char *name);
 
 #endif /* REPLACE_H_ */

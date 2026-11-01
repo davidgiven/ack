@@ -4,8 +4,8 @@ end
 
 function load_table()
 	local specs = {}
-	for line in io.lines() do
-		line = strip(line)
+	for raw_line in io.lines() do
+		local line = strip(raw_line)
 		if line == "" then
 			break
 		end
@@ -27,8 +27,8 @@ function load_table()
 
 	local pseudos = {}
 	local pseudo_count = 0
-	for line in io.lines() do
-		line = strip(line)
+	for raw_line in io.lines() do
+		local line = strip(raw_line)
 		if line == "" then
 			break
 		end
@@ -48,8 +48,8 @@ function load_table()
 
 	local mnems = {}
 	local mnem_count = 0
-	for line in io.lines() do
-		line = strip(line)
+	for raw_line in io.lines() do
+		local line = strip(raw_line)
 		if line == "" then
 			break
 		end

@@ -1,3 +1,4 @@
+#include "warnings.h"
 #include <assert.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -704,7 +705,7 @@ static void emitcase(Term p, int ntnumber)
 			print("%2assert(l && r);\n");
 			break;
 		default:
-			assert(0);
+			fatal("invalid instruction selector operator arity");
 	}
 	for (r = p->rules; r; r = r->next)
 	{
@@ -747,7 +748,7 @@ static void emitcase(Term p, int ntnumber)
 				emitcost(r->pattern->right, "r");
 				break;
 			default:
-				assert(0);
+				fatal("invalid instruction selector operator arity");
 		}
 		print("%d);\n", r->cost);
 		emitrecord("\t\t\t", r, 0);

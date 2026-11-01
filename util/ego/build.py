@@ -1,7 +1,14 @@
-from build.ab import export, simplerule, filenamesof, targetof, filenameof
+from build.ab import export, simplerule, filenamesof, targetof, filenameof, G
 from build.c import cprogram
+from build.pkg import package
 from glob import glob
 from fnmatch import filter
+
+
+package(name="libconfig", package="libconfig")
+if G.WINDOWS == "yes":
+    # Windows builds link libconfig statically; its headers default to DLL imports.
+    targetof(".+libconfig").args.setdefault("caller_cflags", []).append("-DLIBCONFIG_STATIC")
 
 em_mnem = filter(filenamesof([targetof("modules/src/em_data")]), "*/em_mnem.h")[
     0
@@ -16,10 +23,11 @@ def build_ego_helper(name, srcs=[], deps=[]):
             glob(f"util/ego/{name}/*.c") + glob(f"util/ego/{name}/*.h") + srcs
         ),
         deps=[
-            "util/ego/share",
+            "h",
             "modules/src/em_data",
             "modules/src/system",
-            "h",
+            "util/ego+libconfig",
+            "util/ego/share",
         ]
         + deps,
         cflags=["-DDEBUG", "-DVERBOSE", "-DNOTCOMPACT"],
@@ -33,14 +41,16 @@ def build_descr(name):
         ins=[
             "lang/cem/cpp.ansi",
             f"./descr/{name}.descr",
-            "./descr/descr.sed",
             em_mnem,
+            "./descr/schemachecker.py",
         ],
         outs=[f"={name}.descr"],
         commands=[
-            "$[ins[0]] -P -I$[dirname(filenameof(ins[3]))] $[ins[1]] > $[dir]/temp",
-            "sed -f $[ins[2]] < $[dir]/temp > $[outs]",
+            "$[ins[0]] -P -I$[dirname(filenameof(ins[2]))] $[ins[1]] > $[dir]/temp",
+            "$(PYTHON) $[ins[3]] $[dir]/temp $[ins[2]]",
+            "cp $[dir]/temp $[outs]",
         ],
+        label="DESCR"
     )
 
     exports[f"$(PLATIND)/ego/{name}.descr"] = f".+{name}_descr"

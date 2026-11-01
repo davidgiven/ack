@@ -6,6 +6,7 @@
 
 /* V A L U E N U M B E R I N G   M E T H O D */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include "ego/share/types.h"
 #include "ego/share/global.h"
@@ -175,7 +176,7 @@ static void fiddle_stack(line_p lnp)
 	switch (INSTR(lnp))
 	{
 		default:
-			assert(false);
+			fatal("invalid instruction for value numbering");
 			break;
 		case op_lor:
 			dummy.tk_vn = newvalnum();
@@ -293,7 +294,7 @@ static void hopeless(int instr)
 	switch (instr)
 	{
 		default:
-			assert(false);
+			fatal("invalid instruction for stack adjustment");
 			break;
 		case op_mon:
 		case op_str:
@@ -385,7 +386,7 @@ void vnm(bblock_p bp)
 				fiddle_stack(lnp);
 				break;
 			default:
-				assert(false);
+				fatal("invalid instruction class for value numbering");
 				break;
 		}
 	}

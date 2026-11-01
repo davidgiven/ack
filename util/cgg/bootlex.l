@@ -9,6 +9,7 @@
 
 #define MAXBACKUP 50
 
+#include "warnings.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -101,7 +102,7 @@ return			return(RETURN);
                          } else {
                            yylval.yy_ident = ip;
                            switch(ip->i_type) {
-                           default:assert(0);
+                           default:fatal("invalid identifier type in code generator description");
                            case IREG:return(RIDENT);
                            case IPRP:return(PIDENT);
                            case ITOK:return(TIDENT);

@@ -122,7 +122,7 @@ extern string libpath(string);
 /* main.c */
 extern void error(int lineno,string s,string t);
 extern void warning(int lineno,string s,string t);
-extern void fatal(int lineno,string s,string t);
+extern NORETURN void fatal(int lineno,string s,string t);
 extern void copyfile(string);
 extern void install(string, string);
 

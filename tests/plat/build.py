@@ -5,6 +5,9 @@ from glob import glob
 from os.path import *
 
 allsets = {
+    "basic": [
+        "tests/plat/basic/data,bas,.bas",
+    ],
     "bugs": [
         "tests/plat/bugs/bug-157-i80-varargs,c,.c",
         "tests/plat/bugs/bug-164-faddrn,c,.c",
@@ -16,9 +19,11 @@ allsets = {
     "core": [
         "tests/plat/core/aar,e,.e",
         "tests/plat/core/and,e,.e",
+        "tests/plat/core/andbool,e,.c",
         "tests/plat/core/andv,e,.e",
         "tests/plat/core/brk,c,.c",
         "tests/plat/core/bss,e,.c",
+        "tests/plat/core/bytediv,e,.c",
         "tests/plat/core/calloc,c,.c",
         "tests/plat/core/cii,e,.e",
         "tests/plat/core/cmi,e,.e",
@@ -29,6 +34,8 @@ allsets = {
         "tests/plat/core/_dummy,e,.c",
         "tests/plat/core/dup,e,.e",
         "tests/plat/core/exg,e,.e",
+        "tests/plat/core/foldcii,e,-O3,.c",
+        "tests/plat/core/foldoverflow,e,-O3,.c",
         "tests/plat/core/inn,e,.e",
         "tests/plat/core/intadd,e,.c",
         "tests/plat/core/intcmp,e,.c",
@@ -39,6 +46,8 @@ allsets = {
         "tests/plat/core/ior,e,.e",
         "tests/plat/core/iorv,e,.e",
         "tests/plat/core/lar,e,.e",
+        "tests/plat/core/mulminus1,e,.c",
+        "tests/plat/core/negunsigned,e,.c",
         "tests/plat/core/newdispose,p,.p",
         "tests/plat/core/pascalsets,p,.p",
         "tests/plat/core/rck,e,.e",
@@ -47,6 +56,7 @@ allsets = {
         "tests/plat/core/set,e,.e",
         "tests/plat/core/setjmp,c,.c",
         "tests/plat/core/structcopy,e,.c",
+        "tests/plat/core/volatile,e,.c",
         "tests/plat/core/xor,e,.e",
         "tests/plat/core/xorv,e,.e",
     ],

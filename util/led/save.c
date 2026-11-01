@@ -37,7 +37,7 @@ void savemagic(void)
 	if ((p = core_alloc(ALLOMODL, (long)sizeof(int))) != (char*)0)
 	{
 		*(unsigned short*)p = AALMAG;
-		core_position += sizeof(int);
+		core_position += int_align(sizeof(int));
 	}
 }
 

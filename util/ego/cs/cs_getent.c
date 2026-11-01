@@ -3,6 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include "warnings.h"
 #include <em_mnem.h>
 #include "ego/share/types.h"
 #include "ego/share/utils.h"
@@ -82,7 +83,7 @@ entity_p getentity(line_p lnp, line_p* l_out)
 		switch ((int)off == off ? (int)off : 3)
 		{
 			default:
-				assert(false);
+				fatal("invalid indirect entity offset");
 				break;
 			case 0:
 				en.en_kind = ENLOCBASE;
@@ -116,7 +117,7 @@ entity_p getentity(line_p lnp, line_p* l_out)
 	switch (SIZEINF(ip))
 	{
 		default:
-			assert(false);
+			fatal("invalid entity size class");
 			break;
 		case WS1:
 			en.en_size = ws;

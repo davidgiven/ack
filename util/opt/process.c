@@ -4,6 +4,7 @@
  *
  * Author: Hans van Staveren
  */
+#include "warnings.h"
 #include <assert.h>
 #include "param.h"
 #include "types.h"
@@ -117,7 +118,7 @@ static void symvalue(void)
 		switch (lp->l_instr & BMASK)
 		{
 			default:
-				assert(false);
+				fatal("invalid data pseudo-instruction");
 				break;
 			case ps_sym:
 				sp = lp->l_a.la_sp;
@@ -140,7 +141,7 @@ static void symvalue(void)
 					switch (ap->a_typ)
 					{
 						default:
-							assert(false);
+							fatal("invalid data initializer argument type");
 						case ARGOFF:
 							count = align(count, wordsize) + wordsize;
 							break;
