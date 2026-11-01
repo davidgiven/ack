@@ -175,7 +175,10 @@ static bool gains(avail_p avp)
 		return !sli_no_eliminate(avp->av_found->l_prev);
 
 	if (Cis_elem(avp->av_instr & BMASK, addr_modes))
-		return instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
+		/* If it is the first instruction of its basic block, its
+		 * operand comes from before the block: do not eliminate. */
+		return avp->av_found->l_prev != (line_p)0
+		    && instrgroup(avp->av_found->l_prev) != SIMPLE_LOAD;
 
 	if (Cis_elem(avp->av_instr & BMASK, cheaps))
 		return avp->av_saveloc != (entity_p)0;
