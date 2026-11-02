@@ -8,17 +8,15 @@
 
 .1
     rom 0I4
-    loe .1
+    lae .1
+    loi 4
     loc 1       /* bit number */
     inn 4
     zeq *1
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    ass EM_WSIZE
+    asp EM_WSIZE
 1
 
     /* Test existent bit */
@@ -34,11 +32,8 @@
     zne *2
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    ass EM_WSIZE
+    asp EM_WSIZE
 2
 
     /* Test non-existent high bit */
@@ -55,11 +50,8 @@
     zeq *3
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    ass EM_WSIZE
+    asp EM_WSIZE
 3
 
     /* Test existent high bit */
@@ -76,11 +68,8 @@
     zne *4
 
     loc __LINE__
-    loc EM_WSIZE
-    loc 4
-    cuu
     cal $fail
-    ass EM_WSIZE
+    asp EM_WSIZE
 4
 
     cal $finished
