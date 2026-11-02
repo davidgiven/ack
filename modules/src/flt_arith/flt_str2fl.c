@@ -204,7 +204,12 @@ static void add_exponent(flt_arith *e, int exp)
 	divsz = exp / SMALLSZ;
 	modsz = exp % SMALLSZ;
 	if (!status) status = flt_status;
-	flt_mul(e, (neg ? r_10pow : s10pow) + modsz, &x);
+	/* s10pow holds 10 ** i exactly: dividing by it is exact up to the
+	   sticky bit, multiplying by r_10pow is not */
+	if (neg)
+		flt_div(e, s10pow + modsz, &x);
+	else
+		flt_mul(e, s10pow + modsz, &x);
 	if (!status) status = flt_status;
 	while (divsz >= (int)BIGSZ) {
 		flt_mul(&x, neg ? &r_big_10pow[BIGSZ-1] : &big_10pow[BIGSZ-1],&x);
@@ -221,6 +226,7 @@ void flt_str2flt(const char *s, flt_arith *e)
 	int	c;
 	int		dotseen = 0;
 	int		digitseen = 0;
+	int		dropped = 0;	/* a non-zero digit did not fit */
 	int		exp = 0;
 
 	while (isspace(*s)) s++;
@@ -252,7 +258,10 @@ void flt_str2flt(const char *s, flt_arith *e)
 			a1.flt_l_32 = c - '0';
 			flt_b64_add(&(e->flt_mantissa), &a1);
 		}
-		else exp++;
+		else {
+			exp++;
+			if (c != '0') dropped = 1;
+		}
 		if (dotseen) exp--;
 	}
 	if (! digitseen) {
@@ -281,6 +290,8 @@ void flt_str2flt(const char *s, flt_arith *e)
 	e->flt_exp = 63;
 	flt_nrm(e);
 	add_exponent(e, exp);
+	/* the digits that did not fit as a sticky bit, for flt_rnd() */
+	if (dropped) e->m2 |= 1;
 	flt_chk(e);
 }
 

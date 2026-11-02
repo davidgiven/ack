@@ -62,14 +62,9 @@ void flt_mul(flt_arith *e1, flt_arith *e2, flt_arith *res)
 	 */
 	res->m1 = ((uint32_t)result[0] << 16) + result[1];
 	res->m2 = ((uint32_t)result[2] << 16) + result[3];
-	if (result[4] & 0x8000) {
-		if (++res->m2 == 0) {
-			res->m2 = 0;
-			if (++res->m1 == 0) {
-				res->m1 = 0x80000000;
-				res->flt_exp++;
-			}
-		}
-	}
+	/* the lower half as a sticky lowest bit (rounding to odd), so that
+	   flt_rnd() can round the product once more correctly */
+	if (result[4] | result[5] | result[6] | result[7])
+		res->m2 |= 1;
 	flt_chk(res);
 }

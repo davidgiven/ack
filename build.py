@@ -9,9 +9,11 @@ if _plats == "all":
     PLATS = {dirname(p) for p in glob("*/build.py", root_dir="plat")}
 else:
     PLATS = _plats.split(" ")
-    
+
 if IS_WINDOWS and ("cpm" in PLATS):
-    print("Warning: the cpm plat can't be built on Windows because of reasons; skipping.")
+    print(
+        "Warning: the cpm plat can't be built on Windows because of reasons; skipping."
+    )
     PLATS.discard("cpm")
 print("Building plats: " + (" ".join(PLATS)))
 
@@ -51,7 +53,11 @@ export(
     name="all",
     deps=(
         [".+compiler", "examples+all"]
-        + ([] if IS_WINDOWS else ["lang/cem/cpp.ansi+test"])
+        + (
+            []
+            if IS_WINDOWS
+            else ["modules/src/flt_arith+test", "lang/cem/cpp.ansi+test"]
+        )
         + (
             []
             if IS_WINDOWS

@@ -11,5 +11,10 @@
 struct expr;
 
 void fltcstbin(struct expr** expp, int oper, struct expr* expr);
+void fltcstround(struct expr* expr);
+
+/* Mantissa bits of an 8-byte floating type when the target's floating point
+   is not IEEE (-Vm), else 0. */
+extern int flt_dbl_bits;
 
 #endif /* FLTCSTOPER_H_ */
