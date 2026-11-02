@@ -51,6 +51,7 @@ jobs:
         echo "RELEASE_DATE=$(date --rfc-3339=date)" >> ${GITHUB_ENV}
   
     - name: tag
+      shell: pwsh
       run: |
         git config user.name "davidgiven"
         git config user.email "dg@cowlark.com"
@@ -58,6 +59,7 @@ jobs:
         git push -f origin dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIT_TERMINAL_PROMPT: "0"
   
     - name: release
       uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
