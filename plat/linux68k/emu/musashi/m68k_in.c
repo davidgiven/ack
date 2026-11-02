@@ -4450,7 +4450,7 @@ M68KMAKE_OP(divs, 16, ., d)
 			FLAG_N = NFLAG_16(quotient);
 			FLAG_V = VFLAG_CLEAR;
 			FLAG_C = CFLAG_CLEAR;
-			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | (remainder << 16));
+			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | ((uint)remainder << 16));
 			return;
 		}
 		FLAG_V = VFLAG_SET;
@@ -4488,7 +4488,7 @@ M68KMAKE_OP(divs, 16, ., .)
 			FLAG_N = NFLAG_16(quotient);
 			FLAG_V = VFLAG_CLEAR;
 			FLAG_C = CFLAG_CLEAR;
-			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | (remainder << 16));
+			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | ((uint)remainder << 16));
 			return;
 		}
 		FLAG_V = VFLAG_SET;
@@ -4514,7 +4514,7 @@ M68KMAKE_OP(divu, 16, ., d)
 			FLAG_N = NFLAG_16(quotient);
 			FLAG_V = VFLAG_CLEAR;
 			FLAG_C = CFLAG_CLEAR;
-			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | (remainder << 16));
+			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | ((uint)remainder << 16));
 			return;
 		}
 		FLAG_V = VFLAG_SET;
@@ -4540,7 +4540,7 @@ M68KMAKE_OP(divu, 16, ., .)
 			FLAG_N = NFLAG_16(quotient);
 			FLAG_V = VFLAG_CLEAR;
 			FLAG_C = CFLAG_CLEAR;
-			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | (remainder << 16));
+			*r_dst = MASK_OUT_ABOVE_32(MASK_OUT_ABOVE_16(quotient) | ((uint)remainder << 16));
 			return;
 		}
 		FLAG_V = VFLAG_SET;

@@ -29,7 +29,7 @@
 #include	"warning.h"
 #include	"error.h"
 
-#define arith_sign	((arith) 1 << (sizeof(arith) * 8 - 1))
+#define arith_sign	((arith) ((unsigned long) 1 << (sizeof(arith) * 8 - 1)))
 
 #ifndef NOCROSS
 arith full_mask[MAXSIZE+1];/* full_mask[1] == 0xFF, full_mask[2] == 0xFFFF, .. */
@@ -621,7 +621,7 @@ static void CutSize(struct node *expr)
 	else {
 		int nbits = (int) (sizeof(arith) - tp->tp_size) * 8;
 
-		expr->nd_INT = (expr->nd_INT << nbits) >> nbits;
+		expr->nd_INT = (arith) ((unsigned long) expr->nd_INT << nbits) >> nbits;
 	}
 }
 
@@ -633,11 +633,11 @@ void InitCst(void)
 
 	while (!(bt < 0))	{
 		i++;
-		bt = (bt << 8) + 0377;
+		bt = (arith) (((unsigned long) bt << 8) + 0377);
 		if (i == MAXSIZE+1)
 			fatal("array full_mask too small for this machine");
 		full_mask[i] = bt;
-		max_int[i] = bt & ~(1L << ((8 * i) - 1));
+		max_int[i] = bt & ~(arith) (1UL << ((8 * i) - 1));
 		min_int[i] = - max_int[i];
 		if (! options['s']) min_int[i]--;
 	}

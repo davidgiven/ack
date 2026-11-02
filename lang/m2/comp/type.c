@@ -671,7 +671,7 @@ void ForceForwardTypeDef(struct def *df)
 		nd = nd->nd_RIGHT;
 	}
 	df = lookfor(nd, CurrVis, 1, 0);
-	if (! df->df_kind & (D_ERROR|D_TYPE)) {
+	if (!(df->df_kind & (D_ERROR|D_TYPE))) {
 		node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 	}
 	while (df1 && df1->df_kind == D_FORWTYPE) {

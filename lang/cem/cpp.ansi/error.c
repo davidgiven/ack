@@ -30,7 +30,7 @@ static void err_hdr(char *s)
 	if (FileName) {
 		fprintf(ERROUT, "\"%s\", line %d: %s", FileName, (int)LineNumber, s);
 	}
-	else	fprintf(ERROUT, s);
+	else	fprintf(ERROUT, "%s", s);
 }
 
 #if __STDC__

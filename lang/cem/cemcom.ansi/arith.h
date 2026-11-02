@@ -30,7 +30,8 @@ struct expr;
 struct type;
 
 #define arith_size (sizeof(arith))
-#define arith_sign ((arith)1 << (arith_size * 8 - 1))
+/* shift unsigned: 1 << 63 in a long is undefined */
+#define arith_sign ((arith)((unsigned long)1 << (arith_size * 8 - 1)))
 #define max_arith  (~arith_sign)
 
 extern writh full_mask[]; /* cstoper.c */

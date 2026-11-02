@@ -32,7 +32,7 @@ void do_option(char *text)
 {
 	switch(*text++)	{
 	case '-':
-		options[*text] = 1;
+		options[(unsigned char)*text] = 1;
 		break;
 	case 'u':
 		if (! strcmp(text, "ndef")) {
@@ -57,7 +57,7 @@ void do_option(char *text)
 	case 'm':
 	case 'o':	/* ignore garbage after #else or #endif */
 	case 'C' :	/* comment output		*/
-		options[*(text-1)] = 1;
+		options[(unsigned char)*(text-1)] = 1;
 		break;
 	case 'D' :	/* -Dname :	predefine name		*/
 	{
