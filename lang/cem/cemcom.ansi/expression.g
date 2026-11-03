@@ -6,31 +6,31 @@
 /*	EXPRESSION SYNTAX PARSER	*/
 
 {
-#include	<alloc.h>
-#include	<stdlib.h>
-#include	"parameters.h"
-#include	<flt_arith.h>
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"type.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"code.h"
-#include    "error.h"
-#include    "ch3.h"
-#include    "ch3bin.h"
-#include    "ch3mon.h"
-#include    "proto.h"
-#include	"sizes.h"
+    #include <alloc.h>
+    #include <stdlib.h>
+    #include "parameters.h"
+    #include <flt_arith.h>
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "type.h"
+    #include "label.h"
+    #include "expr.h"
+    #include "code.h"
+    #include "error.h"
+    #include "ch3.h"
+    #include "ch3bin.h"
+    #include "ch3mon.h"
+    #include "proto.h"
+    #include "sizes.h"
 
-int InSizeof = 0;	/* inside a sizeof- expression */
-int ResultKnown = 0;	/* result of the expression is already known */
+    int InSizeof = 0; /* inside a sizeof- expression */
+    int ResultKnown = 0; /* result of the expression is already known */
 
-/* Since the grammar in the standard is not LL(n), it is modified so that
- * it accepts basically the same grammar. This means that there is no 1-1
- * mapping from the grammar in the standard to the grammar given here.
- * Such is life.
- */
+    /* Since the grammar in the standard is not LL(n), it is modified so that
+     * it accepts basically the same grammar. This means that there is no 1-1
+     * mapping from the grammar in the standard to the grammar given here.
+     * Such is life.
+     */
 }
 
 /* 3.3.1 */

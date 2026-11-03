@@ -45,28 +45,27 @@
 %start If_expr, control_if_expression;
 
 {
-#include	<stddef.h>
-#include 	<stdbool.h>
-#include	"parameters.h"
-#include	<flt_arith.h>
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"label.h"
-#include	"type.h"
-#include	"declar.h"
-#include	"decspecs.h"
-#include	"code.h"
-#include	"expr.h"
-#include	"def.h"
-#include    "idf.h"
-#include    "declarator.h"
-#include    "stack.h"
-#include    "proto.h"
-#include    "error.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	/* LINT */
-
+    #include <stddef.h>
+    #include <stdbool.h>
+    #include "parameters.h"
+    #include <flt_arith.h>
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "label.h"
+    #include "type.h"
+    #include "declar.h"
+    #include "decspecs.h"
+    #include "code.h"
+    #include "expr.h"
+    #include "def.h"
+    #include "idf.h"
+    #include "declarator.h"
+    #include "stack.h"
+    #include "proto.h"
+    #include "error.h"
+    #ifdef LINT
+        #include "l_lint.h"
+    #endif /* LINT */
 }
 
 control_if_expression

@@ -10,21 +10,21 @@
 /* $Id$ */
 
 {
-#include	<assert.h>
-#include	"em_arith.h"
-#include	"em_label.h"
+    #include <assert.h>
+    #include "em_arith.h"
+    #include "em_label.h"
 
-#include 	"parameters.h"
-#include	"idf.h"
-#include	"LLlex.h"
-#include	"scope.h"
-#include	"def.h"
-#include	"type.h"
-#include	"error.h"
-#include	"node.h"
+    #include "parameters.h"
+    #include "idf.h"
+    #include "LLlex.h"
+    #include "scope.h"
+    #include "def.h"
+    #include "type.h"
+    #include "error.h"
+    #include "node.h"
 
-static int	loopcount = 0;	/* Count nested loops */
-extern struct node *EmptyStatement;
+    static int loopcount = 0; /* Count nested loops */
+    extern struct node* EmptyStatement;
 }
 
 statement(struct node **pnd;)

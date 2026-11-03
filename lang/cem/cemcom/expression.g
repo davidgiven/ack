@@ -6,17 +6,17 @@
 /*	EXPRESSION SYNTAX PARSER	*/
 
 {
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"type.h"
-#include	"idf.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"code.h"
-#include	"noRoption.h"
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "type.h"
+    #include "idf.h"
+    #include "label.h"
+    #include "expr.h"
+    #include "code.h"
+    #include "noRoption.h"
 
-extern char options[];
-extern struct expr *intexpr();
+    extern char options[];
+    extern struct expr* intexpr();
 }
 
 /* 7.1 */

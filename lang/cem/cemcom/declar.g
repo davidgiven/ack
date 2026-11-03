@@ -6,31 +6,31 @@
 /*	DECLARATION SYNTAX PARSER	*/
 
 {
-#include	"lint.h"
-#include	"dbsymtab.h"
-#include	<alloc.h>
-#include	"nobitfield.h"
-#include	"debug.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"label.h"
-#include	"code.h"
-#include	"idf.h"
-#include	"type.h"
-#include	"struct.h"
-#include	"field.h"
-#include	"decspecs.h"
-#include	"def.h"
-#include	"declar.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"sizes.h"
-#include	"level.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	/* LINT */
+    #include "lint.h"
+    #include "dbsymtab.h"
+    #include <alloc.h>
+    #include "nobitfield.h"
+    #include "debug.h"
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "label.h"
+    #include "code.h"
+    #include "idf.h"
+    #include "type.h"
+    #include "struct.h"
+    #include "field.h"
+    #include "decspecs.h"
+    #include "def.h"
+    #include "declar.h"
+    #include "label.h"
+    #include "expr.h"
+    #include "sizes.h"
+    #include "level.h"
+    #ifdef LINT
+        #include "l_lint.h"
+    #endif /* LINT */
 
-extern char options[];
+    extern char options[];
 }
 
 /* 8 */

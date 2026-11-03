@@ -1,25 +1,25 @@
 /* The grammar of ISO-Pascal as given by the specification, BS6192: 1982. */
 
 {
-#include    "parameters.h"
-#include	<alloc.h>
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<em_code.h>
-#include	<stb.h>
+    #include "parameters.h"
+    #include <alloc.h>
+    #include <em_arith.h>
+    #include <em_label.h>
+    #include <em_code.h>
+    #include <stb.h>
 
-#include	"LLlex.h"
-#include	"def.h"
-#include	"f_info.h"
-#include	"idf.h"
-#include	"main.h"
-#include	"node.h"
-#include	"scope.h"
-#include	"enter.h"
-#include	"progs.h"
-#ifdef DBSYMTAB
-#include	"stab.h"
-#endif
+    #include "LLlex.h"
+    #include "def.h"
+    #include "f_info.h"
+    #include "idf.h"
+    #include "main.h"
+    #include "node.h"
+    #include "scope.h"
+    #include "enter.h"
+    #include "progs.h"
+    #ifdef DBSYMTAB
+        #include "stab.h"
+    #endif
 }
 
 %lexical LLlex;

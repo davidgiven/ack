@@ -45,27 +45,27 @@
 %start If_expr, control_if_expression;
 
 {
-#include	"lint.h"
-#include	"nopp.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"idf.h"
-#include	"label.h"
-#include	"type.h"
-#include	"declar.h"
-#include	"decspecs.h"
-#include	"code.h"
-#include	"expr.h"
-#include	"def.h"
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	/* LINT */
+    #include "lint.h"
+    #include "nopp.h"
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "idf.h"
+    #include "label.h"
+    #include "type.h"
+    #include "declar.h"
+    #include "decspecs.h"
+    #include "code.h"
+    #include "expr.h"
+    #include "def.h"
+    #ifdef LINT
+        #include "l_lint.h"
+    #endif /* LINT */
 
-#ifndef NOPP
-extern arith ifval;
-#endif /* NOPP */
+    #ifndef NOPP
+    extern arith ifval;
+    #endif /* NOPP */
 
-extern error();
+    extern error();
 }
 
 control_if_expression

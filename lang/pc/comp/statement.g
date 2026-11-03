@@ -1,31 +1,31 @@
 /* S T A T E M E N T S */
 {
-#include	<string.h>
-#include    "parameters.h"
-#include	<alloc.h>
-#include	<em.h>
-#include	<stb.h>
+    #include <string.h>
+    #include "parameters.h"
+    #include <alloc.h>
+    #include <em.h>
+    #include <stb.h>
 
-#include	"LLlex.h"
-#include	"chk_expr.h"
-#include	"def.h"
-#include	"desig.h"
-#include	"f_info.h"
-#include	"idf.h"
-#include	"main.h"
-#include	"misc.h"
-#include	"node.h"
-#include	"scope.h"
-#include	"type.h"
-#include	"body.h"
-#include	"code.h"
-#include	"error.h"
-#include	"readwrite.h"
-#include	"casestat.h"
-#include	"tmpvar.h"
-#include	"label.h"
+    #include "LLlex.h"
+    #include "chk_expr.h"
+    #include "def.h"
+    #include "desig.h"
+    #include "f_info.h"
+    #include "idf.h"
+    #include "main.h"
+    #include "misc.h"
+    #include "node.h"
+    #include "scope.h"
+    #include "type.h"
+    #include "body.h"
+    #include "code.h"
+    #include "error.h"
+    #include "readwrite.h"
+    #include "casestat.h"
+    #include "tmpvar.h"
+    #include "label.h"
 
-int slevel = 0;		/* nesting level of statements */
+    int slevel = 0; /* nesting level of statements */
 }
 
 

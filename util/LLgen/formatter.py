@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""LLgen parser and grammar formatter preserving embedded C verbatim.
+"""LLgen formatter using clang-format for global C blocks.
 
 Run ``python3 util/LLgen/formatter.py file.g [file.g ...]`` to write formatted LLgen to
-stdout. All C fragments are preserved verbatim. --tree prints the syntax tree
+stdout. Global C blocks use the project's .clang-format; other C fragments
+are preserved verbatim. clang-format must be on PATH to format global blocks.
+--tree prints the syntax tree
 as JSON; --tokens also includes whitespace and grammar comments.
 Files are formatted independently in argument order. Use --inplace / -i to
 update each input file instead of writing to stdout.
@@ -18,6 +20,7 @@ from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 
@@ -304,12 +307,47 @@ def parse(source):
     return Parser(source).parse()
 
 
+class FormatError(ValueError):
+    pass
+
+
+def format_global_c(text):
+    """Use a temporary namespace and conditional to indent code and directives.
+
+    Both wrappers are removed after formatting. clang-format sees the final
+    indentation while making line-wrapping decisions, including for macros.
+    """
+    root = Path(__file__).resolve().parents[2]
+    wrapped = '#if 1\nnamespace LLgenGlobal\n{\n' + text[1:-1] + '\n}\n#endif\n'
+    style = ('{BasedOnStyle: InheritParentConfig, NamespaceIndentation: All, '
+             'IndentPPDirectives: BeforeHash, PPIndentWidth: 4, UseTab: Never, '
+             'FixNamespaceComments: false}')
+    try:
+        result = subprocess.run(
+            ['clang-format', f'--style={style}',
+             f'--assume-filename={root / "llgen-global.cpp"}'],
+            input=wrapped.encode('utf-8', 'surrogateescape'),
+            capture_output=True, check=True)
+    except FileNotFoundError as error:
+        raise FormatError('clang-format executable not found on PATH') from error
+    except subprocess.CalledProcessError as error:
+        message = error.stderr.decode('utf-8', 'replace').strip()
+        raise FormatError(f'clang-format failed: {message}') from error
+    lines = result.stdout.decode('utf-8', 'surrogateescape').splitlines(keepends=True)
+    if ([line.rstrip('\r\n') for line in lines[:3]] !=
+            ['#if 1', 'namespace LLgenGlobal', '{'] or
+            [line.rstrip('\r\n') for line in lines[-2:]] != ['}', '#endif']):
+        raise FormatError('clang-format did not preserve the global block wrapper')
+    content = ''.join(lines[3:-2]).strip('\r\n')
+    return '{\n' + (content + '\n' if content else '') + '}'
+
+
 class Formatter:
     """Lay out grammar tokens using the tree; retain grammar comments verbatim.
 
     Layout is attached to token indices so comments between syntax nodes are
-    never lost. Embedded C is represented by a single token and emitted
-    verbatim. The input Document remains unchanged.
+    never lost. Embedded C is represented by a single token; only global
+    blocks are reformatted. The input Document remains unchanged.
     """
 
     def __init__(self, document):
@@ -435,7 +473,8 @@ class Formatter:
                 continue
             role = self.roles.get(i)
             if role:
-                self.write(token.text, space=role not in {'c_parameters', 'c_arguments'})
+                text = format_global_c(token.text) if role == 'c_global' else token.text
+                self.write(text, space=role not in {'c_parameters', 'c_arguments'})
             else:
                 attach = token.kind in {',', ';', '*', '+', '?'} or (
                     token.kind == 'number' and previous in {']', '*', '+', 'identifier', 'literal', 'c_block', 'c_parens'})
@@ -447,7 +486,7 @@ class Formatter:
 
 
 def format_document(document):
-    """Format LLgen while retaining all embedded C verbatim."""
+    """Format LLgen and global C blocks, retaining other embedded C verbatim."""
     return Formatter(document).format()
 
 
@@ -482,7 +521,7 @@ def main():
                 if args.tokens:
                     result['tokens'] = [asdict(t) for t in document.tokens]
                 print(json.dumps(result, indent=2, ensure_ascii=True))
-        except (OSError, ParseError) as error:
+        except (OSError, ParseError, FormatError) as error:
             print(f'{path}:{error}', file=sys.stderr)
             status = 1
     return status

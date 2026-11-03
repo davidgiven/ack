@@ -10,34 +10,34 @@
 /* $Id$ */
 
 {
-#include 	"parameters.h"
-#include	"debug.h"
+    #include "parameters.h"
+    #include "debug.h"
 
-#include	<assert.h>
-#include	"em_arith.h"
-#include	"em_label.h"
-#include	"alloc.h"
+    #include <assert.h>
+    #include "em_arith.h"
+    #include "em_label.h"
+    #include "alloc.h"
 
-#include	"idf.h"
-#include	"LLlex.h"
-#include	"def.h"
-#include	"type.h"
-#include	"scope.h"
-#include	"node.h"
-#include	"enter.h"
-#include	"error.h"
-#include	"misc.h"
-#include	"main.h"
-#include	"typequiv.h"
-#include	"chk_expr.h"
-#include	"warning.h"
+    #include "idf.h"
+    #include "LLlex.h"
+    #include "def.h"
+    #include "type.h"
+    #include "scope.h"
+    #include "node.h"
+    #include "enter.h"
+    #include "error.h"
+    #include "misc.h"
+    #include "main.h"
+    #include "typequiv.h"
+    #include "chk_expr.h"
+    #include "warning.h"
 
-int		proclevel = 0;		/* nesting level of procedures */
-int		return_occurred;	/* set if a return occurs in a block */
+    int proclevel = 0; /* nesting level of procedures */
+    int return_occurred; /* set if a return occurs in a block */
 
-extern struct node	*EmptyStatement;
+    extern struct node* EmptyStatement;
 
-#define needs_static_link()	(proclevel > 1)
+    #define needs_static_link() (proclevel > 1)
 }
 
 /* inline in declaration: need space

@@ -86,39 +86,40 @@
 %token UNARYMINUS;
 
 {
-#define YYDEBUG
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include "bem.h"
-#include "util.h"
-#include "gencode.h"
-#include "eval.h"
-#include "func.h"
-#include "llmess.h"
+    #define YYDEBUG
+    #include <stdlib.h>
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include "bem.h"
+    #include "util.h"
+    #include "gencode.h"
+    #include "eval.h"
+    #include "func.h"
+    #include "llmess.h"
 
-typedef union {
-	int	integer ;
-	Symbol	*Sptr ;
-	char	*cptr ;
-} YYSTYPE ;
+    typedef union
+    {
+        int integer;
+        Symbol* Sptr;
+        char* cptr;
+    } YYSTYPE;
 
-int basicline;
- 
-int yydebug;
+    int basicline;
 
-YYSTYPE yylval;
+    int yydebug;
 
-int	ival;
-char	*dval;
-char	*sval;
-int	in_data = 0;	/* set if processing DATA statement */
+    YYSTYPE yylval;
 
-char	*formatstring;	/* formatstring used for printing */
-Symbol	*s;		/* Symbol dummy */
+    int ival;
+    char* dval;
+    char* sval;
+    int in_data = 0; /* set if processing DATA statement */
 
-#include "yylexp.h"
-#include "basic.lex"
+    char* formatstring; /* formatstring used for printing */
+    Symbol* s; /* Symbol dummy */
+
+    #include "yylexp.h"
+    #include "basic.lex"
 }
 
 %lexical yylexp;
@@ -1156,7 +1157,7 @@ exprlist(int *ip; int *typetable;)
     ;
 
 {
-#ifndef NORCSID
-static char rcs_id[]	= "$Id$" ;
-#endif
+    #ifndef NORCSID
+    static char rcs_id[] = "$Id$";
+    #endif
 }

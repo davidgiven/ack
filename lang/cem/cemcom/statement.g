@@ -6,33 +6,33 @@
 /*	STATEMENT SYNTAX PARSER	*/
 
 {
-#include	"lint.h"
-#ifndef	LINT
-#include	<em.h>
-#else
-#include	"l_em.h"
-#include	"l_lint.h"
-#endif	/* LINT */
+    #include "lint.h"
+    #ifndef LINT
+        #include <em.h>
+    #else
+        #include "l_em.h"
+        #include "l_lint.h"
+    #endif /* LINT */
 
-#include	"debug.h"
-#include	"botch_free.h"
-#include	"dbsymtab.h"
+    #include "debug.h"
+    #include "botch_free.h"
+    #include "dbsymtab.h"
 
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"type.h"
-#include	"idf.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"code.h"
-#include	"stack.h"
-#include	"def.h"
-#ifdef DBSYMTAB
-#include	<stb.h>
-#endif /* DBSYMTAB */
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "type.h"
+    #include "idf.h"
+    #include "label.h"
+    #include "expr.h"
+    #include "code.h"
+    #include "stack.h"
+    #include "def.h"
+    #ifdef DBSYMTAB
+        #include <stb.h>
+    #endif /* DBSYMTAB */
 
-extern int level;
-extern char options[];
+    extern int level;
+    extern char options[];
 }
 
 /*	Each statement construction is stacked in order to trace a ???

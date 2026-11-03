@@ -10,24 +10,24 @@
 /* $Id$ */
 
 {
-#include 	"parameters.h"
-#include	"debug.h"
+    #include "parameters.h"
+    #include "debug.h"
 
-#include	"alloc.h"
-#include	"em_arith.h"
-#include	"em_label.h"
-#include	<assert.h>
+    #include "alloc.h"
+    #include "em_arith.h"
+    #include "em_label.h"
+    #include <assert.h>
 
-#include	"LLlex.h"
-#include	"idf.h"
-#include	"def.h"
-#include	"node.h"
-#include	"type.h"
-#include	"error.h"
-#include	"chk_expr.h"
-#include	"warning.h"
+    #include "LLlex.h"
+    #include "idf.h"
+    #include "def.h"
+    #include "node.h"
+    #include "type.h"
+    #include "error.h"
+    #include "chk_expr.h"
+    #include "warning.h"
 
-extern char	options[];
+    extern char options[];
 }
 
 /* inline, we need room for pdp/11

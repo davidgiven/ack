@@ -5,23 +5,23 @@
  */
 /*	OCCAM		*/
 {
-#include <stdlib.h>
-#include "token.h"
-#include "symtab.h"
-#include "expr.h"
-#include "code.h"
-#include "sizes.h"
-#include <system.h>
-#include <em.h>
+    #include <stdlib.h>
+    #include "token.h"
+    #include "symtab.h"
+    #include "expr.h"
+    #include "code.h"
+    #include "sizes.h"
+    #include <system.h>
+    #include <em.h>
 
-#define MAXERRORS	10	/* Maximum number of insert/delete errors */
+    #define MAXERRORS 10 /* Maximum number of insert/delete errors */
 
-static void nonconst(), nonpositive(), rep_cleanup(), check_assoc();
-void init_builtins();
-char *strcpy();
+    static void nonconst(), nonpositive(), rep_cleanup(), check_assoc();
+    void init_builtins();
+    char* strcpy();
 
-extern int lineno, LLsymb;
-union type_info info, none;
+    extern int lineno, LLsymb;
+    union type_info info, none;
 }
 
 %token AFTER, ALLOCATE, ALT, AND, ANY, BYTE, CHAN, DEF, FALSE, FOR, IF, LOAD;
@@ -776,132 +776,143 @@ val_expr(struct expr **e;)
 %lexical scanner;
 
 {
-int err=0;
+    int err = 0;
 
-main(argc, argv) register argc; register char **argv;
-{
-	while (argc > 1 && argv[1][0] == '-') {
-		do_option(&argv[1][1]);
-		argc--;
-		argv++;
-	}
+    main(argc, argv) register argc;
+    register char** argv;
+    {
+        while (argc > 1 && argv[1][0] == '-')
+        {
+            do_option(&argv[1][1]);
+            argc--;
+            argv++;
+        }
 
-	leader();
-	occam();
-	trailer();
+        leader();
+        occam();
+        trailer();
 
-	exit(err);
-}
+        exit(err);
+    }
 
-do_option(text)
-	char *text;
-{
-	extern int Lflag;
+    do_option(text) char* text;
+    {
+        extern int Lflag;
 
-	switch(*text++)	{
+        switch (*text++)
+        {
 
-	default:
-		fatal("illegal option: %c", *--text);
+            default:
+                fatal("illegal option: %c", *--text);
 
-	case 'L' :			/* no fil/lin */
-		Lflag++;
-		break;
-	case 'V' :	/* set object sizes and alignment requirements	*/
-	{
-		arith size, align;
-		char c;
+            case 'L': /* no fil/lin */
+                Lflag++;
+                break;
+            case 'V': /* set object sizes and alignment requirements	*/
+            {
+                arith size, align;
+                char c;
 
-		while (c = *text++)	{
-			size = txt2int(&text);
-			switch (c)	{
-			case 'w':	/* word		*/
-				if (size != (arith)0)
-					wz = size;
-				break;
-			case 'p':	/* pointer	*/
-				if (size != (arith)0)
-					pz = size;
-				break;
-			case 'l':	/* long		*/
-				if (size != (arith)0)
-					vz = size;
-				break;
-			default:
-				fatal("-V: bad type indicator %c\n", c);
-			}
-		}
-		break;
-	}
-	}
-}
+                while (c = *text++)
+                {
+                    size = txt2int(&text);
+                    switch (c)
+                    {
+                        case 'w': /* word		*/
+                            if (size != (arith)0)
+                                wz = size;
+                            break;
+                        case 'p': /* pointer	*/
+                            if (size != (arith)0)
+                                pz = size;
+                            break;
+                        case 'l': /* long		*/
+                            if (size != (arith)0)
+                                vz = size;
+                            break;
+                        default:
+                            fatal("-V: bad type indicator %c\n", c);
+                    }
+                }
+                break;
+            }
+        }
+    }
 
-int
-txt2int(tp)
-	char **tp;
-{
-	/*	the integer pointed to by *tp is read, while increasing
-		*tp; the resulting value is yielded.
-	*/
-	register int val = 0, ch;
-	
-	while (ch = **tp, ch >= '0' && ch <= '9')	{
-		val = val * 10 + ch - '0';
-		(*tp)++;
-	}
-	return val;
-}
+    int txt2int(tp) char** tp;
+    {
+        /*	the integer pointed to by *tp is read, while increasing
+         *tp; the resulting value is yielded.
+         */
+        register int val = 0, ch;
 
-LLmessage(tk) register tk;
-{
-	static errors=0;
+        while (ch = **tp, ch >= '0' && ch <= '9')
+        {
+            val = val * 10 + ch - '0';
+            (*tp)++;
+        }
+        return val;
+    }
 
-	if (tk>0) {
-		repeat_token(LLsymb);
-		warning("syntax error: %s expected (inserted)", tokenname(tk, 1));
-	} else
-	if (tk==0)
-		warning("syntax error: bad token %s (deleted)", tokenname(LLsymb, 0));
-	else { /* tk<0 */
-		warning("syntax error: garbage at end of program");
-	}
-	if (++errors==MAXERRORS) {
-		fprintf(stderr, "Too many insert/delete errors. Compiler ends.\n");
-		err=1; trailer(); exit(1);
-	}
-}
+    LLmessage(tk) register tk;
+    {
+        static errors = 0;
 
-static void nonconst(siz) char *siz;
-{
-	report("%s should be a constant", siz);
-}
+        if (tk > 0)
+        {
+            repeat_token(LLsymb);
+            warning("syntax error: %s expected (inserted)", tokenname(tk, 1));
+        }
+        else if (tk == 0)
+            warning("syntax error: bad token %s (deleted)", tokenname(LLsymb, 0));
+        else
+        { /* tk<0 */
+            warning("syntax error: garbage at end of program");
+        }
+        if (++errors == MAXERRORS)
+        {
+            fprintf(stderr, "Too many insert/delete errors. Compiler ends.\n");
+            err = 1;
+            trailer();
+            exit(1);
+        }
+    }
 
-static void nonpositive(siz) char *siz;
-{
-	report("%s must be positive", siz);
-}
+    static void nonconst(siz) char* siz;
+    {
+        report("%s should be a constant", siz);
+    }
 
-static void rep_cleanup(e1, e2) struct expr *e1, *e2;
-{
-	destroy(e1);
-	destroy(e2);
-	sym_up();
-}
+    static void nonpositive(siz) char* siz;
+    {
+        report("%s must be positive", siz);
+    }
 
-static void check_assoc(prev_op, op) register prev_op, op;
-{
-	switch (op) {
-		char prev[5];
-	case '+':	case '*':
-	case AND:	case OR:
-	case BA:	case BO:	case BX:
-		if (prev_op==op) break;
-	default:
-		strcpy(prev, tokenname(prev_op, 0));
+    static void rep_cleanup(e1, e2) struct expr *e1, *e2;
+    {
+        destroy(e1);
+        destroy(e2);
+        sym_up();
+    }
 
-		warning("Operators %s and %s don't associate",
-			prev, tokenname(op, 0)
-		);
-	}
-}
+    static void check_assoc(prev_op, op) register prev_op, op;
+    {
+        switch (op)
+        {
+            char prev[5];
+            case '+':
+            case '*':
+            case AND:
+            case OR:
+            case BA:
+            case BO:
+            case BX:
+                if (prev_op == op)
+                    break;
+            default:
+                strcpy(prev, tokenname(prev_op, 0));
 
+                warning("Operators %s and %s don't associate", prev, tokenname(op, 0));
+        }
+    }
 }

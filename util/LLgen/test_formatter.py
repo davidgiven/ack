@@ -1,12 +1,13 @@
 """Run with: python3 -m unittest discover -s util/LLgen -p 'test_*.py'."""
 
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 
-from formatter import ParseError, format_source, parse
+from formatter import FormatError, ParseError, format_global_c, format_source, parse
 
 
 def walk(node):
@@ -124,8 +125,10 @@ class FormatterTests(unittest.TestCase):
         output = format_source(source)
         before = parse(source)
         after = parse(output)
+        globals_ = {n.start for n in before.tree.children if n.kind == 'c_global'}
         for kind in ('comment', 'line_directive', 'c_block', 'c_parens'):
-            self.assertEqual([t.text for t in before.tokens if t.kind == kind],
+            self.assertEqual([format_global_c(t.text) if i in globals_ else t.text
+                              for i, t in enumerate(before.tokens) if t.kind == kind],
                              [t.text for t in after.tokens if t.kind == kind])
         self.assertIn('secret', output)
         self.assertIn('inside C', output)
@@ -144,9 +147,55 @@ class FormatterTests(unittest.TestCase):
         actions = [line for line in output.splitlines() if line.strip() == '{}']
         self.assertEqual(actions, ['    ' * depth + '{}'
                                    for depth in (2, 3, 4)])
-        self.assertTrue(output.startswith('{int global;}\n'))
+        self.assertTrue(output.startswith('{\n    int global;\n}\n'))
         self.assertIn('\n    {int local;}\n', output)
         self.assertEqual(format_source(output), output)
+
+    def test_global_c_uses_project_style_and_other_fragments_are_verbatim(self):
+        source = ('{int * p; void f(){if(1){g();}}} '
+                  'r(int * p;) {int * q;} : symbol( p ) {if(1){g();}}; '
+                  '{int  another;}')
+        output = format_source(source)
+        self.assertTrue(output.startswith('{\n    int* p;\n    void f()\n    {\n'))
+        self.assertIn('\n        if (1)\n        {\n            g();\n', output)
+        self.assertIn('r(int * p;)', output)
+        self.assertIn('    {int * q;}', output)
+        self.assertIn('symbol( p )', output)
+        self.assertIn('        {if(1){g();}}', output)
+        self.assertIn('{\n    int another;\n}', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_clang_format_failures_and_no_global_blocks(self):
+        with patch('formatter.subprocess.run', side_effect=FileNotFoundError):
+            self.assertEqual(format_source('r: A;'), 'r\n    : A\n    ;\n')
+            with self.assertRaisesRegex(FormatError, 'not found'):
+                format_source('{int x;}')
+        error = subprocess.CalledProcessError(1, 'clang-format', stderr=b'bad config')
+        with patch('formatter.subprocess.run', side_effect=error):
+            with self.assertRaisesRegex(FormatError, 'bad config'):
+                format_source('{int x;}')
+
+    def test_global_directives_and_wrapping_include_indentation(self):
+        source = ('{\n#include "header.h"\n#define LONG_MACRO ' +
+                  ' + '.join(['a_very_long_identifier'] * 6) +
+                  '\n#if ENABLED\nint *p;\n#endif\n}')
+        output = format_global_c(source)
+        for directive in ('#include "header.h"', '#define LONG_MACRO',
+                          '#if ENABLED', '#endif'):
+            self.assertIn('\n    ' + directive, output)
+        self.assertIn('\\\n', output)
+        self.assertTrue(all(len(line) <= 100 for line in output.splitlines()))
+        self.assertNotIn('\t', output)
+        self.assertNotIn('namespace LLgenGlobal', output)
+        self.assertNotIn('#if 1\n', output)
+        self.assertEqual(format_global_c(output), output)
+
+    def test_global_empty_block_and_wrapper_validation(self):
+        self.assertEqual(format_global_c('{}'), '{\n}')
+        result = subprocess.CompletedProcess('clang-format', 0, b'broken wrapper\n')
+        with patch('formatter.subprocess.run', return_value=result):
+            with self.assertRaisesRegex(FormatError, 'wrapper'):
+                format_global_c('{int x;}')
 
     def test_empty_and_comments_only(self):
         self.assertEqual(format_source(''), '')
@@ -179,8 +228,8 @@ class FormatterTests(unittest.TestCase):
                   'call(x,\n s) {\n#if ENABLED\n\tf("}"); // keep\n#endif\n};')
         output = format_source(source)
         self.assertIn('        {\n#if ENABLED\n\tf("}"); // keep\n#endif\n}', output)
-        self.assertEqual([(t.kind, t.text) for t in parse(source).tokens
-                          if t.kind != 'whitespace'],
+        self.assertEqual([(t.kind, format_global_c(t.text) if t.start == 0 else t.text)
+                          for t in parse(source).tokens if t.kind != 'whitespace'],
                          [(t.kind, t.text) for t in parse(output).tokens
                           if t.kind != 'whitespace'])
         self.assertEqual(format_source(output), output)

@@ -1,44 +1,43 @@
 /* D E C L A R A T I O N S */
 
 {
-#include    "parameters.h"
-/* next line DEBUG */
-#include	"debug.h"
+    #include "parameters.h"
+    /* next line DEBUG */
+    #include "debug.h"
 
-#include	<stdlib.h>
-#include	<stdio.h>
-#include	<stddef.h>
-#include	<alloc.h>
-#include	<assert.h>
-#include	<em_arith.h>
-#include	<em_label.h>
-#include	<pc_file.h>
+    #include <stdlib.h>
+    #include <stdio.h>
+    #include <stddef.h>
+    #include <alloc.h>
+    #include <assert.h>
+    #include <em_arith.h>
+    #include <em_label.h>
+    #include <pc_file.h>
 
-#include	"LLlex.h"
-#include	"chk_expr.h"
-#include	"def.h"
-#include	"idf.h"
-#include	"main.h"
-#include	"misc.h"
-#include	"node.h"
-#include	"scope.h"
-#include	"type.h"
-#include	"code.h"
-#include	"error.h"
-#include	"label.h"
-#include	"enter.h"
-#include	"lookup.h"
-#ifdef DBSYMTAB
-#include	"stab.h"
-#endif
+    #include "LLlex.h"
+    #include "chk_expr.h"
+    #include "def.h"
+    #include "idf.h"
+    #include "main.h"
+    #include "misc.h"
+    #include "node.h"
+    #include "scope.h"
+    #include "type.h"
+    #include "code.h"
+    #include "error.h"
+    #include "label.h"
+    #include "enter.h"
+    #include "lookup.h"
+    #ifdef DBSYMTAB
+        #include "stab.h"
+    #endif
 
+    #define PC_BUFSIZ (sizeof(struct file) - offsetof(struct file, bufadr))
 
-#define	PC_BUFSIZ	(sizeof(struct file) - offsetof(struct file, bufadr))
-
-int proclevel = 0;		/* nesting level of procedures */
-int parlevel = 0;		/* nesting level of parametersections */
-int expect_label = 0;		/* so the parser knows that we expect a label */
-static int in_type_defs;	/* in type definition part or not */
+    int proclevel = 0; /* nesting level of procedures */
+    int parlevel = 0; /* nesting level of parametersections */
+    int expect_label = 0; /* so the parser knows that we expect a label */
+    static int in_type_defs; /* in type definition part or not */
 }
 
 /* ISO section 6.2.1, p. 93 */

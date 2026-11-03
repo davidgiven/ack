@@ -6,36 +6,36 @@
 /*	DECLARATION SYNTAX PARSER	*/
 
 {
-#include	"parameters.h"
-#include	<stddef.h>
-#include	<stdbool.h>
-#include	<alloc.h>
-#include	<flt_arith.h>
-#include    "idf.h"
-#include	"arith.h"
-#include	"LLlex.h"
-#include	"label.h"
-#include	"code.h"
-#include	"type.h"
-#include	"proto.h"
-#include	"struct.h"
-#include	"field.h"
-#include	"decspecs.h"
-#include    "declarator.h"
-#include	"def.h"
-#include	"declar.h"
-#include	"label.h"
-#include	"expr.h"
-#include	"sizes.h"
-#include	"level.h"
-#include    "error.h"
-#include    "stab.h"
+    #include "parameters.h"
+    #include <stddef.h>
+    #include <stdbool.h>
+    #include <alloc.h>
+    #include <flt_arith.h>
+    #include "idf.h"
+    #include "arith.h"
+    #include "LLlex.h"
+    #include "label.h"
+    #include "code.h"
+    #include "type.h"
+    #include "proto.h"
+    #include "struct.h"
+    #include "field.h"
+    #include "decspecs.h"
+    #include "declarator.h"
+    #include "def.h"
+    #include "declar.h"
+    #include "label.h"
+    #include "expr.h"
+    #include "sizes.h"
+    #include "level.h"
+    #include "error.h"
+    #include "stab.h"
 
-#ifdef	LINT
-#include	"l_lint.h"
-#endif	/* LINT */
+    #ifdef LINT
+        #include "l_lint.h"
+    #endif /* LINT */
 
-extern char	options[];
+    extern char options[];
 }
 
 /* 3.5 */
