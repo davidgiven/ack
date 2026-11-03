@@ -66,10 +66,7 @@ void conflchecks(void)
 			p->n_flags |= VERBOSE;
 	}
 	if (verbose)
-	{
-		if ((fout = fopen(f_out, "w")) == NULL)
-			fatal(1, e_noopen, f_out);
-	}
+		fout = openoutput(f_out);
 	/*
 	 * Check the rules in the order in which they are declared,
 	 * and input file by input file, to give proper error messages
@@ -117,7 +114,7 @@ void conflchecks(void)
 		}
 	}
 	if (verbose)
-		fclose(fout);
+		closeoutput(&fout);
 }
 
 static void prline(char* s)

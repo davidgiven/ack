@@ -50,10 +50,9 @@ static int firsts; /* are there any? */
 static int listcount;
 
 /* In this file the following routines are defined: */
-static void doclose(FILE **);
 static int *mk_tokenlist(void);
 static void genhdr(void);
-static void opentemp(string);
+static void openparser(string, string);
 static void geninclude(void);
 static void genrecovery(void);
 #ifdef NON_CORRECTING
@@ -90,16 +89,6 @@ extern void save_grammar(FILE *f);
 # define NOPOP		-20000
 
 
-static void doclose(FILE **f)
-{
-	if (ferror(*f) != 0)
-	{
-		fatal(0, "Write error on temporary", NULL );
-	}
-	fclose(*f);
-	*f = NULL;
-}
-
 static int *mk_tokenlist(void)
 {
 	int i = ntokens;
@@ -125,6 +114,7 @@ static void genhdr(void)
 void gencode(int argc)
 {
 	p_file p = files;
+	string output;
 
 	/* Set up for code generation */
 	if ((fact = fopen(f_temp, "r")) == NULL )
@@ -145,16 +135,16 @@ void gencode(int argc)
 	/* For every source file .... */
 	while (argc--)
 	{
-		/* Open temporary */
+		/* Write the parser directly to the output directory. */
 		f_input = p->f_name;
-		opentemp(f_input);
+		output = genname(f_input);
+		openparser(output, f_input);
+		free(output);
 		correct_prefix();
 		/* generate code ... */
 		generate(p);
 		getaction(2);
-		doclose(&fpars);
-		/* And install */
-		install(genname(p->f_name), p->f_name);
+		closeoutput(&fpars);
 		p++;
 	}
 	geninclude();
@@ -164,16 +154,10 @@ void gencode(int argc)
 	fact = NULL;
 }
 
-static void opentemp(string str)
+static void openparser(string filename, string source)
 {
-
-	if ((fpars = fopen(f_pars, "w")) == NULL )
-	{
-		fatal(0, e_noopen, f_pars);
-	}
-	if (!str)
-		str = ".";
-	fprintf(fpars, LLgenid, str);
+	fpars = openoutput(filename);
+	fprintf(fpars, LLgenid, source ? source : ".");
 }
 
 static void geninclude(void)
@@ -181,7 +165,7 @@ static void geninclude(void)
 	p_token p;
 	int maxno = 0;
 
-	opentemp((string) 0);
+	openparser(f_include, NULL);
 	for (p = tokens; p < maxt; p++)
 	{
 		if (p->t_tokno > maxno)
@@ -198,8 +182,7 @@ static void geninclude(void)
 		fprintf(fpars, "#define %sNONCORR\n", prefix ? prefix : "LL");
 	}
 #endif
-	doclose(&fpars);
-	install(f_include, ".");
+	closeoutput(&fpars);
 }
 
 static void genrecovery(void)
@@ -213,7 +196,7 @@ static void genrecovery(void)
 	int i;
 	p_start st;
 
-	opentemp((string) 0);
+	openparser(f_rec, NULL);
 	f = fpars;
 	correct_prefix();
 	genhdr();
@@ -322,8 +305,7 @@ static void genrecovery(void)
 	}
 	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
-	doclose(&fpars);
-	install(f_rec, ".");
+	closeoutput(&fpars);
 }
 
 #ifdef NON_CORRECTING
@@ -336,7 +318,7 @@ static void genncrecovery(void)
 
 	/* Generate the non-correcting error recovery file */
 
-	opentemp((string) 0);
+	openparser(f_nc, NULL);
 	f = fpars;
 
 	genhdr();
@@ -363,8 +345,7 @@ static void genncrecovery(void)
 	copyfile(nc_incl_file);
 	copyfile(nc_rec_file);
 
-	doclose(&fpars);
-	install(f_nc, ".");
+	closeoutput(&fpars);
 }
 #endif
 
@@ -1372,7 +1353,7 @@ static void gencases(int *tokenlist, int caseno, int compacted)
  */
 static string genname(string s)
 {
-	string namebuf, c, d;
+	string namebuf, c, d, output;
 
 	namebuf = alloc(strlen(s) + 3);
 	c = namebuf;
@@ -1397,7 +1378,9 @@ static string genname(string s)
 	*d++ = '.';
 	*d++ = 'c';
 	*d++ = '\0';
-	return ralloc(namebuf, d - namebuf);
+	output = aprintf("%s/%s", f_dir, namebuf);
+	free(namebuf);
+	return output;
 }
 
 static void genpush(int d)

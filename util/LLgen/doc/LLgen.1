@@ -4,7 +4,7 @@
 .SH NAME
 LLgen, an extended LL(1) parser generator
 .SH SYNOPSIS
-LLgen [ \-vxwans ] [ \-j[\fInum\fP] ] [ \-l\fInum\fP ] [ \-h\fInum\fP ] file ...
+LLgen [ \-o\fIdirectory\fP ] [ \-vxwans ] [ \-j[\fInum\fP] ] [ \-l\fInum\fP ] [ \-h\fInum\fP ] file ...
 .SH DESCRIPTION
 \fILLgen\fP
 converts a context-free grammar into a set of
@@ -46,13 +46,9 @@ also generates a file
 that contains the non-correcting recovery mechanism.
 .PP
 \fILLgen\fP
-will only update those output files that differ from their previous
-version.
-This allows
-\fILLgen\fP
-to be used with
-\fImake\fP
-(1) convieniently.
+writes all output files directly to the output directory, overwriting
+existing files without comparing their contents or checking their origin.
+Each output filename is reported on standard error.
 .PP
 To obtain a working program, the user must also supply a
 lexical analyzer, as well as
@@ -76,9 +72,10 @@ If the flag is given more than once,
 will be more "verbose".
 If it is given three times, a complete description of the
 grammar will be supplied.
-.IP \fB\-o\fP
-Specifies the location of the output files. If not set, they
-are placed in the current directory.
+.IP \fB\-o\fP\fIdirectory\fP
+Specifies the directory for all output files. The directory must already exist.
+The directory name must immediately follow the option, without a space.
+If not set, output files are placed in the current directory.
 .IP \fB\-x\fP
 the sets that are computed are extended with the nonterminal
 symbols and these extended sets are also included in the
