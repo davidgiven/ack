@@ -31,7 +31,9 @@ name asld
 	to .out
 	outfile e.out
 	program {EM}/lib/ack/em_ass
-	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	# No -lm: the maths functions are in libc.a, which is always linked,
+	# and em_ass cannot take a library twice.
+	mapflag -l* LNAME={PLATFORMDIR}/lib*.a
 	mapflag -+* ASS_F={ASS_F?} -+*
 	mapflag --* ASS_F={ASS_F?} --*
 	mapflag -s* SIZE_FLAG=-s*
