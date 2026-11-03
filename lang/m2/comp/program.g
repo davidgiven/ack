@@ -54,78 +54,86 @@
 */
 
 %lexical LLlex;
-
-%start	CompUnit, CompilationUnit;
-%start	DefModule, DefinitionModule;
+%start CompUnit, CompilationUnit;
+%start DefModule, DefinitionModule;
 
 ModuleDeclaration
-{
+    {
 	register struct def	*df;
 	struct node		*exportlist;
 	int		qualified;
-} :
-	MODULE IDENT	{ df = DefineLocalModule(dot.TOK_IDF); }
-	priority(&(df->mod_priority))
-	';'
-	import(1)*
-	export(&qualified, &exportlist)
-	block(&(df->mod_body))
-	IDENT		{ EnterExportList(exportlist, qualified);
+}
+    : MODULE IDENT
+        { df = DefineLocalModule(dot.TOK_IDF); }
+    priority(&(df->mod_priority))
+    ';'
+    import(1)*
+    export(&qualified, &exportlist)
+    block(&(df->mod_body))
+    IDENT
+        { EnterExportList(exportlist, qualified);
 			  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 			  match_id(df->df_idf, dot.TOK_IDF);
 			}
-;
+    ;
 
-priority(struct node **prio;):
-	[
-		'[' ConstExpression(prio) ']'
-			{ if (! ((*prio)->nd_type->tp_fund & T_CARDINAL)) {
+priority(struct node **prio;)
+    : [
+        '['
+        ConstExpression(prio)
+        ']'
+            { if (! ((*prio)->nd_type->tp_fund & T_CARDINAL)) {
 				node_error(*prio, "illegal priority");
 			  }
 			}
-	|
-	]
-;
+        |
+    ]
+    ;
 
-export(int *QUALflag; struct node **ExportList;):
-				{ *ExportList = 0; *QUALflag = D_EXPORTED; }
-	[
-		EXPORT
-		[
-			QUALIFIED
-				{ *QUALflag = D_QEXPORTED; }
-		|
-		]
-		IdentList(ExportList) ';'
-	|
-	]
-;
+export(int *QUALflag; struct node **ExportList;)
+    :
+        { *ExportList = 0; *QUALflag = D_EXPORTED; }
+    [
+        EXPORT
+        [
+            QUALIFIED
+                { *QUALflag = D_QEXPORTED; }
+            |
+        ]
+        IdentList(ExportList)
+        ';'
+        |
+    ]
+    ;
 
 import(int local;)
-{
+    {
 	struct node		*ImportList;
 	register struct node	*FromId = 0;
 	register struct def	*df;
-} :
-	/*
+}
+    :
+    /*
 	   When parsing a global module, this is the place where we must
 	   read already compiled definition modules.
 	   If the FROM clause is present, the identifier in it is a module
 	   name, otherwise the names in the import list are module names.
 	*/
-	[ FROM
-	  IDENT
-	  %substart DefinitionModule;
-			{ FromId = dot2leaf(Name);
+    [
+        FROM IDENT
+        %substart DefinitionModule;
+            { FromId = dot2leaf(Name);
 			  if (local) {
 				df = lookfor(FromId,enclosing(CurrVis),0,D_USED);
 			  }
 			  else df = GetDefinitionModule(dot.TOK_IDF, 1);
 			}
-	]?
-	IMPORT IdentList(&ImportList) ';'
-	  %substart DefinitionModule;
-			{ if (FromId) {
+    ]?
+    IMPORT
+    IdentList(&ImportList)
+    ';'
+    %substart DefinitionModule;
+        { if (FromId) {
 				EnterFromImportList(ImportList, df, FromId);
 			  }
 			  else {
@@ -135,10 +143,10 @@ import(int local;)
 			  }
 			  FreeNode(ImportList);
 			}
-;
+    ;
 
 DefinitionModule
-{
+    {
 	register struct def	*df;
 	struct node		*exportlist;
 	int		dummy;
@@ -146,9 +154,9 @@ DefinitionModule
 	extern int	ForeignFlag;
 	register struct scope *currscope = CurrentScope;
 	char buf[512];
-} :
-	DEFINITION
-	MODULE IDENT	{ df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
+}
+    : DEFINITION MODULE IDENT
+        { df = define(dot.TOK_IDF, GlobalScope, D_MODULE);
 			  df->df_flags |= D_BUSY | ForeignFlag;
 		  	  currscope->sc_definedby = df;
 			  if (DefId &&
@@ -167,13 +175,13 @@ DefinitionModule
 				Defined = df;
 			  }
 			}
-	';'
-	import(0)* 
-	export(&dummy, &exportlist)
-		/*	New Modula-2 does not have export lists in definition
+    ';'
+    import(0)*
+    export(&dummy, &exportlist)
+    /*	New Modula-2 does not have export lists in definition
 			modules. Issue a warning.
 		*/
-			{ 
+        { 
 			  if (exportlist) {
 #ifndef STRICT_3RD_ED
 			    if (! options['3'])
@@ -184,58 +192,69 @@ node_warning(exportlist, W_OLDFASHIONED, "export list in definition module ignor
 			    FreeNode(exportlist);
 			  }
 			}
-	definition* END IDENT
-			{ end_definition_list(&(currscope->sc_def));
+    definition*
+    END IDENT
+        { end_definition_list(&(currscope->sc_def));
 			  DefinitionModule--;
 			  match_id(dot.TOK_IDF, df->df_idf);
 			  df->df_flags &= ~D_BUSY;
 			}
-	'.'
-;
+    '.'
+    ;
 
 definition
-{
+    {
 	register struct def	*df;
 	struct def		*dummy;
-} :
-	CONST [ %persistent ConstantDeclaration ';' ]*
-|
-	TYPE
-	[ %persistent
-	  IDENT 	{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
-	  [ '=' type(&(df->df_type))
-			{ SolveForwardTypeRefs(df); }
-	  | /* empty */
-	    /*
+}
+    : CONST
+    [
+        %persistent
+        ConstantDeclaration ';'
+    ]*
+    | TYPE
+    [
+        %persistent
+        IDENT
+            { df = define(dot.TOK_IDF, CurrentScope, D_TYPE); }
+        [
+            '='
+            type(&(df->df_type))
+                { SolveForwardTypeRefs(df); }
+            |
+            /* empty */
+            /*
 	       Here, the exported type has a hidden implementation.
 	       The export is said to be opaque.
 	       It is restricted to pointer types.
 	    */
-	    		{ df->df_kind = D_HIDDEN;
+                { df->df_kind = D_HIDDEN;
 			  df->df_type = construct_type(T_HIDDEN, NULLTYPE);
 			}
-	  ]
-			{
+        ]
+            {
 #ifdef DBSYMTAB
 				if (options['g']) stb_string(df, D_TYPE);
 #endif
 			}
-	  ';'
-	]*
-|
-	VAR [ %persistent VariableDeclaration ';' ]*
-|
-	ProcedureHeading(&dummy, D_PROCHEAD) ';'
-;
+        ';'
+    ]*
+    | VAR
+    [
+        %persistent
+        VariableDeclaration ';'
+    ]*
+    | ProcedureHeading(&dummy, D_PROCHEAD)
+    ';'
+    ;
 
 ProgramModule
-{
+    {
 	register struct def	*df;
-} :
-	MODULE
-	IDENT
-	%substart DefinitionModule;
-		{ 
+}
+    : MODULE IDENT
+    %substart DefinitionModule;
+        { 
 		  if (state == IMPLEMENTATION) {
 		  	int len = strlen(dot.TOK_IDF->id_text);
 		  	char* leafname = strrchr(FileName, '/');
@@ -259,30 +278,33 @@ ProgramModule
 		  	CurrentScope->sc_definedby = df;
 		  }
 		}
-	priority(&(df->mod_priority))
-	';' import(0)*
-	block(&(df->mod_body)) IDENT
-		{
+    priority(&(df->mod_priority))
+    ';'
+    import(0)*
+    block(&(df->mod_body))
+    IDENT
+        {
 		  close_scope(SC_CHKFORW|SC_CHKPROC|SC_REVERSE);
 		  match_id(df->df_idf, dot.TOK_IDF);
 		}
-	'.'
-;
+    '.'
+    ;
 
-CompilationUnit:
-			{ error("Compiling a definition module");
+CompilationUnit
+    :
+        { error("Compiling a definition module");
 			  open_scope(CLOSEDSCOPE);
 			  state = DEFINITION;
 			}
-	DefinitionModule
-			{ close_scope(SC_CHKFORW); }
-|	%default
-	[
-		IMPLEMENTATION
-			{ state = IMPLEMENTATION; }
-	|
-		/* empty */
-			{ state = PROGRAM; }
-	]
-	ProgramModule
-;
+    DefinitionModule
+        { close_scope(SC_CHKFORW); }
+    | %default
+    [
+        IMPLEMENTATION
+            { state = IMPLEMENTATION; }
+        |
+        /* empty */
+            { state = PROGRAM; }
+    ]
+    ProgramModule
+    ;

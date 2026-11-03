@@ -1,6 +1,10 @@
 """Run with: python3 -m unittest discover -s util/LLgen -p 'test_*.py'."""
 
 import unittest
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
 
 from formatter import ParseError, format_source, parse
 
@@ -180,6 +184,79 @@ class FormatterTests(unittest.TestCase):
                          [(t.kind, t.text) for t in parse(output).tokens
                           if t.kind != 'whitespace'])
         self.assertEqual(format_source(output), output)
+
+
+class CommandLineTests(unittest.TestCase):
+    def run_formatter(self, path, *options):
+        return subprocess.run(
+            [sys.executable, str(Path(__file__).with_name('formatter.py')), *options, str(path)],
+            capture_output=True, text=True)
+
+    def test_multiple_files_stdout_and_inplace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            first = Path(directory) / 'first.g'
+            second = Path(directory) / 'second.g'
+            first.write_text('first: A;')
+            second.write_text('second: B C;')
+            result = self.run_formatter(second, str(first))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, format_source('first: A;') +
+                             format_source('second: B C;'))
+            self.assertEqual(first.read_text(), 'first: A;')
+            self.assertEqual(second.read_text(), 'second: B C;')
+            result = self.run_formatter(second, '-i', str(first))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, '')
+            self.assertEqual(first.read_text(), format_source('first: A;'))
+            self.assertEqual(second.read_text(), format_source('second: B C;'))
+
+    def test_file_errors_do_not_prevent_other_files_being_formatted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            good = Path(directory) / 'good.g'
+            bad = Path(directory) / 'bad.g'
+            missing = Path(directory) / 'missing.g'
+            good.write_text('good: A;')
+            bad.write_text('bad: [;')
+            result = self.run_formatter(good, '-i', str(bad), str(missing))
+            self.assertEqual(result.returncode, 1)
+            self.assertIn(str(bad), result.stderr)
+            self.assertIn(str(missing), result.stderr)
+            self.assertEqual(good.read_text(), format_source('good: A;'))
+            self.assertEqual(bad.read_text(), 'bad: [;')
+
+    def test_inplace_aliases_and_default_stdout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'input.g'
+            source = b'/* comment */\n\nr: A B { puts("\xff"); };'
+            expected = format_source(source.decode('utf-8', 'surrogateescape')).encode(
+                'utf-8', 'surrogateescape')
+            for option in ('--inplace', '-i'):
+                path.write_bytes(source)
+                result = self.run_formatter(path, option)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout, '')
+                self.assertEqual(path.read_bytes(), expected)
+                result = self.run_formatter(path, option)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(path.read_bytes(), expected)
+            path.write_text('r: A;')
+            result = self.run_formatter(path)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, format_source('r: A;'))
+            self.assertEqual(path.read_text(), 'r: A;')
+
+    def test_errors_leave_input_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'input.g'
+            path.write_text('r: [ unfinished;')
+            result = self.run_formatter(path, '-i')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(path.read_text(), 'r: [ unfinished;')
+            for option in ('--tree', '--tokens'):
+                result = self.run_formatter(path, '-i', option)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn('cannot be combined', result.stderr)
+                self.assertEqual(path.read_text(), 'r: [ unfinished;')
 
 
 if __name__ == '__main__':

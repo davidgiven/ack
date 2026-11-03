@@ -44,45 +44,50 @@ number(struct node **p;) :
 */
 
 qualident(struct node **p;)
-{
-} :
-	IDENT	{ *p = dot2leaf(Name); }
-	[
-		selector(p)
-	]*
-;
+    {
+}
+    : IDENT
+        { *p = dot2leaf(Name); }
+    [
+        selector(p)
+    ]*
+    ;
 
 selector(struct node **pnd;)
-{ struct node *nd;
-} :
-	'.'	{ nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
-	IDENT	{ (*pnd)->nd_IDF = dot.TOK_IDF; }
-;
+    { struct node *nd;
+}
+    : '.'
+        { nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
+    IDENT
+        { (*pnd)->nd_IDF = dot.TOK_IDF; }
+    ;
 
 ExpList(struct node **pnd;)
-{
+    {
 	register struct node *nd;
-} :
-	expression(pnd)		{ *pnd = nd = dot2node(Link,*pnd,NULLNODE);
+}
+    : expression(pnd)
+        { *pnd = nd = dot2node(Link,*pnd,NULLNODE);
 				  nd->nd_symb = ',';
 				}
-	[
-		','		{ nd->nd_RIGHT = dot2leaf(Link);
+    [
+        ','
+            { nd->nd_RIGHT = dot2leaf(Link);
 				  nd = nd->nd_RIGHT;
 				}
-		expression(&(nd->nd_LEFT))
-	]*
-;
+        expression(&(nd->nd_LEFT))
+    ]*
+    ;
 
 ConstExpression(struct node **pnd;)
-{
-}:
-	expression(pnd)
-	/*
+    {
+}
+    : expression(pnd)
+    /*
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
-		{
+        {
 		  DO_DEBUG(options['C'], printf("CONSTANT EXPRESSION\n"));
 		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 
@@ -96,114 +101,133 @@ ConstExpression(struct node **pnd;)
 		  DO_DEBUG(options['C'], printf("RESULTS IN\n"));
 		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
 		}
-;
+    ;
 
 expression(struct node **pnd;)
-{
-} :
-	SimpleExpression(pnd)
-	[
-		/* relation */
-		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
-			{ *pnd = dot2node(Oper, *pnd, NULLNODE); }
-		SimpleExpression(&((*pnd)->nd_RIGHT))
-	|
-	]
-;
+    {
+}
+    : SimpleExpression(pnd)
+    [
+    /* relation */
+        [
+            '='
+            | '#'
+            | '<'
+            | LESSEQUAL
+            | '>'
+            | GREATEREQUAL
+            | IN
+        ]
+            { *pnd = dot2node(Oper, *pnd, NULLNODE); }
+        SimpleExpression(&((*pnd)->nd_RIGHT))
+        |
+    ]
+    ;
 
-/* Inline in expression
+    /* Inline in expression
 relation:
 	'=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN
 ;
 */
 
 SimpleExpression(struct node **pnd;)
-{
+    {
 	register struct node *nd = 0;
-} :
-	[
-		[ '+' | '-' ]
-			{ nd = dot2leaf(Uoper);
+}
+    : [
+        [
+            '+'
+            | '-'
+        ]
+            { nd = dot2leaf(Uoper);
 			  /* priority of unary operator ??? */
 			}
-	|
-	]
-	term(pnd)
-			{ if (nd) {
+        |
+    ]
+    term(pnd)
+        { if (nd) {
 				nd->nd_RIGHT = *pnd;
 				*pnd = nd;
 			  }
 			  nd = *pnd;
 			}
-	[
-		/* AddOperator */
-		[ '+' | '-' | OR ]
-			{ nd = dot2node(Oper, nd, NULLNODE); }
-		term(&(nd->nd_RIGHT))
-	]*
-			{ *pnd = nd; }
-;
+    [
+    /* AddOperator */
+        [
+            '+'
+            | '-'
+            | OR
+        ]
+            { nd = dot2node(Oper, nd, NULLNODE); }
+        term(&(nd->nd_RIGHT))
+    ]*
+        { *pnd = nd; }
+    ;
 
-/* Inline in "SimpleExpression"
+    /* Inline in "SimpleExpression"
 AddOperator:
 	'+' | '-' | OR
 ;
 */
 
 term(struct node **pnd;)
-{
+    {
 	register struct node *nd;
-}:
-	factor(pnd)	{ nd = *pnd; }
-	[
-		/* MulOperator */
-		[ '*' | '/' | DIV | MOD | AND ]
-			{ nd = dot2node(Oper, nd, NULLNODE); }
-		factor(&(nd->nd_RIGHT))
-	]*
-			{ *pnd = nd; }
-;
+}
+    : factor(pnd)
+        { nd = *pnd; }
+    [
+    /* MulOperator */
+        [
+            '*'
+            | '/'
+            | DIV
+            | MOD
+            | AND
+        ]
+            { nd = dot2node(Oper, nd, NULLNODE); }
+        factor(&(nd->nd_RIGHT))
+    ]*
+        { *pnd = nd; }
+    ;
 
-/* inline in "term"
+    /* inline in "term"
 MulOperator:
 	'*' | '/' | DIV | MOD | AND
 ;
 */
 
 factor(struct node **p;)
-{
+    {
 	register struct node *nd;
 	struct node *nd1;
-} :
-	qualident(p)
-	[
-		designator_tail(p)
-		[
-			{ *p = dot2node(Call, *p, NULLNODE); }
-			ActualParameters(&((*p)->nd_RIGHT))
-		|
-		]
-	|
-		bare_set(&nd1)
-			{ nd = nd1; nd->nd_LEFT = *p; *p = nd; }
-	]
-|
-	bare_set(p)
-| %default
-	[
-		%default
-		INTEGER
-	|
-		REAL
-	|
-		STRING
-	]		{ *p = dot2leaf(Value);
+}
+    : qualident(p)
+    [
+        designator_tail(p)
+        [
+                { *p = dot2node(Call, *p, NULLNODE); }
+            ActualParameters(&((*p)->nd_RIGHT))
+            |
+        ]
+        | bare_set(&nd1)
+            { nd = nd1; nd->nd_LEFT = *p; *p = nd; }
+    ]
+    | bare_set(p)
+    | %default
+    [
+        %default
+        INTEGER
+        | REAL
+        | STRING
+    ]
+        { *p = dot2leaf(Value);
 			  (*p)->nd_type = toktype;
 			}
-|
-	'(' 	{ nd = dot2leaf(Uoper); }
-	expression(p)
-		{ /*	In some cases we must leave the '(' as an unary
+    | '('
+        { nd = dot2leaf(Uoper); }
+    expression(p)
+        { /*	In some cases we must leave the '(' as an unary
 			operator, because otherwise we cannot see that the
 			factor was not a designator
 		  */
@@ -218,78 +242,83 @@ factor(struct node **p;)
 		  }
 		  else FreeNode(nd);
 		}
-	')'
-|
-	NOT		{ *p = dot2leaf(Uoper); }
-	factor(&((*p)->nd_RIGHT))
-;
+    ')'
+    | NOT
+        { *p = dot2leaf(Uoper); }
+    factor(&((*p)->nd_RIGHT))
+    ;
 
 bare_set(struct node **pnd;)
-{
+    {
 	register struct node *nd;
-} :
-	'{'		{ DOT = SET;
+}
+    : '{'
+        { DOT = SET;
 			  *pnd = nd = dot2leaf(Xset);
 			  nd->nd_type = bitset_type;
 			}
-	[
-		element(nd)
-		[	{ nd = nd->nd_RIGHT; }
-			',' element(nd)
-		]*
-	|
-	]
-	'}'
-;
+    [
+        element(nd)
+        [
+                { nd = nd->nd_RIGHT; }
+            ','
+            element(nd)
+        ]*
+        |
+    ]
+    '}'
+    ;
 
-ActualParameters(struct node **pnd;):
-	'(' ExpList(pnd)? ')'
-;
+ActualParameters(struct node **pnd;)
+    : '('
+    ExpList(pnd)?
+    ')'
+    ;
 
-element(struct node *nd;) :
-	expression(&(nd->nd_RIGHT))
-	[
-		UPTO
-			{ nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);}
-		expression(&(nd->nd_RIGHT->nd_RIGHT))
-	|
-	]
-			{ nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);
+element(struct node *nd;)
+    : expression(&(nd->nd_RIGHT))
+    [
+        UPTO
+            { nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);}
+        expression(&(nd->nd_RIGHT->nd_RIGHT))
+        |
+    ]
+        { nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);
 			  nd->nd_RIGHT->nd_symb = ',';
 			}
-;
+    ;
 
 designator(struct node **pnd;)
-:
-	qualident(pnd)
-	designator_tail(pnd)
-;
+    : qualident(pnd)
+    designator_tail(pnd)
+    ;
 
-designator_tail(struct node **pnd;):
-	visible_designator_tail(pnd)
-	[ %persistent
-		%default
-		selector(pnd)
-	|
-		visible_designator_tail(pnd)
-	]*
-|
-;
+designator_tail(struct node **pnd;)
+    : visible_designator_tail(pnd)
+    [
+        %persistent
+        %default
+        selector(pnd)
+        | visible_designator_tail(pnd)
+    ]*
+    |
+    ;
 
 visible_designator_tail(struct node **pnd;)
-{
+    {
 	register struct node *nd = *pnd;
-}:
-	'['		{ nd = dot2node(Arrsel, nd, NULLNODE); }
-		expression(&(nd->nd_RIGHT))
-		[
-			','
-			{ nd = dot2node(Arrsel, nd, NULLNODE);
+}
+    : '['
+        { nd = dot2node(Arrsel, nd, NULLNODE); }
+    expression(&(nd->nd_RIGHT))
+    [
+        ','
+            { nd = dot2node(Arrsel, nd, NULLNODE);
 			}
-			expression(&(nd->nd_RIGHT))
-		]*
-	']'
-			{ *pnd = nd; }
-|
-	'^'		{ *pnd = dot2node(Arrow, NULLNODE, nd); }
-;
+        expression(&(nd->nd_RIGHT))
+    ]*
+    ']'
+        { *pnd = nd; }
+    | '^'
+        { *pnd = dot2node(Arrow, NULLNODE, nd); }
+    ;

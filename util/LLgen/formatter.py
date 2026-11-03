@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """LLgen parser and grammar formatter preserving embedded C verbatim.
 
-Run ``python3 util/LLgen/formatter.py file.g`` to write formatted LLgen to
+Run ``python3 util/LLgen/formatter.py file.g [file.g ...]`` to write formatted LLgen to
 stdout. All C fragments are preserved verbatim. --tree prints the syntax tree
 as JSON; --tokens also includes whitespace and grammar comments.
+Files are formatted independently in argument order. Use --inplace / -i to
+update each input file instead of writing to stdout.
 
 parse(source) returns a Document with an immutable token stream and a syntax
 tree. Token offsets are Python string offsets; node ranges are half-open token
@@ -16,6 +18,7 @@ from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import re
+import sys
 
 
 @dataclass(frozen=True)
@@ -454,23 +457,36 @@ def format_source(source):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('file', type=Path)
+    ap.add_argument('files', type=Path, nargs='+', metavar='file')
+    ap.add_argument('--inplace', '-i', action='store_true', help='format each input file in place')
     ap.add_argument('--tree', action='store_true', help='print syntax tree instead of source')
     ap.add_argument('--tokens', action='store_true', help='include lossless token stream')
     args = ap.parse_args()
-    try:
-        with args.file.open(encoding='utf-8', errors='surrogateescape', newline='') as stream:
-            document = parse(stream.read())
-    except (OSError, ParseError) as error:
-        ap.exit(1, f'{args.file}:{error}\n')
-    if not (args.tree or args.tokens):
-        print(format_document(document), end='')
-        return
-    result = {'tree': asdict(document.tree)}
-    if args.tokens:
-        result['tokens'] = [asdict(t) for t in document.tokens]
-    print(json.dumps(result, indent=2, ensure_ascii=True))
+    if args.inplace and (args.tree or args.tokens):
+        ap.error('--inplace cannot be combined with --tree or --tokens')
+    status = 0
+    for path in args.files:
+        try:
+            with path.open(encoding='utf-8', errors='surrogateescape', newline='') as stream:
+                document = parse(stream.read())
+            if not (args.tree or args.tokens):
+                formatted = format_document(document)
+                if args.inplace:
+                    if formatted != document.source:
+                        with path.open('w', encoding='utf-8', errors='surrogateescape', newline='') as stream:
+                            stream.write(formatted)
+                else:
+                    print(formatted, end='')
+            else:
+                result = {'tree': asdict(document.tree)}
+                if args.tokens:
+                    result['tokens'] = [asdict(t) for t in document.tokens]
+                print(json.dumps(result, indent=2, ensure_ascii=True))
+        except (OSError, ParseError) as error:
+            print(f'{path}:{error}', file=sys.stderr)
+            status = 1
+    return status
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

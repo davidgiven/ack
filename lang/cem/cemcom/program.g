@@ -40,9 +40,9 @@
 	doubts upon the second.
 */
 
-%lexical	LLlex;
-%start		C_program, program;
-%start		If_expr, control_if_expression;
+%lexical LLlex;
+%start C_program, program;
+%start If_expr, control_if_expression;
 
 {
 #include	"lint.h"
@@ -69,12 +69,11 @@ extern error();
 }
 
 control_if_expression
-	{
+    {
 		struct expr *exprX;
 	}
-:
-	constant_expression(&exprX)
-		{
+    : constant_expression(&exprX)
+        {
 #ifndef NOPP
 			struct expr *expr = exprX;
 			if (expr->ex_flags & EX_SIZEOF)
@@ -84,15 +83,18 @@ control_if_expression
 			free_expression(expr);
 #endif /* NOPP */
 		}
-;
+    ;
 
-/* 10 */
-program:
-	[%persistent external_definition]*
-	{unstack_world();}
-;
+    /* 10 */
+program
+    : [
+        %persistent
+        external_definition
+    ]*
+        {unstack_world();}
+    ;
 
-/*	A C identifier definition is remarkable in that it formulates
+    /*	A C identifier definition is remarkable in that it formulates
 	the declaration in a way different from most other languages:
 	e.g., rather than defining x as a pointer-to-integer, it defines
 	*x as an integer and lets the compiler deduce that x is actually
@@ -112,72 +114,70 @@ program:
 */
 
 external_definition
-	{
+    {
 		struct decspecs Ds;
 		struct declarator Dc;
 	}
-:
-	{
+    :
+        {
 		Ds = null_decspecs;
 		Dc = null_declarator;
 	}
-	ext_decl_specifiers(&Ds)
-	[
-		declarator(&Dc)
-		{
+    ext_decl_specifiers(&Ds)
+    [
+        declarator(&Dc)
+            {
 			declare_idf(&Ds, &Dc, level);
 #ifdef	LINT
 			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
 #endif	/* LINT */
 		}
-		[
-			function(&Ds, &Dc)
-		|
-			non_function(&Ds, &Dc)
-		]
-	|
-		';'
-	]
-	{remove_declarator(&Dc);}
-|
-	asm_statement			/* top level, would you believe */
-;
+        [
+            function(&Ds, &Dc)
+            | non_function(&Ds, &Dc)
+        ]
+        | ';'
+    ]
+        {remove_declarator(&Dc);}
+    | asm_statement
+    /* top level, would you believe */
+    ;
 
-ext_decl_specifiers(struct decspecs *ds;) :
-%if (DOT != IDENTIFIER || AHEAD == IDENTIFIER) /* the thin ice in  R.M. 11.1 */
-	decl_specifiers(ds)
-|
-	empty
-	{do_decspecs(ds);}
-;
+ext_decl_specifiers(struct decspecs *ds;)
+    : %if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
+    /* the thin ice in  R.M. 11.1 */
+    decl_specifiers(ds)
+    | empty
+        {do_decspecs(ds);}
+    ;
 
 non_function(struct decspecs *ds; struct declarator *dc;)
-:
-	{reject_params(dc);}
-	[
-		initializer(dc->dc_idf, ds->ds_sc)
-	|
-		{ code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
-	]
-	{
+    :
+        {reject_params(dc);}
+    [
+        initializer(dc->dc_idf, ds->ds_sc)
+        |
+            { code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
+    ]
+        {
 #ifdef	LINT
 		lint_non_function_decl(ds, dc);
 #endif	/* LINT */
 	}
-	[
-		','
-		init_declarator(ds)
-	]*
-	';'
-;
+    [
+        ','
+        init_declarator(ds)
+    ]*
+    ';'
+    ;
 
-/* 10.1 */
+    /* 10.1 */
 function(struct decspecs *ds; struct declarator *dc;)
-	{
+    {
 		arith fbytes;
 	}
-:
-	{	struct idf *idf = dc->dc_idf;
+    :
+        {	struct idf *idf = dc->dc_idf;
 #ifdef	LINT
 		lint_start_function();
 #endif	/* LINT */
@@ -187,15 +187,15 @@ function(struct decspecs *ds; struct declarator *dc;)
 		begin_proc(ds, idf);	/* sets global function info */
 		stack_level();		/* L_FORMAL2 declarations */
 	}
-	declaration*
-	{
+    declaration*
+        {
 		declare_formals(&fbytes);
 #ifdef	LINT
 		lint_formals();
 #endif	/* LINT */
 	}
-	compound_statement
-	{
+    compound_statement
+        {
 		end_proc(fbytes);
 #ifdef	LINT
 		lint_implicit_return();
@@ -209,4 +209,4 @@ function(struct decspecs *ds; struct declarator *dc;)
 		lint_end_function();
 #endif	/* LINT */
 	}
-;
+    ;

@@ -34,37 +34,35 @@ int ResultKnown = 0;	/* result of the expression is already known */
 }
 
 /* 3.3.1 */
-primary(struct expr **expp;) :
-	IDENTIFIER
-	{dot2expr(expp);}
-|
-	constant(expp)
-|
-	string(expp)
-|
-	'(' expression(expp) ')'
-	{ (*expp)->ex_flags |= EX_PARENS; }
-;
+primary(struct expr **expp;)
+    : IDENTIFIER
+        {dot2expr(expp);}
+    | constant(expp)
+    | string(expp)
+    | '('
+    expression(expp)
+    ')'
+        { (*expp)->ex_flags |= EX_PARENS; }
+    ;
 
 
-/* Character string literals that are adjacent tokens
+    /* Character string literals that are adjacent tokens
  * are concatenated into a single character string
  * literal.
  */
 string(struct expr **expp;)
-	{	int i, len;
+    {	int i, len;
 		char *str;
 		int fund;
 	}
-:
-	STRING
-	{	str = dot.tk_bts;
+    : STRING
+        {	str = dot.tk_bts;
 		len = dot.tk_len;
 		fund = dot.tk_fund;
 	}
-	[
-		STRING
-		{	/* A pasted string keeps the type of the first
+    [
+        STRING
+            {	/* A pasted string keeps the type of the first
 			 * string literal.
 			 * The pasting of normal strings and wide
 			 * character strings are stated as having an
@@ -76,95 +74,100 @@ string(struct expr **expp;)
 			for (i = 0; i < dot.tk_len; i++)
 				str[len++] = dot.tk_bts[i];
 		}
-	]*
-	{ string2expr(expp, str, len); }
-;
+    ]*
+        { string2expr(expp, str, len); }
+    ;
 
-/* 3.3.2 */
+    /* 3.3.2 */
 postfix_expression(struct expr **expp;)
-	{ int oper; 
+    { int oper; 
 	  struct expr *e1 = 0;
 	  struct idf *idf;
 	}
-:
-	primary(expp)
-	[
-		'[' expression(&e1) ']'
-			{ ch3bin(expp, '[', e1); e1 = 0; }
-	|
-		'(' parameter_list(&e1)? ')'
-			{ ch3bin(expp, '(', e1); call_proto(expp); e1 = 0; }
-	|
-		[ '.' | ARROW ]			{ oper = DOT; }
-		identifier(&idf)		{ ch3sel(expp, oper, idf); }
-	|
-		[
-			PLUSPLUS	{ oper = POSTINCR; }
-		|
-			MINMIN		{ oper = POSTDECR; }
-		]
-		    { ch3incr(expp, oper); }
-	]*
-;
+    : primary(expp)
+    [
+        '['
+        expression(&e1)
+        ']'
+            { ch3bin(expp, '[', e1); e1 = 0; }
+        | '('
+        parameter_list(&e1)?
+        ')'
+            { ch3bin(expp, '(', e1); call_proto(expp); e1 = 0; }
+        | [
+            '.'
+            | ARROW
+        ]
+            { oper = DOT; }
+        identifier(&idf)
+            { ch3sel(expp, oper, idf); }
+        | [
+            PLUSPLUS
+                { oper = POSTINCR; }
+            | MINMIN
+                { oper = POSTDECR; }
+        ]
+            { ch3incr(expp, oper); }
+    ]*
+    ;
 
 parameter_list(struct expr **expp;)
-	{struct expr *e1 = 0;}
-:
-	assignment_expression(expp)
-	{any2opnd(expp, PARCOMMA);}
-	[ %persistent
-		','
-		assignment_expression(&e1)
-		{any2opnd(&e1, PARCOMMA);}
-		{ch3bin(expp, PARCOMMA, e1);}
-	]*
-;
+    {struct expr *e1 = 0;}
+    : assignment_expression(expp)
+        {any2opnd(expp, PARCOMMA);}
+    [
+        %persistent
+        ','
+        assignment_expression(&e1)
+            {any2opnd(&e1, PARCOMMA);}
+            {ch3bin(expp, PARCOMMA, e1);}
+    ]*
+    ;
 
-%first	first_of_type_specifier, type_specifier;
+%first first_of_type_specifier, type_specifier;
 
 /* 3.3.3 & 3.3.4 */
 unary(struct expr **expp;)
-	{struct type *tp; int oper;}
-:
-%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
-	cast(&tp) unary(expp)
-	{	ch3cast(expp, CAST, tp);
+    {struct type *tp; int oper;}
+    : %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
+    cast(&tp)
+    unary(expp)
+        {	ch3cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
 		if (int_size != pointer_size)
 			(*expp)->ex_flags &= ~EX_PTRDIFF;
 	}
-|
-	postfix_expression(expp)
-|
-	unop(&oper) unary(expp)
-	{ch3mon(oper, expp);}
-|
-	size_of(expp)
-;
+    | postfix_expression(expp)
+    | unop(&oper)
+    unary(expp)
+        {ch3mon(oper, expp);}
+    | size_of(expp)
+    ;
 
-/* When an identifier is used in a sizeof()-expression, we must stil not
+    /* When an identifier is used in a sizeof()-expression, we must stil not
  * mark it as used.
  * extern int i;  ....  sizeof(i)  .... need not have a definition for i
  */
 size_of(struct expr **expp;)
-	{struct type *tp;}
-:
-	SIZEOF { InSizeof++; }	/* handle (sizeof(sizeof(int))) too */
-	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
-		cast(&tp)
-		{
+    {struct type *tp;}
+    : SIZEOF
+        { InSizeof++; }
+        /* handle (sizeof(sizeof(int))) too */
+    [
+        %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
+        cast(&tp)
+            {
 			*expp = intexpr(size_of_type(tp, "type"), UNSIGNED);
 			(*expp)->ex_flags |= EX_SIZEOF;
 		}
-	|
-		unary(expp)
-		{ch3mon(SIZEOF, expp);}
-	]
-	{ InSizeof--; }
-;
+        | unary(expp)
+            {ch3mon(SIZEOF, expp);}
+    ]
+        { InSizeof--; }
+    ;
 
-/* 3.3.5-3.3.17 */
-/*	The set of operators in C is stratified in 15 levels, with level
+    /* 3.3.5-3.3.17 */
+    /*	The set of operators in C is stratified in 15 levels, with level
 	N being treated in RM 7.N (although this is not the standard
 	anymore). The standard describes this in phrase-structure-grammar,
 	which we are unable to parse. The description that follows comes
@@ -204,14 +207,14 @@ size_of(struct expr **expp;)
 */
 
 binary_expression(int maxrank; struct expr **expp;)
-	{int oper, OldResultKnown; struct expr *e1;}
-:
-	unary(expp)
-	[%while (rank_of(DOT) <= maxrank )
-		/*	'?', '=', and ',' are no binops
+    {int oper, OldResultKnown; struct expr *e1;}
+    : unary(expp)
+    [
+        %while (rank_of(DOT) <= maxrank )
+        /*	'?', '=', and ',' are no binops
 		 */
-		binop(&oper)
-		{ OldResultKnown = ResultKnown;
+        binop(&oper)
+            { OldResultKnown = ResultKnown;
 		  if (oper == OR || oper == AND) {
 			  if (is_cp_cst(*expp) || is_fp_cst(*expp)) {
 				  if (is_zero_cst(*expp)) {
@@ -220,135 +223,172 @@ binary_expression(int maxrank; struct expr **expp;)
 			  }
 		  }
 		}
-		binary_expression(rank_of(oper)-1, &e1)
-		{
+        binary_expression(rank_of(oper)-1, &e1)
+            {
 			ch3bin(expp, oper, e1);
 			ResultKnown = OldResultKnown;
 		}
-	]*
-;
+    ]*
+    ;
 
-/* 3.3.15 */
+    /* 3.3.15 */
 conditional_expression(struct expr **expp;)
-	{struct expr *e1 = 0, *e2 = 0; int OldResultKnown, ConstExpr=0;}
-:
-	/* allow all binary operators */
-	binary_expression(rank_of('?') - 1, expp)
-	[	'?'
-		{ OldResultKnown = ResultKnown;
+    {struct expr *e1 = 0, *e2 = 0; int OldResultKnown, ConstExpr=0;}
+    :
+    /* allow all binary operators */
+    binary_expression(rank_of('?') - 1, expp)
+    [
+        '?'
+            { OldResultKnown = ResultKnown;
 		  if (is_cp_cst(*expp) || is_fp_cst(*expp)) {
 			  ConstExpr++;
 			  if (is_zero_cst(*expp)) ResultKnown++;
 		  }
 		}
-		expression(&e1)
-		':'
-		{ if (ConstExpr) {
+        expression(&e1)
+        ':'
+            { if (ConstExpr) {
 			if (OldResultKnown == ResultKnown) ResultKnown++;
 			else ResultKnown = OldResultKnown;
 		  }
 		}
-		conditional_expression(&e2)
-		{	
+        conditional_expression(&e2)
+            {	
 			ResultKnown = OldResultKnown;
 			ch3bin(&e1, ':', e2);
 			opnd2test(expp, '?');
 			ch3bin(expp, '?', e1);
 		}
-	]?
-;
+    ]?
+    ;
 
-/* 3.3.16 */
+    /* 3.3.16 */
 assignment_expression(struct expr **expp;)
-	{ int oper;
+    { int oper;
 	  struct expr *e1 = 0;
 	}
-:
-	conditional_expression(expp)
-	[
-		asgnop(&oper)
-		assignment_expression(&e1)
-		{ch3asgn(expp, oper, e1);}
-	|
-		empty		/* LLgen artefact ??? */
-	]
-;
+    : conditional_expression(expp)
+    [
+        asgnop(&oper)
+        assignment_expression(&e1)
+            {ch3asgn(expp, oper, e1);}
+        | empty
+        /* LLgen artefact ??? */
+    ]
+    ;
 
-/* 3.3.17 */
+    /* 3.3.17 */
 expression(struct expr **expp;)
-	{struct expr *e1;}
-:
-	assignment_expression(expp)
-	[	','
-		assignment_expression(&e1)
-		{
+    {struct expr *e1;}
+    : assignment_expression(expp)
+    [
+        ','
+        assignment_expression(&e1)
+            {
 			ch3bin(expp, ',', e1);
 		}
-	]*
-;
+    ]*
+    ;
 
-unop(int *oper;) :
-	['*' | '&' | '-' | '+' | '!' | '~' | PLUSPLUS | MINMIN]
-	{   if (DOT == '&') DOT = ADDRESSOF;
+unop(int *oper;)
+    : [
+        '*'
+        | '&'
+        | '-'
+        | '+'
+        | '!'
+        | '~'
+        | PLUSPLUS
+        | MINMIN
+    ]
+        {   if (DOT == '&') DOT = ADDRESSOF;
 	    *oper = DOT;
 	}
-;
+    ;
 
-multop:
-	'*' | '/' | '%'
-;
+multop
+    : '*'
+    | '/'
+    | '%'
+    ;
 
-addop:
-	'+' | '-'
-;
+addop
+    : '+'
+    | '-'
+    ;
 
-shiftop:
-	LEFT | RIGHT
-;
+shiftop
+    : LEFT
+    | RIGHT
+    ;
 
-relop:
-	'<' | '>' | LESSEQ | GREATEREQ
-;
+relop
+    : '<'
+    | '>'
+    | LESSEQ
+    | GREATEREQ
+    ;
 
-eqop:
-	EQUAL | NOTEQUAL
-;
+eqop
+    : EQUAL
+    | NOTEQUAL
+    ;
 
-arithop:
-	multop | addop | shiftop
-|
-	'&' | '^' | '|'
-;
+arithop
+    : multop
+    | addop
+    | shiftop
+    | '&'
+    | '^'
+    | '|'
+    ;
 
-binop(int *oper;) :
-	[ arithop | relop | eqop | AND | OR ]
-	{*oper = DOT;}
-;
+binop(int *oper;)
+    : [
+        arithop
+        | relop
+        | eqop
+        | AND
+        | OR
+    ]
+        {*oper = DOT;}
+    ;
 
-asgnop(int *oper;):
-	[ '=' | PLUSAB | MINAB | TIMESAB | DIVAB | MODAB 
-	| LEFTAB | RIGHTAB | ANDAB | XORAB | ORAB ]
-	{ *oper = DOT; }
+asgnop(int *oper;)
+    : [
+        '='
+        | PLUSAB
+        | MINAB
+        | TIMESAB
+        | DIVAB
+        | MODAB
+        | LEFTAB
+        | RIGHTAB
+        | ANDAB
+        | XORAB
+        | ORAB
+    ]
+        { *oper = DOT; }
+    ;
 
-;
+constant(struct expr **expp;)
+    : [
+        INTEGER
+        | FLOATING
+    ]
+        {dot2expr(expp);}
+    ;
 
-constant(struct expr **expp;) :
-[
-	INTEGER
-|
-	FLOATING
-]	{dot2expr(expp);}
-;
+    /* 3.4 */
+constant_expression(struct expr **expp;)
+    : conditional_expression(expp)
+        { chk_cst_expr(expp); }
+    ;
 
-/* 3.4 */
-constant_expression (struct expr **expp;) :
-	conditional_expression(expp)
-	{ chk_cst_expr(expp); }
-;
-
-identifier(struct idf **idfp;) :
-[ IDENTIFIER
-| TYPE_IDENTIFIER
-]
-	{ *idfp = dot.tk_idf; }
-;
+identifier(struct idf **idfp;)
+    : [
+        IDENTIFIER
+        | TYPE_IDENTIFIER
+    ]
+        { *idfp = dot.tk_idf; }
+    ;

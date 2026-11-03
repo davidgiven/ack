@@ -56,29 +56,32 @@ extern struct node	*EmptyStatement;
 */
 
 ProcedureHeading(struct def **pdf; int type;)
-{
+    {
 	struct type	*tp = 0;
 	arith	parmaddr = needs_static_link() ? pointer_size : 0;
 	struct paramlist	*pr = 0;
-} :
-	PROCEDURE IDENT
-			{ *pdf = DeclProc(type, dot.TOK_IDF); }
-	[
-		'('
-		[
-			FPSection(&pr, &parmaddr)
-			[
-				';' FPSection(&pr, &parmaddr)
-			]*
-		|
-		]
-		')'
-		[	':' qualtype(&tp)
-		|
-		]
-	|
-	]
-			{ CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
+}
+    : PROCEDURE IDENT
+        { *pdf = DeclProc(type, dot.TOK_IDF); }
+    [
+        '('
+        [
+            FPSection(&pr, &parmaddr)
+            [
+                ';'
+                FPSection(&pr, &parmaddr)
+            ]*
+            |
+        ]
+        ')'
+        [
+            ':'
+            qualtype(&tp)
+            |
+        ]
+        |
+    ]
+        { CheckWithDef(*pdf, proc_type(tp, pr, parmaddr));
 #ifndef NOSTRICT
 			  if (tp && IsConstructed(tp)) {
 warning(W_STRICT, "procedure \"%s\" has a constructed result type",
@@ -86,49 +89,57 @@ warning(W_STRICT, "procedure \"%s\" has a constructed result type",
 			  }
 #endif
 			}
-;
+    ;
 
-block(struct node **pnd;) :
-	[	%persistent
-		declaration
-	]*
-			{ return_occurred = 0; }
-	[	%default
-		BEGIN
-		StatementSequence(pnd)
-	|
-			{ *pnd = EmptyStatement; }
-	]
-	END
-;
+block(struct node **pnd;)
+    : [
+        %persistent
+        declaration
+    ]*
+        { return_occurred = 0; }
+    [
+        %default
+        BEGIN
+        StatementSequence(pnd)
+        |
+            { *pnd = EmptyStatement; }
+    ]
+    END
+    ;
 
 declaration
-{
+    {
 	struct def *df;
-} :
-	CONST [ ConstantDeclaration ';' ]*
-|
-	TYPE [ TypeDeclaration ';' ]*
-|
-	VAR [ VariableDeclaration ';' ]*
-|
-			{	++proclevel; }
-	ProcedureHeading(&df, D_PROCEDURE)
-			{	
+}
+    : CONST
+    [
+        ConstantDeclaration ';'
+    ]*
+    | TYPE
+    [
+        TypeDeclaration ';'
+    ]*
+    | VAR
+    [
+        VariableDeclaration ';'
+    ]*
+    |
+        {	++proclevel; }
+    ProcedureHeading(&df, D_PROCEDURE)
+        {	
 			}
-	';'
-	block(&(df->prc_body))
-	IDENT
-			{
+    ';'
+    block(&(df->prc_body))
+    IDENT
+        {
 				EndProc(df, dot.TOK_IDF);
 				--proclevel;
 			}
-	';'
-|
-	ModuleDeclaration ';'
-;
+    ';'
+    | ModuleDeclaration ';'
+    ;
 
-/* inline in procedureheading: need space
+    /* inline in procedureheading: need space
  * FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
  * 	'('
  * 	[
@@ -146,144 +157,153 @@ declaration
 */
 
 FPSection(struct paramlist **ppr; arith *parmaddr;)
-{
+    {
 	struct node	*FPList;
 	struct type	*tp;
 	int	VARp;
-} :
-	var(&VARp) IdentList(&FPList) ':' FormalType(&tp)
-			{ EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
-;
+}
+    : var(&VARp)
+    IdentList(&FPList)
+    ':'
+    FormalType(&tp)
+        { EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
+    ;
 
 FormalType(struct type **ptp;)
-		/* index type of conformant array is "CARDINAL".
+/* index type of conformant array is "CARDINAL".
 		   Recognize a conformant array by size 0.
 		*/
-{	register struct type *tp;
-} :
-	ARRAY OF
-		{ tp = construct_type(T_ARRAY, card_type); }
-	qualtype(&(tp->arr_elem))
-		{ ArrayElSize(tp);
+    {	register struct type *tp;
+}
+    : ARRAY OF
+        { tp = construct_type(T_ARRAY, card_type); }
+    qualtype(&(tp->arr_elem))
+        { ArrayElSize(tp);
 		  *ptp = tp;
 		}
-|
-	qualtype(ptp)
-;
+    | qualtype(ptp)
+    ;
 
 TypeDeclaration
-{
+    {
 	struct def *df;
 	struct type *tp;
 	register struct node *nd;
-}:
-	IDENT		{ df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
+}
+    : IDENT
+        { df = define(dot.TOK_IDF, CurrentScope, D_TYPE);
 			  nd = dot2leaf(Name);
 			}
-	'=' type(&tp)
-			{ DeclareType(nd, df, tp);
+    '='
+    type(&tp)
+        { DeclareType(nd, df, tp);
 			  FreeNode(nd);
 			}
-;
+    ;
 
-type(struct type **ptp;):
-	%default SimpleType(ptp)
-|
-	ArrayType(ptp)
-|
-	RecordType(ptp)
-|
-	SetType(ptp)
-|
-	PointerType(ptp)
-|
-	ProcedureType(ptp)
-;
+type(struct type **ptp;)
+    : %default
+    SimpleType(ptp)
+    | ArrayType(ptp)
+    | RecordType(ptp)
+    | SetType(ptp)
+    | PointerType(ptp)
+    | ProcedureType(ptp)
+    ;
 
-SimpleType(struct type **ptp;) :
-	qualtype(ptp)
-	[
-		/* nothing */
-	|
-		SubrangeType(ptp)
-		/* The subrange type is given a base type by the
+SimpleType(struct type **ptp;)
+    : qualtype(ptp)
+    [
+    /* nothing */
+        | SubrangeType(ptp)
+        /* The subrange type is given a base type by the
 		   qualident (this is new modula-2).
 		*/
-	]
-|
-	enumeration(ptp)
-|			{ *ptp = 0;	/* no qualification */ }
-	SubrangeType(ptp)
-;
+    ]
+    | enumeration(ptp)
+    |
+        { *ptp = 0;	/* no qualification */ }
+    SubrangeType(ptp)
+    ;
 
 enumeration(struct type **ptp;)
-{
+    {
 	struct node *EnumList;
-} :
-	'(' IdentList(&EnumList) ')'
-		{ *ptp = enum_type(EnumList); }
-;
+}
+    : '('
+    IdentList(&EnumList)
+    ')'
+        { *ptp = enum_type(EnumList); }
+    ;
 
 IdentList(struct node **p;)
-{
+    {
 	register struct node *q;
-} :
-	IDENT		{ *p = q = dot2leaf(Select); }
-	[ %persistent
-		',' IDENT
-			{ q->nd_NEXT = dot2leaf(Select);
+}
+    : IDENT
+        { *p = q = dot2leaf(Select); }
+    [
+        %persistent
+        ',' IDENT
+            { q->nd_NEXT = dot2leaf(Select);
 			  q = q->nd_NEXT;
 			}
-	]*
-;
+    ]*
+    ;
 
 SubrangeType(struct type **ptp;)
-{
+    {
 	struct node *nd1, *nd2;
-}:
-	/*
+}
+    :
+    /*
 	   This is not exactly the rule in the new report, but see
 	   the rule for "SimpleType".
 	*/
-	'[' ConstExpression(&nd1)
-	UPTO ConstExpression(&nd2)
-	']'
-			{ *ptp = subr_type(nd1, nd2, *ptp);
+    '['
+    ConstExpression(&nd1)
+    UPTO
+    ConstExpression(&nd2)
+    ']'
+        { *ptp = subr_type(nd1, nd2, *ptp);
 			  FreeNode(nd1);
 			  FreeNode(nd2);
 			}
-;
+    ;
 
 ArrayType(struct type **ptp;)
-{
+    {
 	struct type *tp;
 	register struct type *tp1, *tp2;
-} :
-	ARRAY SimpleType(&tp)
-			{ tp1 = tp2 = construct_type(T_ARRAY, tp); }
-	[
-		',' SimpleType(&tp)
-			{ tp2->arr_elem = construct_type(T_ARRAY, tp);
+}
+    : ARRAY
+    SimpleType(&tp)
+        { tp1 = tp2 = construct_type(T_ARRAY, tp); }
+    [
+        ','
+        SimpleType(&tp)
+            { tp2->arr_elem = construct_type(T_ARRAY, tp);
 			  tp2 = tp2->arr_elem;
 			}
-	]* OF type(&tp)
-			{ tp2->arr_elem = tp;
+    ]*
+    OF
+    type(&tp)
+        { tp2->arr_elem = tp;
 			  ArraySizes(tp1);
 			  *ptp = tp1;
 			}
-;
+    ;
 
 RecordType(struct type **ptp;)
-{
+    {
 	register struct scope *scope;
 	arith size = 0;
 	int xalign = struct_align;
 }
-:
-	RECORD
-		{ scope = open_and_close_scope(OPENSCOPE); }
-	FieldListSequence(scope, &size, &xalign)
-		{ if (size == 0) {
+    : RECORD
+        { scope = open_and_close_scope(OPENSCOPE); }
+    FieldListSequence(scope, &size, &xalign)
+        { if (size == 0) {
 			warning(W_ORDINARY, "empty record declaration");
 			size = 1;
 		  }
@@ -291,41 +311,46 @@ RecordType(struct type **ptp;)
 		  (*ptp)->rec_scope = scope;
 		  Reverse(&(scope->sc_def));
 		}
-	END
-;
+    END
+    ;
 
-FieldListSequence(struct scope *scope; arith *cnt; int *palign;):
-	FieldList(scope, cnt, palign)
-	[
-		';' FieldList(scope, cnt, palign)
-	]*
-;
+FieldListSequence(struct scope *scope; arith *cnt; int *palign;)
+    : FieldList(scope, cnt, palign)
+    [
+        ';'
+        FieldList(scope, cnt, palign)
+    ]*
+    ;
 
 FieldList(struct scope *scope; arith *cnt; int *palign;)
-{
+    {
 	struct node *FldList;
 	struct type *tp;
 	struct node *nd;
 	register struct def *df;
 	arith tcnt, max;
-} :
-[
-	IdentList(&FldList) ':' type(&tp)
-			{
+}
+    : [
+        IdentList(&FldList)
+        ':'
+        type(&tp)
+            {
 			  *palign = lcm(*palign, tp->tp_align);
 			  EnterFieldList(FldList, tp, scope, cnt);
 			}
-|
-	CASE
-	/* Also accept old fashioned Modula-2 syntax, but give a warning.
+        | CASE
+        /* Also accept old fashioned Modula-2 syntax, but give a warning.
 	   Sorry for the complicated code.
 	*/
-	[ qualident(&nd)
-	  [ ':' qualtype(&tp)
-			/* This is correct, in both kinds of Modula-2, if
+        [
+            qualident(&nd)
+            [
+                ':'
+                qualtype(&tp)
+                /* This is correct, in both kinds of Modula-2, if
 		   	   the first qualident is a single identifier.
 			*/
-			{ if (nd->nd_class != Name) {
+                    { if (nd->nd_class != Name) {
 				error("illegal variant tag");
 		  	  }
 			  else {
@@ -341,10 +366,11 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			  }
 			  FreeNode(nd);
 			}
-	  |		/* Old fashioned! the first qualident now represents
+                |
+                /* Old fashioned! the first qualident now represents
 			   the type
 			*/
-			{
+                    {
 #ifndef STRICT_3RD_ED
 			  if (! options['3']) warning(W_OLDFASHIONED,
 			      "old fashioned Modula-2 syntax; ':' missing");
@@ -353,60 +379,67 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
 			  error("':' missing");
 			  tp = qualified_type(&nd);
 			}
-	  ]
-	| ':' qualtype(&tp)
-	  /* Aha, third edition. Well done! */
-	]
-			{ tcnt = *cnt; }
-	OF variant(scope, &tcnt, tp, palign)
-			{ max = tcnt; tcnt = *cnt; }
-	[
-	  '|' variant(scope, &tcnt, tp, palign)
-			{ if (tcnt > max) max = tcnt; tcnt = *cnt; }
-	]*
-	[ ELSE FieldListSequence(scope, &tcnt, palign)
-			{ if (tcnt > max) max = tcnt; }
-	|
-	]
-	END
-			{ *cnt = max; }
-|
-]
-;
+            ]
+            | ':'
+            qualtype(&tp)
+            /* Aha, third edition. Well done! */
+        ]
+            { tcnt = *cnt; }
+        OF
+        variant(scope, &tcnt, tp, palign)
+            { max = tcnt; tcnt = *cnt; }
+        [
+            '|'
+            variant(scope, &tcnt, tp, palign)
+                { if (tcnt > max) max = tcnt; tcnt = *cnt; }
+        ]*
+        [
+            ELSE
+            FieldListSequence(scope, &tcnt, palign)
+                { if (tcnt > max) max = tcnt; }
+            |
+        ]
+        END
+            { *cnt = max; }
+        |
+    ]
+    ;
 
 variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
-{
+    {
 	struct node *nd;
-} :
-	[
-		CaseLabelList(&tp, &nd)
-			{ /* Ignore the cases for the time being.
+}
+    : [
+        CaseLabelList(&tp, &nd)
+            { /* Ignore the cases for the time being.
 			     Maybe a checking version will be supplied
 			     later ???
 			  */
 			  FreeNode(nd);
 			}
-		':' FieldListSequence(scope, cnt, palign)
-	|
-	]
-			/* Changed rule in new modula-2 */
-;
+        ':'
+        FieldListSequence(scope, cnt, palign)
+        |
+    ]
+    /* Changed rule in new modula-2 */
+    ;
 
-CaseLabelList(struct type **ptp; struct node **pnd;):
-	CaseLabels(ptp, pnd)
-	[	
-			{ *pnd = dot2node(Link, *pnd, NULLNODE); }
-		',' CaseLabels(ptp, &((*pnd)->nd_RIGHT))
-			{ pnd = &((*pnd)->nd_RIGHT); }
-	]*
-;
+CaseLabelList(struct type **ptp; struct node **pnd;)
+    : CaseLabels(ptp, pnd)
+    [
+            { *pnd = dot2node(Link, *pnd, NULLNODE); }
+        ','
+        CaseLabels(ptp, &((*pnd)->nd_RIGHT))
+            { pnd = &((*pnd)->nd_RIGHT); }
+    ]*
+    ;
 
 CaseLabels(struct type **ptp; register struct node **pnd;)
-{
+    {
 	register struct node *nd;
-}:
-	ConstExpression(pnd)
-			{ 
+}
+    : ConstExpression(pnd)
+        { 
 			  if (*ptp != 0) {
 				struct type *tp = intorcard(*ptp,
 					BaseType((*pnd)->nd_type));
@@ -420,12 +453,13 @@ CaseLabels(struct type **ptp; register struct node **pnd;)
 				node_error(nd, "illegal type in case label");
 			  }
 			}
-	[
-		UPTO	{ *pnd = nd = dot2node(Link,nd,NULLNODE);
+    [
+        UPTO
+            { *pnd = nd = dot2node(Link,nd,NULLNODE);
 			  nd->nd_type = nd->nd_LEFT->nd_type;
 			}
-		ConstExpression(&(*pnd)->nd_RIGHT)
-			{ if (!ChkCompat(&((*pnd)->nd_RIGHT), nd->nd_type,
+        ConstExpression(&(*pnd)->nd_RIGHT)
+            { if (!ChkCompat(&((*pnd)->nd_RIGHT), nd->nd_type,
 					 "case label")) {
 			  	nd->nd_type = error_type;
 			  }
@@ -437,133 +471,147 @@ CaseLabels(struct type **ptp; register struct node **pnd;)
 			  }
 
 			}
-	|
-	]
-			{
+        |
+    ]
+        {
 			  *ptp = nd->nd_type;
 			}
-;
+    ;
 
 SetType(struct type **ptp;)
-{	struct type *tp;
-} :
-	SET OF SimpleType(&tp)
-			{ *ptp = set_type(tp); }
-;
+    {	struct type *tp;
+}
+    : SET OF
+    SimpleType(&tp)
+        { *ptp = set_type(tp); }
+    ;
 
-/*	In a pointer type definition, the type pointed at does not
+    /*	In a pointer type definition, the type pointed at does not
 	have to be declared yet, so be careful about identifying
 	type-identifiers.
 */
 PointerType(struct type **ptp;)
-{	register struct type *tp;
-} :
-			{ tp = construct_type(T_POINTER, NULLTYPE); }
-	POINTER TO
-	[ %if	(type_or_forward(tp))
-	  type(&(tp->tp_next)) 
-	|
-	  IDENT
-	]
-			{ *ptp = tp; }
-;
+    {	register struct type *tp;
+}
+    :
+        { tp = construct_type(T_POINTER, NULLTYPE); }
+    POINTER TO
+    [
+        %if (type_or_forward(tp))
+        type(&(tp->tp_next))
+        | IDENT
+    ]
+        { *ptp = tp; }
+    ;
 
 qualtype(struct type **ptp;)
-{
+    {
 	struct node *nd;
-} :
-	qualident(&nd)
-		{ *ptp = qualified_type(&nd); }
-;
+}
+    : qualident(&nd)
+        { *ptp = qualified_type(&nd); }
+    ;
 
 ProcedureType(struct type **ptp;)
-{
+    {
 	struct paramlist *pr = 0;
 	arith parmaddr = 0;
 	struct type *tp = 0;
-} :
-	PROCEDURE 
-	[
-	  	FormalTypeList(&pr, &parmaddr, &tp)
-	|
-	]
-			{ *ptp = proc_type(tp, pr, parmaddr); }
-;
+}
+    : PROCEDURE
+    [
+        FormalTypeList(&pr, &parmaddr, &tp)
+        |
+    ]
+        { *ptp = proc_type(tp, pr, parmaddr); }
+    ;
 
-FormalTypeList(struct paramlist **ppr; arith *pparmaddr; struct type **ptp;) :
-	'('
-	[
-		VarFormalType(ppr, pparmaddr)
-		[
-			',' VarFormalType(ppr, pparmaddr)
-		]*
-	|
-	]
-	')'
-	[ ':' qualtype(ptp)
-	|
-	]
-;
+FormalTypeList(struct paramlist **ppr; arith *pparmaddr; struct type **ptp;)
+    : '('
+    [
+        VarFormalType(ppr, pparmaddr)
+        [
+            ','
+            VarFormalType(ppr, pparmaddr)
+        ]*
+        |
+    ]
+    ')'
+    [
+        ':'
+        qualtype(ptp)
+        |
+    ]
+    ;
 
 VarFormalType(struct paramlist **ppr; arith *pparmaddr;)
-{
+    {
 	struct type *tp;
 	int isvar;
-} :
-	var(&isvar)
-	FormalType(&tp)
-			{ EnterParamList(ppr,NULLNODE,tp,isvar,pparmaddr); }
-;
+}
+    : var(&isvar)
+    FormalType(&tp)
+        { EnterParamList(ppr,NULLNODE,tp,isvar,pparmaddr); }
+    ;
 
-var(int *VARp;) :
-	[
-		VAR		{ *VARp = D_VARPAR; }
-	|
-		/* empty */	{ *VARp = D_VALPAR; }
-	]
-;
+var(int *VARp;)
+    : [
+        VAR
+            { *VARp = D_VARPAR; }
+        |
+        /* empty */
+            { *VARp = D_VALPAR; }
+    ]
+    ;
 
 ConstantDeclaration
-{
+    {
 	struct idf *id;
 	struct node *nd;
 	register struct def *df;
-}:
-	IDENT		{ id = dot.TOK_IDF; }
-	'=' ConstExpression(&nd)
-			{ df = define(id,CurrentScope,D_CONST);
+}
+    : IDENT
+        { id = dot.TOK_IDF; }
+    '='
+    ConstExpression(&nd)
+        { df = define(id,CurrentScope,D_CONST);
 			  df->con_const = nd->nd_token;
 			  df->df_type = nd->nd_type;
 			  FreeNode(nd);
 			}
-;
+    ;
 
 VariableDeclaration
-{
+    {
 	struct node *VarList;
 	register struct node *nd;
 	struct type *tp;
-} :
-	IdentAddr(&VarList)
-			{ nd = VarList; }
-	[ %persistent
-		',' IdentAddr(&(nd->nd_RIGHT))
-			{ nd = nd->nd_RIGHT; }
-	]*
-	':' type(&tp)
-			{ EnterVarList(VarList, tp, proclevel > 0); }
-;
+}
+    : IdentAddr(&VarList)
+        { nd = VarList; }
+    [
+        %persistent
+        ','
+        IdentAddr(&(nd->nd_RIGHT))
+            { nd = nd->nd_RIGHT; }
+    ]*
+    ':'
+    type(&tp)
+        { EnterVarList(VarList, tp, proclevel > 0); }
+    ;
 
-IdentAddr(struct node **pnd;) 
-{
+IdentAddr(struct node **pnd;)
+    {
 	register struct node *nd;
-} :
-	IDENT		{ nd = dot2leaf(Name);
+}
+    : IDENT
+        { nd = dot2leaf(Name);
 			  *pnd = dot2node(Link, nd, NULLNODE);
 			}
-	[	'['
-		ConstExpression(&(nd->nd_NEXT))
-		']'
-	|
-	]
-;
+    [
+        '['
+        ConstExpression(&(nd->nd_NEXT))
+        ']'
+        |
+    ]
+    ;

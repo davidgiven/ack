@@ -20,118 +20,114 @@ extern struct expr *intexpr();
 }
 
 /* 7.1 */
-primary(struct expr **expp;) :
-	IDENTIFIER
-	{dot2expr(expp);}
-|
-	%illegal TYPE_IDENTIFIER
-|
-	constant(expp)
-|
-	STRING
-	{dot2expr(expp);}
-|
-	'(' expression(expp) ')'
-	{(*expp)->ex_flags |= EX_PARENS;}
-;
+primary(struct expr **expp;)
+    : IDENTIFIER
+        {dot2expr(expp);}
+    | %illegal
+    TYPE_IDENTIFIER
+    | constant(expp)
+    | STRING
+        {dot2expr(expp);}
+    | '('
+    expression(expp)
+    ')'
+        {(*expp)->ex_flags |= EX_PARENS;}
+    ;
 
-secundary(struct expr **expp;) :
-	primary(expp)
-	[
-		index_pack(expp)
-	|
-		parameter_pack(expp)
-	|
-		selection(expp)
-	]*
-;
+secundary(struct expr **expp;)
+    : primary(expp)
+    [
+        index_pack(expp)
+        | parameter_pack(expp)
+        | selection(expp)
+    ]*
+    ;
 
 index_pack(struct expr **expp;)
-	{struct expr *e1;}
-:
-	'[' expression(&e1) ']'
-	{ch7bin(expp, '[', e1);}
-;
+    {struct expr *e1;}
+    : '['
+    expression(&e1)
+    ']'
+        {ch7bin(expp, '[', e1);}
+    ;
 
 parameter_pack(struct expr **expp;)
-	{struct expr *e1 = 0;}
-:
-	'(' parameter_list(&e1)? ')'
-	{ch7bin(expp, '(', e1);}
-;
+    {struct expr *e1 = 0;}
+    : '('
+    parameter_list(&e1)?
+    ')'
+        {ch7bin(expp, '(', e1);}
+    ;
 
 selection(struct expr **expp;)
-	{int oper; struct idf *idf;}
-:
-	[ '.' | ARROW ]
-	{oper = DOT;}
-	identifier(&idf)
-	{ch7sel(expp, oper, idf);}
-;
+    {int oper; struct idf *idf;}
+    : [
+        '.'
+        | ARROW
+    ]
+        {oper = DOT;}
+    identifier(&idf)
+        {ch7sel(expp, oper, idf);}
+    ;
 
 parameter_list(struct expr **expp;)
-	{struct expr *e1 = 0;}
-:
-	assignment_expression(expp)
-	{any2opnd(expp, PARCOMMA);}
-	[ %persistent
-		','
-		assignment_expression(&e1)
-		{any2opnd(&e1, PARCOMMA);}
-		{ch7bin(expp, PARCOMMA, e1);}
-	]*
-;
+    {struct expr *e1 = 0;}
+    : assignment_expression(expp)
+        {any2opnd(expp, PARCOMMA);}
+    [
+        %persistent
+        ','
+        assignment_expression(&e1)
+            {any2opnd(&e1, PARCOMMA);}
+            {ch7bin(expp, PARCOMMA, e1);}
+    ]*
+    ;
 
-/* 7.2 */
+    /* 7.2 */
 postfixed(struct expr **expp;)
-	{int oper;}
-:
-	secundary(expp)
-	[
-		postop(&oper)
-		{ch7incr(expp, oper);}
-	|
-		empty
-	]
-;
+    {int oper;}
+    : secundary(expp)
+    [
+        postop(&oper)
+            {ch7incr(expp, oper);}
+        | empty
+    ]
+    ;
 
-%first	first_of_type_specifier, type_specifier;
+%first first_of_type_specifier, type_specifier;
 
 unary(struct expr **expp;)
-	{struct type *tp; int oper;}
-:
-%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
-	cast(&tp) unary(expp)
-	{	ch7cast(expp, CAST, tp);
+    {struct type *tp; int oper;}
+    : %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
+    cast(&tp)
+    unary(expp)
+        {	ch7cast(expp, CAST, tp);
 		(*expp)->ex_flags |= EX_CAST;
 	}
-|
-	postfixed(expp)
-|
-	unop(&oper) unary(expp)
-	{ch7mon(oper, expp);}
-|
-	size_of(expp)
-;
+    | postfixed(expp)
+    | unop(&oper)
+    unary(expp)
+        {ch7mon(oper, expp);}
+    | size_of(expp)
+    ;
 
 size_of(struct expr **expp;)
-	{struct type *tp;}
-:
-	SIZEOF
-	[%if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
-		cast(&tp)
-		{
+    {struct type *tp;}
+    : SIZEOF
+    [
+        %if (first_of_type_specifier(AHEAD) && AHEAD != IDENTIFIER)
+        cast(&tp)
+            {
 			*expp = intexpr(size_of_type(tp, "type"), INT);
 			(*expp)->ex_flags |= EX_SIZEOF;
 		}
-	|
-		unary(expp)
-		{ch7mon(SIZEOF, expp);}
-	]
-;
+        | unary(expp)
+            {ch7mon(SIZEOF, expp);}
+    ]
+    ;
 
-/* 7.3-7.12 */
-/*	The set of operators in C is stratified in 15 levels, with level
+    /* 7.3-7.12 */
+    /*	The set of operators in C is stratified in 15 levels, with level
 	N being treated in RM 7.N.  In principle each operator is
 	assigned a rank, ranging from 1 to 15.  Such an expression can
 	be parsed by a construct like:
@@ -166,23 +162,23 @@ size_of(struct expr **expp;)
 */
 
 binary_expression(int maxrank; struct expr **expp;)
-	{int oper; struct expr *e1;}
-:
-	unary(expp)
-	[%while (rank_of(DOT) <= maxrank && AHEAD != '=')
-		/*	'?', '=', and ',' are no binops, and the test
+    {int oper; struct expr *e1;}
+    : unary(expp)
+    [
+        %while (rank_of(DOT) <= maxrank && AHEAD != '=')
+        /*	'?', '=', and ',' are no binops, and the test
 			for AHEAD != '=' keeps the other assignment
 			operators out
 		*/
-		binop(&oper)
-		binary_expression(rank_of(oper)-1, &e1)
-		{
+        binop(&oper)
+        binary_expression(rank_of(oper)-1, &e1)
+            {
 			ch7bin(expp, oper, e1);
 		}
-	]*
-;
+    ]*
+    ;
 
-/* 7.13 */
+    /* 7.13 */
 conditional_expression(struct expr **expp;)
 /*	There is some unfortunate disagreement about what is allowed
 	between the '?' and the ':' of a conditional_expression.
@@ -191,20 +187,21 @@ conditional_expression(struct expr **expp;)
 	accept a full assignment_expression there, and programs
 	(like, e.g., emacs) rely on it. So we have little choice.
 */
-	{struct expr *e1 = 0, *e2 = 0;}
-:
-	/* allow all binary operators */
-	binary_expression(rank_of('?') - 1, expp)
-	[	'?'
-		expression(&e1)
-		{
+    {struct expr *e1 = 0, *e2 = 0;}
+    :
+    /* allow all binary operators */
+    binary_expression(rank_of('?') - 1, expp)
+    [
+        '?'
+        expression(&e1)
+            {
 #ifndef NOROPTION
 			check_conditional(e1, '?', "between ? and :");
 #endif
 		}
-		':'
-		assignment_expression(&e2)
-		{	
+        ':'
+        assignment_expression(&e2)
+            {	
 #ifndef NOROPTION
 			check_conditional(e2, '=', "after :");
 #endif
@@ -212,126 +209,153 @@ conditional_expression(struct expr **expp;)
 			opnd2test(expp, '?');
 			ch7bin(expp, '?', e1);
 		}
-	]?
-;
+    ]?
+    ;
 
-/* 7.14 */
+    /* 7.14 */
 assignment_expression(struct expr **expp;)
-	{
+    {
 		int oper;
 		struct expr *e1 = 0;
 	}
-:
-	conditional_expression(expp)
-	[%prefer	/* (rank_of(DOT) <= maxrank) for any asgnop */
-		asgnop(&oper)
-		assignment_expression(&e1)
-		{ch7asgn(expp, oper, e1);}
-	|
-		empty		/* LLgen artefact ??? */
-	]
-;
+    : conditional_expression(expp)
+    [
+        %prefer
+        /* (rank_of(DOT) <= maxrank) for any asgnop */
+        asgnop(&oper)
+        assignment_expression(&e1)
+            {ch7asgn(expp, oper, e1);}
+        | empty
+        /* LLgen artefact ??? */
+    ]
+    ;
 
-/* 7.15 */
+    /* 7.15 */
 expression(struct expr **expp;)
-	{struct expr *e1;}
-:
-	assignment_expression(expp)
-	[	','
-		assignment_expression(&e1)
-		{
+    {struct expr *e1;}
+    : assignment_expression(expp)
+    [
+        ','
+        assignment_expression(&e1)
+            {
 			ch7bin(expp, ',', e1);
 		}
-	]*
-;
+    ]*
+    ;
 
-unop(int *oper;) :
-	['*' | '&' | '-' | '!' | '~' | PLUSPLUS | MINMIN]
-	{*oper = DOT;}
-;
+unop(int *oper;)
+    : [
+        '*'
+        | '&'
+        | '-'
+        | '!'
+        | '~'
+        | PLUSPLUS
+        | MINMIN
+    ]
+        {*oper = DOT;}
+    ;
 
-postop(int *oper;):
-	PLUSPLUS {*oper = POSTINCR;}
-|
-	MINMIN {*oper = POSTDECR;}
-;
+postop(int *oper;)
+    : PLUSPLUS
+        {*oper = POSTINCR;}
+    | MINMIN
+        {*oper = POSTDECR;}
+    ;
 
-multop:
-	'*' | '/' | '%'
-;
+multop
+    : '*'
+    | '/'
+    | '%'
+    ;
 
-addop:
-	'+' | '-'
-;
+addop
+    : '+'
+    | '-'
+    ;
 
-shiftop:
-	LEFT | RIGHT
-;
+shiftop
+    : LEFT
+    | RIGHT
+    ;
 
-relop:
-	'<' | '>' | LESSEQ | GREATEREQ
-;
+relop
+    : '<'
+    | '>'
+    | LESSEQ
+    | GREATEREQ
+    ;
 
-eqop:
-	EQUAL | NOTEQUAL
-;
+eqop
+    : EQUAL
+    | NOTEQUAL
+    ;
 
-arithop:
-	multop | addop | shiftop
-|
-	'&' | '^' | '|'
-;
+arithop
+    : multop
+    | addop
+    | shiftop
+    | '&'
+    | '^'
+    | '|'
+    ;
 
-binop(int *oper;) :
-	[ arithop | relop | eqop | AND | OR ]
-	{*oper = DOT;}
-;
+binop(int *oper;)
+    : [
+        arithop
+        | relop
+        | eqop
+        | AND
+        | OR
+    ]
+        {*oper = DOT;}
+    ;
 
-asgnop(int *oper;):
-	'=' {*oper = DOT;}
-|
-	'+' '=' {*oper = PLUSAB;}
-|
-	'-' '=' {*oper = MINAB;}
-|
-	'*' '=' {*oper = TIMESAB;}
-|
-	'/' '=' {*oper = DIVAB;}
-|
-	'%' '=' {*oper = MODAB;}
-|
-	LEFT '=' {*oper = LEFTAB;}
-|
-	RIGHT '=' {*oper = RIGHTAB;}
-|
-	'&' '=' {*oper = ANDAB;}
-|
-	'^' '=' {*oper = XORAB;}
-|
-	'|' '=' {*oper = ORAB;}
-;
+asgnop(int *oper;)
+    : '='
+        {*oper = DOT;}
+    | '+' '='
+        {*oper = PLUSAB;}
+    | '-' '='
+        {*oper = MINAB;}
+    | '*' '='
+        {*oper = TIMESAB;}
+    | '/' '='
+        {*oper = DIVAB;}
+    | '%' '='
+        {*oper = MODAB;}
+    | LEFT '='
+        {*oper = LEFTAB;}
+    | RIGHT '='
+        {*oper = RIGHTAB;}
+    | '&' '='
+        {*oper = ANDAB;}
+    | '^' '='
+        {*oper = XORAB;}
+    | '|' '='
+        {*oper = ORAB;}
+    ;
 
-constant(struct expr **expp;) :
-[
-	INTEGER
-|
-	FLOATING
-]	{dot2expr(expp);}
-;
+constant(struct expr **expp;)
+    : [
+        INTEGER
+        | FLOATING
+    ]
+        {dot2expr(expp);}
+    ;
 
-/* 15 */
-constant_expression (struct expr **expp;) :
-	assignment_expression(expp)
-	{chk_cst_expr(expp);}
-;
+    /* 15 */
+constant_expression(struct expr **expp;)
+    : assignment_expression(expp)
+        {chk_cst_expr(expp);}
+    ;
 
-identifier(struct idf **idfp;) :
-[
-	IDENTIFIER
-|
-	TYPE_IDENTIFIER
-]
-	{
+identifier(struct idf **idfp;)
+    : [
+        IDENTIFIER
+        | TYPE_IDENTIFIER
+    ]
+        {
 		*idfp = dot.tk_idf;
 	}
-;
+    ;

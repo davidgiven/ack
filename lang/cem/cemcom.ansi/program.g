@@ -40,9 +40,9 @@
 	doubts upon the second.
 */
 
-%lexical	LLlex;
-%start		C_program, program;
-%start		If_expr, control_if_expression;
+%lexical LLlex;
+%start C_program, program;
+%start If_expr, control_if_expression;
 
 {
 #include	<stddef.h>
@@ -70,22 +70,24 @@
 }
 
 control_if_expression
-	{
+    {
 		struct expr *exprX;
 	}
-:
-	constant_expression(&exprX)
-		{
+    : constant_expression(&exprX)
+        {
 		}
-;
+    ;
 
-/* 3.7 */
-program:
-	[%persistent external_definition]*
-	{ unstack_world(); }
-;
+    /* 3.7 */
+program
+    : [
+        %persistent
+        external_definition
+    ]*
+        { unstack_world(); }
+    ;
 
-/*	A C identifier definition is remarkable in that it formulates
+    /*	A C identifier definition is remarkable in that it formulates
 	the declaration in a way different from most other languages:
 	e.g., rather than defining x as a pointer-to-integer, it defines
 	*x as an integer and lets the compiler deduce that x is actually
@@ -123,76 +125,77 @@ program:
 */
 
 external_definition
-	{	struct decspecs Ds;
+    {	struct decspecs Ds;
 		struct	declarator Dc;
 	}
-:
-	{	Ds = null_decspecs;
+    :
+        {	Ds = null_decspecs;
 		Dc = null_declarator;
 	}
-	[ %if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
-		decl_specifiers(&Ds)
-	|
-		{do_decspecs(&Ds);}
-	]
-	[
-		declarator(&Dc)
-		{
+    [
+        %if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
+        decl_specifiers(&Ds)
+        |
+            {do_decspecs(&Ds);}
+    ]
+    [
+        declarator(&Dc)
+            {
 			declare_idf(&Ds, &Dc, level);
 #ifdef	LINT
 			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
 #endif	/* LINT */
 		}
-		[
-			function(&Ds, &Dc)
-		|
-			{	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
+        [
+            function(&Ds, &Dc)
+            |
+                {	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
 				    Ds.ds_notypegiven) {
 					strict("declaration specifiers missing");
 				}
 			}
-			non_function(&Ds, &Dc)
-		]
-	|
-		{	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
+            non_function(&Ds, &Dc)
+        ]
+        |
+            {	if (! Ds.ds_sc_given && ! Ds.ds_typequal &&
 			    Ds.ds_notypegiven) {
 				strict("declaration missing");
 			}
 		}
-		';'
-	]
-	{remove_declarator(&Dc); flush_strings(); }
-;
+        ';'
+    ]
+        {remove_declarator(&Dc); flush_strings(); }
+    ;
 
 non_function(struct decspecs *ds; struct declarator *dc;)
-:
-	{	reject_params(dc);
+    :
+        {	reject_params(dc);
 	}
-	[
-		initializer(dc->dc_idf, ds->ds_sc)
-	|
-		{ code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
-	]
-	{
+    [
+        initializer(dc->dc_idf, ds->ds_sc)
+        |
+            { code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
+    ]
+        {
 #ifdef	LINT
 		lint_non_function_decl(ds, dc);
 #endif	/* LINT */
 	}
-	[
-		','
-		init_declarator(ds)
-	]*
-	';'
-;
+    [
+        ','
+        init_declarator(ds)
+    ]*
+    ';'
+    ;
 
-/* 3.7.1 */
+    /* 3.7.1 */
 function(struct decspecs *ds; struct declarator *dc;)
-	{
+    {
 		arith fbytes;
 		struct idf *idf = dc->dc_idf;
 	}
-:
-	{
+    :
+        {
 #ifdef	LINT
 		lint_start_function();
 #endif	/* LINT */
@@ -203,16 +206,16 @@ function(struct decspecs *ds; struct declarator *dc;)
 		stack_level();		/* L_FORMAL2 declarations */
 		declare_protos(dc);
 	}
-	declaration*
-	{
+    declaration*
+        {
 		check_formals(idf, dc);		/* check style-mixtures */
 		declare_formals(idf, &fbytes);
 #ifdef	LINT
 		lint_formals();
 #endif	/* LINT */
 	}
-	compound_statement
-	{
+    compound_statement
+        {
 		end_proc(fbytes);
 #ifdef	LINT
 		lint_implicit_return();
@@ -226,4 +229,4 @@ function(struct decspecs *ds; struct declarator *dc;)
 		lint_end_function();
 #endif	/* LINT */
 	}
-;
+    ;
