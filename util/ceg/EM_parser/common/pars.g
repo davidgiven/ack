@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i util/ceg/EM_parser/common/pars.g
+ */
+
 /* This file contains the parser for the 'EM_table'.
  * Every row in the table is converted to a C-function.
  * The parser is a fairly simple program, for each row it prints a function-
@@ -7,7 +13,7 @@
  * How this should be done is expressed in the 'as_table'.
  *
  * There are however some complicating factors:
- *	- A row in the 'EM_table' may contain CONDITION's. 
+ *	- A row in the 'EM_table' may contain CONDITION's.
  *	  The parser supports this by outptutting some "if" and "else"'s.
  *
  *	- The user is allowed to use some abbreviation in the 'EM_table', (s)he
@@ -24,126 +30,171 @@
  * 	  function. This function should return the number of bytes between
  *	  the current instruction and a labelled one, both forward and backward
  *	  references must be handled.
- *	  This requires the saving of the generated function, and 
+ *	  This requires the saving of the generated function, and
  *	  backpatching in a second phase.
  */
 {
+    #include <system.h>
+    #include "decl.h"
+    #include "em.h"
 
-#include <system.h>
-#include "decl.h"
-#include "em.h"
+    extern char yytext[];
+    extern int yylineno;
+    extern int first_action, last_action, token;
 
-extern char yytext[];
-extern int yylineno;
-extern int first_action, last_action, token;
-
-t_token tok, stok;
-int no_conversions = FALSE, library, segment = UNKNOWN;
-FILE* outfile;
-char *to_change;
-
+    t_token tok, stok;
+    int no_conversions = FALSE, library, segment = UNKNOWN;
+    FILE* outfile;
+    char* to_change;
 }
 
-%token 	C_INSTR, DEF_C_INSTR, CONDITION, ARROW,
-	CALL, ASSEM_INSTR, DEFAULT, ERROR;
-%start	table, table;
-%start	def_row, def_row;
-%start	c_table, c_table;
-%lexical	lex_analyzer ;
+%token C_INSTR, DEF_C_INSTR, CONDITION, ARROW, CALL, ASSEM_INSTR, DEFAULT, ERROR;
+%start table, table;
+%start def_row, def_row;
+%start c_table, c_table;
+%lexical lex_analyzer;
 
+table
+    : row*
+    ;
 
-table	: row*
-	;
+row
+    : C_INSTR
+        {
+            set_outfile(yytext);
+            header(yytext);
+            set_segment(segment);
+        }
+    [
+        special
+        | simple
+    ]
+        { out("}\n\n"); }
+    | DEF_C_INSTR
+        { init_defaults(yytext); }
+    [
+        Dspecial
+        | Dsimple
+    ]
+        { handle_defaults(); }
+    ;
 
-row	: C_INSTR 		{ set_outfile( yytext); header( yytext);
-				  set_segment(segment);
-				}
-	  [ special | simple]	{ out( "}\n\n");}
+special
+    :
+        { out("if( 0 ) ;\n"); }
+    [
+        CONDITION
+            {
+                out("else ");
+                question(&yytext[0]);
+            }
+        simple
+            { out("}\n"); }
+    ]*
+    DEFAULT
+        { out("else {\n"); }
+    simple
+        { out("}\n"); }
+    ;
 
-	| DEF_C_INSTR		{ init_defaults( yytext);}
-	  [ Dspecial | Dsimple] { handle_defaults();}
-	;
+simple
+    : ARROW
+        { save_output(); }
+    actionlist
+        { back_patch(); }
+    ;
 
-special : 
-				{ out( "if( 0 ) ;\n"); }
+actionlist
+    :
+        { first_action = TRUE; }
+    [
+        action
+            { first_action = FALSE; }
+        [
+            ';' action
+        ]*
+    ]?
+    '.'
+    ;
 
-	  [ CONDITION 		{ out( "else "); question( &yytext[0]);}
-	    simple 		{ out( "}\n");}
- 	  ]*
+action
+    : CALL
+        { print_call(&yytext[0]); }
+    | as_block
+        {
+            last_action = (token == '.');
+            do_block_assemble();
+        }
+    ;
 
-	  DEFAULT 		{ out( "else {\n");}
-	  simple 		{ out( "}\n");}
-	;
+as_block
+    :
+        { init_as_block(); }
+    ASSEM_INSTR
+        { save_as(&yytext[0]); }
+    more_as
+    ;
 
-simple	: ARROW 		{ save_output();}
-	  actionlist		{ back_patch();}
-        ;
-
-
-actionlist :			{ first_action = TRUE;}
-	[ action		{ first_action = FALSE;}
-	  [ ';' action]*
-	]?
-	'.'
-	;
-
-action	: CALL			{ print_call( &yytext[0]);}
-
-	| as_block		{ last_action = ( token == '.');
-				  do_block_assemble();}
-
-	;
-
-as_block :			{ init_as_block();}
-	ASSEM_INSTR 		{ save_as( &yytext[0]);}
-	more_as
-	;
-
-more_as :
-	  %if ( next_token() == ASSEM_INSTR)
-	  ';' 
-	  ASSEM_INSTR 		{ save_as( &yytext[0]);}
-	  more_as
-	|
-	;
+more_as
+    : %if (next_token() == ASSEM_INSTR)
+    ';' ASSEM_INSTR
+        { save_as(&yytext[0]); }
+    more_as
+    |
+    ;
 
 
 /* Grammar rules for a default-instruction, just copy to a temporary file. */
 
-Dspecial: CONDITION 		{ out( " %s ", yytext);}
-	  Dsimple 		
+Dspecial
+    : CONDITION
+        { out(" %s ", yytext); }
+    Dsimple
+    [
+        CONDITION
+            { out(" %s ", yytext); }
+        Dsimple
+    ]*
+    DEFAULT
+        { out(" %s ", yytext); }
+    Dsimple
+    ;
 
-	  [ CONDITION 		{ out( " %s ", yytext);}
-	    Dsimple 		
- 	  ]*
+Dsimple
+    : ARROW
+        { out("%s", yytext); }
+    Dactionlist
+    ;
 
-	  DEFAULT 		{ out( " %s ", yytext);}
-	  Dsimple 		
-	;
+Dactionlist
+    : [
+        Daction
+        [
+            ';'
+                { out(";\n"); }
+            Daction
+        ]*
+    ]?
+    '.'
+        { out(".\n"); }
+    ;
 
-Dsimple	: ARROW 		{ out( "%s", yytext);}
-	  Dactionlist
+Daction
+    : CALL
+        { out("%s", yytext); }
+    | ASSEM_INSTR
+        { out("\"%s\"", yytext); }
+    ;
 
-	;
-
-Dactionlist : 
-	  [ Daction
-	    [ ';'		{ out( ";\n");}
-	      Daction
-	    ]*
-	  ]?
-	  '.' 			{ out( ".\n");}
-	;
-
-Daction	: CALL			{ out( "%s", yytext);}
-
-	| ASSEM_INSTR 		{ out( "\"%s\"", yytext);}
-
-	;
-
-def_row	: 			{ set_segment(segment);}
-	[ special | simple]	{ out( "}\n\n");}
-	;
+def_row
+    :
+        { set_segment(segment); }
+    [
+        special
+        | simple
+    ]
+        { out("}\n\n"); }
+    ;
 
 
 
@@ -152,178 +203,209 @@ def_row	: 			{ set_segment(segment);}
  * use the grammar rules for the normal case above.
  */
 
-c_table	: c_row*
-	;
+c_table
+    : c_row*
+    ;
 
-c_row	: %if ( to_change && strcmp( yytext, to_change) == 0)
-	  C_INSTR 		{ set_outfile( yytext); header( yytext);
-				  set_segment(segment);
-				}
-	  [ special | simple]	{ out( "}\n\n"); to_change = 0; }
+c_row
+    : %if (to_change && strcmp(yytext, to_change) == 0)
+    C_INSTR
+        {
+            set_outfile(yytext);
+            header(yytext);
+            set_segment(segment);
+        }
+    [
+        special
+        | simple
+    ]
+        {
+            out("}\n\n");
+            to_change = 0;
+        }
+    | C_INSTR
+    [
+        c_special
+        | c_simple
+    ]
+    | %if (to_change && strcmp(yytext, to_change) == 0)
+    DEF_C_INSTR
+        { init_defaults(yytext); }
+    [
+        Dspecial
+        | Dsimple
+    ]
+        {
+            handle_defaults();
+            to_change = 0;
+        }
+    | DEF_C_INSTR
+    [
+        c_special
+        | c_simple
+    ]
+    ;
 
-	| C_INSTR
-	  [ c_special | c_simple]
+c_special
+    : CONDITION c_simple
+    [
+        CONDITION c_simple
+    ]*
+    DEFAULT c_simple
+    ;
 
-	| %if ( to_change && strcmp( yytext, to_change) == 0)
-	  DEF_C_INSTR		{ init_defaults( yytext);}
-	  [ Dspecial | Dsimple] { handle_defaults(); to_change = 0; }
+c_simple
+    : ARROW c_actionlist
+    ;
 
-	| DEF_C_INSTR
-	  [ c_special | c_simple]
-	;
+c_actionlist
+    : [
+        c_action
+        [
+            ';' c_action
+        ]*
+    ]?
+    '.'
+    ;
 
-c_special : CONDITION
-	  c_simple
-
-	  [ CONDITION
-	    c_simple
- 	  ]*
-
-	  DEFAULT
-	  c_simple
-	;
-
-c_simple: ARROW
-	  c_actionlist
-
-	;
-
-c_actionlist : 
-	  [ c_action [ ';' c_action]* ]? '.' 
-	;
-
-c_action: CALL
-	| ASSEM_INSTR
-	;
-
-
-
-
+c_action
+    : CALL
+    | ASSEM_INSTR
+    ;
 
 {
+    int saved = 0, token;
+    int nerrors = 0;
 
-int saved = 0, token;
-int nerrors = 0;
+    LLmessage(inserted_token) int inserted_token;
+    {
+        nerrors++;
+        if (inserted_token == 0)
+        {
+            fprintf(stderr, "EM_table : syntax error in line %d, >>", yylineno);
+            print_token(LLsymb);
+            fprintf(stderr, "<<  will be deleted!!\n");
+        }
+        else if (inserted_token < 0)
+        {
+            fprintf(stderr, "EM_table : syntax error in line %d, garbage at end of table\n",
+                    yylineno);
+        }
+        else
+        {
+            fprintf(stderr, "EM_table : syntax error in line %d, >>", yylineno);
+            print_token(inserted_token);
+            fprintf(stderr, "<<  will be inserted!!\n");
+            token = LLsymb;
+            saved = 1;
+        }
+    }
 
+    print_token(token) int token;
+    {
+        switch (token)
+        {
+            case C_INSTR:
+                fprintf(stderr, "C_INSTR  %s", yytext);
+                break;
+            case ASSEM_INSTR:
+                fprintf(stderr, "STRING  %s", yytext);
+                break;
+            case CALL:
+                fprintf(stderr, "CALL  %s", yytext);
+                break;
+            case ARROW:
+                fprintf(stderr, "==> ");
+                break;
+            case CONDITION:
+                fprintf(stderr, "CONDITION  %s", yytext);
+                break;
+            case DEFAULT:
+                fprintf(stderr, "default ");
+                break;
+            case ERROR:
+                fprintf(stderr, "unmatched  %s", yytext);
+                break;
+            default:
+                fprintf(stderr, " %c", token);
+                break;
+        }
+    }
 
-LLmessage( inserted_token)
-int inserted_token;
-{
-	nerrors++;
-	if ( inserted_token == 0) {
-		fprintf( stderr, "EM_table : syntax error in line %d, >>",
-			yylineno);
-		print_token( LLsymb);
-		fprintf( stderr, "<<  will be deleted!!\n");
-	}
-	else if ( inserted_token < 0) {
-		fprintf(stderr,"EM_table : syntax error in line %d, garbage at end of table\n",
-			 yylineno);
-	}
-	else {
-		fprintf( stderr, "EM_table : syntax error in line %d, >>",
-			yylineno);
-		print_token( inserted_token);
-		fprintf( stderr, "<<  will be inserted!!\n");
-		token = LLsymb;
-		saved = 1;
-	}
-}
+    /* The lexical analyzer.
+     *	It uses mylex() to get the tokens.
+     *	It supports the buffering of one token.
+     *	If the curent token is a C_INSTR it will set the global variable
+     *	'C_instr_info' to point to the correct information ( arguments, header,
+     *	etc.).
+     */
 
-print_token( token)
-int token;
-{
-	switch ( token) {
-	  case C_INSTR 	: fprintf( stderr,  "C_INSTR  %s", yytext);
-			  break;
-	  case ASSEM_INSTR : fprintf( stderr,  "STRING  %s", yytext);
-			  break;
-	  case CALL	: fprintf( stderr,  "CALL  %s", yytext);
-			  break;
-	  case ARROW	: fprintf( stderr,  "==> ");
-			  break;
-	  case CONDITION: fprintf( stderr,  "CONDITION  %s", yytext);
-			  break;
-	  case DEFAULT	: fprintf( stderr,  "default ");
-			  break;
-	  case ERROR	: fprintf( stderr,  "unmatched  %s", yytext);
-			  break;
-	  default	: fprintf( stderr, " %c", token);
-			  break;
-	}
-}
+    int lex_analyzer()
+    {
+        extern char* next;
 
+        if (saved)
+        {
+            saved = 0;
+        }
+        else
+        {
+            token = mylex();
+            *next = '\0';
+        }
+        if (token == C_INSTR)
+            set_C_instr_info(yytext);
+        return (token);
+    }
 
-/* The lexical analyzer.
- *	It uses mylex() to get the tokens.
- *	It supports the buffering of one token.
- *	If the curent token is a C_INSTR it will set the global variable
- *	'C_instr_info' to point to the correct information ( arguments, header,
- *	etc.).
- */
+    int next_token()
+    {
+        extern char* next;
 
-int lex_analyzer()
-{
-	extern char *next;
+        if (!saved)
+        {
+            token = mylex();
+            *next = '\0';
+            saved = 1;
+        }
+        return (token);
+    }
 
-	if ( saved) {
-		saved = 0;
-	}
-	else {
-		token = mylex();
-		*next = '\0';
-	}
-	if ( token == C_INSTR)
-		set_C_instr_info( yytext);
-	return( token);
-}
+    /******************************************************************************/
 
-int next_token()
-{
-	extern char *next;
+    /* Handle arguments :
+     *	-l 		: Library, generate one function per file.
+     *	-c <name>	: Change, only update the <name> file.
+     */
 
-	if ( !saved) {
-		token = mylex();
-		*next = '\0';
-		saved = 1;
-	}
-	return( token);
-}
+    main(argc, argv) int argc;
+    char** argv;
+    {
+        outfile = stdout;
+        if (argc > 1)
+        {
+            if (strcmp(argv[1], "-l") == 0)
+                library = TRUE;
+            else if (strcmp(argv[1], "-c") == 0)
+            {
+                library = TRUE;
+                to_change = argv[2];
+                c_table();
+                if (to_change)
+                {
+                    fprintf(stderr, "No rule for %s\n", to_change);
+                    exit(1);
+                }
+                exit(nerrors);
+            }
+        }
+        else
+        {
+            library = FALSE;
+            file_header();
+        }
 
-
-/******************************************************************************/
-
-/* Handle arguments :
- *	-l 		: Library, generate one function per file.
- *	-c <name>	: Change, only update the <name> file.
- */
-
-main( argc, argv)
-int argc;
-char **argv;
-{
-	outfile = stdout;
-	if ( argc > 1) {
-		if ( strcmp( argv[1], "-l") == 0)
-			library = TRUE;
-		else if( strcmp( argv[1], "-c") == 0) {
-			library = TRUE;
-			to_change = argv[2];
-			c_table();
-			if (to_change) {
-				fprintf( stderr, "No rule for %s\n", to_change);
-				exit( 1);
-			}
-			exit(nerrors);
-		}
-	}
-	else {
-		library = FALSE;
-		file_header();
-	}
-	
-	table();
-	exit(nerrors);
-}
-
+        table();
+        exit(nerrors);
+    }
 }
