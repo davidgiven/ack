@@ -72,11 +72,11 @@ class FormatterTests(unittest.TestCase):
     def test_layout(self):
         self.assertEqual(
             format_source('%token A,B; r(int x;) {int y;}: [%while(x) %persistent A(x)| B]*3 {f();}|;'),
-            "%token A, B;\n\nr(/* C parameters */)\n"
-            "    { /* C locals */ }\n    : [\n"
-            "        %while (/* C condition */)\n        %persistent\n"
-            "        A(/* C arguments */)\n        | B\n    ]*3\n"
-            "        { /* C action */ }\n    |\n    ;\n")
+            "%token A, B;\n\nr(int x;)\n"
+            "    {int y;}\n    : [\n"
+            "        %while (x)\n        %persistent\n"
+            "        A(x)\n        | B\n    ]*3\n"
+            "        {f();}\n    |\n    ;\n")
 
     def test_alternative_introducers_share_first_symbol(self):
         output = format_source('r: first second | third | [nested | other];')
@@ -84,12 +84,22 @@ class FormatterTests(unittest.TestCase):
                          '        nested\n        | other\n    ]\n    ;\n')
         self.assertEqual(format_source(output), output)
 
+    def test_conditions_are_preserved_verbatim(self):
+        condition = '(x  && f(")", /* keep */ (int[]){1, 2})\n || y)'
+        source = ('r: %if ' + condition + ' A {hidden();} | '
+                  '[%while (n-- > 0) B];')
+        output = format_source(source)
+        self.assertIn('%if ' + condition, output)
+        self.assertIn('%while (n-- > 0)', output)
+        self.assertIn('{hidden();}', output)
+        self.assertEqual(format_source(output), output)
+
     def test_plain_symbols_group_and_parameterised_symbols_stand_alone(self):
         source = "r: A B call(x) C D other(y) | '#' INTVALUE STRVALUE EOLN;"
         output = format_source(source)
         self.assertEqual(output,
-                         "r\n    : A B\n    call(/* C arguments */)\n"
-                         "    C D\n    other(/* C arguments */)\n"
+                         "r\n    : A B\n    call(x)\n"
+                         "    C D\n    other(y)\n"
                          "    | '#' INTVALUE STRVALUE EOLN\n    ;\n")
         self.assertEqual(format_source(output), output)
 
@@ -97,11 +107,11 @@ class FormatterTests(unittest.TestCase):
         source = 'r: A B? C D /* keep */ E F {f();} G H [I J | K L]+ M N;'
         output = format_source(source)
         self.assertIn(': A\n    B?\n    C D\n', output)
-        self.assertIn('/* keep */\n    E F\n        { /* C action */ }\n    G H\n', output)
+        self.assertIn('/* keep */\n    E F\n        {f();}\n    G H\n', output)
         self.assertIn('        I J\n        | K L\n    ]+\n    M N\n', output)
         self.assertEqual(format_source(output), output)
 
-    def test_comments_preserved_in_order_and_c_replaced(self):
+    def test_comments_and_c_preserved_in_order(self):
         source = ("/* header */ { int secret; /* inside C */ }\n"
                   "r /* before params */ (int n;) /* locals */ {int x;} :\n"
                   "/* first */ x /* arguments */ (n) [/* group */ 'x'\n"
@@ -110,11 +120,11 @@ class FormatterTests(unittest.TestCase):
         output = format_source(source)
         before = parse(source)
         after = parse(output)
-        for kind in ('comment', 'line_directive'):
+        for kind in ('comment', 'line_directive', 'c_block', 'c_parens'):
             self.assertEqual([t.text for t in before.tokens if t.kind == kind],
                              [t.text for t in after.tokens if t.kind == kind])
-        self.assertNotIn('secret', output)
-        self.assertNotIn('inside C', output)
+        self.assertIn('secret', output)
+        self.assertIn('inside C', output)
         self.assertEqual(format_source(output), output)
 
     def test_extensions_literals_and_directives(self):
@@ -122,21 +132,54 @@ class FormatterTests(unittest.TestCase):
                   "r: %illegal %erroneous TOKEN? | %substart a,b; {}+2 | ';'4;")
         output = format_source(source)
         self.assertTrue(output.startswith('# 1 "test.g"\n'))
-        self.assertIn('%substart a, b;\n        { /* C action */ }+2', output)
+        self.assertIn('%substart a, b;\n        {}+2', output)
         self.assertEqual(format_source(output), output)
 
     def test_actions_have_one_extra_indent_at_every_grammar_depth(self):
         output = format_source('{int global;} r {int local;}: {} | [A {} [B {}]];')
-        actions = [line for line in output.splitlines() if 'C action' in line]
-        self.assertEqual(actions, ['    ' * depth + '{ /* C action */ }'
+        actions = [line for line in output.splitlines() if line.strip() == '{}']
+        self.assertEqual(actions, ['    ' * depth + '{}'
                                    for depth in (2, 3, 4)])
-        self.assertTrue(output.startswith('{ /* C global */ }\n'))
-        self.assertIn('\n    { /* C locals */ }\n', output)
+        self.assertTrue(output.startswith('{int global;}\n'))
+        self.assertIn('\n    {int local;}\n', output)
         self.assertEqual(format_source(output), output)
 
     def test_empty_and_comments_only(self):
         self.assertEqual(format_source(''), '')
         self.assertEqual(format_source('  /* retained */  '), '/* retained */\n')
+
+    def test_blank_lines_surrounding_comments_are_preserved(self):
+        source = ('\n\n/* header */\n\n\nr: A\n\n/* middle */\n\n\nB;\n'
+                  '/* between rules */\ns: C;\n\n// trailer\n\n\n')
+        output = format_source(source)
+        self.assertTrue(output.startswith('\n\n/* header */\n\n\nr\n'))
+        self.assertIn(': A\n\n    /* middle */\n\n\n    B', output)
+        self.assertIn(';\n    /* between rules */\ns\n', output)
+        self.assertTrue(output.endswith(';\n\n    // trailer\n\n\n'))
+        self.assertEqual(format_source(output), output)
+
+    def test_blank_lines_between_comments_and_crlf_input(self):
+        source = '/* first */\r\n \t\r\n\r\n/* second */\r\n\r\nr: A;'
+        output = format_source(source)
+        self.assertTrue(output.startswith('/* first */\n\n\n/* second */\n\nr\n'))
+        self.assertEqual(format_source(output), output)
+
+    def test_inline_comments_do_not_gain_blank_lines(self):
+        output = format_source('r: A /* one *//* two */ B;/* end */')
+        self.assertNotIn('\n\n', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_multiline_c_is_not_reindented_or_rewritten(self):
+        source = ('{\n#include "header.h"\nint  global;\n}\n'
+                  'r(int x;\n char *s;) {\n\tint local;\n} :\n'
+                  'call(x,\n s) {\n#if ENABLED\n\tf("}"); // keep\n#endif\n};')
+        output = format_source(source)
+        self.assertIn('        {\n#if ENABLED\n\tf("}"); // keep\n#endif\n}', output)
+        self.assertEqual([(t.kind, t.text) for t in parse(source).tokens
+                          if t.kind != 'whitespace'],
+                         [(t.kind, t.text) for t in parse(output).tokens
+                          if t.kind != 'whitespace'])
+        self.assertEqual(format_source(output), output)
 
 
 if __name__ == '__main__':

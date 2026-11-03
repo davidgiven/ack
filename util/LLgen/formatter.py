@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""LLgen parser and grammar formatter with placeholders for embedded C.
+"""LLgen parser and grammar formatter preserving embedded C verbatim.
 
 Run ``python3 util/LLgen/formatter.py file.g`` to write formatted LLgen to
-stdout. C is replaced with role-specific placeholders. --tree prints the syntax
-tree as JSON; --tokens also includes whitespace and grammar comments.
+stdout. All C fragments are preserved verbatim. --tree prints the syntax tree
+as JSON; --tokens also includes whitespace and grammar comments.
 
 parse(source) returns a Document with an immutable token stream and a syntax
 tree. Token offsets are Python string offsets; node ranges are half-open token
@@ -305,8 +305,8 @@ class Formatter:
     """Lay out grammar tokens using the tree; retain grammar comments verbatim.
 
     Layout is attached to token indices so comments between syntax nodes are
-    never lost. Embedded C is represented by a single token and replaced only
-    at emission time. The input Document remains unchanged.
+    never lost. Embedded C is represented by a single token and emitted
+    verbatim. The input Document remains unchanged.
     """
 
     def __init__(self, document):
@@ -388,8 +388,23 @@ class Formatter:
         else:
             self.line += (' ' if space else '') + text
 
+    def comment_gaps(self):
+        """Map token boundaries adjoining comments to their blank-line counts."""
+        indices = [-1] + [i for i, token in enumerate(self.tokens)
+                          if token.kind != 'whitespace'] + [len(self.tokens)]
+        gaps = {}
+        for left, right in zip(indices, indices[1:]):
+            if not ((left >= 0 and self.tokens[left].kind == 'comment') or
+                    (right < len(self.tokens) and self.tokens[right].kind == 'comment')):
+                continue
+            whitespace = ''.join(t.text for t in self.tokens[left + 1:right])
+            newlines = len(re.findall(r'\r\n|\r|\n', whitespace))
+            gaps[right] = max(0, newlines - (left >= 0))
+        return gaps
+
     def format(self):
         self.layout(self.document.tree)
+        comment_gaps = self.comment_gaps()
         previous = None
         for i, token in enumerate(self.tokens):
             if token.kind == 'whitespace':
@@ -401,8 +416,11 @@ class Formatter:
                         or self.roles.get(i) == 'c_action'):
                     self.flush()
                 self.level, blank = self.breaks[i]
-                if blank and self.lines and self.lines[-1]:
+                if blank and i not in comment_gaps and self.lines and self.lines[-1]:
                     self.lines.append('')
+            if i in comment_gaps:
+                self.flush()
+                self.lines.extend([''] * comment_gaps[i])
             if token.kind in {'comment', 'line_directive'}:
                 self.flush()
                 # Leave the contents of multiline comments untouched, including
@@ -414,21 +432,19 @@ class Formatter:
                 continue
             role = self.roles.get(i)
             if role:
-                label = role[2:].replace('_', ' ')
-                text = ('{ /* C ' + label + ' */ }' if token.kind == 'c_block'
-                        else '(/* C ' + label + ' */)')
-                self.write(text, space=role not in {'c_parameters', 'c_arguments'})
+                self.write(token.text, space=role not in {'c_parameters', 'c_arguments'})
             else:
                 attach = token.kind in {',', ';', '*', '+', '?'} or (
                     token.kind == 'number' and previous in {']', '*', '+', 'identifier', 'literal', 'c_block', 'c_parens'})
                 self.write(token.text, space=not attach)
             previous = token.kind
         self.flush()
+        self.lines.extend([''] * comment_gaps.get(len(self.tokens), 0))
         return '\n'.join(self.lines) + ('\n' if self.lines else '')
 
 
 def format_document(document):
-    """Return formatted LLgen with C placeholders; never modify the document."""
+    """Format LLgen while retaining all embedded C verbatim."""
     return Formatter(document).format()
 
 
