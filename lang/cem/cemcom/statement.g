@@ -36,8 +36,8 @@
 }
 
 /*	Each statement construction is stacked in order to trace a ???
-	statement to such a construction. Example: a case statement should
-	be recognized as a piece of the most enclosing switch statement.
+statement to such a construction. Example: a case statement should
+be recognized as a piece of the most enclosing switch statement.
 */
 
 /* 9 */

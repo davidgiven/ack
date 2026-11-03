@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""LLgen formatter using clang-format for global C, local and action blocks.
+"""LLgen formatter using clang-format for C blocks and grammar comments.
 
 Run ``python3 util/LLgen/formatter.py file.g [file.g ...]`` to write formatted LLgen to
-stdout. Global C, local and action blocks use the project's .clang-format; other C
-fragments are preserved verbatim. clang-format must be on PATH.
+stdout. Global C, local and action blocks and grammar comments use the project's
+.clang-format; other C fragments are preserved verbatim. clang-format must be on PATH.
 --tree prints the syntax tree
 as JSON; --tokens also includes whitespace and grammar comments.
 Files are formatted independently in argument order. Use --inplace / -i to
@@ -452,8 +452,35 @@ def format_actions(actions, *, multiline=()):
     return result
 
 
+def format_comments(comments):
+    """Batch grammar comments at their output indentation, preserving boundaries."""
+    if not comments:
+        return {}
+    wrappers = []
+    for index, text, level in comments:
+        if text.startswith('/*'):
+            # Historical comment indentation is unreliable. Give every line
+            # the surrounding grammar's baseline; clang-format aligns stars.
+            text = ('\n' + '    ' * level).join(
+                line.lstrip(' \t') for line in text.splitlines())
+        wrappers.append(
+            ''.join(f'namespace LLgenComment{index}_{n}\n{{\n' for n in range(level)) +
+            f'int LLgenCommentStart{index};\n\n' + '    ' * level + text +
+            f'\n\nint LLgenCommentEnd{index};\n' + '}\n' * level)
+    formatted = clang_format(''.join(wrappers))
+    result = {}
+    for index, _, _ in comments:
+        match = re.search(
+            rf'^[ \t]*int LLgenCommentStart{index};\r?\n(.*?)'
+            rf'^[ \t]*int LLgenCommentEnd{index};', formatted, re.MULTILINE | re.DOTALL)
+        if not match:
+            raise FormatError('clang-format did not preserve the comment wrapper')
+        result[index] = match.group(1).strip('\r\n')
+    return result
+
+
 class Formatter:
-    """Lay out grammar tokens using the tree; retain grammar comments verbatim.
+    """Lay out grammar tokens using the tree and format C blocks and comments.
 
     Layout is attached to token indices so comments between syntax nodes are
     never lost. Embedded C is represented by a single token; global, local and
@@ -553,12 +580,30 @@ class Formatter:
             gaps[right] = max(0, newlines - (left >= 0))
         return gaps
 
+    def comment_levels(self):
+        """Assign comments to grammar scopes instead of the previous output line."""
+        levels = {i: 0 for i, token in enumerate(self.tokens) if token.kind == 'comment'}
+
+        def visit(node, level):
+            if node.kind in {'rule', 'group'}:
+                level += 1
+            for i in range(node.start, node.end):
+                if i in levels:
+                    levels[i] = level
+            for child in node.children:
+                visit(child, level)
+
+        visit(self.document.tree, 0)
+        return levels
+
     def format(self):
         self.layout(self.document.tree)
         blocks = format_actions(
             [(i, self.tokens[i].text, self.breaks[i][0])
              for i, role in self.roles.items() if role in {'c_action', 'c_locals'}],
             multiline={i for i, role in self.roles.items() if role == 'c_locals'})
+        comments = format_comments([(i, self.tokens[i].text, level)
+                                    for i, level in self.comment_levels().items()])
         comment_gaps = self.comment_gaps()
         previous = None
         for i, token in enumerate(self.tokens):
@@ -578,10 +623,9 @@ class Formatter:
                 self.lines.extend([''] * comment_gaps[i])
             if token.kind in {'comment', 'line_directive'}:
                 self.flush()
-                # Leave the contents of multiline comments untouched, including
-                # their original internal whitespace. Directives stay at column 1.
-                self.line = ('' if token.kind == 'line_directive' else
-                             '    ' * self.level) + token.text
+                # Comments are already indented by clang-format. Line directives
+                # stay at column 1; surrounding blank lines are handled separately.
+                self.line = comments[i] if token.kind == 'comment' else token.text
                 self.flush()
                 previous = None
                 continue
@@ -601,7 +645,7 @@ class Formatter:
 
 
 def format_document(document):
-    """Format LLgen and C blocks, retaining conditions and parameter lists verbatim."""
+    """Format LLgen, comments and C blocks; retain conditions and parameter lists."""
     return Formatter(document).format()
 
 

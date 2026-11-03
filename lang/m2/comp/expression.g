@@ -33,13 +33,13 @@
 /* inline, we need room for pdp/11
 number(struct node **p;) :
 [
-	%default
-	INTEGER
+%default
+INTEGER
 |
-	REAL
+REAL
 ]			{ *p = dot2leaf(Value);
-			  (*p)->nd_type = toktype;
-			}
+(*p)->nd_type = toktype;
+}
 ;
 */
 
@@ -89,9 +89,9 @@ ConstExpression(struct node **pnd;)
     {}
     : expression(pnd)
     /*
-	 * Changed rule in new Modula-2.
-	 * Check that the expression is a constant expression and evaluate!
-	 */
+     * Changed rule in new Modula-2.
+     * Check that the expression is a constant expression and evaluate!
+     */
         {
             DO_DEBUG(options['C'], printf("CONSTANT EXPRESSION\n"));
             DO_DEBUG(options['C'], PrNode(*pnd, 0));
@@ -111,7 +111,7 @@ expression(struct node **pnd;)
     {}
     : SimpleExpression(pnd)
     [
-    /* relation */
+        /* relation */
         [
             '='
             | '#'
@@ -127,9 +127,9 @@ expression(struct node **pnd;)
     ]
     ;
 
-    /* Inline in expression
+/* Inline in expression
 relation:
-	'=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN
+'=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN
 ;
 */
 
@@ -155,7 +155,7 @@ SimpleExpression(struct node **pnd;)
             nd = *pnd;
         }
     [
-    /* AddOperator */
+        /* AddOperator */
         [
             '+'
             | '-'
@@ -167,9 +167,9 @@ SimpleExpression(struct node **pnd;)
         { *pnd = nd; }
     ;
 
-    /* Inline in "SimpleExpression"
+/* Inline in "SimpleExpression"
 AddOperator:
-	'+' | '-' | OR
+'+' | '-' | OR
 ;
 */
 
@@ -180,7 +180,7 @@ term(struct node **pnd;)
     : factor(pnd)
         { nd = *pnd; }
     [
-    /* MulOperator */
+        /* MulOperator */
         [
             '*'
             | '/'
@@ -194,9 +194,9 @@ term(struct node **pnd;)
         { *pnd = nd; }
     ;
 
-    /* inline in "term"
+/* inline in "term"
 MulOperator:
-	'*' | '/' | DIV | MOD | AND
+'*' | '/' | DIV | MOD | AND
 ;
 */
 

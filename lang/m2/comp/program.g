@@ -39,17 +39,17 @@
     #include "defmodule.h"
 }
 /*
-	The grammar as given by Wirth is already almost LL(1); the
-	main problem is that the full form of a qualified designator
-	may be:
-		[ module_ident '.' ]* IDENT [ '.' field_ident ]*
-	which is quite confusing to an LL(1) parser. Rather than
-	resorting to context-sensitive techniques, I have decided
-	to render this as:
-		IDENT [ '.' IDENT ]*
-	on the grounds that it is quite natural to consider the first
-	IDENT to be the name of the object and regard the others as
-	field identifiers.
+The grammar as given by Wirth is already almost LL(1); the
+main problem is that the full form of a qualified designator
+may be:
+[ module_ident '.' ]* IDENT [ '.' field_ident ]*
+which is quite confusing to an LL(1) parser. Rather than
+resorting to context-sensitive techniques, I have decided
+to render this as:
+IDENT [ '.' IDENT ]*
+on the grounds that it is quite natural to consider the first
+IDENT to be the name of the object and regard the others as
+field identifiers.
 */
 
 %lexical LLlex;
@@ -119,11 +119,11 @@ import(int local;)
     }
     :
     /*
-	   When parsing a global module, this is the place where we must
-	   read already compiled definition modules.
-	   If the FROM clause is present, the identifier in it is a module
-	   name, otherwise the names in the import list are module names.
-	*/
+    When parsing a global module, this is the place where we must
+    read already compiled definition modules.
+    If the FROM clause is present, the identifier in it is a module
+    name, otherwise the names in the import list are module names.
+    */
     [
         FROM IDENT
         %substart DefinitionModule;
@@ -189,8 +189,8 @@ DefinitionModule
     import(0)*
     export(&dummy, &exportlist)
     /*	New Modula-2 does not have export lists in definition
-			modules. Issue a warning.
-		*/
+    modules. Issue a warning.
+    */
         {
             if (exportlist)
             {
@@ -237,10 +237,10 @@ definition
             |
             /* empty */
             /*
-	       Here, the exported type has a hidden implementation.
-	       The export is said to be opaque.
-	       It is restricted to pointer types.
-	    */
+            Here, the exported type has a hidden implementation.
+            The export is said to be opaque.
+            It is restricted to pointer types.
+            */
                 {
                     df->df_kind = D_HIDDEN;
                     df->df_type = construct_type(T_HIDDEN, NULLTYPE);

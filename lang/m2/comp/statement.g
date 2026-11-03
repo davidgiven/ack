@@ -34,10 +34,10 @@ statement(struct node **pnd;)
     }
     :
     /*
-	 * This part is not in the reference grammar. The reference grammar
-	 * states : assignment | ProcedureCall | ...
-	 * but this gives LL(1) conflicts
-	 */
+     * This part is not in the reference grammar. The reference grammar
+     * states : assignment | ProcedureCall | ...
+     * but this gives LL(1) conflicts
+     */
     designator(pnd)
     [
             {
@@ -58,9 +58,9 @@ statement(struct node **pnd;)
         expression(&(nd->nd_RIGHT))
     ]
         { *pnd = nd; }
-        /*
-	 * end of changed part
-	 */
+    /*
+     * end of changed part
+     */
     | IfStatement(pnd)
     | CaseStatement(pnd)
     | WHILE
@@ -101,15 +101,15 @@ statement(struct node **pnd;)
         { *pnd = EmptyStatement; }
     ;
 
-    /*
- * The next two rules in-line in "Statement", because of an LL(1) conflict
+/*
+* The next two rules in-line in "Statement", because of an LL(1) conflict
 
 assignment:
-	designator BECOMES expression
+designator BECOMES expression
 ;
 
 ProcedureCall:
-	designator ActualParameters?
+designator ActualParameters?
 ;
 */
 
@@ -212,26 +212,26 @@ case(struct node **pnd; struct type  **ptp;)
         }
     ;
 
-    /* inline in statement; lack of space 
+/* inline in statement; lack of space
 WhileStatement(struct node **pnd;)
 {
-	register struct node *nd;
+register struct node *nd;
 }:
-	WHILE		{ *pnd = nd = dot2leaf(Stat); }
-	expression(&(nd->nd_LEFT))
-	DO
-	StatementSequence(&(nd->nd_RIGHT))
-	END
+WHILE		{ *pnd = nd = dot2leaf(Stat); }
+expression(&(nd->nd_LEFT))
+DO
+StatementSequence(&(nd->nd_RIGHT))
+END
 ;
 
 RepeatStatement(struct node **pnd;)
 {
-	register struct node *nd;
+register struct node *nd;
 }:
-	REPEAT		{ *pnd = nd = dot2leaf(Stat); }
-	StatementSequence(&(nd->nd_LEFT))
-	UNTIL
-	expression(&(nd->nd_RIGHT))
+REPEAT		{ *pnd = nd = dot2leaf(Stat); }
+StatementSequence(&(nd->nd_LEFT))
+UNTIL
+expression(&(nd->nd_RIGHT))
 ;
 */
 
@@ -276,22 +276,22 @@ ForStatement(struct node **pnd;)
     END
     ;
 
-    /* inline in Statement; lack of space
+/* inline in Statement; lack of space
 LoopStatement(struct node **pnd;):
-	LOOP		{ *pnd = dot2leaf(Stat); }
-	StatementSequence(&((*pnd)->nd_RIGHT))
-	END
+LOOP		{ *pnd = dot2leaf(Stat); }
+StatementSequence(&((*pnd)->nd_RIGHT))
+END
 ;
 
 WithStatement(struct node **pnd;)
 {
-	register struct node *nd;
+register struct node *nd;
 }:
-	WITH		{ *pnd = nd = dot2leaf(Stat); }
-	designator(&(nd->nd_LEFT))
-	DO
-	StatementSequence(&(nd->nd_RIGHT))
-	END
+WITH		{ *pnd = nd = dot2leaf(Stat); }
+designator(&(nd->nd_LEFT))
+DO
+StatementSequence(&(nd->nd_RIGHT))
+END
 ;
 */
 

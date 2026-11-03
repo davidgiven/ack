@@ -488,7 +488,7 @@ getstmt
     }
     : getput(&cp)
     [
-    /* empty */
+        /* empty */
             {
                 C_loc((arith)0);
                 C_cal(cp);
@@ -768,7 +768,7 @@ openstmt
     expression(&exp)
         { conversion(exp, STRINGTYPE); }
     [
-    /* empty */
+        /* empty */
             { openstmt(0); }
         | INTVALUE
             { openstmt(ival); }
@@ -806,7 +806,7 @@ printstmt
     }
     : PRINTSYM
     [
-    /* empty */
+        /* empty */
             {
                 setchannel(-1);
                 C_cal("_nl");
@@ -889,7 +889,7 @@ randomizestmt
     }
     : RANDOMIZESYM
     [
-    /* empty */
+        /* empty */
             { C_cal("_randomi"); }
         | expression(&exp)
             {
@@ -956,7 +956,7 @@ wendstmt
 writestmt
     : WRITESYM
     [
-    /* empty */
+        /* empty */
             {
                 setchannel(-1);
                 C_cal("_wrnl");
@@ -1106,7 +1106,7 @@ compare(int *ip;)
     }
     : sum(&sum1)
     [
-    /* empty */
+        /* empty */
             { *ip = sum1; }
         | RELOP
             { rel = yylval.integer; }
@@ -1170,7 +1170,7 @@ factor1(int *ip;)
     }
     : factor2(&mant)
     [
-    /* empty */
+        /* empty */
             { *ip = mant; }
         | '^'
         factor1(&exp)

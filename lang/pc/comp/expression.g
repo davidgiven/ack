@@ -68,11 +68,11 @@ ConstantIdentifier(struct node **pnd;)
         { *pnd = MkLeaf(Name, &dot); }
     ;
 
-    /* ISO section 6.7.1, p. 121 */
+/* ISO section 6.7.1, p. 121 */
 Expression(struct node **pnd;)
     : SimpleExpression(pnd)
     [
-    /* RelationalOperator substituted inline */
+        /* RelationalOperator substituted inline */
         [
             '='
             | NOTEQUAL
@@ -90,15 +90,15 @@ Expression(struct node **pnd;)
 SimpleExpression(struct node **pnd;)
     :
     /* ISO 6.7.1: The signs and the adding-operators have equal precedence,
-		      and are left-associative.
-	*/
+    and are left-associative.
+    */
     [
         Sign(pnd)
         Term(&((*pnd)->nd_right))
         | Term(pnd)
     ]
     [
-    /* AddingOperator substituted inline */
+        /* AddingOperator substituted inline */
         [
             '+'
             | '-'
@@ -112,7 +112,7 @@ SimpleExpression(struct node **pnd;)
 Term(struct node **pnd;)
     : Factor(pnd)
     [
-    /* MultiplyingOperator substituted inline */
+        /* MultiplyingOperator substituted inline */
         [
             '*'
             | '/'
@@ -131,26 +131,26 @@ Factor(struct node **pnd;)
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
     %default
     %prefer
     /* solve conflicts on IDENT and UnsignedConstant */
     IDENT
         { *pnd = MkLeaf(Name, &dot); }
     [
-    /* ISO section 6.7.3, p. 126
-		 * IDENT is a FunctionIdentifier
-		 */
+        /* ISO section 6.7.3, p. 126
+         * IDENT is a FunctionIdentifier
+         */
             { *pnd = MkNode(Call, *pnd, NULLNODE, &dot); }
         ActualParameterList(&((*pnd)->nd_right))
         |
         /* IDENT can be a BoundIdentifier or a ConstantIdentifier or
-		 * a FunctionIdentifier (no parameterlist), in which case
-		 * VariableAccessTail is empty.
-		 * It could also be the beginning of a normal VariableAccess
-		 * (most likely).
-		 */
+         * a FunctionIdentifier (no parameterlist), in which case
+         * VariableAccessTail is empty.
+         * It could also be the beginning of a normal VariableAccess
+         * (most likely).
+         */
             {
                 int class;
 
@@ -238,7 +238,7 @@ MemberDesignator(struct node *nd;)
         }
     ;
 
-    /* ISO section 6.7.2.1, p. 123 */
+/* ISO section 6.7.2.1, p. 123 */
 BooleanExpression(struct node **pnd;)
     : Expression(pnd)
         {
@@ -271,15 +271,15 @@ ActualParameterList(struct node **pnd;)
     ')'
     ;
 
-    /* ISO section 6.5.1, p. 105 */
+/* ISO section 6.5.1, p. 105 */
 VariableAccess(struct node **pnd;)
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 *
-	 * IDENT is an EntireVariable or
-	 * a FieldDesignatorIdentifier (see also 6.8.3.10, p. 132).
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     *
+     * IDENT is an EntireVariable or
+     * a FieldDesignatorIdentifier (see also 6.8.3.10, p. 132).
+     */
     IDENT
         { *pnd = MkLeaf(Name, &dot); }
     VariableAccessTail(pnd)
@@ -289,32 +289,32 @@ VariableAccess(struct node **pnd;)
 VariableAccessTail(struct node **pnd;)
     :
     /* This is a new rule because the grammar specified by the standard
-	 * is not exactly LL(1).
-	 */
+     * is not exactly LL(1).
+     */
 
     /* empty */
     |
     /* PointerVariable or FileVariable
-	 */
+     */
 
     '^'
         { *pnd = MkNode(Arrow, NULLNODE, *pnd, &dot); }
 
-        /* At this point the VariableAccess is an IdentifiedVariable
-	 * ISO section 6.5.4, p. 107 (IdentifiedVariable: PointerVariable '^'),
-	 * or
-	 * it is a BufferVariable
-	 * ISO section 6.5.5, p. 107 (BufferVariable: FileVariable '^').
-	 */
+    /* At this point the VariableAccess is an IdentifiedVariable
+     * ISO section 6.5.4, p. 107 (IdentifiedVariable: PointerVariable '^'),
+     * or
+     * it is a BufferVariable
+     * ISO section 6.5.5, p. 107 (BufferVariable: FileVariable '^').
+     */
 
     VariableAccessTail(pnd)
     |
     /* ArrayVariable
-	 */
+     */
 
     '['
         { *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot); }
-        /* IndexExpression substituted inline */
+    /* IndexExpression substituted inline */
     Expression(&((*pnd)->nd_right))
     [
         %persistent
@@ -328,23 +328,23 @@ VariableAccessTail(struct node **pnd;)
     ']'
 
     /* At this point the VariableAccess is an IndexedVariable
-	 * ISO section 6.5.3.2, p. 106
-	 */
+     * ISO section 6.5.3.2, p. 106
+     */
 
     VariableAccessTail(pnd)
     |
     /* RecordVariable
-	 */
+     */
 
     '.'
         { *pnd = MkNode(Link, *pnd, NULLNODE, &dot); }
-        /* FieldSpecifier & FieldIdentifier substituted inline */
+    /* FieldSpecifier & FieldIdentifier substituted inline */
     IDENT
         { (*pnd)->nd_IDF = dot.TOK_IDF; }
 
-        /* At this point the VariableAccess is a FieldDesignator
-	 * ISO section 6.5.3.3, p. 107
-	 */
+    /* At this point the VariableAccess is a FieldDesignator
+     * ISO section 6.5.3.3, p. 107
+     */
 
     VariableAccessTail(pnd)
     ;

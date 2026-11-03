@@ -170,7 +170,7 @@ ProcedureAndFunctionDeclarationPart
     ]*
     ;
 
-    /* ISO section 6.1.6, p. 92 */
+/* ISO section 6.1.6, p. 92 */
 Label(struct node **pnd;)
     {
         char lab[5];
@@ -197,7 +197,7 @@ Label(struct node **pnd;)
     ;
 
 
-    /* ISO section 6.3, p. 95 */
+/* ISO section 6.3, p. 95 */
 ConstantDefinition
     {
         register struct idf* id;
@@ -222,7 +222,7 @@ ConstantDefinition
         }
     ;
 
-    /* ISO section 6.4.1, p. 96 */
+/* ISO section 6.4.1, p. 96 */
 TypeDefinition
     {
         register struct idf* id;
@@ -249,8 +249,8 @@ TypeDefinition
 TypeDenoter(struct type **ptp;)
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
     TypeIdentifierOrSubrangeType(ptp)
     | PointerType(ptp)
     | StructuredType(ptp)
@@ -263,15 +263,15 @@ TypeIdentifierOrSubrangeType(struct type **ptp;)
     }
     :
     /* This is a new rule because the grammar specified by the standard
-	 * is not exactly LL(1) (see TypeDenoter).
-	 */
+     * is not exactly LL(1) (see TypeDenoter).
+     */
     [
         %prefer
         IDENT
             { nd1 = MkLeaf(Name, &dot); }
         [
-        /* empty */
-        /* at this point IDENT must be a TypeIdentifier !! */
+            /* empty */
+            /* at this point IDENT must be a TypeIdentifier !! */
                 {
                     chk_type_id(ptp, nd1);
                     FreeNode(nd1);
@@ -307,7 +307,7 @@ TypeIdentifier(struct type **ptp;)
         }
     ;
 
-    /* ISO section 6.5.1, p. 105 */
+/* ISO section 6.5.1, p. 105 */
 VariableDeclaration
     {
         struct node* VarList;
@@ -319,7 +319,7 @@ VariableDeclaration
         { EnterVarList(VarList, tp, proclevel > 0); }
     ;
 
-    /* ISO section 6.6.1, p. 108 */
+/* ISO section 6.6.1, p. 108 */
 ProcedureDeclaration
     {
         struct node* nd;
@@ -329,12 +329,12 @@ ProcedureDeclaration
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 *
-	 * ProcedureHeading without a FormalParameterList can be a
-	 * ProcedureIdentification, i.e. the IDENT used in the Heading is
-	 * also used in a "forward" declaration.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     *
+     * ProcedureHeading without a FormalParameterList can be a
+     * ProcedureIdentification, i.e. the IDENT used in the Heading is
+     * also used in a "forward" declaration.
+     */
         { open_scope(); }
     ProcedureHeading(&nd, &tp)
     ';'
@@ -396,12 +396,12 @@ ProcedureHeading(struct node **pnd; register struct type **ptp;)
 Directive
     :
     /* see also Functiondeclaration (6.6.2, p. 110)
-	 * Not actually an identifier but 'letter {letter | digit}'
-	 */
+     * Not actually an identifier but 'letter {letter | digit}'
+     */
     IDENT
     ;
 
-    /* ISO section 6.6.1, p. 108 */
+/* ISO section 6.6.1, p. 108 */
 FunctionDeclaration
     {
         struct node* nd;
@@ -411,8 +411,8 @@ FunctionDeclaration
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
         { open_scope(); }
     FunctionHeading(&nd, &tp)
     ';'
@@ -502,18 +502,18 @@ FunctionHeading(struct node **pnd; register struct type **ptp;)
     ]?
     ;
 
-    /* ISO section 6.4.2.1, p. 96 */
+/* ISO section 6.4.2.1, p. 96 */
 OrdinalType(struct type **ptp;)
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference states that a SubrangeType can start with an IDENT and
-	 * so can an OrdinalTypeIdentifier, and this is not LL(1).
-	 */
+     * reference states that a SubrangeType can start with an IDENT and
+     * so can an OrdinalTypeIdentifier, and this is not LL(1).
+     */
     TypeIdentifierOrSubrangeType(ptp)
     | EnumeratedType(ptp)
     ;
 
-    /* ISO section 6.4.2.3, p. 97 */
+/* ISO section 6.4.2.3, p. 97 */
 EnumeratedType(struct type **ptp;)
     {
         struct node* EnumList;
@@ -559,7 +559,7 @@ IdentifierList(struct node **nd;)
     ]*
     ;
 
-    /* ISO section 6.4.3.2, p. 98 */
+/* ISO section 6.4.3.2, p. 98 */
 StructuredType(struct type **ptp;)
     {
         unsigned short packed = 0;
@@ -578,7 +578,7 @@ UnpackedStructuredType(struct type **ptp; unsigned short packed;)
     | FileType(ptp)
     ;
 
-    /* ISO section 6.4.3.2, p. 98 */
+/* ISO section 6.4.3.2, p. 98 */
 ArrayType(struct type **ptp; unsigned short packed;)
     {
         struct type* tp;
@@ -618,7 +618,7 @@ ComponentType(struct type **ptp;)
     : TypeDenoter(ptp)
     ;
 
-    /* ISO section 6.4.3.3, p. 99 */
+/* ISO section 6.4.3.3, p. 99 */
 RecordType(struct type **ptp; unsigned short packed;)
     {
         register struct scope* scope;
@@ -660,9 +660,9 @@ FieldList(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
 							struct selector **sel;)
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 * Those irritating, annoying (Siklossy !!) semicolons.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     * Those irritating, annoying (Siklossy !!) semicolons.
+     */
 
     /* empty */
     | FixedPart(scope, cnt, palign, packed, sel)
@@ -673,9 +673,9 @@ FixedPart(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
 							struct selector **sel;)
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 * Again those frustrating semicolons !!
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     * Again those frustrating semicolons !!
+     */
     RecordSection(scope, cnt, palign, packed)
     FixedPartTail(scope, cnt, palign, packed, sel)
     ;
@@ -684,15 +684,15 @@ FixedPartTail(struct scope *scope; arith *cnt; int *palign;
 				unsigned short packed; struct selector **sel;)
     :
     /* This is a new rule because the grammar specified by the standard
-	 * is not exactly LL(1).
-	 * We see the light at the end of the tunnel !
-	 */
+     * is not exactly LL(1).
+     * We see the light at the end of the tunnel !
+     */
 
     /* empty */
     | %default
     ';'
     [
-    /* empty */
+        /* empty */
         | VariantPart(scope, cnt, palign, packed, sel)
         | RecordSection(scope, cnt, palign, packed)
         FixedPartTail(scope, cnt, palign, packed, sel)
@@ -726,9 +726,9 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 * We're almost there !!
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     * We're almost there !!
+     */
 
         {
             *sel = (struct selector*)malloc(sizeof(struct selector));
@@ -814,15 +814,15 @@ VariantTail(struct scope *scope; arith *tcnt; arith *max; arith *cnt;
 		int *palign; unsigned short packed; struct selector *sel;)
     :
     /* This is a new rule because the grammar specified by the standard
-	 * is not exactly LL(1).
-	 * At last, the garden of Eden !!
-	 */
+     * is not exactly LL(1).
+     * At last, the garden of Eden !!
+     */
 
     /* empty */
     | %default
     ';'
     [
-    /* empty */
+        /* empty */
         |
             { *tcnt = *cnt; }
         Variant(scope, tcnt, palign, packed, sel)
@@ -837,15 +837,15 @@ VariantSelector(struct type **ptp; register struct idf **pid;)
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
 
     IDENT
         { nd = MkLeaf(Name, &dot); }
     [
-    /* Old fashioned ! at this point the IDENT represents
-		 * the TagType
-		 */
+        /* Old fashioned ! at this point the IDENT represents
+         * the TagType
+         */
             {
                 warning("old-fashioned syntax ':' missing");
                 chk_type_id(ptp, nd);
@@ -892,14 +892,14 @@ CaseConstantList(struct node **nd;)
     ]*
     ;
 
-    /* ISO section 6.4.3.4, p. 101 */
+/* ISO section 6.4.3.4, p. 101 */
 SetType(struct type **ptp; unsigned short packed;)
     : SET OF
     OrdinalType(ptp)
         { *ptp = set_type(*ptp, packed); }
     ;
 
-    /* ISO section 6.4.3.5, p. 101 */
+/* ISO section 6.4.3.5, p. 101 */
 FileType(struct type **ptp;)
     : FILET OF
         {
@@ -922,7 +922,7 @@ FileType(struct type **ptp;)
         }
     ;
 
-    /* ISO section 6.4.4, p. 103 */
+/* ISO section 6.4.4, p. 103 */
 PointerType(struct type **ptp;)
     {
         register struct node* nd;
@@ -950,7 +950,7 @@ PointerType(struct type **ptp;)
         }
     ;
 
-    /* ISO section 6.6.3.1, p. 112 */
+/* ISO section 6.6.3.1, p. 112 */
 FormalParameterList(struct node **pnd;)
     {
         struct node* nd;
@@ -973,13 +973,13 @@ FormalParameterList(struct node **pnd;)
 FormalParameterSection(struct node *nd;)
     :
     /* This is a changed rule, because the grammar as specified
- * in the reference is not LL(1), and this gives conflicts.
- */
+     * in the reference is not LL(1), and this gives conflicts.
+     */
         { /* kind of parameter */ nd->nd_INT = 0; }
     [
         [
-        /* ValueParameterSpecification */
-        /* empty */
+            /* ValueParameterSpecification */
+            /* empty */
                 { nd->nd_INT = (D_VALPAR | D_SET); }
             |
             /* VariableParameterSpecification */
@@ -989,8 +989,8 @@ FormalParameterSection(struct node *nd;)
         IdentifierList(&(nd->nd_left))
         ':'
         [
-        /* ISO section 6.6.3.7.1, p. 115 */
-        /* ConformantArrayParameterSpecification */
+            /* ISO section 6.6.3.7.1, p. 115 */
+            /* ConformantArrayParameterSpecification */
             ConformantArraySchema(&(nd->nd_type))
             | TypeIdentifier(&(nd->nd_type))
         ]

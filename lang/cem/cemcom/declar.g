@@ -50,37 +50,37 @@ declaration
     ';'
     ;
 
-    /*	A `decl_specifiers' describes a sequence of a storage_class_specifier,
-	an unsigned_specifier, a size_specifier and a simple type_specifier,
-	which may occur in arbitrary order and each of which may be absent;
-	at least one of them must be present, however, since the totally
-	empty case has already be dealt with in `external_definition'.
-	This means that something like:
-		unsigned extern int short xx;
-	is perfectly good C.
+/*	A `decl_specifiers' describes a sequence of a storage_class_specifier,
+an unsigned_specifier, a size_specifier and a simple type_specifier,
+which may occur in arbitrary order and each of which may be absent;
+at least one of them must be present, however, since the totally
+empty case has already be dealt with in `external_definition'.
+This means that something like:
+unsigned extern int short xx;
+is perfectly good C.
 
-	On top of that, multiple occurrences of storage_class_specifiers,
-	unsigned_specifiers and size_specifiers are errors, but a second
-	type_specifier should end the decl_specifiers and be treated as
-	the name to be declared (see the thin ice in RM11.1).
-	Such a language is not easily expressed in a grammar; enumeration
-	of the permutations is unattractive. We solve the problem by
-	having a regular grammar for the "soft" items, handling the single
-	occurrence of the type_specifier in the grammar (we have no choice),
-	collecting all data in a `struct decspecs' and turning that data
-	structure into what we want.
+On top of that, multiple occurrences of storage_class_specifiers,
+unsigned_specifiers and size_specifiers are errors, but a second
+type_specifier should end the decl_specifiers and be treated as
+the name to be declared (see the thin ice in RM11.1).
+Such a language is not easily expressed in a grammar; enumeration
+of the permutations is unattractive. We solve the problem by
+having a regular grammar for the "soft" items, handling the single
+occurrence of the type_specifier in the grammar (we have no choice),
+collecting all data in a `struct decspecs' and turning that data
+structure into what we want.
 
-	The existence of declarations like
-		short typedef yepp;
-	makes all hope of writing a specific grammar for typedefs illusory.
+The existence of declarations like
+short typedef yepp;
+makes all hope of writing a specific grammar for typedefs illusory.
 */
 
 decl_specifiers
-/* non-empty */
+    /* non-empty */
 (struct decspecs *ds;)
-/*	Reads a non-empty decl_specifiers and fills the struct
-		decspecs *ds.
-	*/
+    /*	Reads a non-empty decl_specifiers and fills the struct
+    decspecs *ds.
+    */
     : [
         other_specifier(ds)+
         [
@@ -96,7 +96,7 @@ decl_specifiers
         { do_decspecs(ds); }
     ;
 
-    /* 8.1 */
+/* 8.1 */
 other_specifier(struct decspecs *ds;)
     : [
         AUTO
@@ -128,11 +128,11 @@ other_specifier(struct decspecs *ds;)
         }
     ;
 
-    /* 8.2 */
+/* 8.2 */
 type_specifier(struct type **tpp;)
-/*	Used in struct/union declarations and in casts; only the
-		type is relevant.
-	*/
+    /*	Used in struct/union declarations and in casts; only the
+    type is relevant.
+    */
     {
         struct decspecs Ds;
         Ds = null_decspecs;
@@ -168,7 +168,7 @@ single_type_specifier(struct decspecs *ds;)
     | enum_specifier(&ds->ds_type)
     ;
 
-    /* 8.3 */
+/* 8.3 */
 init_declarator_list(struct decspecs *ds;)
     : init_declarator(ds)
     [
@@ -206,7 +206,7 @@ init_declarator(struct decspecs *ds;)
         }
     ;
 
-    /* 8.6: initializer */
+/* 8.6: initializer */
 initializer(struct idf *idf; int sc;)
     {
         struct expr* expr = (struct expr*)0;
@@ -268,12 +268,12 @@ initializer(struct idf *idf; int sc;)
         }
     ;
 
-    /*
-	Functions yielding pointers to functions must be declared as, e.g.,
-		int (*hehe(par1, par2))() char *par1, *par2;	{}
-	Since the function heading is read as a normal declarator,
-	we just include the (formal) parameter list in the declarator
-	description list dc.
+/*
+Functions yielding pointers to functions must be declared as, e.g.,
+int (*hehe(par1, par2))() char *par1, *par2;	{}
+Since the function heading is read as a normal declarator,
+we just include the (formal) parameter list in the declarator
+description list dc.
 */
 declarator(struct declarator *dc;)
     {
@@ -346,7 +346,7 @@ formal(struct formal **fmp;)
         }
     ;
 
-    /* Change 2 */
+/* Change 2 */
 enum_specifier(struct type **tpp;)
     {
         struct idf* idf;
@@ -388,9 +388,9 @@ enumerator_pack(struct type *tp; arith *lp;)
     /* optional trailing comma */
     '}'
         { tp->tp_size = int_size; }
-        /*	fancy implementations that put small enums in 1 byte
-		or so should start here.
-	*/
+    /*	fancy implementations that put small enums in 1 byte
+    or so should start here.
+    */
     ;
 
 enumerator(struct type *tp; arith *lp;)
@@ -410,7 +410,7 @@ enumerator(struct type *tp; arith *lp;)
         { declare_enum(tp, idf, (*lp)++); }
     ;
 
-    /* 8.5 */
+/* 8.5 */
 struct_or_union_specifier(struct type **tpp;)
     {
         int fund;
@@ -456,8 +456,8 @@ struct_declaration_pack(struct type *stp;)
     }
     :
     /*	The size is only filled in after the whole struct has
-		been read, to prevent recursive definitions.
-	*/
+    been read, to prevent recursive definitions.
+    */
     '{'
     struct_declaration(stp, &sdefp, &size)+
     '}'
@@ -471,9 +471,9 @@ struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)
     : type_specifier(&tp)
     struct_declarator_list(tp, stp, sdefpp, szp)
     [
-    /*	in some standard UNIX compilers the semicolon
-			is optional, would you believe!
-		*/
+        /*	in some standard UNIX compilers the semicolon
+        is optional, would you believe!
+        */
         ';'
         | empty
             { warning("no semicolon after declarator"); }
@@ -526,7 +526,7 @@ bit_expression(struct field **fd;)
         }
     ;
 
-    /* 8.7 */
+/* 8.7 */
 cast(struct type **tpp;)
     {
         struct declarator Dc;
@@ -541,8 +541,8 @@ cast(struct type **tpp;)
         { remove_declarator(&Dc); }
     ;
 
-    /*	This code is an abject copy of that of 'declarator', for lack of
-	a two-level grammar.
+/*	This code is an abject copy of that of 'declarator', for lack of
+a two-level grammar.
 */
 abstract_declarator(struct declarator *dc;)
     {
@@ -574,5 +574,5 @@ empty
     :
     ;
 
-    /* 8.8 */
-    /* included in the IDENTIFIER/TYPE_IDENTIFIER mechanism */
+/* 8.8 */
+/* included in the IDENTIFIER/TYPE_IDENTIFIER mechanism */

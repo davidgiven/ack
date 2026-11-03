@@ -34,7 +34,7 @@ CompoundStatement
     : BEGIN StatementSequence END
     ;
 
-    /* ISO section 6.8.3.1, p. 128 */
+/* ISO section 6.8.3.1, p. 128 */
 StatementSequence
     : Statement
     [
@@ -44,7 +44,7 @@ StatementSequence
         { chk_labels(slevel + 1); }
     ;
 
-    /* ISO section 6.8.1, p. 126 */
+/* ISO section 6.8.1, p. 126 */
 Statement
     {
         struct node* nd;
@@ -79,7 +79,7 @@ Statement
         { slevel--; }
     ;
 
-    /* ISO section 6.8.2.1, p. 126 */
+/* ISO section 6.8.2.1, p. 126 */
 SimpleStatement
     {
         struct node *pnd, *expp;
@@ -87,17 +87,17 @@ SimpleStatement
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 * Note : the grammar states : AssignmentStatement |
-	 *				ProcedureStatement | ...
-	 * In order to add assertions, there is an extra entry, which gives
-	 * a conflict. This conflict is then resolved using an %if clause.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     * Note : the grammar states : AssignmentStatement |
+     *				ProcedureStatement | ...
+     * In order to add assertions, there is an extra entry, which gives
+     * a conflict. This conflict is then resolved using an %if clause.
+     */
     EmptyStatement
     | GotoStatement
     |
     /* Evidently this is the beginning of the changed part
-	 */
+     */
     %if ( !options['s'] && !strcmp(dot.TOK_IDF->id_text, "assert") )
     IDENT
         { line = LineNumber; }
@@ -112,8 +112,8 @@ SimpleStatement
         %default
 
         /* At this point the IDENT can be a FunctionIdentifier in
-		 * which case the VariableAccessTail must be empty.
-		 */
+         * which case the VariableAccessTail must be empty.
+         */
         VariableAccessTail(&pnd)
         [
             %default
@@ -137,7 +137,7 @@ SimpleStatement
     ]
     | InputOutputStatement
     /* end of changed part
-	 */
+     */
     ;
 
 InputOutputStatement
@@ -146,8 +146,8 @@ InputOutputStatement
     }
     :
     /* This is a new rule because the grammar specified by the standard
-	 * is not exactly LL(1) (see SimpleStatement).
-	 */
+     * is not exactly LL(1) (see SimpleStatement).
+     */
     [
         READ
         ReadParameterList(&nd)
@@ -170,7 +170,7 @@ EmptyStatement
     /* empty */
     ;
 
-    /* ISO section 6.8.3.1, p. 128 */
+/* ISO section 6.8.3.1, p. 128 */
 StructuredStatement
     : CompoundStatement
     | ConditionalStatement
@@ -178,7 +178,7 @@ StructuredStatement
     | WithStatement
     ;
 
-    /* ISO section 6.8.2.4, p. 127 */
+/* ISO section 6.8.2.4, p. 127 */
 GotoStatement
     {
         struct node* nd;
@@ -188,21 +188,21 @@ GotoStatement
         { if (nd) TstLabel(nd, slevel); }
     ;
 
-    /* ISO section 6.8.3.3, p. 128 */
+/* ISO section 6.8.3.3, p. 128 */
 ConditionalStatement
     : %default
     CaseStatement
     | IfStatement
     ;
 
-    /* ISO section 6.8.3.6, p. 129 */
+/* ISO section 6.8.3.6, p. 129 */
 RepetitiveStatement
     : RepeatStatement
     | WhileStatement
     | ForStatement
     ;
 
-    /* ISO section 6.8.3.10, p. 132 */
+/* ISO section 6.8.3.10, p. 132 */
 WithStatement
     {
         struct scopelist* Save = CurrVis;
@@ -242,7 +242,7 @@ RecordVariable(struct node **pnd;)
         { WithStat(*pnd); }
     ;
 
-    /* ISO section 6.8.3.4, p. 128 */
+/* ISO section 6.8.3.4, p. 128 */
 IfStatement
     {
         struct node* nd;
@@ -280,7 +280,7 @@ IfStatement
     ]
     ;
 
-    /* ISO section 6.8.3.5, p. 128 */
+/* ISO section 6.8.3.5, p. 128 */
 CaseStatement
     {
         struct node *casend, *nd;
@@ -288,9 +288,9 @@ CaseStatement
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference states that a semicolon is optional before END,
-	 * and this is not LL(1).
-	 */
+     * reference states that a semicolon is optional before END,
+     * and this is not LL(1).
+     */
     CASE
         {
             casend = nd = MkLeaf(Link, &dot);
@@ -310,12 +310,12 @@ CaseStatement
 CaseListElementTail(struct node **pnd; label exit_label;)
     :
     /* This is a new rule, all because of a silly semicolon
-	 */
+     */
     /* empty */
     | %default
     ';'
     [
-    /* empty */
+        /* empty */
         | CaseListElement(pnd, exit_label)
         CaseListElementTail(&((*pnd)->nd_right), exit_label)
     ]
@@ -336,7 +336,7 @@ CaseListElement(struct node **pnd; label exit_label;)
         }
     ;
 
-    /* ISO section 6.8.3.7, p. 129 */
+/* ISO section 6.8.3.7, p. 129 */
 RepeatStatement
     {
         struct node* nd;
@@ -356,7 +356,7 @@ RepeatStatement
         }
     ;
 
-    /* ISO section 6.8.3.8, p. 129 */
+/* ISO section 6.8.3.8, p. 129 */
 WhileStatement
     {
         struct node* nd;
@@ -382,7 +382,7 @@ WhileStatement
         }
     ;
 
-    /* ISO section 6.8.3.9, p. 130 */
+/* ISO section 6.8.3.9, p. 130 */
 ForStatement
     {
         register struct node* nd;
@@ -426,16 +426,16 @@ ForStatement
         }
     ;
 
-    /* SPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIAL */
-    /* ISO section 6.9, p. 132-136 */
+/* SPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIAL */
+/* ISO section 6.9, p. 132-136 */
 ReadParameterList(struct node **pnd;)
     {
         register struct node* nd;
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
     '('
     VariableAccess(pnd)
     /* possibly a FileVariable */
@@ -461,11 +461,11 @@ WriteParameterList(struct node **pnd;)
     }
     :
     /* This is a changed rule, because the grammar as specified in the
-	 * reference is not LL(1), and this gives conflicts.
-	 */
+     * reference is not LL(1), and this gives conflicts.
+     */
     '('
     /* Only the first WriteParameter can be a FileVariable !!
-		 */
+     */
     WriteParameter(pnd)
         {
             *pnd = nd = MkNode(Link, *pnd, NULLNODE, &dot);
@@ -496,8 +496,8 @@ WriteParameter(struct node **pnd;)
             nd->nd_symb = ':';
         }
     [
-    /* Here the first Expression can't be a FileVariable
-	 */
+        /* Here the first Expression can't be a FileVariable
+         */
         ':'
             {
                 nd->nd_right = MkLeaf(Link, &dot);

@@ -48,7 +48,7 @@
 }
 
 /*	initial_value recursively guides the initialisation expression.
-	Upto now, the initialisation of a union is not allowed!
+Upto now, the initialisation of a union is not allowed!
 */
 /* 7 */
 initial_value(struct type **tpp; struct expr **expp;)

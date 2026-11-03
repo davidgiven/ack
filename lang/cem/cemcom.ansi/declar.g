@@ -50,51 +50,51 @@ declaration
     ';'
     ;
 
-    /*	A `decl_specifiers' describes a sequence of a storage_class_specifier,
-	an unsigned_specifier, a size_specifier and a simple type_specifier,
-	which may occur in arbitrary order and each of which may be absent;
-	at least one of them must be present, however, since the totally
-	empty case has already be dealt with in `external_definition'.
-	This means that something like:
-		unsigned extern int short xx;
-	is perfectly legal C.
-	
-	On top of that, multiple occurrences of storage_class_specifiers,
-	unsigned_specifiers and size_specifiers are errors, but a second
-	type_specifier should end the decl_specifiers and be treated as
-	the name to be declared.
-	Such a language is not easily expressed in a grammar; enumeration
-	of the permutations is unattractive. We solve the problem by
-	having a regular grammar for the "soft" items, handling the single
-	occurrence of the type_specifier in the grammar (we have no choice),
-	collecting all data in a `struct decspecs' and turning that data
-	structure into what we want.
-	
-	The existence of declarations like
-		short typedef yepp;
-	makes all hope of writing a specific grammar for typedefs illusory.
+/*	A `decl_specifiers' describes a sequence of a storage_class_specifier,
+an unsigned_specifier, a size_specifier and a simple type_specifier,
+which may occur in arbitrary order and each of which may be absent;
+at least one of them must be present, however, since the totally
+empty case has already be dealt with in `external_definition'.
+This means that something like:
+unsigned extern int short xx;
+is perfectly legal C.
+
+On top of that, multiple occurrences of storage_class_specifiers,
+unsigned_specifiers and size_specifiers are errors, but a second
+type_specifier should end the decl_specifiers and be treated as
+the name to be declared.
+Such a language is not easily expressed in a grammar; enumeration
+of the permutations is unattractive. We solve the problem by
+having a regular grammar for the "soft" items, handling the single
+occurrence of the type_specifier in the grammar (we have no choice),
+collecting all data in a `struct decspecs' and turning that data
+structure into what we want.
+
+The existence of declarations like
+short typedef yepp;
+makes all hope of writing a specific grammar for typedefs illusory.
 */
-    /*      Accept a single declaration specifier.  Then accept zero or more
-	declaration specifiers.  There can be a conflict on both
-	TYPE_IDENTIFIER and IDENTIFIER.
-	The following rule is used:
-	When we see a TYPE_IDENTIFIER, we accept it if no type-specifier was
-	given, and it is not directly followed by an identifier.  If a
-	type-specifier was given, it is taken as the identifier being
-	declared.  If it is followed by an identifier, we assume that an
-	error has been  made, (e.g. unsigned typedeffed_int x;) and that
-	this will be detected later on.
-	When we see an IDENTIFIER, directly followed by another IDENTIFIER,
-	we assume that a typing mistake has been made, and we accept it as
-	an erroneous type-identifier.
+/*      Accept a single declaration specifier.  Then accept zero or more
+declaration specifiers.  There can be a conflict on both
+TYPE_IDENTIFIER and IDENTIFIER.
+The following rule is used:
+When we see a TYPE_IDENTIFIER, we accept it if no type-specifier was
+given, and it is not directly followed by an identifier.  If a
+type-specifier was given, it is taken as the identifier being
+declared.  If it is followed by an identifier, we assume that an
+error has been  made, (e.g. unsigned typedeffed_int x;) and that
+this will be detected later on.
+When we see an IDENTIFIER, directly followed by another IDENTIFIER,
+we assume that a typing mistake has been made, and we accept it as
+an erroneous type-identifier.
 */
 
 decl_specifiers
-/* non-empty */
+    /* non-empty */
 (struct decspecs *ds;)
-/*	Reads a non-empty decl_specifiers and fills the struct
-		decspecs *ds.
-	*/
+    /*	Reads a non-empty decl_specifiers and fills the struct
+    decspecs *ds.
+    */
     : single_decl_specifier(ds)
     [
         %while (  (DOT==TYPE_IDENTIFIER
@@ -109,7 +109,7 @@ decl_specifiers
     ;
 
 single_decl_specifier
-/* non_empty */
+    /* non_empty */
 (struct decspecs *ds;)
     : [
         AUTO
@@ -192,11 +192,11 @@ single_decl_specifier
     | enum_specifier(&ds->ds_type)
     ;
 
-    /* 3.5.2 */
+/* 3.5.2 */
 type_specifier(struct type **tpp;)
-/*	Used in struct/union declarations and in casts; only the
-		type is relevant.
-	*/
+    /*	Used in struct/union declarations and in casts; only the
+    type is relevant.
+    */
     {
         struct decspecs Ds;
         Ds = null_decspecs;
@@ -211,7 +211,7 @@ type_specifier(struct type **tpp;)
         { *tpp = Ds.ds_type; }
     ;
 
-    /* 3.5 */
+/* 3.5 */
 init_declarator_list(struct decspecs *ds;)
     : init_declarator(ds)
     [
@@ -249,7 +249,7 @@ init_declarator(struct decspecs *ds;)
         }
     ;
 
-    /* 3.5.7: initializer */
+/* 3.5.7: initializer */
 initializer(struct idf *idf; int sc;)
     {
         struct expr* expr = (struct expr*)0;
@@ -322,14 +322,14 @@ initializer(struct idf *idf; int sc;)
         }
     ;
 
-    /*
-	Functions yielding pointers to functions must be declared as, e.g.,
-		int (*hehe(par1, par2))() char *par1, *par2;	{}
-	Since the function heading is read as a normal declarator,
-	we just include the (formal) parameter list in the declarator
-	description list dc.
+/*
+Functions yielding pointers to functions must be declared as, e.g.,
+int (*hehe(par1, par2))() char *par1, *par2;	{}
+Since the function heading is read as a normal declarator,
+we just include the (formal) parameter list in the declarator
+description list dc.
 */
-    /* 3.5.4 */
+/* 3.5.4 */
 declarator(struct declarator *dc;)
     {
         struct formal* fm = NO_PARAMS;
@@ -339,7 +339,7 @@ declarator(struct declarator *dc;)
     }
     : primary_declarator(dc)
     [
-    /*%while(1)*/
+        /*%while(1)*/
         '('
         [
             %if (DOT != IDENTIFIER)
@@ -412,7 +412,7 @@ formal(struct formal **fmp;)
         }
     ;
 
-    /* Change 2 */
+/* Change 2 */
 enum_specifier(struct type **tpp;)
     {
         struct idf* idf;
@@ -438,7 +438,7 @@ enum_specifier(struct type **tpp;)
                 }
             |
                 { apply_struct(ENUM, idf, tpp); }
-                /* empty */
+            /* empty */
         ]
     ]
     ;
@@ -457,9 +457,9 @@ enumerator_pack(struct type *tp; arith *lp;)
     ]?
     '}'
         { tp->tp_size = int_size; }
-        /*	fancy implementations that put small enums in 1 byte
-		or so should start here.
-	*/
+    /*	fancy implementations that put small enums in 1 byte
+    or so should start here.
+    */
     ;
 
 enumerator(struct type *tp; arith *lp;)
@@ -479,7 +479,7 @@ enumerator(struct type *tp; arith *lp;)
         { declare_enum(tp, idf, (*lp)++); }
     ;
 
-    /* 8.5 */
+/* 8.5 */
 struct_or_union_specifier(struct type **tpp;)
     {
         int fund;
@@ -526,7 +526,7 @@ struct_or_union_specifier(struct type **tpp;)
                     else
                         apply_struct(fund, idf, tpp);
                 }
-                /* empty */
+            /* empty */
         ]
     ]
     ;
@@ -538,8 +538,8 @@ struct_declaration_pack(struct type *stp;)
     }
     :
     /*	The size is only filled in after the whole struct has
-		been read, to prevent recursive definitions.
-	*/
+    been read, to prevent recursive definitions.
+    */
     '{'
     struct_declaration(stp, &sdefp, &size)+
     '}'
@@ -604,7 +604,7 @@ bit_expression(struct field **fd;)
         }
     ;
 
-    /* 8.7 */
+/* 8.7 */
 cast(struct type **tpp;)
     {
         struct declarator Dc;
@@ -619,8 +619,8 @@ cast(struct type **tpp;)
         { remove_declarator(&Dc); }
     ;
 
-    /*	This code is an abject copy of that of 'declarator', for lack of
-	a two-level grammar.
+/*	This code is an abject copy of that of 'declarator', for lack of
+a two-level grammar.
 */
 abstract_declarator(struct declarator *dc;)
     {
@@ -719,27 +719,27 @@ parameter_decl(struct proto **plp;)
         }
     ;
 
-    /*	This is weird. Due to the LR structure of the ANSI C grammar
-	we have to duplicate the actions of 'declarator' and
-	'abstract_declarator'. Calling these separately, as in
+/*	This is weird. Due to the LR structure of the ANSI C grammar
+we have to duplicate the actions of 'declarator' and
+'abstract_declarator'. Calling these separately, as in
 
-	parameter_decl:
-		decl_specifiers
-		[
-			declarator
-		|
-			abstract_declarator
-		]
+parameter_decl:
+decl_specifiers
+[
+declarator
+|
+abstract_declarator
+]
 
 
-	gives us a conflict on the terminals '(' and '*'. E.i. on
-	some input, it is impossible to decide which rule we take.
-	Combining the two declarators into one common declarator
-	is out of the question, since this results in an empty
-	string for the non-terminal 'declarator'.
-	So we combine the two only for the use of parameter_decl,
-	since this is the only place where they don't give
-	conflicts. However, this makes the grammar messy.
+gives us a conflict on the terminals '(' and '*'. E.i. on
+some input, it is impossible to decide which rule we take.
+Combining the two declarators into one common declarator
+is out of the question, since this results in an empty
+string for the non-terminal 'declarator'.
+So we combine the two only for the use of parameter_decl,
+since this is the only place where they don't give
+conflicts. However, this makes the grammar messy.
 */
 parameter_declarator(struct declarator *dc;)
     {
@@ -788,24 +788,24 @@ pointer(int *qual;)
     type_qualifier_list(qual)
     ;
 
-    /*	Type qualifiers may come in three flavours:
-	volatile, const, const volatile.
-	These all have different semantic properties:
+/*	Type qualifiers may come in three flavours:
+volatile, const, const volatile.
+These all have different semantic properties:
 
-	volatile:
-		means that the object can be modified
-		without prior knowledge of the implementation.
+volatile:
+means that the object can be modified
+without prior knowledge of the implementation.
 
-	const:
-		means that the object can not be modified; thus
-		it's illegal to use this as a l-value.
+const:
+means that the object can not be modified; thus
+it's illegal to use this as a l-value.
 
-	const volatile:
-		means  that the object can be modified without
-		prior knowledge of the implementation, but may
-		not be used as a l-value.
+const volatile:
+means  that the object can be modified without
+prior knowledge of the implementation, but may
+not be used as a l-value.
 */
-    /* 3.5.4 */
+/* 3.5.4 */
 type_qualifier_list(int *qual;)
     :
         { *qual = 0; }

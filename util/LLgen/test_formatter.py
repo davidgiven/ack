@@ -74,6 +74,52 @@ rule(int n; char *s;) /* parameters */
 
 
 class FormatterTests(unittest.TestCase):
+    def test_comment_indentation_comes_from_grammar_scope(self):
+        source = ('r: A;\n\n             /*\n                   global comment\n'
+                  '                          */\n\ns: A [\n'
+                  '/*\n                     nested comment\n */\n B] ;')
+        output = format_source(source)
+        self.assertIn(';\n\n/*\nglobal comment\n*/\n\ns', output)
+        self.assertIn('        /*\n        nested comment\n        */', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_old_block_comment_indentation_is_ignored(self):
+        first = 'r: A /*\n          * text\n                          * more\n */ B;'
+        second = 'r: A /*\n* text\n  * more\n                 */ B;'
+        output = format_source(first)
+        self.assertEqual(output, format_source(second))
+        self.assertIn('    /*\n     * text\n     * more\n     */', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_grammar_comments_are_reflowed_with_surrounding_blank_lines(self):
+        sentence = 'A long explanatory comment with useful words.'
+        source = 'r: A\n\n/* ' + (sentence + ' ') * 7 + '*/\n\nB;'
+        output = format_source(source)
+        self.assertIn(': A\n\n    /* ', output)
+        self.assertIn(' */\n\n    B', output)
+        self.assertIn('\n     * ', output)
+        self.assertTrue(all(len(line) <= 100 for line in output.splitlines()))
+        words = ' '.join(line.strip().lstrip('/*').rstrip('*/').strip()
+                         for line in output.splitlines() if '/*' in line or line.lstrip().startswith('*'))
+        self.assertEqual(words, ' '.join([sentence] * 7))
+        self.assertEqual(format_source(output), output)
+
+    def test_grammar_comment_alignment_and_batching(self):
+        source = '/* header */\nr: A\n/*\n * first\n   * second\n*/\nB; // end'
+        with patch('formatter.subprocess.run', wraps=subprocess.run) as run:
+            output = format_source(source)
+            self.assertEqual(run.call_count, 1)
+        self.assertIn('    /*\n     * first\n     * second\n     */', output)
+        self.assertIn('\n// end', output)
+        self.assertNotIn('LLgenComment', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_reflowed_line_comment_stays_stable(self):
+        output = format_source('r: A;\n\n// ' + 'explanatory words ' * 20 + '\n\n')
+        self.assertGreater(output.count('//'), 1)
+        self.assertTrue(output.endswith('\n\n'))
+        self.assertEqual(format_source(output), output)
+
     def test_local_declarations_are_expanded_and_batched_with_actions(self):
         source = ('r(int * p;) {int * q; int values[]={1,2};} : A {f();}; '
                   's {char * name;} : B;')
@@ -264,8 +310,8 @@ class FormatterTests(unittest.TestCase):
         output = format_source(source)
         self.assertTrue(output.startswith('\n\n/* header */\n\n\nr\n'))
         self.assertIn(': A\n\n    /* middle */\n\n\n    B', output)
-        self.assertIn(';\n    /* between rules */\ns\n', output)
-        self.assertTrue(output.endswith(';\n\n    // trailer\n\n\n'))
+        self.assertIn(';\n/* between rules */\ns\n', output)
+        self.assertTrue(output.endswith(';\n\n// trailer\n\n\n'))
         self.assertEqual(format_source(output), output)
 
     def test_blank_lines_between_comments_and_crlf_input(self):

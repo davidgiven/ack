@@ -92,7 +92,7 @@ expression_statement
         }
     ;
 
-    /* 3.6.1 (partially) */
+/* 3.6.1 (partially) */
 label
     {
         struct idf* idf;
@@ -114,7 +114,7 @@ label
         }
     ;
 
-    /* 3.6.4.1 */
+/* 3.6.4.1 */
 if_statement
     {
         struct expr* expr;
@@ -178,7 +178,7 @@ if_statement
     ]
     ;
 
-    /* 3.6.5.3 */
+/* 3.6.5.3 */
 while_statement
     {
         struct expr* expr;
@@ -224,7 +224,7 @@ while_statement
         }
     ;
 
-    /* 3.6.5.2 */
+/* 3.6.5.2 */
 do_statement
     {
         struct expr* expr;
@@ -276,7 +276,7 @@ do_statement
         }
     ;
 
-    /* 3.6.5.3 */
+/* 3.6.5.3 */
 for_statement
     {
         struct expr *e_init = 0, *e_test = 0, *e_incr = 0;
@@ -340,7 +340,7 @@ for_statement
         }
     ;
 
-    /* 3.6.4.2 */
+/* 3.6.4.2 */
 switch_statement
     {
         struct expr* expr;
@@ -363,7 +363,7 @@ switch_statement
         }
     ;
 
-    /* 3.6.1 (partially) */
+/* 3.6.1 (partially) */
 case_statement
     {
         struct expr* expr;
@@ -380,7 +380,7 @@ case_statement
     ':' statement
     ;
 
-    /* 3.6.1 (partially) */
+/* 3.6.1 (partially) */
 default_statement
     : DEFAULT
         {
@@ -392,7 +392,7 @@ default_statement
     ':' statement
     ;
 
-    /* 3.6.6.4 */
+/* 3.6.6.4 */
 return_statement
     {
         struct expr* expr = 0;
@@ -422,7 +422,7 @@ return_statement
     ';'
     ;
 
-    /* 3.6.6.1 (partially) */
+/* 3.6.6.1 (partially) */
 jump
     {
         struct idf* idf;
@@ -439,7 +439,7 @@ jump
         }
     ;
 
-    /* 3.6.2 */
+/* 3.6.2 */
 compound_statement
     {
     #ifdef DBSYMTAB

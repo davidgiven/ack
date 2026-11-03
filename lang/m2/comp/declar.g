@@ -53,7 +53,7 @@
  * 				--proclevel;
  * 			}
  * ;
-*/
+ */
 
 ProcedureHeading(struct def **pdf; int type;)
     {
@@ -140,7 +140,7 @@ declaration
     | ModuleDeclaration ';'
     ;
 
-    /* inline in procedureheading: need space
+/* inline in procedureheading: need space
  * FormalParameters(struct paramlist **ppr; arith *parmaddr; struct type **ptp;):
  * 	'('
  * 	[
@@ -155,7 +155,7 @@ declaration
  *	|
  * 	]
  * ;
-*/
+ */
 
 FPSection(struct paramlist **ppr; arith *parmaddr;)
     {
@@ -171,9 +171,9 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
     ;
 
 FormalType(struct type **ptp;)
-/* index type of conformant array is "CARDINAL".
-		   Recognize a conformant array by size 0.
-		*/
+    /* index type of conformant array is "CARDINAL".
+    Recognize a conformant array by size 0.
+    */
     {
         register struct type* tp;
     }
@@ -219,11 +219,11 @@ type(struct type **ptp;)
 SimpleType(struct type **ptp;)
     : qualtype(ptp)
     [
-    /* nothing */
+        /* nothing */
         | SubrangeType(ptp)
         /* The subrange type is given a base type by the
-		   qualident (this is new modula-2).
-		*/
+        qualident (this is new modula-2).
+        */
     ]
     | enumeration(ptp)
     |
@@ -263,9 +263,9 @@ SubrangeType(struct type **ptp;)
     }
     :
     /*
-	   This is not exactly the rule in the new report, but see
-	   the rule for "SimpleType".
-	*/
+    This is not exactly the rule in the new report, but see
+    the rule for "SimpleType".
+    */
     '['
     ConstExpression(&nd1)
     UPTO
@@ -351,16 +351,16 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
             }
         | CASE
         /* Also accept old fashioned Modula-2 syntax, but give a warning.
-	   Sorry for the complicated code.
-	*/
+        Sorry for the complicated code.
+        */
         [
             qualident(&nd)
             [
                 ':'
                 qualtype(&tp)
                 /* This is correct, in both kinds of Modula-2, if
-		   	   the first qualident is a single identifier.
-			*/
+                the first qualident is a single identifier.
+                */
                     {
                         if (nd->nd_class != Name)
                         {
@@ -383,8 +383,8 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
                     }
                 |
                 /* Old fashioned! the first qualident now represents
-			   the type
-			*/
+                the type
+                */
                     {
     #ifndef STRICT_3RD_ED
                         if (!options['3'])
@@ -509,9 +509,9 @@ SetType(struct type **ptp;)
         { *ptp = set_type(tp); }
     ;
 
-    /*	In a pointer type definition, the type pointed at does not
-	have to be declared yet, so be careful about identifying
-	type-identifiers.
+/*	In a pointer type definition, the type pointed at does not
+have to be declared yet, so be careful about identifying
+type-identifiers.
 */
 PointerType(struct type **ptp;)
     {
