@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Lossless LLgen parser; no formatting is performed.
+"""LLgen parser and grammar formatter with placeholders for embedded C.
 
-Run ``python3 util/LLgen/formatter.py file.g`` to inspect the syntax tree as
-JSON. --tokens includes whitespace and grammar comments in the output.
+Run ``python3 util/LLgen/formatter.py file.g`` to write formatted LLgen to
+stdout. C is replaced with role-specific placeholders. --tree prints the syntax
+tree as JSON; --tokens also includes whitespace and grammar comments.
 
 parse(source) returns a Document with an immutable token stream and a syntax
 tree. Token offsets are Python string offsets; node ranges are half-open token
@@ -300,9 +301,145 @@ def parse(source):
     return Parser(source).parse()
 
 
+class Formatter:
+    """Lay out grammar tokens using the tree; retain grammar comments verbatim.
+
+    Layout is attached to token indices so comments between syntax nodes are
+    never lost. Embedded C is represented by a single token and replaced only
+    at emission time. The input Document remains unchanged.
+    """
+
+    def __init__(self, document):
+        self.document = document
+        self.tokens = document.tokens
+        self.breaks = {}
+        self.roles = {}
+        self.lines = []
+        self.line = ''
+        self.level = 0
+
+    def significant(self, node):
+        return [i for i in range(node.start, node.end)
+                if self.tokens[i].kind not in Parser.TRIVIA]
+
+    def mark(self, index, level, blank=False):
+        self.breaks[index] = (level, blank)
+
+    def layout(self, node, level=0):
+        kind = node.kind
+        indices = self.significant(node)
+        if kind.startswith('c_'):
+            self.roles[node.start] = kind
+            if kind == 'c_action':
+                self.mark(node.start, level + 1)
+        if kind == 'document':
+            previous = None
+            for child in node.children:
+                self.layout(child, 0)
+                self.mark(child.start, 0, previous is not None and
+                          (previous != 'declaration' or child.kind != 'declaration'))
+                previous = child.kind
+            return
+        if kind == 'rule':
+            colon = next(i for i in indices if self.tokens[i].kind == ':')
+            self.mark(colon, level + 1)
+            self.mark(indices[-1], level + 1)
+            for child in node.children:
+                self.layout(child, level + 1 if child.kind in {'alternatives', 'c_locals'} else level)
+                if child.kind == 'c_locals':
+                    self.mark(child.start, level + 1)
+            return
+        if kind == 'alternatives':
+            for i in indices:
+                if self.tokens[i].kind == '|':
+                    # Nested alternatives will override their own separators.
+                    self.mark(i, level)
+            for child in node.children:
+                self.layout(child, level)
+            return
+        if kind == 'alternative':
+            previous_plain = False
+            for child in node.children:
+                plain = (child.kind == 'symbol' and len(child.children) == 1
+                         and child.children[0].kind in {'identifier', 'literal'})
+                if child.kind != 'c_condition' and not (plain and previous_plain):
+                    self.mark(child.start, level)
+                self.layout(child, level)
+                previous_plain = plain
+            return
+        if kind == 'group':
+            self.mark(indices[-1], level)
+            for child in node.children:
+                self.layout(child, level + 1)
+                if child.kind not in {'alternatives', 'c_condition'}:
+                    self.mark(child.start, level + 1)
+            return
+        for child in node.children:
+            self.layout(child, level)
+
+    def flush(self):
+        if self.line:
+            self.lines.append(self.line)
+            self.line = ''
+
+    def write(self, text, space=True):
+        if not self.line:
+            self.line = '    ' * self.level + text
+        else:
+            self.line += (' ' if space else '') + text
+
+    def format(self):
+        self.layout(self.document.tree)
+        previous = None
+        for i, token in enumerate(self.tokens):
+            if token.kind == 'whitespace':
+                continue
+            if i in self.breaks:
+                # Start an alternative beside its introducer. Comments flush
+                # the line themselves, so none are moved across grammar tokens.
+                if (self.line.strip() not in {':', '|'} or token.kind in {'|', ']', ';'}
+                        or self.roles.get(i) == 'c_action'):
+                    self.flush()
+                self.level, blank = self.breaks[i]
+                if blank and self.lines and self.lines[-1]:
+                    self.lines.append('')
+            if token.kind in {'comment', 'line_directive'}:
+                self.flush()
+                # Leave the contents of multiline comments untouched, including
+                # their original internal whitespace. Directives stay at column 1.
+                self.line = ('' if token.kind == 'line_directive' else
+                             '    ' * self.level) + token.text
+                self.flush()
+                previous = None
+                continue
+            role = self.roles.get(i)
+            if role:
+                label = role[2:].replace('_', ' ')
+                text = ('{ /* C ' + label + ' */ }' if token.kind == 'c_block'
+                        else '(/* C ' + label + ' */)')
+                self.write(text, space=role not in {'c_parameters', 'c_arguments'})
+            else:
+                attach = token.kind in {',', ';', '*', '+', '?'} or (
+                    token.kind == 'number' and previous in {']', '*', '+', 'identifier', 'literal', 'c_block', 'c_parens'})
+                self.write(token.text, space=not attach)
+            previous = token.kind
+        self.flush()
+        return '\n'.join(self.lines) + ('\n' if self.lines else '')
+
+
+def format_document(document):
+    """Return formatted LLgen with C placeholders; never modify the document."""
+    return Formatter(document).format()
+
+
+def format_source(source):
+    return format_document(parse(source))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('file', type=Path)
+    ap.add_argument('--tree', action='store_true', help='print syntax tree instead of source')
     ap.add_argument('--tokens', action='store_true', help='include lossless token stream')
     args = ap.parse_args()
     try:
@@ -310,6 +447,9 @@ def main():
             document = parse(stream.read())
     except (OSError, ParseError) as error:
         ap.exit(1, f'{args.file}:{error}\n')
+    if not (args.tree or args.tokens):
+        print(format_document(document), end='')
+        return
     result = {'tree': asdict(document.tree)}
     if args.tokens:
         result['tokens'] = [asdict(t) for t in document.tokens]

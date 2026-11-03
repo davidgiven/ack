@@ -2,7 +2,7 @@
 
 import unittest
 
-from formatter import ParseError, parse
+from formatter import ParseError, format_source, parse
 
 
 def walk(node):
@@ -66,6 +66,77 @@ rule(int n; char *s;) /* parameters */
         with self.assertRaises(ParseError) as error:
             parse('\nrule: @;')
         self.assertEqual((error.exception.line, error.exception.column), (2, 7))
+
+
+class FormatterTests(unittest.TestCase):
+    def test_layout(self):
+        self.assertEqual(
+            format_source('%token A,B; r(int x;) {int y;}: [%while(x) %persistent A(x)| B]*3 {f();}|;'),
+            "%token A, B;\n\nr(/* C parameters */)\n"
+            "    { /* C locals */ }\n    : [\n"
+            "        %while (/* C condition */)\n        %persistent\n"
+            "        A(/* C arguments */)\n        | B\n    ]*3\n"
+            "        { /* C action */ }\n    |\n    ;\n")
+
+    def test_alternative_introducers_share_first_symbol(self):
+        output = format_source('r: first second | third | [nested | other];')
+        self.assertEqual(output, 'r\n    : first second\n    | third\n    | [\n'
+                         '        nested\n        | other\n    ]\n    ;\n')
+        self.assertEqual(format_source(output), output)
+
+    def test_plain_symbols_group_and_parameterised_symbols_stand_alone(self):
+        source = "r: A B call(x) C D other(y) | '#' INTVALUE STRVALUE EOLN;"
+        output = format_source(source)
+        self.assertEqual(output,
+                         "r\n    : A B\n    call(/* C arguments */)\n"
+                         "    C D\n    other(/* C arguments */)\n"
+                         "    | '#' INTVALUE STRVALUE EOLN\n    ;\n")
+        self.assertEqual(format_source(output), output)
+
+    def test_operators_comments_and_actions_separate_symbol_runs(self):
+        source = 'r: A B? C D /* keep */ E F {f();} G H [I J | K L]+ M N;'
+        output = format_source(source)
+        self.assertIn(': A\n    B?\n    C D\n', output)
+        self.assertIn('/* keep */\n    E F\n        { /* C action */ }\n    G H\n', output)
+        self.assertIn('        I J\n        | K L\n    ]+\n    M N\n', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_comments_preserved_in_order_and_c_replaced(self):
+        source = ("/* header */ { int secret; /* inside C */ }\n"
+                  "r /* before params */ (int n;) /* locals */ {int x;} :\n"
+                  "/* first */ x /* arguments */ (n) [/* group */ 'x'\n"
+                  "| /* empty */ ] /* suffix */ +2 // trailing\n"
+                  "{secret();} ; /* end */")
+        output = format_source(source)
+        before = parse(source)
+        after = parse(output)
+        for kind in ('comment', 'line_directive'):
+            self.assertEqual([t.text for t in before.tokens if t.kind == kind],
+                             [t.text for t in after.tokens if t.kind == kind])
+        self.assertNotIn('secret', output)
+        self.assertNotIn('inside C', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_extensions_literals_and_directives(self):
+        source = ('# 1 "test.g"\n%start parser, r;\n'
+                  "r: %illegal %erroneous TOKEN? | %substart a,b; {}+2 | ';'4;")
+        output = format_source(source)
+        self.assertTrue(output.startswith('# 1 "test.g"\n'))
+        self.assertIn('%substart a, b;\n        { /* C action */ }+2', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_actions_have_one_extra_indent_at_every_grammar_depth(self):
+        output = format_source('{int global;} r {int local;}: {} | [A {} [B {}]];')
+        actions = [line for line in output.splitlines() if 'C action' in line]
+        self.assertEqual(actions, ['    ' * depth + '{ /* C action */ }'
+                                   for depth in (2, 3, 4)])
+        self.assertTrue(output.startswith('{ /* C global */ }\n'))
+        self.assertIn('\n    { /* C locals */ }\n', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_empty_and_comments_only(self):
+        self.assertEqual(format_source(''), '')
+        self.assertEqual(format_source('  /* retained */  '), '/* retained */\n')
 
 
 if __name__ == '__main__':
