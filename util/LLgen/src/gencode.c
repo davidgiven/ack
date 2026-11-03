@@ -50,7 +50,7 @@ static int firsts; /* are there any? */
 static int listcount;
 
 /* In this file the following routines are defined: */
-static void doclose(FILE *);
+static void doclose(FILE **);
 static int *mk_tokenlist(void);
 static void genhdr(void);
 static void opentemp(string);
@@ -90,13 +90,14 @@ extern void save_grammar(FILE *f);
 # define NOPOP		-20000
 
 
-static void doclose(FILE *f)
+static void doclose(FILE **f)
 {
-	if (ferror(f) != 0)
+	if (ferror(*f) != 0)
 	{
 		fatal(0, "Write error on temporary", NULL );
 	}
-	fclose(f);
+	fclose(*f);
+	*f = NULL;
 }
 
 static int *mk_tokenlist(void)
@@ -151,7 +152,7 @@ void gencode(int argc)
 		/* generate code ... */
 		generate(p);
 		getaction(2);
-		doclose(fpars);
+		doclose(&fpars);
 		/* And install */
 		install(genname(p->f_name), p->f_name);
 		p++;
@@ -160,6 +161,7 @@ void gencode(int argc)
 	genrecovery();
 
 	fclose(fact);
+	fact = NULL;
 }
 
 static void opentemp(string str)
@@ -196,7 +198,7 @@ static void geninclude(void)
 		fprintf(fpars, "#define %sNONCORR\n", prefix ? prefix : "LL");
 	}
 #endif
-	doclose(fpars);
+	doclose(&fpars);
 	install(f_include, ".");
 }
 
@@ -320,7 +322,7 @@ static void genrecovery(void)
 	}
 	fputs("#define LL_NEWMESS\n", f);
 	copyfile(rec_file);
-	doclose(f);
+	doclose(&fpars);
 	install(f_rec, ".");
 }
 
@@ -361,7 +363,7 @@ static void genncrecovery(void)
 	copyfile(nc_incl_file);
 	copyfile(nc_rec_file);
 
-	doclose(f);
+	doclose(&fpars);
 	install(f_nc, ".");
 }
 #endif

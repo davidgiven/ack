@@ -202,6 +202,7 @@ int main(int argc, string argv[])
 	if (nerrors)
 		comfatal();
 	fclose(fact);
+	fact = NULL;
 	if (argc-- == 1)
 	{
 		fputs("No code generation for input from standard input\n",
@@ -326,11 +327,13 @@ static NORETURN void comfatal(void)
 	if (fact != NULL)
 	{
 		fclose(fact);
-		remove(f_temp);
 	}
+	if (f_temp != NULL)
+		remove(f_temp);
 	if (fpars != NULL)
 		fclose(fpars);
-	remove(f_pars);
+	if (f_pars != NULL)
+		remove(f_pars);
 	exit(EXIT_FAILURE);
 }
 
