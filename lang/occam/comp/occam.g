@@ -153,7 +153,7 @@ guarded_process(*END;)
             oind = ind;
         }
     [
-        %if (line==lineno)
+        %if (line == lineno)
         replicator(&v, &e1, &e2)
             { rep_init(v, e1, e2, &to_test); }
         guarded_process(END)
@@ -168,7 +168,7 @@ guarded_process(*END;)
     ]
     ;
 
-conditional(*END; )
+conditional(*END;)
     {
         struct symbol* v;
         struct expr *e1, *e2;
@@ -195,7 +195,7 @@ conditional(*END; )
             oind = ind;
         }
     [
-        %if (line==lineno)
+        %if (line == lineno)
         replicator(&v, &e1, &e2)
             { rep_init(v, e1, e2, &to_test); }
         conditional(END)
@@ -210,7 +210,7 @@ conditional(*END; )
     ]
     ;
 
-replicator(struct symbol **s; register struct expr **e1; register struct expr **e2; )
+replicator(struct symbol** s; register struct expr** e1; register struct expr** e2;)
     {
         register char* index;
     }
@@ -244,7 +244,7 @@ construct
             oind = ind;
         }
     [
-        %if (line==lineno)
+        %if (line == lineno)
         replicator(&v, &e1, &e2)
             { rep_init(v, e1, e2, &to_test); }
         process
@@ -266,7 +266,7 @@ construct
                 par_begin();
             }
         [
-            %if (line==lineno)
+            %if (line == lineno)
             replicator(&v, &e1, &e2)
                 {
                     rep_init(v, e1, e2, &to_test);
@@ -305,7 +305,7 @@ construct
                 Label(new_label(&BEGIN));
             }
         [
-            %if (line==lineno)
+            %if (line == lineno)
             replicator(&v, &e1, &e2)
                 { rep_init(v, e1, e2, &to_test); }
             guarded_process(&END)
@@ -330,7 +330,7 @@ construct
             oind = ind;
         }
     [
-        %if (line==lineno)
+        %if (line == lineno)
         replicator(&v, &e1, &e2)
             { rep_init(v, e1, e2, &to_test); }
         conditional(&END)
@@ -362,7 +362,7 @@ construct
         }
     ;
 
-subscript(*byte; register struct expr **e; )
+subscript(*byte; register struct expr** e;)
     {
         struct expr* e1;
         register slice = 0, err = 0;
@@ -489,7 +489,7 @@ const_def
         }
     ;
 
-form_parm(struct par_list ***aapars; register *g_type;)
+form_parm(struct par_list*** aapars; register* g_type;)
     {
         register char* name;
         register type = *g_type;
@@ -519,7 +519,7 @@ form_parm(struct par_list ***aapars; register *g_type;)
         { pars_add(aapars, type & (T_TYPE | T_ARR), insert(name, type | T_PARAM, 0, &none)); }
     ;
 
-form_parms(struct par_list **apars;)
+form_parms(struct par_list** apars;)
     {
         int type = -1;
     }
@@ -578,7 +578,7 @@ proc_declaration
         }
     ;
 
-vector_constant(struct expr **e;)
+vector_constant(struct expr** e;)
     {
         struct table *pt = nil, **apt = &pt;
         register Tlen = 0;
@@ -612,7 +612,7 @@ vector_constant(struct expr **e;)
         }
     ;
 
-item(struct expr **e;)
+item(struct expr** e;)
     {
         struct expr* e1;
         register struct symbol* var;
@@ -637,7 +637,7 @@ item(struct expr **e;)
             }
         }
     [
-        %while (line==lineno || tabulated(oind, ind))
+        %while (line == lineno || tabulated(oind, ind))
         [
             subscript(&byte, &e1)
                 { *e = new_node('[', *e, e1, byte); }
@@ -689,7 +689,7 @@ item(struct expr **e;)
     ]?
     ;
 
-statement(struct expr **e;)
+statement(struct expr** e;)
     {
         struct expr* e1;
         struct expr_list *elp = nil, **aelp = &elp;
@@ -726,13 +726,13 @@ statement(struct expr **e;)
     ]?
     ;
 
-io_arg(struct expr **e; )
+io_arg(struct expr** e;)
     : expression(e)
     | ANY
         { *e = nil; }
     ;
 
-table(struct expr **e;)
+table(struct expr** e;)
     {
         struct table *pt = nil, **apt = &pt;
         struct expr* e1;
@@ -816,7 +816,7 @@ operator
     | shift_op
     ;
 
-element(struct expr **e;)
+element(struct expr** e;)
     : %default
     NUMBER
         { *e = new_const(token.t_lval); }
@@ -835,7 +835,7 @@ element(struct expr **e;)
         { if (valueless(*e)) warning("primitive should not be parenthesized"); }
     ;
 
-expression(struct expr **e;)
+expression(struct expr** e;)
     {
         int op = 0;
         struct expr* e1;
@@ -857,7 +857,7 @@ expression(struct expr **e;)
         { *e = new_node(op, e1, (char*)nil, 0); }
     ;
 
-val_expr(struct expr **e;)
+val_expr(struct expr** e;)
     : expression(e)
         { used(*e); }
     ;

@@ -140,7 +140,7 @@ programline
 stmts
     : singlestmt
     [
-        %while ( LLsymb == ':' )
+        %while (LLsymb == ':')
         ':' singlestmt
     ]*
     ;
@@ -225,7 +225,7 @@ callstmt
     ]
     ;
 
-parmlist(int *ip;)
+parmlist(int* ip;)
     {
         int var;
     }
@@ -388,7 +388,7 @@ dimstmt
     ]*
     ;
 
-arraydcl(Symbol **sympp;)
+arraydcl(Symbol** sympp;)
     : IDENTIFIER
         { *sympp = s = yylval.Sptr; }
     '(' INTVALUE
@@ -504,7 +504,7 @@ getstmt
     ]
     ;
 
-getput(char **cpp;)
+getput(char** cpp;)
     {
         int intv;
     }
@@ -848,7 +848,7 @@ format
         { formatstring = 0; }
     ;
 
-printlist(int *ip;)
+printlist(int* ip;)
     {
         int exp;
     }
@@ -985,12 +985,12 @@ cross
     /* empty */
     ;
 
-intvalue(int *ip;)
+intvalue(int* ip;)
     : INTVALUE
         { *ip = yylval.integer; }
     ;
 
-variable(int *ip;)
+variable(int* ip;)
     {
         Symbol* symp;
         int exp;
@@ -1024,7 +1024,7 @@ variable(int *ip;)
         }
     ;
 
-expression(int *ip;)
+expression(int* ip;)
     {
         int neg;
     }
@@ -1038,7 +1038,7 @@ expression(int *ip;)
     ]?
     ;
 
-expression1(int *ip;)
+expression1(int* ip;)
     {
         int neg;
     }
@@ -1051,7 +1051,7 @@ expression1(int *ip;)
     ]*
     ;
 
-expression2(int *ip;)
+expression2(int* ip;)
     {
         int neg;
     }
@@ -1064,7 +1064,7 @@ expression2(int *ip;)
     ]*
     ;
 
-expression3(int *ip;)
+expression3(int* ip;)
     {
         int neg;
     }
@@ -1077,7 +1077,7 @@ expression3(int *ip;)
     ]*
     ;
 
-expression4(int *ip;)
+expression4(int* ip;)
     {
         int neg;
     }
@@ -1090,7 +1090,7 @@ expression4(int *ip;)
     ]*
     ;
 
-negation(int *ip;)
+negation(int* ip;)
     {
         int comp;
     }
@@ -1100,7 +1100,7 @@ negation(int *ip;)
     | compare(ip)
     ;
 
-compare(int *ip;)
+compare(int* ip;)
     {
         int sum1, sum2, rel;
     }
@@ -1118,7 +1118,7 @@ compare(int *ip;)
     ]
     ;
 
-sum(int *ip;)
+sum(int* ip;)
     {
         int term1;
     }
@@ -1135,7 +1135,7 @@ sum(int *ip;)
     ]*
     ;
 
-term(int *ip;)
+term(int* ip;)
     {
         int fac1;
     }
@@ -1157,14 +1157,14 @@ term(int *ip;)
     ]*
     ;
 
-factor(int *ip;)
+factor(int* ip;)
     : '-'
     factor(ip)
         { *ip = negate(*ip); }
     | factor1(ip)
     ;
 
-factor1(int *ip;)
+factor1(int* ip;)
     {
         int mant, exp;
     }
@@ -1178,7 +1178,7 @@ factor1(int *ip;)
     ]
     ;
 
-factor2(int *ip;)
+factor2(int* ip;)
     {
         int var, func, expl, funcc, exp, intv, funcn, inpt;
         int typetable[10];
@@ -1252,7 +1252,7 @@ factor2(int *ip;)
         }
     ;
 
-inputtail(int *ip;)
+inputtail(int* ip;)
     {
         int exp;
     }
@@ -1270,12 +1270,12 @@ inputtail(int *ip;)
         }
     ;
 
-funcname(int *ip;)
+funcname(int* ip;)
     : FUNCTID
         { *ip = fcncall(yylval.Sptr); }
     ;
 
-funccall(int *ip;)
+funccall(int* ip;)
     {
         int exp;
     }
@@ -1295,7 +1295,7 @@ funccall(int *ip;)
     ]*
     ;
 
-identifier(Symbol **ident;)
+identifier(Symbol** ident;)
     : IDENTIFIER
         {
             dcltype(yylval.Sptr);
@@ -1303,7 +1303,7 @@ identifier(Symbol **ident;)
         }
     ;
 
-exprlist(int *ip; int *typetable;)
+exprlist(int* ip; int* typetable;)
     {
         int exp;
     }

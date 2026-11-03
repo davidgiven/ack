@@ -77,7 +77,7 @@ makes all hope of writing a specific grammar for typedefs illusory.
 
 decl_specifiers
     /* non-empty */
-(struct decspecs *ds;)
+(struct decspecs* ds;)
     /*	Reads a non-empty decl_specifiers and fills the struct
     decspecs *ds.
     */
@@ -97,7 +97,7 @@ decl_specifiers
     ;
 
 /* 8.1 */
-other_specifier(struct decspecs *ds;)
+other_specifier(struct decspecs* ds;)
     : [
         AUTO
         | STATIC
@@ -129,7 +129,7 @@ other_specifier(struct decspecs *ds;)
     ;
 
 /* 8.2 */
-type_specifier(struct type **tpp;)
+type_specifier(struct type** tpp;)
     /*	Used in struct/union declarations and in casts; only the
     type is relevant.
     */
@@ -147,7 +147,7 @@ type_specifier(struct type **tpp;)
         { *tpp = Ds.ds_type; }
     ;
 
-single_type_specifier(struct decspecs *ds;)
+single_type_specifier(struct decspecs* ds;)
     : %default
     TYPE_IDENTIFIER
     /* this includes INT, CHAR, etc. */
@@ -169,7 +169,7 @@ single_type_specifier(struct decspecs *ds;)
     ;
 
 /* 8.3 */
-init_declarator_list(struct decspecs *ds;)
+init_declarator_list(struct decspecs* ds;)
     : init_declarator(ds)
     [
         ','
@@ -177,7 +177,7 @@ init_declarator_list(struct decspecs *ds;)
     ]*
     ;
 
-init_declarator(struct decspecs *ds;)
+init_declarator(struct decspecs* ds;)
     {
         struct declarator Dc;
     }
@@ -207,7 +207,7 @@ init_declarator(struct decspecs *ds;)
     ;
 
 /* 8.6: initializer */
-initializer(struct idf *idf; int sc;)
+initializer(struct idf* idf; int sc;)
     {
         struct expr* expr = (struct expr*)0;
         int globalflag = level == L_GLOBAL || (level >= L_LOCAL && sc == STATIC);
@@ -234,8 +234,7 @@ initializer(struct idf *idf; int sc;)
                 code_declaration(idf, &ex, level, sc);
             }
         }
-    initial_value(globalflag ? &(idf->id_def->df_type) : (struct type **)0,
-			&expr)
+    initial_value(globalflag ? &(idf->id_def->df_type) : (struct type**)0, &expr)
         {
             if (!globalflag)
             {
@@ -275,7 +274,7 @@ Since the function heading is read as a normal declarator,
 we just include the (formal) parameter list in the declarator
 description list dc.
 */
-declarator(struct declarator *dc;)
+declarator(struct declarator* dc;)
     {
         arith count;
         struct formal* fm = 0;
@@ -298,14 +297,14 @@ declarator(struct declarator *dc;)
         { add_decl_unary(dc, POINTER, (arith)0, NO_PARAMS); }
     ;
 
-primary_declarator(struct declarator *dc;)
+primary_declarator(struct declarator* dc;)
     : identifier(&dc->dc_idf)
     | '('
     declarator(dc)
     ')'
     ;
 
-arrayer(arith *sizep;)
+arrayer(arith* sizep;)
     {
         struct expr* expr;
     }
@@ -323,7 +322,7 @@ arrayer(arith *sizep;)
     ']'
     ;
 
-formal_list(struct formal **fmp;)
+formal_list(struct formal** fmp;)
     : formal(fmp)
     [
         %persistent
@@ -332,7 +331,7 @@ formal_list(struct formal **fmp;)
     ]*
     ;
 
-formal(struct formal **fmp;)
+formal(struct formal** fmp;)
     {
         struct idf* idf;
     }
@@ -347,7 +346,7 @@ formal(struct formal **fmp;)
     ;
 
 /* Change 2 */
-enum_specifier(struct type **tpp;)
+enum_specifier(struct type** tpp;)
     {
         struct idf* idf;
         arith l = (arith)0;
@@ -375,7 +374,7 @@ enum_specifier(struct type **tpp;)
     ]
     ;
 
-enumerator_pack(struct type *tp; arith *lp;)
+enumerator_pack(struct type* tp; arith* lp;)
     : '{'
     enumerator(tp, lp)
     [
@@ -393,7 +392,7 @@ enumerator_pack(struct type *tp; arith *lp;)
     */
     ;
 
-enumerator(struct type *tp; arith *lp;)
+enumerator(struct type* tp; arith* lp;)
     {
         struct idf* idf;
         struct expr* expr;
@@ -411,7 +410,7 @@ enumerator(struct type *tp; arith *lp;)
     ;
 
 /* 8.5 */
-struct_or_union_specifier(struct type **tpp;)
+struct_or_union_specifier(struct type** tpp;)
     {
         int fund;
         struct idf* idfX;
@@ -449,7 +448,7 @@ struct_or_union_specifier(struct type **tpp;)
     ]
     ;
 
-struct_declaration_pack(struct type *stp;)
+struct_declaration_pack(struct type* stp;)
     {
         struct sdef** sdefp = &stp->tp_sdef;
         arith size = (arith)0;
@@ -464,7 +463,7 @@ struct_declaration_pack(struct type *stp;)
         { stp->tp_size = align(size, stp->tp_align); }
     ;
 
-struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)
+struct_declaration(struct type* stp; struct sdef*** sdefpp; arith* szp;)
     {
         struct type* tp;
     }
@@ -480,8 +479,7 @@ struct_declaration(struct type *stp; struct sdef ***sdefpp; arith *szp;)
     ]
     ;
 
-struct_declarator_list(struct type *tp; struct type *stp;
-			struct sdef ***sdefpp; arith *szp;)
+struct_declarator_list(struct type* tp; struct type* stp; struct sdef*** sdefpp; arith* szp;)
     : struct_declarator(tp, stp, sdefpp, szp)
     [
         ','
@@ -489,8 +487,7 @@ struct_declarator_list(struct type *tp; struct type *stp;
     ]*
     ;
 
-struct_declarator(struct type *tp; struct type *stp;
-			struct sdef ***sdefpp; arith *szp;)
+struct_declarator(struct type* tp; struct type* stp; struct sdef*** sdefpp; arith* szp;)
     {
         struct declarator Dc;
         struct field* fd = 0;
@@ -509,7 +506,7 @@ struct_declarator(struct type *tp; struct type *stp;
         { remove_declarator(&Dc); }
     ;
 
-bit_expression(struct field **fd;)
+bit_expression(struct field** fd;)
     {
         struct expr* expr;
     }
@@ -527,7 +524,7 @@ bit_expression(struct field **fd;)
     ;
 
 /* 8.7 */
-cast(struct type **tpp;)
+cast(struct type** tpp;)
     {
         struct declarator Dc;
     }
@@ -544,7 +541,7 @@ cast(struct type **tpp;)
 /*	This code is an abject copy of that of 'declarator', for lack of
 a two-level grammar.
 */
-abstract_declarator(struct declarator *dc;)
+abstract_declarator(struct declarator* dc;)
     {
         arith count;
     }
@@ -560,7 +557,7 @@ abstract_declarator(struct declarator *dc;)
         { add_decl_unary(dc, POINTER, (arith)0, NO_PARAMS); }
     ;
 
-primary_abstract_declarator(struct declarator *dc;)
+primary_abstract_declarator(struct declarator* dc;)
     : [
         %if (AHEAD == ')')
         empty

@@ -142,7 +142,7 @@ external_definition
     /* top level, would you believe */
     ;
 
-ext_decl_specifiers(struct decspecs *ds;)
+ext_decl_specifiers(struct decspecs* ds;)
     : %if (DOT != IDENTIFIER || AHEAD == IDENTIFIER)
     /* the thin ice in  R.M. 11.1 */
     decl_specifiers(ds)
@@ -150,7 +150,7 @@ ext_decl_specifiers(struct decspecs *ds;)
         { do_decspecs(ds); }
     ;
 
-non_function(struct decspecs *ds; struct declarator *dc;)
+non_function(struct decspecs* ds; struct declarator* dc;)
     :
         { reject_params(dc); }
     [
@@ -171,7 +171,7 @@ non_function(struct decspecs *ds; struct declarator *dc;)
     ;
 
 /* 10.1 */
-function(struct decspecs *ds; struct declarator *dc;)
+function(struct decspecs* ds; struct declarator* dc;)
     {
         arith fbytes;
     }

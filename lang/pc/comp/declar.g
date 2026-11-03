@@ -41,7 +41,7 @@
 }
 
 /* ISO section 6.2.1, p. 93 */
-Block(struct def *df;)
+Block(struct def* df;)
     {
         arith i;
     }
@@ -91,7 +91,7 @@ LabelDeclarationPart
     ]?
     ;
 
-Module(struct def *df; arith *i;)
+Module(struct def* df; arith* i;)
     {
         label save_label;
     }
@@ -171,7 +171,7 @@ ProcedureAndFunctionDeclarationPart
     ;
 
 /* ISO section 6.1.6, p. 92 */
-Label(struct node **pnd;)
+Label(struct node** pnd;)
     {
         char lab[5];
     }
@@ -246,7 +246,7 @@ TypeDefinition
         }
     ;
 
-TypeDenoter(struct type **ptp;)
+TypeDenoter(struct type** ptp;)
     :
     /* This is a changed rule, because the grammar as specified in the
      * reference is not LL(1), and this gives conflicts.
@@ -257,7 +257,7 @@ TypeDenoter(struct type **ptp;)
     | EnumeratedType(ptp)
     ;
 
-TypeIdentifierOrSubrangeType(struct type **ptp;)
+TypeIdentifierOrSubrangeType(struct type** ptp;)
     {
         struct node *nd1, *nd2;
     }
@@ -298,7 +298,7 @@ TypeIdentifierOrSubrangeType(struct type **ptp;)
     ]
     ;
 
-TypeIdentifier(struct type **ptp;)
+TypeIdentifier(struct type** ptp;)
     : IDENT
         {
             register struct node* nd = MkLeaf(Name, &dot);
@@ -365,7 +365,7 @@ ProcedureDeclaration
     ]
     ;
 
-ProcedureHeading(struct node **pnd; register struct type **ptp;)
+ProcedureHeading(struct node** pnd; register struct type** ptp;)
     {
         struct node* fpl;
     }
@@ -459,7 +459,7 @@ FunctionDeclaration
     ]
     ;
 
-FunctionHeading(struct node **pnd; register struct type **ptp;)
+FunctionHeading(struct node** pnd; register struct type** ptp;)
     {
         /*	This is the Function AND FunctionIdentification part.
         If it is a identification, *ptp is set to NULLTYPE.
@@ -503,7 +503,7 @@ FunctionHeading(struct node **pnd; register struct type **ptp;)
     ;
 
 /* ISO section 6.4.2.1, p. 96 */
-OrdinalType(struct type **ptp;)
+OrdinalType(struct type** ptp;)
     :
     /* This is a changed rule, because the grammar as specified in the
      * reference states that a SubrangeType can start with an IDENT and
@@ -514,7 +514,7 @@ OrdinalType(struct type **ptp;)
     ;
 
 /* ISO section 6.4.2.3, p. 97 */
-EnumeratedType(struct type **ptp;)
+EnumeratedType(struct type** ptp;)
     {
         struct node* EnumList;
         arith i = (arith)1;
@@ -543,7 +543,7 @@ EnumeratedType(struct type **ptp;)
         }
     ;
 
-IdentifierList(struct node **nd;)
+IdentifierList(struct node** nd;)
     {
         register struct node* tnd;
     }
@@ -560,7 +560,7 @@ IdentifierList(struct node **nd;)
     ;
 
 /* ISO section 6.4.3.2, p. 98 */
-StructuredType(struct type **ptp;)
+StructuredType(struct type** ptp;)
     {
         unsigned short packed = 0;
     }
@@ -571,7 +571,7 @@ StructuredType(struct type **ptp;)
     UnpackedStructuredType(ptp, packed)
     ;
 
-UnpackedStructuredType(struct type **ptp; unsigned short packed;)
+UnpackedStructuredType(struct type** ptp; unsigned short packed;)
     : ArrayType(ptp, packed)
     | RecordType(ptp, packed)
     | SetType(ptp, packed)
@@ -579,7 +579,7 @@ UnpackedStructuredType(struct type **ptp; unsigned short packed;)
     ;
 
 /* ISO section 6.4.3.2, p. 98 */
-ArrayType(struct type **ptp; unsigned short packed;)
+ArrayType(struct type** ptp; unsigned short packed;)
     {
         struct type* tp;
         register struct type* tp2;
@@ -610,16 +610,16 @@ ArrayType(struct type **ptp; unsigned short packed;)
         }
     ;
 
-Indextype(struct type **ptp;)
+Indextype(struct type** ptp;)
     : OrdinalType(ptp)
     ;
 
-ComponentType(struct type **ptp;)
+ComponentType(struct type** ptp;)
     : TypeDenoter(ptp)
     ;
 
 /* ISO section 6.4.3.3, p. 99 */
-RecordType(struct type **ptp; unsigned short packed;)
+RecordType(struct type** ptp; unsigned short packed;)
     {
         register struct scope* scope;
         register struct def* df;
@@ -656,8 +656,8 @@ RecordType(struct type **ptp; unsigned short packed;)
     END
     ;
 
-FieldList(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
-							struct selector **sel;)
+FieldList(
+    struct scope* scope; arith* cnt; int* palign; unsigned short packed; struct selector** sel;)
     :
     /* This is a changed rule, because the grammar as specified in the
      * reference is not LL(1), and this gives conflicts.
@@ -669,8 +669,8 @@ FieldList(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
     | VariantPart(scope, cnt, palign, packed, sel)
     ;
 
-FixedPart(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
-							struct selector **sel;)
+FixedPart(
+    struct scope* scope; arith* cnt; int* palign; unsigned short packed; struct selector** sel;)
     :
     /* This is a changed rule, because the grammar as specified in the
      * reference is not LL(1), and this gives conflicts.
@@ -680,8 +680,8 @@ FixedPart(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
     FixedPartTail(scope, cnt, palign, packed, sel)
     ;
 
-FixedPartTail(struct scope *scope; arith *cnt; int *palign;
-				unsigned short packed; struct selector **sel;)
+FixedPartTail(
+    struct scope* scope; arith* cnt; int* palign; unsigned short packed; struct selector** sel;)
     :
     /* This is a new rule because the grammar specified by the standard
      * is not exactly LL(1).
@@ -699,8 +699,7 @@ FixedPartTail(struct scope *scope; arith *cnt; int *palign;
     ]
     ;
 
-RecordSection(struct scope *scope; arith *cnt; int *palign;
-							unsigned short packed;)
+RecordSection(struct scope* scope; arith* cnt; int* palign; unsigned short packed;)
     {
         struct node* FldList;
         struct type* tp;
@@ -714,8 +713,8 @@ RecordSection(struct scope *scope; arith *cnt; int *palign;
         }
     ;
 
-VariantPart(struct scope *scope; arith *cnt; int *palign;
-				unsigned short packed; struct selector **sel;)
+VariantPart(
+    struct scope* scope; arith* cnt; int* palign; unsigned short packed; struct selector** sel;)
     {
         struct type* tp;
         struct def* df = 0;
@@ -810,8 +809,13 @@ VariantPart(struct scope *scope; arith *cnt; int *palign;
         }
     ;
 
-VariantTail(struct scope *scope; arith *tcnt; arith *max; arith *cnt;
-		int *palign; unsigned short packed; struct selector *sel;)
+VariantTail(struct scope* scope;
+            arith* tcnt;
+            arith* max;
+            arith* cnt;
+            int* palign;
+            unsigned short packed;
+            struct selector* sel;)
     :
     /* This is a new rule because the grammar specified by the standard
      * is not exactly LL(1).
@@ -831,7 +835,7 @@ VariantTail(struct scope *scope; arith *tcnt; arith *max; arith *cnt;
     ]
     ;
 
-VariantSelector(struct type **ptp; register struct idf **pid;)
+VariantSelector(struct type** ptp; register struct idf** pid;)
     {
         register struct node* nd;
     }
@@ -862,8 +866,7 @@ VariantSelector(struct type **ptp; register struct idf **pid;)
     ]
     ;
 
-Variant(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
-							struct selector *sel;)
+Variant(struct scope* scope; arith* cnt; int* palign; unsigned short packed; struct selector* sel;)
     {
         struct node* nd;
         struct selector* sel1 = 0;
@@ -878,7 +881,7 @@ Variant(struct scope *scope; arith *cnt; int *palign; unsigned short packed;
         }
     ;
 
-CaseConstantList(struct node **nd;)
+CaseConstantList(struct node** nd;)
     {
         struct node* nd1;
     }
@@ -893,14 +896,14 @@ CaseConstantList(struct node **nd;)
     ;
 
 /* ISO section 6.4.3.4, p. 101 */
-SetType(struct type **ptp; unsigned short packed;)
+SetType(struct type** ptp; unsigned short packed;)
     : SET OF
     OrdinalType(ptp)
         { *ptp = set_type(*ptp, packed); }
     ;
 
 /* ISO section 6.4.3.5, p. 101 */
-FileType(struct type **ptp;)
+FileType(struct type** ptp;)
     : FILET OF
         {
             *ptp = construct_type(T_FILE, NULLTYPE);
@@ -923,7 +926,7 @@ FileType(struct type **ptp;)
     ;
 
 /* ISO section 6.4.4, p. 103 */
-PointerType(struct type **ptp;)
+PointerType(struct type** ptp;)
     {
         register struct node* nd;
         register struct def* df;
@@ -951,7 +954,7 @@ PointerType(struct type **ptp;)
     ;
 
 /* ISO section 6.6.3.1, p. 112 */
-FormalParameterList(struct node **pnd;)
+FormalParameterList(struct node** pnd;)
     {
         struct node* nd;
     }
@@ -970,7 +973,7 @@ FormalParameterList(struct node **pnd;)
     ')'
     ;
 
-FormalParameterSection(struct node *nd;)
+FormalParameterSection(struct node* nd;)
     :
     /* This is a changed rule, because the grammar as specified
      * in the reference is not LL(1), and this gives conflicts.
@@ -1008,16 +1011,14 @@ FormalParameterSection(struct node *nd;)
     ]
     ;
 
-ProceduralParameterSpecification(struct node **pnd;
-						register struct type **ptp;)
+ProceduralParameterSpecification(struct node** pnd; register struct type** ptp;)
     :
         { parlevel++; }
     ProcedureHeading(pnd, ptp)
         { parlevel--; }
     ;
 
-FunctionalParameterSpecification(struct node **pnd;
-						register struct type **ptp;)
+FunctionalParameterSpecification(struct node** pnd; register struct type** ptp;)
     :
         { parlevel++; }
     FunctionHeading(pnd, ptp)
@@ -1031,13 +1032,13 @@ FunctionalParameterSpecification(struct node **pnd;
         }
     ;
 
-ConformantArraySchema(struct type **ptp;)
+ConformantArraySchema(struct type** ptp;)
     : PackedConformantArraySchema(ptp)
     | %default
     UnpackedConformantArraySchema(ptp)
     ;
 
-PackedConformantArraySchema(struct type **ptp;)
+PackedConformantArraySchema(struct type** ptp;)
     {
         struct type* tp;
     }
@@ -1059,7 +1060,7 @@ PackedConformantArraySchema(struct type **ptp;)
         }
     ;
 
-UnpackedConformantArraySchema(struct type **ptp;)
+UnpackedConformantArraySchema(struct type** ptp;)
     {
         struct type *tp, *tp2;
     }
@@ -1089,7 +1090,7 @@ UnpackedConformantArraySchema(struct type **ptp;)
         }
     ;
 
-Index_TypeSpecification(struct type **ptp; register struct type *tp;)
+Index_TypeSpecification(struct type** ptp; register struct type* tp;)
     {
         register struct def *df1, *df2;
     }

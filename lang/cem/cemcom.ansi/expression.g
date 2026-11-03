@@ -34,7 +34,7 @@
 }
 
 /* 3.3.1 */
-primary(struct expr **expp;)
+primary(struct expr** expp;)
     : IDENTIFIER
         { dot2expr(expp); }
     | constant(expp)
@@ -50,7 +50,7 @@ primary(struct expr **expp;)
  * are concatenated into a single character string
  * literal.
  */
-string(struct expr **expp;)
+string(struct expr** expp;)
     {
         int i, len;
         char* str;
@@ -82,7 +82,7 @@ string(struct expr **expp;)
     ;
 
 /* 3.3.2 */
-postfix_expression(struct expr **expp;)
+postfix_expression(struct expr** expp;)
     {
         int oper;
         struct expr* e1 = 0;
@@ -122,7 +122,7 @@ postfix_expression(struct expr **expp;)
     ]*
     ;
 
-parameter_list(struct expr **expp;)
+parameter_list(struct expr** expp;)
     {
         struct expr* e1 = 0;
     }
@@ -140,7 +140,7 @@ parameter_list(struct expr **expp;)
 %first first_of_type_specifier, type_specifier;
 
 /* 3.3.3 & 3.3.4 */
-unary(struct expr **expp;)
+unary(struct expr** expp;)
     {
         struct type* tp;
         int oper;
@@ -165,7 +165,7 @@ unary(struct expr **expp;)
  * mark it as used.
  * extern int i;  ....  sizeof(i)  .... need not have a definition for i
  */
-size_of(struct expr **expp;)
+size_of(struct expr** expp;)
     {
         struct type* tp;
     }
@@ -225,14 +225,14 @@ assignment_expression	for level 14 and
 expression		for the most general expression
 */
 
-binary_expression(int maxrank; struct expr **expp;)
+binary_expression(int maxrank; struct expr** expp;)
     {
         int oper, OldResultKnown;
         struct expr* e1;
     }
     : unary(expp)
     [
-        %while (rank_of(DOT) <= maxrank )
+        %while (rank_of(DOT) <= maxrank)
         /*	'?', '=', and ',' are no binops
          */
         binop(&oper)
@@ -252,7 +252,7 @@ binary_expression(int maxrank; struct expr **expp;)
                     }
                 }
             }
-        binary_expression(rank_of(oper)-1, &e1)
+        binary_expression(rank_of(oper) - 1, &e1)
             {
                 ch3bin(expp, oper, e1);
                 ResultKnown = OldResultKnown;
@@ -261,7 +261,7 @@ binary_expression(int maxrank; struct expr **expp;)
     ;
 
 /* 3.3.15 */
-conditional_expression(struct expr **expp;)
+conditional_expression(struct expr** expp;)
     {
         struct expr *e1 = 0, *e2 = 0;
         int OldResultKnown, ConstExpr = 0;
@@ -302,7 +302,7 @@ conditional_expression(struct expr **expp;)
     ;
 
 /* 3.3.16 */
-assignment_expression(struct expr **expp;)
+assignment_expression(struct expr** expp;)
     {
         int oper;
         struct expr* e1 = 0;
@@ -318,7 +318,7 @@ assignment_expression(struct expr **expp;)
     ;
 
 /* 3.3.17 */
-expression(struct expr **expp;)
+expression(struct expr** expp;)
     {
         struct expr* e1;
     }
@@ -330,7 +330,7 @@ expression(struct expr **expp;)
     ]*
     ;
 
-unop(int *oper;)
+unop(int* oper;)
     : [
         '*'
         | '&'
@@ -385,7 +385,7 @@ arithop
     | '|'
     ;
 
-binop(int *oper;)
+binop(int* oper;)
     : [
         arithop
         | relop
@@ -396,7 +396,7 @@ binop(int *oper;)
         { *oper = DOT; }
     ;
 
-asgnop(int *oper;)
+asgnop(int* oper;)
     : [
         '='
         | PLUSAB
@@ -413,7 +413,7 @@ asgnop(int *oper;)
         { *oper = DOT; }
     ;
 
-constant(struct expr **expp;)
+constant(struct expr** expp;)
     : [
         INTEGER
         | FLOATING
@@ -422,12 +422,12 @@ constant(struct expr **expp;)
     ;
 
 /* 3.4 */
-constant_expression(struct expr **expp;)
+constant_expression(struct expr** expp;)
     : conditional_expression(expp)
         { chk_cst_expr(expp); }
     ;
 
-identifier(struct idf **idfp;)
+identifier(struct idf** idfp;)
     : [
         IDENTIFIER
         | TYPE_IDENTIFIER

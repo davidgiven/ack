@@ -21,7 +21,7 @@
     #include "lookup.h"
 }
 
-Constant(struct node **pnd;)
+Constant(struct node** pnd;)
     {
         register struct node** nd = pnd;
     }
@@ -44,7 +44,7 @@ Constant(struct node **pnd;)
         }
     ;
 
-Sign(struct node **pnd;)
+Sign(struct node** pnd;)
     : [
         '+'
         | '-'
@@ -52,7 +52,7 @@ Sign(struct node **pnd;)
         { *pnd = MkLeaf(Uoper, &dot); }
     ;
 
-UnsignedNumber(struct node **pnd;)
+UnsignedNumber(struct node** pnd;)
     : [
         INTEGER
         | REAL
@@ -63,13 +63,13 @@ UnsignedNumber(struct node **pnd;)
         }
     ;
 
-ConstantIdentifier(struct node **pnd;)
+ConstantIdentifier(struct node** pnd;)
     : IDENT
         { *pnd = MkLeaf(Name, &dot); }
     ;
 
 /* ISO section 6.7.1, p. 121 */
-Expression(struct node **pnd;)
+Expression(struct node** pnd;)
     : SimpleExpression(pnd)
     [
         /* RelationalOperator substituted inline */
@@ -87,7 +87,7 @@ Expression(struct node **pnd;)
     ]?
     ;
 
-SimpleExpression(struct node **pnd;)
+SimpleExpression(struct node** pnd;)
     :
     /* ISO 6.7.1: The signs and the adding-operators have equal precedence,
     and are left-associative.
@@ -109,7 +109,7 @@ SimpleExpression(struct node **pnd;)
     ]*
     ;
 
-Term(struct node **pnd;)
+Term(struct node** pnd;)
     : Factor(pnd)
     [
         /* MultiplyingOperator substituted inline */
@@ -125,7 +125,7 @@ Term(struct node **pnd;)
     ]*
     ;
 
-Factor(struct node **pnd;)
+Factor(struct node** pnd;)
     {
         register struct def* df;
     }
@@ -183,7 +183,7 @@ Factor(struct node **pnd;)
     Factor(&((*pnd)->nd_right))
     ;
 
-UnsignedConstant(struct node **pnd;)
+UnsignedConstant(struct node** pnd;)
     : UnsignedNumber(pnd)
     | STRING
         {
@@ -201,7 +201,7 @@ UnsignedConstant(struct node **pnd;)
         }
     ;
 
-SetConstructor(struct node **pnd;)
+SetConstructor(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -222,7 +222,7 @@ SetConstructor(struct node **pnd;)
     ']'
     ;
 
-MemberDesignator(struct node *nd;)
+MemberDesignator(struct node* nd;)
     {
         struct node* nd1;
     }
@@ -239,7 +239,7 @@ MemberDesignator(struct node *nd;)
     ;
 
 /* ISO section 6.7.2.1, p. 123 */
-BooleanExpression(struct node **pnd;)
+BooleanExpression(struct node** pnd;)
     : Expression(pnd)
         {
             if (ChkExpression(*pnd) && (*pnd)->nd_type != bool_type)
@@ -248,7 +248,7 @@ BooleanExpression(struct node **pnd;)
         }
     ;
 
-ActualParameterList(struct node **pnd;)
+ActualParameterList(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -272,7 +272,7 @@ ActualParameterList(struct node **pnd;)
     ;
 
 /* ISO section 6.5.1, p. 105 */
-VariableAccess(struct node **pnd;)
+VariableAccess(struct node** pnd;)
     :
     /* This is a changed rule, because the grammar as specified in the
      * reference is not LL(1), and this gives conflicts.
@@ -286,7 +286,7 @@ VariableAccess(struct node **pnd;)
         { (void)ChkVariable(*pnd); }
     ;
 
-VariableAccessTail(struct node **pnd;)
+VariableAccessTail(struct node** pnd;)
     :
     /* This is a new rule because the grammar specified by the standard
      * is not exactly LL(1).

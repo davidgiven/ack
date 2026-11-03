@@ -55,7 +55,7 @@
  * ;
  */
 
-ProcedureHeading(struct def **pdf; int type;)
+ProcedureHeading(struct def** pdf; int type;)
     {
         struct type* tp = 0;
         arith parmaddr = needs_static_link() ? pointer_size : 0;
@@ -93,7 +93,7 @@ ProcedureHeading(struct def **pdf; int type;)
         }
     ;
 
-block(struct node **pnd;)
+block(struct node** pnd;)
     : [
         %persistent
         declaration
@@ -157,7 +157,7 @@ declaration
  * ;
  */
 
-FPSection(struct paramlist **ppr; arith *parmaddr;)
+FPSection(struct paramlist** ppr; arith* parmaddr;)
     {
         struct node* FPList;
         struct type* tp;
@@ -170,7 +170,7 @@ FPSection(struct paramlist **ppr; arith *parmaddr;)
         { EnterParamList(ppr, FPList, tp, VARp, parmaddr); }
     ;
 
-FormalType(struct type **ptp;)
+FormalType(struct type** ptp;)
     /* index type of conformant array is "CARDINAL".
     Recognize a conformant array by size 0.
     */
@@ -206,7 +206,7 @@ TypeDeclaration
         }
     ;
 
-type(struct type **ptp;)
+type(struct type** ptp;)
     : %default
     SimpleType(ptp)
     | ArrayType(ptp)
@@ -216,7 +216,7 @@ type(struct type **ptp;)
     | ProcedureType(ptp)
     ;
 
-SimpleType(struct type **ptp;)
+SimpleType(struct type** ptp;)
     : qualtype(ptp)
     [
         /* nothing */
@@ -231,7 +231,7 @@ SimpleType(struct type **ptp;)
     SubrangeType(ptp)
     ;
 
-enumeration(struct type **ptp;)
+enumeration(struct type** ptp;)
     {
         struct node* EnumList;
     }
@@ -241,7 +241,7 @@ enumeration(struct type **ptp;)
         { *ptp = enum_type(EnumList); }
     ;
 
-IdentList(struct node **p;)
+IdentList(struct node** p;)
     {
         register struct node* q;
     }
@@ -257,7 +257,7 @@ IdentList(struct node **p;)
     ]*
     ;
 
-SubrangeType(struct type **ptp;)
+SubrangeType(struct type** ptp;)
     {
         struct node *nd1, *nd2;
     }
@@ -278,7 +278,7 @@ SubrangeType(struct type **ptp;)
         }
     ;
 
-ArrayType(struct type **ptp;)
+ArrayType(struct type** ptp;)
     {
         struct type* tp;
         register struct type *tp1, *tp2;
@@ -303,7 +303,7 @@ ArrayType(struct type **ptp;)
         }
     ;
 
-RecordType(struct type **ptp;)
+RecordType(struct type** ptp;)
     {
         register struct scope* scope;
         arith size = 0;
@@ -325,7 +325,7 @@ RecordType(struct type **ptp;)
     END
     ;
 
-FieldListSequence(struct scope *scope; arith *cnt; int *palign;)
+FieldListSequence(struct scope* scope; arith* cnt; int* palign;)
     : FieldList(scope, cnt, palign)
     [
         ';'
@@ -333,7 +333,7 @@ FieldListSequence(struct scope *scope; arith *cnt; int *palign;)
     ]*
     ;
 
-FieldList(struct scope *scope; arith *cnt; int *palign;)
+FieldList(struct scope* scope; arith* cnt; int* palign;)
     {
         struct node* FldList;
         struct type* tp;
@@ -427,7 +427,7 @@ FieldList(struct scope *scope; arith *cnt; int *palign;)
     ]
     ;
 
-variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
+variant(struct scope* scope; arith* cnt; struct type* tp; int* palign;)
     {
         struct node* nd;
     }
@@ -447,7 +447,7 @@ variant(struct scope *scope; arith *cnt; struct type *tp; int *palign;)
     /* Changed rule in new modula-2 */
     ;
 
-CaseLabelList(struct type **ptp; struct node **pnd;)
+CaseLabelList(struct type** ptp; struct node** pnd;)
     : CaseLabels(ptp, pnd)
     [
             { *pnd = dot2node(Link, *pnd, NULLNODE); }
@@ -457,7 +457,7 @@ CaseLabelList(struct type **ptp; struct node **pnd;)
     ]*
     ;
 
-CaseLabels(struct type **ptp; register struct node **pnd;)
+CaseLabels(struct type** ptp; register struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -500,7 +500,7 @@ CaseLabels(struct type **ptp; register struct node **pnd;)
         { *ptp = nd->nd_type; }
     ;
 
-SetType(struct type **ptp;)
+SetType(struct type** ptp;)
     {
         struct type* tp;
     }
@@ -513,7 +513,7 @@ SetType(struct type **ptp;)
 have to be declared yet, so be careful about identifying
 type-identifiers.
 */
-PointerType(struct type **ptp;)
+PointerType(struct type** ptp;)
     {
         register struct type* tp;
     }
@@ -528,7 +528,7 @@ PointerType(struct type **ptp;)
         { *ptp = tp; }
     ;
 
-qualtype(struct type **ptp;)
+qualtype(struct type** ptp;)
     {
         struct node* nd;
     }
@@ -536,7 +536,7 @@ qualtype(struct type **ptp;)
         { *ptp = qualified_type(&nd); }
     ;
 
-ProcedureType(struct type **ptp;)
+ProcedureType(struct type** ptp;)
     {
         struct paramlist* pr = 0;
         arith parmaddr = 0;
@@ -550,7 +550,7 @@ ProcedureType(struct type **ptp;)
         { *ptp = proc_type(tp, pr, parmaddr); }
     ;
 
-FormalTypeList(struct paramlist **ppr; arith *pparmaddr; struct type **ptp;)
+FormalTypeList(struct paramlist** ppr; arith* pparmaddr; struct type** ptp;)
     : '('
     [
         VarFormalType(ppr, pparmaddr)
@@ -568,7 +568,7 @@ FormalTypeList(struct paramlist **ppr; arith *pparmaddr; struct type **ptp;)
     ]
     ;
 
-VarFormalType(struct paramlist **ppr; arith *pparmaddr;)
+VarFormalType(struct paramlist** ppr; arith* pparmaddr;)
     {
         struct type* tp;
         int isvar;
@@ -578,7 +578,7 @@ VarFormalType(struct paramlist **ppr; arith *pparmaddr;)
         { EnterParamList(ppr, NULLNODE, tp, isvar, pparmaddr); }
     ;
 
-var(int *VARp;)
+var(int* VARp;)
     : [
         VAR
             { *VARp = D_VARPAR; }
@@ -625,7 +625,7 @@ VariableDeclaration
         { EnterVarList(VarList, tp, proclevel > 0); }
     ;
 
-IdentAddr(struct node **pnd;)
+IdentAddr(struct node** pnd;)
     {
         register struct node* nd;
     }

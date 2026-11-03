@@ -20,7 +20,7 @@
 }
 
 /* 7.1 */
-primary(struct expr **expp;)
+primary(struct expr** expp;)
     : IDENTIFIER
         { dot2expr(expp); }
     | %illegal
@@ -34,7 +34,7 @@ primary(struct expr **expp;)
         { (*expp)->ex_flags |= EX_PARENS; }
     ;
 
-secundary(struct expr **expp;)
+secundary(struct expr** expp;)
     : primary(expp)
     [
         index_pack(expp)
@@ -43,7 +43,7 @@ secundary(struct expr **expp;)
     ]*
     ;
 
-index_pack(struct expr **expp;)
+index_pack(struct expr** expp;)
     {
         struct expr* e1;
     }
@@ -53,7 +53,7 @@ index_pack(struct expr **expp;)
         { ch7bin(expp, '[', e1); }
     ;
 
-parameter_pack(struct expr **expp;)
+parameter_pack(struct expr** expp;)
     {
         struct expr* e1 = 0;
     }
@@ -63,7 +63,7 @@ parameter_pack(struct expr **expp;)
         { ch7bin(expp, '(', e1); }
     ;
 
-selection(struct expr **expp;)
+selection(struct expr** expp;)
     {
         int oper;
         struct idf* idf;
@@ -77,7 +77,7 @@ selection(struct expr **expp;)
         { ch7sel(expp, oper, idf); }
     ;
 
-parameter_list(struct expr **expp;)
+parameter_list(struct expr** expp;)
     {
         struct expr* e1 = 0;
     }
@@ -93,7 +93,7 @@ parameter_list(struct expr **expp;)
     ;
 
 /* 7.2 */
-postfixed(struct expr **expp;)
+postfixed(struct expr** expp;)
     {
         int oper;
     }
@@ -107,7 +107,7 @@ postfixed(struct expr **expp;)
 
 %first first_of_type_specifier, type_specifier;
 
-unary(struct expr **expp;)
+unary(struct expr** expp;)
     {
         struct type* tp;
         int oper;
@@ -126,7 +126,7 @@ unary(struct expr **expp;)
     | size_of(expp)
     ;
 
-size_of(struct expr **expp;)
+size_of(struct expr** expp;)
     {
         struct type* tp;
     }
@@ -178,7 +178,7 @@ assignment_expression	for level 14 and
 expression		for the most general expression
 */
 
-binary_expression(int maxrank; struct expr **expp;)
+binary_expression(int maxrank; struct expr** expp;)
     {
         int oper;
         struct expr* e1;
@@ -191,13 +191,13 @@ binary_expression(int maxrank; struct expr **expp;)
         operators out
         */
         binop(&oper)
-        binary_expression(rank_of(oper)-1, &e1)
+        binary_expression(rank_of(oper) - 1, &e1)
             { ch7bin(expp, oper, e1); }
     ]*
     ;
 
 /* 7.13 */
-conditional_expression(struct expr **expp;)
+conditional_expression(struct expr** expp;)
     /*	There is some unfortunate disagreement about what is allowed
     between the '?' and the ':' of a conditional_expression.
     Although the Ritchie compiler does not even allow
@@ -233,7 +233,7 @@ conditional_expression(struct expr **expp;)
     ;
 
 /* 7.14 */
-assignment_expression(struct expr **expp;)
+assignment_expression(struct expr** expp;)
     {
         int oper;
         struct expr* e1 = 0;
@@ -251,7 +251,7 @@ assignment_expression(struct expr **expp;)
     ;
 
 /* 7.15 */
-expression(struct expr **expp;)
+expression(struct expr** expp;)
     {
         struct expr* e1;
     }
@@ -263,7 +263,7 @@ expression(struct expr **expp;)
     ]*
     ;
 
-unop(int *oper;)
+unop(int* oper;)
     : [
         '*'
         | '&'
@@ -276,7 +276,7 @@ unop(int *oper;)
         { *oper = DOT; }
     ;
 
-postop(int *oper;)
+postop(int* oper;)
     : PLUSPLUS
         { *oper = POSTINCR; }
     | MINMIN
@@ -320,7 +320,7 @@ arithop
     | '|'
     ;
 
-binop(int *oper;)
+binop(int* oper;)
     : [
         arithop
         | relop
@@ -331,7 +331,7 @@ binop(int *oper;)
         { *oper = DOT; }
     ;
 
-asgnop(int *oper;)
+asgnop(int* oper;)
     : '='
         { *oper = DOT; }
     | '+' '='
@@ -356,7 +356,7 @@ asgnop(int *oper;)
         { *oper = ORAB; }
     ;
 
-constant(struct expr **expp;)
+constant(struct expr** expp;)
     : [
         INTEGER
         | FLOATING
@@ -365,12 +365,12 @@ constant(struct expr **expp;)
     ;
 
 /* 15 */
-constant_expression(struct expr **expp;)
+constant_expression(struct expr** expp;)
     : assignment_expression(expp)
         { chk_cst_expr(expp); }
     ;
 
-identifier(struct idf **idfp;)
+identifier(struct idf** idfp;)
     : [
         IDENTIFIER
         | TYPE_IDENTIFIER

@@ -43,7 +43,7 @@ REAL
 ;
 */
 
-qualident(struct node **p;)
+qualident(struct node** p;)
     {}
     : IDENT
         { *p = dot2leaf(Name); }
@@ -52,7 +52,7 @@ qualident(struct node **p;)
     ]*
     ;
 
-selector(struct node **pnd;)
+selector(struct node** pnd;)
     {
         struct node* nd;
     }
@@ -66,7 +66,7 @@ selector(struct node **pnd;)
         { (*pnd)->nd_IDF = dot.TOK_IDF; }
     ;
 
-ExpList(struct node **pnd;)
+ExpList(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -85,7 +85,7 @@ ExpList(struct node **pnd;)
     ]*
     ;
 
-ConstExpression(struct node **pnd;)
+ConstExpression(struct node** pnd;)
     {}
     : expression(pnd)
     /*
@@ -107,7 +107,7 @@ ConstExpression(struct node **pnd;)
         }
     ;
 
-expression(struct node **pnd;)
+expression(struct node** pnd;)
     {}
     : SimpleExpression(pnd)
     [
@@ -133,7 +133,7 @@ relation:
 ;
 */
 
-SimpleExpression(struct node **pnd;)
+SimpleExpression(struct node** pnd;)
     {
         register struct node* nd = 0;
     }
@@ -173,7 +173,7 @@ AddOperator:
 ;
 */
 
-term(struct node **pnd;)
+term(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -200,7 +200,7 @@ MulOperator:
 ;
 */
 
-factor(struct node **p;)
+factor(struct node** p;)
     {
         register struct node* nd;
         struct node* nd1;
@@ -256,7 +256,7 @@ factor(struct node **p;)
     factor(&((*p)->nd_RIGHT))
     ;
 
-bare_set(struct node **pnd;)
+bare_set(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -278,13 +278,13 @@ bare_set(struct node **pnd;)
     '}'
     ;
 
-ActualParameters(struct node **pnd;)
+ActualParameters(struct node** pnd;)
     : '('
     ExpList(pnd)?
     ')'
     ;
 
-element(struct node *nd;)
+element(struct node* nd;)
     : expression(&(nd->nd_RIGHT))
     [
         UPTO
@@ -298,12 +298,12 @@ element(struct node *nd;)
         }
     ;
 
-designator(struct node **pnd;)
+designator(struct node** pnd;)
     : qualident(pnd)
     designator_tail(pnd)
     ;
 
-designator_tail(struct node **pnd;)
+designator_tail(struct node** pnd;)
     : visible_designator_tail(pnd)
     [
         %persistent
@@ -314,7 +314,7 @@ designator_tail(struct node **pnd;)
     |
     ;
 
-visible_designator_tail(struct node **pnd;)
+visible_designator_tail(struct node** pnd;)
     {
         register struct node* nd = *pnd;
     }

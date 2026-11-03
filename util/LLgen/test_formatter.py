@@ -7,7 +7,8 @@ import subprocess
 import sys
 import tempfile
 
-from formatter import FormatError, ParseError, format_global_c, format_actions, format_source, parse
+from formatter import (FormatError, ParseError, c_top_level, format_global_c,
+                       format_actions, format_source, parse)
 
 
 def walk(node):
@@ -74,6 +75,53 @@ rule(int n; char *s;) /* parameters */
 
 
 class FormatterTests(unittest.TestCase):
+    def test_formal_parameter_separators_and_nested_declarators(self):
+        source = ('r(int *x; void (*callback)(int,char); char *s;) : '
+                  'symbol(f( 1 , 2 ), ";,", (int[]){1,2}); '
+                  's(int *x; char *s) : TOKEN;')
+        output = format_source(source)
+        self.assertIn('r(int* x; void (*callback)(int, char); char* s;)', output)
+        self.assertIn('s(int* x; char* s)', output)
+        self.assertIn('symbol(f(1, 2), ";,", (int[]) { 1, 2 })', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_parameter_comments_and_optional_trailing_semicolons(self):
+        source = ('r(int *x; // parameter comment\n int y; /* tail */) : '
+                  'symbol(";", f(1,2)); empty(): symbol();')
+        output = format_source(source)
+        for doc in (parse(source), parse(output)):
+            params = [t for t in doc.tokens if t.kind == 'c_parens'][0]
+            separators = [t for t, _, _ in c_top_level(params.text[1:-1]) if t in {';', ','}]
+            self.assertEqual(separators, [';', ';'])
+        self.assertIn('// parameter comment', output)
+        self.assertIn('/* tail */', output)
+        self.assertIn('empty()', output)
+        self.assertIn('symbol()', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_parenthesized_fragments_are_batched(self):
+        source = 'r(int *x;): %if(a&&b) symbol( x+1 ) [%while(n>0) next( x )];'
+        with patch('formatter.subprocess.run', wraps=subprocess.run) as run:
+            output = format_source(source)
+            self.assertEqual(run.call_count, 1)
+        self.assertIn('r(int* x;)', output)
+        self.assertIn('%if (a && b)', output)
+        self.assertIn('%while (n > 0)', output)
+        self.assertIn('symbol(x + 1)', output)
+        self.assertNotIn('LLGEN_PARENS', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_parenthesized_fragment_wrapping_uses_output_columns(self):
+        source = ('very_long_rule_name(' + '; '.join(['int parameter_name_' + str(i)
+                   for i in range(6)]) + ';) : %if (' +
+                  ' && '.join(['long_condition_' + str(i) for i in range(8)]) +
+                  ') long_nonterminal_name(' + ', '.join(['long_argument_' + str(i)
+                   for i in range(9)]) + ');')
+        output = format_source(source)
+        self.assertTrue(all(len(line) <= 100 for line in output.splitlines()))
+        self.assertIn('int parameter_name_5;', output)
+        self.assertEqual(format_source(output), output)
+
     def test_comment_indentation_comes_from_grammar_scope(self):
         source = ('r: A;\n\n             /*\n                   global comment\n'
                   '                          */\n\ns: A [\n'
@@ -121,12 +169,12 @@ class FormatterTests(unittest.TestCase):
         self.assertEqual(format_source(output), output)
 
     def test_local_declarations_are_expanded_and_batched_with_actions(self):
-        source = ('r(int * p;) {int * q; int values[]={1,2};} : A {f();}; '
+        source = ('r(int* p;) {int * q; int values[]={1,2};} : A {f();}; '
                   's {char * name;} : B;')
         with patch('formatter.subprocess.run', wraps=subprocess.run) as run:
             output = format_source(source)
-            self.assertEqual(run.call_count, 1)
-        self.assertIn('r(int * p;)\n    {\n        int* q;\n'
+            self.assertEqual(run.call_count, 2)
+        self.assertIn('r(int* p;)\n    {\n        int* q;\n'
                       '        int values[] = { 1, 2 };\n    }\n', output)
         self.assertIn('s\n    {\n        char* name;\n    }\n', output)
         self.assertIn('        { f(); }', output)
@@ -187,12 +235,12 @@ class FormatterTests(unittest.TestCase):
                          '        nested\n        | other\n    ]\n    ;\n')
         self.assertEqual(format_source(output), output)
 
-    def test_conditions_are_preserved_verbatim(self):
+    def test_conditions_are_formatted(self):
         condition = '(x  && f(")", /* keep */ (int[]){1, 2})\n || y)'
         source = ('r: %if ' + condition + ' A {hidden();} | '
                   '[%while (n-- > 0) B];')
         output = format_source(source)
-        self.assertIn('%if ' + condition, output)
+        self.assertIn('%if (x && f(")", /* keep */ (int[]) { 1, 2 }) || y)', output)
         self.assertIn('%while (n-- > 0)', output)
         self.assertIn('{ hidden(); }', output)
         self.assertEqual(format_source(output), output)
@@ -254,16 +302,16 @@ class FormatterTests(unittest.TestCase):
         self.assertIn('\n    {\n        int local;\n    }\n', output)
         self.assertEqual(format_source(output), output)
 
-    def test_global_c_uses_project_style_and_other_fragments_are_verbatim(self):
+    def test_c_fragments_use_project_style(self):
         source = ('{int * p; void f(){if(1){g();}}} '
                   'r(int * p;) {int * q;} : symbol( p ) {if(1){g();}}; '
                   '{int  another;}')
         output = format_source(source)
         self.assertTrue(output.startswith('{\n    int* p;\n    void f()\n    {\n'))
         self.assertIn('\n        if (1)\n        {\n            g();\n', output)
-        self.assertIn('r(int * p;)', output)
+        self.assertIn('r(int* p;)', output)
         self.assertIn('    {\n        int* q;\n    }', output)
-        self.assertIn('symbol( p )', output)
+        self.assertIn('symbol(p)', output)
         self.assertIn('        { if (1) { g(); } }', output)
         self.assertIn('{\n    int another;\n}', output)
         self.assertEqual(format_source(output), output)
@@ -325,13 +373,13 @@ class FormatterTests(unittest.TestCase):
         self.assertNotIn('\n\n', output)
         self.assertEqual(format_source(output), output)
 
-    def test_parameters_and_arguments_remain_verbatim(self):
+    def test_parameters_and_arguments_are_formatted(self):
         source = ('r(int x;\n char *s;) {\n\tint local;\n} :\n'
                   'call(x,\n s) {\n#if ENABLED\n\tf("}"); // keep\n#endif\n};')
         output = format_source(source)
-        self.assertIn('r(int x;\n char *s;)', output)
+        self.assertIn('r(int x; char* s;)', output)
         self.assertIn('    {\n        int local;\n    }', output)
-        self.assertIn('call(x,\n s)', output)
+        self.assertIn('call(x, s)', output)
         self.assertIn('            f("}"); // keep', output)
         self.assertIn('#if ENABLED', output)
         self.assertEqual(format_source(output), output)

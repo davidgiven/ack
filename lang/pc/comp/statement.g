@@ -98,7 +98,7 @@ SimpleStatement
     |
     /* Evidently this is the beginning of the changed part
      */
-    %if ( !options['s'] && !strcmp(dot.TOK_IDF->id_text, "assert") )
+    %if (!options['s'] && !strcmp(dot.TOK_IDF->id_text, "assert"))
     IDENT
         { line = LineNumber; }
     Expression(&expp)
@@ -217,7 +217,7 @@ WithStatement
         }
     ;
 
-RecordVariableList(struct node **pnd;)
+RecordVariableList(struct node** pnd;)
     {
         struct node* nd;
     }
@@ -237,7 +237,7 @@ RecordVariableList(struct node **pnd;)
     ]*
     ;
 
-RecordVariable(struct node **pnd;)
+RecordVariable(struct node** pnd;)
     : VariableAccess(pnd)
         { WithStat(*pnd); }
     ;
@@ -307,7 +307,7 @@ CaseStatement
         { CaseEnd(casend, exit_label); }
     ;
 
-CaseListElementTail(struct node **pnd; label exit_label;)
+CaseListElementTail(struct node** pnd; label exit_label;)
     :
     /* This is a new rule, all because of a silly semicolon
      */
@@ -321,7 +321,7 @@ CaseListElementTail(struct node **pnd; label exit_label;)
     ]
     ;
 
-CaseListElement(struct node **pnd; label exit_label;)
+CaseListElement(struct node** pnd; label exit_label;)
     : CaseConstantList(pnd)
     ':'
         {
@@ -428,7 +428,7 @@ ForStatement
 
 /* SPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIAL */
 /* ISO section 6.9, p. 132-136 */
-ReadParameterList(struct node **pnd;)
+ReadParameterList(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -455,7 +455,7 @@ ReadParameterList(struct node **pnd;)
     ')'
     ;
 
-WriteParameterList(struct node **pnd;)
+WriteParameterList(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -483,7 +483,7 @@ WriteParameterList(struct node **pnd;)
     ')'
     ;
 
-WriteParameter(struct node **pnd;)
+WriteParameter(struct node** pnd;)
     {
         register struct node* nd;
     }

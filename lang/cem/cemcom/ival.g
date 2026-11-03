@@ -51,7 +51,7 @@
 Upto now, the initialisation of a union is not allowed!
 */
 /* 7 */
-initial_value(struct type **tpp; struct expr **expp;)
+initial_value(struct type** tpp; struct expr** expp;)
     :
         { if (tpp) gen_tpcheck(tpp, 0); }
     [
@@ -73,7 +73,7 @@ initial_value(struct type **tpp; struct expr **expp;)
     ]
     ;
 
-initial_value_pack(struct type **tpp; struct expr **expp;)
+initial_value_pack(struct type** tpp; struct expr** expp;)
     : '{'
         {
             if (pack_level == 0)
@@ -99,7 +99,7 @@ initial_value_pack(struct type **tpp; struct expr **expp;)
     '}'
     ;
 
-initial_value_list(struct type **tpp; struct expr **expp;)
+initial_value_list(struct type** tpp; struct expr** expp;)
     {
         struct expr* e1;
         struct type** tpp2 = 0;

@@ -56,7 +56,7 @@ Program
     Module(df, &dummy)
     ;
 
-ProgramHeading(struct def **df;)
+ProgramHeading(struct def** df;)
     : PROGRAM IDENT
         {
             program = *df = new_def();

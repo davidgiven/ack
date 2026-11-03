@@ -27,7 +27,7 @@
     extern struct node* EmptyStatement;
 }
 
-statement(struct node **pnd;)
+statement(struct node** pnd;)
     {
         register struct node* nd;
         extern int return_occurred;
@@ -113,7 +113,7 @@ designator ActualParameters?
 ;
 */
 
-StatementSequence(struct node **pnd;)
+StatementSequence(struct node** pnd;)
     {
         struct node* nd;
         register struct node* nd1;
@@ -135,7 +135,7 @@ StatementSequence(struct node **pnd;)
     ]*
     ;
 
-IfStatement(struct node **pnd;)
+IfStatement(struct node** pnd;)
     {
         register struct node* nd;
     }
@@ -174,7 +174,7 @@ IfStatement(struct node **pnd;)
     END
     ;
 
-CaseStatement(struct node **pnd;)
+CaseStatement(struct node** pnd;)
     {
         register struct node* nd;
         struct type* tp = 0;
@@ -198,7 +198,7 @@ CaseStatement(struct node **pnd;)
     END
     ;
 
-case(struct node **pnd; struct type  **ptp;)
+case(struct node** pnd; struct type** ptp;)
     : [
         CaseLabelList(ptp, pnd)
         ':'
@@ -235,7 +235,7 @@ expression(&(nd->nd_RIGHT))
 ;
 */
 
-ForStatement(struct node **pnd;)
+ForStatement(struct node** pnd;)
     {
         register struct node *nd, *nd1;
     }
@@ -295,7 +295,7 @@ END
 ;
 */
 
-ReturnStatement(struct node **pnd;)
+ReturnStatement(struct node** pnd;)
     {
         register struct def* df = CurrentScope->sc_definedby;
         register struct type* tp = df->df_type ? ResultType(df->df_type) : 0;

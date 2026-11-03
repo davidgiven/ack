@@ -77,7 +77,7 @@ ModuleDeclaration
         }
     ;
 
-priority(struct node **prio;)
+priority(struct node** prio;)
     : [
         '['
         ConstExpression(prio)
@@ -92,7 +92,7 @@ priority(struct node **prio;)
     ]
     ;
 
-export(int *QUALflag; struct node **ExportList;)
+export(int* QUALflag; struct node** ExportList;)
     :
         {
             *ExportList = 0;

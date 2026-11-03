@@ -450,8 +450,7 @@ compound_statement
     : '{'
         { stack_level(); }
     [
-        %while ((DOT != IDENTIFIER && AHEAD != ':') ||
-		 (DOT == IDENTIFIER && AHEAD == IDENTIFIER))
+        %while ((DOT != IDENTIFIER && AHEAD != ':') || (DOT == IDENTIFIER && AHEAD == IDENTIFIER))
         /* >>> conflict on TYPE_IDENTIFIER, IDENTIFIER */
         declaration
             {

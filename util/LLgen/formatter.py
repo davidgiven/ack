@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""LLgen formatter using clang-format for C blocks and grammar comments.
+"""LLgen formatter using clang-format for embedded C and grammar comments.
 
 Run ``python3 util/LLgen/formatter.py file.g [file.g ...]`` to write formatted LLgen to
-stdout. Global C, local and action blocks and grammar comments use the project's
-.clang-format; other C fragments are preserved verbatim. clang-format must be on PATH.
+stdout. Embedded C and grammar comments use the project's .clang-format.
+clang-format must be on PATH.
 --tree prints the syntax tree
 as JSON; --tokens also includes whitespace and grammar comments.
 Files are formatted independently in argument order. Use --inplace / -i to
@@ -311,11 +311,11 @@ class FormatError(ValueError):
     pass
 
 
-def clang_format(source):
+def clang_format(source, extra_style=''):
     root = Path(__file__).resolve().parents[2]
     style = ('{BasedOnStyle: InheritParentConfig, NamespaceIndentation: All, '
              'IndentPPDirectives: BeforeHash, PPIndentWidth: 4, UseTab: Never, '
-             'FixNamespaceComments: false}')
+             'FixNamespaceComments: false' + extra_style + '}')
     try:
         result = subprocess.run(
             ['clang-format', f'--style={style}',
@@ -479,6 +479,94 @@ def format_comments(comments):
     return result
 
 
+def c_top_level(text):
+    """Yield nontrivia C tokens, treating nested delimiters as opaque tokens."""
+    lexer = Lexer(text)
+    while lexer.pos < len(text):
+        start = lexer.pos
+        ch = text[start]
+        if ch.isspace():
+            lexer.pos += 1
+            continue
+        if text.startswith(('/*', '//'), start):
+            lexer.comment()
+            continue
+        if ch in "\"'":
+            lexer.quoted()
+        elif ch in '({[':
+            lexer.c_fragment()
+        else:
+            lexer.pos += 1
+        yield text[start:lexer.pos], start, lexer.pos
+
+
+def format_parentheses(fragments):
+    """Batch conditions, actual arguments and LLgen formal parameter lists.
+
+    Dummy names match the emitted prefix width, so clang-format sees the final
+    opening-parenthesis column. Formal parameters temporarily use C separators.
+    """
+    if not fragments:
+        return {}
+    wrappers = []
+    metadata = {}
+    for index, text, role, level, width in fragments:
+        name = 'P' * max(1, width)
+        content = text[1:-1]
+        separators = []
+        trailing = False
+        if role == 'c_parameters':
+            tokens = list(c_top_level(content))
+            trailing = bool(tokens and tokens[-1][0] == ';')
+            trailing_pos = tokens[-1][1] if trailing else -1
+            replacements = []
+            for token, start, end in tokens:
+                if token in {';', ','}:
+                    if start == trailing_pos:
+                        replacements.append((start, end, ''))
+                    else:
+                        separators.append(token)
+                        replacements.append((start, end, ','))
+            for start, end, replacement in reversed(replacements):
+                content = content[:start] + replacement + content[end:]
+        depth = level if role == 'c_parameters' else max(0, level - 1)
+        namespaces = ''.join(f'namespace LLgenParen{index}_{n}\n{{\n'
+                             for n in range(depth))
+        if role == 'c_parameters':
+            code = f'void\n{name}({content});\n'
+        else:
+            code = f'void LLgenParenBody{index}()\n{{\n{name}({content});\n}}\n'
+        wrappers.append(f'// LLGEN_PARENS_{index}\n' + namespaces + code + '}\n' * depth)
+        metadata[index] = (name, separators, trailing)
+    formatted = clang_format(''.join(wrappers), ', AlwaysBreakAfterReturnType: All')
+    result = {}
+    for index, _, role, _, _ in fragments:
+        name, separators, trailing = metadata[index]
+        marker = re.search(rf'^\s*// LLGEN_PARENS_{index}\s*$', formatted, re.MULTILINE)
+        if not marker:
+            raise FormatError('clang-format did not preserve the parameter wrapper')
+        match = re.search(rf'\b{name}\s*\(', formatted[marker.end():])
+        if not match:
+            raise FormatError('clang-format did not preserve the parameter wrapper')
+        start = marker.end() + match.end() - 1
+        lexer = Lexer(formatted)
+        lexer.pos = start
+        lexer.c_fragment()
+        content = formatted[start + 1:lexer.pos - 1]
+        if role == 'c_parameters':
+            commas = [(a, b) for token, a, b in c_top_level(content) if token == ',']
+            if len(commas) != len(separators):
+                raise FormatError('clang-format changed the parameter separators')
+            for (a, b), separator in reversed(list(zip(commas, separators))):
+                content = content[:a] + separator + content[b:]
+            if trailing:
+                tokens = list(c_top_level(content))
+                end = tokens[-1][2] if tokens else 0
+                content = content[:end] + ';' + content[end:]
+        result[index] = '(' + content + ')'
+    return result
+
+
 class Formatter:
     """Lay out grammar tokens using the tree and format C blocks and comments.
 
@@ -605,6 +693,7 @@ class Formatter:
         comments = format_comments([(i, self.tokens[i].text, level)
                                     for i, level in self.comment_levels().items()])
         comment_gaps = self.comment_gaps()
+        parentheses = []
         previous = None
         for i, token in enumerate(self.tokens):
             if token.kind == 'whitespace':
@@ -631,8 +720,13 @@ class Formatter:
                 continue
             role = self.roles.get(i)
             if role:
-                text = (format_global_c(token.text) if role == 'c_global' else
-                        blocks[i] if role in {'c_action', 'c_locals'} else token.text)
+                if role in {'c_condition', 'c_parameters', 'c_arguments'}:
+                    space = role == 'c_condition'
+                    prefix = self.line.rsplit('\n', 1)[-1].lstrip(' ')
+                    parentheses.append((i, token.text, role, self.level, len(prefix) + space))
+                    text = f'@@LLGEN_PARENS_{i}@@'
+                else:
+                    text = (format_global_c(token.text) if role == 'c_global' else blocks[i])
                 self.write(text, space=role not in {'c_parameters', 'c_arguments'})
             else:
                 attach = token.kind in {',', ';', '*', '+', '?'} or (
@@ -641,11 +735,14 @@ class Formatter:
             previous = token.kind
         self.flush()
         self.lines.extend([''] * comment_gaps.get(len(self.tokens), 0))
-        return '\n'.join(self.lines) + ('\n' if self.lines else '')
+        output = '\n'.join(self.lines) + ('\n' if self.lines else '')
+        for index, text in format_parentheses(parentheses).items():
+            output = output.replace(f'@@LLGEN_PARENS_{index}@@', text, 1)
+        return output
 
 
 def format_document(document):
-    """Format LLgen, comments and C blocks; retain conditions and parameter lists."""
+    """Format LLgen, grammar comments and all embedded C fragments."""
     return Formatter(document).format()
 
 
