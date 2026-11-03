@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""LLgen formatter using clang-format for global C blocks.
+"""LLgen formatter using clang-format for global C, local and action blocks.
 
 Run ``python3 util/LLgen/formatter.py file.g [file.g ...]`` to write formatted LLgen to
-stdout. Global C blocks use the project's .clang-format; other C fragments
-are preserved verbatim. clang-format must be on PATH to format global blocks.
+stdout. Global C, local and action blocks use the project's .clang-format; other C
+fragments are preserved verbatim. clang-format must be on PATH.
 --tree prints the syntax tree
 as JSON; --tokens also includes whitespace and grammar comments.
 Files are formatted independently in argument order. Use --inplace / -i to
@@ -311,14 +311,8 @@ class FormatError(ValueError):
     pass
 
 
-def format_global_c(text):
-    """Use a temporary namespace and conditional to indent code and directives.
-
-    Both wrappers are removed after formatting. clang-format sees the final
-    indentation while making line-wrapping decisions, including for macros.
-    """
+def clang_format(source):
     root = Path(__file__).resolve().parents[2]
-    wrapped = '#if 1\nnamespace LLgenGlobal\n{\n' + text[1:-1] + '\n}\n#endif\n'
     style = ('{BasedOnStyle: InheritParentConfig, NamespaceIndentation: All, '
              'IndentPPDirectives: BeforeHash, PPIndentWidth: 4, UseTab: Never, '
              'FixNamespaceComments: false}')
@@ -326,14 +320,25 @@ def format_global_c(text):
         result = subprocess.run(
             ['clang-format', f'--style={style}',
              f'--assume-filename={root / "llgen-global.cpp"}'],
-            input=wrapped.encode('utf-8', 'surrogateescape'),
+            input=source.encode('utf-8', 'surrogateescape'),
             capture_output=True, check=True)
     except FileNotFoundError as error:
         raise FormatError('clang-format executable not found on PATH') from error
     except subprocess.CalledProcessError as error:
         message = error.stderr.decode('utf-8', 'replace').strip()
         raise FormatError(f'clang-format failed: {message}') from error
-    lines = result.stdout.decode('utf-8', 'surrogateescape').splitlines(keepends=True)
+    return result.stdout.decode('utf-8', 'surrogateescape')
+
+
+def format_global_c(text):
+    """Use a temporary namespace and conditional to indent code and directives.
+
+    Both wrappers are removed after formatting. clang-format sees the final
+    indentation while making line-wrapping decisions, including for macros.
+    """
+    wrapped = '#if 1\nnamespace LLgenGlobal\n{\n' + text[1:-1] + '\n}\n#endif\n'
+    formatted = clang_format(wrapped)
+    lines = formatted.splitlines(keepends=True)
     if ([line.rstrip('\r\n') for line in lines[:3]] !=
             ['#if 1', 'namespace LLgenGlobal', '{'] or
             [line.rstrip('\r\n') for line in lines[-2:]] != ['}', '#endif']):
@@ -342,12 +347,117 @@ def format_global_c(text):
     return '{\n' + (content + '\n' if content else '') + '}'
 
 
+def single_c_statement(text):
+    """Recognize a complete single statement for compact action layout.
+
+    This counts statement boundaries, not semicolons inside delimiters. Unknown
+    or incomplete constructs stay multiline. Line comments, multiline comments,
+    continued literals and directives stay multiline to preserve their meaning.
+    """
+    lexer = Lexer(text)
+    tokens = []
+    while lexer.pos < len(text):
+        ch = text[lexer.pos]
+        if text.startswith(('//', '\\\n', '\\\r'), lexer.pos) or ch == '#':
+            return False
+        if text.startswith('/*', lexer.pos):
+            start = lexer.pos
+            lexer.comment()
+            if '\n' in text[start:lexer.pos] or '\r' in text[start:lexer.pos]:
+                return False
+        elif ch.isspace():
+            lexer.pos += 1
+        elif ch in "\"'":
+            start = lexer.pos
+            lexer.quoted()
+            if '\n' in text[start:lexer.pos] or '\r' in text[start:lexer.pos]:
+                return False
+            tokens.append(text[start:lexer.pos])
+        else:
+            match = re.match(r'[A-Za-z_][A-Za-z_0-9]*', text[lexer.pos:])
+            token = match.group() if match else ch
+            tokens.append(token)
+            lexer.pos += len(token)
+
+    def balanced(pos):
+        close = {'(': ')', '[': ']', '{': '}'}[tokens[pos]]
+        pos += 1
+        while pos < len(tokens) and tokens[pos] != close:
+            pos = balanced(pos) if tokens[pos] in {'(', '[', '{'} else pos + 1
+        if pos == len(tokens):
+            raise ValueError('unclosed delimiter')
+        return pos + 1
+
+    def statement(pos):
+        head = tokens[pos]
+        if head == '{':
+            return balanced(pos)
+        if head in {'if', 'for', 'while', 'switch'}:
+            if tokens[pos + 1] != '(':
+                raise ValueError('expected condition')
+            end = statement(balanced(pos + 1))
+            if head == 'if' and end < len(tokens) and tokens[end] == 'else':
+                end = statement(end + 1)
+            return end
+        if head == 'do':
+            end = statement(pos + 1)
+            if tokens[end:end + 2] != ['while', '(']:
+                raise ValueError('expected while')
+            end = balanced(end + 1)
+            if tokens[end] != ';':
+                raise ValueError('expected semicolon')
+            return end + 1
+        while pos < len(tokens):
+            if tokens[pos] == ';':
+                return pos + 1
+            pos = balanced(pos) if tokens[pos] in {'(', '[', '{'} else pos + 1
+        raise ValueError('expected statement terminator')
+
+    try:
+        return bool(tokens) and statement(0) == len(tokens)
+    except (ValueError, IndexError):
+        return False
+
+
+def format_actions(actions, *, multiline=()):
+    """Batch function-scope blocks; indices in multiline keep expanded layout."""
+    if not actions:
+        return {}
+    wrappers = []
+    for index, text, level in actions:
+        wrappers.append('#if 1\n' +
+                        ''.join(f'namespace LLgenAction{index}_{n}\n{{\n'
+                                for n in range(level)) +
+                        f'void LLgenActionBody{index}()\n{{\n' +
+                        '    ' * (level + 1) + text[1:-1].strip() + '\n}\n' +
+                        '}\n' * level + '#endif\n')
+    formatted = clang_format(''.join(wrappers))
+    result = {}
+    for index, text, level in actions:
+        match = re.search(rf'\bvoid LLgenActionBody{index}\(\)\s*\{{', formatted)
+        if not match:
+            raise FormatError('clang-format did not preserve the action wrapper')
+        start = match.end() - 1
+        lexer = Lexer(formatted)
+        lexer.pos = start
+        lexer.c_fragment()
+        block = formatted[start:lexer.pos]
+        if not text[1:-1].strip():
+            block = '{}'
+        elif index not in multiline and single_c_statement(text[1:-1]):
+            compact = ' '.join(line.strip() for line in block.splitlines())
+            if len(compact) + 4 * level <= 100:
+                block = compact
+        result[index] = block
+    return result
+
+
 class Formatter:
     """Lay out grammar tokens using the tree; retain grammar comments verbatim.
 
     Layout is attached to token indices so comments between syntax nodes are
-    never lost. Embedded C is represented by a single token; only global
-    blocks are reformatted. The input Document remains unchanged.
+    never lost. Embedded C is represented by a single token; global, local and
+    action blocks are reformatted. The input Document remains unchanged.
     """
 
     def __init__(self, document):
@@ -445,6 +555,10 @@ class Formatter:
 
     def format(self):
         self.layout(self.document.tree)
+        blocks = format_actions(
+            [(i, self.tokens[i].text, self.breaks[i][0])
+             for i, role in self.roles.items() if role in {'c_action', 'c_locals'}],
+            multiline={i for i, role in self.roles.items() if role == 'c_locals'})
         comment_gaps = self.comment_gaps()
         previous = None
         for i, token in enumerate(self.tokens):
@@ -473,7 +587,8 @@ class Formatter:
                 continue
             role = self.roles.get(i)
             if role:
-                text = format_global_c(token.text) if role == 'c_global' else token.text
+                text = (format_global_c(token.text) if role == 'c_global' else
+                        blocks[i] if role in {'c_action', 'c_locals'} else token.text)
                 self.write(text, space=role not in {'c_parameters', 'c_arguments'})
             else:
                 attach = token.kind in {',', ';', '*', '+', '?'} or (
@@ -486,7 +601,7 @@ class Formatter:
 
 
 def format_document(document):
-    """Format LLgen and global C blocks, retaining other embedded C verbatim."""
+    """Format LLgen and C blocks, retaining conditions and parameter lists verbatim."""
     return Formatter(document).format()
 
 

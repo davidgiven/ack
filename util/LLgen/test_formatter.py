@@ -7,7 +7,7 @@ import subprocess
 import sys
 import tempfile
 
-from formatter import FormatError, ParseError, format_global_c, format_source, parse
+from formatter import FormatError, ParseError, format_global_c, format_actions, format_source, parse
 
 
 def walk(node):
@@ -74,14 +74,66 @@ rule(int n; char *s;) /* parameters */
 
 
 class FormatterTests(unittest.TestCase):
+    def test_local_declarations_are_expanded_and_batched_with_actions(self):
+        source = ('r(int * p;) {int * q; int values[]={1,2};} : A {f();}; '
+                  's {char * name;} : B;')
+        with patch('formatter.subprocess.run', wraps=subprocess.run) as run:
+            output = format_source(source)
+            self.assertEqual(run.call_count, 1)
+        self.assertIn('r(int * p;)\n    {\n        int* q;\n'
+                      '        int values[] = { 1, 2 };\n    }\n', output)
+        self.assertIn('s\n    {\n        char* name;\n    }\n', output)
+        self.assertIn('        { f(); }', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_single_and_multiple_statement_actions(self):
+        output = format_source('r: A {x=1;} B {x=1;y=2;} [C {f();g();}];')
+        self.assertIn('        { x = 1; }\n', output)
+        self.assertIn('        {\n            x = 1;\n            y = 2;\n        }', output)
+        self.assertIn('            {\n                f();\n                g();\n            }', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_single_control_statement_and_delimiters(self):
+        output = format_source(
+            'r: {for(i=0;i<3;i++){f();}} {if(x) f(); else g();} '
+            '{puts("; // }");} {int a[]={1,2};} {for(;;) f(); g();};')
+        self.assertIn('{ for (i = 0; i < 3; i++) { f(); } }', output)
+        self.assertIn('{ if (x) f(); else g(); }', output)
+        self.assertIn('{ puts("; // }"); }', output)
+        self.assertIn('{ int a[] = { 1, 2 }; }', output)
+        self.assertIn('        {\n            for (;;)', output)
+        self.assertEqual(format_source(output), output)
+
+    def test_action_comments_and_long_statements_keep_multiline_layout(self):
+        long_call = 'f(' + ', '.join(['very_long_argument'] * 10) + ');'
+        output = format_source('r: { // keep\nf(); } {' + long_call + '};')
+        self.assertIn('        {\n            // keep\n            f();\n        }', output)
+        self.assertTrue(all(len(line) <= 100 for line in output.splitlines()))
+        self.assertEqual(format_source(output), output)
+
+    def test_actions_are_batched_in_one_clang_format_call(self):
+        with patch('formatter.subprocess.run', wraps=subprocess.run) as run:
+            output = format_source('r: {f();} {g();h();} [A {k();}];')
+            self.assertEqual(run.call_count, 1)
+        self.assertNotIn('LLgenAction', output)
+        self.assertNotIn('#if 1', output)
+
+    def test_action_comments_and_leading_whitespace_are_stable(self):
+        source = ('r: {f(); /* keep */} {  \n f();g(); } '
+                  '{ /* explains code */\n#ifdef FEATURE\nf();\n#endif\ng(); };')
+        output = format_source(source)
+        self.assertIn('{ f(); /* keep */ }', output)
+        self.assertIn('            /* explains code */', output)
+        self.assertEqual(format_source(output), output)
+
     def test_layout(self):
         self.assertEqual(
-            format_source('%token A,B; r(int x;) {int y;}: [%while(x) %persistent A(x)| B]*3 {f();}|;'),
+            format_source('%token A,B; r(int x;) {int y;}: [%while(x) %persistent A(x)| B]*3 { f(); }|;'),
             "%token A, B;\n\nr(int x;)\n"
-            "    {int y;}\n    : [\n"
+            "    {\n        int y;\n    }\n    : [\n"
             "        %while (x)\n        %persistent\n"
             "        A(x)\n        | B\n    ]*3\n"
-            "        {f();}\n    |\n    ;\n")
+            "        { f(); }\n    |\n    ;\n")
 
     def test_alternative_introducers_share_first_symbol(self):
         output = format_source('r: first second | third | [nested | other];')
@@ -96,7 +148,7 @@ class FormatterTests(unittest.TestCase):
         output = format_source(source)
         self.assertIn('%if ' + condition, output)
         self.assertIn('%while (n-- > 0)', output)
-        self.assertIn('{hidden();}', output)
+        self.assertIn('{ hidden(); }', output)
         self.assertEqual(format_source(output), output)
 
     def test_plain_symbols_group_and_parameterised_symbols_stand_alone(self):
@@ -109,10 +161,10 @@ class FormatterTests(unittest.TestCase):
         self.assertEqual(format_source(output), output)
 
     def test_operators_comments_and_actions_separate_symbol_runs(self):
-        source = 'r: A B? C D /* keep */ E F {f();} G H [I J | K L]+ M N;'
+        source = 'r: A B? C D /* keep */ E F { f(); } G H [I J | K L]+ M N;'
         output = format_source(source)
         self.assertIn(': A\n    B?\n    C D\n', output)
-        self.assertIn('/* keep */\n    E F\n        {f();}\n    G H\n', output)
+        self.assertIn('/* keep */\n    E F\n        { f(); }\n    G H\n', output)
         self.assertIn('        I J\n        | K L\n    ]+\n    M N\n', output)
         self.assertEqual(format_source(output), output)
 
@@ -126,8 +178,13 @@ class FormatterTests(unittest.TestCase):
         before = parse(source)
         after = parse(output)
         globals_ = {n.start for n in before.tree.children if n.kind == 'c_global'}
+        actions = {n.start for n in walk(before.tree) if n.kind == 'c_action'}
+        locals_ = {n.start for n in walk(before.tree) if n.kind == 'c_locals'}
         for kind in ('comment', 'line_directive', 'c_block', 'c_parens'):
-            self.assertEqual([format_global_c(t.text) if i in globals_ else t.text
+            self.assertEqual([format_global_c(t.text) if i in globals_ else
+                              format_actions([(i, t.text, 2)])[i] if i in actions else
+                              format_actions([(i, t.text, 1)], multiline={i})[i]
+                              if i in locals_ else t.text
                               for i, t in enumerate(before.tokens) if t.kind == kind],
                              [t.text for t in after.tokens if t.kind == kind])
         self.assertIn('secret', output)
@@ -148,7 +205,7 @@ class FormatterTests(unittest.TestCase):
         self.assertEqual(actions, ['    ' * depth + '{}'
                                    for depth in (2, 3, 4)])
         self.assertTrue(output.startswith('{\n    int global;\n}\n'))
-        self.assertIn('\n    {int local;}\n', output)
+        self.assertIn('\n    {\n        int local;\n    }\n', output)
         self.assertEqual(format_source(output), output)
 
     def test_global_c_uses_project_style_and_other_fragments_are_verbatim(self):
@@ -159,9 +216,9 @@ class FormatterTests(unittest.TestCase):
         self.assertTrue(output.startswith('{\n    int* p;\n    void f()\n    {\n'))
         self.assertIn('\n        if (1)\n        {\n            g();\n', output)
         self.assertIn('r(int * p;)', output)
-        self.assertIn('    {int * q;}', output)
+        self.assertIn('    {\n        int* q;\n    }', output)
         self.assertIn('symbol( p )', output)
-        self.assertIn('        {if(1){g();}}', output)
+        self.assertIn('        { if (1) { g(); } }', output)
         self.assertIn('{\n    int another;\n}', output)
         self.assertEqual(format_source(output), output)
 
@@ -222,16 +279,15 @@ class FormatterTests(unittest.TestCase):
         self.assertNotIn('\n\n', output)
         self.assertEqual(format_source(output), output)
 
-    def test_multiline_c_is_not_reindented_or_rewritten(self):
-        source = ('{\n#include "header.h"\nint  global;\n}\n'
-                  'r(int x;\n char *s;) {\n\tint local;\n} :\n'
+    def test_parameters_and_arguments_remain_verbatim(self):
+        source = ('r(int x;\n char *s;) {\n\tint local;\n} :\n'
                   'call(x,\n s) {\n#if ENABLED\n\tf("}"); // keep\n#endif\n};')
         output = format_source(source)
-        self.assertIn('        {\n#if ENABLED\n\tf("}"); // keep\n#endif\n}', output)
-        self.assertEqual([(t.kind, format_global_c(t.text) if t.start == 0 else t.text)
-                          for t in parse(source).tokens if t.kind != 'whitespace'],
-                         [(t.kind, t.text) for t in parse(output).tokens
-                          if t.kind != 'whitespace'])
+        self.assertIn('r(int x;\n char *s;)', output)
+        self.assertIn('    {\n        int local;\n    }', output)
+        self.assertIn('call(x,\n s)', output)
+        self.assertIn('            f("}"); // keep', output)
+        self.assertIn('#if ENABLED', output)
         self.assertEqual(format_source(output), output)
 
 

@@ -82,53 +82,64 @@ initial_value(struct type **tpp; struct expr **expp;)
             { if (pack_level == 0) gen_error = 0; }
         assignment_expression(expp)
             {
-#ifdef	LINT
-			lint_expr(*expp, USED);
-#endif	/* LINT */
-			if ((*expp)->ex_type->tp_fund == ARRAY)
-				array2pointer(*expp);
-			if (tpp) {
-				if (level >= L_LOCAL
-				    || is_ld_cst(*expp)
-				    || is_fp_cst(*expp)
-				    || (*expp)->ex_class == String) {
-					gen_simple_exp(tpp, expp);
-					free_expression(*expp);
-					*expp = 0;
-				} else {
-					expr_error(*expp,"illegal initialization");
-					free_expression(*expp);
-					*expp = 0;
-				}
-			}
-		}
+    #ifdef LINT
+                lint_expr(*expp, USED);
+    #endif /* LINT */
+                if ((*expp)->ex_type->tp_fund == ARRAY)
+                    array2pointer(*expp);
+                if (tpp)
+                {
+                    if (level >= L_LOCAL || is_ld_cst(*expp) || is_fp_cst(*expp)
+                        || (*expp)->ex_class == String)
+                    {
+                        gen_simple_exp(tpp, expp);
+                        free_expression(*expp);
+                        *expp = 0;
+                    }
+                    else
+                    {
+                        expr_error(*expp, "illegal initialization");
+                        free_expression(*expp);
+                        *expp = 0;
+                    }
+                }
+            }
         | initial_value_pack(tpp, expp)
     ]
     ;
 
 initial_value_pack(struct type **tpp; struct expr **expp;)
     : '{'
-        { if (pack_level == 0) gen_error = 0; pack_level++; }
+        {
+            if (pack_level == 0)
+                gen_error = 0;
+            pack_level++;
+        }
     initial_value_list(tpp, expp)
-        { pack_level--;
-			  if (!pack_level) {
-				while (p_stack) {
-					struct e_stack *p = p_stack->next;
+        {
+            pack_level--;
+            if (!pack_level)
+            {
+                while (p_stack)
+                {
+                    struct e_stack* p = p_stack->next;
 
-					free_e_stack(p_stack);
-					p_stack = p;
-				}
-			  }
-			  if (pack_level < gen_error) gen_error = 0;
-			}
+                    free_e_stack(p_stack);
+                    p_stack = p;
+                }
+            }
+            if (pack_level < gen_error)
+                gen_error = 0;
+        }
     '}'
     ;
 
 initial_value_list(struct type **tpp; struct expr **expp;)
-    { struct expr *e1;
-	  struct type **tpp2 = 0;
-	  int err_flag = gen_error;
-	}
+    {
+        struct expr* e1;
+        struct type** tpp2 = 0;
+        int err_flag = gen_error;
+    }
     :
         { if (tpp) tpp2 = gen_tphead(tpp, 0); }
     initial_value(tpp2, &e1)
@@ -141,7 +152,7 @@ initial_value_list(struct type **tpp; struct expr **expp;)
         initial_value(tpp2, &e1)
             { if (!tpp) init_expression(&expp, e1); }
     ]*
-        { if (tpp && ! err_flag) gen_tpend(); }
+        { if (tpp && !err_flag) gen_tpend(); }
     ','?
     /* optional trailing comma */
     ;

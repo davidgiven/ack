@@ -70,19 +70,18 @@
 
 control_if_expression
     {
-		struct expr *exprX;
-	}
+        struct expr* exprX;
+    }
     : constant_expression(&exprX)
         {
-#ifndef NOPP
-			struct expr *expr = exprX;
-			if (expr->ex_flags & EX_SIZEOF)
-				expr_error(expr,
-					"sizeof not allowed in preprocessor");
-			ifval = expr->VL_VALUE;
-			free_expression(expr);
-#endif /* NOPP */
-		}
+    #ifndef NOPP
+            struct expr* expr = exprX;
+            if (expr->ex_flags & EX_SIZEOF)
+                expr_error(expr, "sizeof not allowed in preprocessor");
+            ifval = expr->VL_VALUE;
+            free_expression(expr);
+    #endif /* NOPP */
+        }
     ;
 
     /* 10 */
@@ -91,7 +90,7 @@ program
         %persistent
         external_definition
     ]*
-        {unstack_world();}
+        { unstack_world(); }
     ;
 
     /*	A C identifier definition is remarkable in that it formulates
@@ -115,30 +114,30 @@ program
 
 external_definition
     {
-		struct decspecs Ds;
-		struct declarator Dc;
-	}
+        struct decspecs Ds;
+        struct declarator Dc;
+    }
     :
         {
-		Ds = null_decspecs;
-		Dc = null_declarator;
-	}
+            Ds = null_decspecs;
+            Dc = null_declarator;
+        }
     ext_decl_specifiers(&Ds)
     [
         declarator(&Dc)
             {
-			declare_idf(&Ds, &Dc, level);
-#ifdef	LINT
-			lint_ext_def(Dc.dc_idf, Ds.ds_sc);
-#endif	/* LINT */
-		}
+                declare_idf(&Ds, &Dc, level);
+    #ifdef LINT
+                lint_ext_def(Dc.dc_idf, Ds.ds_sc);
+    #endif /* LINT */
+            }
         [
             function(&Ds, &Dc)
             | non_function(&Ds, &Dc)
         ]
         | ';'
     ]
-        {remove_declarator(&Dc);}
+        { remove_declarator(&Dc); }
     | asm_statement
     /* top level, would you believe */
     ;
@@ -148,22 +147,22 @@ ext_decl_specifiers(struct decspecs *ds;)
     /* the thin ice in  R.M. 11.1 */
     decl_specifiers(ds)
     | empty
-        {do_decspecs(ds);}
+        { do_decspecs(ds); }
     ;
 
 non_function(struct decspecs *ds; struct declarator *dc;)
     :
-        {reject_params(dc);}
+        { reject_params(dc); }
     [
         initializer(dc->dc_idf, ds->ds_sc)
         |
-            { code_declaration(dc->dc_idf, (struct expr *) 0, level, ds->ds_sc); }
+            { code_declaration(dc->dc_idf, (struct expr*)0, level, ds->ds_sc); }
     ]
         {
-#ifdef	LINT
-		lint_non_function_decl(ds, dc);
-#endif	/* LINT */
-	}
+    #ifdef LINT
+            lint_non_function_decl(ds, dc);
+    #endif /* LINT */
+        }
     [
         ','
         init_declarator(ds)
@@ -174,39 +173,40 @@ non_function(struct decspecs *ds; struct declarator *dc;)
     /* 10.1 */
 function(struct decspecs *ds; struct declarator *dc;)
     {
-		arith fbytes;
-	}
+        arith fbytes;
+    }
     :
-        {	struct idf *idf = dc->dc_idf;
-#ifdef	LINT
-		lint_start_function();
-#endif	/* LINT */
-		init_idf(idf);
-		stack_level();		/* L_FORMAL1 declarations */
-		declare_params(dc);
-		begin_proc(ds, idf);	/* sets global function info */
-		stack_level();		/* L_FORMAL2 declarations */
-	}
+        {
+            struct idf* idf = dc->dc_idf;
+    #ifdef LINT
+            lint_start_function();
+    #endif /* LINT */
+            init_idf(idf);
+            stack_level(); /* L_FORMAL1 declarations */
+            declare_params(dc);
+            begin_proc(ds, idf); /* sets global function info */
+            stack_level(); /* L_FORMAL2 declarations */
+        }
     declaration*
         {
-		declare_formals(&fbytes);
-#ifdef	LINT
-		lint_formals();
-#endif	/* LINT */
-	}
+            declare_formals(&fbytes);
+    #ifdef LINT
+            lint_formals();
+    #endif /* LINT */
+        }
     compound_statement
         {
-		end_proc(fbytes);
-#ifdef	LINT
-		lint_implicit_return();
-#endif	/* LINT */
-		unstack_level();	/* L_FORMAL2 declarations */
-#ifdef	LINT
-		lint_end_formals();
-#endif	/* LINT */
-		unstack_level();	/* L_FORMAL1 declarations */
-#ifdef	LINT
-		lint_end_function();
-#endif	/* LINT */
-	}
+            end_proc(fbytes);
+    #ifdef LINT
+            lint_implicit_return();
+    #endif /* LINT */
+            unstack_level(); /* L_FORMAL2 declarations */
+    #ifdef LINT
+            lint_end_formals();
+    #endif /* LINT */
+            unstack_level(); /* L_FORMAL1 declarations */
+    #ifdef LINT
+            lint_end_function();
+    #endif /* LINT */
+        }
     ;

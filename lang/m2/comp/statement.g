@@ -29,9 +29,9 @@
 
 statement(struct node **pnd;)
     {
-	register struct node *nd;
-	extern int return_occurred;
-}
+        register struct node* nd;
+        extern int return_occurred;
+    }
     :
     /*
 	 * This part is not in the reference grammar. The reference grammar
@@ -40,17 +40,19 @@ statement(struct node **pnd;)
 	 */
     designator(pnd)
     [
-            { nd = dot2node(Stat, *pnd, NULLNODE);
-				  nd->nd_symb = '(';
-				  nd->nd_lineno = (*pnd)->nd_lineno;
-				}
+            {
+                nd = dot2node(Stat, *pnd, NULLNODE);
+                nd->nd_symb = '(';
+                nd->nd_lineno = (*pnd)->nd_lineno;
+            }
         ActualParameters(&(nd->nd_RIGHT))?
         | [
             BECOMES
             | %erroneous '='
-                { error("':=' expected instead of '='");
-				  DOT = BECOMES;
-				}
+                {
+                    error("':=' expected instead of '='");
+                    DOT = BECOMES;
+                }
         ]
             { nd = dot2node(Stat, *pnd, NULLNODE); }
         expression(&(nd->nd_RIGHT))
@@ -87,9 +89,11 @@ statement(struct node **pnd;)
     StatementSequence(&(nd->nd_RIGHT))
     END
     | EXIT
-        { if (!loopcount) error("EXIT not in a LOOP");
-			  *pnd = dot2leaf(Stat);
-			}
+        {
+            if (!loopcount)
+                error("EXIT not in a LOOP");
+            *pnd = dot2leaf(Stat);
+        }
     | ReturnStatement(pnd)
         { return_occurred = 1; }
     |
@@ -111,49 +115,55 @@ ProcedureCall:
 
 StatementSequence(struct node **pnd;)
     {
-	struct node *nd;
-	register struct node *nd1;
-}
+        struct node* nd;
+        register struct node* nd1;
+    }
     : statement(pnd)
     [
         %persistent
         ';'
         statement(&nd)
-            { if (nd != EmptyStatement) {
-			  	nd1 = dot2node(Link, *pnd, nd);
-			  	*pnd = nd1;
-			  	nd1->nd_symb = ';';
-			  	pnd = &(nd1->nd_RIGHT);
-			  }
-			}
+            {
+                if (nd != EmptyStatement)
+                {
+                    nd1 = dot2node(Link, *pnd, nd);
+                    *pnd = nd1;
+                    nd1->nd_symb = ';';
+                    pnd = &(nd1->nd_RIGHT);
+                }
+            }
     ]*
     ;
 
 IfStatement(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : IF
-        { nd = dot2leaf(Stat);
-			  *pnd = nd;
-			}
+        {
+            nd = dot2leaf(Stat);
+            *pnd = nd;
+        }
     expression(&(nd->nd_LEFT))
     THEN
-        { nd->nd_RIGHT = dot2leaf(Link);
-			  nd = nd->nd_RIGHT;
-			}
+        {
+            nd->nd_RIGHT = dot2leaf(Link);
+            nd = nd->nd_RIGHT;
+        }
     StatementSequence(&(nd->nd_LEFT))
     [
         ELSIF
-            { nd->nd_RIGHT = dot2leaf(Stat);
-			  nd = nd->nd_RIGHT;
-			  nd->nd_symb = IF;
-			}
+            {
+                nd->nd_RIGHT = dot2leaf(Stat);
+                nd = nd->nd_RIGHT;
+                nd->nd_symb = IF;
+            }
         expression(&(nd->nd_LEFT))
         THEN
-            { nd->nd_RIGHT = dot2leaf(Link);
-			  nd = nd->nd_RIGHT;
-			}
+            {
+                nd->nd_RIGHT = dot2leaf(Link);
+                nd = nd->nd_RIGHT;
+            }
         StatementSequence(&(nd->nd_LEFT))
     ]*
     [
@@ -166,9 +176,9 @@ IfStatement(struct node **pnd;)
 
 CaseStatement(struct node **pnd;)
     {
-	register struct node *nd;
-	struct type  *tp = 0;
-}
+        register struct node* nd;
+        struct type* tp = 0;
+    }
     : CASE
         { *pnd = nd = dot2leaf(Stat); }
     expression(&(nd->nd_LEFT))
@@ -196,9 +206,10 @@ case(struct node **pnd; struct type  **ptp;)
         StatementSequence(&((*pnd)->nd_RIGHT))
         |
     ]
-        { *pnd = dot2node(Link, *pnd, NULLNODE);
-			  (*pnd)->nd_symb = '|';
-			}
+        {
+            *pnd = dot2node(Link, *pnd, NULLNODE);
+            (*pnd)->nd_symb = '|';
+        }
     ;
 
     /* inline in statement; lack of space 
@@ -226,34 +237,39 @@ RepeatStatement(struct node **pnd;)
 
 ForStatement(struct node **pnd;)
     {
-	register struct node *nd, *nd1;
-}
+        register struct node *nd, *nd1;
+    }
     : FOR
         { *pnd = nd = dot2leaf(Stat); }
     IDENT
         { nd1 = dot2leaf(Name); }
     BECOMES
-        { nd->nd_LEFT = dot2node(Stat, nd1, dot2leaf(Link));
-			  nd1 = nd->nd_LEFT->nd_RIGHT;
-			  nd1->nd_symb = TO;
-			}
+        {
+            nd->nd_LEFT = dot2node(Stat, nd1, dot2leaf(Link));
+            nd1 = nd->nd_LEFT->nd_RIGHT;
+            nd1->nd_symb = TO;
+        }
     expression(&(nd1->nd_LEFT))
     TO
     expression(&(nd1->nd_RIGHT))
-        { nd->nd_RIGHT = nd1 = dot2leaf(Link); 
-			  nd1->nd_symb = BY;
-			}
+        {
+            nd->nd_RIGHT = nd1 = dot2leaf(Link);
+            nd1->nd_symb = BY;
+        }
     [
         BY
         ConstExpression(&(nd1->nd_LEFT))
-            { if (!(nd1->nd_LEFT->nd_type->tp_fund & T_INTORCARD)) {
-				error("illegal type in BY clause");
-			  }
-			}
+            {
+                if (!(nd1->nd_LEFT->nd_type->tp_fund & T_INTORCARD))
+                {
+                    error("illegal type in BY clause");
+                }
+            }
         |
-            { nd1->nd_LEFT = dot2leaf(Value);
-			  nd1->nd_LEFT->nd_INT = 1;
-			}
+            {
+                nd1->nd_LEFT = dot2leaf(Value);
+                nd1->nd_LEFT->nd_INT = 1;
+            }
     ]
     DO
     StatementSequence(&(nd1->nd_RIGHT))
@@ -281,25 +297,31 @@ WithStatement(struct node **pnd;)
 
 ReturnStatement(struct node **pnd;)
     {
-	register struct def *df = CurrentScope->sc_definedby;
-	register struct type  *tp = df->df_type ? ResultType(df->df_type) : 0;
-	register struct node *nd;
-}
+        register struct def* df = CurrentScope->sc_definedby;
+        register struct type* tp = df->df_type ? ResultType(df->df_type) : 0;
+        register struct node* nd;
+    }
     : RETURN
         { *pnd = nd = dot2leaf(Stat); }
     [
         expression(&(nd->nd_RIGHT))
-            { if (scopeclosed(CurrentScope)) {
-error("a module body cannot return a value");
-			  }
-			  else if (! tp) {
-error("procedure \"%s\" is not a function, so cannot return a value", df->df_idf->id_text);
-			  }
-			}
+            {
+                if (scopeclosed(CurrentScope))
+                {
+                    error("a module body cannot return a value");
+                }
+                else if (!tp)
+                {
+                    error("procedure \"%s\" is not a function, so cannot return a value",
+                          df->df_idf->id_text);
+                }
+            }
         |
-            { if (tp) {
-error("function procedure \"%s\" must return a value", df->df_idf->id_text);
-			  }
-			}
+            {
+                if (tp)
+                {
+                    error("function procedure \"%s\" must return a value", df->df_idf->id_text);
+                }
+            }
     ]
     ;

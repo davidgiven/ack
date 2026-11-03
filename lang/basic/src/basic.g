@@ -127,7 +127,11 @@
 
 programline
     : INTVALUE
-        { basicline = ival;newblock(ival); newemblock(ival); }
+        {
+            basicline = ival;
+            newblock(ival);
+            newemblock(ival);
+        }
     stmts EOLN
     | '#' INTVALUE STRVALUE EOLN
     | EOLN
@@ -142,7 +146,9 @@ stmts
     ;
 
 singlestmt
-    { int d2 ; }
+    {
+        int d2;
+    }
     : callstmt
     | clearstmt
     | CLOSESYM closestmt
@@ -178,15 +184,16 @@ singlestmt
     | restorestmt
     | returnstmt
     | ENDSYM
-        { C_loc((arith) 0 );
-                                  C_cal("_hlt");
-                                  C_asp((arith) BEMINTSIZE);
-                                }
+        {
+            C_loc((arith)0);
+            C_cal("_hlt");
+            C_asp((arith)BEMINTSIZE);
+        }
     | STOPSYM
         { C_cal("_stop"); }
     | swapstmt
     | TRONOFFSYM
-        { tronoff=yylval.integer; }
+        { tronoff = yylval.integer; }
     | whilestmt
     | wendstmt
     | writestmt
@@ -200,14 +207,18 @@ illegalstmt
     ;
 
 callstmt
-    { Symbol *id; int i; }
+    {
+        Symbol* id;
+        int i;
+    }
     : CALLSYM IDENTIFIER
         { id = yylval.Sptr; }
     [
         parmlist(&i)
-            { C_cal(id->symname);
-	          		  C_asp((arith) (i*BEMPTRSIZE));
-				}
+            {
+                C_cal(id->symname);
+                C_asp((arith)(i * BEMPTRSIZE));
+            }
         |
         /* empty */
             { C_cal(id->symname); }
@@ -215,7 +226,9 @@ callstmt
     ;
 
 parmlist(int *ip;)
-    { int var ; }
+    {
+        int var;
+    }
     : '('
     variable(&var)
         { *ip = 1; }
@@ -228,7 +241,9 @@ parmlist(int *ip;)
     ;
 
 clearstmt
-    { int exp; }
+    {
+        int exp;
+    }
     : CLEARSYM
     [
         ','
@@ -245,46 +260,56 @@ closestmt
     ;
 
 filelist
-    { int intv; }
+    {
+        int intv;
+    }
     : cross
     intvalue(&intv)
-        { C_loc((arith) ival);
-                     		  C_cal("_clochn");
-                     		  C_asp((arith) BEMINTSIZE);
-				}
+        {
+            C_loc((arith)ival);
+            C_cal("_clochn");
+            C_asp((arith)BEMINTSIZE);
+        }
     [
         ',' cross
         intvalue(&intv)
-            { C_loc((arith) ival);
-                             	  C_cal("_clochn");
-                             	  C_asp((arith) BEMINTSIZE);
-                        	}
+            {
+                C_loc((arith)ival);
+                C_cal("_clochn");
+                C_asp((arith)BEMINTSIZE);
+            }
     ]*
     ;
 
 datastmt
     : DATASYM
-        { datastmt(); in_data = 1;}
+        {
+            datastmt();
+            in_data = 1;
+        }
     datalist
-        { datprintf("\n"); in_data = 0; }
+        {
+            datprintf("\n");
+            in_data = 0;
+        }
     ;
 
 dataelm
     : INTVALUE
-        { datprintf("%d",ival); }
+        { datprintf("%d", ival); }
     | '-'
     [
         INTVALUE
-            { datprintf("%d",-ival); }
+            { datprintf("%d", -ival); }
         | FLTVALUE
-            { datprintf("-%s",dval); }
+            { datprintf("-%s", dval); }
     ]
     | FLTVALUE
-        { datprintf("%s",dval); }
+        { datprintf("%s", dval); }
     | STRVALUE
-        { datprintf("\"%s\"",sval); }
+        { datprintf("\"%s\"", sval); }
     | IDENTIFIER
-        { datprintf("\"%s\"",sval); }
+        { datprintf("\"%s\"", sval); }
     ;
 
 datalist
@@ -305,7 +330,9 @@ defstmt
     ;
 
 deffnstmt
-    { int exp; }
+    {
+        int exp;
+    }
     : heading '='
     expression(&exp)
         { endscope(exp); }
@@ -331,13 +358,13 @@ idlist
 
 defvarstmt
     : DEFINTSYM
-        { setdefaulttype( INTTYPE); }
+        { setdefaulttype(INTTYPE); }
     | DEFSNGSYM
-        { setdefaulttype( FLOATTYPE); }
+        { setdefaulttype(FLOATTYPE); }
     | DEFDBLSYM
-        { setdefaulttype( DOUBLETYPE); }
+        { setdefaulttype(DOUBLETYPE); }
     | DEFSTRSYM
-        { setdefaulttype( STRINGTYPE); }
+        { setdefaulttype(STRINGTYPE); }
     ;
 
 defusrstmt
@@ -346,7 +373,9 @@ defusrstmt
     ;
 
 dimstmt
-    { Symbol *symp; }
+    {
+        Symbol* symp;
+    }
     : DIMSYM
     arraydcl(&symp)
     ')'
@@ -364,22 +393,27 @@ arraydcl(Symbol **sympp;)
         { *sympp = s = yylval.Sptr; }
     '(' INTVALUE
         {
-					s->dimlimit[s->dimensions]=ival;
-					s->dimensions++;
-	  			}
+            s->dimlimit[s->dimensions] = ival;
+            s->dimensions++;
+        }
     [
         ',' INTVALUE
             {
-					if(s->dimensions<MAXDIMENSIONS) {
-						s->dimlimit[s->dimensions]=ival;
-						s->dimensions++;
-					} else error("too many dimensions");
-				}
+                if (s->dimensions < MAXDIMENSIONS)
+                {
+                    s->dimlimit[s->dimensions] = ival;
+                    s->dimensions++;
+                }
+                else
+                    error("too many dimensions");
+            }
     ]*
     ;
 
 fieldstmt
-    { int intv; }
+    {
+        int intv;
+    }
     : FIELDSYM cross
     intvalue(&intv)
         { setchannel(ival); }
@@ -388,7 +422,10 @@ fieldstmt
     ;
 
 fieldlist
-    { int intv; int var; }
+    {
+        int intv;
+        int var;
+    }
     : intvalue(&intv)
     ASSYM
     variable(&var)
@@ -401,7 +438,9 @@ fieldlist
     ;
 
 forstmt
-    { int exp; }
+    {
+        int exp;
+    }
     : FORSYM IDENTIFIER
         { forinit(yylval.Sptr); }
     '='
@@ -414,16 +453,18 @@ forstmt
     ;
 
 step
-    { int exp; }
+    {
+        int exp;
+    }
     : STEPSYM
     expression(&exp)
         { forstep(exp); }
     |
     /*EMPTY*/
-        { 
-                                     		C_loc((arith) 1);
-                                     		forstep(INTTYPE); 
-					}
+        {
+            C_loc((arith)1);
+            forstep(INTTYPE);
+        }
     ;
 
 nextstmt
@@ -432,7 +473,7 @@ nextstmt
             { nextstmt(yylval.Sptr); }
         |
         /* empty */
-            { nextstmt((Symbol *)0); }
+            { nextstmt((Symbol*)0); }
     ]
     [
         ',' IDENTIFIER
@@ -441,35 +482,44 @@ nextstmt
     ;
 
 getstmt
-    { char *cp; int intv; }
+    {
+        char* cp;
+        int intv;
+    }
     : getput(&cp)
     [
     /* empty */
-            { C_loc((arith) 0);
-                     		  C_cal(cp);
-                     		  C_asp((arith) BEMINTSIZE);
-				}
+            {
+                C_loc((arith)0);
+                C_cal(cp);
+                C_asp((arith)BEMINTSIZE);
+            }
         | ','
         intvalue(&intv)
-            { C_loc((arith) ival);
-                           	  C_cal(cp);
-                           	  C_asp((arith) BEMINTSIZE);
-				}
+            {
+                C_loc((arith)ival);
+                C_cal(cp);
+                C_asp((arith)BEMINTSIZE);
+            }
     ]
     ;
 
 getput(char **cpp;)
-    { int intv; }
+    {
+        int intv;
+    }
     : GETSYM cross
     intvalue(&intv)
-        { setchannel(ival); 
-				  *cpp = "$_getrec";
-				}
+        {
+            setchannel(ival);
+            *cpp = "$_getrec";
+        }
     | PUTSYM cross
     intvalue(&intv)
-        { setchannel(ival); 
-			  	  *cpp = "$_putsym";
-				}
+        {
+            setchannel(ival);
+            *cpp = "$_putsym";
+        }
     ;
 
 gosubstmt
@@ -483,12 +533,15 @@ returnstmt
     ;
 
 ifstmt
-    { int exp; int d1; }
+    {
+        int exp;
+        int d1;
+    }
     : IFSYM
     expression(&exp)
-        { d1=ifstmt(exp); }
+        { d1 = ifstmt(exp); }
     thenpart
-        { d1=thenpart(d1); }
+        { d1 = thenpart(d1); }
     elsepart
         { elsepart(d1); }
     ;
@@ -517,7 +570,9 @@ elsepart
     ;
 
 inputstmt
-    { int intv; }
+    {
+        int intv;
+    }
     : INPUTSYM
     [
         semiprompt readlist
@@ -529,24 +584,29 @@ inputstmt
     ;
 
 semiprompt
-    { int str; }
+    {
+        int str;
+    }
     : semi STRVALUE
         { str = yylval.integer; }
     [
         ';'
-            { loadstr(str); 
-				  prompt(1); 
-				}
+            {
+                loadstr(str);
+                prompt(1);
+            }
         | ','
-            { loadstr(str); 
-				  prompt(0); 
-				}
+            {
+                loadstr(str);
+                prompt(0);
+            }
     ]
     |
     /*EMPTY*/
-        { setchannel(-1);
-                                  C_cal("_qstmark"); 
-				}
+        {
+            setchannel(-1);
+            C_cal("_qstmark");
+        }
     ;
 
 semi
@@ -556,22 +616,28 @@ semi
     ;
 
 letstmt
-    { int var; int exp; }
+    {
+        int var;
+        int exp;
+    }
     : LETSYM
     variable(&var)
         { save_address(); }
     '='
     expression(&exp)
-        { assign(var,exp); }
+        { assign(var, exp); }
     | variable(&var)
         { save_address(); }
     '='
     expression(&exp)
-        { assign(var,exp); }
+        { assign(var, exp); }
     ;
 
 lineinputstmt
-    { int var; int intv; }
+    {
+        int var;
+        int intv;
+    }
     : LINESYM
     [
         INPUTSYM semiprompt
@@ -595,13 +661,18 @@ readlist
     ;
 
 readelm
-    { int var; }
+    {
+        int var;
+    }
     : variable(&var)
         { readelm(var); }
     ;
 
 lsetstmt
-    { int var; int exp; }
+    {
+        int var;
+        int exp;
+    }
     : LSETSYM
     variable(&var)
     '='
@@ -610,12 +681,15 @@ lsetstmt
     ;
 
 midstmt
-    { int exp; }
+    {
+        int exp;
+    }
     : MIDSYM '$' midparms '='
     expression(&exp)
-        { C_cal("_midstmt");
-                     		  C_asp((arith) (2*BEMINTSIZE + 2*BEMPTRSIZE));
-				}
+        {
+            C_cal("_midstmt");
+            C_asp((arith)(2 * BEMINTSIZE + 2 * BEMPTRSIZE));
+        }
     ;
 
 midparms
@@ -623,26 +697,32 @@ midparms
     ;
 
 midfirst
-    { int exp; }
+    {
+        int exp;
+    }
     : expression(&exp)
-        { conversion(exp,STRINGTYPE); }
+        { conversion(exp, STRINGTYPE); }
     ;
 
 midsec
-    { int exp; }
+    {
+        int exp;
+    }
     : ','
     expression(&exp)
-        { conversion(exp,INTTYPE); }
+        { conversion(exp, INTTYPE); }
     ;
 
 midthird
-    { int exp; }
+    {
+        int exp;
+    }
     : ','
     expression(&exp)
-        { conversion(exp,INTTYPE); }
+        { conversion(exp, INTTYPE); }
     |
     /* empty */
-        { C_loc((arith) -1); }
+        { C_loc((arith)-1); }
     ;
 
 onstmt
@@ -659,7 +739,9 @@ exceptionstmt
     ;
 
 ongotostmt
-    { int exp; }
+    {
+        int exp;
+    }
     : expression(&exp)
     [
         GOSUBSYM constantlist
@@ -679,13 +761,15 @@ constantlist
     ;
 
 openstmt
-    { int exp; }
+    {
+        int exp;
+    }
     : OPENSYM mode openchannel
     expression(&exp)
-        { conversion(exp,STRINGTYPE); }
+        { conversion(exp, STRINGTYPE); }
     [
     /* empty */
-            { openstmt(0);  }
+            { openstmt(0); }
         | INTVALUE
             { openstmt(ival); }
     ]
@@ -697,39 +781,46 @@ openchannel
     ;
 
 mode
-    { int exp; }
+    {
+        int exp;
+    }
     : expression(&exp)
     ','
-        { conversion(exp,STRINGTYPE); }
+        { conversion(exp, STRINGTYPE); }
     | ','
-        { C_lae_dnam("_iomode",(arith)0); }
+        { C_lae_dnam("_iomode", (arith)0); }
     ;
 
 optionstmt
-    { int intv; }
+    {
+        int intv;
+    }
     : OPTIONSYM BASESYM
     intvalue(&intv)
         { optionbase(ival); }
     ;
 
 printstmt
-    { int plist; }
+    {
+        int plist;
+    }
     : PRINTSYM
     [
     /* empty */
-            { setchannel(-1);
-                                  C_cal("_nl"); 
-				}
+            {
+                setchannel(-1);
+                C_cal("_nl");
+            }
         | file format
         printlist(&plist)
-            { if(plist) 
-                                  C_cal("_nl");            
-				}
+            { if (plist) C_cal("_nl"); }
     ]
     ;
 
 file
-    { int intv; }
+    {
+        int intv;
+    }
     : '#'
     intvalue(&intv)
     ','
@@ -740,7 +831,9 @@ file
     ;
 
 format
-    { int var ; }
+    {
+        int var;
+    }
     : USINGSYM
     [
         STRVALUE
@@ -748,52 +841,69 @@ format
         ';'
         | variable(&var)
         ';'
-            { if(var!=STRINGTYPE) 
-					error("string variable expected"); 
-				}
+            { if (var != STRINGTYPE) error("string variable expected"); }
     ]
     |
     /* empty */
-        { formatstring=0; }
+        { formatstring = 0; }
     ;
 
 printlist(int *ip;)
-    { int exp; }
+    {
+        int exp;
+    }
     : [
         expression(&exp)
-            { printstmt(exp); *ip=1; }
+            {
+                printstmt(exp);
+                *ip = 1;
+            }
         | ','
-            { zone(1); *ip=0; }
+            {
+                zone(1);
+                *ip = 0;
+            }
         | ';'
-            { zone(0); *ip=0; }
+            {
+                zone(0);
+                *ip = 0;
+            }
     ]+
     ;
 
 pokestmt
-    { int exp1; int exp2 ; }
+    {
+        int exp1;
+        int exp2;
+    }
     : POKESYM
     expression(&exp1)
     ','
     expression(&exp2)
-        { pokestmt(exp1,exp2); }
+        { pokestmt(exp1, exp2); }
     ;
 
 randomizestmt
-    { int exp; }
+    {
+        int exp;
+    }
     : RANDOMIZESYM
     [
     /* empty */
             { C_cal("_randomi"); }
         | expression(&exp)
-            { conversion(exp,INTTYPE);
-                       			  C_cal("_setrand");
-                       			  C_asp((arith) BEMINTSIZE);     
-					}
+            {
+                conversion(exp, INTTYPE);
+                C_cal("_setrand");
+                C_asp((arith)BEMINTSIZE);
+            }
     ]
     ;
 
 readstmt
-    { int var; }
+    {
+        int var;
+    }
     : READSYM
         { setchannel(0); }
     variable(&var)
@@ -817,16 +927,21 @@ restorestmt
     ;
 
 swapstmt
-    { int var1; int var2; }
+    {
+        int var1;
+        int var2;
+    }
     : SWAPSYM
     variable(&var1)
     ','
     variable(&var2)
-        { swapstmt(var1,var2); }
+        { swapstmt(var1, var2); }
     ;
 
 whilestmt
-    { int exp; }
+    {
+        int exp;
+    }
     : WHILESYM
         { whilestart(); }
     expression(&exp)
@@ -842,22 +957,25 @@ writestmt
     : WRITESYM
     [
     /* empty */
-            { setchannel(-1);
-                                          C_cal("_wrnl");    
-					}
+            {
+                setchannel(-1);
+                C_cal("_wrnl");
+            }
         | file writelist
-            { C_cal("_wrnl");  }
+            { C_cal("_wrnl"); }
     ]
     ;
 
 writelist
-    { int exp; }
+    {
+        int exp;
+    }
     : expression(&exp)
-        { writestmt(exp,0); }
+        { writestmt(exp, 0); }
     [
         ','
         expression(&exp)
-            { writestmt(exp,1); }
+            { writestmt(exp, 1); }
     ]*
     ;
 
@@ -873,7 +991,10 @@ intvalue(int *ip;)
     ;
 
 variable(int *ip;)
-    { Symbol *symp; int exp; }
+    {
+        Symbol* symp;
+        int exp;
+    }
     : identifier(&symp)
     [
         %avoid
@@ -892,267 +1013,312 @@ variable(int *ip;)
             { *ip = endarrayload(); }
     ]
     | ERRSYM
-        { C_lae_dnam("_errsym",(arith) 0); 
-					  *ip = INTTYPE; 
-					}
+        {
+            C_lae_dnam("_errsym", (arith)0);
+            *ip = INTTYPE;
+        }
     | ERLSYM
-        { C_lae_dnam("_erlsym",(arith) 0); 
-					  *ip = INTTYPE; 
-					}
+        {
+            C_lae_dnam("_erlsym", (arith)0);
+            *ip = INTTYPE;
+        }
     ;
 
 expression(int *ip;)
-    { int neg; }
+    {
+        int neg;
+    }
     /* NIEUW */
     : expression1(&neg)
         { *ip = neg; }
     [
         IMPSYM
         expression(&neg)
-            { *ip = boolop(*ip,neg,IMPSYM); }
+            { *ip = boolop(*ip, neg, IMPSYM); }
     ]?
     ;
 
 expression1(int *ip;)
-    { int neg; }
+    {
+        int neg;
+    }
     : expression2(&neg)
         { *ip = neg; }
     [
         EQVSYM
         expression2(&neg)
-            { *ip = boolop(*ip,neg,EQVSYM); }
+            { *ip = boolop(*ip, neg, EQVSYM); }
     ]*
     ;
 
 expression2(int *ip;)
-    { int neg; }
+    {
+        int neg;
+    }
     : expression3(&neg)
         { *ip = neg; }
     [
         XORSYM
         expression3(&neg)
-            { *ip = boolop(*ip,neg,XORSYM); }
+            { *ip = boolop(*ip, neg, XORSYM); }
     ]*
     ;
 
 expression3(int *ip;)
-    { int neg; }
+    {
+        int neg;
+    }
     : expression4(&neg)
         { *ip = neg; }
     [
         ORSYM
         expression4(&neg)
-            { *ip = boolop(*ip,neg,ORSYM); }
+            { *ip = boolop(*ip, neg, ORSYM); }
     ]*
     ;
 
 expression4(int *ip;)
-    { int neg; }
+    {
+        int neg;
+    }
     : negation(&neg)
         { *ip = neg; }
     [
         ANDSYM
         negation(&neg)
-            { *ip = boolop(*ip,neg,ANDSYM); }
+            { *ip = boolop(*ip, neg, ANDSYM); }
     ]*
     ;
 
 negation(int *ip;)
-    { int comp; }
+    {
+        int comp;
+    }
     : NOTSYM
     compare(&comp)
-        { *ip=boolop(comp,0,NOTSYM); }
+        { *ip = boolop(comp, 0, NOTSYM); }
     | compare(ip)
     ;
 
 compare(int *ip;)
-    { int sum1,sum2,rel; }
+    {
+        int sum1, sum2, rel;
+    }
     : sum(&sum1)
     [
     /* empty */
             { *ip = sum1; }
         | RELOP
-            { rel=yylval.integer; }
+            { rel = yylval.integer; }
         sum(&sum2)
-            { *ip=relop(sum1,sum2,rel); }
+            { *ip = relop(sum1, sum2, rel); }
         | '='
         sum(&sum2)
-            { *ip=relop(sum1,sum2,'='); }
+            { *ip = relop(sum1, sum2, '='); }
     ]
     ;
 
 sum(int *ip;)
-    { int term1; }
+    {
+        int term1;
+    }
     : term(&term1)
         { *ip = term1; }
     [
         %while (1)
         '-'
         term(&term1)
-            { *ip=plusmin(*ip,term1,'-'); }
+            { *ip = plusmin(*ip, term1, '-'); }
         | '+'
         term(&term1)
-            { *ip=plusmin(*ip,term1,'+'); }
+            { *ip = plusmin(*ip, term1, '+'); }
     ]*
     ;
 
 term(int *ip;)
-    { int fac1; }
+    {
+        int fac1;
+    }
     : factor(&fac1)
         { *ip = fac1; }
     [
         '*'
         factor(&fac1)
-            { *ip=muldiv(*ip,fac1,'*'); }
+            { *ip = muldiv(*ip, fac1, '*'); }
         | '\\'
         factor(&fac1)
-            { *ip=muldiv(*ip,fac1,'\\'); }
+            { *ip = muldiv(*ip, fac1, '\\'); }
         | '/'
         factor(&fac1)
-            { *ip=muldiv(*ip,fac1,'/'); }
+            { *ip = muldiv(*ip, fac1, '/'); }
         | MODSYM
         factor(&fac1)
-            { *ip=muldiv(*ip,fac1,MODSYM); }
+            { *ip = muldiv(*ip, fac1, MODSYM); }
     ]*
     ;
 
 factor(int *ip;)
     : '-'
     factor(ip)
-        { *ip=negate(*ip); }
+        { *ip = negate(*ip); }
     | factor1(ip)
     ;
 
 factor1(int *ip;)
-    { int mant,exp; }
+    {
+        int mant, exp;
+    }
     : factor2(&mant)
     [
     /* empty */
             { *ip = mant; }
         | '^'
         factor1(&exp)
-            { *ip = power(mant,exp); }
+            { *ip = power(mant, exp); }
     ]
     ;
 
 factor2(int *ip;)
-    { int var,func,expl,funcc,exp,intv,funcn,inpt; int typetable[10]; }
+    {
+        int var, func, expl, funcc, exp, intv, funcn, inpt;
+        int typetable[10];
+    }
     : INTVALUE
-        { *ip=loadint(ival); }
+        { *ip = loadint(ival); }
     | '('
     expression(&exp)
     ')'
-        { *ip=exp; }
+        { *ip = exp; }
     | FLTVALUE
-        { *ip=loaddbl(dval); }
+        { *ip = loaddbl(dval); }
     | STRVALUE
-        { *ip= STRINGTYPE; 
-					  loadstr(yylval.integer); 
-					}
+        {
+            *ip = STRINGTYPE;
+            loadstr(yylval.integer);
+        }
     | variable(&var)
-        { *ip=var; 
-					  loadvar(var); 
-					}
+        {
+            *ip = var;
+            loadvar(var);
+        }
     | INKEYSYM '$'
-        { C_cal("_inkey");
-                                          C_lfr((arith) BEMPTRSIZE);
-					  *ip= STRINGTYPE;
-					}
+        {
+            C_cal("_inkey");
+            C_lfr((arith)BEMPTRSIZE);
+            *ip = STRINGTYPE;
+        }
     | VARPTR '(' '#'
     intvalue(&intv)
     ')'
-        { warning("Not supported"); 
-					  *ip=INTTYPE; 
-					}
+        {
+            warning("Not supported");
+            *ip = INTTYPE;
+        }
     | FUNCTION
-        { func=yylval.integer; }
+        { func = yylval.integer; }
     [
         %avoid
         /* empty */
-            { *ip= callfcn(yylval.integer,0, typetable); }
+            { *ip = callfcn(yylval.integer, 0, typetable); }
         | '(' cross
         exprlist(&expl, typetable)
         ')'
-            { *ip=callfcn(func,expl, typetable); }
+            { *ip = callfcn(func, expl, typetable); }
     ]
     | funcname(&funcn)
     [
         %avoid
         /* empty */
-            { *ip=fcnend(0); }
+            { *ip = fcnend(0); }
         | funccall(&funcc)
         ')'
-            { *ip=fcnend(funcc); }
+            { *ip = fcnend(funcc); }
     ]
     | MIDSYM '$' midparms
-        { 
-                   			  C_cal("_mid");
-                   			  C_asp((arith) (2*BEMINTSIZE+BEMPTRSIZE));
-                   		 	  C_lfr((arith) BEMPTRSIZE);
-					  *ip= STRINGTYPE;
-					}
+        {
+            C_cal("_mid");
+            C_asp((arith)(2 * BEMINTSIZE + BEMPTRSIZE));
+            C_lfr((arith)BEMPTRSIZE);
+            *ip = STRINGTYPE;
+        }
     | INPUTSYM '$' '('
     expression(&exp)
     inputtail(&inpt)
-        { /*waar worden inpt en  exp gebruikt?*/
-             				  C_cal("_inpfcn");
-             				  C_asp((arith) (2*BEMINTSIZE+BEMPTRSIZE));
-	  				  *ip= STRINGTYPE;
-					}
+        {
+            /*waar worden inpt en  exp gebruikt?*/
+            C_cal("_inpfcn");
+            C_asp((arith)(2 * BEMINTSIZE + BEMPTRSIZE));
+            *ip = STRINGTYPE;
+        }
     ;
 
 inputtail(int *ip;)
-    { int exp; }
+    {
+        int exp;
+    }
     : ',' cross
     expression(&exp)
     ')'
-        { conversion(exp,INTTYPE); 
-					  *ip= INTTYPE; 
-					}
+        {
+            conversion(exp, INTTYPE);
+            *ip = INTTYPE;
+        }
     | ')'
-        { C_loc((arith) -1);  
-					  *ip= INTTYPE; 
-					}
+        {
+            C_loc((arith)-1);
+            *ip = INTTYPE;
+        }
     ;
 
 funcname(int *ip;)
     : FUNCTID
-        { *ip=fcncall(yylval.Sptr); }
+        { *ip = fcncall(yylval.Sptr); }
     ;
 
 funccall(int *ip;)
-    { int exp; }
+    {
+        int exp;
+    }
     : '('
     expression(&exp)
-        { callparm(0,exp);*ip=1; }
+        {
+            callparm(0, exp);
+            *ip = 1;
+        }
     [
         ','
         expression(&exp)
-            { callparm(*ip,exp); 
-			 	  *ip = *ip+1; 
-				}
+            {
+                callparm(*ip, exp);
+                *ip = *ip + 1;
+            }
     ]*
     ;
 
 identifier(Symbol **ident;)
     : IDENTIFIER
-        { dcltype(yylval.Sptr); 
-				  *ident=yylval.Sptr; 
-				}
+        {
+            dcltype(yylval.Sptr);
+            *ident = yylval.Sptr;
+        }
     ;
 
 exprlist(int *ip; int *typetable;)
-    { int exp; }
+    {
+        int exp;
+    }
     : expression(&exp)
-        { typetable[0]=exp; 
-					  *ip=1; 
-					}
+        {
+            typetable[0] = exp;
+            *ip = 1;
+        }
     [
         ','
         expression(&exp)
-            { typetable[*ip]=exp;
-					  *ip = *ip+1; 
-					}
+            {
+                typetable[*ip] = exp;
+                *ip = *ip + 1;
+            }
     ]*
     ;
 

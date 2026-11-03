@@ -23,8 +23,8 @@
 
 Constant(struct node **pnd;)
     {
-	register struct node **nd = pnd;
-}
+        register struct node** nd = pnd;
+    }
     : %default
     [
         Sign(nd)
@@ -35,12 +35,13 @@ Constant(struct node **pnd;)
         UnsignedNumber(nd)
         | ConstantIdentifier(nd)
     ]
-        { (void) ChkConstant(*pnd); }
+        { (void)ChkConstant(*pnd); }
     | STRING
-        { *pnd = MkLeaf(Value, &dot);
-				  if( ((*pnd)->nd_type = toktype) != char_type )
-					RomString(*pnd);
-				}
+        {
+            *pnd = MkLeaf(Value, &dot);
+            if (((*pnd)->nd_type = toktype) != char_type)
+                RomString(*pnd);
+        }
     ;
 
 Sign(struct node **pnd;)
@@ -56,15 +57,15 @@ UnsignedNumber(struct node **pnd;)
         INTEGER
         | REAL
     ]
-        { *pnd = MkLeaf(Value, &dot);
-				  (*pnd)->nd_type = toktype;
-				}
+        {
+            *pnd = MkLeaf(Value, &dot);
+            (*pnd)->nd_type = toktype;
+        }
     ;
 
 ConstantIdentifier(struct node **pnd;)
     : IDENT
-        { *pnd = MkLeaf(Name, &dot);
-				}
+        { *pnd = MkLeaf(Name, &dot); }
     ;
 
     /* ISO section 6.7.1, p. 121 */
@@ -126,8 +127,8 @@ Term(struct node **pnd;)
 
 Factor(struct node **pnd;)
     {
-	register struct def *df;
-}
+        register struct def* df;
+    }
     :
     /* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
@@ -141,9 +142,7 @@ Factor(struct node **pnd;)
     /* ISO section 6.7.3, p. 126
 		 * IDENT is a FunctionIdentifier
 		 */
-            {
-				  *pnd = MkNode(Call, *pnd, NULLNODE, &dot);
-				}
+            { *pnd = MkNode(Call, *pnd, NULLNODE, &dot); }
         ActualParameterList(&((*pnd)->nd_right))
         |
         /* IDENT can be a BoundIdentifier or a ConstantIdentifier or
@@ -152,31 +151,31 @@ Factor(struct node **pnd;)
 		 * It could also be the beginning of a normal VariableAccess
 		 * (most likely).
 		 */
-            { int class;
+            {
+                int class;
 
-			  df = lookfor(*pnd, CurrVis, 1);
-			  /* df->df_flags |= D_USED; */
-			  if( df->df_type->tp_fund & T_ROUTINE )	{
-				/* This part is context-sensitive:
-				   is the occurence of the proc/func name
-				   a call or not ?
-				*/
-				if( df->df_type == std_type )
-					class = Call;
-				else
-					class = NameOrCall;
-				*pnd = MkNode(class, *pnd, NULLNODE, &dot);
-				(*pnd)->nd_symb = '(';
-			  }
-			}
+                df = lookfor(*pnd, CurrVis, 1);
+                /* df->df_flags |= D_USED; */
+                if (df->df_type->tp_fund & T_ROUTINE)
+                {
+                    /* This part is context-sensitive:
+                       is the occurence of the proc/func name
+                       a call or not ?
+                    */
+                    if (df->df_type == std_type)
+                        class = Call;
+                    else
+                        class = NameOrCall;
+                    *pnd = MkNode(class, *pnd, NULLNODE, &dot);
+                    (*pnd)->nd_symb = '(';
+                }
+            }
         VariableAccessTail(pnd)
     ]
     | UnsignedConstant(pnd)
     | SetConstructor(pnd)
     | '('
-        { /* dummy node to force ChkVariable */
-				  *pnd = MkLeaf(Uoper, &dot);
-				}
+        { /* dummy node to force ChkVariable */ *pnd = MkLeaf(Uoper, &dot); }
     Expression(&((*pnd)->nd_right))
     ')'
     | NOT
@@ -187,27 +186,30 @@ Factor(struct node **pnd;)
 UnsignedConstant(struct node **pnd;)
     : UnsignedNumber(pnd)
     | STRING
-        { *pnd = MkLeaf(Value, &dot);
-				  if( ((*pnd)->nd_type = toktype) != char_type )
-					RomString(*pnd);
-				}
+        {
+            *pnd = MkLeaf(Value, &dot);
+            if (((*pnd)->nd_type = toktype) != char_type)
+                RomString(*pnd);
+        }
     | ConstantIdentifier(pnd)
     | NIL
-        { *pnd = MkLeaf(Value, &dot);
-				  (*pnd)->nd_type = nil_type;
-				  /* to evaluate NIL = NIL */
-				  (*pnd)->nd_INT = 0;
-				}
+        {
+            *pnd = MkLeaf(Value, &dot);
+            (*pnd)->nd_type = nil_type;
+            /* to evaluate NIL = NIL */
+            (*pnd)->nd_INT = 0;
+        }
     ;
 
 SetConstructor(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : '['
-        { dot.tk_symb = SET;
-			  *pnd = nd = MkLeaf(Xset, &dot);
-			}
+        {
+            dot.tk_symb = SET;
+            *pnd = nd = MkLeaf(Xset, &dot);
+        }
     [
         MemberDesignator(nd)
         [
@@ -222,46 +224,48 @@ SetConstructor(struct node **pnd;)
 
 MemberDesignator(struct node *nd;)
     {
-	struct node *nd1;
-}
+        struct node* nd1;
+    }
     : Expression(&nd1)
     [
         UPTO
             { nd1 = MkNode(Link, nd1, NULLNODE, &dot); }
         Expression(&(nd1->nd_right))
     ]?
-        { nd->nd_right = MkNode(Link, nd1, NULLNODE, &dot);
-			  nd->nd_right->nd_symb = ',';
-			}
+        {
+            nd->nd_right = MkNode(Link, nd1, NULLNODE, &dot);
+            nd->nd_right->nd_symb = ',';
+        }
     ;
 
     /* ISO section 6.7.2.1, p. 123 */
 BooleanExpression(struct node **pnd;)
     : Expression(pnd)
-        { if( ChkExpression(*pnd) &&
-						(*pnd)->nd_type != bool_type )
-				node_error(*pnd, "boolean expression expected");
-			  MarkUsed(*pnd);
-			}
+        {
+            if (ChkExpression(*pnd) && (*pnd)->nd_type != bool_type)
+                node_error(*pnd, "boolean expression expected");
+            MarkUsed(*pnd);
+        }
     ;
 
 ActualParameterList(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : '('
     /* ActualParameter substituted inline */
     Expression(pnd)
-        { *pnd = nd =
-					     MkNode(Link, *pnd, NULLNODE, &dot);
-					  nd->nd_symb = ',';
-					}
+        {
+            *pnd = nd = MkNode(Link, *pnd, NULLNODE, &dot);
+            nd->nd_symb = ',';
+        }
     [
         %persistent
         ','
-            { nd->nd_right = MkLeaf(Link, &dot);
-					  nd = nd->nd_right;
-					}
+            {
+                nd->nd_right = MkLeaf(Link, &dot);
+                nd = nd->nd_right;
+            }
         Expression(&(nd->nd_left))
     ]*
     ')'
@@ -279,7 +283,7 @@ VariableAccess(struct node **pnd;)
     IDENT
         { *pnd = MkLeaf(Name, &dot); }
     VariableAccessTail(pnd)
-        { (void) ChkVariable(*pnd); }
+        { (void)ChkVariable(*pnd); }
     ;
 
 VariableAccessTail(struct node **pnd;)
@@ -315,9 +319,10 @@ VariableAccessTail(struct node **pnd;)
     [
         %persistent
         ','
-            { *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot);
-				  (*pnd)->nd_symb = '[';
-				}
+            {
+                *pnd = MkNode(Arrsel, *pnd, NULLNODE, &dot);
+                (*pnd)->nd_symb = '[';
+            }
         Expression(&((*pnd)->nd_right))
     ]*
     ']'

@@ -47,30 +47,31 @@ StatementSequence
     /* ISO section 6.8.1, p. 126 */
 Statement
     {
-	struct node *nd;
-}
+        struct node* nd;
+    }
     :
-        {
-					  slevel++;
-					}
+        { slevel++; }
     [
         Label(&nd)
         ':'
-            { if( nd ) DefLabel(nd, slevel); }
+            { if (nd) DefLabel(nd, slevel); }
     ]?
-        { if( !options['L'] )
-						C_lin((arith) dot.tk_lineno);
-#ifdef DBSYMTAB
-					  if (options['g']) {
-					    static int ms_lineno;
+        {
+            if (!options['L'])
+                C_lin((arith)dot.tk_lineno);
+    #ifdef DBSYMTAB
+            if (options['g'])
+            {
+                static int ms_lineno;
 
-					    if (ms_lineno != dot.tk_lineno) {
-						C_ms_std((char *) 0, N_SLINE, (int) dot.tk_lineno);
-						ms_lineno = dot.tk_lineno;
-					    }
-					  }
-#endif /* DBSYMTAB */
-					}
+                if (ms_lineno != dot.tk_lineno)
+                {
+                    C_ms_std((char*)0, N_SLINE, (int)dot.tk_lineno);
+                    ms_lineno = dot.tk_lineno;
+                }
+            }
+    #endif /* DBSYMTAB */
+        }
     [
         SimpleStatement
         | StructuredStatement
@@ -81,9 +82,9 @@ Statement
     /* ISO section 6.8.2.1, p. 126 */
 SimpleStatement
     {
-	struct node *pnd, *expp;
-	unsigned short line;
-}
+        struct node *pnd, *expp;
+        unsigned short line;
+    }
     :
     /* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
@@ -101,9 +102,10 @@ SimpleStatement
     IDENT
         { line = LineNumber; }
     Expression(&expp)
-        { AssertStat(expp, line);
-				  FreeNode(expp);
-				}
+        {
+            AssertStat(expp, line);
+            FreeNode(expp);
+        }
     | IDENT
         { pnd = MkLeaf(Name, &dot); }
     [
@@ -124,13 +126,14 @@ SimpleStatement
         |
             { pnd = MkNode(Call, pnd, NULLNODE, &dot); }
         ActualParameterList(&(pnd->nd_right))?
-            { ProcStat(pnd);
+            {
+                ProcStat(pnd);
 
-				  if( !err_occurred )
-					CodeCall(pnd);
+                if (!err_occurred)
+                    CodeCall(pnd);
 
-				  FreeNode(pnd);
-				}
+                FreeNode(pnd);
+            }
     ]
     | InputOutputStatement
     /* end of changed part
@@ -139,8 +142,8 @@ SimpleStatement
 
 InputOutputStatement
     {
-	struct node *nd = NULLNODE;
-}
+        struct node* nd = NULLNODE;
+    }
     :
     /* This is a new rule because the grammar specified by the standard
 	 * is not exactly LL(1) (see SimpleStatement).
@@ -178,11 +181,11 @@ StructuredStatement
     /* ISO section 6.8.2.4, p. 127 */
 GotoStatement
     {
-	struct node *nd;
-}
+        struct node* nd;
+    }
     : GOTO
     Label(&nd)
-        { if( nd ) TstLabel(nd, slevel); }
+        { if (nd) TstLabel(nd, slevel); }
     ;
 
     /* ISO section 6.8.3.3, p. 128 */
@@ -202,31 +205,34 @@ RepetitiveStatement
     /* ISO section 6.8.3.10, p. 132 */
 WithStatement
     {
-	struct scopelist *Save = CurrVis;
-	struct node *nd;
-}
+        struct scopelist* Save = CurrVis;
+        struct node* nd;
+    }
     : WITH
     RecordVariableList(&nd)
     DO Statement
-        { EndWith(Save, nd);
-			  chk_labels(slevel + 1);
-			}
+        {
+            EndWith(Save, nd);
+            chk_labels(slevel + 1);
+        }
     ;
 
 RecordVariableList(struct node **pnd;)
     {
-	struct node *nd;
-}
+        struct node* nd;
+    }
     : RecordVariable(&nd)
-        { *pnd = nd = MkNode(Link, nd, NULLNODE, &dot);
-				  nd->nd_symb = ',';
-				}
+        {
+            *pnd = nd = MkNode(Link, nd, NULLNODE, &dot);
+            nd->nd_symb = ',';
+        }
     [
         %persistent
         ','
-            { nd->nd_right = MkLeaf(Link, &dot);
-				  nd = nd->nd_right;
-				}
+            {
+                nd->nd_right = MkLeaf(Link, &dot);
+                nd = nd->nd_right;
+            }
         RecordVariable(&(nd->nd_left))
     ]*
     ;
@@ -239,32 +245,35 @@ RecordVariable(struct node **pnd;)
     /* ISO section 6.8.3.4, p. 128 */
 IfStatement
     {
-	struct node *nd;
-	label l1 = ++text_label;
-	label l2 = ++text_label;
-}
+        struct node* nd;
+        label l1 = ++text_label;
+        label l2 = ++text_label;
+    }
     : IF
     BooleanExpression(&nd)
-        { struct desig ds;
-					
-					  ds = InitDesig;
-					  if( !err_occurred )
-						CodeExpr(nd, &ds, l1);
-					  FreeNode(nd);
-					}
+        {
+            struct desig ds;
+
+            ds = InitDesig;
+            if (!err_occurred)
+                CodeExpr(nd, &ds, l1);
+            FreeNode(nd);
+        }
     THEN Statement
         { chk_labels(slevel + 1); }
     [
         %prefer
         /* closest matching */
         ELSE
-            { C_bra(l2);
-					  C_df_ilb(l1);
-					}
+            {
+                C_bra(l2);
+                C_df_ilb(l1);
+            }
         Statement
-            { C_df_ilb(l2);
-					  chk_labels(slevel + 1);
-					}
+            {
+                C_df_ilb(l2);
+                chk_labels(slevel + 1);
+            }
         |
         /* empty */
             { C_df_ilb(l1); }
@@ -274,19 +283,20 @@ IfStatement
     /* ISO section 6.8.3.5, p. 128 */
 CaseStatement
     {
-	struct node *casend, *nd;
-	label exit_label;
-}
+        struct node *casend, *nd;
+        label exit_label;
+    }
     :
     /* This is a changed rule, because the grammar as specified in the
 	 * reference states that a semicolon is optional before END,
 	 * and this is not LL(1).
 	 */
     CASE
-        { casend = nd = MkLeaf(Link, &dot);
-					  casend->nd_lab = ++text_label;
-					  exit_label = ++text_label;
-					}
+        {
+            casend = nd = MkLeaf(Link, &dot);
+            casend->nd_lab = ++text_label;
+            exit_label = ++text_label;
+        }
     Expression(&(nd->nd_left))
         { CaseExpr(casend); }
     OF
@@ -314,69 +324,73 @@ CaseListElementTail(struct node **pnd; label exit_label;)
 CaseListElement(struct node **pnd; label exit_label;)
     : CaseConstantList(pnd)
     ':'
-        { *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
-				  (*pnd)->nd_lab = ++text_label;
-				  C_df_ilb(text_label);
-				}
+        {
+            *pnd = MkNode(Link, *pnd, NULLNODE, &dot);
+            (*pnd)->nd_lab = ++text_label;
+            C_df_ilb(text_label);
+        }
     Statement
-        { C_bra(exit_label);
-				  chk_labels(slevel + 1);
-				}
+        {
+            C_bra(exit_label);
+            chk_labels(slevel + 1);
+        }
     ;
 
     /* ISO section 6.8.3.7, p. 129 */
 RepeatStatement
     {
-	struct node *nd;
-	label repeatlb = ++text_label;
-}
+        struct node* nd;
+        label repeatlb = ++text_label;
+    }
     : REPEAT
         { C_df_ilb(repeatlb); }
     StatementSequence UNTIL
     BooleanExpression(&nd)
-        { struct desig ds;
+        {
+            struct desig ds;
 
-					  ds = InitDesig;
-					  if( !err_occurred )
-						CodeExpr(nd, &ds, repeatlb);
-					  FreeNode(nd);
-					}
+            ds = InitDesig;
+            if (!err_occurred)
+                CodeExpr(nd, &ds, repeatlb);
+            FreeNode(nd);
+        }
     ;
 
     /* ISO section 6.8.3.8, p. 129 */
 WhileStatement
     {
-	struct node *nd;
-	label whilelb = ++text_label;
-	label exitlb = ++text_label;
-
-}
+        struct node* nd;
+        label whilelb = ++text_label;
+        label exitlb = ++text_label;
+    }
     : WHILE
         { C_df_ilb(whilelb); }
     BooleanExpression(&nd)
-        { struct desig ds;
+        {
+            struct desig ds;
 
-					  ds = InitDesig;
-					  if( !err_occurred )
-						CodeExpr(nd, &ds, exitlb);
-					  FreeNode(nd);
-					}
+            ds = InitDesig;
+            if (!err_occurred)
+                CodeExpr(nd, &ds, exitlb);
+            FreeNode(nd);
+        }
     DO Statement
-        { C_bra(whilelb);
-					  C_df_ilb(exitlb);
-					  chk_labels(slevel + 1);
-					}
+        {
+            C_bra(whilelb);
+            C_df_ilb(exitlb);
+            chk_labels(slevel + 1);
+        }
     ;
 
     /* ISO section 6.8.3.9, p. 130 */
 ForStatement
     {
-	register struct node *nd;
-	int stepsize;
-	label l1 = ++text_label;
-	label l2 = ++text_label;
-	arith tmp2 = (arith) 0;
-}
+        register struct node* nd;
+        int stepsize;
+        label l1 = ++text_label;
+        label l2 = ++text_label;
+        arith tmp2 = (arith)0;
+    }
     : FOR
     /* ControlVariable must be an EntireVariable */
     IDENT
@@ -390,30 +404,34 @@ ForStatement
             { stepsize = -1; }
     ]
     Expression(&(nd->nd_right))
-        { ChkForStat(nd);
-				  if( !err_occurred )	{
-					CodePExpr(nd->nd_left);
-					C_dup(int_size);
-					tmp2 = CodeInitFor(nd->nd_right, 2);
-				  	CodeFor(nd, stepsize, l1, l2);
-				  }
-				}
+        {
+            ChkForStat(nd);
+            if (!err_occurred)
+            {
+                CodePExpr(nd->nd_left);
+                C_dup(int_size);
+                tmp2 = CodeInitFor(nd->nd_right, 2);
+                CodeFor(nd, stepsize, l1, l2);
+            }
+        }
     DO Statement
-        { if( !err_occurred )
-				       CodeEndFor(nd, stepsize, l1, l2, tmp2);
-				  EndForStat(nd);
-				  chk_labels(slevel + 1);
-				  FreeNode(nd);
-				  if( tmp2 ) FreeInt(tmp2);
-				}
+        {
+            if (!err_occurred)
+                CodeEndFor(nd, stepsize, l1, l2, tmp2);
+            EndForStat(nd);
+            chk_labels(slevel + 1);
+            FreeNode(nd);
+            if (tmp2)
+                FreeInt(tmp2);
+        }
     ;
 
     /* SPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIALSPECIAL */
     /* ISO section 6.9, p. 132-136 */
 ReadParameterList(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     :
     /* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
@@ -421,16 +439,17 @@ ReadParameterList(struct node **pnd;)
     '('
     VariableAccess(pnd)
     /* possibly a FileVariable */
-        { *pnd = nd =
-					     MkNode(Link, *pnd, NULLNODE, &dot);
-					  nd->nd_symb = ',';
-					}
+        {
+            *pnd = nd = MkNode(Link, *pnd, NULLNODE, &dot);
+            nd->nd_symb = ',';
+        }
     [
         %persistent
         ','
-            { nd->nd_right = MkLeaf(Link, &dot);
-					  nd = nd->nd_right;
-					}
+            {
+                nd->nd_right = MkLeaf(Link, &dot);
+                nd = nd->nd_right;
+            }
         VariableAccess(&(nd->nd_left))
     ]*
     ')'
@@ -438,8 +457,8 @@ ReadParameterList(struct node **pnd;)
 
 WriteParameterList(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     :
     /* This is a changed rule, because the grammar as specified in the
 	 * reference is not LL(1), and this gives conflicts.
@@ -448,16 +467,17 @@ WriteParameterList(struct node **pnd;)
     /* Only the first WriteParameter can be a FileVariable !!
 		 */
     WriteParameter(pnd)
-        { *pnd = nd =
-					     MkNode(Link, *pnd, NULLNODE, &dot);
-					  nd->nd_symb = ',';
-					}
+        {
+            *pnd = nd = MkNode(Link, *pnd, NULLNODE, &dot);
+            nd->nd_symb = ',';
+        }
     [
         %persistent
         ','
-            { nd->nd_right = MkLeaf(Link, &dot);
-					  nd = nd->nd_right;
-					}
+            {
+                nd->nd_right = MkLeaf(Link, &dot);
+                nd = nd->nd_right;
+            }
         WriteParameter(&(nd->nd_left))
     ]*
     ')'
@@ -465,38 +485,42 @@ WriteParameterList(struct node **pnd;)
 
 WriteParameter(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : Expression(pnd)
-        { if( !ChkExpression(*pnd) )
-						(*pnd)->nd_type = error_type;
-					  MarkUsed(*pnd);
-					  *pnd = nd =
-					     MkNode(Link, *pnd, NULLNODE, &dot);
-					  nd->nd_symb = ':';
-					}
+        {
+            if (!ChkExpression(*pnd))
+                (*pnd)->nd_type = error_type;
+            MarkUsed(*pnd);
+            *pnd = nd = MkNode(Link, *pnd, NULLNODE, &dot);
+            nd->nd_symb = ':';
+        }
     [
     /* Here the first Expression can't be a FileVariable
 	 */
         ':'
-            { nd->nd_right = MkLeaf(Link, &dot);
-					  nd = nd->nd_right;
-					}
+            {
+                nd->nd_right = MkLeaf(Link, &dot);
+                nd = nd->nd_right;
+            }
         Expression(&(nd->nd_left))
-            { if( !ChkExpression(nd->nd_left) )
-					      nd->nd_left->nd_type = error_type;
-					  MarkUsed(nd->nd_left);
-					}
+            {
+                if (!ChkExpression(nd->nd_left))
+                    nd->nd_left->nd_type = error_type;
+                MarkUsed(nd->nd_left);
+            }
         [
             ':'
-                { nd->nd_right = MkLeaf(Link, &dot);
-					  nd = nd->nd_right;
-					}
+                {
+                    nd->nd_right = MkLeaf(Link, &dot);
+                    nd = nd->nd_right;
+                }
             Expression(&(nd->nd_left))
-                { if( !ChkExpression(nd->nd_left) )
-					      nd->nd_left->nd_type = error_type;
-					  MarkUsed(nd->nd_left);
-					}
+                {
+                    if (!ChkExpression(nd->nd_left))
+                        nd->nd_left->nd_type = error_type;
+                    MarkUsed(nd->nd_left);
+                }
         ]?
     ]?
     ;

@@ -44,8 +44,7 @@ number(struct node **p;) :
 */
 
 qualident(struct node **p;)
-    {
-}
+    {}
     : IDENT
         { *p = dot2leaf(Name); }
     [
@@ -54,58 +53,62 @@ qualident(struct node **p;)
     ;
 
 selector(struct node **pnd;)
-    { struct node *nd;
-}
+    {
+        struct node* nd;
+    }
     : '.'
-        { nd = dot2leaf(Select); nd->nd_NEXT = *pnd; *pnd = nd; }
+        {
+            nd = dot2leaf(Select);
+            nd->nd_NEXT = *pnd;
+            *pnd = nd;
+        }
     IDENT
         { (*pnd)->nd_IDF = dot.TOK_IDF; }
     ;
 
 ExpList(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : expression(pnd)
-        { *pnd = nd = dot2node(Link,*pnd,NULLNODE);
-				  nd->nd_symb = ',';
-				}
+        {
+            *pnd = nd = dot2node(Link, *pnd, NULLNODE);
+            nd->nd_symb = ',';
+        }
     [
         ','
-            { nd->nd_RIGHT = dot2leaf(Link);
-				  nd = nd->nd_RIGHT;
-				}
+            {
+                nd->nd_RIGHT = dot2leaf(Link);
+                nd = nd->nd_RIGHT;
+            }
         expression(&(nd->nd_LEFT))
     ]*
     ;
 
 ConstExpression(struct node **pnd;)
-    {
-}
+    {}
     : expression(pnd)
     /*
 	 * Changed rule in new Modula-2.
 	 * Check that the expression is a constant expression and evaluate!
 	 */
         {
-		  DO_DEBUG(options['C'], printf("CONSTANT EXPRESSION\n"));
-		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
+            DO_DEBUG(options['C'], printf("CONSTANT EXPRESSION\n"));
+            DO_DEBUG(options['C'], PrNode(*pnd, 0));
 
-		  if (ChkExpression(pnd) &&
-		      (*pnd)->nd_class != Set &&
-		      (*pnd)->nd_class != Value &&
-		      ! (options['l'] && (*pnd)->nd_class == Def && IsProc((*pnd)))) {
-			error("constant expression expected");
-		  }
+            if (ChkExpression(pnd) && (*pnd)->nd_class != Set && (*pnd)->nd_class != Value
+                && !(options['l'] && (*pnd)->nd_class == Def && IsProc((*pnd))))
+            {
+                error("constant expression expected");
+            }
 
-		  DO_DEBUG(options['C'], printf("RESULTS IN\n"));
-		  DO_DEBUG(options['C'], PrNode(*pnd, 0));
-		}
+            DO_DEBUG(options['C'], printf("RESULTS IN\n"));
+            DO_DEBUG(options['C'], PrNode(*pnd, 0));
+        }
     ;
 
 expression(struct node **pnd;)
-    {
-}
+    {}
     : SimpleExpression(pnd)
     [
     /* relation */
@@ -132,25 +135,25 @@ relation:
 
 SimpleExpression(struct node **pnd;)
     {
-	register struct node *nd = 0;
-}
+        register struct node* nd = 0;
+    }
     : [
         [
             '+'
             | '-'
         ]
-            { nd = dot2leaf(Uoper);
-			  /* priority of unary operator ??? */
-			}
+            { nd = dot2leaf(Uoper); /* priority of unary operator ??? */ }
         |
     ]
     term(pnd)
-        { if (nd) {
-				nd->nd_RIGHT = *pnd;
-				*pnd = nd;
-			  }
-			  nd = *pnd;
-			}
+        {
+            if (nd)
+            {
+                nd->nd_RIGHT = *pnd;
+                *pnd = nd;
+            }
+            nd = *pnd;
+        }
     [
     /* AddOperator */
         [
@@ -172,8 +175,8 @@ AddOperator:
 
 term(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : factor(pnd)
         { nd = *pnd; }
     [
@@ -199,9 +202,9 @@ MulOperator:
 
 factor(struct node **p;)
     {
-	register struct node *nd;
-	struct node *nd1;
-}
+        register struct node* nd;
+        struct node* nd1;
+    }
     : qualident(p)
     [
         designator_tail(p)
@@ -211,7 +214,11 @@ factor(struct node **p;)
             |
         ]
         | bare_set(&nd1)
-            { nd = nd1; nd->nd_LEFT = *p; *p = nd; }
+            {
+                nd = nd1;
+                nd->nd_LEFT = *p;
+                *p = nd;
+            }
     ]
     | bare_set(p)
     | %default
@@ -221,27 +228,28 @@ factor(struct node **p;)
         | REAL
         | STRING
     ]
-        { *p = dot2leaf(Value);
-			  (*p)->nd_type = toktype;
-			}
+        {
+            *p = dot2leaf(Value);
+            (*p)->nd_type = toktype;
+        }
     | '('
         { nd = dot2leaf(Uoper); }
     expression(p)
-        { /*	In some cases we must leave the '(' as an unary
-			operator, because otherwise we cannot see that the
-			factor was not a designator
-		  */
-		  register int class = (*p)->nd_class;
+        {
+            /*	In some cases we must leave the '(' as an unary
+            operator, because otherwise we cannot see that the
+            factor was not a designator
+          */
+            register int class = (*p)->nd_class;
 
-		  if (class == Arrsel ||
-		      class == Arrow ||
-		      class == Name ||
-		      class == Select) {
-			nd->nd_RIGHT = *p;
-			*p = nd;
-		  }
-		  else FreeNode(nd);
-		}
+            if (class == Arrsel || class == Arrow || class == Name || class == Select)
+            {
+                nd->nd_RIGHT = *p;
+                *p = nd;
+            }
+            else
+                FreeNode(nd);
+        }
     ')'
     | NOT
         { *p = dot2leaf(Uoper); }
@@ -250,13 +258,14 @@ factor(struct node **p;)
 
 bare_set(struct node **pnd;)
     {
-	register struct node *nd;
-}
+        register struct node* nd;
+    }
     : '{'
-        { DOT = SET;
-			  *pnd = nd = dot2leaf(Xset);
-			  nd->nd_type = bitset_type;
-			}
+        {
+            DOT = SET;
+            *pnd = nd = dot2leaf(Xset);
+            nd->nd_type = bitset_type;
+        }
     [
         element(nd)
         [
@@ -279,13 +288,14 @@ element(struct node *nd;)
     : expression(&(nd->nd_RIGHT))
     [
         UPTO
-            { nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);}
+            { nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE); }
         expression(&(nd->nd_RIGHT->nd_RIGHT))
         |
     ]
-        { nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);
-			  nd->nd_RIGHT->nd_symb = ',';
-			}
+        {
+            nd->nd_RIGHT = dot2node(Link, nd->nd_RIGHT, NULLNODE);
+            nd->nd_RIGHT->nd_symb = ',';
+        }
     ;
 
 designator(struct node **pnd;)
@@ -306,15 +316,14 @@ designator_tail(struct node **pnd;)
 
 visible_designator_tail(struct node **pnd;)
     {
-	register struct node *nd = *pnd;
-}
+        register struct node* nd = *pnd;
+    }
     : '['
         { nd = dot2node(Arrsel, nd, NULLNODE); }
     expression(&(nd->nd_RIGHT))
     [
         ','
-            { nd = dot2node(Arrsel, nd, NULLNODE);
-			}
+            { nd = dot2node(Arrsel, nd, NULLNODE); }
         expression(&(nd->nd_RIGHT))
     ]*
     ']'
