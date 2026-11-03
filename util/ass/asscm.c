@@ -18,6 +18,7 @@
  The algorithm is first fit.
  */
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "ass00.h"
@@ -41,13 +42,29 @@ static struct freeblock freexx[2] = { { freexx, 0 }, { freexx + 1, 0 } };
 
 #define CHUNK 2048 /* Smallest chunk to be gotten from UNIX */
 
+/*
+ * Every area and every free block starts at a multiple of ALIGN, so that
+ * the structs kept in them (line_t, relc_t, locl_t, ... with pointers: 8
+ * bytes on a 64-bit host) are aligned: malloc() returns such addresses,
+ * and all sizes are rounded up to ALIGN. A free block must also have room
+ * for its own header.
+ */
+#define ALIGN _Alignof(max_align_t)
+
+static unsigned int roundsize(unsigned int size)
+{
+	if (size < sizeof(struct freeblock))
+		size = sizeof(struct freeblock);
+	return (size + (ALIGN - 1)) & ~(unsigned int)(ALIGN - 1);
+}
+
 area_t getarea(unsigned int size)
 {
 	struct freeblock *c_ptr, *l_ptr;
 	char* ptr;
 	unsigned rqsize;
 
-	size = ((size + (sizeof(int) - 1)) / sizeof(int)) * sizeof(int);
+	size = roundsize(size);
 #ifdef MEMUSE
 	m_used += size;
 	m_free -= size;
@@ -75,7 +92,7 @@ area_t getarea(unsigned int size)
 			if (ptr)
 				break; /* request succesfull */
 			rqsize /= 2;
-			rqsize -= rqsize % sizeof(int);
+			rqsize -= rqsize % ALIGN;
 			if (rqsize < sizeof freehead)
 			{
 				fatal("Out of memory");
@@ -93,7 +110,7 @@ void freearea(area_t ptr, unsigned int size)
 {
 	struct freeblock *c_ptr, *l_ptr;
 
-	size = ((size + (sizeof(int) - 1)) / sizeof(int)) * sizeof(int);
+	size = roundsize(size);
 #ifdef MEMUSE
 	m_free += size;
 	m_used -= size;
