@@ -44,9 +44,7 @@ def llgen(self, name, srcs: Targets = []):
         outs=(["=Lpars.c", "=Lpars.h"] + [f"={f}.c" for f in fs]),
         deps=["util/LLgen/lib/incl", "util/LLgen/lib/rec"],
         commands=[
-            f"$[ins[0]] {' '.join(filenamesof(srcs))}",
-            # llgen emits the files into the current directory (of the sandbox).
-            f"mv *.[ch] $[dir]",
+            f"$[ins[0]] -o$[dir] {' '.join(filenamesof(srcs))}",
         ],
         label="LLGEN",
     )
