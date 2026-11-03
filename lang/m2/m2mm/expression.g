@@ -17,140 +17,155 @@
 
 /* $Id$ */
 
-qualident :
-	IDENT
-	[
-		selector
-	]*
-;
+qualident
+    : IDENT
+    [
+        selector
+    ]*
+    ;
 
-selector :
-	'.' IDENT
-;
+selector
+    : '.' IDENT
+    ;
 
-ExpList :
-	expression
-	[
-		',' expression
-	]*
-;
+ExpList
+    : expression
+    [
+        ',' expression
+    ]*
+    ;
 
-ConstExpression :
-	expression
-	/*
-	 * Changed rule in new Modula-2.
-	 */
-;
+ConstExpression
+    : expression
+    /*
+     * Changed rule in new Modula-2.
+     */
+    ;
 
-expression :
-	SimpleExpression
-	[
-		/* relation */
-		[ '=' | '#' | '<' | LESSEQUAL | '>' | GREATEREQUAL | IN ]
-		SimpleExpression
-	|
-		/* empty */
-	]
-;
+expression
+    : SimpleExpression
+    [
+        /* relation */
+        [
+            '='
+            | '#'
+            | '<'
+            | LESSEQUAL
+            | '>'
+            | GREATEREQUAL
+            | IN
+        ]
+        SimpleExpression
+        |
+        /* empty */
+    ]
+    ;
 
-SimpleExpression :
-	[
-		'+' 
-	|
-		'-'
-	|
-		/* empty */
-	]
-	term
-	[
-		/* AddOperator */
-		[ '+' | '-' | OR ] term
-	]*
-;
+SimpleExpression
+    : [
+        '+'
+        | '-'
+        |
+        /* empty */
+    ]
+    term
+    [
+        /* AddOperator */
+        [
+            '+'
+            | '-'
+            | OR
+        ]
+        term
+    ]*
+    ;
 
-term :
-	factor
-	[
-		/* MulOperator */
-		[ '*' | '/' | DIV | MOD | AND ] factor
-	]*
-;
+term
+    : factor
+    [
+        /* MulOperator */
+        [
+            '*'
+            | '/'
+            | DIV
+            | MOD
+            | AND
+        ]
+        factor
+    ]*
+    ;
 
-factor :
-	qualident
-	[
-		designator_tail?
-		[
-			ActualParameters
-		|
-			/* empty */
-		]
-	|
-		bare_set
-	]
-|
-	bare_set
-| %default
-	[ %default
-		INTEGER
-	|
-		REAL
-	|
-		STRING
-	]
-|
-	'(' expression ')'
-|
-	NOT factor
-;
+factor
+    : qualident
+    [
+        designator_tail?
+        [
+            ActualParameters
+            |
+            /* empty */
+        ]
+        | bare_set
+    ]
+    | bare_set
+    | %default
+    [
+        %default
+        INTEGER
+        | REAL
+        | STRING
+    ]
+    | '(' expression ')'
+    | NOT factor
+    ;
 
-bare_set :
-	'{'
-	[
-		element
-		[
-			',' element
-		]*
-	|
-		/* empty */
-	]
-	'}'
-;
+bare_set
+    : '{'
+    [
+        element
+        [
+            ',' element
+        ]*
+        |
+        /* empty */
+    ]
+    '}'
+    ;
 
-ActualParameters :
-	'(' ExpList? ')'
-;
+ActualParameters
+    : '('
+    ExpList?
+    ')'
+    ;
 
-element :
-	expression
-	[
-		UPTO expression
-	|
-		/* empty */
-	]
-;
+element
+    : expression
+    [
+        UPTO expression
+        |
+        /* empty */
+    ]
+    ;
 
-designator :
-	qualident designator_tail?
-;
+designator
+    : qualident
+    designator_tail?
+    ;
 
-designator_tail :
-	visible_designator_tail
-	[ %persistent
-	    %default
-		selector
-	|
-		visible_designator_tail
-	]*
-;
+designator_tail
+    : visible_designator_tail
+    [
+        %persistent
+        %default
+        selector
+        | visible_designator_tail
+    ]*
+    ;
 
-visible_designator_tail :
-	'['
-		expression
-		[
-			',' expression
-		]*
-	']'
-|
-	'^'
-;
+visible_designator_tail
+    : '[' expression
+    [
+        ',' expression
+    ]*
+    ']'
+    | '^'
+    ;
