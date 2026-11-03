@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i modules/src/em_opt/parser.g
+ */
+
 /* Parser to read optimization patterns of the form:
 		op1 op2 ... test : action
 	or

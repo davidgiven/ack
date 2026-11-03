@@ -5,6 +5,12 @@
  * Author: Ceriel J.H. Jacobs
  */
 
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i lang/m2/comp/declar.g
+ */
+
 /* D E C L A R A T I O N S */
 
 /* $Id$ */

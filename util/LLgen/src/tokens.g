@@ -4,6 +4,12 @@
  */
 
 /*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i util/LLgen/src/tokens.g
+ */
+
+/*
  *  L L G E N
  *
  *  An Extended LL(1) Parser Generator

@@ -5,6 +5,12 @@
  * Author: Ceriel J.H. Jacobs
  */
 
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i lang/m2/m2mm/expression.g
+ */
+
 /* E X P R E S S I O N S */
 
 /* stripped down version of the one in the Modula-2 compiler */

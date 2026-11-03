@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i lang/pc/comp/declar.g
+ */
+
 /* D E C L A R A T I O N S */
 
 {

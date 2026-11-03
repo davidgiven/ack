@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i util/ceg/EM_parser/common/pars.g
+ */
+
 /* This file contains the parser for the 'EM_table'.
  * Every row in the table is converted to a C-function.
  * The parser is a fairly simple program, for each row it prints a function-

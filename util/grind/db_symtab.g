@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i util/grind/db_symtab.g
+ */
+
 /* $Id$ */
 
 /* Symbol table reader

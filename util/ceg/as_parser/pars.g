@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i util/ceg/as_parser/pars.g
+ */
+
 /* This file contains the description of the 'as_table' parser.
  * It transforms every entry into a C-funtion, for example :
  *

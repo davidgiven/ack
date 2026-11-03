@@ -3,6 +3,12 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i lang/basic/src/basic.g
+ */
+
 %token ILLEGAL;
 %token ASSYM;
 %token BASESYM;

@@ -1,3 +1,9 @@
+/*
+ * Reformat from the repository root (requires clang-format):
+ *
+ *     python3 util/LLgen/formatter.py -i lang/pc/comp/program.g
+ */
+
 /* The grammar of ISO-Pascal as given by the specification, BS6192: 1982. */
 
 {
