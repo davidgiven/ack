@@ -399,6 +399,7 @@ loi 		| R16 |
 
 los $1==2	| R16 |
 		"! los $1"
+		"\ttsx"
 		"\tldx 0,x"
 		"\tins"
 		"\tins"
