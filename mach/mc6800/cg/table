@@ -2406,42 +2406,19 @@ inn ND	| R16 |
 		"\tpulb"
 		"\tjsr Inn"
 					| %[1] | |
-loc set $2==2 && $1>=0 && $1<16	| |
-		allocate(R16)
-		"! loc set $1 $2"
+loc set $2==2 && $1>=0 && $1<16 | | | | loc (1<<$1) |
+set D | R16 |
+		"! set $1"
 		"\tldx #$1"
-		"\tclrb"
-		"\tclra"
-		"\tsec"
-		"1:"
-		"\trolb"
-		"\trola"
-		"\tdex"
-		"bne 1b"
-					| %[a] | |
-set $1==2	| R16 |
-		"! set $1"
-		"\tstab <ARTH+1"
-		"\tstaa <ARTH"
-		"\tldx <ARTH"
-		"\tclrb"
-		"\tclra"
-		"\tsec"
-		"1:"
-		"\trolb"
-		"\trola"
-		"\tdex"
-		"\tbne 1b"
-					| %[1] | |
-set $1<=256	| R16 |
-		"! set $1"
-		"\tldx #$1-1"
 		"\tjsr Set"
 					| | |
-set ND	| R16 |
+set ND | R16 |
 		"! set ND"
-		"\tjsr TestFFh"
-		"\tjsr Pop"
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
 		"\tjsr Set"
 					| | |
 
