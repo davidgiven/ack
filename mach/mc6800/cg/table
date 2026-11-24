@@ -2450,13 +2450,17 @@ sar $1==2	| R16 |
 		"\tjsr Sar"
 					| | |
 sar ND	| R16 |
-		"! Sar ND"
+		"! sar ND"
 		"\ttsta"
-		"\tbeq 1f"
+		"\tbne 1f"
 		"\tcmpb #2"
-		"\tbeq 1f"
-		"\tjsr Trap"
+		"\tbeq 2f"
 		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
 		"\tjsr Sar"
 					| | |
 lae aar $2==2 && rom(1,3)==1 && rom(1,1)==0 | | | | adi 2 |
