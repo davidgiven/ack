@@ -1901,11 +1901,8 @@ zer $1>0 && $1<=256	| |
 		allocate(R16)
 		"! zer $1"
 		"\tclra"
-		"\tldab $1"
-		"\tlsrb"
-		"\tincb"
+		"\tldab #[$1].l"
 		"1:"
-		"\tpsha"
 		"\tpsha"
 		"\tdecb"
 		"\tbne 1b"
