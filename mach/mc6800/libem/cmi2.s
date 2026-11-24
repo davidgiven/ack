@@ -6,25 +6,25 @@
 .sect .bss
 .sect .text
 
-! This subroutine compares on two unsigned integers.
+! This subroutine compares two signed 16-bit integers.
 !   -1  if S < T,
 !    0  if S = T,
 !    1  if S > T.
-
-! AccAB: S
+!
+! AccAB: T
 ! Stack:
 ! +0:	return address
-! +2:	T
+! +2:	S
 
 Cmi2:
 	tsx
-	subb 3,x	! S - T
+	subb 3,x	! T - S
 	sbca 2,x
-	blt 3f		! S < T
-	bgt 2f		! S > T
+	blt 2f		! S > T
+	bgt 3f		! S < T
 	tstb
-	bne 2f		! S != T  (i.e S > T)
-			! S == T, AccAB already zero
+	bne 3f		! positive difference in the low byte
+			! AccAB is already zero for equal operands
 1:
 	ldx 0,x
 	ins
