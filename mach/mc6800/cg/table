@@ -2225,63 +2225,35 @@ com ND	| |
 		"\tcpx <ADDR+2"
 		"\tbne 1b"
 					| | |
-rol $1==2	| R16 |
+rol D | R16 |
 		"! rol $1"
-		"\taslb"
-		"\trola"
-					| %[1] | |
-rol $1==4	| R16 |
-		"! rol $1"
-		"\ttsx"
-		"\tasl 1,x"
-		"\trol 0,x"
-		"\trolb"
-		"\trola"
+		"\tldx #$1"
+		"\tjsr Rol"
 					| | |
-rol ND	| R16 |
+rol ND | R16 |
 		"! rol ND"
-		"\ttsx"
-		"\tstx <ADDR"
-		"\taddb <ADDR+1"
-		"\tadca <ADDR"
-		"\tstab <ADDR+3"
-		"\tstaa <ADDR+2"
-		"\tldx <ADDR+2"
-		"\tclc"
-		"1:"
-		"\tdex"
-		"\trol 0,x"
-		"\tcpx <ADDR"
-		"\tbne 1b"
-					| %[1] | |
-ror $1==2	| R16 |
-		"! ror $1"
-		"\tasra"
-		"\trorb"
-					| %[1] | |
-ror $1==4	| R16 |
-		"! ror $1"
-		"\ttsx"
-		"\tasra"
-		"\trorb"
-		"\tror 0,x"
-		"\tror 1,x"
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
+		"\tjsr Rol"
 					| | |
-ror ND	| R16 |
+
+ror D | R16 |
+		"! ror $1"
+		"\tldx #$1"
+		"\tjsr Ror"
+					| | |
+ror ND | R16 |
 		"! ror ND"
-		"\ttsx"
-		"\tstx <ADDR"
-		"\taddb <ADDR+1"
-		"\tadca <ADDR"
-		"\tstab <ADDR+3"
-		"\tstaa <ADDR+2"
-		"\tclc"
-		"1:"
-		"\tror 0,x"
-		"\tinx"
-		"\tcpx <ADDR+2"
-		"\tbne 1b"
-					| %[1] | |
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
+		"\tjsr Ror"
+					| | |
 
 
 /* GROUP 10 - SETS */
