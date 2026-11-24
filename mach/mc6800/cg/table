@@ -556,13 +556,14 @@ sil IN($1)	| R16 |
 sil	| |
 		allocate(R16)
 		"! sil $1"
-		"\tldab <LBl+1"
-		"\tldaa <LBl"
-		"\taddb #BASE+$1"
-		"\tadca #0"
+		"\tldab #[$1].l"
+		"\tldaa #[$1].h"
+		"\taddb <LB+1"
+		"\tadca <LB"
 		"\tstab <TMP+1"
 		"\tstaa <TMP"
 		"\tldx <TMP"
+		"\tldx 0,x"
 		"\tpula"
 		"\tpulb"
 		"\tstab 1,x"
