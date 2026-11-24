@@ -35,6 +35,14 @@ Dotrap:
 	bne 1f
 	jmp Mtrap
 1:	ldx #RETURN	! save return area
+	ldab 7,x
+	ldaa 6,x
+	pshb
+	psha
+	ldab 5,x
+	ldaa 4,x
+	pshb
+	psha
 	ldab 3,x
 	ldaa 2,x
 	pshb
@@ -77,6 +85,14 @@ Dotrap:
 	pulb
 	staa <RETURN+2
 	stab <RETURN+3
+	pula
+	pulb
+	staa <RETURN+4
+	stab <RETURN+5
+	pula
+	pulb
+	staa <RETURN+6
+	stab <RETURN+7
 	rts
 
 Rtt:

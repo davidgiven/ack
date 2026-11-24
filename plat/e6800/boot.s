@@ -30,7 +30,7 @@ LB: .space 2            ! the localbase
 LBl: .space 2           ! the second localbase (localbase-BASE)
 ERRPROC: .space 2	! can hold the address of the error handler
 ARTH: .space 16         ! used for arithmetic
-RETURN: .space 4        ! the return area
+RETURN: .space 8        ! the return area
 SIGN: .space 1
 RETSIZE: .space 1
 TRAPVAL: .space 1
