@@ -3174,7 +3174,24 @@ nop	| STACK |
 		"\tjsr Printstack"
 #endif
 					| | |
-rck	| R16 | | | |
+rck $1==2	| R16 |
+		"! rck $1"
+		"\tjsr Rck"
+					| | |
+rck ND	| R16 |
+		"! rck ND"
+		"\ttsta"
+		"\tbne 1f"
+		"\tcmpb #2"
+		"\tbeq 2f"
+		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
+		"\tjsr Rck"
+					| | |
 rtt	| |
 		remove(ALL)
 		"! rtt"
