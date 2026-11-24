@@ -407,9 +407,10 @@ static void simple_test_neg(int size, int irop)
     simple_test(size, irop);
 
     push(
-        new_ir1(
-            IR_NOT, EM_wordsize,
-            pop(EM_wordsize)
+        new_ir2(
+            IR_EOR, EM_wordsize,
+            pop(EM_wordsize),
+            new_wordir(1)
         )
     );
 }
@@ -613,6 +614,12 @@ static void insn_simple(int opcode)
                 )
             );
             break;
+
+        case op_nop:
+        {
+            /* Emitted after a volatile access --- ignore. */
+            break;
+        }
 
         case op_lni:
         {
@@ -1741,7 +1748,7 @@ static void generate_tree(struct basicblock* bb)
                 break;
 
             default:
-                assert(0);
+                fatal("invalid EM instruction parameter type");
         }
 
         if (tracing('E'))

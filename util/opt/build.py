@@ -73,7 +73,7 @@ def build_variant(name, cflags):
             "./util.h",
         ],
         cflags=cflags,
-        deps=["h", "modules/h", "modules/src/em_data", "modules/src/system"],
+        deps=["modules/src/data", "h", "modules/h", "modules/src/em_data", "modules/src/system"],
     )
 
 

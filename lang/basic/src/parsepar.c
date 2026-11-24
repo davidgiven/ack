@@ -84,5 +84,5 @@ void parseparams(int argc,char **argv)
 					default:fatal("Too many file arguments") ;
 				}
 			}
-		if (files < 3) fatal("Too few file arguments");
+	if (files < 3) fatal("Too few file arguments");
 }

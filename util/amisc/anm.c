@@ -313,7 +313,7 @@ static void do_file(FILE* fd)
 		}
 
 		printf(
-		    "%8lx %s %s %s\n", nbufp[n].on_valu, cs1, cs2,
+		    "%8lx %s %s %s\n", (unsigned long)nbufp[n].on_valu, cs1, cs2,
 		    nbufp[n].on_mptr ? nbufp[n].on_mptr : "(NULL)");
 	}
 

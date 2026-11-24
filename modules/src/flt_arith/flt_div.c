@@ -112,6 +112,14 @@ void flt_div(flt_arith *e1,flt_arith *e2,flt_arith *res)
 	}
 	res->m1 = result[0];
 	res->m2 = result[1];
+	/* a remainder as a sticky lowest bit (rounding to odd), so that
+	   flt_rnd() can round the quotient once more correctly */
+	for (j = 0; j < 8; j++) {
+		if (u[j]) {
+			res->m2 |= 1;
+			break;
+		}
+	}
 
 	flt_nrm(res);
 	flt_chk(res);

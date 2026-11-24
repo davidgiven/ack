@@ -47,7 +47,7 @@ bool Cis_elem(Celem_t x, cset s)
 
 	assert(x > 0 && x <= s->v_size);
 	n = DIVWL(x - 1);
-	mask = (1 << MODWL(x - 1));
+	mask = (int)(1U << MODWL(x - 1));
 	if ((s->v_bits[n] & mask) == 0)
 	{
 		return false;
@@ -67,7 +67,7 @@ void Cadd(Celem_t x, cset* s_p)
 	s = *s_p;
 	assert(x > 0 && x <= s->v_size);
 	n = DIVWL(x - 1);
-	mask = (1 << MODWL(x - 1));
+	mask = (int)(1U << MODWL(x - 1));
 	s->v_bits[n] |= mask;
 }
 
@@ -80,7 +80,7 @@ void Cremove(Celem_t x, cset* s_p)
 	s = *s_p;
 	assert(x > 0 && x <= s->v_size);
 	n = DIVWL(x - 1);
-	mask = (1 << MODWL(x - 1));
+	mask = (int)(1U << MODWL(x - 1));
 	s->v_bits[n] &= ~mask;
 }
 

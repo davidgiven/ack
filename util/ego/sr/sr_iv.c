@@ -9,6 +9,7 @@
  *
  */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include "ego/share/types.h"
@@ -98,7 +99,7 @@ static int sign(line_p lnp)
 		case op_sbu:
 			return (-1);
 		default:
-			assert(false);
+			fatal("invalid induction variable update instruction");
 	}
 	UNREACHABLE_CODE;
 }

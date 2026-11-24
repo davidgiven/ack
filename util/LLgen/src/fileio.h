@@ -32,7 +32,6 @@ extern FILE* fpars;
 extern FILE* fact;
 extern FILE* fout;
 extern string f_dir;
-extern string f_pars;
 extern string f_temp;
 extern string f_out;
 extern string f_input;
@@ -41,3 +40,6 @@ extern string f_rec;
 #ifdef NON_CORRECTING
 extern string f_nc;
 #endif
+
+extern FILE* openoutput(string);
+extern void closeoutput(FILE**);

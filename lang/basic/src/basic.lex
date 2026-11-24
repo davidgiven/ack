@@ -244,7 +244,7 @@ int getinputline(void)
 		error("source line too long");
 	inputline[MAXLINELENGTH-1]=0;
 	if ( listing)
-		fprintf(stderr, inputline);
+		fprintf(stderr, "%s", inputline);
 	cptr= inputline;
 	return(true);
 }
@@ -329,7 +329,7 @@ int lookup(void)
 	}
 	if ( typech)
 		Sym->symtype=typech;
-	if (debug) printf("lookup:%d Identifier\n",Sym);
+	if (debug) printf("lookup:%p Identifier\n",(void*)Sym);
 	if ( (name[0]=='f' || name[0]=='F') &&
 	     (name[1]=='n' || name[1]=='N') )
 		return(FUNCTID);
@@ -422,7 +422,7 @@ int number(void)
 		}
 		/*NOSTRICT*/ ival= i1;
 #ifdef YYDEBUG
-		if (yydebug) printf("number:INTVALUE %d",i1);
+		if (yydebug) printf("number:INTVALUE %ld",(long)i1);
 #endif
 		return(INTVALUE);
 	}

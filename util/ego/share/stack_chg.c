@@ -5,6 +5,7 @@
  */
 /* S T A C K _ C H A N G E . C */
 
+#include "warnings.h"
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -94,7 +95,7 @@ static int stack_change(line_p l, char sign)
 				case '?':
 					return -1;
 				default:
-					assert(false);
+					fatal("invalid stack effect descriptor");
 			}
 		}
 		s++;

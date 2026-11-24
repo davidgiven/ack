@@ -586,7 +586,7 @@ again:
 							{
 								int c;
 
-								if (is_dig(*np))
+								if (is_dig((unsigned char)*np))
 								{
 									c = *np++ - '0';
 								}

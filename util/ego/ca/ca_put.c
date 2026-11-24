@@ -3,6 +3,7 @@
  * (c) copyright 1987 by the Vrije Universiteit, Amsterdam, The Netherlands.
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
+#include "warnings.h"
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_pseu.h>
@@ -270,7 +271,7 @@ static void cputargs(line_p lnp)
 				cputstr(&ap->a_a.a_con.ac_con);
 				break;
 			default:
-				assert(false);
+				fatal("invalid argument type when writing compact EM");
 		}
 		ap = ap->a_next;
 		/* Avoid generating extremely long CON or ROM statements */
@@ -344,7 +345,7 @@ static void outoperand(line_p lnp)
 			}
 			break;
 		default:
-			assert(false);
+			fatal("invalid operand type when writing compact EM");
 	}
 }
 

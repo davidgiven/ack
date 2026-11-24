@@ -74,6 +74,11 @@ extern unsigned short	nname;		/* Counts name table index in PASS_3 */
 extern item_t	*hashtab[H_TOTAL];
 extern short	hashindex;	/* see item_search() */
 
+extern item_t	*last_it;	/* last identifier seen in an expression */
+
+void item_set_nami(item_t *ip, unsigned short nami);
+unsigned short item_get_nami(item_t *ip);
+
 extern item_t	*fb_ptr[4*FB_SIZE];
 
 #ifdef THREE_PASS
@@ -105,7 +110,7 @@ extern int	curr_token;
 /* comm2.y */
 int	 yyparse(void);
 /* comm4.c */
-void	 stop(void);
+NORETURN void	 stop(void);
 void	 newmodule(char *);
 /* comm5.c */
 int	 yylex(void);
@@ -156,7 +161,7 @@ void	 emitstr(int);
 void	 emitf(int size, int negative);
 void	 yyerror(const char *);
 void	 nosect(void);
-void	 fatal(const char *, ...);
+NORETURN void	 fatal(const char *, ...);
 void	 serror(const char *, ...);
 void	 warning(const char *, ...);
 void	 nofit(void);

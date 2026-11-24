@@ -170,7 +170,7 @@ iocc_t descr_iocc(char *ident)
 		switch (arexp[i].ex_typ)
 		{
 			default:
-				assert(0);
+				fatal("invalid expression type in instruction constraint");
 			case TYPINT:
 				if (tp->tk_att[i].ta_type != -1) {
 					if (tp->tk_att[i].ta_type == -2)

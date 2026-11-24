@@ -5,6 +5,8 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
+#include <float.h>
 #include "doprnt.h"
 
 #if ACKCONF_WANT_STDIO && ACKCONF_WANT_STDIO_FLOAT
@@ -184,6 +186,23 @@ char* _f_print(va_list* ap, int flags, char* s, char c, int precision)
 		ld_val = va_arg(*ap, long double);
 	else
 		ld_val = (long double)va_arg(*ap, double);
+
+	/* infinity and NaN have no digits; a NaN gets no sign of its own
+	 * (comparisons with it do not tell) */
+	if (ld_val != ld_val || ld_val > LDBL_MAX || ld_val < -LDBL_MAX)
+	{
+		const char* t = ld_val != ld_val ? "nan" : "inf";
+
+		if (*t == 'i' && ld_val < 0)
+			*s++ = '-';
+		else if (flags & FL_SIGN)
+			*s++ = '+';
+		else if (flags & FL_SPACE)
+			*s++ = ' ';
+		while (*t)
+			*s++ = (c == 'E' || c == 'G') ? toupper(*t++) : *t++;
+		return s;
+	}
 
 	switch (c)
 	{

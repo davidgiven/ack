@@ -32,7 +32,7 @@ symbol *lookup(char *name, symtype type, lookupstyle style)
 		switch (style)
 		{
 			default:
-				assert(0);
+				fatal("invalid symbol lookup mode");
 			case justlooking:
 			case mustexist:
 			case makeexist:
@@ -47,7 +47,7 @@ symbol *lookup(char *name, symtype type, lookupstyle style)
 	switch (style)
 	{
 		default:
-			assert(0);
+			fatal("invalid symbol lookup mode");
 		case justlooking:
 			return ((symbol *) 0);
 		case mustexist:

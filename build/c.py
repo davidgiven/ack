@@ -109,7 +109,7 @@ def cfileimpl(self, name, srcs, deps, suffix, commands, label, toolchain, cflags
     hdr_files = collectattrs(targets=hdr_deps, name="cheader_files")
     cflags = collectattrs(targets=hdr_deps, name="caller_cflags", initial=cflags)
 
-    t = simplerule(
+    simplerule(
         replaces=self,
         ins=srcs,
         deps=other_deps + hdr_files,

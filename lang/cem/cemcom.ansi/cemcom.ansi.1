@@ -78,6 +78,11 @@ and the \fIn\fR parameter for the alignment of that type.
 Absence of \fIm\fR or \fIn\fR causes the default value to be retained.
 To specify that the bitfields should be right adjusted instead of the
 default left adjustment, specify \fBr\fR as \fIc\fR parameter.
+Floating constants are computed as the target computes them: rounded to
+IEEE single (4 bytes) and double (8 bytes) precision. For a target
+whose floating point is not IEEE, \fBm\fR as \fIc\fR parameter gives
+the number of mantissa bits of an 8-byte floating type in \fIm\fR
+(a 4-byte one has 24); there are no subnormal numbers then.
 .IP \fB\-w\fR
 suppress warning messages.
 .IP \fB\-s\fR

@@ -25,7 +25,14 @@ CFLAGS ?= $(HOSTCFLAGS)
 CXXFLAGS ?= $(CFLAGS)
 LDFLAGS ?= $(HOSTLDFLAGS)
 
+DMD ?= ldmd2
+DFLAGS ?= -g -O0
+
+HOSTDMD ?= $(DMD)
+HOSTDFLAGS ?= $(DFLAGS)
+
 NINJA ?= ninja
+BWRAP ?= bwrap
 
 ifdef VERBOSE
 	hide =
@@ -80,6 +87,15 @@ $(call check_for_command,$(PYTHON))
 pkg-config-hash = $(shell ($(PKG_CONFIG) --list-all && $(HOST_PKG_CONFIG) --list-all) | md5sum)
 build-files = $(shell find . -name .obj -prune -o \( -name 'build.py' -a -type f \) -print) $(wildcard build/*.py) $(wildcard config.py)
 build-file-timestamps = $(shell ls -l $(build-files) | md5sum)
+
+# Detect the presence of bubblewrap.
+
+ifneq ($(shell command -v $(BWRAP) >/dev/null; echo $$?),0)
+  ifneq ("$(AB_SANDBOX)","no")
+    $(shell echo "bubblewrap not detected; disabling sandboxing" >&2)
+    AB_SANDBOX := no
+  endif
+endif
 
 # Wipe the build file (forcing a regeneration) if the make environment is different.
 # (Conveniently, this includes the pkg-config hash calculated above.)

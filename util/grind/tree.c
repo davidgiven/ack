@@ -165,7 +165,7 @@ get_addr_from_node(p)
 	break;
 
   default:
-	assert(0);
+	fatal("invalid symbol kind for scope lookup");
   }
   return a;
 }
@@ -400,7 +400,7 @@ print_node(f, p, top_level)
 	(*currlang->printop)(f, p);
 	break;
   default:
-	assert(0);
+	fatal("invalid expression operator for printing");
   }
   if (top_level) fputs("\n", f);
 }
@@ -502,7 +502,7 @@ perform(p, a)
 	if (p->t_args[2]) do_print(p->t_args[2]);
 	break;
   default:
-	assert(0);
+	fatal("invalid debugger action operator");
   }
 }
 

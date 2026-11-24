@@ -1,4 +1,5 @@
-from build.c import clibrary
+from build.c import clibrary, cprogram
+from build.utils import test
 
 
 clibrary(
@@ -16,6 +17,7 @@ clibrary(
         "./flt_nrm.c",
         "./b64_sft.c",
         "./flt_umin.c",
+        "./flt_rnd.c",
         "./flt_chk.c",
         "./split.c",
         "./flt_misc.h",
@@ -23,3 +25,14 @@ clibrary(
     hdrs={"flt_arith.h": "./flt_arith.h", "flt_misc.h": "./flt_misc.h"},
     deps=["h", "modules/h"],
 )
+
+# flt_add, flt_sub, flt_mul and flt_div rounded with flt_rnd against the
+# host's IEEE double and float arithmetic.
+cprogram(
+    name="ieeetest",
+    srcs=["./ieeetest.c"],
+    deps=[".+flt_arith"],
+    ldflags=["-lm"],
+)
+
+test(name="test", command=".+ieeetest")

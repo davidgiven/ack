@@ -46,7 +46,6 @@ FILE	*fpars;
 FILE	*finput;
 FILE	*fact;
 string	f_dir;
-string	f_pars;
 string	f_temp;
 #ifdef NON_CORRECTING
 string	f_nc;

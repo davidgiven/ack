@@ -492,6 +492,44 @@ a_new_line:		ch = GetChar();
 	}
 }
 
+/*	quoted_name() returns `name' as a string literal, in quotes, with
+	" and \ escaped and other control characters in octal, as the
+	compiler and #line read it back. The result is valid until the next
+	call.
+*/
+char *quoted_name(const char *name)
+{
+	static char *buf;
+	static size_t size;
+	size_t need = 4 * strlen(name) + 3;
+	char *p;
+
+	if (need > size) {
+		free(buf);
+		buf = malloc(need);
+		if (!buf)
+			fatal("out of memory");
+		size = need;
+	}
+	p = buf;
+	*p++ = '"';
+	for (; *name; name++) {
+		unsigned char c = *name;
+
+		if (c == '"' || c == '\\') {
+			*p++ = '\\';
+			*p++ = c;
+		} else if (c < ' ' || c == 0177) {
+			sprintf(p, "\\%03o", c);
+			p += 4;
+		} else
+			*p++ = c;
+	}
+	*p++ = '"';
+	*p = '\0';
+	return buf;
+}
+
 static void macro_func(struct idf *idef)
 {
 	/*	macro_func() performs the special actions needed with some
@@ -500,13 +538,14 @@ static void macro_func(struct idf *idef)
 		used.
 	*/
 	struct macro *mac = idef->id_macro;
-	static char FilNamBuf[PATHLENGTH];
+	static char *FilNamBuf;
 
 	switch (idef->id_text[2]) {
 	case 'F':			/* __FILE__	*/
-		FilNamBuf[0] = '"';
-		strcpy(&FilNamBuf[1], FileName);
-		strcat(FilNamBuf, "\"");
+		free(FilNamBuf);
+		FilNamBuf = strdup(quoted_name(FileName));
+		if (!FilNamBuf)
+			fatal("out of memory");
 		mac->mc_text = FilNamBuf;
 		mac->mc_length = strlen(FilNamBuf);
 		break;

@@ -99,6 +99,16 @@ arith flt_flt2arith(flt_arith *e, int uns);
 /** Negates the number indicated by `e` and stores the result
  *  in `e`. */
 void flt_umin(flt_arith *e);
+/** Rounds the number indicated by `e` to `bits` bits of mantissa, to
+ *  nearest and ties to even. Below 2^`emin` fewer bits are kept, as in a
+ *  subnormal number. flt_add(), flt_sub(), flt_mul() and flt_div() keep
+ *  the bits that do not fit in the 64-bit mantissa as a sticky lowest
+ *  bit: with operands rounded by flt_rnd() (at most 62 bits), the result
+ *  rounded by flt_rnd() to the same precision is the correctly rounded
+ *  result, as the target computes it. E.g. bits 53, emin -1022 for an
+ *  IEEE double, 24 and -126 for a float.
+ */
+void flt_rnd(flt_arith *e, int bits, int emin);
 /** Shifts the mantissa m |n| bits left or right, depending on the sign
  *  of n. If n is negative, it is a left-shift; If n is positive,
  *  it is a right shift.

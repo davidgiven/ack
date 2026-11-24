@@ -214,7 +214,7 @@ static void stb_type(struct type* tp)
 						sprintf(
 						    buf, ",%ld,%ld;",
 						    sdef->sd_offset * 8 + sdef->sd_type->tp_field->fd_shift,
-						    sdef->sd_type->tp_field->fd_width);
+						    (long)sdef->sd_type->tp_field->fd_width);
 						adds_db_str(buf);
 					}
 					else

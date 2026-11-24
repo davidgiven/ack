@@ -4,6 +4,7 @@
  *
  * Author: Hans van Staveren
  */
+#include "warnings.h"
 #include <assert.h>
 #include "param.h"
 #include "types.h"
@@ -36,7 +37,7 @@ void regvar(arg_p ap)
 	switch (i)
 	{
 		default:
-			assert(false);
+			fatal("invalid register message parameter index");
 			break;
 		case 0:
 		case 1:

@@ -305,7 +305,7 @@ int in_range(arith i, struct type *tp)
 		return	chk_bounds(i, tp->sub_ub, SubBaseType(tp)->tp_fund) &&
 			chk_bounds(tp->sub_lb, i, SubBaseType(tp)->tp_fund);
 	}
-	assert(0);
+	fatal("invalid type for bounds check");
 	UNREACHABLE_CODE;
 }
 
@@ -671,7 +671,7 @@ void ForceForwardTypeDef(struct def *df)
 		nd = nd->nd_RIGHT;
 	}
 	df = lookfor(nd, CurrVis, 1, 0);
-	if (! df->df_kind & (D_ERROR|D_TYPE)) {
+	if (!(df->df_kind & (D_ERROR|D_TYPE))) {
 		node_error(nd, "\"%s\" is not a type", df1->df_idf->id_text);
 	}
 	while (df1 && df1->df_kind == D_FORWTYPE) {

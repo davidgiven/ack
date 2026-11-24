@@ -1210,7 +1210,8 @@ from memory2
 
 from memory1
     uses DD_REG = {zero_const, 0}
-    gen move_b %1, %a	yields	%a
+    gen move_b %1, %a
+	killcc.			yields	%a
 
 from memory2
     uses DD_REG
@@ -6400,18 +6401,20 @@ pat lil loc sru sil $1==$4 && $2==1 && $3==4	call rlil1shsil("lsr #1,")
 
 proc txxand
 with test_set_int DD_REG
-    gen test %1
+    gen and_i {const,1}, %2
+	test %1
 	bxx[1] {slabel, 1f}
-	bclr {const,0}, %2
+	clr_i %2
 	1:		yields	%2
 #if WORD_SIZE==2
 with test_set1 DD_REG
 #else
 with test_set1 + test_set2 DD_REG
 #endif
-    gen test %1
+    gen and_i {const,1}, %2
+	test %1
 	bxx[2] {slabel, 1f}
-	bclr {const,0}, %2
+	clr_i %2
 	1:		yields	%2
 
 proc txxior
@@ -6432,19 +6435,21 @@ with test_set1 + test_set2 DD_REG
 
 proc txxand_ouch
 with test_set_int DD_REG
-    gen	killcc.
+    gen and_i {const,1}, %2
+	killcc.
 	test %1
 	bxx[1] {slabel, 1f}
-	bclr {const,0}, %2
+	clr_i %2
 	1:		yields	%2
 #if WORD_SIZE==2
 with test_set1 DD_REG
 #else
 with test_set1 + test_set2 DD_REG
 #endif
-    gen test %1
+    gen and_i {const,1}, %2
+	test %1
 	bxx[2] {slabel, 1f}
-	bclr {const,0}, %2
+	clr_i %2
 	1:		yields	%2
 
 proc txxior_ouch
@@ -6480,46 +6485,54 @@ pat tgt ior $2==WORD_SIZE		call txxior_ouch("ble", "bls")
 
 proc cmxtxxand
 with exact extend1 extend1 DD_REG
-    gen cmp_b %2, %1
+    gen and_i {const,1}, %3
+	cmp_b %2, %1
 	bxx[2] {llabel,1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with exact extend2 extend2 DD_REG
-    gen cmp_w %2, %1
+    gen and_i {const,1}, %3
+	cmp_w %2, %1
 	bxx[2] {llabel,1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with exact sconsts any_int DD_REG
     uses DD_REG=%1
-    gen cmp_i %2, %a
+    gen and_i {const,1}, %3
+	cmp_i %2, %a
 	bxx[2] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with exact any_int sconsts DD_REG
     uses DD_REG=%2
-    gen cmp_i %1, %a
+    gen and_i {const,1}, %3
+	cmp_i %1, %a
 	bxx[1] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with any_int-sconsts genreg DD_REG
-    gen cmp_i %1, %2
+    gen and_i {const,1}, %3
+	cmp_i %1, %2
 	bxx[1] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with genreg any_int-sconsts DD_REG
-    gen cmp_i %2, %1
+    gen and_i {const,1}, %3
+	cmp_i %2, %1
 	bxx[2] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with exact immediate_int-sconsts imm_cmp_int DD_REG
-    gen cmp_i %1, %2
+    gen and_i {const,1}, %3
+	cmp_i %1, %2
 	bxx[1] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 with exact imm_cmp_int immediate_int-sconsts DD_REG
-    gen cmp_i %2, %1
+    gen and_i {const,1}, %3
+	cmp_i %2, %1
 	bxx[2] {slabel, 1f}
-	bclr {const,0}, %3
+	clr_i %3
 	1:		yields	%3
 
 proc cmxtxxior

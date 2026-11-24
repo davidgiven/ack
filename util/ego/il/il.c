@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 	FILE* f;
 	char* tmpdir = sys_gettmpdir();
 
-	go(argc, argv, no_action, no_action, no_action, il_flags);
+	go(argc, argv, no_action, no_action, no_machinit, il_flags);
 	il_extptab(fproc); /* add extended data structures */
 
 	cname = sys_maketempfile("il", "i1");

@@ -17,7 +17,7 @@ int	typetable[10];
 int	exprlimit;
 
 /* handle all predefined functions */
-#define cv(X)	conversion(type,X); pop=X
+#define cv(X)	do { conversion(type,X); pop=X; } while (0)
 
 
 

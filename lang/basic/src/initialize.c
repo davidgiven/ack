@@ -11,34 +11,12 @@
 static char rcs_id[] = "$Id$";
 #endif
 
-/* generate temporary files etc */
-
-FILE	*datfile;
-
 extern void fillkex(void);
 
 void initialize(void)
 {
-	char *cindex, *cptr;
         int result;
 
-	/* Find the basename */
-	/* Strip leading directories */
-	cindex= (char *)0;
-	for ( cptr=program; *cptr; cptr++ ) if ( *cptr=='/' ) cindex=cptr;
-	if ( !cindex ) cindex= program;
-	else {
-		cindex++;
-		if ( !*cindex ) {
-			warning("Null program name, assuming \"basic\"");
-			cindex= "basic";
-		}
-	}
-	cptr=datfname;
-	while ( (*cptr++ = *cindex++) !=0 );
-	/* Strip trailing suffix */
-	if ( cptr>datfname+3 && cptr[-3]=='.' ) cptr[-3]=0;
-	strcat(datfname,".d");
 	C_init((arith)BEMINTSIZE, (arith)BEMPTRSIZE);
 	yyin = fopen(inpfile, "r");
 	result = C_open(outfile);

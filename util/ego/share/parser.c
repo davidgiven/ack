@@ -4,6 +4,7 @@
  * See the copyright notice in the ACK home directory, in the file "Copyright".
  */
 
+#include "warnings.h"
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -171,7 +172,7 @@ static offset nrbytes(int class, offset arg1, offset arg2)
 		case CLASS12:
 			return (arg1 < ws ? ws : arg1);
 		default:
-			assert(false);
+			fatal("invalid instruction size class");
 	}
 	return 0;
 }

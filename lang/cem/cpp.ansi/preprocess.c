@@ -124,8 +124,6 @@ void do_pragma(void)
 	LineNumber++;
 }
 
-char Xbuf[256];
-
 void preprocess(char *fn)
 {
 	int c;
@@ -133,6 +131,7 @@ void preprocess(char *fn)
 	char* ob = &_obuf[OBUFSIZE];
 	int lineno = 0;
 	int startline;
+	char lbuf[32];
 
 #define flush(X) (fwrite(_obuf, 1, X, stdout))
 #define echo(ch)                                                                                   \
@@ -148,19 +147,31 @@ void preprocess(char *fn)
 		op--;                                                                                      \
 	op++;                                                                                          \
 	echo('\n')
+/* A line directive; the file name has no length limit (it can come from
+   #line), so it is echoed, not formatted into a buffer, and it is quoted
+   as a string literal (quoted_name()). */
+#define line_dir(n)                                                                                \
+	{                                                                                              \
+		char* p = lbuf;                                                                            \
+		sprintf(lbuf, "%s %d ", LINE_PREFIX, (int)(n));                                            \
+		while (*p)                                                                                 \
+		{                                                                                          \
+			echo(*p++);                                                                            \
+		}                                                                                          \
+		p = quoted_name(FileName);                                                                 \
+		while (*p)                                                                                 \
+		{                                                                                          \
+			echo(*p++);                                                                            \
+		}                                                                                          \
+		echo('\n');                                                                                \
+	}
 
 	if (!options['P'])
 	{
 		/* Generate a line directive communicating the
 		   source filename
 		*/
-		char* p = Xbuf;
-
-		sprintf(p, "%s 1 \"%s\"\n", LINE_PREFIX, FileName);
-		while (*p)
-		{
-			echo(*p++);
-		}
+		line_dir(1);
 	}
 
 #define do_line_dir(lineno, fn)                                                                    \
@@ -170,17 +181,12 @@ void preprocess(char *fn)
 		lineno = LineNumber;                                                                       \
 		if (!options['P'])                                                                         \
 		{                                                                                          \
-			char* p = Xbuf;                                                               \
-			sprintf(Xbuf, "%s %d \"%s\"\n", LINE_PREFIX, (int)LineNumber, FileName);                \
 			op--;                                                                                  \
 			while (op >= _obuf && (class(*op) == STSKIP || *op == '\n'))                           \
 				op--;                                                                              \
 			op++;                                                                                  \
 			newline();                                                                             \
-			while (*p)                                                                             \
-			{                                                                                      \
-				echo(*p++);                                                                        \
-			}                                                                                      \
+			line_dir(LineNumber);                                                                  \
 		}                                                                                          \
 	}
 

@@ -8,6 +8,7 @@
  *  I L 2 _ A U X . C
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
@@ -376,7 +377,7 @@ static call_p find_origin(call_p c)
 		if (x->cl_id == c->cl_id)
 			return x;
 	}
-	assert(false);
+	fatal("call site missing from caller");
 	UNREACHABLE_CODE;
 }
 
@@ -729,7 +730,7 @@ static void Sstatist(call_p list, long space)
 			else if (c->cl_ratio == 0)
 				Szeroratio++;
 			else
-				assert(false);
+				fatal("unclassified rejected inline call");
 		}
 	}
 }

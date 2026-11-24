@@ -266,7 +266,7 @@ static void ImportEffects(struct def *idef, struct scope *scope, int flag)
 			df->df_flags |= D_QEXPORTED;
 			if ((!(df1 = lookup(df->df_idf, scope, D_IMPORT, 0)) ||
 			     df1 != df) &&
-			    ! DoImport(df, scope, flag|D_USED)) assert(0);
+			    ! DoImport(df, scope, flag|D_USED)) fatal("cannot import qualified export");
 				/* don't complain when not used ... */
 		}
 		idef->df_flags |= D_USED;	/* don't complain ... */
@@ -286,7 +286,7 @@ static void ImportEffects(struct def *idef, struct scope *scope, int flag)
 		     df = df->df_nextinscope) {
 			if (df->df_flags & D_EXPORTED) {
 				if (!DoImport(df, scope, D_IMP_BY_EXP|D_USED)){
-					assert(0);
+					fatal("cannot import exported definition");
 				}
 				/* don't complain when these are not used */
 			}
@@ -383,7 +383,7 @@ void EnterExportList(struct node *Idlist, int qualified)
 			while (df1) {
 				if ((df1->df_kind & D_IMPORTED) &&
 				    df1->imp_def == CurrentScope->sc_definedby) {
-					if (! DoImport(df, df1->df_scope, D_IMP_BY_EXP)) assert(0);
+					if (! DoImport(df, df1->df_scope, D_IMP_BY_EXP)) fatal("cannot propagate exported definition");
 				}
 				df1 = df1->df_next;
 			}
@@ -419,7 +419,7 @@ void EnterExportList(struct node *Idlist, int qualified)
 				}
 			}
 
-			if (! DoImport(df,enclosing(CurrVis)->sc_scope,D_IMP_BY_EXP)) assert(0);
+			if (! DoImport(df,enclosing(CurrVis)->sc_scope,D_IMP_BY_EXP)) fatal("cannot import enclosing module export");
 		}
 	}
 	FreeNode(Idlist);
@@ -497,7 +497,7 @@ node_error(FromId,"identifier \"%s\" does not represent a module",module_name);
 			module_name);
 			df->df_flags |= D_QEXPORTED;
 		}
-		if (! DoImport(df, CurrentScope, 0)) assert(0);
+		if (! DoImport(df, CurrentScope, 0)) fatal("cannot import definition");
 	}
 
 	FreeNode(FromId);
@@ -517,7 +517,7 @@ void EnterImportList(struct node *idlist, int local, struct scope *sc)
 		if (! DoImport(local ?
 			   ForwDef(idlist, sc) :
 			   GetDefinitionModule(idlist->nd_IDF, 1), 
-			 CurrentScope, 0)) assert(0);
+			 CurrentScope, 0)) fatal("cannot import module definition");
 		file_info = f;
 	}
 }

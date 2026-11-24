@@ -8,6 +8,7 @@
  *  I L 3 _ C H A N G E . C
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_mnem.h>
@@ -220,7 +221,7 @@ static void act_info(offset off, actual_p acts, offset ab_off, actual_p* act_out
 		}
 		sum += act->ac_size;
 	}
-	assert(false);
+	fatal("inline parameter offset outside actual arguments");
 }
 
 static void store_off(offset off, line_p l)

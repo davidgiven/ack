@@ -1,101 +1,112 @@
-wordsize: 4
-pointersize: 4
-%%RA
-general registers: 2
-address registers: 0
-floating point registers: 0
-use general as pointer: yes
-
-register score parameters:
-        local variable:
-                (2 cases)
-                pointer,general
-                        (1 size)
-                        default ->      (8,4)
-                general,general
-                        (1 size)
-                        default ->      (4,2)
-        address of local variable:
-                (2 cases)
-                pointer,general
-                        (1 size)
-                        default ->      (0,0)
-                general,general
-                        (1 size)
-                        default ->      (2,2)
-        constant:
-                (1 sizes)
-                default ->      (2,2)
-        double constant:
-                (1 size)
-                default ->      (-1,-1)
-        address of global variable:
-                (1 size)
-                default ->      (4,2)
-        address of procedure:
-                (1 size)
-                default ->      (2,2)
-
-opening cost parameters:
-        local variable:
-                (2 cases)
-                pointer
-                        (1 size)
-                        default ->      (9,4)
-                general
-                        (1 size)
-                        default ->      (9,4)
-        address of local variable:
-                (2 cases)
-                pointer
-                        (1 size)
-                        default ->      (10,6)
-                general
-                        (1 size)
-                        general ->      (10,6)
-        constant:
-                (1 size)
-                default ->      (4,4)
-        double constant:
-                (1 size)
-                default ->      (1000,1000)
-        address of global variable:
-                (1 size)
-                default ->      (4,4)
-        address of procedure:
-                (1 size)
-                default ->      (4,4)
-
-register save costs:
-        (4 cases)
-        0 -> (0,0)
-        1 -> (18,2)
-        2 -> (36,4)
-        0 -> (0,0)
-
-%%UD
-access costs of global variables:
-	(1 size)
-	default ->	(4,2)
-access costs of local variables:
-	(1 size)
-	default ->	(4,2)
-%%SR
-overflow harmful?:  no
-array bound harmful?:  no
-reduce sli if shift count larger than:  0
-%%CS
 #include "em_mnem.h"
-first time then space:
-addressing modes: op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-                  op_adp op_lof op_ldf op_loi op_dch op_lpb -1
-cheap operations: op_cii op_cui op_ciu op_cuu -1
-                  op_cii op_cui op_ciu op_cuu -1
-lexical tresholds: 1 1
-indirection limit: 8
-convert remainder to division?: no no
-do not eliminate sli if index on shiftcounts:   -1
-                                                -1
-forbidden operators: -1 -1
-%%SP
-global stack pollution allowed?: no
+
+word_size = 4;
+pointer_size = 4;
+
+register_allocation = {
+    registers = {
+        general = 2;
+        pointer = 0;
+        float = 0;
+        general_as_pointer = true;
+    };
+
+    /* Rules are tested in order; the final rule must be "default".
+     * Each cost has separate time and space estimates. */
+    scores = {
+        local_variable = (
+            {
+                from = "pointer"; to = "general";
+                rules = ( { when = "default"; time = 8; space = 4; } );
+            },
+            {
+                from = "general"; to = "general";
+                rules = ( { when = "default"; time = 4; space = 2; } );
+            }
+        );
+        local_address = (
+            {
+                from = "pointer"; to = "general";
+                rules = ( { when = "default"; time = 0; space = 0; } );
+            },
+            {
+                from = "general"; to = "general";
+                rules = ( { when = "default"; time = 2; space = 2; } );
+            }
+        );
+        constant = ( { when = "default"; time = 2; space = 2; } );
+        double_constant = ( { when = "default"; time = -1; space = -1; } );
+        global_address = ( { when = "default"; time = 4; space = 2; } );
+        procedure_address = ( { when = "default"; time = 2; space = 2; } );
+    };
+
+    opening_costs = {
+        local_variable = (
+            {
+                register_class = "pointer";
+                rules = ( { when = "default"; time = 9; space = 4; } );
+            },
+            {
+                register_class = "general";
+                rules = ( { when = "default"; time = 9; space = 4; } );
+            }
+        );
+        local_address = (
+            {
+                register_class = "pointer";
+                rules = ( { when = "default"; time = 10; space = 6; } );
+            },
+            {
+                register_class = "general";
+                rules = ( { when = "default"; time = 10; space = 6; } );
+            }
+        );
+        constant = ( { when = "default"; time = 4; space = 4; } );
+        double_constant = ( { when = "default"; time = 1000; space = 1000; } );
+        global_address = ( { when = "default"; time = 4; space = 4; } );
+        procedure_address = ( { when = "default"; time = 4; space = 4; } );
+    };
+
+    /* Indexed by total registers saved, starting at zero. */
+    save_costs = (
+        { time = 0; space = 0; },
+        { time = 18; space = 2; },
+        { time = 36; space = 4; },
+        { time = 0; space = 0; }
+    );
+};
+
+constant_propagation = {
+    global_access = ( { when = "default"; time = 4; space = 2; } );
+    local_access = ( { when = "default"; time = 4; space = 2; } );
+};
+
+strength_reduction = {
+    overflow_harmful = false;
+    array_bounds_harmful = false;
+    shift_threshold = 0;
+};
+
+common_subexpressions = {
+    time = {
+        addressing_modes = [ op_adp, op_lof, op_ldf, op_loi, op_dch, op_lpb ];
+        cheap_operations = [ op_cii, op_cui, op_ciu, op_cuu ];
+        lexical_threshold = 1;
+        convert_remainder_to_division = false;
+        excluded_index_shift_counts = [];
+        forbidden_operations = [];
+    };
+    space = {
+        addressing_modes = [ op_adp, op_lof, op_ldf, op_loi, op_dch, op_lpb ];
+        cheap_operations = [ op_cii, op_cui, op_ciu, op_cuu ];
+        lexical_threshold = 1;
+        convert_remainder_to_division = false;
+        excluded_index_shift_counts = [];
+        forbidden_operations = [];
+    };
+    indirection_limit = 8;
+};
+
+stack_pollution = {
+    global_allowed = false;
+};

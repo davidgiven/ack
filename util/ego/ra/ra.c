@@ -13,6 +13,7 @@
 #include <string.h>
 #include <em_reg.h>
 #include "ego/share/types.h"
+#include "ego/share/mach.h"
 #include "ego/share/debug.h"
 #include "ego/share/global.h"
 #include "ego/share/files.h"
@@ -31,9 +32,9 @@
 #include "ra_pack.h"
 #include "ra_xform.h"
 
-#define newrabx() (bext_p) newstruct(bext_ra)
-#define newralpx() (lpext_p) newstruct(lpext_ra)
-#define oldrabx(x) oldstruct(bext_ra, x)
+#define newrabx()   (bext_p) newstruct(bext_ra)
+#define newralpx()  (lpext_p) newstruct(lpext_ra)
+#define oldrabx(x)  oldstruct(bext_ra, x)
 #define oldralpx(x) oldstruct(lpext_ra, x)
 
 static void stat_regusage(alloc_p list);
@@ -58,79 +59,78 @@ short regs_available[] = {
 
 short use_any_as_pointer = 0;
 
-static cond_p getcondtab(FILE* f)
+static int register_class(config_setting_t* setting, const char* field)
 {
-	int l, i;
-	cond_p tab;
-
-	fscanf(f, "%d", &l);
-	tab = newcondtab(l);
-	for (i = 0; i < l; i++)
-	{
-		fscanf(f, "%hd %hd %hd", &tab[i].mc_cond, &tab[i].mc_tval, &tab[i].mc_sval);
-	}
-	assert(tab[l - 1].mc_cond == DEFAULT);
-	return tab;
+	const char* name = mach_string(setting, field);
+	if (!strcmp(name, "general"))
+		return reg_any;
+	if (!strcmp(name, "pointer"))
+		return reg_pointer;
+	if (!strcmp(name, "float"))
+		return reg_float;
+	error("unknown register class %s", name);
 }
 
-static void get_atab(FILE* f, cond_p tab[NRREGTYPES][NRREGTYPES])
+static void get_atab(config_setting_t* settings, cond_p tab[NRREGTYPES][NRREGTYPES])
 {
-	int i, cnt, totyp, regtyp;
-
-	fscanf(f, "%d", &cnt);
-	for (i = 0; i < cnt; i++)
+	int i;
+	for (i = 0; i < config_setting_length(settings); i++)
 	{
-		fscanf(f, "%d %d", &regtyp, &totyp);
-		assert(regtyp >= 0 && regtyp < NRREGTYPES);
-		assert(totyp >= 0 && totyp < NRREGTYPES);
-		tab[regtyp][totyp] = getcondtab(f);
+		config_setting_t* entry = config_setting_get_elem(settings, i);
+		int from = register_class(entry, "from");
+		int to = register_class(entry, "to");
+		tab[from][to] = mach_condtab(config_setting_get_member(entry, "rules"));
 	}
 }
 
-static void get_otab(FILE* f, cond_p tab[NRREGTYPES])
+static void get_otab(config_setting_t* settings, cond_p tab[NRREGTYPES])
 {
-	int i, cnt, regtyp;
-
-	fscanf(f, "%d", &cnt);
-	for (i = 0; i < cnt; i++)
+	int i;
+	for (i = 0; i < config_setting_length(settings); i++)
 	{
-		fscanf(f, "%d", &regtyp);
-		assert(regtyp >= 0 && regtyp < NRREGTYPES);
-		tab[regtyp] = getcondtab(f);
+		config_setting_t* entry = config_setting_get_elem(settings, i);
+		tab[register_class(entry, "register_class")]
+		    = mach_condtab(config_setting_get_member(entry, "rules"));
 	}
 }
 
-static void ra_machinit(void* vp)
+static void ra_machinit(config_t* config)
 {
-	/* Read target machine dependent information for this phase */
-	FILE* f = vp;
-	char s[100];
+	config_setting_t* regs = mach_setting(config, "register_allocation.registers");
+	config_setting_t* saves;
+	int i, length;
 
-	for (;;)
+	regs_available[reg_any] = mach_int(regs, "general");
+	regs_available[reg_pointer] = mach_int(regs, "pointer");
+	regs_available[reg_float] = mach_int(regs, "float");
+	use_any_as_pointer = mach_bool(regs, "general_as_pointer");
+	get_atab(mach_setting(config, "register_allocation.scores.local_variable"), alocaltab);
+	get_atab(mach_setting(config, "register_allocation.scores.local_address"), alocaddrtab);
+	aconsttab = mach_condtab(mach_setting(config, "register_allocation.scores.constant"));
+	adconsttab = mach_condtab(mach_setting(config, "register_allocation.scores.double_constant"));
+	aglobaltab = mach_condtab(mach_setting(config, "register_allocation.scores.global_address"));
+	aproctab = mach_condtab(mach_setting(config, "register_allocation.scores.procedure_address"));
+	get_otab(mach_setting(config, "register_allocation.opening_costs.local_variable"), olocaltab);
+	get_otab(mach_setting(config, "register_allocation.opening_costs.local_address"), olocaddrtab);
+	oconsttab = mach_condtab(mach_setting(config, "register_allocation.opening_costs.constant"));
+	odconsttab
+	    = mach_condtab(mach_setting(config, "register_allocation.opening_costs.double_constant"));
+	oglobaltab
+	    = mach_condtab(mach_setting(config, "register_allocation.opening_costs.global_address"));
+	oproctab
+	    = mach_condtab(mach_setting(config, "register_allocation.opening_costs.procedure_address"));
+
+	saves = mach_setting(config, "register_allocation.save_costs");
+	length = config_setting_length(saves);
+	regsav_cost = newcondtab(length);
+	for (i = 0; i < length; i++)
 	{
-		while (getc(f) != '\n')
-			;
-		fscanf(f, "%99s", s);
-		if (strcmp(s, "%%RA") == 0)
-			break;
+		config_setting_t* cost = config_setting_get_elem(saves, i);
+		/* Save costs are indexed directly by number of registers. */
+		regsav_cost[i].mc_cond = (i == length - 1) ? DEFAULT : i + 1;
+		regsav_cost[i].mc_tval = mach_int(cost, "time");
+		regsav_cost[i].mc_sval = mach_int(cost, "space");
 	}
-	fscanf(f, "%hd", &regs_available[reg_any]);
-	fscanf(f, "%hd", &regs_available[reg_pointer]);
-	fscanf(f, "%hd", &regs_available[reg_float]);
-	fscanf(f, "%hd", &use_any_as_pointer);
-	get_atab(f, alocaltab);
-	get_atab(f, alocaddrtab);
-	aconsttab = getcondtab(f);
-	adconsttab = getcondtab(f);
-	aglobaltab = getcondtab(f);
-	aproctab = getcondtab(f);
-	get_otab(f, olocaltab);
-	get_otab(f, olocaddrtab);
-	oconsttab = getcondtab(f);
-	odconsttab = getcondtab(f);
-	oglobaltab = getcondtab(f);
-	oproctab = getcondtab(f);
-	regsav_cost = getcondtab(f);
 }
 
 static bblock_p header(loop_p lp)

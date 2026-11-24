@@ -8,6 +8,7 @@
  * I C . C
  */
 
+#include "warnings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <em_spec.h>
@@ -391,7 +392,7 @@ static line_p readoperand(short instr)
 			VP(PROC(lnp));
 			break;
 		default:
-			assert(false);
+			fatal("invalid EM argument type");
 	}
 	return lnp;
 }
@@ -578,7 +579,7 @@ static line_p inpseudo(short n)
 			}
 			return lnp;
 		default:
-			assert(false);
+			fatal("invalid EM instruction type");
 	}
 	UNREACHABLE_CODE;
 }

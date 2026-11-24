@@ -254,7 +254,7 @@ dopseudo(void) {
 	long save;
 	word romcont[MAXROM+1];
 	int nromwords;
-	int rombit,rommask;
+	unsigned rombit,rommask;
 
 	if (nextispseu==0 || nemlines>0)
 		error("No table entry for %d",emlines[0].em_instr);
@@ -687,7 +687,7 @@ static long con(int t) {
 		con_float();
 		return(argval);
 	}
-	assert(false);
+	fatal("invalid EM argument type");
 	UNREACHABLE_CODE;
 }
 

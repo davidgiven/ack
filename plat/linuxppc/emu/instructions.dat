@@ -197,8 +197,12 @@
 <63--><FRT>.....<FRB><136----->R setcr1(R, cpu.fpr[FRT] = d2b(-fabs(fpr(FRB))));
 <63--><FRT><FRA><FRB><21------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) + fpr(FRB)));
 <63--><FRT><FRA><FRB><20------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) - fpr(FRB)));
-<63--><FRT><FRA><FRB><25------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) * fpr(FRB)));
+<63--><FRT><FRA>.....<FRC><25->R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) * fpr(FRC)));
 <63--><FRT><FRA><FRB><18------>R setcr1(R, cpu.fpr[FRT] = d2b(fpr(FRA) / fpr(FRB)));
+<59--><FRT><FRA><FRB>.....<21->R setcr1(R, cpu.fpr[FRT] = d2b((float)(fpr(FRA) + fpr(FRB))));
+<59--><FRT><FRA><FRB>.....<20->R setcr1(R, cpu.fpr[FRT] = d2b((float)(fpr(FRA) - fpr(FRB))));
+<59--><FRT><FRA>.....<FRC><25->R setcr1(R, cpu.fpr[FRT] = d2b((float)(fpr(FRA) * fpr(FRC))));
+<59--><FRT><FRA><FRB>.....<18->R setcr1(R, cpu.fpr[FRT] = d2b((float)(fpr(FRA) / fpr(FRB))));
 
 # Floating point comparisons
 

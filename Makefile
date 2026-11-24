@@ -38,6 +38,7 @@ endif
 # What build flags do you want to use for native code?
 
 CFLAGS ?= -g -Os \
+	-fno-strict-aliasing \
 	-Werror=return-type \
 	-Werror=implicit-function-declaration \
 	-Werror=strict-prototypes \

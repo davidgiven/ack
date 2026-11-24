@@ -81,7 +81,7 @@ item_addr_actions(a, mess_type, may_stop)
 		case OP_DISPLAY:
 			break;
 		default:
-			assert(0);
+			fatal("invalid debugger item operator");
 		}
 	}
   }
@@ -105,7 +105,7 @@ item_addr_actions(a, mess_type, may_stop)
 		case OP_DISPLAY:
 			break;
 		default:
-			assert(0);
+			fatal("invalid debugger item operator");
 		}
 	}
   }

@@ -171,7 +171,8 @@ void cut_size(struct expr* expr)
 		if (remainder != 0 && remainder != ~full_mask[size])
 			if (!ResultKnown)
 				expr_warning(expr, "overflow in constant expression");
-		o1 = (o1 << nbits) >> nbits; /* ??? */
+		/* sign extend; shift left unsigned (a negative << is undefined) */
+		o1 = (writh)((unsigned writh)o1 << nbits) >> nbits;
 	}
 	expr->VL_VALUE = o1;
 }

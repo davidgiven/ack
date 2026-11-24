@@ -31,7 +31,7 @@ extern double _cvd(String *s);
 extern double _exp(double x);
 extern double _fcint(double f);
 extern double _log(double x);
-extern double _power(double x, double y);
+extern double _power(double exponent, double base);
 extern double _rnd(double d);
 extern double _sin(double x);
 extern double _sqt(double x);

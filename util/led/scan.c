@@ -29,7 +29,7 @@ static char rcsid[] = "$Id$";
 
 #define READ 0
 
-#define IND_EMIT(x) (IND_CHAR(x) + (ind_t)align((x).oh_nchar))
+#define IND_EMIT(x) int_align(IND_CHAR(x) + (x).oh_nchar)
 #define IND_RELO(x) (IND_EMIT(x) + (x).oh_nsect * sizeof(ind_t))
 #ifdef SYMDBUG
 #define IND_DBUG(x) (IND_RELO(x) + sizeof(ind_t))
@@ -43,7 +43,6 @@ int passnumber; /* Current pass */
 long objectsize;
 #endif /* SYMDBUG */
 
-static size_t align(size_t size);
 static char* modulbase;
 static size_t modulsize(struct outhead* head);
 static void can_modul(void);
@@ -113,8 +112,8 @@ int getfile(char* filename)
 			}
 			else if (incore)
 			{
-				modulbase += sizeof(int);
-				core_position += sizeof(int);
+				modulbase += int_align(sizeof(int));
+				core_position += int_align(sizeof(int));
 			}
 			return ARCHIVE;
 		default:
@@ -223,16 +222,12 @@ static bool direct_alloc(struct outhead* head)
 	unsigned short nsect = head->oh_nsect;
 	size_t size, rest;
 
-#ifdef SYMDBUG
-	rest = nsect * sizeof(ind_t) + sizeof(ind_t) + sizeof(ind_t);
-#else /* SYMDBUG */
-	rest = nsect * sizeof(ind_t) + sizeof(ind_t);
-#endif /* SYMDBUG */
 	/*
-	 * We already allocated space for the header, we now need
-	 * the section, name an string table.
+	 * We already allocated space for the header (IND_SECT bytes, alloc()
+	 * rounds), we now need the section, name and string table.
 	 */
-	size = modulsize(head) - sizeof(struct outhead) - rest;
+	size = IND_EMIT(*head) - IND_SECT(*head);
+	rest = modulsize(head) - IND_EMIT(*head);
 	if (hard_alloc(ALLOMODL, size) == BADOFF)
 		fatal("no space for module");
 	rd_sect(sects = ((struct outsect*)modulptr(sectindex)), nsect);
@@ -444,11 +439,7 @@ static void read_modul(void)
 	nameindex = IND_NAME(*head);
 	nchar = head->oh_nchar;
 	charindex = IND_CHAR(*head);
-#ifdef SYMDBUG
-	size = modulsize(head) - (nsect * sizeof(ind_t) + 2 * sizeof(ind_t));
-#else /* SYMDBUG */
-	size = modulsize(head) - (nsect * sizeof(ind_t) + sizeof(ind_t));
-#endif /* SYMDBUG */
+	size = IND_EMIT(*head) - IND_SECT(*head);
 	if (hard_alloc(ALLOMODL, size) == BADOFF)
 		fatal("no space for module");
 
@@ -471,15 +462,6 @@ static void read_modul(void)
 }
 
 /*
- * Align `size' to a multiple of the size of a double.
- * This is assumed to be a power of 2.
- */
-static size_t align(size_t size)
-{
-	return (size + (sizeof(double) - 1)) & ~(sizeof(double) - 1);
-}
-
-/*
  * Compute how many DIRECT bytes must be allocated for a module of which the
  * header is pointed to by `head':
  *	0. the header,
@@ -494,16 +476,11 @@ static size_t align(size_t size)
  */
 static size_t modulsize(struct outhead* head)
 {
-	return sizeof(struct outhead) + /* 0 */
-	    head->oh_nsect * sizeof(struct outsect) + /* 1 */
-	    head->oh_nname * sizeof(struct outname) + /* 2 */
-	    align(head->oh_nchar) + /* 3 */
-	    head->oh_nsect * sizeof(ind_t) + /* 4 */
+	/* Each part starts aligned (IND_SECT, IND_NAME, IND_EMIT). */
 #ifdef SYMDBUG
-	    sizeof(ind_t) + /* 5 */
-	    sizeof(ind_t); /* 6 */
+	return int_align(IND_DBUG(*head) + sizeof(ind_t));
 #else /* SYMDBUG */
-	    sizeof(ind_t); /* 5 */
+	return int_align(IND_RELO(*head) + sizeof(ind_t));
 #endif /* SYMDBUG */
 }
 

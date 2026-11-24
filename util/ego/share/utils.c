@@ -9,6 +9,7 @@
  *
  */
 
+#include "warnings.h"
 #include <em_mes.h>
 #include <em_pseu.h>
 #include "types.h"
@@ -28,7 +29,7 @@ offset off_set(line_p lnp)
 		case OPOFFSET:
 			return OFFSET(lnp);
 		default:
-			assert(false);
+			fatal("invalid offset operand type");
 	}
 	UNREACHABLE_CODE;
 }

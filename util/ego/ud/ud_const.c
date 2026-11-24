@@ -5,6 +5,7 @@
  */
 /* C O N S T A N T   P R O P A G A T I O N */
 
+#include "warnings.h"
 #include <em_mnem.h>
 #include <em_pseu.h>
 #include <em_spec.h>
@@ -98,7 +99,7 @@ bool value_known(line_p def, offset* val_out)
 			}
 			break;
 		default:
-			assert(false);
+			fatal("invalid constant definition instruction");
 	}
 	*val_out = v;
 	return true;
@@ -222,7 +223,7 @@ void fold_const(line_p l, bblock_p b, offset val)
 			n->l_instr = op_ldc;
 			break;
 		default:
-			assert(false);
+			fatal("invalid instruction for constant replacement");
 	}
 	repl_line(l, n, b);
 }

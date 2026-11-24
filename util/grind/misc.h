@@ -1,5 +1,5 @@
 /* $Id$ */
 
-void fatal(char *, ...);
+NORETURN void fatal(char *, ...);
 void error(char *, ...);
 void warning(char *, ...);

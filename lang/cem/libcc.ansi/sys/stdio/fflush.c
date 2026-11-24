@@ -32,7 +32,8 @@ int fflush(FILE* stream)
 		if (stream->_buf && !io_testflag(stream, _IONBF))
 			adjust = stream->_count;
 		stream->_count = 0;
-		lseek(fileno(stream), (off_t)adjust, SEEK_CUR);
+		/* Give back the unread bytes in the buffer (as fseek does). */
+		lseek(fileno(stream), -(off_t)adjust, SEEK_CUR);
 		if (io_testflag(stream, _IOWRITE))
 			stream->_flags &= ~(_IOREADING | _IOWRITING);
 		stream->_ptr = stream->_buf;

@@ -52,6 +52,7 @@ def build_variant(name, cflags):
             "modules/src/alloc",
             "modules/src/em_code+headers",
             "modules/src/em_data",
+            "modules/src/data",
             "modules/src/string",
             "modules/src/system",
         ],

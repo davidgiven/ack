@@ -118,7 +118,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 		switch ((*codep++) & 037)
 		{
 			default:
-				assert(false);
+				fatal("invalid code generator opcode");
 				UNREACHABLE_CODE;
 			case DO_NEXTEM:
 				DEBUG("NEXTEM")
@@ -797,7 +797,7 @@ unsigned int codegen(byte *codep, int ply, int toplevel, unsigned int costlimit,
 					switch (result.e_typ)
 					{
 						default:
-							assert(false);
+							fatal("invalid EM replacement value type");
 						case 0:
 							emp[i].em_optyp = OPNO;
 							emp[i].em_soper = 0;

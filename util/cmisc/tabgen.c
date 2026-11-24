@@ -335,8 +335,9 @@ char* getln(char* s, int n, FILE* fp)
 {
 	int c = getc(fp);
 	char* str = s;
+	char* end = s + n - 1; /* room for the terminating 0 */
 
-	while (n--)
+	while (str < end)
 	{
 		if (c == EOF)
 		{
@@ -350,7 +351,7 @@ char* getln(char* s, int n, FILE* fp)
 		*str++ = c;
 		c = getc(fp);
 	}
-	s[n - 1] = '\0';
+	*end = '\0'; /* line too long: truncated */
 	return s;
 }
 

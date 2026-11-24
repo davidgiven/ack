@@ -6,7 +6,7 @@ Filedesc _fdtable[16];
 /* BASIC file descriptor table */
 /* Channel assignment:
    -1		terminal IO
-    0		data file
+    0		DATA statements (in the program, see read.c)
     1-15	user files
 */
 
@@ -30,6 +30,13 @@ void _setchan(int index)
 	if (index < 0 || index > 15)
 		error(27);
 	_chann = index;
+	if (index == 0)
+	{
+		/* DATA: read from the program (read.c), not a file */
+		_chanrd = 0;
+		_chanwr = stdout;
+		return;
+	}
 	_chanrd = _chanwr = _fdtable[index].fd;
 }
 

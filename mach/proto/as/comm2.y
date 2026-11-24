@@ -14,7 +14,7 @@
 #include	"comm0.h"
 #include	"comm1.h"
 
-static item_t	*last_it, *o_it;
+static item_t	*o_it;
 %}
 
 /* ========== Machine independent Yacc definitions ========== */

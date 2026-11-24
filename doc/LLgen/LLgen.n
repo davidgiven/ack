@@ -40,12 +40,8 @@ to resolve these ambiguities.
 The specification can be split into several files, for each of
 which \fILLgen\fR generates an output file containing the
 corresponding part of the parser.
-Furthermore, only output files that differ from their previous
-version are updated.
-Other output files are not affected in any
-way.
-This allows the user to recompile only those output files that have
-changed.
+All output files are written directly to the output directory and
+existing files are overwritten without comparison or identification checks.
 .PP
 The subroutine produced by \fILLgen\fR calls a user supplied routine
 that must return the next token. This way, the input to the
@@ -122,9 +118,8 @@ yacc
 .]).
 It demonstrates the struggle \fILLparse\fR and other LL(1)
 parsers have with expressions.
-Appendix C gives an example of the \fILLgen\fR features
-allowing the user to recompile only those output files that
-have changed, using the \fImake\fR program.
+Appendix C gives an example of using \fILLgen\fR with the
+\fImake\fR program.
 .[
 make
 .]
@@ -612,17 +607,15 @@ The LLgen working environment
 file, and two other files: \fILpars.c\fR and \fILpars.h\fR.
 \fILpars.h\fR contains "#-define"s for the tokennames.
 \fILpars.c\fR contains the error recovery routines and tables.
-Only those output files that differ from their previous version
-are updated. See appendix C for a possible application of this
-feature.
+All output files are overwritten on each run. Their names are reported
+on standard error.
 .PP
 The names of the output files are constructed as
 follows:
-in the input file name, the suffix after the last point is
-replaced by a "c". If no point is present in the input file
-name, ".c" is appended to it. \fILLgen\fR checks that the
-filename constructed this way in fact represents a previous
-version, or does not exist already.
+in the basename of the input file, the suffix after the last point is
+replaced by a "c". If no point is present, ".c" is appended.
+All output files are placed in the directory specified by
+\fB-o\fR\fIdirectory\fR, or in the current directory if this option is absent.
 .PP
 The user must provide some environment to obtain a complete
 program.

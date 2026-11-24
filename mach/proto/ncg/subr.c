@@ -76,7 +76,7 @@ void instance(int instno, token_p token) {
 	inp= &tokeninstances[instno];
 	switch (inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		if (inp->in_info[0] == 0)
 			if (curtoken) tp = curtoken;
@@ -91,7 +91,7 @@ void instance(int instno, token_p token) {
 			rp = &machregs[tp->t_att[0].ar];
 			token->t_att[0].ar=rp->r_members[inp->in_info[1]-1];
 #else
-			assert(false);
+			fatal("register member requested on a machine without register members");
 #endif
 		}
 		return;
@@ -168,7 +168,7 @@ static void cinstance(int instno, token_p token, token_p tp, int regno) {
 	inp= &tokeninstances[instno];
 	switch (inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		assert(inp->in_info[0] <= 1);
 		if (inp->in_info[1]==0) {
@@ -180,7 +180,7 @@ static void cinstance(int instno, token_p token, token_p tp, int regno) {
 			rp = &machregs[tp->t_att[0].ar];
 			token->t_att[0].ar=rp->r_members[inp->in_info[1]-1];
 #else
-			assert(false);
+			fatal("register member requested on a machine without register members");
 #endif
 		}
 		return;
@@ -402,7 +402,7 @@ static int instsize(int tinstno, token_p tp) {
 	inp = &tokeninstances[tinstno];
 	switch (inp->in_which) {
 	default:
-		assert(false);
+		fatal("invalid token instance kind");
 	case IN_COPY:
 		assert(inp->in_info[0]<=1);
 #if MAXMEMBERS!=0
@@ -419,7 +419,7 @@ static int instsize(int tinstno, token_p tp) {
 	case IN_RIDENT:
 		return(machregs[inp->in_info[0]].r_size);
 	case IN_ALLOC:
-		assert(false);  /* cannot occur in splitting coercion */
+		fatal("register allocation in splitting coercion");  /* cannot occur in splitting coercion */
 	case IN_DESCR:
 	case IN_S_DESCR:
 	case IN_D_DESCR:
@@ -615,7 +615,7 @@ unsigned stackupto(token_p limit, int ply, int toplevel) {
 				goto contin;
 			}
 		}
-		assert(false);
+		fatal("no matching register coercion");
 	contin: ;
 	}
 	return(totalcost);

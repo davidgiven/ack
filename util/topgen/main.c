@@ -42,6 +42,7 @@ int main(int argc,char* argv[])
 	fputs("Fatal error : couldn't open gen.c\n",stderr);
 	exit(1);
     }
+    fputs("#include \"warnings.h\"\n", genc);
     if ((genh = fopen("gen.h","w")) == NULL) {
 	fputs("Fatal error : couldn't open gen.h\n",stderr);
 	exit(1);

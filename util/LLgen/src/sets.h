@@ -19,10 +19,10 @@
  */
 
 # define BITS		(8 * sizeof (int))
-# define IN(a,i)	((a)[(i)/BITS] & (1<<((i) % BITS)))
-# define NTIN(a,i)	((a)[(i)/BITS+tsetsize]&(1<<((i)%BITS)))
-# define PUTIN(a,i)	((a)[(i)/BITS] |=(1<<((i) % BITS)))
-# define NTPUTIN(a,i)	((a)[(i)/BITS+tsetsize]|=(1<<((i)%BITS)))
+# define IN(a,i)	((a)[(i)/BITS] & (1U<<((i) % BITS)))
+# define NTIN(a,i)	((a)[(i)/BITS+tsetsize]&(1U<<((i)%BITS)))
+# define PUTIN(a,i)	((a)[(i)/BITS] |=(1U<<((i) % BITS)))
+# define NTPUTIN(a,i)	((a)[(i)/BITS+tsetsize]|=(1U<<((i)%BITS)))
 # define NBYTES(n)	(((n) + 7) / 8)
 /*
  * The next two macros operate on byte counts!

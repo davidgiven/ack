@@ -9,6 +9,7 @@ def build_top(self, name, arch):
 
     cprogram(
         replaces=self,
+        deps=["modules/src/data"],
         srcs=[
             "mach/proto/top/queue.c",
             "mach/proto/top/queue.h",

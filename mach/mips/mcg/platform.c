@@ -250,44 +250,160 @@ nomove:
     fatal("cannot move %s to %s", src->id, dest->id);
 }
 
+static void swap_reg_and_stack(struct hop* hop, struct hreg* reg, struct hreg* stack)
+{
+    switch (reg->attrs & TYPE_ATTRS)
+    {
+        case burm_int_ATTR:
+            hop_add_insel(hop, "mov at, %H", reg);
+            hop_add_insel(hop, "lw %H, %S(fp) ! %H", reg, stack, stack);
+            hop_add_insel(hop, "sw at, %S(fp) ! %H", stack, stack);
+            break;
+
+        case burm_long_ATTR:
+            hop_add_insel(hop, "mov at, %0H", reg);
+            hop_add_insel(hop, "lw %0H, 0+%S(fp) ! %H", reg, stack, stack);
+            hop_add_insel(hop, "sw at, 0+%S(fp) ! %H", stack, stack);
+
+            hop_add_insel(hop, "mov at, %1H", reg);
+            hop_add_insel(hop, "lw %1H, 4+%S(fp) ! %H", reg, stack, stack);
+            hop_add_insel(hop, "sw at, 4+%S(fp) ! %H", stack, stack);
+            break;
+
+        case burm_float_ATTR:
+            hop_add_insel(hop, "mov.s f30, %H", reg);
+            hop_add_insel(hop, "lwc1 %H, %S(fp) ! %H", reg, stack, stack);
+            hop_add_insel(hop, "swc1 f30, %S(fp) ! %H", stack, stack);
+            break;
+
+        case burm_double_ATTR:
+            hop_add_insel(hop, "mov.d f30, %H", reg);
+            hop_add_insel(hop, "ldc1 %H, %S(fp) ! %H", reg, stack, stack);
+            hop_add_insel(hop, "sdc1 f30, %S(fp) ! %H", stack, stack);
+            break;
+
+        default:
+            fatal("cannot swap %s and %s", reg->id, stack->id);
+    }
+}
+
+static void swap_stack_and_stack(struct hop* hop, struct hreg* src, struct hreg* dest)
+{
+    switch (src->attrs & TYPE_ATTRS)
+    {
+        case burm_int_ATTR:
+        case burm_float_ATTR:
+            hop_add_insel(hop, "addiu sp, sp, -4");
+            if (src->attrs & burm_int_ATTR)
+            {
+                hop_add_insel(hop, "lw at, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "sw at, 0(sp)");
+                hop_add_insel(hop, "lw at, %S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "sw at, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "lw at, 0(sp)");
+                hop_add_insel(hop, "sw at, %S(fp) ! %H", dest, dest);
+            }
+            else
+            {
+                hop_add_insel(hop, "lwc1 f30, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "swc1 f30, 0(sp)");
+                hop_add_insel(hop, "lwc1 f30, %S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "swc1 f30, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "lwc1 f30, 0(sp)");
+                hop_add_insel(hop, "swc1 f30, %S(fp) ! %H", dest, dest);
+            }
+            hop_add_insel(hop, "addiu sp, sp, 4");
+            break;
+
+        case burm_long_ATTR:
+        case burm_double_ATTR:
+            hop_add_insel(hop, "addiu sp, sp, -8");
+            if (src->attrs & burm_long_ATTR)
+            {
+                hop_add_insel(hop, "lw at, 0+%S(fp) ! %H", src, src);
+                hop_add_insel(hop, "sw at, 0(sp)");
+                hop_add_insel(hop, "lw at, 4+%S(fp) ! %H", src, src);
+                hop_add_insel(hop, "sw at, 4(sp)");
+
+                hop_add_insel(hop, "lw at, 0+%S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "sw at, 0+%S(fp) ! %H", src, src);
+                hop_add_insel(hop, "lw at, 4+%S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "sw at, 4+%S(fp) ! %H", src, src);
+
+                hop_add_insel(hop, "lw at, 0(sp)");
+                hop_add_insel(hop, "sw at, 0+%S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "lw at, 4(sp)");
+                hop_add_insel(hop, "sw at, 4+%S(fp) ! %H", dest, dest);
+            }
+            else
+            {
+                hop_add_insel(hop, "ldc1 f30, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "sdc1 f30, 0(sp)");
+                hop_add_insel(hop, "ldc1 f30, %S(fp) ! %H", dest, dest);
+                hop_add_insel(hop, "sdc1 f30, %S(fp) ! %H", src, src);
+                hop_add_insel(hop, "ldc1 f30, 0(sp)");
+                hop_add_insel(hop, "sdc1 f30, %S(fp) ! %H", dest, dest);
+            }
+            hop_add_insel(hop, "addiu sp, sp, 8");
+            break;
+
+        default:
+            fatal("cannot swap %s and %s", src->id, dest->id);
+    }
+}
+
 struct hop* platform_swap(struct basicblock* bb, struct hreg* src, struct hreg* dest)
 {
     struct hop* hop = new_hop(bb, NULL);
 
 	tracef('R', "R: swap of %s to %s\n", src->id, dest->id);
-    assert(!src->is_stacked);
-    assert(!dest->is_stacked);
     assert((src->attrs & TYPE_ATTRS) == (dest->attrs & TYPE_ATTRS));
-    
-    switch (src->attrs & TYPE_ATTRS)
+
+    if (src->is_stacked && dest->is_stacked)
     {
-        case burm_int_ATTR:
-            hop_add_insel(hop, "mov at, %H", src);
-            hop_add_insel(hop, "mov %H, %H", src, dest);
-            hop_add_insel(hop, "mov %H, at", dest);
-            break;
+        swap_stack_and_stack(hop, src, dest);
+    }
+    else if (src->is_stacked || dest->is_stacked)
+    {
+        struct hreg* reg = src->is_stacked ? dest : src;
+        struct hreg* stack = src->is_stacked ? src : dest;
+        swap_reg_and_stack(hop, reg, stack);
+    }
+    else
+    {
+        switch (src->attrs & TYPE_ATTRS)
+        {
+            case burm_int_ATTR:
+                hop_add_insel(hop, "mov at, %H", src);
+                hop_add_insel(hop, "mov %H, %H", src, dest);
+                hop_add_insel(hop, "mov %H, at", dest);
+                break;
 
-        case burm_long_ATTR:
-            hop_add_insel(hop, "mov at, %0H", src);
-            hop_add_insel(hop, "mov %0H, %0H", src, dest);
-            hop_add_insel(hop, "mov %0H, at", dest);
+            case burm_long_ATTR:
+                hop_add_insel(hop, "mov at, %0H", src);
+                hop_add_insel(hop, "mov %0H, %0H", src, dest);
+                hop_add_insel(hop, "mov %0H, at", dest);
 
-            hop_add_insel(hop, "mov at, %1H", src);
-            hop_add_insel(hop, "mov %1H, %1H", src, dest);
-            hop_add_insel(hop, "mov %1H, at", dest);
-            break;
+                hop_add_insel(hop, "mov at, %1H", src);
+                hop_add_insel(hop, "mov %1H, %1H", src, dest);
+                hop_add_insel(hop, "mov %1H, at", dest);
+                break;
 
-        case burm_float_ATTR:
-            hop_add_insel(hop, "mov.s f30, %H", src);
-            hop_add_insel(hop, "mov.s %H, %H", src, dest);
-            hop_add_insel(hop, "mov.s %H, f30", dest);
-            break;
+            case burm_float_ATTR:
+                hop_add_insel(hop, "mov.s f30, %H", src);
+                hop_add_insel(hop, "mov.s %H, %H", src, dest);
+                hop_add_insel(hop, "mov.s %H, f30", dest);
+                break;
 
-        case burm_double_ATTR:
-            hop_add_insel(hop, "mov.d f30, %H", src);
-            hop_add_insel(hop, "mov.d %H, %H", src, dest);
-            hop_add_insel(hop, "mov.d %H, f30", dest);
-            break;
+            case burm_double_ATTR:
+                hop_add_insel(hop, "mov.d f30, %H", src);
+                hop_add_insel(hop, "mov.d %H, %H", src, dest);
+                hop_add_insel(hop, "mov.d %H, f30", dest);
+                break;
+
+            default:
+                fatal("cannot swap %s and %s", src->id, dest->id);
+        }
     }
 
     return hop;

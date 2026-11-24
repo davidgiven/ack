@@ -67,13 +67,18 @@ newident(item_t *ip, int typ)
 	    strncmp(ip->i_name, genlab, sizeof(genlab)-1) == 0)
 		flag = SYM_LAB;
 #endif /* GENLAB */
-	if (sflag & flag)
+	if (sflag & flag) {
+#ifndef ASLD
+		if (pass != PASS_3)
+			item_set_nami(ip, (unsigned short)outhead.oh_nname + 1);
+#endif
 		newsymb(
 			ip->i_name,
 			ip->i_type & (S_EXT|S_TYP),
 			0,
 			load(ip)
 		);
+	}
 }
 
 void
@@ -331,6 +336,57 @@ new_string(const char *s)
 		outhead.oh_nchar += len;
 	}
 	return r;
+}
+
+#define NAMI_HASH 256
+
+struct nami_entry {
+	struct nami_entry *next;
+	item_t *ip;
+	unsigned short nami;
+};
+
+static struct nami_entry *nami_tab[NAMI_HASH];
+
+static unsigned
+nami_hash(item_t *ip)
+{
+	return ((unsigned)(uintptr_t)ip >> 3) % NAMI_HASH;
+}
+
+void
+item_set_nami(item_t *ip, unsigned short nami)
+{
+	unsigned h = nami_hash(ip);
+	struct nami_entry *e;
+
+	for (e = nami_tab[h]; e; e = e->next) {
+		if (e->ip == ip) {
+			e->nami = nami;
+			return;
+		}
+	}
+	e = (struct nami_entry *)malloc(sizeof(*e));
+	if (e == 0)
+		fatal("out of memory");
+	e->ip = ip;
+	e->nami = nami;
+	e->next = nami_tab[h];
+	nami_tab[h] = e;
+}
+
+unsigned short
+item_get_nami(item_t *ip)
+{
+	struct nami_entry *e;
+
+	if (ip == 0)
+		return 0;
+	for (e = nami_tab[nami_hash(ip)]; e; e = e->next) {
+		if (e->ip == ip)
+			return e->nami;
+	}
+	return 0;
 }
 
 void

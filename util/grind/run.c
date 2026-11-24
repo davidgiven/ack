@@ -504,7 +504,7 @@ getbytes(size, from, to, kind, errmess)
   case M_DATA:
   	return ureceive(to, BUFTOI(answer.m_buf+1, LS));
   default:
-	assert(0);
+	fatal("unexpected debugger reply when reading memory");
   }
   UNREACHABLE_CODE;
 }
@@ -555,7 +555,7 @@ set_bytes(size, from, to)
   case M_OK:
 	break;
   default:
-	assert(0);
+	fatal("unexpected debugger reply when writing memory");
   }
 }
 
@@ -581,7 +581,7 @@ get_dump(globbuf, stackbuf)
   case M_DGLOB:
 	break;
   default:
-	assert(0);
+	fatal("unexpected debugger reply when reading globals");
   }
 
   sz = BUFTOI(answer.m_buf+1, LS);
@@ -658,7 +658,7 @@ get_EM_regs(level)
   case M_GETEMREGS:
 	break;
   default:
-	assert(0);
+	fatal("unexpected debugger reply when reading registers");
   }
   *to++ = (t_addr) BUFTOI(answer.m_buf+LB_OFF, PS);
   *to++ = (t_addr) BUFTOI(answer.m_buf+AB_OFF, PS);
@@ -687,7 +687,7 @@ set_pc(PC)
   case M_OK:
 	return 1;
   default:
-	assert(0);
+	fatal("unexpected debugger reply when setting registers");
   }
   UNREACHABLE_CODE;
 }

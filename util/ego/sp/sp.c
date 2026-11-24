@@ -14,6 +14,7 @@
 #include <em_mnem.h>
 #include <em_spec.h>
 #include "ego/share/types.h"
+#include "ego/share/mach.h"
 #include "ego/share/debug.h"
 #include "ego/share/global.h"
 #include "ego/share/files.h"
@@ -31,10 +32,10 @@
  * ASPs that are part of a loop are not removed.
  */
 
-#define BF_MARK 04
-#define MARK(b) b->b_flags |= BF_MARK
+#define BF_MARK       04
+#define MARK(b)       b->b_flags |= BF_MARK
 #define NOT_MARKED(b) (!(b->b_flags & BF_MARK))
-#define IN_LOOP(b) (Lnrelems(b->b_loops) > 0)
+#define IN_LOOP(b)    (Lnrelems(b->b_loops) > 0)
 
 static int Ssp; /* number of optimizations */
 
@@ -48,21 +49,9 @@ static int globl_sp_allowed;
 
 #define IS_ASP(l) (INSTR(l) == op_asp && TYPE(l) == OPSHORT && SHORT(l) > 0)
 
-static void sp_machinit(void* vp)
+static void sp_machinit(config_t* config)
 {
-	/* Read target machine dependent information for this phase */
-	FILE* f = vp;
-	char s[100];
-
-	for (;;)
-	{
-		while (getc(f) != '\n')
-			;
-		fscanf(f, "%99s", s);
-		if (strcmp(s, "%%SP") == 0)
-			break;
-	}
-	fscanf(f, "%d", &globl_sp_allowed);
+	globl_sp_allowed = mach_bool(mach_setting(config, "stack_pollution"), "global_allowed");
 }
 
 static void comb_asps(line_p l1, line_p l2, bblock_p b)

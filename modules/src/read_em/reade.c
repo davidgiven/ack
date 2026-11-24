@@ -8,6 +8,7 @@
 	EM-code.
 */
 
+#include "warnings.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -349,7 +350,7 @@ static int getnumber(int c, struct e_arg *ap)
 			ap->ema_argtype = fco_ptyp;
 			return sp_fcon;
 		}
-		assert(0);
+		fatal("invalid EM constant type");
 	}
 
 	ungetbyte(c);

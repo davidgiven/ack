@@ -2223,6 +2223,9 @@ PATTERNS
 	pat lni                            /* Increment line number */
 		leaving ine "hol0"
 
+	pat nop                            /* After a volatile access */
+		kills ALL
+
 	pat lim                            /* Load EM trap ignore mask */
 		leaving loe ".ignmask"
 

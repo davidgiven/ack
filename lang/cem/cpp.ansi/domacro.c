@@ -673,7 +673,7 @@ void macro_def(struct idf* id, char* text, int nformals, int length, int flags)
 #define setbit(bx)                                                                                 \
 	if (!*p)                                                                                       \
 		goto go_on;                                                                                \
-	bits[*p++] |= (bx)
+	bits[(unsigned char)*p++] |= (bx)
 		setbit(bit0);
 		setbit(bit1);
 		setbit(bit2);

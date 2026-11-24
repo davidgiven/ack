@@ -127,11 +127,10 @@ void ch3mon(int oper, struct expr** expp)
 			{
 				writh o1 = (*expp)->VL_VALUE;
 
-				(*expp)->VL_VALUE = (oper == '-')
-				    ? -o1
-				    : ((*expp)->ex_type->tp_unsigned
-				           ? (~o1) & full_mask[(int)(*expp)->ex_type->tp_size]
-				           : ~o1);
+				o1 = (oper == '-') ? -o1 : ~o1;
+				if ((*expp)->ex_type->tp_unsigned)
+					o1 &= full_mask[(int)(*expp)->ex_type->tp_size];
+				(*expp)->VL_VALUE = o1;
 			}
 			else if (is_fp_cst(*expp))
 				switch_sign_fp(*expp);

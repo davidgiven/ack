@@ -8,6 +8,7 @@
  * G E T . C
  */
 
+#include "warnings.h"
 #include <stdio.h>
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -285,7 +286,7 @@ dblock_p getdtable(const char* dname)
 				arg->a_a.a_offset = getoff();
 				break;
 			default:
-				assert(false);
+				fatal("invalid intermediate argument marker");
 		}
 	}
 	OUTTRACE("have read data table, %d objects", olength);
@@ -360,7 +361,7 @@ static arg_p readargs(void)
 				argstring(getshort(), &arg->a_a.a_con.ac_con);
 				break;
 			default:
-				assert(false);
+				fatal("invalid compact EM argument type");
 		}
 	}
 }

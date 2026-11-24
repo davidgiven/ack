@@ -236,7 +236,7 @@ int small(int fitsmall, int gain)
 			assert(fitsmall || (*p & bit) == 0);
 			return (*p & bit);
 		default:
-			assert(0);
+			fatal("invalid assembler pass");
 	}
 	UNREACHABLE_CODE;
 }
@@ -335,7 +335,7 @@ void emitx(valu_t val, int n)
 #endif
 			break;
 		default:
-			assert(0);
+			fatal("invalid relocation size");
 	}
 }
 

@@ -612,7 +612,7 @@ void lv_optimize(void* vp)
 
 int main(int argc, char* argv[])
 {
-	go(argc, argv, init_globals, lv_optimize, no_action, lv_flags);
+	go(argc, argv, init_globals, lv_optimize, no_machinit, lv_flags);
 	report("useless assignments deleted", Slv);
 	exit(0);
 }

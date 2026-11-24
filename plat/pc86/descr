@@ -48,7 +48,9 @@ name led
 	from .o.a
 	to .out
 	program {EM}/lib/ack/em_led
-	mapflag -l* LNAME={PLATFORMDIR}/lib*
+	# The maths functions are in libc.a: -lm links that.
+	mapflag -lm LNAME={PLATFORMDIR}/libc.a
+	mapflag -l* LNAME={PLATFORMDIR}/lib*.a
 	mapflag -i SEPID=-b1:0
 	mapflag -fp FLOATS={EM}/{ILIB}fp
 	args {ALIGN} {SEPID?} \

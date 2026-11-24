@@ -632,7 +632,7 @@ int WalkStat(struct node* nd, label exit_label, int end_reached)
 	if (nd->nd_symb == ';')
 		return 1;
 
-	if (!end_reached & REACH_FLAG)
+	if (!(end_reached & REACH_FLAG))
 	{
 		node_warning(nd, W_ORDINARY, "statement not reached");
 	}

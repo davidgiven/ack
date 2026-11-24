@@ -25,6 +25,7 @@ void newemblock(int nr);
 void newblock(int nr);
 void datastmt(void);
 void datatable(void);
+void datprintf(const char* fmt, ...);
 /* ERROR and exception handling */
 void exceptstmt(int lab);
 void errorstmt(int exprtype);
@@ -55,10 +56,8 @@ void wend(void);
 /* generate code for the final version */
 void prologcode(void);
 void prolog2(void);
-void gendata(void);
 void epilogcode(void);
 void setchannel(int val);
-void gendata(void);
 
 
 #endif /* __GENCODE_H_INCLUDED__ */

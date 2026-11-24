@@ -444,7 +444,7 @@ void CodeAddress(struct desig *ds)
 		
 	case DSG_PFIXED:
 		if (! DoLoad(ds, pointer_size)) {
-			assert(0);
+			fatal("cannot load pointer designator");
 		}
 		break;
 

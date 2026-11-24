@@ -1294,7 +1294,7 @@ int t_safety(int rep, int count, int persistent, int safety)
 	switch (rep)
 	{
 	default:
-		assert(0);
+		fatal(0, "invalid repetition kind", NULL);
 	case OPT:
 		if (!persistent || safety < SAFESCANDONE)
 			return SAFE;

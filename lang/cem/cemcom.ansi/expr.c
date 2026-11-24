@@ -26,6 +26,7 @@
 #include "sizes.h"
 #include "level.h"
 #include "cstoper.h"
+#include "fltcstoper.h"
 #include "error.h"
 
 extern char options[];
@@ -260,6 +261,7 @@ void float2expr(struct expr* expr)
 	assert(flt_status != FLT_NOFLT);
 	if (flt_status == FLT_OVFL)
 		expr_warning(expr, "internal floating point overflow");
+	fltcstround(expr);
 }
 
 struct expr* intexpr(arith ivalue, int fund)

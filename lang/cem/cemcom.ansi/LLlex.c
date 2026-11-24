@@ -542,12 +542,12 @@ static void strflt2tok(char fltbuf[], struct token* ptok)
 	char* cp = fltbuf;
 	int malformed = 0;
 
-	while (is_dig(*cp))
+	while (is_dig((unsigned char)*cp))
 		cp++;
 	if (*cp == '.')
 	{
 		cp++;
-		while (is_dig(*cp))
+		while (is_dig((unsigned char)*cp))
 			cp++;
 	}
 	if (*cp == 'e' || *cp == 'E')
@@ -555,9 +555,9 @@ static void strflt2tok(char fltbuf[], struct token* ptok)
 		cp++;
 		if (*cp == '+' || *cp == '-')
 			cp++;
-		if (!is_dig(*cp))
+		if (!is_dig((unsigned char)*cp))
 			malformed++;
-		while (is_dig(*cp))
+		while (is_dig((unsigned char)*cp))
 			cp++;
 	}
 	if (*cp == 'f' || *cp == 'F')
@@ -616,7 +616,7 @@ static void strint2tok(char intbuf[], struct token* ptok)
 	/* The upperbound checks if val * base would overflow. */
 	ubound = ~(unsigned writh)0 / base;
 
-	while (is_hex(*cp))
+	while (is_hex((unsigned char)*cp))
 	{
 		dig = hex_val(*cp);
 		if (dig >= base)

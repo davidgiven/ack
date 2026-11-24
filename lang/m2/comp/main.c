@@ -216,7 +216,7 @@ static void AddProcs(struct stdproc *p)
 {
 	for (; p->st_nam != 0; p++) {
 		if (! Enter(p->st_nam, D_PROCEDURE, std_type, p->st_con)) {
-			assert(0);
+			fatal("cannot enter standard procedure");
 		}
 	}
 }

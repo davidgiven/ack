@@ -133,7 +133,7 @@ static void oprnd(struct operand *p)
 				emit4(p->exp.val);
 				break;
 			default:
-				assert(0);
+				fatal("invalid immediate operand size");
 			}
 		}
 		break;
@@ -196,7 +196,7 @@ static void oprnd(struct operand *p)
 		}
 		break;
 	default:
-		assert(0);
+		fatal("invalid operand addressing mode");
 	}
 }
 
@@ -230,7 +230,7 @@ static int size_ops(void)
 			sz += p->size;
 			break;
 		default:
-			assert(0);
+			fatal("invalid operand addressing mode");
 		}
 		p++;
 	}

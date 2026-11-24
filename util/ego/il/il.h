@@ -19,7 +19,7 @@ struct call
 	call_id cl_id; /* uniquely denotes a CAL instruction	*/
 	proc_p cl_proc; /* the called procedure			*/
 	byte cl_looplevel; /* loop nesting level of the CAL	*/
-	bool cl_flags; /* flag bits				*/
+	byte cl_flags; /* flag bits (CLF_*); a byte, not a bool */
 	short cl_ratio; /* indicates 'speed gain / size lost'	*/
 	call_p cl_cdr; /* link to next call			*/
 	call_p cl_car; /* link to nested calls			*/

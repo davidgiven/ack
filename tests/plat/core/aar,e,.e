@@ -28,12 +28,12 @@ descriptor
 	aar EM_WSIZE
 
 	lae array
-	cmu EM_WSIZE
+	cmu EM_PSIZE
 	zeq *1
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	asp EM_WSIZE
 1
 
 	/* Access element 0 */
@@ -45,12 +45,12 @@ descriptor
 
 	lae array
 	adp EM_WSIZE
-	cmu EM_WSIZE
+	cmu EM_PSIZE
 	zeq *2
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	asp EM_WSIZE
 2
 
 	/* Access element 1 */
@@ -62,12 +62,12 @@ descriptor
 
 	lae array
 	adp EM_WSIZE*2
-	cmu EM_WSIZE
+	cmu EM_PSIZE
 	zeq *3
 
 	loc __LINE__
 	cal $fail
-	ass EM_WSIZE
+	asp EM_WSIZE
 3
 
     cal $finished

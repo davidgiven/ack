@@ -23,7 +23,7 @@ static const char* type_to_str(int type)
 		case EM_EOF:        return "EM_EOF";
 	}
 
-    assert(0 && "invalid EM type");
+    fatal("invalid EM type %d", type);
 }
 
 static const char* argtype_to_str(int type)

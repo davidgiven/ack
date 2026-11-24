@@ -159,12 +159,12 @@ nel(tp)
   case T_INTEGER:
 	if (tp->ty_size == 1) return 256;
 	if (tp->ty_size == 2) return 65536L;
-	assert(0);
+	fatal("unsupported integer size for range calculation");
 	break;
   case T_ENUM:
 	return tp->ty_nenums;
   default:
-	assert(0);
+	fatal("invalid type for range calculation");
 	break;
   }
   return 0;

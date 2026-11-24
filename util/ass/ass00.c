@@ -48,7 +48,8 @@ int main(int argc, char** argv)
 	 *   The d flag can be repeated several times, resulting in more
 	 *        debugging information.
 	 */
-	char workspace[6000];
+	/* Given to the allocator (asscm.c): aligned as its areas must be. */
+	_Alignas(max_align_t) char workspace[6000];
 	char* cp;
 	int argno;
 

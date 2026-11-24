@@ -8,6 +8,7 @@
  *  I C _ A U X . C
  */
 
+#include "warnings.h"
 #include <em_pseu.h>
 #include <em_spec.h>
 #include <em_mnem.h>
@@ -87,7 +88,7 @@ static offset argsize(arg_p arg)
 		case ARGFCN:
 			return arg->a_a.a_con.ac_length;
 		default:
-			assert(false);
+			fatal("invalid initializer argument type");
 	}
 	UNREACHABLE_CODE;
 }
@@ -118,7 +119,7 @@ static offset blocksize(byte pseudo, arg_p args)
 			}
 			return sum;
 		default:
-			assert(false);
+			fatal("invalid data block pseudo-instruction");
 	}
 	UNREACHABLE_CODE;
 }
@@ -181,7 +182,7 @@ void dblockdef(dblock_p db, int n, line_p lnp)
 			m = DROM;
 			break;
 		default:
-			assert(false);
+			fatal("invalid data block pseudo-instruction");
 	}
 	db->d_pseudo = m;
 	db->d_size = blocksize(m, ARG(lnp));

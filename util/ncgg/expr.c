@@ -241,7 +241,7 @@ int eq2expr(expr_t e1, expr_t e2)
 	switch (e1.ex_typ)
 	{
 		default:
-			assert(0);
+			fatal("invalid operand type for equality");
 		case TYPBOOL:
 			error("== on booleans not implemented");
 		case TYPINT:
@@ -261,7 +261,7 @@ int ne2expr(expr_t e1, expr_t e2)
 	switch (e1.ex_typ)
 	{
 		default:
-			assert(0);
+			fatal("invalid operand type for inequality");
 		case TYPBOOL:
 			error("!= on booleans not implemented");
 		case TYPINT:
