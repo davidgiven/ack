@@ -2676,6 +2676,7 @@ ble	| R16 |
 		"1:"
 					| | |
 lol loc beq IN($1) | |
+		remove(ALL)
 		"! lol loc beq"
 		"\tldx <LBl"
 		"\tldx BASE+$1,x"
