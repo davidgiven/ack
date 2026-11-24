@@ -1487,8 +1487,8 @@ loe loe mlu $3==2	| |
 loc loe mlu $3==2	| |
 		allocate(R16)
 		"\tldx #$1"
-		"\tldab $1+1"
-		"\tldaa $1"
+		"\tldab $2+1"
+		"\tldaa $2"
 		"\tjsr Mlux"
 					| %[a] | |
 loe loc mlu 	| | | | loc $2 loe $1 mlu $3 |
