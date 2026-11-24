@@ -3176,22 +3176,15 @@ rtt	| |
 		"! rtt"
 		"\tjmp Rtt"
 					| | |
-sig 	| R16 |
+sig	| R16 |
 		"! sig"
-		"\tdes"
-		"\tdes"
-		"\ttsx"
-		"\tpshb"
-		"\tpsha"
-		"\tldab ERRPROC+1"
-		"\tldaa ERRPROC"
-		"\tstab 3,x"
-		"\tstaa 2,x"
-		"\tpula"
-		"\tpulb"
-		"\tstab ERRPROC+1"
-		"\tstaa ERRPROC"
-					| | |
+		"\tldx <ERRPROC"
+		"\tstab <ERRPROC+1"
+		"\tstaa <ERRPROC"
+		"\tstx <TMP"
+		"\tldab <TMP+1"
+		"\tldaa <TMP"
+					| %[1] | |
 sim	| R16 |
 		"! sim"
 		"\tstab IGNMASK+1"
