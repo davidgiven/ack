@@ -2433,11 +2433,15 @@ lar $1==2	| R16 |
 lar ND	| R16 |
 		"! lar ND"
 		"\ttsta"
-		"\tbeq 1f"
+		"\tbne 1f"
 		"\tcmpb #2"
-		"\tbeq 1f"
-		"\tjsr Trap"
+		"\tbeq 2f"
 		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
 		"\tjsr Lar"
 					| | |
 lae sar defined(rom(1,3)) | | | | lae $1 aar $2 sti rom(1,3) |
