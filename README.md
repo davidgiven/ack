@@ -5,6 +5,15 @@ The target environment is emu6800 from the Fuzix Compiler Kit.
 
 ## Current status
 
+Results for the ACK regression tests (run on emu6800).
+
+- `core` — All 42 tests passed.
+- `bugs` — All 6 tests passed.
+- `m2` — All 6 tests passed.
+- `basic` — The `DATA` test stopped at a floating-point operation.
+- `floats` — Floating point is not supported. The 6 tests were not run.
+- `long-long` — `long long` is not supported. All 8 tests failed to compile.
+
 It is still incomplete, with work remaining especially for languages other than C.
 
 In the emu6800 environment (-me6800), support for stdin, stdout, and stderr has been added.
@@ -90,16 +99,18 @@ Cycle time of Mandelbrot.
 - 146,818,028 Fuzix CC
 -  90,918,135 chibicc-6800 -O2
 
+## Other language
+
+- BASIC: PRINT works fine, but INPUT is still acting up.
+- Pascal: All tests pass ( tests/plat/core/ ).
+- Modula-2: All tests pass ( tests/plat/m2/ ).
 
 ## TODO
 
 - Add essential source files under plat/e6800/
 - Avoid generating redundant ldx LB/LBl instructions.
 - Support routines need to be extended further. 
-- Other language support (test with hilo.\*)
-  - BASIC: PRINT works fine, but INPUT is still acting up.
-  - Pascal: Compilation succeeds, but the program crashes during initialization.
-  - Other languages: Compilation fails due to insufficient library support.
+- Other languages: Compilation fails due to insufficient library support.
 
 ## DONE
 
