@@ -22,8 +22,8 @@ print("Building plats: " + (" ".join(PLATS)))
 #    "linuxppc",
 #    "pc86",
 #]
-#TEST_PLATS = [ "e6800" ]
-TEST_PLATS = []
+TEST_PLATS = [ "e6800" ]
+#TEST_PLATS = []
 
 # This contains the platform-independent host tooling required to build the plats.
 export(

@@ -1210,10 +1210,10 @@ loe loe dvi $3==2	| |
 loc loe dvi $3==2	| |
 		allocate(R16)
 		"! loc loe dvi $3"
-		"\tldx #[$1]"
+		"\tldx $2"
 		"\tstx <ARTH"
-		"\tldab $2+1"
-		"\tldaa $2"
+		"\tldab #[$1].l"
+		"\tldaa #[$1].h"
 		"\tjsr Dvi"
 					| %[a] | |
 loe loc dvi $3==2	| |
@@ -1277,8 +1277,8 @@ loe dvi $2==2	| R16 |
 		"! loe dvi $2"
 		"\tpshb"
 		"\tpsha"
-		"\tldab $1+1,x"
-		"\tldaa $1+0,x"
+		"\tldab $1+1"
+		"\tldaa $1"
 		"\tstab <ARTH+1"
 		"\tstaa <ARTH"
 		"\tpula"
