@@ -2519,7 +2519,7 @@ cmu ND	| |
 					| | |
 cmp	| |
 					| | cmu 2 |
-cms $1==2 || $1==4	| |
+cms D	| |
 		allocate(R16)
 		"! cms $1"
 		"\tldab #[$1].l"
