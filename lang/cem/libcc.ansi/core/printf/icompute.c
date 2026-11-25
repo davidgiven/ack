@@ -7,11 +7,23 @@
 
 #if ACKCONF_WANT_STDIO
 
+extern	void	putstr(const char *s);
+extern	void	print(int x);
+extern	void	puthexi(int x);
+extern	void	puthexl(long x);
+
 /* This routine is used in doprnt.c as well as in tmpfile.c and tmpnam.c. */
 
 char* _i_compute(unsigned long val, int base, char* s, int nrdigits)
 {
 	int c;
+
+#if 0
+putstr("_i_compute: val=");puthexl(val);
+putstr("          : base=");print(base);
+putstr("          : nrdigits=");print(nrdigits);
+putstr("          : s=");putstr(s);putstr("\n");
+#endif
 
 	c = val % base;
 	val /= base;

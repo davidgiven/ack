@@ -23,7 +23,7 @@ Blm:
 	stx ADDR	! destination address (lowbyte)
 	sta ADDR+1	! destination address (highbyte)
 Blmnp:	ldx NBYTES+1
-    1:	dey
+1:	dey
 	lda (ADDR),y	! get source byte
 	sta (ADDR+2),y	! copy to destination
 	tya

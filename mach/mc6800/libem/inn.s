@@ -57,9 +57,9 @@ Inn:
 !
 	pula
 	pulb
-	addb <ADDR+1	! calcucalte data address
+	eorb #1		! swap bytes within the EM word
+	addb <ADDR+1	! calculate data address
 	adca <ADDR
-	eorb #1		! byte swap
 	stab <ADDR+1
 	staa <ADDR
 	ldx <ADDR

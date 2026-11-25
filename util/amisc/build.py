@@ -20,6 +20,7 @@ simpleprogram("anm")
 simpleprogram("ashow")
 simpleprogram("asize")
 simpleprogram("aslod")
+simpleprogram("aslod68")
 simpleprogram("astrip")
 
 export(name="all", items=i)

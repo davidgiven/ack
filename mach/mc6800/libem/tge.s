@@ -13,8 +13,7 @@
 
 Tge:
 	clrb
-	eora #0x80
-	asla
+	suba #0x80
 	rolb
 	clra
 	rts

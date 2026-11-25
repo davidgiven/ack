@@ -21,8 +21,6 @@
 .define Cuf
 .define Cff
 .define Cfu
-.define Lfr8
-.define Ret8
 .sect .zero
 .sect .text
 .sect .rom
@@ -58,8 +56,6 @@ Cif:
 Cuf:
 Cff:
 Cfu:
-Lfr8:
-Ret8:
 	ldab #Eillins
 	clra
 	jsr Trap

@@ -1,4 +1,4 @@
-.define Trap
+.define Trap,Rtt
 .sect .zero
 .sect .text
 .sect .rom
@@ -11,23 +11,23 @@
 ! AccB: Trap number
 
 Trap:
-	cmpb #64
-	bcc 1f
-    2:	jmp Dotrap
-    1:	bmi 2b
+	cmpb #16
+	bcc Dotrap
 	pshb
 	stab <TMP
-	ldab <IGNMASK+1	! get bitmask (lowbyte)
-	ldaa <IGNMASK	! get bitmask (highbyte)
-    2:	lsra
-	rorb		! shiftright bitmask n times
+	inc TMP
+	ldab <IGNMASK+1
+	ldaa <IGNMASK
+1:
+	lsra
+	rorb
 	dec TMP
-	bne 2b
-	bitb #1
-	pulb		! clear hardware_stack
-	bne 3f
-	jmp Dotrap
-    3:	rts
+	bne 1b
+	pulb
+	bcs 2f
+	bra Dotrap
+2:
+	rts
 
 Dotrap:
 	stab <TRAPVAL
@@ -35,6 +35,14 @@ Dotrap:
 	bne 1f
 	jmp Mtrap
 1:	ldx #RETURN	! save return area
+	ldab 7,x
+	ldaa 6,x
+	pshb
+	psha
+	ldab 5,x
+	ldaa 4,x
+	pshb
+	psha
 	ldab 3,x
 	ldaa 2,x
 	pshb
@@ -51,15 +59,44 @@ Dotrap:
 	ldaa <hol0
 	pshb		! save linenumber
 	psha
-	ldx <ERRPROC	! address of errorhandler
-	stx <ADDR	
-	ldx #0
-	stx <ERRPROC	! reset ERRPROC
+	ldx <ERRPROC
+	clr ERRPROC
+	clr ERRPROC+1
 	ldab <TRAPVAL
-	ldaa #0
+	clra
 	pshb
 	psha
-	jmp 0,x		! proceed with errorhandler
+	jsr 0,x
+	ins
+	ins
+	pula
+	pulb
+	staa <hol0
+	stab <hol0+1
+	pula
+	pulb
+	staa <hol0+4
+	stab <hol0+5
+	pula
+	pulb
+	staa <RETURN
+	stab <RETURN+1
+	pula
+	pulb
+	staa <RETURN+2
+	stab <RETURN+3
+	pula
+	pulb
+	staa <RETURN+4
+	stab <RETURN+5
+	pula
+	pulb
+	staa <RETURN+6
+	stab <RETURN+7
+	rts
+
+Rtt:
+	jmp Ret0	! return to Trap
 
 .sect .data
 traptbl:

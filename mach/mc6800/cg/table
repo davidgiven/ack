@@ -399,6 +399,7 @@ loi 		| R16 |
 
 los $1==2	| R16 |
 		"! los $1"
+		"\ttsx"
 		"\tldx 0,x"
 		"\tins"
 		"\tins"
@@ -555,13 +556,14 @@ sil IN($1)	| R16 |
 sil	| |
 		allocate(R16)
 		"! sil $1"
-		"\tldab <LBl+1"
-		"\tldaa <LBl"
-		"\taddb #BASE+$1"
-		"\tadca #0"
+		"\tldab #[$1].l"
+		"\tldaa #[$1].h"
+		"\taddb <LB+1"
+		"\tadca <LB"
 		"\tstab <TMP+1"
 		"\tstaa <TMP"
 		"\tldx <TMP"
+		"\tldx 0,x"
 		"\tpula"
 		"\tpulb"
 		"\tstab 1,x"
@@ -701,26 +703,7 @@ sdf $1==0	| R16 |
 		"\tstab 3,x"
 		"\tstaa 2,x"
 					| | |
-sdf	| |
-		allocate(R16)
-		"! sdf $1"
-		"\ttsx"
-		"\taddb 1,x"
-		"\tadca 0,x"
-		"\tins"
-		"\tins"
-		"\tstab <TMP+1"
-		"\tstaa <TMP"
-		"\tldx <TMP"
-		"\tpula"
-		"\tpulb"
-		"\tstab 1,x"
-		"\tstaa 0,x"
-		"\tpula"
-		"\tpulb"
-		"\tstab 3,x"
-		"\tstaa 2,x"
-					| | |
+sdf	| | | | adp $1 sti 4 |
 
 /* GROUP 3 - INTEGER ARITHMETIC */
 lol loc sli ads IN($1) && $2==1 && $3==2 && $4==2	| R16 |
@@ -1210,10 +1193,10 @@ loe loe dvi $3==2	| |
 loc loe dvi $3==2	| |
 		allocate(R16)
 		"! loc loe dvi $3"
-		"\tldx #[$1]"
+		"\tldx $2"
 		"\tstx <ARTH"
-		"\tldab $2+1"
-		"\tldaa $2"
+		"\tldab #[$1].l"
+		"\tldaa #[$1].h"
 		"\tjsr Dvi"
 					| %[a] | |
 loe loc dvi $3==2	| |
@@ -1277,8 +1260,8 @@ loe dvi $2==2	| R16 |
 		"! loe dvi $2"
 		"\tpshb"
 		"\tpsha"
-		"\tldab $1+1,x"
-		"\tldaa $1+0,x"
+		"\tldab $1+1"
+		"\tldaa $1"
 		"\tstab <ARTH+1"
 		"\tstaa <ARTH"
 		"\tpula"
@@ -1487,8 +1470,8 @@ loe loe mlu $3==2	| |
 loc loe mlu $3==2	| |
 		allocate(R16)
 		"\tldx #$1"
-		"\tldab $1+1"
-		"\tldaa $1"
+		"\tldab $2+1"
+		"\tldaa $2"
 		"\tjsr Mlux"
 					| %[a] | |
 loe loc mlu 	| | | | loc $2 loe $1 mlu $3 |
@@ -1901,11 +1884,8 @@ zer $1>0 && $1<=256	| |
 		allocate(R16)
 		"! zer $1"
 		"\tclra"
-		"\tldab $1"
-		"\tlsrb"
-		"\tincb"
+		"\tldab #[$1].l"
 		"1:"
-		"\tpsha"
 		"\tpsha"
 		"\tdecb"
 		"\tbne 1b"
@@ -2015,6 +1995,7 @@ and $1>=0 && $1<=254 | |
 		"1:"
 		"\tpula"
 		"\tanda 0,x"
+		"\tstaa 0,x"
 		"\tinx"
 		"\tdecb"
 		"\tbne 1b"
@@ -2087,6 +2068,7 @@ ior $1>=0 && $1<=254	| |
 		"1:"
 		"\tpula"
 		"\toraa 0,x"
+		"\tstaa 0,x"
 		"\tinx"
 		"\tdecb"
 		"\tbne 1b"
@@ -2159,6 +2141,7 @@ xor $1>=0 && $1<=254	| |
 		"1:"
 		"\tpula"
 		"\teora 0,x"
+		"\tstaa 0,x"
 		"\tinx"
 		"\tdecb"
 		"\tbne 1b"
@@ -2225,63 +2208,35 @@ com ND	| |
 		"\tcpx <ADDR+2"
 		"\tbne 1b"
 					| | |
-rol $1==2	| R16 |
+rol D | R16 |
 		"! rol $1"
-		"\taslb"
-		"\trola"
-					| %[1] | |
-rol $1==4	| R16 |
-		"! rol $1"
-		"\ttsx"
-		"\tasl 1,x"
-		"\trol 0,x"
-		"\trolb"
-		"\trola"
+		"\tldx #$1"
+		"\tjsr Rol"
 					| | |
-rol ND	| R16 |
+rol ND | R16 |
 		"! rol ND"
-		"\ttsx"
-		"\tstx <ADDR"
-		"\taddb <ADDR+1"
-		"\tadca <ADDR"
-		"\tstab <ADDR+3"
-		"\tstaa <ADDR+2"
-		"\tldx <ADDR+2"
-		"\tclc"
-		"1:"
-		"\tdex"
-		"\trol 0,x"
-		"\tcpx <ADDR"
-		"\tbne 1b"
-					| %[1] | |
-ror $1==2	| R16 |
-		"! ror $1"
-		"\tasra"
-		"\trorb"
-					| %[1] | |
-ror $1==4	| R16 |
-		"! ror $1"
-		"\ttsx"
-		"\tasra"
-		"\trorb"
-		"\tror 0,x"
-		"\tror 1,x"
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
+		"\tjsr Rol"
 					| | |
-ror ND	| R16 |
+
+ror D | R16 |
+		"! ror $1"
+		"\tldx #$1"
+		"\tjsr Ror"
+					| | |
+ror ND | R16 |
 		"! ror ND"
-		"\ttsx"
-		"\tstx <ADDR"
-		"\taddb <ADDR+1"
-		"\tadca <ADDR"
-		"\tstab <ADDR+3"
-		"\tstaa <ADDR+2"
-		"\tclc"
-		"1:"
-		"\tror 0,x"
-		"\tinx"
-		"\tcpx <ADDR+2"
-		"\tbne 1b"
-					| %[1] | |
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
+		"\tjsr Ror"
+					| | |
 
 
 /* GROUP 10 - SETS */
@@ -2406,42 +2361,19 @@ inn ND	| R16 |
 		"\tpulb"
 		"\tjsr Inn"
 					| %[1] | |
-loc set $2==2 && $1>=0 && $1<16	| |
-		allocate(R16)
-		"! loc set $1 $2"
+loc set $2==2 && $1>=0 && $1<16 | | | | loc (1<<$1) |
+set D | R16 |
+		"! set $1"
 		"\tldx #$1"
-		"\tclrb"
-		"\tclra"
-		"\tsec"
-		"1:"
-		"\trolb"
-		"\trola"
-		"\tdex"
-		"bne 1b"
-					| %[a] | |
-set $1==2	| R16 |
-		"! set $1"
-		"\tstab <ARTH+1"
-		"\tstaa <ARTH"
-		"\tldx <ARTH"
-		"\tclrb"
-		"\tclra"
-		"\tsec"
-		"1:"
-		"\trolb"
-		"\trola"
-		"\tdex"
-		"\tbne 1b"
-					| %[1] | |
-set $1<=256	| R16 |
-		"! set $1"
-		"\tldx #$1-1"
 		"\tjsr Set"
 					| | |
-set ND	| R16 |
+set ND | R16 |
 		"! set ND"
-		"\tjsr TestFFh"
-		"\tjsr Pop"
+		"\tstab <ARTH+1"
+		"\tstaa <ARTH"
+		"\tpula"
+		"\tpulb"
+		"\tldx <ARTH"
 		"\tjsr Set"
 					| | |
 
@@ -2456,11 +2388,15 @@ lar $1==2	| R16 |
 lar ND	| R16 |
 		"! lar ND"
 		"\ttsta"
-		"\tbeq 1f"
+		"\tbne 1f"
 		"\tcmpb #2"
-		"\tbeq 1f"
-		"\tjsr Trap"
+		"\tbeq 2f"
 		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
 		"\tjsr Lar"
 					| | |
 lae sar defined(rom(1,3)) | | | | lae $1 aar $2 sti rom(1,3) |
@@ -2469,13 +2405,17 @@ sar $1==2	| R16 |
 		"\tjsr Sar"
 					| | |
 sar ND	| R16 |
-		"! Sar ND"
+		"! sar ND"
 		"\ttsta"
-		"\tbeq 1f"
+		"\tbne 1f"
 		"\tcmpb #2"
-		"\tbeq 1f"
-		"\tjsr Trap"
+		"\tbeq 2f"
 		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
 		"\tjsr Sar"
 					| | |
 lae aar $2==2 && rom(1,3)==1 && rom(1,1)==0 | | | | adi 2 |
@@ -2562,7 +2502,7 @@ cmu ND	| |
 					| | |
 cmp	| |
 					| | cmu 2 |
-cms $1==2 || $1==4	| |
+cms D	| |
 		allocate(R16)
 		"! cms $1"
 		"\tldab #[$1].l"
@@ -2676,6 +2616,7 @@ ble	| R16 |
 		"1:"
 					| | |
 lol loc beq IN($1) | |
+		remove(ALL)
 		"! lol loc beq"
 		"\tldx <LBl"
 		"\tldx BASE+$1,x"
@@ -3188,28 +3129,38 @@ nop	| STACK |
 		"\tjsr Printstack"
 #endif
 					| | |
-rck	| R16 | | | |
+rck $1==2	| R16 |
+		"! rck $1"
+		"\tjsr Rck"
+					| | |
+rck ND	| R16 |
+		"! rck ND"
+		"\ttsta"
+		"\tbne 1f"
+		"\tcmpb #2"
+		"\tbeq 2f"
+		"1:"
+		"\tldab #Eoddz"
+		"\tjsr Trap"
+		"2:"
+		"\tpula"
+		"\tpulb"
+		"\tjsr Rck"
+					| | |
 rtt	| |
 		remove(ALL)
 		"! rtt"
 		"\tjmp Rtt"
 					| | |
-sig 	| R16 |
+sig	| R16 |
 		"! sig"
-		"\tdes"
-		"\tdes"
-		"\ttsx"
-		"\tpshb"
-		"\tpsha"
-		"\tldab ERRPROC+1"
-		"\tldaa ERRPROC"
-		"\tstab 3,x"
-		"\tstaa 2,x"
-		"\tpula"
-		"\tpulb"
-		"\tstab ERRPROC+1"
-		"\tstaa ERRPROC"
-					| | |
+		"\tldx <ERRPROC"
+		"\tstab <ERRPROC+1"
+		"\tstaa <ERRPROC"
+		"\tstx <TMP"
+		"\tldab <TMP+1"
+		"\tldaa <TMP"
+					| %[1] | |
 sim	| R16 |
 		"! sim"
 		"\tstab IGNMASK+1"

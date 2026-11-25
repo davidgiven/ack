@@ -50,8 +50,7 @@ Aar:
 	cpx #4
 	beq 4f
 !			! AccAB has index - lower bound
-	stx ARTH
-	jsr Mlu2	! AccAB = AccAB * ARTH (object size)
+	jsr Mlux	! AccAB = AccAB * X (object size)
 	bra 6f
 !
 4:	aslb		! object size == 4
