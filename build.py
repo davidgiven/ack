@@ -18,14 +18,12 @@ if IS_WINDOWS and ("cpm" in PLATS):
 print("Building plats: " + (" ".join(PLATS)))
 
 # This is the list of which plats to test.
-#TEST_PLATS = [
-#    "cpm",
-#    "linux68k",
-#    "linuxppc",
-#    "pc86",
-#]
-TEST_PLATS = [ "e6800" ]
-#TEST_PLATS = []
+TEST_PLATS = [
+    "cpm",
+    "linux68k",
+    "linuxppc",
+    "pc86",
+]
 
 # This contains the platform-independent host tooling required to build the plats.
 export(
